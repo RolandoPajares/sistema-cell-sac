@@ -1,0 +1,116 @@
+/* Compatibilidad visual para las pantallas administrativas que aún usan
+ * formularios y listados de la primera iteración Laravel. */
+.admin-body .admin-main > .container.content-page,
+.admin-body .admin-main > .container.form-page {
+  width: 100%;
+  max-width: 1680px;
+  padding: 0;
+}
+
+.admin-body .content-page h1,
+.admin-body .form-page h1 {
+  color: #07122f;
+  font-size: clamp(1.7rem, 2.5vw, 2.25rem);
+  letter-spacing: -0.04em;
+}
+
+.admin-body .two-column {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(290px, 0.85fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.admin-body .form-card,
+.admin-body .stat-card,
+.admin-body .data-row {
+  border: 1px solid #dfe9f6;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(30, 86, 150, 0.08);
+}
+
+.admin-body .form-card {
+  gap: 12px;
+  padding: 18px;
+}
+
+.admin-body .form-card h2,
+.admin-body .form-card h3 {
+  color: #0c1a3e;
+  font-size: 1.05rem;
+}
+
+.admin-body .form-card label {
+  color: #3a557f;
+  font-size: 0.8rem;
+}
+
+.admin-body .form-card input,
+.admin-body .form-card select,
+.admin-body .form-card textarea,
+.admin-body .inventory-row input,
+.admin-body .inventory-row select {
+  border: 1px solid #d8e5f4;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.admin-body .stats-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0 0 16px;
+}
+
+.admin-body .stat-card {
+  min-height: 120px;
+  padding: 17px;
+}
+
+.admin-body .stat-card small {
+  color: #25416f;
+  font-weight: 720;
+}
+
+.admin-body .stat-card strong {
+  color: #080f29;
+  font-size: 1.55rem;
+}
+
+.admin-body .data-row {
+  margin: 8px 0;
+  padding: 12px 14px;
+  color: #18345f;
+}
+
+.admin-body .data-row small {
+  color: #6d83a9;
+}
+
+.admin-body .management-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.admin-body .management-links a {
+  border: 1px solid #dfe9f6;
+  border-radius: 10px;
+  color: #185195;
+  background: #fff;
+  box-shadow: 0 5px 18px rgba(30, 86, 150, 0.05);
+}
+
+@media (max-width: 900px) {
+  .admin-body .two-column,
+  .admin-body .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+  .admin-body .two-column,
+  .admin-body .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

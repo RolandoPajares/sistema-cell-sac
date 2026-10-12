@@ -1,0 +1,10 @@
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 13px;
+  border-radius: 999px;
+  background: #dceeff;
+  color: #0562d7;
+  font-size: 0.72rem;
+  font-weight: 800;
+}

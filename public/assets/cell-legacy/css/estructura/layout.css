@@ -1,0 +1,14 @@
+.container {
+  width: min(1180px, 92%);
+  margin: auto;
+}
+
+section {
+  padding: 64px 0;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 42px;
+}

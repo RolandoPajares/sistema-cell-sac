@@ -1,0 +1,134 @@
+.topbar {
+  background: #0b1f4a;
+  color: #fff;
+  font-size: 0.84rem;
+}
+.topbar .container {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: color-mix(in srgb, var(--card) 94%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+.navbar {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+.brand img {
+  width: 120px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: 0;
+}
+.navlinks {
+  display: flex;
+  align-self: stretch;
+  align-items: center;
+  gap: 21px;
+  margin-left: auto;
+}
+.navlinks a {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  font-weight: 650;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.navlinks a:hover,
+.navlinks a.active {
+  color: var(--primary);
+}
+.navlinks a.active::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--primary);
+}
+.header-search {
+  flex: 1 1 250px;
+  max-width: 300px;
+  min-width: 170px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 7px 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--card) 92%, var(--primary) 8%);
+  color: var(--muted);
+}
+.header-login {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--card);
+  color: var(--primary);
+  font-size: .75rem;
+  font-weight: 800;
+}
+.header-login i:last-child { font-size: .55rem; }
+.header-search input {
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.82rem;
+}
+.nav-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  white-space: nowrap;
+}
+.header-account {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+}
+.header-account > i {
+  color: var(--primary);
+  font-size: 1.9rem;
+}
+.header-account b,
+.header-account small {
+  display: block;
+}
+.header-account small {
+  max-width: 110px;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.68rem;
+  text-overflow: ellipsis;
+}
+.menu-toggle {
+  display: none;
+}

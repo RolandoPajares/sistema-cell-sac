@@ -1,0 +1,5 @@
+@extends('layouts.admin')
+@push('styles')<link rel="stylesheet" href="{{ asset('assets/cell-legacy/css/modulos/marketing/campanias.css') }}">@endpush
+@section('title','Segmentación')
+@section('content')<section class="container content-page"><h1>Segmentación por rol de cuenta</h1><p>Los segmentos controlan qué campañas internas se muestran a cada perfil CELL SAC.</p><form method="post" class="form-card compact-form" action="{{ route('management.segments.store') }}">@csrf<label>Nombre<input name="nombre" required maxlength="120"></label><fieldset><legend>Roles incluidos</legend>@foreach($roles as $role)<label class="check"><input type="checkbox" name="roles[]" value="{{ $role }}">{{ str_replace('_',' ',$role) }}</label>@endforeach</fieldset><button class="btn btn-primary">Crear segmento</button></form>@foreach($segments as $segment)<article class="data-row"><b>{{ $segment->nombre }}</b><span>{{ implode(', ', $segment->criterios['roles'] ?? []) }}</span></article>@endforeach{{ $segments->links() }}</section>@endsection
+

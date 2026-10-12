@@ -1,0 +1,102 @@
+.modulo-cuenta .cuenta-fondo {
+  background: #eef7ff;
+}
+
+.modulo-cuenta .site-header {
+  background: linear-gradient(110deg, #0756cf 0%, #0649bd 58%, #0a83f7 100%);
+  border-bottom-color: rgba(255, 255, 255, 0.22);
+}
+
+.modulo-cuenta .site-header .navlinks a,
+.modulo-cuenta .site-header .header-account,
+.modulo-cuenta .site-header .header-account small {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.modulo-cuenta .site-header .navlinks a:hover,
+.modulo-cuenta .site-header .navlinks a.active,
+.modulo-cuenta .site-header .header-account > i {
+  color: #fff;
+}
+
+.modulo-cuenta .site-header .navlinks a.active::after {
+  background: #fff;
+}
+
+.modulo-cuenta .site-header .header-search {
+  background: rgba(255, 255, 255, 0.13);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.modulo-cuenta .site-header .header-search input {
+  color: #fff;
+}
+
+.modulo-cuenta .site-header .header-search input::placeholder {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.modulo-cuenta .site-header .icon-btn {
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.modulo-cuenta .cuenta-lateral {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(155deg, #074ab9 0%, #01308c 44%, #086df1 100%);
+  box-shadow: 10px 0 30px rgba(0, 49, 139, 0.14);
+}
+
+.modulo-cuenta .cuenta-identidad {
+  border-bottom-color: rgba(255, 255, 255, 0.24);
+}
+
+.modulo-cuenta .cuenta-identidad > span {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.modulo-cuenta .cuenta-identidad small {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.modulo-cuenta .cuenta-identidad em {
+  color: #b8f7d9;
+}
+
+.modulo-cuenta .cuenta-lateral nav a {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.modulo-cuenta .cuenta-lateral nav a i {
+  color: #fff;
+}
+
+.modulo-cuenta .cuenta-lateral nav a:hover,
+.modulo-cuenta .cuenta-lateral nav a.activo {
+  color: #fff;
+  border-left-color: transparent;
+  background: linear-gradient(90deg, #1494ff, #04bdf5);
+  box-shadow: 0 8px 22px rgba(0, 182, 255, 0.28);
+}
+
+.modulo-cuenta .cuenta-lateral nav a:hover i,
+.modulo-cuenta .cuenta-lateral nav a.activo i {
+  color: #fff;
+}
+
+.modulo-cuenta .cuenta-lateral form {
+  border-top-color: rgba(255, 255, 255, 0.24);
+}
+
+.modulo-cuenta .cuenta-lateral form button {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.modulo-cuenta .cuenta-lateral form button:hover {
+  background: linear-gradient(90deg, #1494ff, #04bdf5);
+}

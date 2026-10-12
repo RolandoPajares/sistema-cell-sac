@@ -1,0 +1,105 @@
+/* Campañas: editor y listado conforme al mockup de MD Ads. */
+.campanias-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(310px, 0.75fr);
+  gap: 14px;
+  align-items: start;
+}
+.campaign-editor {
+  grid-column: 2;
+  grid-row: 1;
+  position: sticky;
+  top: 90px;
+}
+.campaign-list-section {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+}
+.campaign-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.campaign-span-2 {
+  grid-column: 1/-1;
+}
+.campaign-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 13px 0;
+  color: #294664;
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+.campaign-check input {
+  accent-color: #0873f9;
+}
+.campaign-actions {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid #e8eef6;
+  padding-top: 13px;
+}
+.campaign-type,
+.status-on,
+.status-off {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+.campaign-type {
+  background: #eaf3ff;
+  color: #0968ce;
+  text-transform: capitalize;
+}
+.status-on {
+  background: #e5f8ef;
+  color: #128359;
+}
+.status-off {
+  background: #f0f3f7;
+  color: #6e7d91;
+}
+.campaign-editor textarea,
+.campaign-editor select {
+  width: 100%;
+  border: 1px solid #dce7f4;
+  border-radius: 9px;
+  padding: 10px;
+  font: inherit;
+  background: #fff;
+}
+@media (max-width: 1199px) {
+  .campanias-workspace {
+    grid-template-columns: 1fr;
+  }
+  .campaign-editor,
+  .campaign-list-section {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .campaign-editor {
+    position: static;
+    order: 1;
+  }
+  .campaign-list-section {
+    order: 2;
+  }
+}
+@media (max-width: 560px) {
+  .campaign-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .campaign-span-2 {
+    grid-column: auto;
+  }
+  .campaign-actions .btn {
+    width: 100%;
+  }
+}
+

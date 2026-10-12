@@ -1,0 +1,374 @@
+@media (min-width: 981px) and (max-width: 1450px) {
+  .navbar {
+    gap: 12px;
+  }
+  .brand {
+    flex-basis: auto;
+  }
+  .brand img {
+    width: 136px;
+    height: 58px;
+  }
+  .navlinks {
+    gap: 13px;
+  }
+  .navlinks a {
+    font-size: 0.88rem;
+  }
+  .nav-actions {
+    gap: 5px;
+  }
+  .nav-actions .btn {
+    padding: 10px 11px;
+  }
+  .header-search {
+    max-width: 230px;
+  }
+}
+
+@media (min-width: 781px) {
+  .site-header .container {
+    width: min(1340px, 94%);
+  }
+  .navbar {
+    min-height: 36px;
+    gap: 10px;
+  }
+  .brand img {
+    width: 96px;
+    height: 34px;
+  }
+  .navlinks {
+    gap: 18px;
+  }
+  .navlinks a {
+    font-size: 0.53rem;
+  }
+  .header-search {
+    max-width: 270px;
+    min-width: 180px;
+    height: 25px;
+    padding-left: 10px;
+  }
+  .header-search input {
+    font-size: 0.52rem;
+  }
+  .nav-actions {
+    gap: 5px;
+  }
+  .icon-btn {
+    width: 27px;
+    height: 27px;
+    border-radius: 7px;
+    font-size: 0.7rem;
+  }
+  .icon-btn sup {
+    top: -4px;
+    right: -4px;
+    min-width: 13px;
+    height: 13px;
+    font-size: 8px;
+  }
+  .header-login {
+    min-height: 27px;
+    padding: 0 8px;
+    border-radius: 7px;
+    font-size: 0.52rem;
+  }
+}
+
+@media (max-width: 780px) {
+  .navlinks {
+    display: none;
+    position: absolute;
+    left: 4%;
+    right: 4%;
+    top: 76px;
+    background: var(--card);
+    padding: 18px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    flex-direction: column;
+    align-items: stretch;
+    margin-left: 0;
+  }
+  .navlinks a {
+    height: auto;
+    padding: 10px 12px;
+  }
+  .navlinks a.active::after {
+    top: 7px;
+    right: auto;
+    bottom: 7px;
+    left: 0;
+    width: 3px;
+    height: auto;
+    border-radius: 0 3px 3px 0;
+  }
+  .navlinks.open {
+    display: flex;
+  }
+  .menu-toggle {
+    display: block;
+    margin-left: auto;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    font-size: 1.4rem;
+  }
+  .header-search {
+    margin-left: auto;
+    max-width: 320px;
+  }
+  .nav-actions .btn {
+    display: none;
+  }
+  .brand {
+    min-width: 150px;
+  }
+  .brand img {
+    width: 150px;
+    height: 58px;
+  }
+  .hero-grid,
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+  .hero-card img {
+    height: 330px;
+  }
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .brands {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .gallery {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .filters {
+    grid-template-columns: 1fr 1fr;
+  }
+  .dashboard-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .admin-layout {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  .topbar .container {
+    flex-direction: column;
+    gap: 3px;
+  }
+  .navbar {
+    min-height: 74px;
+    gap: 8px;
+  }
+  .brand {
+    min-width: 120px;
+  }
+  .brand img {
+    width: 120px;
+    height: 50px;
+  }
+  .header-search {
+    display: none;
+  }
+  .header-account span,
+  .nav-actions form {
+    display: none;
+  }
+  .hero {
+    padding-top: 44px;
+  }
+  .hero h1 {
+    font-size: 2.7rem;
+  }
+  .stats,
+  .feature-grid,
+  .product-grid,
+  .brands,
+  .gallery,
+  .info-list,
+  .dashboard-cards {
+    grid-template-columns: 1fr;
+  }
+  .filters {
+    grid-template-columns: 1fr;
+  }
+  .hero-card img {
+    height: 270px;
+  }
+  .gallery img {
+    height: 280px;
+  }
+  .section-head {
+    display: block;
+  }
+  .cta {
+    display: block;
+  }
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    grid-template-columns: 1fr 1fr;
+  }
+  .nav-actions {
+    gap: 5px;
+  }
+  .icon-btn {
+    width: 38px;
+    height: 38px;
+  }
+  .product-art {
+    height: 230px;
+  }
+}
+
+@media (min-width: 781px) {
+  .site-header .container {
+    width: 92%;
+    max-width: none;
+  }
+  .navbar {
+    min-height: 78px;
+    gap: 18px;
+  }
+  .brand img {
+    width: 154px;
+    height: 62px;
+  }
+  .navlinks {
+    gap: 21px;
+  }
+  .navlinks a {
+    font-size: 0.9rem;
+  }
+  .nav-actions {
+    gap: 8px;
+    margin-left: auto;
+  }
+  .icon-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    font-size: 1rem;
+  }
+  .icon-btn sup {
+    top: -6px;
+    right: -5px;
+    min-width: 18px;
+    height: 18px;
+    font-size: 11px;
+  }
+  .nav-actions .btn {
+    display: inline-flex;
+    padding: 11px 16px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (min-width: 1400px) {
+  .navlinks {
+    margin-left: clamp(180px, 15vw, 290px);
+  }
+}
+
+@media (min-width: 1600px) {
+  .site-header .container {
+    width: calc(100% - 152px);
+  }
+  .navbar {
+    min-height: 118px;
+    gap: 18px;
+  }
+  .brand img {
+    width: 200px;
+    height: 90px;
+  }
+  .navlinks {
+    gap: 25px;
+    margin-left: clamp(205px, 13.2vw, 255px);
+  }
+  .navlinks a {
+    font-size: 1.18rem;
+    font-weight: 750;
+  }
+  .header-search {
+    flex: 0 1 345px;
+    max-width: 345px;
+    min-width: 280px;
+    height: 65px;
+    padding: 0 20px;
+    font-size: 1.3rem;
+  }
+  .header-search input {
+    font-size: 1.05rem;
+  }
+  .nav-actions {
+    gap: 8px;
+    margin-left: 0;
+  }
+  .icon-btn {
+    width: 65px;
+    height: 65px;
+    border-radius: 15px;
+    font-size: 1.25rem;
+  }
+  .icon-btn sup {
+    top: -8px;
+    right: -6px;
+    min-width: 27px;
+    height: 27px;
+    font-size: 0.82rem;
+  }
+  .nav-actions .btn {
+    min-height: 65px;
+    padding: 0 20px;
+    border-radius: 15px;
+    font-size: 1.18rem;
+  }
+  .nav-actions .btn-primary {
+    padding-right: 24px;
+    padding-left: 24px;
+  }
+}
+
+@media (min-width: 781px) and (max-width: 1399px) {
+  .site-header .container {
+    width: 94%;
+  }
+  .navbar {
+    min-height: 58px;
+    gap: 12px;
+  }
+  .brand img {
+    width: 120px;
+    height: 48px;
+  }
+  .navlinks {
+    margin-left: auto;
+    gap: 12px;
+  }
+  .navlinks a {
+    font-size: 0.7rem;
+  }
+  .nav-actions {
+    margin-left: 0;
+    gap: 5px;
+  }
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+  }
+  .nav-actions .btn {
+    padding: 9px 11px;
+    font-size: 0.75rem;
+  }
+}

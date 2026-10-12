@@ -1,0 +1,7 @@
+.auth-wrap {
+  width: min(520px, 92%);
+  margin: 60px auto;
+}
+.auth-wrap h1 {
+  margin-top: 0;
+}

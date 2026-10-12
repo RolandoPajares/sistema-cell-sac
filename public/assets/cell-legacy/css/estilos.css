@@ -1,0 +1,13 @@
+@import url("base/variables.css");
+@import url("base/reinicio.css");
+@import url("base/tipografia.css");
+@import url("estructura/layout.css");
+@import url("componentes/botones.css");
+@import url("componentes/formularios.css");
+@import url("componentes/precios.css");
+@import url("componentes/tarjetas.css");
+@import url("componentes/alertas.css");
+@import url("componentes/badges.css");
+@import url("componentes/estados.css");
+@import url("componentes/tablas.css");
+@import url("componentes/utilidades.css");

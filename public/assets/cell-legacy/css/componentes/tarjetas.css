@@ -1,0 +1,48 @@
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: end;
+  margin-bottom: 26px;
+}
+.section-head h2 {
+  font-size: 2rem;
+  margin: 0;
+}
+.section-head p {
+  margin: 5px 0 0;
+  color: var(--muted);
+}
+.panel {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+.feature {
+  background: var(--card);
+  border: 1px solid var(--line);
+  padding: 22px;
+  border-radius: 18px;
+}
+.feature span {
+  font-size: 1.7rem;
+}
+.feature h3 {
+  margin: 8px 0;
+}
+.feature p {
+  color: var(--muted);
+  margin: 0;
+}
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+}

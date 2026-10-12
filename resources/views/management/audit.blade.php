@@ -1,0 +1,5 @@
+@extends('layouts.admin')
+@push('styles')<link rel="stylesheet" href="{{ asset('assets/cell-legacy/css/roles/internos/administrador.css') }}">@endpush
+@section('title','Auditoría')
+@section('content')<section class="container content-page"><h1>Auditoría</h1><form method="get" class="filter-form"><label>Entidad<input name="entidad" value="{{ request('entidad') }}"></label><label>Desde<input name="desde" type="date" value="{{ request('desde') }}"></label><label>Hasta<input name="hasta" type="date" value="{{ request('hasta') }}"></label><button class="btn btn-primary">Filtrar</button></form>@foreach($logs as $log)<article class="data-row"><div><b>{{ $log->accion }} · {{ $log->entidad }} #{{ $log->entidad_id }}</b><small>Usuario {{ $log->usuario_id ?? 'sistema' }} · {{ $log->creado_en }} · {{ $log->direccion_ip }}</small></div><details><summary>Datos</summary><pre>{{ json_encode(['antes'=>$log->valores_anteriores,'despues'=>$log->valores_nuevos],JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE) }}</pre></details></article>@endforeach{{ $logs->links() }}</section>@endsection
+

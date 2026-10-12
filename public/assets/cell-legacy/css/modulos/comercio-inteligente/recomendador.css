@@ -1,0 +1,395 @@
+/* ---------- 1. Presentación (banner) ---------- */
+.smartmatch-hero {
+  padding: 50px 0;
+  background: linear-gradient(135deg, #f3f8ff, #d6e8ff);
+}
+
+.smartmatch-hero-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 30px;
+  align-items: center;
+}
+
+.smartmatch-etiqueta {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: #e6efff;
+  color: #1356e8;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.smartmatch-hero h1 {
+  margin: 16px 0 12px;
+  font-size: 46px;
+  line-height: 1.1;
+  color: #0b1b3f;
+}
+
+/* la parte resaltada del título en azul */
+.smartmatch-hero h1 span {
+  color: #1356e8;
+}
+
+.smartmatch-hero p {
+  color: #475569;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+/* los tres pasitos debajo del texto */
+.smartmatch-pasos-mini {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.smartmatch-pasos-mini span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px 8px 8px;
+  border-radius: 30px;
+  background: #fff;
+  border: 1px solid #cfe0ff;
+  font-weight: 600;
+  color: #0b1b3f;
+}
+
+.smartmatch-pasos-mini b {
+  width: 26px;
+  height: 26px;
+  line-height: 26px;
+  text-align: center;
+  border-radius: 50%;
+  background: #1356e8;
+  color: #fff;
+}
+
+/* imagen dentro de un círculo de color */
+.smartmatch-hero-imagen {
+  padding: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff, #cfe0ff);
+}
+
+.smartmatch-hero-imagen img {
+  width: 100%;
+}
+
+/* ---------- 2. Formulario ---------- */
+.smartmatch-contenido {
+  padding: 0 0 70px;
+}
+
+.smartmatch-form {
+  margin-top: -30px; /* sube un poco sobre el banner */
+  overflow: hidden;
+  border-radius: 22px;
+  background: #fff;
+  border: 1px solid #e3ecf8;
+  box-shadow: 0 15px 35px rgba(30, 27, 75, 0.1);
+  scroll-margin-top: 100px;
+}
+
+/* franja azul con el título */
+.smartmatch-form-titulo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 28px;
+  color: #fff;
+  background: linear-gradient(120deg, #0b3fb8, #1356e8, #3b82f6);
+}
+
+.smartmatch-form-titulo > i {
+  padding: 11px 13px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 22px;
+}
+
+.smartmatch-form-titulo h2 {
+  margin: 0 0 3px;
+  color: #fff;
+}
+
+.smartmatch-form-titulo p {
+  margin: 0;
+  color: #dbe7ff;
+}
+
+.smartmatch-campos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr) auto;
+  gap: 16px;
+  align-items: end;
+  padding: 24px 28px 28px;
+}
+
+.smartmatch-campos label {
+  display: grid;
+  gap: 8px;
+  font-weight: bold;
+  color: #0b1b3f;
+}
+
+.smartmatch-campos label i {
+  color: #1356e8;
+}
+
+.smartmatch-campos input,
+.smartmatch-campos select {
+  width: 100%;
+  border-radius: 12px;
+  background: #f8fbff;
+  border: 1.5px solid #dbe6f5;
+}
+
+.smartmatch-campos input:focus,
+.smartmatch-campos select:focus {
+  outline: none;
+  border-color: #1356e8;
+  background: #fff;
+}
+
+.smartmatch-campos .btn {
+  padding: 13px 20px;
+  background: linear-gradient(120deg, #0b3fb8, #1356e8);
+  border: 0;
+}
+
+/* ---------- 3. Cómo funciona ---------- */
+.smartmatch-como {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 30px;
+}
+
+.smartmatch-como article {
+  padding: 22px;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid #e3ecf8;
+  transition: 0.3s;
+}
+
+.smartmatch-como article:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 25px rgba(30, 27, 75, 0.08);
+}
+
+.smartmatch-como i {
+  display: inline-block;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #e6efff;
+  color: #1356e8;
+  font-size: 22px;
+}
+
+.smartmatch-como h3 {
+  margin: 14px 0 6px;
+}
+
+.smartmatch-como p {
+  margin: 0;
+  color: #64748b;
+}
+
+/* ---------- 4. Resultados ---------- */
+.smartmatch-titulo-resultados {
+  margin: 45px 0 18px;
+}
+
+.smartmatch-titulo-resultados h2 {
+  margin: 0 0 4px;
+}
+
+.smartmatch-titulo-resultados p {
+  margin: 0;
+  color: #64748b;
+}
+
+.smartmatch-resultados {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.smartmatch-tarjeta {
+  position: relative;
+  padding: 24px;
+  border-radius: 20px;
+  background: #fff;
+  border: 1px solid #e3ecf8;
+  box-shadow: 0 10px 25px rgba(30, 27, 75, 0.06);
+  transition: 0.3s;
+}
+
+.smartmatch-tarjeta:hover {
+  transform: translateY(-4px);
+  border-color: #9cc0ff;
+}
+
+/* el primer puesto se resalta con borde azul */
+.smartmatch-tarjeta:first-child {
+  border: 2px solid #1356e8;
+}
+
+.smartmatch-puesto {
+  position: absolute;
+  top: -12px;
+  left: 20px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: #1356e8;
+  color: #fff;
+  font-weight: bold;
+  font-size: 14px;
+}
+.smartmatch-product-photo {
+  display: grid;
+  width: 100%;
+  height: 160px;
+  place-items: center;
+  object-fit: contain;
+  padding: 10px;
+  background: #f4f8ff;
+  border-radius: 12px;
+}
+.smartmatch-product-placeholder {
+  color: #2464ad;
+  font-size: 4rem;
+}
+
+.smartmatch-tarjeta-arriba {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.smartmatch-tarjeta small {
+  color: #1356e8;
+  font-weight: bold;
+}
+
+.smartmatch-tarjeta h3 {
+  margin: 4px 0;
+}
+
+.smartmatch-precio {
+  margin: 0;
+  font-size: 20px;
+  font-weight: bold;
+  color: #1356e8;
+}
+
+/* círculo con el porcentaje de coincidencia */
+.smartmatch-porcentaje {
+  flex-shrink: 0;
+  width: 78px;
+  height: 78px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 6px solid #9cc0ff;
+  background: #eef4ff;
+}
+
+.smartmatch-porcentaje b {
+  font-size: 18px;
+  color: #0b3fb8;
+}
+
+.smartmatch-porcentaje small {
+  font-size: 10px;
+  color: #1356e8;
+}
+
+.smartmatch-tarjeta ul {
+  margin: 16px 0;
+  padding: 0;
+  list-style: none;
+  color: #475569;
+  line-height: 1.9;
+}
+
+.smartmatch-tarjeta li i {
+  color: #10b981;
+}
+
+.smartmatch-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* mensaje cuando no hay resultados */
+.smartmatch-vacio {
+  margin-top: 40px;
+  padding: 40px 20px;
+  text-align: center;
+  border-radius: 20px;
+  background: #fff;
+  border: 2px dashed #cfe0ff;
+}
+
+.smartmatch-vacio > i {
+  font-size: 44px;
+  color: #6ea0ff;
+}
+
+.smartmatch-vacio h2 {
+  margin: 10px 0 6px;
+}
+
+.smartmatch-vacio p {
+  max-width: 480px;
+  margin: 0 auto 18px;
+  color: #64748b;
+}
+
+/* ---------- 5. Responsive (tablet y celular) ---------- */
+@media (max-width: 980px) {
+  .smartmatch-hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .smartmatch-hero-imagen {
+    max-width: 380px;
+    margin: 0 auto;
+  }
+
+  .smartmatch-campos {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .smartmatch-resultados {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+  .smartmatch-hero h1 {
+    font-size: 32px;
+  }
+
+  .smartmatch-campos,
+  .smartmatch-como,
+  .smartmatch-resultados {
+    grid-template-columns: 1fr;
+  }
+
+  .smartmatch-form-titulo,
+  .smartmatch-campos {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+}

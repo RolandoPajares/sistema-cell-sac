@@ -1,0 +1,9 @@
+.full-width {
+  width: 100%;
+}
+.text-primary {
+  color: var(--primary);
+}
+.two-columns {
+  grid-template-columns: 1fr 1fr;
+}
