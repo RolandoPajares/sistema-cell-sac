@@ -40,4 +40,26 @@ class SupplierController extends Controller
 
         return back()->with('status', 'Proveedor desactivado.');
     }
+    
+public function activate(Supplier $supplier, AuditLogger $audit): RedirectResponse
+{
+    if ($supplier->activo) {
+        return back()->with('status', 'El proveedor ya está activo.');
+    }
+
+    $supplier->update(['activo' => true]);
+
+    $audit->record(
+        request()->user()->id,
+        'supplier.activated',
+        'proveedores',
+        $supplier->id,
+        ['activo' => false],
+        ['activo' => true],
+        request()->ip()
+    );
+
+    return back()->with('status', 'Proveedor activado correctamente.');
+}
+
 }

@@ -58,3 +58,2004 @@ body.rol-compras-logistica .admin-user small {
     grid-template-columns: 1fr !important;
   }
 }
+
+
+/* ==========================================
+   DAVID - PAGINACIÓN DEL INVENTARIO
+   ========================================== */
+
+body.modulo-inventario .inventory-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin: 28px auto 0;
+    padding: 16px 10px;
+}
+
+body.modulo-inventario .inventory-page-numbers {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+body.modulo-inventario .inventory-page-dot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+body.modulo-inventario .inventory-dot-square {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    background: #9cb8e7;
+    transition: all 0.2s ease;
+}
+
+body.modulo-inventario a.inventory-page-dot:hover {
+    background: #e8f1ff;
+}
+
+body.modulo-inventario a.inventory-page-dot:hover
+.inventory-dot-square {
+    background: #075ee8;
+    transform: scale(1.2);
+}
+
+body.modulo-inventario .inventory-page-dot.is-current {
+    background: #075ee8;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 800;
+    box-shadow: 0 4px 12px rgba(7, 94, 232, 0.2);
+}
+
+body.modulo-inventario .inventory-page-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #e8f1ff;
+    color: #075ee8;
+    text-decoration: none;
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
+}
+
+body.modulo-inventario a.inventory-page-arrow:hover {
+    background: #075ee8;
+    color: #fff;
+}
+
+body.modulo-inventario .inventory-page-arrow.is-disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+body.modulo-inventario .inventory-pagination-info {
+    margin: 0 0 20px;
+    text-align: center;
+    color: #63718a;
+    font-size: 0.85rem;
+}
+
+/* ==========================================
+   PAGINACIÓN RESPONSIVE
+   ========================================== */
+
+@media (max-width: 600px) {
+
+    body.modulo-inventario .inventory-pagination {
+        gap: 5px;
+        padding: 12px 4px;
+    }
+
+    body.modulo-inventario .inventory-page-numbers {
+        gap: 2px;
+    }
+
+    body.modulo-inventario .inventory-page-dot {
+        width: 27px;
+        height: 27px;
+    }
+
+    body.modulo-inventario .inventory-dot-square {
+        width: 7px;
+        height: 7px;
+    }
+
+    body.modulo-inventario .inventory-page-arrow {
+        width: 30px;
+        height: 30px;
+    }
+}
+
+
+/* ==========================================
+   DAVID - MODAL MOVIMIENTO DE INVENTARIO
+   ========================================== */
+
+body.modulo-inventario .inventory-open-modal {
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+body.modulo-inventario .inventory-movement-modal {
+    position: fixed;
+    inset: 0;
+    width: min(500px, calc(100vw - 32px));
+    max-width: 500px;
+    max-height: calc(100dvh - 32px);
+    margin: auto;
+    padding: 0;
+    overflow-y: auto;
+    border: 1px solid #dce6f3;
+    border-radius: 18px;
+    background: #ffffff;
+    color: #102044;
+    box-shadow: 0 24px 80px rgba(7, 24, 55, 0.25);
+}
+
+body.modulo-inventario .inventory-movement-modal:not([open]) {
+    display: none;
+}
+
+body.modulo-inventario .inventory-movement-modal::backdrop {
+    background: rgba(7, 24, 55, 0.55);
+    backdrop-filter: blur(3px);
+}
+
+/* Encabezado */
+body.modulo-inventario .inventory-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 24px 26px 18px;
+    border-bottom: 1px solid #e5ebf4;
+}
+
+body.modulo-inventario .inventory-modal-eyebrow {
+    display: block;
+    margin-bottom: 6px;
+    color: #075ee8;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+body.modulo-inventario .inventory-modal-header h2 {
+    margin: 0 0 7px;
+    color: #102044;
+    font-size: 1.45rem;
+    font-weight: 800;
+}
+
+body.modulo-inventario .inventory-modal-header p {
+    margin: 0;
+    color: #63718a;
+    font-size: 0.88rem;
+    line-height: 1.45;
+}
+
+body.modulo-inventario .inventory-modal-close {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    place-items: center;
+    border: 0;
+    border-radius: 10px;
+    background: #f1f5fb;
+    color: #33435f;
+    cursor: pointer;
+}
+
+body.modulo-inventario .inventory-modal-close:hover {
+    background: #e8f1ff;
+    color: #075ee8;
+}
+
+/* Formulario */
+body.modulo-inventario .inventory-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 24px 26px;
+}
+
+body.modulo-inventario .inventory-modal-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+body.modulo-inventario .inventory-modal-field > span {
+    color: #102044;
+    font-size: 0.88rem;
+    font-weight: 750;
+}
+
+body.modulo-inventario .inventory-modal-field input,
+body.modulo-inventario .inventory-modal-field select,
+body.modulo-inventario .inventory-modal-field textarea {
+    width: 100%;
+    min-height: 46px;
+    padding: 11px 13px;
+    border: 1px solid #d6e1ef;
+    border-radius: 10px;
+    outline: none;
+    background: #ffffff;
+    color: #102044;
+    font: inherit;
+    font-size: 0.92rem;
+    transition: border-color 0.2s ease;
+}
+
+body.modulo-inventario .inventory-modal-field textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+body.modulo-inventario .inventory-modal-field input:focus,
+body.modulo-inventario .inventory-modal-field select:focus,
+body.modulo-inventario .inventory-modal-field textarea:focus {
+    border-color: #075ee8;
+    box-shadow: 0 0 0 3px rgba(7, 94, 232, 0.1);
+}
+
+/* Botones */
+body.modulo-inventario .inventory-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 18px 26px 24px;
+    border-top: 1px solid #e5ebf4;
+}
+
+body.modulo-inventario .inventory-modal-cancel,
+body.modulo-inventario .inventory-modal-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 10px 17px;
+    border-radius: 10px;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+body.modulo-inventario .inventory-modal-cancel {
+    border: 1px solid #d6e1ef;
+    background: #ffffff;
+    color: #33435f;
+}
+
+body.modulo-inventario .inventory-modal-submit {
+    border: 0;
+    background: #075ee8;
+    color: #ffffff;
+}
+
+body.modulo-inventario .inventory-modal-submit:hover {
+    background: #0649b7;
+}
+
+body.modulo-inventario .inventory-modal-submit:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+/* ==========================================
+   RESPONSIVE - CELULARES
+   ========================================== */
+
+@media (max-width: 600px) {
+
+    body.modulo-inventario .inventory-movement-modal {
+        width: calc(100vw - 24px);
+        max-height: calc(100dvh - 24px);
+        border-radius: 14px;
+    }
+
+    body.modulo-inventario .inventory-modal-header,
+    body.modulo-inventario .inventory-modal-body {
+        padding: 18px;
+    }
+
+    body.modulo-inventario .inventory-modal-footer {
+        padding: 16px 18px 20px;
+        flex-direction: column-reverse;
+    }
+
+    body.modulo-inventario .inventory-modal-cancel,
+    body.modulo-inventario .inventory-modal-submit {
+        width: 100%;
+    }
+}
+
+
+/* ==========================================
+   DAVID - BUSCADOR DE INVENTARIO
+   ========================================== */
+
+body.modulo-inventario .inventory-search-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+body.modulo-inventario .inventory-search-field {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid #d6e1ef;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #075ee8;
+}
+
+body.modulo-inventario .inventory-search-field:focus-within {
+    border-color: #075ee8;
+    box-shadow: 0 0 0 3px rgba(7, 94, 232, 0.1);
+}
+
+body.modulo-inventario .inventory-search-field input {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #102044;
+    font: inherit;
+    font-size: 0.9rem;
+}
+
+body.modulo-inventario .inventory-search-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 20px;
+    border: none;
+    border-radius: 10px;
+    background: #075ee8;
+    color: #ffffff;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 750;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+body.modulo-inventario .inventory-search-button:hover {
+    background: #0649b7;
+}
+
+body.modulo-inventario .inventory-search-clear {
+    color: #075ee8;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+body.modulo-inventario .inventory-search-clear:hover {
+    text-decoration: underline;
+}
+
+/* Tablets y celulares */
+@media (max-width: 900px) {
+    body.modulo-inventario .inventory-search-form {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 600px) {
+    body.modulo-inventario .inventory-search-button {
+        padding: 0 12px;
+    }
+
+    body.modulo-inventario .inventory-search-clear {
+        width: 100%;
+        text-align: right;
+    }
+}
+
+/* DAVID - AJUSTE DEL BUSCADOR DE INVENTARIO */
+
+body.modulo-inventario .inventory-search-form {
+    padding-right: 12px;
+}
+
+body.modulo-inventario .inventory-search-clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 12px;
+    border-radius: 8px;
+}
+
+body.modulo-inventario .inventory-search-clear:hover {
+    background: #e8f1ff;
+    text-decoration: none;
+}
+
+
+/* ==========================================
+   DAVID - INVENTARIO RESPONSIVE MÓVIL
+   ========================================== */
+
+@media (max-width: 600px) {
+
+    /* Encabezado del panel */
+    body.modulo-inventario .admin-panel-header {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+        padding: 16px 12px;
+    }
+
+    /* Buscador en una columna */
+    body.modulo-inventario .inventory-search-form {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        gap: 10px;
+        padding: 0;
+    }
+
+    /* Campo de búsqueda */
+    body.modulo-inventario .inventory-search-field {
+        display: flex;
+        width: 100%;
+        min-height: 44px;
+        flex: none;
+    }
+
+    body.modulo-inventario .inventory-search-field input {
+        width: 100%;
+        min-width: 0;
+    }
+
+    /* Botón Buscar a todo el ancho */
+    body.modulo-inventario .inventory-search-button {
+        display: flex;
+        width: 100%;
+        min-height: 44px;
+    }
+
+    /* Limpiar centrado */
+    body.modulo-inventario .inventory-search-clear {
+        display: block;
+        width: 100%;
+        padding: 8px;
+        text-align: center;
+    }
+
+    /* Tabla con desplazamiento horizontal */
+    body.modulo-inventario .admin-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    body.modulo-inventario .admin-table {
+        min-width: 750px;
+    }
+}
+
+
+/* ==========================================
+   DAVID - PROVEEDORES
+   Diseño visual del módulo de proveedores
+   ========================================== */
+
+/* Página principal */
+
+.suppliers-page {
+    color: #102044;
+}
+
+.suppliers-page-head {
+    margin-bottom: 24px;
+}
+
+/* ==========================================
+   PANEL PRINCIPAL
+   ========================================== */
+
+.suppliers-panel {
+    padding: 24px;
+    border: 1px solid #dce6f3;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(16, 32, 68, 0.05);
+}
+
+.suppliers-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.suppliers-panel-header h2 {
+    margin: 0 0 6px;
+    color: #102044;
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.suppliers-panel-header h2 i {
+    margin-right: 8px;
+    color: #075ee8;
+}
+
+.suppliers-panel-header p {
+    margin: 0;
+    color: #63718a;
+    font-size: 0.9rem;
+}
+
+/* ==========================================
+   BOTÓN NUEVO PROVEEDOR
+   ========================================== */
+
+.suppliers-primary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 44px;
+    padding: 10px 18px;
+    border: 0;
+    border-radius: 10px;
+    background: #075ee8;
+    color: #ffffff;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 750;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.suppliers-primary-button:hover {
+    background: #0649b7;
+}
+
+/* ==========================================
+   CUADRÍCULA DE PROVEEDORES
+   ========================================== */
+
+.suppliers-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.supplier-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 20px;
+    border: 1px solid #dce6f3;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 4px 14px rgba(16, 32, 68, 0.04);
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+.supplier-card:hover {
+    border-color: #b9d1f5;
+    box-shadow: 0 8px 20px rgba(16, 32, 68, 0.08);
+    transform: translateY(-2px);
+}
+
+/* Encabezado de tarjeta */
+
+.supplier-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.supplier-card-icon {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    place-items: center;
+    border-radius: 12px;
+    background: #e8f1ff;
+    color: #075ee8;
+    font-size: 1.3rem;
+}
+
+.supplier-card h3 {
+    margin: 0 0 16px;
+    color: #102044;
+    font-size: 1.08rem;
+    font-weight: 800;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+/* ==========================================
+   ESTADOS DE PROVEEDORES
+   ========================================== */
+
+.supplier-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.supplier-status i {
+    font-size: 0.45rem;
+}
+
+.supplier-status.is-active {
+    background: #e0f7ec;
+    color: #16834b;
+}
+
+.supplier-status.is-inactive {
+    background: #f1f3f6;
+    color: #667085;
+}
+
+/* ==========================================
+   INFORMACIÓN DEL PROVEEDOR
+   ========================================== */
+
+.supplier-card-details {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    flex: 1;
+}
+
+.supplier-card-details p {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0;
+    color: #53627a;
+    font-size: 0.88rem;
+    line-height: 1.45;
+}
+
+.supplier-card-details p i {
+    flex-shrink: 0;
+    color: #075ee8;
+}
+
+.supplier-card-details p span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+/* ==========================================
+   BOTONES EDITAR Y DESACTIVAR
+   ========================================== */
+
+.supplier-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #e5ebf4;
+}
+
+.supplier-card-actions form {
+    margin: 0;
+}
+
+.supplier-edit-button,
+.supplier-deactivate-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 9px 14px;
+    border: 1px solid #d6e1ef;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #075ee8;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 750;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease;
+}
+
+.supplier-edit-button:hover {
+    background: #e8f1ff;
+    border-color: #075ee8;
+}
+
+.supplier-deactivate-button {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.supplier-deactivate-button:hover {
+    background: #fee2e2;
+    border-color: #fecaca;
+    color: #b91c1c;
+}
+
+/* ==========================================
+   MODALES DE PROVEEDORES
+   ========================================== */
+
+.suppliers-modal {
+    position: fixed;
+    inset: 0;
+    width: min(520px, calc(100vw - 32px));
+    max-width: 520px;
+    max-height: calc(100dvh - 32px);
+    margin: auto;
+    padding: 0;
+    overflow-y: auto;
+    border: 1px solid #dce6f3;
+    border-radius: 18px;
+    background: #ffffff;
+    color: #102044;
+    box-shadow: 0 24px 80px rgba(7, 24, 55, 0.25);
+}
+
+.suppliers-modal:not([open]) {
+    display: none;
+}
+
+.suppliers-modal::backdrop {
+    background: rgba(7, 24, 55, 0.55);
+    backdrop-filter: blur(3px);
+}
+
+/* ==========================================
+   ENCABEZADO DEL MODAL
+   ========================================== */
+
+.suppliers-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 24px 26px 18px;
+    border-bottom: 1px solid #e5ebf4;
+}
+
+.suppliers-modal-eyebrow {
+    display: block;
+    margin-bottom: 6px;
+    color: #075ee8;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.suppliers-modal-header h2 {
+    margin: 0 0 7px;
+    color: #102044;
+    font-size: 1.45rem;
+    font-weight: 800;
+}
+
+.suppliers-modal-header p {
+    margin: 0;
+    color: #63718a;
+    font-size: 0.88rem;
+    line-height: 1.45;
+}
+
+/* Botón cerrar */
+
+.suppliers-modal-close {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    place-items: center;
+    border: 0;
+    border-radius: 10px;
+    background: #f1f5fb;
+    color: #33435f;
+    cursor: pointer;
+}
+
+.suppliers-modal-close:hover {
+    background: #e8f1ff;
+    color: #075ee8;
+}
+
+/* ==========================================
+   CAMPOS DEL FORMULARIO
+   ========================================== */
+
+.suppliers-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px 26px;
+}
+
+.suppliers-modal-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.suppliers-modal-field > span {
+    color: #102044;
+    font-size: 0.88rem;
+    font-weight: 750;
+}
+
+.suppliers-modal-field input {
+    width: 100%;
+    min-width: 0;
+    min-height: 46px;
+    padding: 11px 13px;
+    border: 1px solid #d6e1ef;
+    border-radius: 10px;
+    outline: none;
+    background: #ffffff;
+    color: #102044;
+    font: inherit;
+    font-size: 0.92rem;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.suppliers-modal-field input:focus {
+    border-color: #075ee8;
+    box-shadow: 0 0 0 3px rgba(7, 94, 232, 0.1);
+}
+
+/* ==========================================
+   BOTONES DEL MODAL
+   ========================================== */
+
+.suppliers-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 18px 26px 24px;
+    border-top: 1px solid #e5ebf4;
+}
+
+.suppliers-cancel-button,
+.suppliers-submit-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 10px 17px;
+    border-radius: 10px;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 750;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+/* Cancelar */
+
+.suppliers-cancel-button {
+    border: 1px solid #d6e1ef;
+    background: #ffffff;
+    color: #33435f;
+}
+
+.suppliers-cancel-button:hover {
+    background: #f1f5f9;
+}
+
+/* Guardar / Actualizar */
+
+.suppliers-submit-button {
+    border: 0;
+    background: #075ee8;
+    color: #ffffff;
+}
+
+.suppliers-submit-button:hover {
+    background: #0649b7;
+}
+
+.suppliers-submit-button:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+/* ==========================================
+   ERRORES DE VALIDACIÓN
+   ========================================== */
+
+.suppliers-form-errors {
+    padding: 12px 14px;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    background: #fef2f2;
+    color: #991b1b;
+    font-size: 0.85rem;
+}
+
+.suppliers-form-errors strong {
+    display: block;
+    margin-bottom: 6px;
+}
+
+.suppliers-form-errors ul {
+    margin: 8px 0 0;
+    padding-left: 20px;
+}
+
+.suppliers-form-errors li {
+    margin-bottom: 4px;
+}
+
+/* ==========================================
+   ESTADO VACÍO
+   ========================================== */
+
+.suppliers-empty {
+    grid-column: 1 / -1;
+    padding: 45px 20px;
+    text-align: center;
+    color: #63718a;
+}
+
+.suppliers-empty > i {
+    display: block;
+    margin-bottom: 12px;
+    color: #075ee8;
+    font-size: 2.5rem;
+}
+
+.suppliers-empty h3 {
+    margin: 0 0 8px;
+    color: #102044;
+}
+
+.suppliers-empty p {
+    margin: 0;
+}
+
+/* ==========================================
+   PAGINACIÓN DE PROVEEDORES
+   ========================================== */
+
+.suppliers-pagination {
+    margin-top: 24px;
+}
+
+/* Controlar tamaño de flechas SVG de Laravel */
+.suppliers-pagination svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Evitar desbordamiento */
+.suppliers-pagination nav {
+    max-width: 100%;
+}
+
+/* ==========================================
+   RESPONSIVE - TABLETS
+   ========================================== */
+
+@media (max-width: 1100px) {
+
+    .suppliers-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .suppliers-panel-header {
+        gap: 14px;
+    }
+}
+
+/* ==========================================
+   RESPONSIVE - CELULARES
+   ========================================== */
+
+@media (max-width: 700px) {
+
+    .suppliers-panel {
+        padding: 16px;
+    }
+
+    .suppliers-panel-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .suppliers-primary-button {
+        width: 100%;
+    }
+
+    .suppliers-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .supplier-card {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 600px) {
+
+    /* Modal */
+    .suppliers-modal {
+        width: calc(100vw - 24px);
+        max-height: calc(100dvh - 24px);
+        border-radius: 14px;
+    }
+
+    .suppliers-modal-header,
+    .suppliers-modal-body {
+        padding: 18px;
+    }
+
+    .suppliers-modal-footer {
+        flex-direction: column-reverse;
+        padding: 16px 18px 20px;
+    }
+
+    .suppliers-cancel-button,
+    .suppliers-submit-button {
+        width: 100%;
+    }
+
+    /* Botones de tarjetas */
+    .supplier-card-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .supplier-card-actions form,
+    .supplier-edit-button,
+    .supplier-deactivate-button {
+        width: 100%;
+    }
+
+    /* Paginación */
+    .suppliers-pagination {
+        overflow-x: auto;
+        padding-bottom: 8px;
+    }
+}
+
+
+/* ==========================================
+   DAVID - CENTRADO DEL PANEL PROVEEDORES
+   ========================================== */
+
+/* Espacio lateral del módulo */
+.suppliers-page {
+    width: 100%;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 12px 24px 40px;
+    box-sizing: border-box;
+}
+
+/* Panel principal */
+.suppliers-page .suppliers-panel {
+    width: 100%;
+    margin: 0 auto;
+    padding: 26px;
+    box-sizing: border-box;
+}
+
+/* Encabezado */
+.suppliers-page .suppliers-page-head {
+    margin-bottom: 24px;
+}
+
+/* Tablets */
+@media (max-width: 1024px) {
+    .suppliers-page {
+        padding: 12px 18px 32px;
+    }
+
+    .suppliers-page .suppliers-panel {
+        padding: 20px;
+    }
+}
+
+/* Celulares */
+@media (max-width: 600px) {
+    .suppliers-page {
+        padding: 8px 10px 24px;
+    }
+
+    .suppliers-page .suppliers-panel {
+        padding: 14px;
+        border-radius: 12px;
+    }
+}
+
+
+/* ==========================================
+   DAVID - ACTIVAR PROVEEDOR
+   ========================================== */
+
+.suppliers-page .supplier-activate-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 9px 16px;
+    border: 1px solid #075ee8;
+    border-radius: 9px;
+    background: #075ee8;
+    color: #ffffff;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.suppliers-page .supplier-activate-button:hover {
+    background: #0649b7;
+}
+
+@media (max-width: 600px) {
+    .suppliers-page .supplier-activate-button {
+        width: 100%;
+    }
+}
+
+
+/* ==========================================
+   DAVID - ESPACIADO INTERIOR PROVEEDORES
+   ========================================== */
+
+/* Panel principal con márgenes internos */
+.suppliers-page .suppliers-panel {
+    padding: 30px 36px !important;
+    box-sizing: border-box;
+}
+
+/* Separación del encabezado */
+.suppliers-page .suppliers-panel-header {
+    margin-bottom: 28px;
+    gap: 20px;
+}
+
+/* Espacio para el listado */
+.suppliers-page .suppliers-grid {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Tarjetas de proveedores */
+.suppliers-page .supplier-card {
+    box-sizing: border-box;
+}
+
+/* ==========================================
+   TABLETS
+   ========================================== */
+
+@media (min-width: 601px) and (max-width: 1024px) {
+
+    .suppliers-page .suppliers-panel {
+        padding: 24px !important;
+    }
+}
+
+/* ==========================================
+   CELULARES
+   ========================================== */
+
+@media (max-width: 600px) {
+
+    .suppliers-page .suppliers-panel {
+        padding: 18px 16px !important;
+    }
+
+    .suppliers-page .suppliers-panel-header {
+        margin-bottom: 20px;
+    }
+
+    .suppliers-page .suppliers-grid {
+        gap: 14px;
+    }
+}
+
+
+/* ==========================================
+   DAVID - COMPRAS A PROVEEDORES
+   ========================================== */
+
+.purchases-page {
+    width: 100%;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 20px 24px 50px;
+    box-sizing: border-box;
+    color: #102044;
+}
+
+/* ==========================================
+   ENCABEZADO
+   ========================================== */
+
+.purchases-page .purchases-page-header {
+    margin-bottom: 28px;
+}
+
+.purchases-page .purchases-eyebrow {
+    display: inline-block;
+    margin-bottom: 12px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: #e0efff;
+    color: #075ee8;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.purchases-page .purchases-page-header h1 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 12px;
+    color: #102044;
+    font-size: clamp(1.7rem, 3vw, 2.5rem);
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.purchases-page .purchases-page-header h1 i {
+    color: #075ee8;
+    font-size: 0.85em;
+}
+
+.purchases-page .purchases-page-header p {
+    margin: 0;
+    color: #7587a4;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* ==========================================
+   PANELES
+   ========================================== */
+
+.purchases-page .purchases-form-panel,
+.purchases-page .purchases-history-panel {
+    width: 100%;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    border: 1px solid #dce6f3;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(16, 32, 68, 0.05);
+    box-sizing: border-box;
+}
+
+/* ==========================================
+   ENCABEZADOS DE SECCIONES
+   ========================================== */
+
+.purchases-page .purchases-section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 26px;
+}
+
+.purchases-page .purchases-section-icon {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    place-items: center;
+    border-radius: 12px;
+    background: #e8f1ff;
+    color: #075ee8;
+    font-size: 1.35rem;
+}
+
+.purchases-page .purchases-section-header h2 {
+    margin: 0 0 5px;
+    color: #102044;
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.purchases-page .purchases-section-header p {
+    margin: 0;
+    color: #63718a;
+    font-size: 0.9rem;
+}
+
+/* ==========================================
+   FORMULARIO
+   ========================================== */
+
+.purchases-page .purchases-form {
+    width: 100%;
+}
+
+.purchases-page .purchases-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 24px;
+}
+
+.purchases-page .purchases-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.purchases-page .purchases-field-full {
+    grid-column: 1 / -1;
+}
+
+.purchases-page .purchases-field > span {
+    color: #17365f;
+    font-size: 0.9rem;
+    font-weight: 750;
+}
+
+.purchases-page .purchases-field input,
+.purchases-page .purchases-field select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    padding: 11px 14px;
+    border: 1px solid #d6e1ef;
+    border-radius: 10px;
+    outline: none;
+    background: #ffffff;
+    color: #102044;
+    font: inherit;
+    font-size: 0.92rem;
+    box-sizing: border-box;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.purchases-page .purchases-field input:focus,
+.purchases-page .purchases-field select:focus {
+    border-color: #075ee8;
+    box-shadow: 0 0 0 3px rgba(7, 94, 232, 0.1);
+}
+
+.purchases-page .purchases-field input::placeholder {
+    color: #9aa8ba;
+}
+
+/* ==========================================
+   BOTÓN REGISTRAR
+   ========================================== */
+
+.purchases-page .purchases-form-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 26px;
+}
+
+.purchases-page .purchases-submit-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 12px 26px;
+    border: 0;
+    border-radius: 10px;
+    background: #075ee8;
+    color: #ffffff;
+    font: inherit;
+    font-size: 0.92rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 5px 14px rgba(7, 94, 232, 0.15);
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.purchases-page .purchases-submit-button:hover {
+    background: #0649b7;
+    transform: translateY(-1px);
+}
+
+/* ==========================================
+   ERRORES DE VALIDACIÓN
+   ========================================== */
+
+.purchases-page .purchases-form-errors {
+    margin-top: 20px;
+    padding: 14px 16px;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    background: #fef2f2;
+    color: #991b1b;
+    font-size: 0.88rem;
+}
+
+.purchases-page .purchases-form-errors strong {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.purchases-page .purchases-form-errors ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+/* ==========================================
+   HISTORIAL DE COMPRAS
+   ========================================== */
+
+.purchases-page .purchases-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.purchases-page .purchase-history-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+    padding: 18px;
+    border: 1px solid #e0e8f4;
+    border-radius: 12px;
+    background: #ffffff;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.purchases-page .purchase-history-card:hover {
+    background: #f8fbff;
+    border-color: #b9d1f5;
+}
+
+.purchases-page .purchase-history-icon {
+    display: grid;
+    width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+    place-items: center;
+    border-radius: 12px;
+    background: #e8f1ff;
+    color: #075ee8;
+    font-size: 1.25rem;
+}
+
+.purchases-page .purchase-history-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.purchases-page .purchase-history-info h3 {
+    margin: 0 0 5px;
+    color: #102044;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.purchases-page .purchase-history-supplier {
+    margin: 0 0 8px;
+    color: #53627a;
+    font-size: 0.9rem;
+    overflow-wrap: anywhere;
+}
+
+.purchases-page .purchase-history-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    color: #63718a;
+    font-size: 0.82rem;
+}
+
+.purchases-page .purchase-history-meta i {
+    margin-right: 4px;
+    color: #075ee8;
+}
+
+.purchases-page .purchase-history-status {
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: #e8f1ff;
+    color: #075ee8;
+    font-size: 0.75rem;
+    font-weight: 750;
+}
+
+.purchases-page .purchase-history-total {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.purchases-page .purchase-history-total small {
+    color: #63718a;
+    font-size: 0.78rem;
+}
+
+.purchases-page .purchase-history-total strong {
+    color: #075ee8;
+    font-size: 1.15rem;
+    font-weight: 800;
+}
+
+/* ==========================================
+   HISTORIAL VACÍO
+   ========================================== */
+
+.purchases-page .purchases-history-empty {
+    padding: 45px 20px;
+    text-align: center;
+    
+    color: #63718a;
+}
+
+.purchases-page .purchases-history-empty > i {
+    display: block;
+    margin-bottom: 14px;
+    color: #075ee8;
+    font-size: 2.6rem;
+}
+
+.purchases-page .purchases-history-empty h3 {
+    margin: 0 0 8px;
+    color: #102044;
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+.purchases-page .purchases-history-empty p {
+    margin: 0;
+    color: #63718a;
+    font-size: 0.9rem;
+}
+
+/* ==========================================
+   DAVID - PAGINACIÓN DE COMPRAS
+   ========================================== */
+
+.purchases-page .purchases-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 28px auto 0;
+    padding: 14px 10px;
+}
+
+.purchases-page .purchases-page-numbers {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.purchases-page .purchases-page-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid #dce6f3;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #075ee8;
+    font-size: 0.88rem;
+    font-weight: 750;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.purchases-page a.purchases-page-number:hover {
+    background: #e8f1ff;
+    border-color: #075ee8;
+}
+
+.purchases-page .purchases-page-number.is-current {
+    border-color: #075ee8;
+    background: #075ee8;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(7, 94, 232, 0.18);
+}
+
+.purchases-page .purchases-page-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #e8f1ff;
+    color: #075ee8;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.purchases-page a.purchases-page-arrow:hover {
+    background: #075ee8;
+    color: #ffffff;
+}
+
+.purchases-page .purchases-page-arrow.is-disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.purchases-page .purchases-pagination-info {
+    margin: 0 0 12px;
+    text-align: center;
+    color: #63718a;
+    font-size: 0.85rem;
+}
+
+/* ==========================================
+   DAVID - RESPONSIVE TABLETS
+   ========================================== */
+
+@media (max-width: 1024px) {
+
+    .purchases-page {
+        padding: 18px 18px 36px;
+    }
+
+    .purchases-page .purchases-form-panel,
+    .purchases-page .purchases-history-panel {
+        padding: 24px;
+    }
+
+    .purchases-page .purchases-form-grid {
+        gap: 18px;
+    }
+
+    .purchases-page .purchases-page-header h1 {
+        font-size: 1.9rem;
+    }
+}
+
+/* ==========================================
+   DAVID - RESPONSIVE CELULARES
+   ========================================== */
+
+@media (max-width: 600px) {
+
+    .purchases-page {
+        padding: 12px 10px 28px;
+    }
+
+    /* Encabezado */
+    .purchases-page .purchases-page-header {
+        margin-bottom: 20px;
+    }
+
+    .purchases-page .purchases-page-header h1 {
+        font-size: 1.55rem;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .purchases-page .purchases-page-header p {
+        font-size: 0.88rem;
+    }
+
+    /* Paneles */
+    .purchases-page .purchases-form-panel,
+    .purchases-page .purchases-history-panel {
+        padding: 18px 16px;
+        margin-bottom: 18px;
+        border-radius: 12px;
+    }
+
+    /* Encabezados de sección */
+    .purchases-page .purchases-section-header {
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .purchases-page .purchases-section-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+
+    .purchases-page .purchases-section-header h2 {
+        font-size: 1.08rem;
+    }
+
+    .purchases-page .purchases-section-header p {
+        font-size: 0.82rem;
+    }
+
+    /* Formulario en una columna */
+    .purchases-page .purchases-form-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
+    }
+
+    .purchases-page .purchases-field-full {
+        grid-column: auto;
+    }
+
+    .purchases-page .purchases-field input,
+    .purchases-page .purchases-field select {
+        min-height: 46px;
+        font-size: 0.9rem;
+    }
+
+    /* Botón de registro */
+    .purchases-page .purchases-form-footer {
+        margin-top: 22px;
+    }
+
+    .purchases-page .purchases-submit-button {
+        width: 100%;
+        min-height: 48px;
+        padding: 12px;
+        font-size: 0.88rem;
+    }
+
+    /* Historial de compras */
+    .purchases-page .purchase-history-card {
+        display: grid;
+        grid-template-columns: 42px minmax(0, 1fr);
+        gap: 12px;
+        padding: 14px;
+    }
+
+    .purchases-page .purchase-history-icon {
+        width: 42px;
+        height: 42px;
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .purchases-page .purchase-history-info {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .purchases-page .purchase-history-info h3 {
+        font-size: 0.92rem;
+    }
+
+    .purchases-page .purchase-history-meta {
+        gap: 8px;
+    }
+
+    .purchases-page .purchase-history-total {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        align-items: flex-end;
+        padding-top: 12px;
+        border-top: 1px solid #e5ebf4;
+    }
+
+    .purchases-page .purchase-history-total strong {
+        font-size: 1.1rem;
+    }
+
+    /* Paginación */
+    .purchases-page .purchases-pagination {
+        gap: 6px;
+        padding: 12px 0;
+    }
+
+    .purchases-page .purchases-page-numbers {
+        gap: 4px;
+    }
+
+    .purchases-page .purchases-page-number {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+    }
+
+    .purchases-page .purchases-page-arrow {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+/* ==========================================
+   DAVID - AJUSTES PARA MÓVILES PEQUEÑOS
+   ========================================== */
+
+@media (max-width: 380px) {
+
+    .purchases-page {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .purchases-page .purchases-form-panel,
+    .purchases-page .purchases-history-panel {
+        padding: 14px 12px;
+    }
+
+    .purchases-page .purchases-page-header h1 {
+        font-size: 1.4rem;
+    }
+
+    .purchases-page .purchases-submit-button {
+        font-size: 0.82rem;
+    }
+}
+
+
+/* ==========================================
+   DAVID - ESPACIADO FINAL DEL MÓDULO COMPRAS
+   ========================================== */
+
+/* Centrar el contenido y separarlo de los laterales */
+.purchases-page {
+    width: 100%;
+    max-width: 1320px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 24px 28px 50px !important;
+    box-sizing: border-box;
+}
+
+/* Espaciado interior de ambos paneles */
+.purchases-page .purchases-form-panel,
+.purchases-page .purchases-history-panel {
+    padding: 32px 36px !important;
+    box-sizing: border-box;
+}
+
+/* Separación del encabezado */
+.purchases-page .purchases-section-header {
+    margin-bottom: 28px;
+}
+
+/* Evitar que los campos choquen con los bordes */
+.purchases-page .purchases-form {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.purchases-page .purchases-form-grid {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Espacio inferior para el botón */
+.purchases-page .purchases-form-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 32px;
+    padding-bottom: 12px;
+}
+
+/* Separación entre el historial y sus bordes */
+.purchases-page .purchases-history-list {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* ==========================================
+   TABLETS
+   ========================================== */
+
+@media (min-width: 601px) and (max-width: 1024px) {
+
+    .purchases-page {
+        padding: 20px 20px 40px !important;
+    }
+
+    .purchases-page .purchases-form-panel,
+    .purchases-page .purchases-history-panel {
+        padding: 26px 28px !important;
+    }
+
+    .purchases-page .purchases-form-footer {
+        padding-bottom: 10px;
+    }
+}
+
+/* ==========================================
+   CELULARES
+   ========================================== */
+
+@media (max-width: 600px) {
+
+    .purchases-page {
+        padding: 12px 12px 30px !important;
+    }
+
+    .purchases-page .purchases-form-panel,
+    .purchases-page .purchases-history-panel {
+        padding: 20px 18px !important;
+    }
+
+    /* Mantener formulario en una columna */
+    .purchases-page .purchases-form-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
+    }
+
+    .purchases-page .purchases-field-full {
+        grid-column: auto;
+    }
+
+    /* Botón con espacio inferior */
+    .purchases-page .purchases-form-footer {
+        margin-top: 24px;
+        padding-bottom: 8px;
+    }
+
+    .purchases-page .purchases-submit-button {
+        width: 100%;
+    }
+}
