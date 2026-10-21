@@ -1,243 +1,594 @@
-.publicidad-ia-fondo {
-  background: #f2f7fd;
-  padding: 18px 0 42px;
+
+/* ==========================================
+   DAVID - PUBLICIDAD INTELIGENTE
+   ========================================== */
+
+body.modulo-publicidad-inteligente .publicidad-ia-fondo {
+    min-height: 75vh;
+    padding: 28px 0 55px;
+    background: #f2f7fd;
+    color: #102044;
 }
-.publicidad-ia-layout {
-  display: grid;
-  grid-template-columns: 210px minmax(0, 1fr);
-  gap: 15px;
-}
-.publicidad-ia-menu {
-  display: flex;
-  flex-direction: column;
-  background: #fff;
-  border: 1px solid #dfe9f5;
-  border-radius: 12px;
-  padding: 10px;
-  min-height: 760px;
-}
-.publicidad-ia-menu > div:first-child {
-  display: flex;
-  gap: 9px;
-  padding: 12px 8px 18px;
-}
-.publicidad-ia-menu > div:first-child > i {
-  font-size: 1.7rem;
-  color: #0873f9;
-}
-.publicidad-ia-menu b,
-.publicidad-ia-menu small {
-  display: block;
-}
-.publicidad-ia-menu small {
-  color: #74849a;
-}
-.publicidad-ia-menu > a {
-  display: flex;
-  gap: 9px;
-  align-items: center;
-  padding: 10px;
-  border-radius: 8px;
-  color: #34516f;
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-.publicidad-ia-menu > a.activo {
-  background: #0873f9;
-  color: #fff;
-}
-.publicidad-convierte {
-  margin-top: auto !important;
-  display: grid !important;
-  gap: 6px !important;
-  padding: 16px !important;
-  border-radius: 10px;
-  background: linear-gradient(145deg, #e9f4ff, #bddcff);
-  color: #0759bd;
-}
-.publicidad-ia-contenido > header {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-}
-.publicidad-ia-contenido > header span {
-  background: #e7f2ff;
-  color: #1a5caa;
-  border-radius: 999px;
-  padding: 6px 10px;
-  font-size: 0.72rem;
-}
-.publicidad-ia-contenido > header h1 {
-  font-size: 2.5rem;
-  line-height: 0.95;
-  margin: 12px 0;
-}
-.publicidad-ia-contenido > header h1 em {
-  font-style: normal;
-  color: #0873f9;
-}
-.publicidad-ia-contenido > header p {
-  color: #6d7f96;
-}
-.publicidad-ia-acciones {
-  display: flex;
-  align-items: flex-start;
-  gap: 7px;
-}
-.publicidad-ia-acciones > a {
-  border: 1px solid #dbe6f3;
-  background: #fff;
-  padding: 10px;
-  border-radius: 8px;
-  font-size: 0.72rem;
-  font-weight: 800;
-}
-.publicidad-ia-acciones > a.btn {
-  background: #0873f9;
-  color: #fff;
-}
-.publicidad-metricas {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin: 14px 0;
-}
-.publicidad-metricas article {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  background: #fff;
-  border: 1px solid #e1eaf5;
-  border-radius: 11px;
-  padding: 13px;
-}
-.publicidad-metricas article > i {
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  background: #e8f3ff;
-  color: #0873f9;
-  border-radius: 10px;
-  font-size: 1.25rem;
-}
-.publicidad-metricas span,
-.publicidad-metricas b,
-.publicidad-metricas small {
-  display: block;
-}
-.publicidad-metricas b {
-  font-size: 1.2rem;
-}
-.publicidad-metricas small {
-  color: #0aa56c;
-}
-.publicidad-rejilla {
-  display: grid;
-  grid-template-columns: 1.5fr 0.75fr 0.8fr;
-  gap: 10px;
-}
-.publicidad-rejilla .panel {
-  min-width: 0;
-}
-.embudo-publicidad > div {
-  width: var(--ancho);
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 8px;
-  margin: 7px auto;
-  padding: 8px 12px;
-  background: linear-gradient(90deg, #0873f9, #44a8ff);
-  clip-path: polygon(7% 0, 93% 0, 100% 100%, 0 100%);
-  color: #fff;
-  font-size: 0.68rem;
-}
-.publicidad-rejilla aside article {
-  display: flex;
-  gap: 9px;
-  padding: 10px 0;
-  border-bottom: 1px solid #edf2f7;
-}
-.publicidad-rejilla aside article > i {
-  color: #0873f9;
-}
-.publicidad-rejilla aside p {
-  margin: 4px 0;
-  color: #6c7e95;
-  font-size: 0.72rem;
-}
-.publicidad-tablas {
-  display: grid;
-  grid-template-columns: 1fr 1fr 0.8fr;
-  gap: 10px;
-  margin-top: 10px;
-}
-.publicidad-tablas h2 {
-  font-size: 0.95rem;
-}
-.publicidad-tablas ol {
-  padding-left: 22px;
-  margin: 0;
-}
-.publicidad-tablas li {
-  padding: 6px;
-  border-bottom: 1px solid #edf2f7;
-  font-size: 0.72rem;
-}
-.publicidad-tablas li b {
-  float: right;
-  color: #0b9b65;
-}
-@media (max-width: 1050px) {
-  .publicidad-ia-layout {
-    grid-template-columns: 1fr;
-  }
-  .publicidad-ia-menu {
-    min-height: 0;
+
+/* ==========================================
+   DISTRIBUCIÓN GENERAL
+   ========================================== */
+
+body.modulo-publicidad-inteligente .publicidad-ia-layout {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-  }
-  .publicidad-ia-menu > div:first-child,
-  .publicidad-convierte {
-    grid-column: 1/-1;
-  }
-  .publicidad-rejilla {
-    grid-template-columns: 1fr 1fr;
-  }
-  .publicidad-rejilla > aside {
-    grid-column: 1/-1;
-  }
-  .publicidad-metricas {
-    grid-template-columns: 1fr 1fr;
-  }
+    grid-template-columns: 200px minmax(0, 1fr);
+    align-items: start;
+    gap: 24px;
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 0 28px;
+    box-sizing: border-box;
 }
-@media (max-width: 760px) {
-  .publicidad-ia-menu {
+
+body.modulo-publicidad-inteligente .publicidad-ia-contenido {
+    min-width: 0;
+}
+
+/* ==========================================
+   MENÚ INTERNO MD ADS
+   ========================================== */
+
+body.modulo-publicidad-inteligente .publicidad-ia-menu {
     display: flex;
-    min-height: 0;
-  }
-  .publicidad-convierte {
-    display: none !important;
-  }
-  .publicidad-ia-contenido > header {
     flex-direction: column;
-  }
-  .publicidad-ia-acciones {
-    overflow: auto;
-  }
-  .publicidad-rejilla,
-  .publicidad-tablas {
-    grid-template-columns: 1fr;
-  }
-  .publicidad-rejilla > aside {
-    grid-column: auto;
-  }
+    gap: 5px;
+    min-width: 0;
+    min-height: 0;
+    padding: 16px 12px;
+    border: 1px solid #dce6f3;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(16, 32, 68, 0.05);
 }
-@media (max-width: 460px) {
-  .publicidad-metricas {
-    grid-template-columns: 1fr;
-  }
-  .publicidad-ia-contenido > header h1 {
-    font-size: 2rem;
-  }
+
+body.modulo-publicidad-inteligente .publicidad-ia-menu > div:first-child {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 8px 20px;
+}
+
+body.modulo-publicidad-inteligente .publicidad-ia-menu > div:first-child > i {
+    color: #075ee8;
+    font-size: 1.5rem;
+}
+
+body.modulo-publicidad-inteligente .publicidad-ia-menu b {
+    display: block;
+    color: #102044;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+body.modulo-publicidad-inteligente .publicidad-ia-menu small {
+    display: block;
+    margin-top: 4px;
+    color: #63718a;
+    font-size: 0.78rem;
+    line-height: 1.5;
+}
+
+body.modulo-publicidad-inteligente .publicidad-ia-menu > a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    padding: 10px 12px;
+    border-radius: 9px;
+    color: #34516f;
+    font-size: 0.82rem;
+    font-weight: 750;
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+body.modulo-publicidad-inteligente .publicidad-ia-menu > a:hover {
+    background: #e8f1ff;
+    color: #075ee8;
+}
+
+body.modulo-publicidad-inteligente .publicidad-ia-menu > a.activo {
+    background: #075ee8;
+    color: #ffffff;
+}
+
+body.modulo-publicidad-inteligente .publicidad-ia-menu > a i {
+    font-size: 1rem;
+}
+
+/* Mensaje inferior del menú */
+body.modulo-publicidad-inteligente .publicidad-convierte {
+    display: grid;
+    gap: 8px;
+    margin-top: 24px !important;
+    padding: 16px !important;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #e9f4ff, #bddcff);
+    color: #0759bd;
+}
+
+body.modulo-publicidad-inteligente .publicidad-convierte i {
+    font-size: 1.3rem;
+}
+
+body.modulo-publicidad-inteligente .publicidad-convierte b {
+    color: #0759bd;
+    font-size: 0.9rem;
+}
+
+/* ==========================================
+   ENCABEZADO
+   ========================================== */
+
+body.modulo-publicidad-inteligente .publicidad-ia-contenido > header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-bottom: 28px;
+}
+
+body.modulo-publicidad-inteligente .publicidad-ia-contenido > header > div:first-child {
+    flex: 1 1 420px;
+    min-width: 0;
+}
+
+body.modulo-publicidad-inteligente .publicidad-ia-contenido > header span {
+    display: inline-block;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: #e7f2ff;
+    color: #075ee8;
+    font-size: 0.75rem;
+    font-weight: 750;
+}
+
+body.modulo-publicidad-inteligente .publicidad-ia-contenido > header h1 {
+    margin: 16px 0;
+    color: #102044;
+    font-size: clamp(1.9rem, 3vw, 2.7rem);
+    font-weight: 800;
+    line-height: 1.12;
+}
+
+body.modulo-publicidad-inteligente .publicidad-ia-contenido > header h1 em {
+    color: #075ee8;
+    font-style: normal;
+}
+
+body.modulo-publicidad-inteligente .publicidad-ia-contenido > header p {
+    max-width: 620px;
+    margin: 0;
+    color: #63718a;
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
+
+/* ==========================================
+   BOTONES DEL ENCABEZADO
+   ========================================== */
+
+body.modulo-publicidad-inteligente .publicidad-ia-acciones {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    min-width: 0;
+}
+
+body.modulo-publicidad-inteligente .publicidad-ia-acciones > a,
+body.modulo-publicidad-inteligente .publicidad-ia-acciones > button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 10px 15px;
+    border: 1px solid #d6e1ef;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #075ee8;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 750;
+    text-align: center;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+body.modulo-publicidad-inteligente .publicidad-ia-acciones > a.btn {
+    border-color: #075ee8;
+    background: #075ee8;
+    color: #ffffff;
+}
+
+body.modulo-publicidad-inteligente .publicidad-ia-acciones > a.btn:hover {
+    background: #0649b7;
+}
+
+body.modulo-publicidad-inteligente .publicidad-ia-acciones > button:disabled {
+    background: #f1f3f6;
+    color: #98a2b3;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+/* ==========================================
+   ESTADÍSTICAS
+   ========================================== */
+
+body.modulo-publicidad-inteligente .publicidad-metricas {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin: 0 0 24px;
+}
+
+body.modulo-publicidad-inteligente .publicidad-metricas article {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    min-height: 112px;
+    padding: 18px;
+    border: 1px solid #dce6f3;
+    border-radius: 14px;
+    background: #ffffff;
+    box-sizing: border-box;
+    box-shadow: 0 5px 16px rgba(16, 32, 68, 0.04);
+}
+
+body.modulo-publicidad-inteligente .publicidad-metricas article > i {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    place-items: center;
+    border-radius: 12px;
+    background: #e8f1ff;
+    color: #075ee8;
+    font-size: 1.25rem;
+}
+
+body.modulo-publicidad-inteligente .publicidad-metricas article > div {
+    min-width: 0;
+}
+
+body.modulo-publicidad-inteligente .publicidad-metricas span {
+    display: block;
+    color: #53627a;
+    font-size: 0.82rem;
+    line-height: 1.4;
+}
+
+body.modulo-publicidad-inteligente .publicidad-metricas b {
+    display: block;
+    margin: 5px 0;
+    color: #102044;
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+body.modulo-publicidad-inteligente .publicidad-metricas small {
+    display: block;
+    color: #0a9963;
+    font-size: 0.76rem;
+}
+
+/* ==========================================
+   PANELES GENERALES
+   ========================================== */
+
+body.modulo-publicidad-inteligente .publicidad-rejilla .panel,
+body.modulo-publicidad-inteligente .publicidad-tablas .panel {
+    min-width: 0;
+    padding: 24px;
+    border: 1px solid #dce6f3;
+    border-radius: 16px;
+    background: #ffffff;
+    box-sizing: border-box;
+    box-shadow: 0 6px 18px rgba(16, 32, 68, 0.04);
+}
+
+body.modulo-publicidad-inteligente .publicidad-rejilla h2,
+body.modulo-publicidad-inteligente .publicidad-tablas h2 {
+    margin: 0 0 16px;
+    color: #102044;
+    font-size: 1.1rem;
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+body.modulo-publicidad-inteligente .publicidad-rejilla p,
+body.modulo-publicidad-inteligente .publicidad-tablas p {
+    margin: 0;
+    color: #63718a;
+    font-size: 0.9rem;
+    line-height: 1.7;
+}
+
+/* ==========================================
+   PRIMERA FILA DE PANELES
+   ========================================== */
+
+body.modulo-publicidad-inteligente .publicidad-rejilla {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+/* Ventas atribuidas */
+body.modulo-publicidad-inteligente .publicidad-rejilla > .panel:first-child {
+    grid-column: 1 / -1;
+    min-height: 180px;
+}
+
+body.modulo-publicidad-inteligente .titulo-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+body.modulo-publicidad-inteligente .titulo-panel h2 {
+    margin: 0;
+}
+
+body.modulo-publicidad-inteligente .titulo-panel button {
+    padding: 10px 12px;
+    border: 1px solid #dce6f3;
+    border-radius: 9px;
+    background: #f8fbff;
+    color: #63718a;
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: not-allowed;
+}
+
+/* Conversión */
+body.modulo-publicidad-inteligente .embudo-publicidad {
+    min-height: 180px;
+}
+
+/* Insights */
+body.modulo-publicidad-inteligente #recomendaciones {
+    min-height: 180px;
+}
+
+body.modulo-publicidad-inteligente #recomendaciones h2 i {
+    color: #075ee8;
+    margin-right: 6px;
+}
+
+/* ==========================================
+   SEGUNDA FILA DE PANELES
+   ========================================== */
+
+body.modulo-publicidad-inteligente .publicidad-tablas {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 18px;
+}
+
+body.modulo-publicidad-inteligente .publicidad-tablas ol {
+    margin: 0;
+    padding-left: 20px;
+}
+
+body.modulo-publicidad-inteligente .publicidad-tablas li {
+    padding: 10px 0;
+    border-bottom: 1px solid #edf2f7;
+    color: #53627a;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+body.modulo-publicidad-inteligente .publicidad-tablas li:last-child {
+    border-bottom: 0;
+}
+
+body.modulo-publicidad-inteligente .publicidad-tablas li b {
+    float: right;
+    margin-left: 10px;
+    color: #0a9963;
+    font-weight: 800;
+}
+
+/* Botones deshabilitados en paneles */
+body.modulo-publicidad-inteligente .publicidad-tablas button:disabled {
+    margin-top: 18px;
+    padding: 10px 16px;
+    border-radius: 9px;
+    background: #e8f1ff;
+    color: #63718a;
+    cursor: not-allowed;
+    opacity: 0.75;
+}
+
+/* ==========================================
+   RESPONSIVE - LAPTOPS
+   ========================================== */
+
+@media (max-width: 1350px) {
+    body.modulo-publicidad-inteligente .publicidad-ia-layout {
+        grid-template-columns: 185px minmax(0, 1fr);
+        gap: 18px;
+        padding: 0 20px;
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-metricas {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-tablas {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-tablas > .panel:last-child {
+        grid-column: 1 / -1;
+    }
+}
+
+/* ==========================================
+   RESPONSIVE - TABLETS
+   ========================================== */
+
+@media (max-width: 1050px) {
+    body.modulo-publicidad-inteligente .publicidad-ia-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-ia-menu {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+        min-height: 0;
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-ia-menu > div:first-child {
+        grid-column: 1 / -1;
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-convierte {
+        display: none !important;
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-ia-menu > a {
+        justify-content: center;
+        text-align: center;
+    }
+}
+
+/* ==========================================
+   RESPONSIVE - CELULARES
+   ========================================== */
+
+@media (max-width: 760px) {
+    body.modulo-publicidad-inteligente .publicidad-ia-fondo {
+        padding: 18px 0 35px;
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-ia-layout {
+        padding: 0 14px;
+        gap: 20px;
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-ia-menu {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 12px;
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-ia-menu > a {
+        font-size: 0.78rem;
+        padding: 10px 8px;
+    }
+
+    
+    body.modulo-publicidad-inteligente .publicidad-ia-contenido > header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 20px;
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-ia-contenido > header > div:first-child {
+        flex: 0 1 auto;
+        width: 100%;
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-ia-contenido > header h1 {
+        font-size: 1.9rem;
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-ia-acciones {
+        width: 100%;
+        gap: 8px;
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-ia-acciones > a,
+    body.modulo-publicidad-inteligente .publicidad-ia-acciones > button {
+        flex: 1 1 100%;
+    }
+
+    /* Estadísticas */
+    body.modulo-publicidad-inteligente .publicidad-metricas {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-metricas article {
+        padding: 14px;
+        min-height: 100px;
+    }
+
+    /* Paneles */
+    body.modulo-publicidad-inteligente .publicidad-rejilla,
+    body.modulo-publicidad-inteligente .publicidad-tablas {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-rejilla > .panel:first-child,
+    body.modulo-publicidad-inteligente .publicidad-tablas > .panel:last-child {
+        grid-column: auto;
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-rejilla .panel,
+    body.modulo-publicidad-inteligente .publicidad-tablas .panel {
+        padding: 20px;
+        min-height: 0;
+    }
+}
+
+/* ==========================================
+   CELULARES PEQUEÑOS
+   ========================================== */
+
+@media (max-width: 480px) {
+
+    body.modulo-publicidad-inteligente .publicidad-ia-layout {
+        padding: 0 10px;
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-ia-contenido > header h1 {
+        font-size: 1.7rem;
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-metricas {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-metricas article {
+        min-height: 90px;
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-ia-menu {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-ia-menu > a {
+        font-size: 0.72rem;
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-rejilla .panel,
+    body.modulo-publicidad-inteligente .publicidad-tablas .panel {
+        padding: 16px;
+    }
+
+    body.modulo-publicidad-inteligente .publicidad-tablas li b {
+        float: none;
+        display: block;
+        margin: 4px 0 0;
+    }
 }

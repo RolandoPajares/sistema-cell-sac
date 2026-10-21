@@ -151,6 +151,10 @@ Route::prefix('gestion')->middleware(['auth', 'role:administrador,marketing'])->
     Route::post('/campanas', [CampaignController::class, 'store'])->name('campaigns.store');
     Route::put('/campanas/{campaign}', [CampaignController::class, 'update'])->name('campaigns.update');
     Route::delete('/campanas/{campaign}', [CampaignController::class, 'deactivate'])->name('campaigns.deactivate');
+    // Reactivar campañas desactivadas
+Route::patch('/campanas/{campaign}/activar', [CampaignController::class, 'activate'])
+    ->whereNumber('campaign')
+    ->name('campaigns.activate');
     Route::get('/cupones', [CouponController::class, 'index'])->name('coupons');
     Route::post('/cupones', [CouponController::class, 'store'])->name('coupons.store');
     Route::get('/segmentos', [CustomerSegmentController::class, 'index'])->name('segments');
