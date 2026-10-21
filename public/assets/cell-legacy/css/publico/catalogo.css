@@ -1000,3 +1000,340 @@ body.modulo-catalog .catalog-modal-actions .btn:disabled {
     flex-direction: column;
   }
 }
+
+/* =========================================
+   DAVID - MEJORAS DEL PANEL DE FILTROS
+   ========================================= */
+
+/* Panel lateral compacto y fijo al desplazarse */
+body.modulo-catalog .catalog-sidebar {
+    position: sticky;
+    top: 95px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-content: start;
+
+    gap: 16px;
+    align-self: start;
+
+    padding: 18px 14px;
+
+    max-height: calc(100vh - 110px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+/* Evitar espacios excesivos entre secciones */
+body.modulo-catalog .catalog-filter-section {
+    margin: 0;
+    padding: 0;
+    flex: 0 0 auto;
+}
+
+/* Títulos de filtros */
+body.modulo-catalog .catalog-filter-section h2,
+body.modulo-catalog .catalog-price-filter h2 {
+    margin: 0 0 10px;
+}
+
+/* Opciones más juntas */
+body.modulo-catalog .catalog-filter-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* Espaciado compacto de cada opción */
+body.modulo-catalog .catalog-filter-list a {
+    padding: 8px 10px;
+    line-height: 1.35;
+}
+
+/* Filtro de precio sin separaciones exageradas */
+body.modulo-catalog .catalog-price-filter {
+    margin: 0;
+    padding-top: 14px;
+    flex: 0 0 auto;
+}
+
+/* En pantallas pequeñas el panel vuelve al flujo normal */
+@media (max-width: 760px) {
+    body.modulo-catalog .catalog-sidebar {
+        position: static;
+        max-height: none;
+        overflow: visible;
+    }
+}
+
+
+/* =========================================
+   FILTROS RESPONSIVOS Y PAGINACION
+   MD TECHNOLOGY CELL
+   ========================================= */
+
+/* TABLETS Y LAPTOPS: FILTROS VISIBLES */
+
+@media (min-width: 761px) {
+
+    body.modulo-catalog .catalog-layout {
+        display: grid;
+        grid-template-columns: 240px minmax(0, 1fr);
+        gap: 24px;
+        align-items: start;
+    }
+
+    body.modulo-catalog .catalog-filters-container {
+        display: block;
+        min-width: 0;
+    }
+
+    body.modulo-catalog .catalog-mobile-filter-toggle {
+        display: none !important;
+    }
+
+    body.modulo-catalog .catalog-sidebar {
+        display: flex !important;
+        flex-direction: column;
+        position: static;
+        width: 100%;
+        max-height: none;
+        overflow: visible;
+    }
+}
+
+/* MOVILES: FILTROS DESPLEGABLES */
+
+@media (max-width: 760px) {
+
+    body.modulo-catalog .catalog-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
+    }
+
+    body.modulo-catalog .catalog-mobile-filter-toggle {
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px;
+        background: #fff;
+        border: 1px solid #e0e6ef;
+        border-radius: 12px;
+        cursor: pointer;
+        list-style: none;
+    }
+
+    body.modulo-catalog
+    .catalog-mobile-filter-toggle::-webkit-details-marker {
+        display: none;
+    }
+
+    body.modulo-catalog
+    .catalog-filters-container:not([open])
+    .catalog-sidebar {
+        display: none !important;
+    }
+
+    body.modulo-catalog
+    .catalog-filters-container[open]
+    .catalog-sidebar {
+        display: flex !important;
+        flex-direction: column;
+        position: static;
+        max-height: none;
+        overflow: visible;
+        margin-top: 10px;
+    }
+
+    body.modulo-catalog
+    .catalog-filters-container[open]
+    .catalog-filter-chevron {
+        transform: rotate(180deg);
+    }
+}
+
+/* PAGINACION IGUAL A LA REFERENCIA */
+
+body.modulo-catalog .catalog-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    margin: 35px auto 0;
+    padding: 10px 0;
+}
+
+body.modulo-catalog .catalog-page-numbers {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    flex: 1;
+    min-width: 0;
+    gap: 4px;
+}
+
+body.modulo-catalog .catalog-page-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 40px;
+    color: #555;
+    font-size: 22px;
+    text-decoration: none;
+}
+
+body.modulo-catalog .catalog-page-arrow.is-disabled {
+    opacity: 0.35;
+}
+
+body.modulo-catalog .catalog-page-dot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    text-decoration: none;
+}
+
+body.modulo-catalog .catalog-dot-square {
+    display: block;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    background: #9db9ed;
+}
+
+body.modulo-catalog .catalog-page-dot.is-current {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #0759ed;
+    color: #fff;
+    font-size: 17px;
+    font-weight: 800;
+}
+
+/* PAGINACION EN CELULARES */
+
+@media (max-width: 760px) {
+
+    body.modulo-catalog .catalog-pagination {
+        gap: 2px;
+    }
+
+    body.modulo-catalog .catalog-page-arrow {
+        flex-basis: 25px;
+        width: 25px;
+    }
+
+    body.modulo-catalog .catalog-page-dot {
+        width: 16px;
+        height: 34px;
+    }
+
+    body.modulo-catalog .catalog-dot-square {
+        width: 7px;
+        height: 7px;
+    }
+
+    body.modulo-catalog .catalog-page-dot.is-current {
+        flex-basis: 34px;
+        width: 34px;
+        height: 34px;
+        font-size: 14px;
+    }
+}
+
+/* FILTROS VISIBLES EN LAPTOPS Y TABLETS */
+
+@media screen and (min-width: 761px) {
+
+    body.modulo-catalog .catalog-layout {
+        display: grid !important;
+        grid-template-columns: 240px minmax(0, 1fr) !important;
+        gap: 24px;
+        align-items: start;
+    }
+
+    body.modulo-catalog .catalog-filters-container {
+        display: block !important;
+        width: 100%;
+        min-width: 0;
+    }
+
+    body.modulo-catalog .catalog-mobile-filter-toggle {
+        display: none !important;
+    }
+
+    body.modulo-catalog .catalog-sidebar {
+        display: flex !important;
+        flex-direction: column;
+        position: static !important;
+        width: 100%;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+}
+
+
+/* ==========================================
+   FILTROS FIJOS AL HACER SCROLL
+   SOLO TABLETS Y LAPTOPS
+   ========================================== */
+
+@media screen and (min-width: 761px) {
+
+    /* Contenedor de los filtros */
+    body.modulo-catalog .catalog-filters-container {
+        position: sticky !important;
+        top: 20px;
+        align-self: start;
+        height: fit-content;
+        overflow: visible;
+    }
+
+    /* Panel lateral */
+    body.modulo-catalog .catalog-sidebar {
+        position: static !important;
+        display: flex !important;
+        flex-direction: column;
+        width: 100%;
+
+        /* Altura maxima segun pantalla */
+        max-height: calc(100vh - 40px) !important;
+
+        /* Scroll interno si hay muchos filtros */
+        overflow-y: auto !important;
+        overscroll-behavior: contain;
+    }
+
+    /* Mantener las dos columnas */
+    body.modulo-catalog .catalog-layout {
+        display: grid !important;
+        grid-template-columns: 240px minmax(0, 1fr) !important;
+        align-items: start;
+        gap: 24px;
+    }
+}
+
+/* MOVILES: COMPORTAMIENTO NORMAL */
+
+@media screen and (max-width: 760px) {
+
+    body.modulo-catalog .catalog-filters-container {
+        position: static !important;
+        height: auto;
+    }
+
+    body.modulo-catalog .catalog-sidebar {
+        position: static !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+}

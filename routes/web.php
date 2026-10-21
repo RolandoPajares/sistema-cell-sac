@@ -116,20 +116,45 @@ Route::prefix('gestion')->middleware(['auth', 'role:administrador,compras_logist
     Route::post('/inventario/{product}', [InventoryController::class, 'adjust'])->whereNumber('product')->name('inventory.adjust');
 });
 
-Route::prefix('gestion')->middleware(['auth', 'role:administrador,compras_logistica'])->name('management.')->group(function (): void {
-    Route::get('/proveedores', [SupplierController::class, 'index'])->name('suppliers');
-    Route::post('/proveedores', [SupplierController::class, 'store'])->name('suppliers.store');
-    Route::put('/proveedores/{supplier}', [SupplierController::class, 'update'])->name('suppliers.update');
-    Route::delete('/proveedores/{supplier}', [SupplierController::class, 'deactivate'])->name('suppliers.deactivate');
-    Route::get('/compras', [PurchaseController::class, 'index'])->name('purchases');
-    Route::post('/compras', [PurchaseController::class, 'store'])->name('purchases.store');
-});
+
+Route::prefix('gestion')
+    ->middleware(['auth', 'role:administrador,compras_logistica'])
+    ->name('management.')
+    ->group(function (): void {
+
+        Route::get('/proveedores', [SupplierController::class, 'index'])
+            ->name('suppliers');
+
+        Route::post('/proveedores', [SupplierController::class, 'store'])
+            ->name('suppliers.store');
+
+        Route::put('/proveedores/{supplier}', [SupplierController::class, 'update'])
+            ->name('suppliers.update');
+
+        Route::delete('/proveedores/{supplier}', [SupplierController::class, 'deactivate'])
+            ->name('suppliers.deactivate');
+
+        // DAVID - Reactivar proveedores inactivos
+        Route::patch('/proveedores/{supplier}/activar', [SupplierController::class, 'activate'])
+            ->name('suppliers.activate');
+
+        Route::get('/compras', [PurchaseController::class, 'index'])
+            ->name('purchases');
+
+        Route::post('/compras', [PurchaseController::class, 'store'])
+            ->name('purchases.store');
+    });
+
 
 Route::prefix('gestion')->middleware(['auth', 'role:administrador,marketing'])->name('management.')->group(function (): void {
     Route::get('/campanas', [CampaignController::class, 'index'])->name('campaigns');
     Route::post('/campanas', [CampaignController::class, 'store'])->name('campaigns.store');
     Route::put('/campanas/{campaign}', [CampaignController::class, 'update'])->name('campaigns.update');
     Route::delete('/campanas/{campaign}', [CampaignController::class, 'deactivate'])->name('campaigns.deactivate');
+    // Reactivar campañas desactivadas
+Route::patch('/campanas/{campaign}/activar', [CampaignController::class, 'activate'])
+    ->whereNumber('campaign')
+    ->name('campaigns.activate');
     Route::get('/cupones', [CouponController::class, 'index'])->name('coupons');
     Route::post('/cupones', [CouponController::class, 'store'])->name('coupons.store');
     Route::get('/segmentos', [CustomerSegmentController::class, 'index'])->name('segments');

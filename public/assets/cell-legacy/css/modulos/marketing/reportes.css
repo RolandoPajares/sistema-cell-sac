@@ -1,0 +1,403 @@
+
+/* ==========================================
+   DAVID - REPORTES COMERCIALES
+   MD TECHNOLOGY CELL
+   ========================================== */
+
+/* CONTENEDOR PRINCIPAL */
+
+body.modulo-reportes .admin-page {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 28px 32px 55px;
+    box-sizing: border-box;
+    color: #102044;
+}
+
+/* ENCABEZADO */
+
+body.modulo-reportes .admin-page-head {
+    margin-bottom: 30px;
+}
+
+body.modulo-reportes .admin-page-head h1 {
+    color: #102044;
+    font-weight: 800;
+}
+
+body.modulo-reportes .admin-page-head h1 i {
+    color: #075ee8;
+}
+
+body.modulo-reportes .admin-page-head p {
+    color: #7587a4;
+    line-height: 1.6;
+}
+
+/* ==========================================
+   TARJETAS DE ESTADÍSTICAS
+   ========================================== */
+
+body.modulo-reportes .admin-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 26px;
+}
+
+body.modulo-reportes .admin-kpi-card {
+    min-width: 0;
+    min-height: 135px;
+    padding: 22px;
+    border-radius: 14px;
+    box-sizing: border-box;
+    box-shadow: 0 6px 20px rgba(16, 32, 68, 0.05);
+}
+
+body.modulo-reportes .admin-kpi-card strong {
+    font-size: 1.55rem;
+    font-weight: 800;
+}
+
+/* ==========================================
+   PANELES INFERIORES
+   ========================================== */
+
+body.modulo-reportes .reports-panels {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 22px;
+}
+
+body.modulo-reportes .reports-panel {
+    min-width: 0;
+    padding: 32px 36px;
+    border: 1px solid #dce6f3;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(16, 32, 68, 0.05);
+    box-sizing: border-box;
+}
+
+/* ENCABEZADOS DE PANELES */
+
+body.modulo-reportes .reports-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+}
+
+body.modulo-reportes .reports-panel-icon {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    place-items: center;
+    border-radius: 12px;
+    background: #e8f1ff;
+    color: #075ee8;
+    font-size: 1.35rem;
+}
+
+body.modulo-reportes .reports-panel-header h2 {
+    margin: 0 0 6px;
+    color: #102044;
+    font-size: 1.2rem;
+    font-weight: 800;
+}
+
+body.modulo-reportes .reports-panel-header p {
+    margin: 0;
+    color: #63718a;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+/* ==========================================
+   RENDIMIENTO DE CAMPAÑAS
+   ========================================== */
+
+body.modulo-reportes .reports-campaign-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+body.modulo-reportes .reports-campaign-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    min-width: 0;
+    padding: 24px;
+    border: 1px solid #dce6f3;
+    border-radius: 12px;
+    background: #f5f9ff;
+    box-sizing: border-box;
+}
+
+body.modulo-reportes .reports-stat-icon {
+    display: grid;
+    width: 46px;
+    height: 46px;
+    place-items: center;
+    border-radius: 11px;
+    background: #e8f1ff;
+    color: #075ee8;
+    font-size: 1.3rem;
+}
+
+body.modulo-reportes .reports-campaign-stat > span:not(.reports-stat-icon) {
+    color: #63718a;
+    font-size: 0.9rem;
+}
+
+body.modulo-reportes .reports-campaign-stat strong {
+    color: #075ee8;
+    font-size: 2.1rem;
+    font-weight: 800;
+}
+
+/* ==========================================
+   MOVIMIENTOS RECIENTES
+   ========================================== */
+
+body.modulo-reportes .reports-movements {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+body.modulo-reportes .reports-movement {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid #e0e8f4;
+    border-radius: 12px;
+    background: #ffffff;
+    box-sizing: border-box;
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+body.modulo-reportes .reports-movement:hover {
+    border-color: #b9d1f5;
+    background: #f8fbff;
+}
+
+body.modulo-reportes .reports-movement-icon {
+    display: grid;
+    width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+    place-items: center;
+    border-radius: 11px;
+    background: #e8f1ff;
+    color: #075ee8;
+    font-size: 1.25rem;
+}
+
+body.modulo-reportes .reports-movement-info {
+    flex: 1;
+    min-width: 0;
+}
+
+body.modulo-reportes .reports-movement-info h3 {
+    margin: 0 0 6px;
+    color: #102044;
+    font-size: 0.95rem;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+    line-height: 1.4;
+}
+
+body.modulo-reportes .reports-movement-info p {
+    margin: 0;
+    color: #63718a;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+body.modulo-reportes .reports-movement-quantity {
+    flex-shrink: 0;
+    padding: 8px 13px;
+    border-radius: 999px;
+    background: #e0f7ec;
+    color: #16834b;
+    font-size: 0.88rem;
+    font-weight: 800;
+}
+
+/* ==========================================
+   SIN MOVIMIENTOS
+   ========================================== */
+
+body.modulo-reportes .reports-empty {
+    padding: 45px 20px;
+    text-align: center;
+    color: #63718a;
+}
+
+body.modulo-reportes .reports-empty i {
+    display: block;
+    margin-bottom: 12px;
+    color: #075ee8;
+    font-size: 2.4rem;
+}
+
+body.modulo-reportes .reports-empty p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* ==========================================
+   RESPONSIVE - LAPTOPS
+   ========================================== */
+
+@media (max-width: 1200px) {
+
+    body.modulo-reportes .admin-page {
+        padding: 24px 24px 48px;
+    }
+
+    body.modulo-reportes .admin-kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    body.modulo-reportes .reports-panel {
+        padding: 28px;
+    }
+}
+
+/* ==========================================
+   RESPONSIVE - TABLETS
+   ========================================== */
+
+@media (max-width: 850px) {
+
+    body.modulo-reportes .admin-page {
+        padding: 20px 18px 40px;
+    }
+
+    body.modulo-reportes .reports-panels {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 18px;
+    }
+
+    body.modulo-reportes .reports-panel {
+        padding: 26px;
+    }
+}
+
+/* ==========================================
+   RESPONSIVE - CELULARES
+   ========================================== */
+
+@media (max-width: 600px) {
+
+    body.modulo-reportes .admin-page {
+        padding: 14px 12px 34px;
+    }
+
+    body.modulo-reportes .admin-page-head {
+        margin-bottom: 24px;
+    }
+
+    body.modulo-reportes .admin-page-head h1 {
+        font-size: 1.7rem;
+    }
+
+    body.modulo-reportes .admin-kpi-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    body.modulo-reportes .admin-kpi-card {
+        min-height: 110px;
+        padding: 18px;
+    }
+
+    body.modulo-reportes .reports-panels {
+        gap: 14px;
+    }
+
+    body.modulo-reportes .reports-panel {
+        padding: 22px 18px;
+        border-radius: 12px;
+    }
+
+    body.modulo-reportes .reports-panel-header {
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 22px;
+    }
+
+    body.modulo-reportes .reports-panel-icon {
+        width: 42px;
+        height: 42px;
+    }
+
+    body.modulo-reportes .reports-panel-header h2 {
+        font-size: 1.05rem;
+    }
+
+    body.modulo-reportes .reports-campaign-stats {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    body.modulo-reportes .reports-campaign-stat {
+        padding: 18px;
+    }
+
+    body.modulo-reportes .reports-campaign-stat strong {
+        font-size: 1.8rem;
+    }
+
+    body.modulo-reportes .reports-movement {
+        gap: 10px;
+        padding: 12px;
+    }
+
+    body.modulo-reportes .reports-movement-icon {
+        width: 38px;
+        height: 38px;
+    }
+
+    body.modulo-reportes .reports-movement-quantity {
+        padding: 6px 9px;
+        font-size: 0.8rem;
+    }
+}
+
+/* ==========================================
+   CELULARES MUY PEQUEÑOS
+   ========================================== */
+
+@media (max-width: 380px) {
+
+    body.modulo-reportes .admin-page {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    body.modulo-reportes .reports-panel {
+        padding: 18px 14px;
+    }
+
+    body.modulo-reportes .reports-movement {
+        flex-wrap: wrap;
+    }
+
+    body.modulo-reportes .reports-movement-quantity {
+        margin-left: auto;
+    }
+}

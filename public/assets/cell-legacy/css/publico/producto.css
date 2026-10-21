@@ -391,3 +391,349 @@ body > main .product-detail-specs li strong {
     margin-bottom: 20px;
   }
 }
+
+
+/* ==========================================
+   DAVID - MEJORAS VISUALES DETALLE PRODUCTO
+   ========================================== */
+
+/* Distribución equilibrada */
+body > main .product-detail-modern {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: 32px;
+    align-items: start;
+}
+
+/* Galería de imágenes */
+body > main .detail-gallery {
+    grid-template-columns: 76px minmax(0, 1fr);
+    gap: 12px;
+    min-width: 0;
+}
+
+/* Miniaturas compactas */
+body > main .gallery-thumbs {
+    gap: 10px;
+    max-height: 480px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+}
+
+/* Miniaturas con bordes suaves */
+body > main .gallery-thumb {
+    width: 72px;
+    min-width: 72px;
+    aspect-ratio: 1;
+    padding: 5px;
+    border: 1px solid #e0e6ef;
+    border-radius: 10px;
+    background: #fff;
+    transition: border-color 0.2s ease;
+}
+
+/* Miniatura seleccionada */
+body > main .gallery-thumb.active {
+    border: 2px solid #075ee8;
+}
+
+/* Imagen principal más equilibrada */
+body > main .detail-main-image {
+    min-height: 480px;
+    height: 480px;
+    border: 1px solid #e0e6ef;
+    border-radius: 16px;
+    background: #f8f9fb;
+}
+
+/* Imagen completa, sin recortes */
+body > main .detail-main-image > img {
+    width: 100%;
+    height: 100%;
+    max-height: 480px;
+    padding: 22px;
+    object-fit: contain;
+}
+
+/* Flechas acordes al catálogo */
+body > main .gallery-arrow {
+    width: 38px;
+    height: 38px;
+    background: rgba(7, 94, 232, 0.9);
+    color: #fff;
+    transition: background 0.2s ease;
+}
+
+body > main .gallery-arrow:hover {
+    background: #0649b7;
+}
+
+/* Información más compacta */
+body > main .product-detail-heading h1 {
+    margin: 8px 0 18px;
+    color: #102044;
+    font-weight: 750;
+}
+
+body > main .product-detail-price {
+    margin-bottom: 12px;
+}
+
+body > main .product-detail-price > strong {
+    color: #075ee8;
+    font-size: 1.9rem;
+    font-weight: 800;
+}
+
+body > main .product-detail-stock {
+    margin-bottom: 20px;
+}
+
+/* Botón con los colores del catálogo */
+body > main .product-detail-buy {
+    width: 100%;
+    max-width: none;
+    background: #075ee8;
+    color: #fff;
+    border-radius: 12px;
+    font-size: 1rem;
+}
+
+body > main .product-detail-buy:hover:not(:disabled) {
+    background: #0649b7;
+}
+
+/* Descripción más cercana */
+body > main .product-detail-description,
+body > main .product-detail-specs {
+    margin-top: 20px;
+}
+
+/* ==========================================
+   TABLETS
+   ========================================== */
+
+@media (min-width: 721px) and (max-width: 980px) {
+    body > main .product-detail-modern {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+        gap: 20px;
+    }
+
+    body > main .detail-gallery {
+        grid-template-columns: 62px minmax(0, 1fr);
+        gap: 8px;
+    }
+
+    body > main .gallery-thumb {
+        width: 60px;
+        min-width: 60px;
+    }
+
+    body > main .detail-main-image {
+        min-height: 380px;
+        height: 380px;
+    }
+
+    body > main .detail-main-image > img {
+        max-height: 380px;
+    }
+
+    body > main .gallery-thumbs {
+        max-height: 380px;
+    }
+}
+
+/* ==========================================
+   CELULARES
+   ========================================== */
+
+@media (max-width: 720px) {
+    body > main .product-detail-modern {
+        grid-template-columns: 1fr;
+        gap: 22px;
+    }
+
+    body > main .detail-gallery {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    body > main .detail-main-image {
+        min-height: 340px;
+        height: 340px;
+    }
+
+    body > main .detail-main-image > img {
+        max-height: 340px;
+        padding: 16px;
+    }
+
+    body > main .gallery-thumbs {
+        order: 2;
+        flex-direction: row;
+        max-height: none;
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+
+    body > main .gallery-thumb {
+        width: 66px;
+        min-width: 66px;
+    }
+
+    body > main .detail-info {
+        padding: 0;
+    }
+
+    body > main .product-detail-buy {
+        min-height: 48px;
+    }
+}
+
+@media (max-width: 420px) {
+    body > main .detail-main-image {
+        min-height: 290px;
+        height: 290px;
+    }
+
+    body > main .detail-main-image > img {
+        max-height: 290px;
+    }
+}
+
+
+/* ==========================================
+   DAVID - RETOQUES FINALES DETALLE PRODUCTO
+   ========================================== */
+
+/* Reducir separación entre compra y descripción */
+body > main .product-detail-cart {
+    margin-bottom: 12px;
+}
+
+body > main .product-detail-description {
+    margin-top: 18px;
+}
+
+/* Mejorar distribución de miniaturas */
+body > main .detail-gallery {
+    column-gap: 16px;
+}
+
+/* Scroll más discreto */
+body > main .gallery-thumbs {
+    scrollbar-width: thin;
+    scrollbar-color: #b8c9e5 transparent;
+    padding-right: 5px;
+}
+
+/* Barra de desplazamiento en Chrome y Edge */
+body > main .gallery-thumbs::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+body > main .gallery-thumbs::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+body > main .gallery-thumbs::-webkit-scrollbar-thumb {
+    background: #b8c9e5;
+    border-radius: 10px;
+}
+
+/* Separación uniforme de secciones */
+body > main .product-detail-specs {
+    margin-top: 20px;
+}
+
+/* Ajustes para celulares */
+@media (max-width: 720px) {
+    body > main .detail-gallery {
+        gap: 10px;
+    }
+
+    body > main .gallery-thumbs {
+        padding-right: 0;
+        padding-bottom: 5px;
+    }
+}
+
+
+/* ==========================================
+   DAVID - TABLETS CON DISEÑO TIPO MÓVIL
+   ========================================== */
+
+@media (min-width: 721px) and (max-width: 980px) {
+
+    /* Galería arriba e información debajo */
+    body > main .product-detail-modern {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 22px;
+    }
+
+    /* Imagen principal arriba y miniaturas debajo */
+    body > main .detail-gallery {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-width: 0;
+    }
+
+    /* Imagen principal */
+    body > main .detail-main-image {
+        order: 0;
+        width: 100%;
+        height: 420px;
+        min-height: 420px;
+    }
+
+    body > main .detail-main-image > img {
+        width: 100%;
+        height: 100%;
+        max-height: 420px;
+        padding: 16px;
+        object-fit: contain;
+    }
+
+    /* Miniaturas en una fila horizontal */
+    body > main .gallery-thumbs {
+        order: 1;
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        max-height: none;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 4px 0 8px;
+    }
+
+    body > main .gallery-thumb {
+        width: 72px;
+        min-width: 72px;
+        aspect-ratio: 1;
+    }
+
+    /* Información debajo de la galería */
+    body > main .detail-info {
+        width: 100%;
+        padding: 0;
+    }
+
+    /* Botón de compra */
+    body > main .product-detail-buy {
+        width: 100%;
+        max-width: none;
+    }
+
+    /* Evitar espacios excesivos */
+    body > main .product-detail-cart {
+        margin-bottom: 12px;
+    }
+
+    body > main .product-detail-description {
+        margin-top: 18px;
+    }
+}

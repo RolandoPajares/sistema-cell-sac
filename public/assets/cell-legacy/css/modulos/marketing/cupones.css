@@ -1,0 +1,780 @@
+
+/* ==========================================
+   DAVID - CUPONES DE MARKETING
+   ========================================== */
+
+.coupons-page {
+    width: 100%;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 24px 28px 50px;
+    box-sizing: border-box;
+    color: #102044;
+}
+
+/* ENCABEZADO */
+
+.coupons-heading {
+    margin-bottom: 24px;
+}
+
+.coupons-eyebrow {
+    display: inline-block;
+    margin-bottom: 12px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: #e0efff;
+    color: #075ee8;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.coupons-heading h1 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 12px;
+    color: #102044;
+    font-size: clamp(1.7rem, 3vw, 2.5rem);
+    font-weight: 800;
+}
+
+.coupons-heading h1 i {
+    color: #075ee8;
+}
+
+.coupons-heading p {
+    margin: 0;
+    color: #7587a4;
+    font-size: 1rem;
+}
+
+/* AVISO */
+
+.coupons-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding: 16px 20px;
+    border: 1px solid #cfe0ff;
+    border-radius: 12px;
+    background: #eaf3ff;
+    color: #0751b5;
+}
+
+.coupons-notice i {
+    flex-shrink: 0;
+    font-size: 1.2rem;
+}
+
+.coupons-notice p {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.6;
+}
+
+.coupons-success {
+    margin-bottom: 20px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    background: #e0f7ec;
+    color: #16834b;
+}
+
+/* PANEL PRINCIPAL */
+
+.coupons-panel {
+    padding: 32px 36px;
+    border: 1px solid #dce6f3;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(16,32,68,.05);
+}
+
+.coupons-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.coupons-panel-header h2 {
+    margin: 0 0 6px;
+    color: #102044;
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.coupons-panel-header h2 i {
+    margin-right: 8px;
+    color: #075ee8;
+}
+
+.coupons-panel-header p {
+    margin: 0;
+    color: #63718a;
+    font-size: 0.9rem;
+}
+
+/* BOTÓN PRINCIPAL */
+
+.coupons-primary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 46px;
+    padding: 11px 20px;
+    border: 1px solid #075ee8;
+    border-radius: 10px;
+    background: #075ee8;
+    color: #ffffff;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.coupons-primary-button:hover {
+    background: #0649b7;
+}
+
+/* TARJETAS */
+
+.coupons-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.coupon-card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+    padding: 22px;
+    border: 1px solid #dce6f3;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 4px 14px rgba(16,32,68,.04);
+    box-sizing: border-box;
+}
+
+.coupon-card:hover {
+    border-color: #b9d1f5;
+    box-shadow: 0 8px 20px rgba(16,32,68,.08);
+}
+
+.coupon-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.coupon-icon {
+    display: grid;
+    width: 46px;
+    height: 46px;
+    place-items: center;
+    border-radius: 12px;
+    background: #e8f1ff;
+    color: #075ee8;
+    font-size: 1.4rem;
+}
+
+.coupon-type {
+    padding: 7px 11px;
+    border-radius: 999px;
+    background: #e8f1ff;
+    color: #075ee8;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.coupon-code-label {
+    color: #63718a;
+    font-size: 0.8rem;
+}
+
+.coupon-code {
+    color: #102044;
+    font-size: 1.25rem;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.coupon-discount {
+    color: #075ee8;
+    font-size: 1.8rem;
+    font-weight: 800;
+}
+
+.coupon-detail {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    color: #53627a;
+    font-size: 0.86rem;
+    line-height: 1.5;
+}
+
+.coupon-detail i {
+    color: #075ee8;
+    flex-shrink: 0;
+}
+
+.coupon-detail strong {
+    color: #102044;
+}
+
+/* PROGRESO */
+
+.coupon-usage {
+    margin-top: 8px;
+}
+
+.coupon-usage-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+    color: #63718a;
+    font-size: 0.82rem;
+}
+
+.coupon-usage-heading strong {
+    color: #102044;
+}
+
+.coupon-progress {
+    height: 9px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #e8f1ff;
+}
+
+.coupon-progress > div {
+    height: 100%;
+    border-radius: inherit;
+    background: #075ee8;
+}
+
+.coupon-card-footer {
+    margin-top: auto;
+    padding-top: 15px;
+    border-top: 1px solid #e5ebf4;
+    color: #63718a;
+    font-size: 0.78rem;
+    line-height: 1.5;
+}
+
+/* ESTADO VACÍO */
+
+.coupons-empty {
+    grid-column: 1 / -1;
+    padding: 45px 20px;
+    text-align: center;
+    color: #63718a;
+}
+
+.coupons-empty > i {
+    color: #075ee8;
+    font-size: 2.5rem;
+}
+
+.coupons-empty h3 {
+    color: #102044;
+}
+
+.coupons-pagination {
+    margin-top: 24px;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.coupons-pagination svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ==========================================
+   MODAL NUEVO CUPÓN
+   ========================================== */
+
+.coupon-modal {
+    position: fixed;
+    inset: 0;
+    
+    width: min(760px, calc(100vw - 32px));
+    max-width: 760px;
+    max-height: calc(100dvh - 32px);
+    margin: auto;
+    padding: 0;
+    overflow-y: auto;
+    border: 1px solid #dce6f3;
+    border-radius: 18px;
+    background: #ffffff;
+    color: #102044;
+    box-shadow: 0 24px 70px rgba(7, 24, 55, 0.25);
+    box-sizing: border-box;
+}
+
+.coupon-modal:not([open]) {
+    display: none;
+}
+
+.coupon-modal::backdrop {
+    background: rgba(7, 24, 55, 0.58);
+    backdrop-filter: blur(3px);
+}
+
+/* ==========================================
+   ENCABEZADO DEL MODAL
+   ========================================== */
+
+.coupon-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 26px 32px;
+    border-bottom: 1px solid #e5ebf4;
+}
+
+.coupon-modal-header h2 {
+    margin: 0;
+    color: #102044;
+    font-size: 1.4rem;
+    font-weight: 800;
+}
+
+.coupon-modal-close {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    place-items: center;
+    padding: 0;
+    border: 1px solid #cfe0ff;
+    border-radius: 10px;
+    background: #e8f1ff;
+    color: #075ee8;
+    font-size: 1.15rem;
+    cursor: pointer;
+}
+
+.coupon-modal-close:hover {
+    background: #075ee8;
+    color: #ffffff;
+}
+
+/* ==========================================
+   FORMULARIO DEL MODAL
+   ========================================== */
+
+.coupon-form {
+    width: 100%;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.coupon-form-body {
+    padding: 28px 32px;
+}
+
+.coupon-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 22px;
+}
+
+.coupon-field {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    min-width: 0;
+}
+
+.coupon-field-full {
+    grid-column: 1 / -1;
+}
+
+.coupon-field > span {
+    color: #17365f;
+    font-size: 0.88rem;
+    font-weight: 750;
+}
+
+.coupon-field input,
+.coupon-field select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    margin: 0;
+    padding: 11px 14px;
+    border: 1px solid #d6e1ef;
+    border-radius: 10px;
+    outline: none;
+    background: #ffffff;
+    color: #102044;
+    font: inherit;
+    font-size: 0.92rem;
+    box-sizing: border-box;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.coupon-field input:focus,
+.coupon-field select:focus {
+    border-color: #075ee8;
+    box-shadow: 0 0 0 3px rgba(7, 94, 232, 0.1);
+}
+
+.coupon-field input::placeholder {
+    color: #9aa8ba;
+}
+
+/* ==========================================
+   PIE DEL MODAL
+   ========================================== */
+
+.coupon-form-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 22px 32px 30px;
+    border-top: 1px solid #e5ebf4;
+}
+
+.coupon-cancel-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 10px 20px;
+    border: 1px solid #d6e1ef;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #075ee8;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.coupon-cancel-button:hover {
+    background: #e8f1ff;
+}
+
+.coupon-submit-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 10px 22px;
+    border: 1px solid #075ee8;
+    border-radius: 10px;
+    background: #075ee8;
+    color: #ffffff;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.coupon-submit-button:hover {
+    background: #0649b7;
+}
+
+/* ==========================================
+   ERRORES DE VALIDACIÓN
+   ========================================== */
+
+.coupon-form-errors {
+    margin: 0 32px 20px;
+    padding: 14px 16px;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    background: #fef2f2;
+    color: #991b1b;
+    font-size: 0.88rem;
+}
+
+.coupon-form-errors ul {
+    margin: 8px 0 0;
+    padding-left: 20px;
+}
+
+/* ==========================================
+   RESPONSIVE - LAPTOPS
+   ========================================== */
+
+@media (max-width: 1200px) {
+
+    .coupons-page {
+        padding: 20px 22px 44px;
+    }
+
+    .coupons-panel {
+        padding: 28px;
+    }
+
+    .coupons-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* ==========================================
+   RESPONSIVE - TABLETS
+   ========================================== */
+
+@media (max-width: 800px) {
+
+    .coupons-page {
+        padding: 18px 18px 38px;
+    }
+
+    .coupons-panel {
+        padding: 24px;
+    }
+
+    .coupons-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .coupon-card {
+        padding: 18px;
+    }
+
+    .coupon-modal {
+        width: calc(100vw - 28px);
+    }
+
+    .coupon-form-body {
+        padding: 24px;
+    }
+
+    .coupon-modal-header,
+    .coupon-form-footer {
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+}
+
+/* ==========================================
+   RESPONSIVE - CELULARES
+   ========================================== */
+
+@media (max-width: 600px) {
+
+    .coupons-page {
+        padding: 12px 10px 30px;
+    }
+
+    .coupons-heading h1 {
+        font-size: 1.7rem;
+    }
+
+    .coupons-notice {
+        padding: 14px;
+    }
+
+    .coupons-panel {
+        padding: 20px 16px;
+        border-radius: 12px;
+    }
+
+    .coupons-panel-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+    }
+
+    .coupons-primary-button {
+        width: 100%;
+    }
+
+    .coupons-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+    }
+
+    .coupon-card {
+        padding: 18px;
+    }
+
+    /* Modal */
+    .coupon-modal {
+        width: calc(100vw - 20px);
+        max-height: calc(100dvh - 20px);
+        border-radius: 14px;
+    }
+
+    .coupon-modal-header {
+        padding: 20px;
+    }
+
+    .coupon-modal-header h2 {
+        font-size: 1.2rem;
+    }
+
+    .coupon-form-body {
+        padding: 20px;
+    }
+
+    .coupon-form-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
+    }
+
+    .coupon-field-full {
+        grid-column: auto;
+    }
+
+    .coupon-form-footer {
+        flex-direction: column-reverse;
+        align-items: stretch;
+        padding: 20px;
+    }
+
+    .coupon-cancel-button,
+    .coupon-submit-button {
+        width: 100%;
+    }
+
+    .coupon-form-errors {
+        margin: 0 20px 18px;
+    }
+}
+
+/* ==========================================
+   PANTALLAS MUY PEQUEÑAS
+   ========================================== */
+
+@media (max-width: 380px) {
+
+    .coupons-page {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .coupons-panel {
+        padding: 16px 12px;
+    }
+
+    .coupon-card {
+        padding: 14px;
+    }
+
+    .coupon-modal-header,
+    .coupon-form-body,
+    .coupon-form-footer {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+}
+
+
+/* ==========================================
+   DAVID - ESPACIADO FINAL DE CUPONES
+   ========================================== */
+
+/* Contenedor principal */
+.coupons-page {
+    width: 100%;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 24px 28px 50px;
+    box-sizing: border-box;
+}
+
+/* Espacio interior del panel blanco */
+.coupons-page .coupons-panel {
+    width: 100%;
+    padding: 34px 38px !important;
+    box-sizing: border-box;
+}
+
+/* Separación del encabezado */
+.coupons-page .coupons-panel-header {
+    gap: 24px;
+    margin-bottom: 30px;
+}
+
+/* Separación de las tarjetas */
+.coupons-page .coupons-grid {
+    width: 100%;
+    gap: 20px;
+    box-sizing: border-box;
+}
+
+/* Mantener espacio interior de las tarjetas */
+.coupons-page .coupon-card {
+    min-width: 0;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+/* ==========================================
+   TABLETS
+   ========================================== */
+
+@media (min-width: 601px) and (max-width: 1024px) {
+
+    .coupons-page {
+        padding: 18px 20px 38px;
+    }
+
+    .coupons-page .coupons-panel {
+        padding: 26px 28px !important;
+    }
+
+    .coupons-page .coupons-grid {
+        gap: 16px;
+    }
+
+    .coupons-page .coupon-card {
+        padding: 20px;
+    }
+}
+
+/* ==========================================
+   CELULARES
+   ========================================== */
+
+@media (max-width: 600px) {
+
+    .coupons-page {
+        padding: 12px 10px 30px;
+    }
+
+    .coupons-page .coupons-panel {
+        padding: 20px 16px !important;
+        border-radius: 12px;
+    }
+
+    .coupons-page .coupons-panel-header {
+        margin-bottom: 22px;
+        gap: 14px;
+    }
+
+    .coupons-page .coupons-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+    }
+
+    .coupons-page .coupon-card {
+        padding: 16px;
+    }
+}

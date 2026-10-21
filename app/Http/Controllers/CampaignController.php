@@ -53,4 +53,29 @@ class CampaignController extends Controller
 
         return back()->with('status', 'Campaña actualizada.');
     }
+    
+public function activate(Campaign $campaign, AuditLogger $audit): RedirectResponse
+{
+    if ($campaign->activo) {
+        return back()->with('status', 'La campaña ya está activa.');
+    }
+
+    $campaign->update([
+        'activo' => true,
+        'actualizado_en' => now(),
+    ]);
+
+    $audit->record(
+        request()->user()->id,
+        'campaign.activated',
+        'campanas_publicitarias',
+        $campaign->id,
+        ['activo' => false],
+        ['activo' => true],
+        request()->ip()
+    );
+
+    return back()->with('status', 'Campaña activada correctamente.');
+}
+
 }
