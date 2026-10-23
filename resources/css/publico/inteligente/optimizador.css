@@ -1,0 +1,24 @@
+.proposal-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.proposal-kpis > div {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  display: grid;
+  gap: 6px;
+}
+.proposal-kpis span {
+  color: var(--muted);
+}
+.proposal-kpis strong {
+  font-size: 1.5rem;
+}
+@media (max-width: 650px) {
+  .proposal-kpis {
+    grid-template-columns: 1fr;
+  }
+}

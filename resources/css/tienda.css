@@ -1,0 +1,37 @@
+@import './app.css';
+@import './base/variables.css';
+@import './base/reinicio.css';
+@import './base/tipografia.css';
+@import './layouts/tienda.css';
+@import './componentes/botones.css';
+@import './componentes/formularios.css';
+@import './legacy/componentes/precios.css';
+@import './componentes/tarjetas.css';
+@import './componentes/alertas.css';
+@import './legacy/componentes/badges.css';
+@import './legacy/componentes/estados.css';
+@import './componentes/tablas.css';
+@import './legacy/componentes/utilidades.css';
+@import './layouts/publico/encabezado.css';
+@import './layouts/publico/pie-pagina.css';
+@import './legacy/responsive/adaptable.css';
+@import './componentes/publico/publicidad.css';
+
+/* Page modules are bundled here so Blade only selects a layout. */
+@import './publico/inicio/inicio.css';
+@import './legacy/publico/autenticacion.css';
+@import './publico/catalogo/catalogo.css';
+@import './publico/catalogo/detalle.css';
+@import './publico/comercio/carrito.css';
+@import './publico/paginas/contacto.css';
+@import './publico/paginas/nosotros.css';
+@import './publico/inteligente/base.css';
+@import './publico/asistente/asistente.css';
+@import './publico/catalogo/comparar.css';
+@import './publico/inteligente/optimizador.css';
+@import './publico/catalogo/recomendaciones.css';
+@import './legacy/modulos/cuenta/cuenta.css';
+@import './legacy/overrides/barra-lateral-cuenta-azul.css';
+@import './legacy/modulos/mayorista/portal-mayorista.css';
+@import './publico/inteligente/mayorista.css';
+@import './publico/comercio/pedidos.css';

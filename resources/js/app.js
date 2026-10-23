@@ -1,7 +1,5 @@
-import './legacy/aplicacion.js';
 import './legacy/administrador.js';
 import './legacy/david/panel.js';
-import './legacy/david/producto.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const token = document.querySelector('meta[name="csrf-token"]')?.content;
