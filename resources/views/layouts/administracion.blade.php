@@ -9,7 +9,7 @@
         <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.min.css') }}">
         @stack('styles')
     </head>
-    <body class="admin-body admin-theme @yield('body_class')">
+    <body class="admin-body admin-theme @yield('body_class')" data-panel-role="{{ auth()->user()?->rol }}">
         <div class="admin-layout admin-app" data-admin-app>
             @include('layouts.panel.menu-lateral', ['links' => $sidebarLinks ?? []])
             <div class="admin-shell admin-content-shell">
