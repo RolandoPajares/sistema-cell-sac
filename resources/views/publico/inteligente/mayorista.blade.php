@@ -88,12 +88,47 @@
                 @csrf
                 <input type="hidden" name="nombre" value="{{ auth()->user()?->nombre ?: 'Solicitud mayorista' }}">
                 <input type="hidden" name="contacto" value="{{ auth()->user()?->correo ?: 'Portal mayorista' }}">
-                <label><i class="bi bi-buildings"></i><input name="empresa" placeholder="Nombre de la empresa" required></label>
-                <label><i class="bi bi-card-text"></i><input name="ruc" placeholder="RUC de la empresa"></label>
-                <label><i class="bi bi-geo-alt"></i><input name="ciudad" placeholder="Ciudad"></label>
-                <label><i class="bi bi-box-seam"></i><input name="productos" placeholder="Productos de interés" required></label>
-                <textarea name="mensaje" hidden>Solicitud de cotización mayorista para {{ auth()->user()?->nombre ?: 'cliente' }}.</textarea>
-                <button class="btn btn-primary" type="submit">Enviar solicitud <i class="bi bi-arrow-right"></i></button>
+                <label>
+                    <i class="bi bi-buildings"></i>
+                    <input
+                        name="empresa"
+                        placeholder="Nombre de la empresa"
+                        required
+                    >
+                </label>
+
+                <label>
+                    <i class="bi bi-card-text"></i>
+                    <input
+                        name="ruc"
+                        placeholder="RUC de la empresa"
+                    >
+                </label>
+
+                <label>
+                    <i class="bi bi-geo-alt"></i>
+                    <input
+                        name="ciudad"
+                        placeholder="Ciudad"
+                    >
+                </label>
+
+                <label>
+                    <i class="bi bi-box-seam"></i>
+                    <input
+                        name="productos"
+                        placeholder="Productos de interés"
+                        required
+                    >
+                </label>
+                <textarea
+                    name="mensaje"
+                    hidden
+                >Solicitud de cotización mayorista para {{ auth()->user()?->nombre ?: 'cliente' }}.</textarea>
+                <button class="btn btn-primary" type="submit">
+                    Enviar solicitud
+                    <i class="bi bi-arrow-right"></i>
+                </button>
             </form>
             <small><i class="bi bi-shield-check"></i> Nos pondremos en contacto en menos de 24 horas.</small>
             <a class="asesor-b2b" href="{{ route('assistant') }}"><i class="bi bi-people"></i><span><b>Un equipo dedicado a tu crecimiento</b>Asesoría, mejores condiciones y soporte continuo.</span></a>

@@ -26,18 +26,59 @@
                                 </td>
                                 <td>S/ {{ number_format((float) $line['product']->effective_price, 2) }}</td>
                                 <td>
-                                    <form class="qty" method="post" action="{{ route('cart.update', $line['product']) }}">@csrf @method('PATCH')<input type="number" name="cantidad" min="0" max="{{ $line['product']->existencias }}" value="{{ $line['quantity'] }}"><button class="btn btn-ghost" type="submit">Actualizar</button></form>
+                                    <form
+                                        class="qty"
+                                        method="post"
+                                        action="{{ route('cart.update', $line['product']) }}"
+                                    >
+                                        @csrf
+                                        @method('PATCH')
+                                        <input
+                                            type="number"
+                                            name="cantidad"
+                                            min="0"
+                                            max="{{ $line['product']->existencias }}"
+                                            value="{{ $line['quantity'] }}"
+                                        >
+                                        <button class="btn btn-ghost" type="submit">Actualizar</button>
+                                    </form>
                                 </td>
                                 <td>S/ {{ number_format($line['subtotal'], 2) }}</td>
-                                <td><form method="post" action="{{ route('cart.remove', $line['product']) }}">@csrf<button class="btn btn-ghost" type="submit"><i class="bi bi-trash3" aria-hidden="true"></i> Quitar</button></form></td>
+                                <td>
+                                    <form method="post" action="{{ route('cart.remove', $line['product']) }}">
+                                        @csrf
+                                        <button class="btn btn-ghost" type="submit">
+                                            <i class="bi bi-trash3" aria-hidden="true"></i>
+                                            Quitar
+                                        </button>
+                                    </form>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
                 <div class="cart-summary">
                     <div>
-                        <form method="post" action="{{ route('cart.clear') }}">@csrf<button class="btn btn-ghost" type="submit"><i class="bi bi-x-circle" aria-hidden="true"></i> Vaciar</button></form>
-                        <form class="inline-form" method="post" action="{{ route('cart.coupon') }}">@csrf<label>Cupón<input name="codigo" value="{{ session('coupon_code') }}" maxlength="50"></label><button class="btn btn-ghost" type="submit">Aplicar</button></form>
+                        <form method="post" action="{{ route('cart.clear') }}">
+                            @csrf
+                            <button class="btn btn-ghost" type="submit">
+                                <i class="bi bi-x-circle" aria-hidden="true"></i>
+                                Vaciar
+                            </button>
+                        </form>
+
+                        <form class="inline-form" method="post" action="{{ route('cart.coupon') }}">
+                            @csrf
+                            <label>
+                                Cupón
+                                <input
+                                    name="codigo"
+                                    value="{{ session('coupon_code') }}"
+                                    maxlength="50"
+                                >
+                            </label>
+                            <button class="btn btn-ghost" type="submit">Aplicar</button>
+                        </form>
                     </div>
                     <div><b>Total: <span class="price">S/ {{ number_format($total, 2) }}</span></b><a class="btn btn-primary" href="{{ route('checkout.form') }}"><i class="bi bi-arrow-right" aria-hidden="true"></i> Continuar</a></div>
                 </div>

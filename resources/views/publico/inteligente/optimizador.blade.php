@@ -15,8 +15,17 @@
             <form class="smart-form panel" method="get">
                 <label>
                     Presupuesto
-                    <input class="input" type="number" name="presupuesto" min="500" step="100" value="{{ $budget > 0 ? $budget : '' }}" placeholder="Ej. 10000">
+                    <input
+                        class="input"
+                        type="number"
+                        name="presupuesto"
+                        min="500"
+                        step="100"
+                        value="{{ $budget > 0 ? $budget : '' }}"
+                        placeholder="Ej. 10000"
+                    >
                 </label>
+
                 <label>
                     Objetivo
                     <select name="objetivo">

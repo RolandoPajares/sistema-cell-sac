@@ -1,0 +1,58 @@
+/* Fuente actual de tablas. */
+.table-wrap {
+  overflow: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 13px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+.table th {
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.data-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  margin: 10px 0;
+  padding: 15px 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.data-row > div {
+  display: grid;
+  gap: 5px;
+}
+
+.data-row small {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+}
+
+.data-row form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width: 850px) {
+  .data-row {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+}

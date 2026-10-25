@@ -82,7 +82,18 @@
                         <div class="stock">{{ $product->existencias }} unidades disponibles</div>
                         <div class="home-product-actions">
                             @auth
-                                <form class="home-product-buy-form" action="{{ route('cart.add', $product) }}" method="post">@csrf<input type="hidden" name="cantidad" value="1"><button class="btn btn-primary home-product-action" type="submit"><i class="bi bi-cart3" aria-hidden="true"></i> Comprar</button></form>
+                                <form
+                                    class="home-product-buy-form"
+                                    action="{{ route('cart.add', $product) }}"
+                                    method="post"
+                                >
+                                    @csrf
+                                    <input type="hidden" name="cantidad" value="1">
+                                    <button class="btn btn-primary home-product-action" type="submit">
+                                        <i class="bi bi-cart3" aria-hidden="true"></i>
+                                        Comprar
+                                    </button>
+                                </form>
                             @else
                                 <a class="btn btn-primary home-product-action" href="{{ route('login') }}"><i class="bi bi-cart3" aria-hidden="true"></i> Comprar</a>
                             @endauth

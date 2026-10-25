@@ -1,4 +1,4 @@
-@extends('layouts.store')
+@extends('layouts.tienda')
 @section('title', 'Página no encontrada')
 @section('content')
 <section class="container form-page">

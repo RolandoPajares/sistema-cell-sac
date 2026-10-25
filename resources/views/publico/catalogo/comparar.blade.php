@@ -5,12 +5,6 @@
 
 @php
     $selectedIds = collect(explode(',', (string) request('seleccion')))->filter()->values();
-    $imageUrl = static function ($product): string {
-        $path = $product->images->first()?->ruta_imagen ?: $product->url_imagen;
-        $path = ltrim((string) preg_replace('~^assets/~', '', $path ?: 'img/marca/logo.jpeg'), '/');
-
-        return asset('assets/cell-legacy/'.$path);
-    };
 @endphp
 
 @section('content')
@@ -43,20 +37,7 @@
             @if ($products->isNotEmpty())
                 <div class="comparison-grid">
                     @foreach ($products as $product)
-                        <article class="panel comparison-card">
-                            <img class="comparison-product-photo" src="{{ $imageUrl($product) }}" alt="{{ $product->marca }} {{ $product->nombre }}" loading="lazy">
-                            <span class="eyebrow">{{ $product->marca ?: 'CELL SAC' }}</span>
-                            <h2>{{ $product->nombre }}</h2>
-                            <div class="price">S/ {{ number_format((float) $product->effective_price, 2) }}</div>
-                            <p>{{ $product->category?->nombre ?: 'Equipo' }} · Stock {{ (int) $product->existencias }}</p>
-                            @php($score = $product->intelligenceProfile?->puntuacion_valor ?? 70)
-                            <div class="score-row">
-                                <span>SmartScore</span>
-                                <b>{{ (int) $score }}/100</b>
-                                <div class="scorebar"><i style="width: {{ (int) $score }}%"></i></div>
-                            </div>
-                            <a class="btn btn-ghost" href="{{ route('catalog.show', $product) }}">Ver detalles</a>
-                        </article>
+                        <x-inteligencia.comprador.comparacion :product="$product" />
                     @endforeach
                 </div>
             @else
@@ -69,12 +50,3 @@
         </div>
     </section>
 @endsection
-
-@push('scripts')
-    <script>
-        document.getElementById('compareForm')?.addEventListener('submit', () => {
-            const values = [...document.querySelectorAll('.compare-select')].map((select) => select.value).filter(Boolean);
-            document.getElementById('compareIds').value = [...new Set(values)].slice(0, 3).join(',');
-        });
-    </script>
-@endpush

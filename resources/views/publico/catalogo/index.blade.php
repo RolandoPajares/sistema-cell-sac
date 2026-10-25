@@ -40,13 +40,41 @@
                 <form class="catalog-price-filter" method="get" action="{{ route('catalog.index') }}">
                     <h2>Rango de precio</h2>
                     <input type="hidden" name="q" value="{{ $query }}">
-                    <input type="hidden" name="marca" value="{{ $selectedBrand }}">
-                    <input type="hidden" name="categoria" value="{{ $selectedCategory }}">
-                    <input type="hidden" name="orden" value="{{ request('orden') }}">
+                    <input
+                        type="hidden"
+                        name="marca"
+                        value="{{ $selectedBrand }}"
+                    >
+                    <input
+                        type="hidden"
+                        name="categoria"
+                        value="{{ $selectedCategory }}"
+                    >
+                    <input
+                        type="hidden"
+                        name="orden"
+                        value="{{ request('orden') }}"
+                    >
                     <label for="catalog-min-price">Mínimo</label>
-                    <input class="input" id="catalog-min-price" name="min" type="number" min="0" step="0.01" value="{{ request('min') }}">
+                    <input
+                        class="input"
+                        id="catalog-min-price"
+                        name="min"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value="{{ request('min') }}"
+                    >
                     <label for="catalog-max-price">Máximo</label>
-                    <input class="input" id="catalog-max-price" name="max" type="number" min="0" step="0.01" value="{{ request('max') }}">
+                    <input
+                        class="input"
+                        id="catalog-max-price"
+                        name="max"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value="{{ request('max') }}"
+                    >
                     <button class="btn btn-ghost" type="submit">Aplicar</button>
                 </form>
             </aside>
@@ -55,10 +83,21 @@
                 <div class="catalog-toolbar">
                     <div class="catalog-heading"><h1>{{ $selectedCategory ? $categories->firstWhere('id', (int) $selectedCategory)?->nombre : 'Catálogo' }}</h1><p>Encuentra el celular ideal para ti.</p></div>
                     <form id="catalog-search-form" class="catalog-search" method="get" action="{{ route('catalog.index') }}" role="search">
-                        <input type="hidden" name="marca" value="{{ $selectedBrand }}"><input type="hidden" name="categoria" value="{{ $selectedCategory }}"><input type="hidden" name="min" value="{{ request('min') }}"><input type="hidden" name="max" value="{{ request('max') }}">
+                        <input type="hidden" name="marca" value="{{ $selectedBrand }}">
+                        <input type="hidden" name="categoria" value="{{ $selectedCategory }}">
+                        <input type="hidden" name="min" value="{{ request('min') }}">
+                        <input type="hidden" name="max" value="{{ request('max') }}">
                         <label class="visually-hidden" for="catalog-search-input">Buscar productos</label>
-                        <input class="input" id="catalog-search-input" name="q" value="{{ $query }}" placeholder="Buscar celulares, marcas o modelos...">
-                        <button class="btn btn-primary" type="submit" aria-label="Buscar"><i class="bi bi-search" aria-hidden="true"></i></button>
+                        <input
+                            class="input"
+                            id="catalog-search-input"
+                            name="q"
+                            value="{{ $query }}"
+                            placeholder="Buscar celulares, marcas o modelos..."
+                        >
+                        <button class="btn btn-primary" type="submit" aria-label="Buscar">
+                            <i class="bi bi-search" aria-hidden="true"></i>
+                        </button>
                         <label class="visually-hidden" for="catalog-sort">Ordenar por</label>
                         <select id="catalog-sort" name="orden" data-catalog-sort>
                             <option value="nuevo" @selected(request('orden') === 'nuevo')>Más recientes</option>

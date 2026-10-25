@@ -3,7 +3,13 @@
         <a class="brand" href="{{ route('home') }}">
             <img src="{{ asset('assets/cell-legacy/img/marca/logo.jpeg') }}" alt="MD Technology Digital Cell">
         </a>
-        <button class="menu-toggle" type="button" aria-label="Abrir menú" aria-controls="navegacionPrincipal" aria-expanded="false">
+        <button
+            class="menu-toggle"
+            type="button"
+            aria-label="Abrir menú"
+            aria-controls="navegacionPrincipal"
+            aria-expanded="false"
+        >
             <i class="bi bi-list" aria-hidden="true"></i>
         </button>
         <div class="navlinks" id="navegacionPrincipal">
@@ -16,7 +22,13 @@
         </div>
         <form class="header-search" method="get" action="{{ route('catalog.index') }}" role="search">
             <i class="bi bi-search" aria-hidden="true"></i>
-            <input type="search" name="q" value="{{ request('q') }}" placeholder="Buscar productos, marcas..." aria-label="Buscar productos o marcas">
+            <input
+                type="search"
+                name="q"
+                value="{{ request('q') }}"
+                placeholder="Buscar productos, marcas..."
+                aria-label="Buscar productos o marcas"
+            >
         </form>
         <div class="nav-actions">
             <a class="icon-btn" href="{{ route('cart.index') }}" title="Carrito" aria-label="Ver carrito">
@@ -30,7 +42,14 @@
                 </a>
                 <form method="post" action="{{ route('logout') }}">
                     @csrf
-                    <button class="icon-btn" type="submit" title="Salir" aria-label="Cerrar sesión"><i class="bi bi-box-arrow-right" aria-hidden="true"></i></button>
+                    <button
+                        class="icon-btn"
+                        type="submit"
+                        title="Salir"
+                        aria-label="Cerrar sesión"
+                    >
+                        <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+                    </button>
                 </form>
             @else
                 <a class="btn btn-ghost" href="{{ route('login') }}">Ingresar</a>

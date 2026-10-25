@@ -6,14 +6,7 @@ const modulosPorPagina = [
     ['modulo-catalog', 'publico/catalogo/index'],
     ['modulo-producto', 'publico/catalogo/detalle'],
     ['modulo-comparador', 'publico/catalogo/comparar'],
-    ['modulo-recomendador', 'publico/catalogo/recomendaciones'],
-    ['modulo-contacto', 'publico/paginas/contacto'],
-    ['modulo-carrito', 'publico/comercio/carrito'],
-    ['modulo-checkout', 'publico/comercio/finalizar-compra'],
-    ['modulo-pedidos', 'publico/comercio/pedidos'],
     ['modulo-asistente', 'publico/asistente/index'],
-    ['modulo-mayorista', 'publico/inteligente/mayorista'],
-    ['modulo-optimizador', 'publico/inteligente/optimizador'],
 ];
 
 const inicializarBotonSubir = () => {

@@ -30,11 +30,63 @@
             <form method="post" action="{{ route('pages.contact.store') }}">
                 @csrf
                 <div class="contacto-dos-campos">
-                    <div class="form-group"><label for="contact-name">Nombre</label><div class="contacto-campo"><i class="bi bi-person"></i><input id="contact-name" name="nombre" class="input" value="{{ old('nombre', auth()->user()?->nombre) }}" required maxlength="120" placeholder="Tu nombre completo"></div></div>
-                    <div class="form-group"><label for="contact-email">Correo o teléfono</label><div class="contacto-campo"><i class="bi bi-envelope"></i><input id="contact-email" name="contacto" class="input" value="{{ old('contacto', auth()->user()?->correo) }}" required maxlength="160" placeholder="ejemplo@correo.com o 9XX XXX XXX"></div></div>
+                    <div class="form-group">
+                        <label for="contact-name">Nombre</label>
+                        <div class="contacto-campo">
+                            <i class="bi bi-person"></i>
+                            <input
+                                id="contact-name"
+                                name="nombre"
+                                class="input"
+                                value="{{ old('nombre', auth()->user()?->nombre) }}"
+                                required
+                                maxlength="120"
+                                placeholder="Tu nombre completo"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contact-email">Correo o teléfono</label>
+                        <div class="contacto-campo">
+                            <i class="bi bi-envelope"></i>
+                            <input
+                                id="contact-email"
+                                name="contacto"
+                                class="input"
+                                value="{{ old('contacto', auth()->user()?->correo) }}"
+                                required
+                                maxlength="160"
+                                placeholder="ejemplo@correo.com o 9XX XXX XXX"
+                            >
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group"><label for="contact-message">Mensaje</label><div class="contacto-campo"><i class="bi bi-chat-left-text"></i><textarea id="contact-message" name="mensaje" rows="5" required maxlength="2000" placeholder="Ej.: ¿Tienen disponible el Samsung Galaxy A55 en color azul?">{{ old('mensaje') }}</textarea></div></div>
-                <div class="contacto-enviar"><small><i class="bi bi-shield-lock"></i> Tus datos solo se usan para responder tu consulta.</small><button type="submit" class="btn btn-primary">Enviar consulta <i class="bi bi-send"></i></button></div>
+                <div class="form-group">
+                    <label for="contact-message">Mensaje</label>
+                    <div class="contacto-campo">
+                        <i class="bi bi-chat-left-text"></i>
+                        <textarea
+                            id="contact-message"
+                            name="mensaje"
+                            rows="5"
+                            required
+                            maxlength="2000"
+                            placeholder="Ej.: ¿Tienen disponible el Samsung Galaxy A55 en color azul?"
+                        >{{ old('mensaje') }}</textarea>
+                    </div>
+                </div>
+
+                <div class="contacto-enviar">
+                    <small>
+                        <i class="bi bi-shield-lock"></i>
+                        Tus datos solo se usan para responder tu consulta.
+                    </small>
+                    <button type="submit" class="btn btn-primary">
+                        Enviar consulta
+                        <i class="bi bi-send"></i>
+                    </button>
+                </div>
             </form>
         </div>
         <div class="contacto-mapa" id="mapa">

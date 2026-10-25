@@ -36,7 +36,22 @@
                 <div class="product-detail-price"><strong>S/ {{ number_format($salePrice, 2) }}</strong>@if($discount > 0)<div class="product-detail-old-price"><del>S/ {{ number_format($originalPrice, 2) }}</del><span class="product-detail-discount">-{{ $discount }}%</span></div>@endif</div>
                 <p class="product-detail-stock {{ $product->existencias > 0 ? 'is-available' : 'is-unavailable' }}"><i class="bi {{ $product->existencias > 0 ? 'bi-check-circle' : 'bi-x-circle' }}" aria-hidden="true"></i>{{ $product->existencias > 0 ? $product->existencias.' unidades disponibles' : 'Sin stock' }}</p>
                 @auth
-                    <form class="product-detail-cart" action="{{ route('cart.add', $product) }}" method="post">@csrf<input type="hidden" name="cantidad" value="1"><button class="product-detail-buy" type="submit" @disabled($product->existencias <= 0)><i class="bi bi-cart3" aria-hidden="true"></i>{{ $product->existencias > 0 ? 'Agregar al carrito' : 'Sin stock' }}</button></form>
+                    <form
+                        class="product-detail-cart"
+                        action="{{ route('cart.add', $product) }}"
+                        method="post"
+                    >
+                        @csrf
+                        <input type="hidden" name="cantidad" value="1">
+                        <button
+                            class="product-detail-buy"
+                            type="submit"
+                            @disabled($product->existencias <= 0)
+                        >
+                            <i class="bi bi-cart3" aria-hidden="true"></i>
+                            {{ $product->existencias > 0 ? 'Agregar al carrito' : 'Sin stock' }}
+                        </button>
+                    </form>
                 @else
                     <a class="product-detail-buy" href="{{ route('login') }}"><i class="bi bi-cart3" aria-hidden="true"></i>Inicia sesión para comprar</a>
                 @endauth

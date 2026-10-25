@@ -3,15 +3,6 @@
 @section('body_class', 'modulo-recomendador')
 @section('title', 'SmartMatch')
 
-@php
-    $imageUrl = static function ($product): string {
-        $path = $product->images->first()?->ruta_imagen ?: $product->url_imagen;
-        $path = ltrim((string) preg_replace('~^assets/~', '', $path ?: 'img/marca/logo.jpeg'), '/');
-
-        return asset('assets/cell-legacy/'.$path);
-    };
-@endphp
-
 @section('content')
     <section class="smartmatch-hero">
         <div class="container smartmatch-hero-grid">
@@ -43,8 +34,17 @@
             <div class="smartmatch-campos">
                 <label>
                     <span><i class="bi bi-cash-coin"></i> Presupuesto máximo (S/)</span>
-                    <input class="input" type="number" name="presupuesto" min="300" step="50" value="{{ request('presupuesto') }}" placeholder="Ej. 1500">
+                    <input
+                        class="input"
+                        type="number"
+                        name="presupuesto"
+                        min="300"
+                        step="50"
+                        value="{{ request('presupuesto') }}"
+                        placeholder="Ej. 1500"
+                    >
                 </label>
+
                 <label>
                     <span><i class="bi bi-phone"></i> Uso principal</span>
                     <select name="uso">
@@ -56,6 +56,7 @@
                         <option value="social" @selected(request('uso') === 'social')>Redes sociales</option>
                     </select>
                 </label>
+
                 <label>
                     <span><i class="bi bi-star"></i> Prioridad</span>
                     <select name="prioridad">
@@ -84,27 +85,7 @@
         @if ($products->isNotEmpty())
             <div class="smartmatch-resultados">
                 @foreach ($products as $product)
-                    <article class="smartmatch-tarjeta">
-                        <span class="smartmatch-puesto">#{{ $loop->iteration }}</span>
-                        <img class="smartmatch-product-photo" src="{{ $imageUrl($product) }}" alt="{{ $product->marca }} {{ $product->nombre }}" loading="lazy">
-                        <div class="smartmatch-tarjeta-arriba">
-                            <div>
-                                <small>{{ $product->marca ?: 'CELL SAC' }}</small>
-                                <h3>{{ $product->nombre }}</h3>
-                                <p class="smartmatch-precio">S/ {{ number_format((float) $product->effective_price, 2) }}</p>
-                            </div>
-                            <div class="smartmatch-porcentaje"><b>{{ (int) $product->recommendation_score }}%</b><small>coincide</small></div>
-                        </div>
-                        <ul>
-                            <li><i class="bi bi-check-circle-fill"></i> Precio dentro del catálogo vigente</li>
-                            <li><i class="bi bi-check-circle-fill"></i> Stock disponible: {{ $product->existencias }}</li>
-                            <li><i class="bi bi-check-circle-fill"></i> Puntaje calculado según tu selección</li>
-                        </ul>
-                        <div class="smartmatch-botones">
-                            <a class="btn btn-primary" href="{{ route('catalog.show', $product) }}">Ver equipo</a>
-                            <a class="btn btn-ghost" href="{{ route('comparison', ['seleccion' => $product->id]) }}">Comparar</a>
-                        </div>
-                    </article>
+                    <x-inteligencia.comprador.recomendaciones :product="$product" :position="$loop->iteration" />
                 @endforeach
             </div>
         @else

@@ -243,12 +243,6 @@
 .to-top.show {
   display: block;
 }
-[hidden] {
-  display: none !important;
-}
-
-
-
 /*
  * El layout global usa `nav { display: flex; }` para la barra principal.
  * Estas reglas mantienen las columnas del footer independientes y verticales.

@@ -22,7 +22,18 @@
         <div class="stock catalog-product-stock">{{ $product->existencias > 0 ? $product->existencias.' unidades disponibles' : 'Agotado' }}</div>
         <div class="catalog-product-actions">
             @auth
-                <form action="{{ route('cart.add', $product) }}" method="post">@csrf<input type="hidden" name="cantidad" value="1"><button class="btn btn-primary catalog-buy-button" type="submit" @disabled($product->existencias <= 0)><i class="bi bi-cart3" aria-hidden="true"></i> {{ $product->existencias > 0 ? 'Comprar' : 'Agotado' }}</button></form>
+                <form action="{{ route('cart.add', $product) }}" method="post">
+                    @csrf
+                    <input type="hidden" name="cantidad" value="1">
+                    <button
+                        class="btn btn-primary catalog-buy-button"
+                        type="submit"
+                        @disabled($product->existencias <= 0)
+                    >
+                        <i class="bi bi-cart3" aria-hidden="true"></i>
+                        {{ $product->existencias > 0 ? 'Comprar' : 'Agotado' }}
+                    </button>
+                </form>
             @else
                 <a class="btn btn-primary catalog-buy-button" href="{{ route('login') }}"><i class="bi bi-cart3" aria-hidden="true"></i> Comprar</a>
             @endauth
