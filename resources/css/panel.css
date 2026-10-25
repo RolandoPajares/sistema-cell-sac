@@ -1,0 +1,32 @@
+@import './app.css';
+@import './base/variables.css';
+@import './base/reinicio.css';
+@import './base/tipografia.css';
+@import './componentes/botones.css';
+@import './componentes/formularios.css';
+@import './componentes/precios.css';
+@import './componentes/tarjetas.css';
+@import './componentes/alertas.css';
+@import './componentes/badges.css';
+@import './componentes/estados.css';
+@import './componentes/tablas.css';
+@import './base/utilidades.css';
+
+@import './layouts/administracion.css';
+@import './layouts/responsive.css';
+@import './gestion/reportes/reportes.css';
+@import './modulos/pedidos.css';
+@import './gestion/productos/productos.css';
+@import './gestion/campanias/campanias.css';
+@import './gestion/campanias/publicidad-inteligente.css';
+@import './cuenta/perfil.css';
+@import './cuenta/cuenta.css';
+@import './paneles/administrador/dashboard.css';
+@import './paneles/compras-logistica/dashboard.css';
+@import './paneles/cliente-mayorista/dashboard.css';
+@import './paneles/cliente-minorista/dashboard.css';
+
+/* Estilos de módulos y roles del panel. */
+@import './layouts/panel/menu-lateral.css';
+@import './layouts/panel/encabezado.css';
+

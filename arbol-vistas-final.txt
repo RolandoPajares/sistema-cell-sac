@@ -1,0 +1,124 @@
+resources/views/
+├── auth/
+│   ├── login.blade.php
+│   └── register.blade.php
+├── components/
+│   ├── comunes/
+│   │   ├── dashboard-cliente.blade.php
+│   │   └── dashboard-rol-interno.blade.php
+│   ├── inteligencia/
+│   │   ├── asistente/
+│   │   │   ├── chat.blade.php
+│   │   │   ├── mensaje.blade.php
+│   │   │   └── sugerencias.blade.php
+│   │   ├── comprador/
+│   │   │   ├── comparacion.blade.php
+│   │   │   └── recomendaciones.blade.php
+│   │   └── cotizador/
+│   │       ├── formulario.blade.php
+│   │       └── resumen.blade.php
+│   ├── perfil/
+│   │   └── pagina.blade.php
+│   └── publico/
+│       ├── catalogo/
+│       │   └── tarjeta-producto.blade.php
+│       └── publicidad.blade.php
+├── cuenta/
+│   └── perfiles/
+│       ├── administrador/
+│       │   ├── editar.blade.php
+│       │   └── mostrar.blade.php
+│       ├── cliente-mayorista/
+│       │   ├── editar.blade.php
+│       │   └── mostrar.blade.php
+│       ├── cliente-minorista/
+│       │   ├── editar.blade.php
+│       │   └── mostrar.blade.php
+│       ├── compras-logistica/
+│       │   ├── editar.blade.php
+│       │   └── mostrar.blade.php
+│       ├── marketing/
+│       │   ├── editar.blade.php
+│       │   └── mostrar.blade.php
+│       ├── ventas-mayoristas/
+│       │   ├── editar.blade.php
+│       │   └── mostrar.blade.php
+│       └── ventas-minoristas/
+│           ├── editar.blade.php
+│           └── mostrar.blade.php
+├── errors/
+│   └── 404.blade.php
+├── gestion/
+│   ├── auditoria/
+│   │   └── index.blade.php
+│   ├── campanias/
+│   │   └── index.blade.php
+│   ├── categorias/
+│   │   └── index.blade.php
+│   ├── clientes/
+│   │   └── index.blade.php
+│   ├── compras/
+│   │   └── index.blade.php
+│   ├── cotizaciones/
+│   │   └── index.blade.php
+│   ├── cupones/
+│   │   └── index.blade.php
+│   ├── inventario/
+│   │   └── index.blade.php
+│   ├── productos/
+│   │   └── index.blade.php
+│   ├── proveedores/
+│   │   └── index.blade.php
+│   ├── reportes/
+│   │   └── index.blade.php
+│   ├── segmentos/
+│   │   └── index.blade.php
+│   └── usuarios/
+│       └── index.blade.php
+├── inteligente/
+│   └── publicidad.blade.php
+├── layouts/
+│   ├── panel/
+│   │   ├── encabezado.blade.php
+│   │   └── menu-lateral.blade.php
+│   ├── publico/
+│   │   ├── encabezado.blade.php
+│   │   └── pie-pagina.blade.php
+│   ├── administracion.blade.php
+│   └── tienda.blade.php
+├── paneles/
+│   ├── administrador/
+│   │   └── dashboard.blade.php
+│   ├── cliente-mayorista/
+│   │   └── dashboard.blade.php
+│   ├── cliente-minorista/
+│   │   └── dashboard.blade.php
+│   ├── compras-logistica/
+│   │   └── dashboard.blade.php
+│   ├── marketing/
+│   │   └── dashboard.blade.php
+│   ├── ventas-mayoristas/
+│   │   └── dashboard.blade.php
+│   └── ventas-minoristas/
+│       └── dashboard.blade.php
+└── publico/
+    ├── asistente/
+    │   └── index.blade.php
+    ├── catalogo/
+    │   ├── comparar.blade.php
+    │   ├── detalle.blade.php
+    │   ├── index.blade.php
+    │   └── recomendaciones.blade.php
+    ├── comercio/
+    │   ├── carrito.blade.php
+    │   ├── finalizar-compra.blade.php
+    │   ├── pedido.blade.php
+    │   └── pedidos.blade.php
+    ├── inicio/
+    │   └── index.blade.php
+    ├── inteligente/
+    │   ├── mayorista.blade.php
+    │   └── optimizador.blade.php
+    └── paginas/
+        ├── contacto.blade.php
+        └── nosotros.blade.php

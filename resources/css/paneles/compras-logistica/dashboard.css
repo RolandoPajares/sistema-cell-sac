@@ -1,0 +1,61 @@
+/* ROL: Compras y logística. Sin excepciones visuales propias; utiliza los módulos compartidos. */
+/* Compras y logística - refinamiento operacional */
+body.rol-compras-logistica .admin-user b {
+  color: #17365f !important;
+  opacity: 1 !important;
+}
+body.rol-compras-logistica .admin-user small {
+  color: #6f819a !important;
+}
+.modulo-listado-real {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+.modulo-listado-real:has([data-provider-panel]:not([hidden])) {
+  grid-template-columns: minmax(0, 1.7fr) minmax(300px, 0.7fr);
+}
+.modulo-listado-real .panel {
+  background: #fff;
+  color: #18345b;
+  border: 1px solid #e1eaf5;
+  box-shadow: 0 7px 22px rgba(24, 61, 120, 0.07);
+}
+.modulo-listado-real .table th {
+  background: #edf5ff;
+  color: #12315d;
+}
+.modulo-listado-real .table td {
+  color: #243d60;
+  border-color: #e5edf6;
+}
+.btn-sm {
+  padding: 8px 11px !important;
+  font-size: 0.76rem !important;
+  white-space: nowrap;
+}
+.btn-outline {
+  background: #fff !important;
+  color: #0b67d1 !important;
+  border: 1px solid #cfe0f4 !important;
+}
+.module-workspace.single {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+.module-workspace.single:has(.module-editor) {
+  grid-template-columns: minmax(0, 1.65fr) minmax(330px, 0.75fr) !important;
+}
+.module-workspace.single .module-editor {
+  background: #fff !important;
+  color: #18345b !important;
+}
+@media (max-width: 1000px) {
+  .modulo-listado-real:has([data-provider-panel]:not([hidden])) {
+    grid-template-columns: 1fr;
+  }
+  .module-workspace.single:has(.module-editor) {
+    grid-template-columns: 1fr !important;
+  }
+}
+
