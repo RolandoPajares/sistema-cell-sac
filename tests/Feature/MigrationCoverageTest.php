@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\Category;
-use App\Models\ContactMessage;
-use App\Models\Product;
+use App\Models\Catalogo\Categoria;
+use App\Models\Catalogo\Producto;
+use App\Models\Comunicacion\MensajeContacto;
 use App\Models\User;
 
 it('exposes the public modules migrated from the legacy application', function () {
@@ -27,7 +27,7 @@ it('stores contact requests through the Laravel service flow', function () {
         'mensaje' => '¿Tienen disponibilidad de un equipo?',
     ])->assertRedirect();
 
-    expect(ContactMessage::query()->count())->toBe(1);
+    expect(MensajeContacto::query()->count())->toBe(1);
     $this->assertDatabaseHas('mensajes_contacto', [
         'contacto' => 'cliente@example.test',
         'estado' => 'Nuevo',
@@ -35,8 +35,8 @@ it('stores contact requests through the Laravel service flow', function () {
 });
 
 it('calculates an optimizer proposal from active catalog stock', function () {
-    $category = Category::factory()->create(['nombre' => 'Celulares']);
-    Product::factory()->create([
+    $category = Categoria::factory()->create(['nombre' => 'Celulares']);
+    Producto::factory()->create([
         'categoria_id' => $category->id,
         'categoria' => 'Celulares',
         'precio' => 500,
@@ -55,4 +55,25 @@ it('protects administrative catalog modules by role', function () {
 
     $this->actingAs($admin)->get(route('management.categories'))->assertOk();
     $this->actingAs($marketing)->get(route('management.categories'))->assertForbidden();
+});
+
+it('exports authorized report data as an Excel-compatible CSV', function () {
+    $admin = User::factory()->create(['rol' => 'administrador']);
+
+    $response = $this->actingAs($admin)->get(route('management.reports.export'));
+
+    $response
+        ->assertOk()
+        ->assertDownload('reporte-pedidos.csv')
+        ->assertStreamed();
+
+    expect($response->streamedContent())->toContain('id,usuario_id,subtotal,descuento,total,estado,creado_en');
+});
+
+it('forbids customer roles from exporting internal reports', function () {
+    $customer = User::factory()->create(['rol' => 'cliente_minorista']);
+
+    $this->actingAs($customer)
+        ->get(route('management.reports.export'))
+        ->assertForbidden();
 });

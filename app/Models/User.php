@@ -3,6 +3,9 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Clientes\Cliente;
+use App\Models\Comercio\Pedido;
+use App\Models\Inventario\MovimientoInventario;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -51,17 +54,17 @@ class User extends Authenticatable
 
     public function customer(): HasOne
     {
-        return $this->hasOne(Customer::class, 'usuario_id');
+        return $this->hasOne(Cliente::class, 'usuario_id');
     }
 
     public function orders(): HasMany
     {
-        return $this->hasMany(Order::class, 'usuario_id');
+        return $this->hasMany(Pedido::class, 'usuario_id');
     }
 
     public function inventoryMovements(): HasMany
     {
-        return $this->hasMany(InventoryMovement::class, 'usuario_id');
+        return $this->hasMany(MovimientoInventario::class, 'usuario_id');
     }
 
     public function getRouteKeyName(): string
