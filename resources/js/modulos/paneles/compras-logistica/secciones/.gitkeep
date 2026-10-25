@@ -1,0 +1,2 @@
+# Integrante 2 - Compras y Logística: guardar aquí JavaScript de indicadores, inventario y abastecimiento.
+# Importar desde ../index.js y evitar listeners globales que afecten otros paneles.

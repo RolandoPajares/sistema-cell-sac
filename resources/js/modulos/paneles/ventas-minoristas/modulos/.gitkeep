@@ -1,0 +1,2 @@
+# Integrante 3 - Ventas Minoristas: guardar aquí JavaScript de módulos exclusivos del rol.
+# Importar desde ../index.js y validar el contexto para evitar listeners duplicados.

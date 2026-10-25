@@ -1,0 +1,2 @@
+# Integrante 1 - Administrador: guardar aquí CSS exclusivo de las secciones del dashboard.
+# Importar cada archivo desde ../index.css y limitar los selectores al contexto del rol.
