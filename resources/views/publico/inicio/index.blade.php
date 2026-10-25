@@ -10,7 +10,7 @@
     </a>
     <div class="home-hero-banner-content">
         <span class="home-hero-banner-kicker">Tecnología original en Bagua</span>
-        <h1>Tu próximo celular está en <span>MD Technology Cell</span></h1>
+        <h1>Tu próximo celular está  <span>en MD Technology Cell</span></h1>
         <p>Celulares y accesorios originales con atención local y precios para ti.</p>
         <div class="home-hero-banner-actions">
             <a class="btn btn-primary" href="{{ route('catalog.index', $cellCategoryId ? ['categoria' => $cellCategoryId] : []) }}">Ver celulares <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
