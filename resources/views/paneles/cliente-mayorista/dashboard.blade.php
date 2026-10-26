@@ -4,5 +4,6 @@
 @section('body_class', 'modulo-cuenta rol-cliente-mayorista')
 
 @section('content')
-    @include('components.comunes.dashboard-cliente', ['role' => 'cliente_mayorista'])
+    {{-- ahora el panel usa su propia sección en vez del dashboard común --}}
+    @include('paneles.cliente-mayorista.secciones.resumen-mayorista')
 @endsection
