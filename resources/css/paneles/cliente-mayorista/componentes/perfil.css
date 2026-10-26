@@ -1,0 +1,180 @@
+/* Perfil del cliente mayorista (mostrar y editar) - Integrante 4 */
+
+.perfil-cliente {
+  display: grid;
+  gap: 22px;
+}
+
+.perfil-cliente-portada {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 26px 28px;
+  border-radius: 22px;
+  color: #fff;
+  background: linear-gradient(120deg, #0a0f1c, #0b2a6f);
+}
+
+.perfil-cliente-portada > div {
+  flex: 1;
+}
+
+.perfil-cliente-portada h1 {
+  margin: 0 0 4px;
+  font-size: 1.6rem;
+  color: #fff;
+}
+
+.perfil-cliente-portada p {
+  margin: 0;
+  color: #dbeafe;
+}
+
+/* circulo con la inicial del nombre */
+.perfil-cliente-avatar {
+  display: grid;
+  place-items: center;
+  width: 70px;
+  height: 70px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  font-size: 1.8rem;
+  font-weight: 800;
+  background: #fff;
+  color: #0b2a6f;
+}
+
+.perfil-cliente-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  background: #1d4ed8;
+  color: #fff;
+}
+
+.perfil-cliente-portada .perfil-cliente-boton {
+  background: #fff;
+  color: #0b2a6f;
+}
+
+.perfil-cliente-boton--negro {
+  background: #0f172a;
+}
+
+.perfil-cliente-datos {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.perfil-cliente-datos article {
+  padding: 18px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #1d4ed8;
+  border-radius: 14px;
+}
+
+.perfil-cliente-datos small {
+  display: block;
+  margin-bottom: 4px;
+  color: #64748b;
+}
+
+.perfil-cliente-datos strong {
+  color: #0f172a;
+  word-break: break-all;
+}
+
+.perfil-cliente-activo i {
+  color: #1d4ed8;
+}
+
+.perfil-cliente-formularios {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+
+.perfil-cliente-caja {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  padding: 22px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+}
+
+.perfil-cliente-caja h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #0f172a;
+}
+
+.perfil-cliente-caja h2 i {
+  color: #1d4ed8;
+}
+
+.perfil-cliente-caja label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.perfil-cliente-caja input {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 11px;
+  font: inherit;
+}
+
+.perfil-cliente-caja .admin-password-input {
+  position: relative;
+  display: block;
+}
+
+.perfil-cliente-caja .admin-password-input button {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.perfil-cliente-caja > .perfil-cliente-boton {
+  justify-self: start;
+}
+
+@media (max-width: 800px) {
+  .perfil-cliente-portada {
+    flex-wrap: wrap;
+  }
+
+  .perfil-cliente-datos,
+  .perfil-cliente-formularios {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* el contenedor del ojito ya trae borde desde otro css, se lo quitamos
+   para que no salgan dos bordes */
+.admin-theme .admin-password-input {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
