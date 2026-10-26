@@ -1,11 +1,12 @@
 @import '../../publico/inteligente/mayorista.css';
 
 /* ROL: Cliente mayorista (empresas).
-   Se cambia el azul claro por azul marino con dorado
-   para que se diferencie del cliente minorista. */
+   Se cambia el azul claro por azul marino y negro
+   para que se diferencie del cliente minorista.
+   (se quitó el dorado porque los colores del proyecto son azul, blanco y negro) */
 
 .rol-cliente-mayorista .cuenta-fondo {
-  background: #f7f6f2;
+  background: #f4f6fb;
 }
 
 /* banner y menú lateral en azul oscuro */
@@ -17,45 +18,45 @@
   background: linear-gradient(120deg, #06163d, #0b2a6f, #1d4ed8);
 }
 
-/* detalles en dorado */
+/* detalles en blanco y celeste */
 .rol-cliente-mayorista .cuenta-banner-etiqueta {
-  background: rgba(245, 158, 11, 0.25);
-  color: #fde68a;
+  background: rgba(255, 255, 255, 0.15);
+  color: #dbeafe;
 }
 
 .rol-cliente-mayorista .cuenta-btn-blanco {
-  background: #fbbf24;
+  background: #ffffff;
   color: #06163d;
 }
 
 .rol-cliente-mayorista .cuenta-identidad > span {
-  background: #fbbf24;
+  background: #ffffff;
   color: #06163d;
 }
 
 .rol-cliente-mayorista .cuenta-lateral nav a.activo {
   color: #0b2a6f;
-  border-left-color: #f59e0b;
+  border-left-color: #1d4ed8;
 }
 
 .rol-cliente-mayorista .cuenta-lateral nav a.activo i {
-  color: #d97706;
+  color: #1d4ed8;
 }
 
 .rol-cliente-mayorista .pedido-producto > span,
 .rol-cliente-mayorista .cuenta-accesos a:hover {
-  background: #fff6e3;
+  background: #e8efff;
   color: #0b2a6f;
 }
 
 .rol-cliente-mayorista .lista-pedidos-cuenta article:hover {
-  border-color: #f59e0b;
+  border-color: #1d4ed8;
 }
 
 .rol-cliente-mayorista .cuenta-recomendado {
   background:
     url("/assets/cell-legacy/img/publico/inicio/secciones/hero-devices.png") right -30px
       bottom -10px / 150px no-repeat,
-    #fff8e8;
+    #eef3ff;
 }
 

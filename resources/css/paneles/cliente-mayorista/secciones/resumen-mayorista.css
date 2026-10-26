@@ -1,0 +1,504 @@
+/* Panel del cliente mayorista - Integrante 4 (Sebastián)
+   Colores: azul marino, azul, negro y blanco.
+   El mayorista se ve más "serio" (tonos oscuros) porque son empresas. */
+
+.mayorista-panel {
+  --may-negro: #0a0f1c;
+  --may-marino: #0b2a6f;
+  --may-azul: #1d4ed8;
+  --may-celeste: #e8efff;
+  --may-gris: #64748b;
+  --may-borde: #e2e8f0;
+
+  display: grid;
+  gap: 22px;
+  color: #111827;
+}
+
+/* ---------- cabecera ---------- */
+.mayorista-cabecera {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 20px;
+  padding: 30px;
+  border-radius: 22px;
+  color: #fff;
+  background: linear-gradient(125deg, var(--may-negro) 0%, var(--may-marino) 60%, var(--may-azul) 100%);
+  box-shadow: 0 14px 30px rgba(10, 15, 28, 0.25);
+}
+
+.mayorista-etiqueta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.mayorista-cabecera h1 {
+  margin: 14px 0 8px;
+  font-size: 1.9rem;
+  color: #fff;
+}
+
+.mayorista-cabecera p {
+  max-width: 520px;
+  margin: 0;
+  color: #cbd5e1;
+}
+
+.mayorista-cabecera-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.mayorista-cabecera-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 18px;
+  text-align: center;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.mayorista-cabecera-info > i {
+  font-size: 2.2rem;
+  color: #93c5fd;
+}
+
+.mayorista-cabecera-info small {
+  color: #cbd5e1;
+  word-break: break-all;
+}
+
+.mayorista-estado-cuenta {
+  margin-top: 8px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: #fff;
+  color: var(--may-marino);
+  font-weight: 700;
+}
+
+/* ---------- botones ---------- */
+.mayorista-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.15s;
+}
+
+.mayorista-boton:hover {
+  transform: translateY(-2px);
+  opacity: 0.92;
+}
+
+.mayorista-boton--blanco {
+  background: #fff;
+  color: var(--may-marino);
+}
+
+.mayorista-boton--borde {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.mayorista-boton--azul {
+  background: var(--may-azul);
+  color: #fff;
+}
+
+.mayorista-boton--negro {
+  background: var(--may-negro);
+  color: #fff;
+}
+
+/* ---------- tarjetas de resumen ---------- */
+.mayorista-tarjetas {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.mayorista-tarjeta {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 18px;
+  background: #fff;
+  border: 1px solid var(--may-borde);
+  border-radius: 18px;
+  border-top: 4px solid var(--may-marino);
+}
+
+.mayorista-tarjeta:nth-child(even) {
+  border-top-color: var(--may-negro);
+}
+
+.mayorista-tarjeta-icono {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  font-size: 1.3rem;
+  background: var(--may-celeste);
+  color: var(--may-marino);
+}
+
+.mayorista-tarjeta h2 {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--may-gris);
+}
+
+.mayorista-tarjeta strong {
+  display: block;
+  font-size: 1.3rem;
+  white-space: nowrap;
+  color: var(--may-negro);
+}
+
+.mayorista-tarjeta small {
+  color: var(--may-gris);
+  font-size: 0.78rem;
+}
+
+/* ---------- cajas generales ---------- */
+.mayorista-caja {
+  min-width: 0;
+  padding: 22px;
+  background: #fff;
+  border: 1px solid var(--may-borde);
+  border-radius: 18px;
+}
+
+.mayorista-caja-titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.mayorista-caja-titulo h2 {
+  margin: 0;
+  font-size: 1.08rem;
+  color: var(--may-negro);
+}
+
+.mayorista-caja-titulo h2 i {
+  color: var(--may-azul);
+  margin-right: 4px;
+}
+
+.mayorista-dos-columnas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+
+/* ---------- filtros de la tabla ---------- */
+.mayorista-filtros {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: #f1f5f9;
+}
+
+.mayorista-filtros button {
+  white-space: nowrap;
+  padding: 7px 14px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--may-gris);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mayorista-filtros button.activo {
+  background: var(--may-marino);
+  color: #fff;
+}
+
+/* ---------- tabla de pedidos ---------- */
+.mayorista-tabla-contenedor {
+  overflow-x: auto;
+}
+
+.mayorista-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.mayorista-tabla th {
+  padding: 11px 12px;
+  text-align: left;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: var(--may-negro);
+}
+
+.mayorista-tabla th:first-child {
+  border-radius: 10px 0 0 10px;
+}
+
+.mayorista-tabla th:last-child {
+  border-radius: 0 10px 10px 0;
+}
+
+.mayorista-tabla td {
+  padding: 13px 12px;
+  border-bottom: 1px solid var(--may-borde);
+}
+
+.mayorista-tabla tbody tr:hover td {
+  background: #f8faff;
+}
+
+.mayorista-estado {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.mayorista-estado--pendiente {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.mayorista-estado--en-proceso,
+.mayorista-estado--enviado {
+  background: var(--may-celeste);
+  color: var(--may-azul);
+}
+
+.mayorista-estado--entregado {
+  background: var(--may-marino);
+  color: #fff;
+}
+
+.mayorista-estado--cancelado {
+  background: #111827;
+  color: #fff;
+}
+
+.mayorista-link {
+  color: var(--may-azul);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.mayorista-sin-resultados td {
+  text-align: center;
+  color: var(--may-gris);
+}
+
+.mayorista-vacio {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 20px;
+  text-align: center;
+  color: var(--may-gris);
+}
+
+.mayorista-vacio > i {
+  font-size: 2.4rem;
+  color: var(--may-marino);
+}
+
+/* ---------- accesos rápidos ---------- */
+.mayorista-accesos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.mayorista-accesos a {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid var(--may-borde);
+  color: var(--may-negro);
+  font-weight: 600;
+  text-decoration: none;
+  transition: 0.15s;
+}
+
+.mayorista-accesos a i {
+  font-size: 1.4rem;
+  color: var(--may-azul);
+}
+
+.mayorista-accesos a:hover {
+  background: var(--may-marino);
+  border-color: var(--may-marino);
+  color: #fff;
+}
+
+.mayorista-accesos a:hover i {
+  color: #fff;
+}
+
+/* ---------- beneficios ---------- */
+.mayorista-beneficios {
+  background: linear-gradient(160deg, var(--may-marino), var(--may-negro));
+  border: 0;
+  color: #fff;
+}
+
+.mayorista-beneficios .mayorista-caja-titulo h2,
+.mayorista-beneficios .mayorista-caja-titulo h2 i {
+  color: #fff;
+}
+
+.mayorista-beneficios ul {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mayorista-beneficios li {
+  display: flex;
+  gap: 10px;
+  color: #dbeafe;
+}
+
+.mayorista-beneficios li i {
+  color: #93c5fd;
+}
+
+/* ---------- formularios ---------- */
+.mayorista-formulario {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.mayorista-formulario label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.mayorista-formulario input {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 11px;
+  font: inherit;
+}
+
+.mayorista-formulario input:focus {
+  outline: 2px solid var(--may-azul);
+  border-color: var(--may-azul);
+}
+
+.mayorista-formulario .admin-password-input {
+  position: relative;
+  display: block;
+}
+
+.mayorista-formulario .admin-password-input input {
+  padding-right: 44px;
+}
+
+.mayorista-formulario .admin-password-input button {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: var(--may-gris);
+  cursor: pointer;
+}
+
+.mayorista-formulario > .mayorista-boton {
+  justify-self: start;
+}
+
+/* el layout general le quita el padding a los section, aquí se lo devolvemos */
+.admin-theme .admin-main section.mayorista-caja {
+  padding: 22px;
+}
+
+/* para que la tabla no se salga de la pantalla en celular */
+.mayorista-panel > *,
+.mayorista-dos-columnas > * {
+  min-width: 0;
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 1100px) {
+  .mayorista-tarjetas {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 800px) {
+  .mayorista-cabecera,
+  .mayorista-dos-columnas {
+    grid-template-columns: 1fr;
+  }
+
+  .mayorista-cabecera {
+    padding: 22px;
+  }
+}
+
+@media (max-width: 520px) {
+  .mayorista-tarjetas,
+  .mayorista-accesos {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* el contenedor del ojito ya trae borde desde otro css, se lo quitamos
+   para que no salgan dos bordes */
+.admin-theme .admin-password-input {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
