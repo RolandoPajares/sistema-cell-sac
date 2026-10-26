@@ -1,0 +1,584 @@
+.modulo-ventas-minoristas .ventas-b2c-dashboard {
+  --ventas-b2c-azul: #096ef2;
+  --ventas-b2c-azul-oscuro: #09265a;
+  --ventas-b2c-fondo: #f2f7fd;
+  --ventas-b2c-linea: #dce8f5;
+  --ventas-b2c-muted: #526783;
+  display: grid;
+  gap: 16px;
+  width: 100%;
+  color: var(--ventas-b2c-azul-oscuro);
+}
+
+.modulo-ventas-minoristas .ventas-b2c-cabecera {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-etiqueta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 5px 13px;
+  border-radius: 999px;
+  color: #075dbf;
+  background: #dceeff;
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-cabecera h1 {
+  margin: 10px 0 4px;
+  color: #081d48;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-cabecera p {
+  margin: 0;
+  color: var(--ventas-b2c-muted);
+  font-size: clamp(0.9rem, 1.4vw, 1.05rem);
+}
+
+.modulo-ventas-minoristas .ventas-b2c-cabecera-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-boton:hover {
+  transform: translateY(-1px);
+}
+
+.modulo-ventas-minoristas .ventas-b2c-boton:focus-visible,
+.modulo-ventas-minoristas .ventas-b2c-periodos button:focus-visible,
+.modulo-ventas-minoristas .ventas-b2c-accesos-grid a:focus-visible {
+  outline: 3px solid #0866d9;
+  outline-offset: 2px;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-boton--principal {
+  color: #fff;
+  background: linear-gradient(135deg, #0753be, #0968d4);
+  box-shadow: 0 9px 20px rgba(9, 110, 242, 0.2);
+}
+
+.modulo-ventas-minoristas .ventas-b2c-boton--principal:hover {
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(9, 110, 242, 0.28);
+}
+
+.modulo-ventas-minoristas .ventas-b2c-boton--secundario {
+  color: #075fce;
+  border-color: #cfdeef;
+  background: #fff;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-boton--secundario:hover {
+  color: #064fa9;
+  background: #f6faff;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-metricas {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-metrica,
+.modulo-ventas-minoristas .ventas-b2c-panel {
+  border: 1px solid var(--ventas-b2c-linea);
+  background: #fff;
+  box-shadow: 0 9px 26px rgba(38, 87, 145, 0.065);
+}
+
+.modulo-ventas-minoristas .ventas-b2c-metrica {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+  min-height: 108px;
+  padding: 16px;
+  border-radius: 16px;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-metrica-icono {
+  display: grid;
+  flex: 0 0 52px;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 14px;
+  font-size: 1.35rem;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-metrica--azul .ventas-b2c-metrica-icono {
+  color: #0874ef;
+  background: #e4f2ff;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-metrica--verde .ventas-b2c-metrica-icono {
+  color: #0d9b67;
+  background: #e1f7ed;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-metrica--violeta .ventas-b2c-metrica-icono {
+  color: #7047df;
+  background: #eee8ff;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-metrica--naranja .ventas-b2c-metrica-icono {
+  color: #d87500;
+  background: #fff0d8;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-metrica h2,
+.modulo-ventas-minoristas .ventas-b2c-metrica p {
+  margin: 0;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-metrica h2 {
+  color: #43597b;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-metrica strong {
+  display: block;
+  margin: 4px 0;
+  color: #07183c;
+  font-size: clamp(1.35rem, 2.1vw, 1.75rem);
+  line-height: 1;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-metrica p {
+  color: var(--ventas-b2c-muted);
+  font-size: 0.7rem;
+  line-height: 1.35;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-analitica,
+.modulo-ventas-minoristas .ventas-b2c-inferior {
+  display: grid;
+  gap: 12px;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-analitica {
+  grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.95fr);
+}
+
+.modulo-ventas-minoristas .ventas-b2c-inferior {
+  grid-template-columns: minmax(0, 1.3fr) minmax(360px, 0.9fr);
+}
+
+.modulo-ventas-minoristas .ventas-b2c-panel {
+  min-width: 0;
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-panel-cabecera,
+.modulo-ventas-minoristas .ventas-b2c-panel-titulo {
+  display: flex;
+  align-items: center;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-panel-cabecera {
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 13px;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-panel-titulo {
+  gap: 9px;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-panel-titulo > i {
+  color: var(--ventas-b2c-azul);
+  font-size: 1.15rem;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-panel h2 {
+  margin: 0;
+  color: #0a204d;
+  font-size: 1rem;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-panel-cabecera > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #0872ed;
+  font-size: 0.73rem;
+  font-weight: 800;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-periodos {
+  display: inline-grid;
+  grid-template-columns: repeat(3, auto);
+  padding: 3px;
+  border: 1px solid #dae6f3;
+  border-radius: 10px;
+  background: #f5f8fc;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-periodos button {
+  min-width: 68px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 7px;
+  color: #526783;
+  background: transparent;
+  font-size: 0.7rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-periodos button.is-active {
+  color: #fff;
+  background: var(--ventas-b2c-azul);
+  box-shadow: 0 4px 12px rgba(9, 110, 242, 0.22);
+}
+
+.modulo-ventas-minoristas .ventas-b2c-grafico-vacio {
+  display: grid;
+  min-height: 225px;
+  place-items: center;
+  align-content: center;
+  padding: 24px;
+  border-radius: 12px;
+  background-color: #fbfdff;
+  background-image:
+    linear-gradient(to right, rgba(198, 214, 233, 0.45) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(198, 214, 233, 0.45) 1px, transparent 1px);
+  background-size: 16.66% 100%, 100% 25%;
+  text-align: center;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-grafico-icono {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  margin-bottom: 10px;
+  place-items: center;
+  border-radius: 50%;
+  color: #8498b5;
+  background: rgba(237, 243, 250, 0.96);
+  font-size: 1.4rem;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-grafico-vacio strong {
+  color: #27436e;
+  font-size: 0.95rem;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-grafico-vacio p {
+  margin: 4px 0 0;
+  color: var(--ventas-b2c-muted);
+  font-size: 0.76rem;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-inventario-contenido {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.9fr) minmax(170px, 1.1fr);
+  align-items: center;
+  gap: 20px;
+  min-height: 225px;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-anillo {
+  display: grid;
+  width: 158px;
+  height: 158px;
+  margin: auto;
+  place-items: center;
+  border-radius: 50%;
+  background: conic-gradient(#1477ec 0 100%);
+  box-shadow: inset 0 0 0 1px rgba(9, 110, 242, 0.08);
+}
+
+.modulo-ventas-minoristas .ventas-b2c-anillo.is-pending {
+  background: #dfe7f1;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-anillo > div {
+  display: grid;
+  width: 112px;
+  height: 112px;
+  place-items: center;
+  align-content: center;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-anillo strong,
+.modulo-ventas-minoristas .ventas-b2c-anillo span {
+  display: block;
+  text-align: center;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-anillo strong {
+  color: #07183c;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-anillo span {
+  max-width: 82px;
+  margin-top: 6px;
+  color: var(--ventas-b2c-muted);
+  font-size: 0.68rem;
+  line-height: 1.2;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-leyenda {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-leyenda li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  min-height: 47px;
+  border-bottom: 1px solid #e4edf7;
+  color: #536987;
+  font-size: 0.76rem;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-leyenda li:last-child {
+  border-bottom: 0;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-leyenda strong {
+  color: #0a204d;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-punto {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-punto--disponible {
+  background: #1477ec;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-punto--bajo {
+  background: #e39a00;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-punto--agotado {
+  background: #e54855;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-pedidos-vacio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  min-height: 142px;
+  padding: 18px;
+  border-radius: 12px;
+  background: var(--ventas-b2c-fondo);
+}
+
+.modulo-ventas-minoristas .ventas-b2c-pedidos-vacio > span {
+  display: grid;
+  flex: 0 0 68px;
+  width: 68px;
+  height: 68px;
+  place-items: center;
+  border-radius: 50%;
+  color: #8498b5;
+  background: #e6edf6;
+  font-size: 1.65rem;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-pedidos-vacio strong {
+  color: #0a204d;
+  font-size: 0.95rem;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-pedidos-vacio p {
+  margin: 4px 0 11px;
+  color: var(--ventas-b2c-muted);
+  font-size: 0.74rem;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-pedidos-vacio .ventas-b2c-boton {
+  min-height: 38px;
+  padding: 8px 13px;
+  font-size: 0.75rem;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-accesos-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-accesos-grid a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+  min-height: 66px;
+  padding: 11px;
+  border: 1px solid #d7e4f2;
+  border-radius: 11px;
+  color: #153768;
+  background: #fbfdff;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-accesos-grid a:hover {
+  border-color: #7ebcff;
+  color: #0a58bb;
+  box-shadow: 0 8px 18px rgba(38, 87, 145, 0.08);
+  transform: translateY(-1px);
+}
+
+.modulo-ventas-minoristas .ventas-b2c-accesos-grid a > i {
+  flex: 0 0 auto;
+  color: var(--ventas-b2c-azul);
+  font-size: 1.25rem;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-accesos-grid a:nth-child(2) > i {
+  color: #0d9b67;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-accesos-grid a:nth-child(3) > i {
+  color: #7047df;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-accesos-grid a:nth-child(4) > i {
+  color: #d87500;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-accesos-grid span,
+.modulo-ventas-minoristas .ventas-b2c-accesos-grid strong,
+.modulo-ventas-minoristas .ventas-b2c-accesos-grid small {
+  display: block;
+  min-width: 0;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-accesos-grid strong {
+  font-size: 0.76rem;
+  line-height: 1.25;
+}
+
+.modulo-ventas-minoristas .ventas-b2c-accesos-grid small {
+  margin-top: 3px;
+  color: var(--ventas-b2c-muted);
+  font-size: 0.66rem;
+  line-height: 1.3;
+}
+
+@media (max-width: 1180px) {
+  .modulo-ventas-minoristas .ventas-b2c-metricas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .modulo-ventas-minoristas .ventas-b2c-analitica,
+  .modulo-ventas-minoristas .ventas-b2c-inferior {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 800px) {
+  .modulo-ventas-minoristas .ventas-b2c-cabecera {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .modulo-ventas-minoristas .ventas-b2c-cabecera-acciones {
+    justify-content: flex-start;
+  }
+
+  .modulo-ventas-minoristas .ventas-b2c-panel-cabecera {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .modulo-ventas-minoristas .ventas-b2c-inventario-contenido {
+    grid-template-columns: 1fr;
+  }
+
+  .modulo-ventas-minoristas .ventas-b2c-leyenda {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .modulo-ventas-minoristas .ventas-b2c-leyenda li {
+    border-right: 1px solid #e4edf7;
+    border-bottom: 0;
+  }
+
+  .modulo-ventas-minoristas .ventas-b2c-leyenda li:last-child {
+    border-right: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .modulo-ventas-minoristas .ventas-b2c-metricas,
+  .modulo-ventas-minoristas .ventas-b2c-accesos-grid,
+  .modulo-ventas-minoristas .ventas-b2c-leyenda {
+    grid-template-columns: 1fr;
+  }
+
+  .modulo-ventas-minoristas .ventas-b2c-cabecera-acciones,
+  .modulo-ventas-minoristas .ventas-b2c-boton {
+    width: 100%;
+  }
+
+  .modulo-ventas-minoristas .ventas-b2c-periodos {
+    width: 100%;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .modulo-ventas-minoristas .ventas-b2c-periodos button {
+    min-width: 0;
+  }
+
+  .modulo-ventas-minoristas .ventas-b2c-leyenda li {
+    border-right: 0;
+    border-bottom: 1px solid #e4edf7;
+  }
+
+  .modulo-ventas-minoristas .ventas-b2c-pedidos-vacio {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modulo-ventas-minoristas .ventas-b2c-boton,
+  .modulo-ventas-minoristas .ventas-b2c-accesos-grid a {
+    transition: none;
+  }
+}
