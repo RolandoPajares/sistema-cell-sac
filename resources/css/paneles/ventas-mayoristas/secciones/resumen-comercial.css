@@ -1,0 +1,550 @@
+.modulo-ventas-mayoristas .ventas-b2b-dashboard {
+  --ventas-b2b-azul: #096ef2;
+  --ventas-b2b-azul-oscuro: #09265a;
+  --ventas-b2b-celeste: #13a9e8;
+  --ventas-b2b-fondo: #f2f7fd;
+  --ventas-b2b-linea: #dce8f5;
+  --ventas-b2b-muted: #526783;
+  display: grid;
+  gap: 16px;
+  width: 100%;
+  color: var(--ventas-b2b-azul-oscuro);
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-cabecera {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-etiqueta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 5px 13px;
+  border-radius: 999px;
+  color: #075dbf;
+  background: #dceeff;
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-cabecera h1 {
+  margin: 10px 0 4px;
+  color: #081d48;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-cabecera p {
+  margin: 0;
+  color: var(--ventas-b2b-muted);
+  font-size: clamp(0.9rem, 1.4vw, 1.05rem);
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-cabecera-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-boton:hover {
+  transform: translateY(-1px);
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-boton:focus-visible,
+.modulo-ventas-mayoristas .ventas-b2b-periodos button:focus-visible,
+.modulo-ventas-mayoristas .ventas-b2b-accesos-grid a:focus-visible {
+  outline: 3px solid #0866d9;
+  outline-offset: 2px;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-boton--principal {
+  color: #fff;
+  background: linear-gradient(135deg, #0753be, #0968d4);
+  box-shadow: 0 9px 20px rgba(9, 110, 242, 0.2);
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-boton--principal:hover {
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(9, 110, 242, 0.28);
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-boton--secundario {
+  color: #075fce;
+  border-color: #cfdeef;
+  background: #fff;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-boton--secundario:hover {
+  color: #064fa9;
+  background: #f6faff;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-metricas {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-metrica,
+.modulo-ventas-mayoristas .ventas-b2b-panel {
+  border: 1px solid var(--ventas-b2b-linea);
+  background: #fff;
+  box-shadow: 0 9px 26px rgba(38, 87, 145, 0.065);
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-metrica {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+  min-height: 118px;
+  padding: 17px;
+  border-radius: 16px;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-metrica-icono {
+  display: grid;
+  flex: 0 0 52px;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 14px;
+  font-size: 1.35rem;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-metrica--azul .ventas-b2b-metrica-icono {
+  color: #0874ef;
+  background: #e4f2ff;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-metrica--verde .ventas-b2b-metrica-icono {
+  color: #0d9b67;
+  background: #e1f7ed;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-metrica--violeta .ventas-b2b-metrica-icono {
+  color: #7047df;
+  background: #eee8ff;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-metrica--celeste .ventas-b2b-metrica-icono {
+  color: #0089c4;
+  background: #def6ff;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-metrica h2,
+.modulo-ventas-mayoristas .ventas-b2b-metrica p {
+  margin: 0;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-metrica h2 {
+  color: #43597b;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-metrica strong {
+  display: block;
+  margin: 3px 0;
+  color: #07183c;
+  font-size: clamp(1.45rem, 2.2vw, 1.85rem);
+  line-height: 1;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-metrica p {
+  color: var(--ventas-b2b-muted);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-analitica,
+.modulo-ventas-mayoristas .ventas-b2b-inferior {
+  display: grid;
+  gap: 12px;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-analitica {
+  grid-template-columns: minmax(0, 1.7fr) minmax(300px, 0.95fr);
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-inferior {
+  grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.9fr);
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-panel {
+  min-width: 0;
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-panel-cabecera,
+.modulo-ventas-mayoristas .ventas-b2b-panel-titulo {
+  display: flex;
+  align-items: center;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-panel-cabecera {
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 13px;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-panel-titulo {
+  gap: 9px;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-panel-titulo > i {
+  color: var(--ventas-b2b-azul);
+  font-size: 1.15rem;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-panel h2 {
+  margin: 0;
+  color: #0a204d;
+  font-size: 1rem;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-panel-cabecera > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #0872ed;
+  font-size: 0.73rem;
+  font-weight: 800;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-periodos {
+  display: inline-grid;
+  grid-template-columns: repeat(3, auto);
+  padding: 3px;
+  border: 1px solid #dae6f3;
+  border-radius: 10px;
+  background: #f5f8fc;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-periodos button {
+  min-width: 68px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 7px;
+  color: #526783;
+  background: transparent;
+  font-size: 0.7rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-periodos button.is-active {
+  color: #fff;
+  background: var(--ventas-b2b-azul);
+  box-shadow: 0 4px 12px rgba(9, 110, 242, 0.22);
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-grafico-vacio {
+  display: grid;
+  min-height: 215px;
+  place-items: center;
+  align-content: center;
+  padding: 24px;
+  border-radius: 12px;
+  background-color: #fbfdff;
+  background-image:
+    linear-gradient(to right, rgba(198, 214, 233, 0.45) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(198, 214, 233, 0.45) 1px, transparent 1px);
+  background-size: 16.66% 100%, 100% 25%;
+  text-align: center;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-grafico-icono {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  margin-bottom: 10px;
+  place-items: center;
+  border-radius: 50%;
+  color: #91a4bf;
+  background: rgba(237, 243, 250, 0.96);
+  font-size: 1.4rem;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-grafico-vacio strong {
+  color: #27436e;
+  font-size: 0.95rem;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-grafico-vacio p {
+  margin: 4px 0 0;
+  color: var(--ventas-b2b-muted);
+  font-size: 0.76rem;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-estados-contenido {
+  display: grid;
+  grid-template-columns: minmax(125px, 0.9fr) minmax(150px, 1.1fr);
+  align-items: center;
+  gap: 18px;
+  min-height: 215px;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-anillo {
+  display: grid;
+  width: 140px;
+  height: 140px;
+  margin: auto;
+  place-items: center;
+  border-radius: 50%;
+  background: conic-gradient(#dfe7f1 0 100%);
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-anillo > div {
+  display: grid;
+  width: 100px;
+  height: 100px;
+  place-items: center;
+  align-content: center;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-anillo strong,
+.modulo-ventas-mayoristas .ventas-b2b-anillo span {
+  display: block;
+  text-align: center;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-anillo strong {
+  color: #07183c;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-anillo span {
+  margin-top: 4px;
+  color: var(--ventas-b2b-muted);
+  font-size: 0.72rem;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-leyenda {
+  display: grid;
+  gap: 13px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-leyenda li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  color: #536987;
+  font-size: 0.76rem;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-leyenda strong {
+  color: #0a204d;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-punto {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-punto--borrador {
+  background: #72b5f4;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-punto--enviada {
+  background: #0876f9;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-punto--aprobada {
+  background: #14b87a;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-punto--rechazada {
+  background: #f05a68;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-cotizaciones-vacio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  min-height: 142px;
+  padding: 18px;
+  border-radius: 12px;
+  background: var(--ventas-b2b-fondo);
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-cotizaciones-vacio > span {
+  display: grid;
+  flex: 0 0 68px;
+  width: 68px;
+  height: 68px;
+  place-items: center;
+  border-radius: 50%;
+  color: #91a4bf;
+  background: #e6edf6;
+  font-size: 1.65rem;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-cotizaciones-vacio strong {
+  color: #0a204d;
+  font-size: 0.95rem;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-cotizaciones-vacio p {
+  margin: 4px 0 11px;
+  color: var(--ventas-b2b-muted);
+  font-size: 0.74rem;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-cotizaciones-vacio .ventas-b2b-boton {
+  min-height: 38px;
+  padding: 8px 13px;
+  font-size: 0.75rem;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-accesos-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-accesos-grid a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+  min-height: 66px;
+  padding: 11px;
+  border: 1px solid #d7e4f2;
+  border-radius: 11px;
+  color: #153768;
+  background: #fbfdff;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-accesos-grid a:hover {
+  border-color: #7ebcff;
+  color: #0a58bb;
+  box-shadow: 0 8px 18px rgba(38, 87, 145, 0.08);
+  transform: translateY(-1px);
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-accesos-grid a > i {
+  flex: 0 0 auto;
+  color: var(--ventas-b2b-azul);
+  font-size: 1.25rem;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-accesos-grid span,
+.modulo-ventas-mayoristas .ventas-b2b-accesos-grid strong,
+.modulo-ventas-mayoristas .ventas-b2b-accesos-grid small {
+  display: block;
+  min-width: 0;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-accesos-grid strong {
+  font-size: 0.76rem;
+  line-height: 1.25;
+}
+
+.modulo-ventas-mayoristas .ventas-b2b-accesos-grid small {
+  margin-top: 3px;
+  color: var(--ventas-b2b-muted);
+  font-size: 0.66rem;
+  line-height: 1.3;
+}
+
+@media (max-width: 1180px) {
+  .modulo-ventas-mayoristas .ventas-b2b-metricas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .modulo-ventas-mayoristas .ventas-b2b-analitica,
+  .modulo-ventas-mayoristas .ventas-b2b-inferior {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 800px) {
+  .modulo-ventas-mayoristas .ventas-b2b-cabecera {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .modulo-ventas-mayoristas .ventas-b2b-cabecera-acciones {
+    justify-content: flex-start;
+  }
+
+  .modulo-ventas-mayoristas .ventas-b2b-panel-cabecera {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .modulo-ventas-mayoristas .ventas-b2b-estados-contenido {
+    grid-template-columns: 1fr;
+  }
+
+  .modulo-ventas-mayoristas .ventas-b2b-leyenda {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .modulo-ventas-mayoristas .ventas-b2b-metricas,
+  .modulo-ventas-mayoristas .ventas-b2b-accesos-grid,
+  .modulo-ventas-mayoristas .ventas-b2b-leyenda {
+    grid-template-columns: 1fr;
+  }
+
+  .modulo-ventas-mayoristas .ventas-b2b-cabecera-acciones,
+  .modulo-ventas-mayoristas .ventas-b2b-boton {
+    width: 100%;
+  }
+
+  .modulo-ventas-mayoristas .ventas-b2b-periodos {
+    width: 100%;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .modulo-ventas-mayoristas .ventas-b2b-periodos button {
+    min-width: 0;
+  }
+
+  .modulo-ventas-mayoristas .ventas-b2b-cotizaciones-vacio {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modulo-ventas-mayoristas .ventas-b2b-boton,
+  .modulo-ventas-mayoristas .ventas-b2b-accesos-grid a {
+    transition: none;
+  }
+}
