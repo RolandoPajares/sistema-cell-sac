@@ -1,2 +1,11 @@
 /* CELL SAC | ADMINISTRADOR | RESPONSABLE: INTEGRANTE 1 */
 /* Importar aquí CSS de nuevas secciones y módulos del panel; no duplicar dashboard.css ni modificar estilos compartidos. */
+@import './componentes/menu-lateral-desplegable.css';
+@import '../../gestion/ventas/ventas.css';
+
+@media (min-width: 1000px) {
+    .admin-theme.modulo-clientes .clientes-kpi-grid,
+    .admin-theme.modulo-proveedores .proveedores-kpi-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}

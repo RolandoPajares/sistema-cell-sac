@@ -17,6 +17,11 @@
 @import './gestion/reportes/reportes.css';
 @import './modulos/pedidos.css';
 @import './gestion/productos/productos.css';
+@import './gestion/inventario/inventario.css';
+@import './gestion/pedidos/pedidos.css';
+@import './gestion/clientes/clientes.css';
+@import './gestion/proveedores/proveedores.css';
+@import './gestion/usuarios/usuarios.css';
 @import './gestion/campanias/campanias.css';
 @import './gestion/campanias/publicidad-inteligente.css';
 @import './cuenta/perfil.css';

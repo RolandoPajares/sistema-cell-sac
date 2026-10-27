@@ -17,6 +17,7 @@ use App\Http\Controllers\Gestion\Proveedores\ProveedorController;
 use App\Http\Controllers\Gestion\Reportes\ReporteController;
 use App\Http\Controllers\Gestion\Segmentos\SegmentoClienteController;
 use App\Http\Controllers\Gestion\Usuarios\GestionUsuariosController;
+use App\Http\Controllers\Gestion\Ventas\VentaController;
 use App\Http\Controllers\Paneles\Administrador\DashboardController as AdministradorDashboardController;
 use App\Http\Controllers\Publico\Asistente\AsistenteController;
 use App\Http\Controllers\Publico\Catalogo\CatalogoController;
@@ -87,6 +88,8 @@ Route::prefix('gestion')->middleware(['auth', 'role:administrador'])->name('mana
     Route::get('/', AdministradorDashboardController::class)->name('dashboard');
 
     Route::get('/productos', [GestionProductosController::class, 'index'])->name('products');
+    Route::get('/productos/exportar/{format}', [GestionProductosController::class, 'export'])
+        ->whereIn('format', ['pdf', 'excel', 'csv'])->name('products.export');
     Route::post('/productos', [GestionProductosController::class, 'store'])->name('products.store');
     Route::put('/productos/{product}', [GestionProductosController::class, 'update'])->whereNumber('product')->name('products.update');
     Route::delete('/productos/{product}', [GestionProductosController::class, 'deactivate'])->whereNumber('product')->name('products.deactivate');
@@ -96,6 +99,7 @@ Route::prefix('gestion')->middleware(['auth', 'role:administrador'])->name('mana
     Route::get('/auditoria', [AuditoriaController::class, 'index'])->name('audit');
 
     Route::get('/categorias', [CategoriaController::class, 'index'])->name('categories');
+    Route::get('/categorias/exportar', [CategoriaController::class, 'export'])->name('categories.export');
     Route::post('/categorias', [CategoriaController::class, 'store'])->name('categories.store');
     Route::put('/categorias/{category}', [CategoriaController::class, 'update'])->name('categories.update');
     Route::delete('/categorias/{category}', [CategoriaController::class, 'deactivate'])->name('categories.deactivate');
@@ -106,6 +110,10 @@ Route::prefix('gestion')->middleware(['auth', 'role:administrador'])->name('mana
     Route::delete('/clientes/{customer}', [ClienteController::class, 'deactivate'])->name('customers.deactivate');
 
     Route::get('/pedidos', [PedidoController::class, 'index'])->name('orders');
+    Route::get('/ventas', [VentaController::class, 'index'])->name('sales');
+    Route::get('/ventas/exportar', [VentaController::class, 'export'])->name('sales.export');
+    Route::post('/ventas', [VentaController::class, 'store'])->name('sales.store');
+    Route::put('/ventas/{order}', [VentaController::class, 'update'])->whereNumber('order')->name('sales.update');
     Route::get('/cuenta', [CuentaController::class, 'dashboard'])->name('account');
     Route::put('/cuenta/perfil', [CuentaAdministracionController::class, 'updateProfile'])->name('account.profile');
     Route::put('/cuenta/password', [CuentaAdministracionController::class, 'updatePassword'])->name('account.password');

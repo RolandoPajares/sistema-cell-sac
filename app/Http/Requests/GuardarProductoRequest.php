@@ -18,10 +18,15 @@ class GuardarProductoRequest extends FormRequest
             'nombre' => ['required', 'string', 'max:160'],
             'categoria_id' => ['required', 'integer', 'exists:categorias,id'],
             'precio' => ['required', 'numeric', 'min:0'],
+            'precio_original' => ['nullable', 'numeric', 'min:0'],
             'precio_oferta' => ['nullable', 'numeric', 'min:0', 'lte:precio'],
             'url_imagen' => ['nullable', 'string', 'max:255'],
+            'imagen' => ['nullable', 'image', 'max:5120'],
+            'etiqueta' => ['nullable', 'string', 'max:80'],
             'descripcion' => ['nullable', 'string'],
             'existencias' => ['sometimes', 'integer', 'min:0'],
+            'proveedor_id' => ['nullable', 'integer', 'exists:proveedores,id'],
+            'activo' => ['sometimes', 'boolean'],
         ];
     }
 }
