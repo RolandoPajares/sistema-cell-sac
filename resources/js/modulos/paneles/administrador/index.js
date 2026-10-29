@@ -1,6 +1,11 @@
 import '../../../../css/paneles/administrador/index.css';
 import './componentes/menu-lateral-desplegable.js';
+import './administracion/index.js';
+import './analisis/index.js';
+import './configuracion/index.js';
+import './finanzas/index.js';
 import '../../gestion/ventas/index.js';
+import '../../gestion/modulos-pendientes.js';
 
 const dashboard = document.querySelector('[data-admin-dashboard]');
 

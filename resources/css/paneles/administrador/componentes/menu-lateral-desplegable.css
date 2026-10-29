@@ -5,9 +5,24 @@
   max-height: calc(100vh - var(--reference-header-height) - 76px);
   overflow-x: hidden;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 0 7px 14px;
   scrollbar-color: rgba(255, 255, 255, 0.34) transparent;
   scrollbar-width: thin;
+}
+
+/*
+ * El menú administrativo es el único contenedor que debe desplazarse.
+ * El aside compartido conserva su estructura, pero no muestra una segunda
+ * barra gris cuando este componente está montado dentro del Administrador.
+ */
+.admin-sidebar:has(.admin-menu-desplegable) {
+  overflow: hidden;
+}
+
+.admin-sidebar:has(.admin-menu-desplegable) .admin-sidebar-nav {
+  min-height: 0;
+  overflow: hidden;
 }
 
 .admin-menu-desplegable::-webkit-scrollbar {

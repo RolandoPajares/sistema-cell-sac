@@ -15,6 +15,8 @@
 @import './layouts/administracion.css';
 @import './layouts/responsive.css';
 @import './gestion/reportes/reportes.css';
+@import './gestion/cotizaciones/cotizaciones.css';
+@import './gestion/compras/compras.css';
 @import './modulos/pedidos.css';
 @import './gestion/productos/productos.css';
 @import './gestion/inventario/inventario.css';
@@ -34,4 +36,3 @@
 /* Estilos de módulos y roles del panel. */
 @import './layouts/panel/menu-lateral.css';
 @import './layouts/panel/encabezado.css';
-

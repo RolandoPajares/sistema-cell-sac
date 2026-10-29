@@ -1,0 +1,4 @@
+.admin-finance-module--pagos .admin-finance-card-icon { background: #e5f1ff; color: #0875ed; }
+.admin-finance-module--pagos .admin-finance-summary-card:first-child { background: linear-gradient(145deg, #fff, #fffaf0); }
+.admin-finance-module--pagos .admin-finance-summary-card:nth-child(2) { background: linear-gradient(145deg, #fff, #f7fbff); }
+.admin-finance-module--pagos .admin-finance-summary-card:nth-child(3) { background: linear-gradient(145deg, #fff, #f4fff9); }

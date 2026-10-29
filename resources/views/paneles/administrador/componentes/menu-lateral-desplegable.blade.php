@@ -40,9 +40,9 @@
                 $enabledItem('management.orders', 'Pedidos', 'bi-receipt'),
                 $enabledItem('management.sales', 'Ventas', 'bi-cart-check'),
                 $enabledItem('management.purchases', 'Compras', 'bi-cart-plus'),
-                $enabledItem('quotations.index', 'Cotizaciones', 'bi-file-earmark-text'),
+                $enabledItem('management.quotations', 'Cotizaciones', 'bi-file-earmark-text'),
                 $disabledItem('Envíos y entregas', 'bi-truck'),
-                $disabledItem('Devoluciones y garantías', 'bi-arrow-counterclockwise'),
+                $enabledItem('management.returns', 'Devoluciones y garantías', 'bi-arrow-counterclockwise'),
             ],
         ],
         [
@@ -52,7 +52,7 @@
             'items' => [
                 $enabledItem('management.customers', 'Clientes', 'bi-people'),
                 $enabledItem('management.suppliers', 'Proveedores', 'bi-truck'),
-                $disabledItem('Soporte y reclamos', 'bi-headset'),
+                $enabledItem('management.support', 'Soporte y reclamos', 'bi-headset'),
             ],
         ],
         [
@@ -71,9 +71,9 @@
             'label' => 'Finanzas',
             'icon' => 'bi-wallet2',
             'items' => [
-                $disabledItem('Pagos', 'bi-credit-card'),
-                $disabledItem('Facturación', 'bi-receipt-cutoff'),
-                $disabledItem('Reembolsos', 'bi-arrow-return-left'),
+                $enabledItem('management.payments', 'Pagos', 'bi-credit-card'),
+                $enabledItem('management.billing', 'Facturación', 'bi-receipt-cutoff'),
+                $enabledItem('management.refunds', 'Reembolsos', 'bi-arrow-return-left'),
             ],
         ],
         [
@@ -81,10 +81,10 @@
             'label' => 'Análisis',
             'icon' => 'bi-bar-chart-line',
             'items' => [
-                $enabledItem('management.reports', 'Reportes comerciales', 'bi-bar-chart'),
-                $disabledItem('Reportes financieros', 'bi-graph-up-arrow'),
-                $disabledItem('Analítica de clientes', 'bi-person-lines-fill'),
-                $disabledItem('Métricas de marketing', 'bi-bullseye'),
+                $enabledItem('management.reports', 'Reportes', 'bi-bar-chart'),
+                $enabledItem('management.financial_reports', 'Reportes financieros', 'bi-graph-up-arrow'),
+                $enabledItem('management.customer_analytics', 'Analítica de clientes', 'bi-person-lines-fill'),
+                $enabledItem('management.marketing_metrics', 'Métricas de marketing', 'bi-bullseye'),
             ],
         ],
         [
@@ -93,11 +93,11 @@
             'icon' => 'bi-shield-lock',
             'items' => [
                 $enabledItem('management.users', 'Usuarios', 'bi-person-gear'),
-                $disabledItem('Roles y permisos', 'bi-key'),
+                $enabledItem('management.roles_permissions', 'Roles y permisos', 'bi-key'),
                 $enabledItem('management.audit', 'Auditoría', 'bi-shield-check'),
-                $disabledItem('Notificaciones', 'bi-bell'),
-                $disabledItem('Integraciones', 'bi-plug'),
-                $disabledItem('Respaldos y mantenimiento', 'bi-database-gear'),
+                $enabledItem('management.notifications', 'Notificaciones', 'bi-bell'),
+                $enabledItem('management.integrations', 'Integraciones', 'bi-plug'),
+                $enabledItem('management.backups', 'Respaldos y mantenimiento', 'bi-database-gear'),
             ],
         ],
         [
@@ -105,10 +105,10 @@
             'label' => 'Configuración',
             'icon' => 'bi-gear',
             'items' => [
-                $disabledItem('Datos de empresa', 'bi-building'),
-                $disabledItem('Configuración comercial', 'bi-sliders'),
-                $disabledItem('Seguridad', 'bi-shield-check'),
-                $enabledItem('management.account', 'Configuración general', 'bi-gear'),
+                $enabledItem('management.company_settings', 'Datos de empresa', 'bi-building'),
+                $enabledItem('management.commercial_settings', 'Configuración comercial', 'bi-sliders'),
+                $enabledItem('management.security_settings', 'Seguridad', 'bi-shield-check'),
+                $enabledItem('management.general_settings', 'Configuración general', 'bi-gear'),
             ],
         ],
     ];

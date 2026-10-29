@@ -1,0 +1,66 @@
+<?php
+
+return [
+    'key' => 'devoluciones-garantias',
+    'area' => 'Operaciones comerciales',
+    'title' => 'Devoluciones y garantías',
+    'description' => 'Centraliza las solicitudes de devolución, cambios, garantías y su resolución.',
+    'icon' => 'bi-arrow-counterclockwise',
+    'record_singular' => 'solicitud',
+    'record_plural' => 'solicitudes',
+    'mode' => 'crud',
+    'kpis' => [
+        ['label' => 'Solicitudes abiertas', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-inbox', 'tone' => 'blue'],
+        ['label' => 'En revisión', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-search', 'tone' => 'purple'],
+        ['label' => 'Aprobadas', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-check-circle', 'tone' => 'green'],
+        ['label' => 'Resueltas', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-archive', 'tone' => 'orange'],
+    ],
+    'analytics' => [
+        ['title' => 'Flujo de solicitudes', 'icon' => 'bi-arrow-repeat', 'description' => 'Solicitudes recibidas y resueltas.', 'type' => 'line', 'labels' => ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4', 'Semana 5']],
+        ['title' => 'Solicitudes por estado', 'icon' => 'bi-pie-chart', 'description' => 'Distribución del proceso de atención.', 'type' => 'donut', 'legend' => ['Abiertas', 'En revisión', 'Aprobadas', 'Resueltas']],
+    ],
+    'columns' => ['Código', 'Pedido', 'Cliente', 'Motivo', 'Estado', 'Fecha'],
+    'fields' => [
+        ['label' => 'Código de solicitud', 'type' => 'text', 'placeholder' => 'Ej. DEV-0001', 'required' => true, 'wide' => false],
+        ['label' => 'Pedido relacionado', 'type' => 'text', 'placeholder' => 'Número de pedido', 'required' => true, 'wide' => false],
+        ['label' => 'Cliente', 'type' => 'text', 'placeholder' => 'Nombre del cliente', 'required' => true, 'wide' => false],
+        ['label' => 'Tipo', 'type' => 'select', 'placeholder' => 'Seleccionar tipo', 'required' => true, 'wide' => false, 'options' => ['Devolución', 'Garantía', 'Cambio']],
+        ['label' => 'Estado', 'type' => 'select', 'placeholder' => 'Seleccionar estado', 'required' => true, 'wide' => false, 'options' => ['Abierta', 'En revisión', 'Aprobada', 'Resuelta', 'Rechazada']],
+        ['label' => 'Motivo', 'type' => 'textarea', 'placeholder' => 'Describe el motivo de la solicitud', 'required' => false, 'wide' => true],
+    ],
+    'operacion_ui' => [
+        'breadcrumb' => ['Administración', 'Operaciones comerciales', 'Devoluciones y garantías'],
+        'title' => 'Gestión de devoluciones y garantías',
+        'description' => 'Controla solicitudes, evaluaciones técnicas, cobertura y resolución de casos.',
+        'search_label' => 'Buscar solicitudes',
+        'search_placeholder' => 'Buscar caso, pedido, cliente o producto...',
+        'actions' => [
+            ['label' => 'Exportar', 'icon' => 'bi-download', 'route' => 'management.returns.export'],
+            ['label' => 'Ver políticas', 'icon' => 'bi-file-earmark-text', 'notice' => 'Las políticas se mostrarán cuando exista una configuración comercial integrada.'],
+            ['label' => 'Nueva solicitud', 'icon' => 'bi-plus-lg', 'modal' => 'crear'],
+        ],
+        'kpis' => [
+            ['label' => 'Solicitudes del mes', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-file-earmark-text', 'tone' => 'blue'],
+            ['label' => 'En evaluación', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-clock', 'tone' => 'orange'],
+            ['label' => 'Casos resueltos', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-check-circle', 'tone' => 'green'],
+            ['label' => 'Fuera de plazo', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-exclamation-triangle', 'tone' => 'red'],
+        ],
+        'filters' => [
+            ['name' => 'periodo', 'label' => 'Fecha', 'placeholder' => 'Fecha: Este mes', 'options' => ['Esta semana', 'Este mes', 'Últimos 90 días']],
+            ['name' => 'tipo', 'label' => 'Tipo', 'placeholder' => 'Tipo: Todos', 'options' => ['Devolución', 'Garantía', 'Cambio']],
+            ['name' => 'estado', 'label' => 'Estado', 'placeholder' => 'Estado: Todos', 'options' => ['Recibida', 'En evaluación', 'Aprobada', 'Rechazada', 'Resuelta']],
+        ],
+        'table_icon' => 'bi-arrow-counterclockwise',
+        'table_title' => 'Solicitudes de devolución y garantía',
+        'table_count' => 'Sin registros',
+        'table_columns' => ['Caso', 'Cliente', 'Producto', 'Tipo', 'Motivo', 'Fecha', 'Estado', 'Acciones'],
+        'empty_title' => 'No hay solicitudes para mostrar',
+        'empty_description' => 'Las solicitudes aparecerán cuando el módulo esté conectado con ventas y pedidos.',
+        'table_footer' => 'Sin registros disponibles',
+        'panels' => [
+            ['title' => 'Casos prioritarios', 'subtitle' => 'Solicitudes que requieren atención.', 'link' => 'Ver casos', 'icon' => 'bi-exclamation-octagon', 'tone' => 'danger', 'empty_icon' => 'bi-check-circle', 'empty_title' => 'Sin casos prioritarios', 'empty' => 'No hay solicitudes fuera de plazo.', 'notice' => 'Los casos prioritarios se mostrarán con datos reales.'],
+            ['title' => 'Próximos vencimientos', 'subtitle' => 'Control de plazos de respuesta.', 'link' => 'Ver calendario', 'icon' => 'bi-clock', 'tone' => 'orange', 'empty_icon' => 'bi-calendar-check', 'empty_title' => 'Sin vencimientos próximos', 'empty' => 'Los vencimientos aparecerán aquí.', 'notice' => 'El calendario se habilitará con los registros reales.'],
+            ['title' => 'Resolución de casos', 'subtitle' => 'Seguimiento del cumplimiento.', 'link' => 'Ver reporte', 'icon' => 'bi-graph-up', 'tone' => 'green', 'type' => 'performance', 'metric' => 'Casos resueltos', 'empty' => 'Métrica pendiente de integración.', 'notice' => 'El reporte estará disponible cuando se integren los casos.'],
+        ],
+    ],
+];
