@@ -1,2 +1,33 @@
 /* CELL SAC | ADMINISTRADOR | RESPONSABLE: INTEGRANTE 1 */
 /* Importar aquí CSS de nuevas secciones y módulos del panel; no duplicar dashboard.css ni modificar estilos compartidos. */
+@import './componentes/menu-lateral-desplegable.css';
+@import '../../gestion/ventas/ventas.css';
+@import '../../gestion/modulos-pendientes.css';
+@import '../../gestion/soporte-reclamos/soporte-reclamos.css';
+@import './componentes/marketing-modulos.css';
+@import './componentes/finanzas-modulos.css';
+@import './finanzas/pagos/pagos.css';
+@import './finanzas/facturacion/facturacion.css';
+@import './finanzas/reembolsos/reembolsos.css';
+@import './componentes/administracion-modulos.css';
+@import './administracion/roles-permisos/roles-permisos.css';
+@import './administracion/notificaciones/notificaciones.css';
+@import './administracion/integraciones/integraciones.css';
+@import './administracion/respaldos-mantenimiento/respaldos-mantenimiento.css';
+@import './componentes/configuracion-modulos.css';
+@import './componentes/analisis-modulos.css';
+@import './analisis/reportes/reportes.css';
+@import './analisis/reportes-financieros/reportes-financieros.css';
+@import './analisis/analitica-clientes/analitica-clientes.css';
+@import './analisis/metricas-marketing/metricas-marketing.css';
+@import './configuracion/configuracion-empresa/configuracion-empresa.css';
+@import './configuracion/configuracion-comercial/configuracion-comercial.css';
+@import './configuracion/configuracion-seguridad/configuracion-seguridad.css';
+@import './configuracion/configuracion-general/configuracion-general.css';
+
+@media (min-width: 1000px) {
+    .admin-theme.modulo-clientes .clientes-kpi-grid,
+    .admin-theme.modulo-proveedores .proveedores-kpi-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}

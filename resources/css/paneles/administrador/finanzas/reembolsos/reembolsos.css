@@ -1,0 +1,4 @@
+.admin-finance-module--reembolsos .admin-finance-card-icon { background: #f0e7ff; color: #7041df; }
+.admin-finance-module--reembolsos .admin-finance-summary-card:first-child { background: linear-gradient(145deg, #fff, #fffaf0); }
+.admin-finance-module--reembolsos .admin-finance-summary-card:nth-child(2) { background: linear-gradient(145deg, #fff, #f7fbff); }
+.admin-finance-module--reembolsos .admin-finance-summary-card:nth-child(3) { background: linear-gradient(145deg, #fff, #f4fff9); }
