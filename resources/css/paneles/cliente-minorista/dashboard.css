@@ -1,0 +1,12 @@
+/* ROL: Cliente minorista.
+   Usa los colores azules de la marca (definidos en cuenta.css).
+   Aquí solo se agregan pequeños detalles propios del minorista. */
+
+.rol-cliente-minorista .cuenta-banner-etiqueta {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.rol-cliente-minorista .cuenta-fondo {
+  background: #f4f8fd;
+}
+

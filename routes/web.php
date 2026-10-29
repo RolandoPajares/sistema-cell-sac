@@ -1,140 +1,178 @@
 <?php
 
-use App\Http\Controllers\AccountController;
-use App\Http\Controllers\AssistantController;
-use App\Http\Controllers\AuditController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CampaignController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\CatalogController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\ComparisonController;
-use App\Http\Controllers\CommerceIntelligenceController;
-use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\CouponController;
-use App\Http\Controllers\CustomerSegmentController;
-use App\Http\Controllers\InventoryController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ManagementDashboardController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\PageController;
-use App\Http\Controllers\ProductManagementController;
-use App\Http\Controllers\PublicCampaignController;
-use App\Http\Controllers\PurchaseController;
-use App\Http\Controllers\QuotationController;
-use App\Http\Controllers\RecommendationController;
-use App\Http\Controllers\ReportController;
-use App\Http\Controllers\SupplierController;
-use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\Auth\AutenticacionController;
+use App\Http\Controllers\Cuenta\CuentaAdministracionController;
+use App\Http\Controllers\Cuenta\CuentaController;
+use App\Http\Controllers\Gestion\Auditoria\AuditoriaController;
+use App\Http\Controllers\Gestion\Campanias\CampaniaController;
+use App\Http\Controllers\Gestion\Campanias\PublicidadInteligenteController;
+use App\Http\Controllers\Gestion\Categorias\CategoriaController;
+use App\Http\Controllers\Gestion\Clientes\ClienteController;
+use App\Http\Controllers\Gestion\Compras\CompraController;
+use App\Http\Controllers\Gestion\Cotizaciones\CotizacionController;
+use App\Http\Controllers\Gestion\Cupones\CuponController;
+use App\Http\Controllers\Gestion\DevolucionesGarantias\DevolucionGarantiaController;
+use App\Http\Controllers\Gestion\Inventario\InventarioController;
+use App\Http\Controllers\Gestion\Productos\GestionProductosController;
+use App\Http\Controllers\Gestion\Proveedores\ProveedorController;
+use App\Http\Controllers\Gestion\Reportes\ReporteController;
+use App\Http\Controllers\Gestion\SoporteReclamos\SoporteReclamoController;
+use App\Http\Controllers\Gestion\Segmentos\SegmentoClienteController;
+use App\Http\Controllers\Gestion\Usuarios\GestionUsuariosController;
+use App\Http\Controllers\Gestion\Ventas\VentaController;
+use App\Http\Controllers\Paneles\Administrador\DashboardController as AdministradorDashboardController;
+use App\Http\Controllers\Publico\Asistente\AsistenteController;
+use App\Http\Controllers\Publico\Catalogo\CatalogoController;
+use App\Http\Controllers\Publico\Catalogo\ComparadorController;
+use App\Http\Controllers\Publico\Catalogo\RecomendacionController;
+use App\Http\Controllers\Publico\Comercio\CampaniaPublicaController;
+use App\Http\Controllers\Publico\Comercio\CarritoController;
+use App\Http\Controllers\Publico\Comercio\FinalizarCompraController;
+use App\Http\Controllers\Publico\Comercio\PedidoController;
+use App\Http\Controllers\Publico\Inicio\InicioController;
+use App\Http\Controllers\Publico\Inteligente\InteligenciaComercialController;
+use App\Http\Controllers\Publico\Paginas\PaginaController;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', HomeController::class)->name('home');
-Route::get('/catalogo', [CatalogController::class, 'index'])->name('catalog.index');
-Route::get('/catalogo/{product}', [CatalogController::class, 'show'])->whereNumber('product')->name('catalog.show');
-Route::post('/campanas/{campaign}/evento', [PublicCampaignController::class, 'track'])
+Route::get('/', InicioController::class)->name('home');
+Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalog.index');
+Route::get('/catalogo/{product}', [CatalogoController::class, 'show'])->whereNumber('product')->name('catalog.show');
+Route::post('/campanas/{campaign}/evento', [CampaniaPublicaController::class, 'track'])
     ->whereNumber('campaign')->middleware('throttle:60,1')->name('campaigns.track');
-Route::get('/nosotros', [PageController::class, 'about'])->name('pages.about');
-Route::get('/contacto', [PageController::class, 'contact'])->name('pages.contact');
-Route::post('/contacto', [PageController::class, 'sendContact'])->middleware('throttle:contact')->name('pages.contact.store');
+Route::get('/nosotros', [PaginaController::class, 'about'])->name('pages.about');
+Route::get('/contacto', [PaginaController::class, 'contact'])->name('pages.contact');
+Route::post('/contacto', [PaginaController::class, 'sendContact'])->middleware('throttle:contact')->name('pages.contact.store');
 
-Route::get('/recomendador', [RecommendationController::class, 'index'])->name('recommendations');
-Route::get('/comparador', [ComparisonController::class, 'index'])->name('comparison');
-Route::get('/optimizador', [CommerceIntelligenceController::class, 'optimizer'])->name('smart.optimizer');
-Route::get('/asistente', [AssistantController::class, 'index'])->name('assistant');
-Route::post('/asistente', [AssistantController::class, 'ask'])->middleware('throttle:10,1')->name('assistant.ask');
+Route::get('/recomendador', [RecomendacionController::class, 'index'])->name('recommendations');
+Route::get('/comparador', [ComparadorController::class, 'index'])->name('comparison');
+Route::get('/optimizador', [InteligenciaComercialController::class, 'optimizer'])->name('smart.optimizer');
+Route::get('/asistente', [AsistenteController::class, 'index'])->name('assistant');
+Route::post('/asistente', [AsistenteController::class, 'ask'])->middleware('throttle:10,1')->name('assistant.ask');
 
 Route::middleware('guest')->group(function (): void {
-    Route::get('/iniciar-sesion', [AuthController::class, 'loginForm'])->name('login');
-    Route::post('/iniciar-sesion', [AuthController::class, 'login'])->middleware('throttle:login')->name('login.store');
-    Route::get('/registrarse', [AuthController::class, 'registerForm'])->name('register');
-    Route::post('/registrarse', [AuthController::class, 'register'])->middleware('throttle:register')->name('register.store');
+    Route::get('/iniciar-sesion', [AutenticacionController::class, 'loginForm'])->name('login');
+    Route::post('/iniciar-sesion', [AutenticacionController::class, 'login'])->middleware('throttle:login')->name('login.store');
+    Route::get('/registrarse', [AutenticacionController::class, 'registerForm'])->name('register');
+    Route::post('/registrarse', [AutenticacionController::class, 'register'])->middleware('throttle:register')->name('register.store');
 });
 
-Route::post('/cerrar-sesion', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
+Route::post('/cerrar-sesion', [AutenticacionController::class, 'logout'])->middleware('auth')->name('logout');
 
 Route::middleware('auth')->group(function (): void {
-    Route::get('/mi-cuenta', [AccountController::class, 'dashboard'])->name('dashboard');
-    Route::put('/mi-cuenta/perfil', [\App\Http\Controllers\AdminAccountController::class, 'updateProfile'])->name('account.profile');
-    Route::put('/mi-cuenta/password', [\App\Http\Controllers\AdminAccountController::class, 'updatePassword'])->name('account.password');
+    Route::get('/mi-cuenta', [CuentaController::class, 'dashboard'])->name('dashboard');
+    Route::put('/mi-cuenta/perfil', [CuentaAdministracionController::class, 'updateProfile'])->name('account.profile');
+    Route::put('/mi-cuenta/password', [CuentaAdministracionController::class, 'updatePassword'])->name('account.password');
 
-    Route::get('/carrito', [CartController::class, 'index'])->name('cart.index');
-    Route::post('/carrito/{product}/agregar', [CartController::class, 'add'])->whereNumber('product')->name('cart.add');
-    Route::patch('/carrito/{product}', [CartController::class, 'update'])->whereNumber('product')->name('cart.update');
-    Route::post('/carrito/{product}/quitar', [CartController::class, 'remove'])->whereNumber('product')->name('cart.remove');
-    Route::post('/carrito/vaciar', [CartController::class, 'clear'])->name('cart.clear');
-    Route::post('/carrito/cupon', [CartController::class, 'applyCoupon'])->name('cart.coupon');
-    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.form');
-    Route::post('/checkout', [CheckoutController::class, 'store'])->middleware('throttle:checkout')->name('checkout');
+    Route::get('/carrito', [CarritoController::class, 'index'])->name('cart.index');
+    Route::post('/carrito/{product}/agregar', [CarritoController::class, 'add'])->whereNumber('product')->name('cart.add');
+    Route::patch('/carrito/{product}', [CarritoController::class, 'update'])->whereNumber('product')->name('cart.update');
+    Route::post('/carrito/{product}/quitar', [CarritoController::class, 'remove'])->whereNumber('product')->name('cart.remove');
+    Route::post('/carrito/vaciar', [CarritoController::class, 'clear'])->name('cart.clear');
+    Route::post('/carrito/cupon', [CarritoController::class, 'applyCoupon'])->name('cart.coupon');
+    Route::get('/checkout', [FinalizarCompraController::class, 'index'])->name('checkout.form');
+    Route::post('/checkout', [FinalizarCompraController::class, 'store'])->middleware('throttle:checkout')->name('checkout');
 
-    Route::get('/mis-pedidos', [OrderController::class, 'index'])->name('orders.index');
-    Route::get('/mis-pedidos/{order}', [OrderController::class, 'show'])->whereNumber('order')->name('orders.show');
-    Route::patch('/mis-pedidos/{order}/estado', [OrderController::class, 'updateStatus'])->whereNumber('order')->name('orders.status');
+    Route::get('/mis-pedidos', [PedidoController::class, 'index'])->name('orders.index');
+    Route::get('/mis-pedidos/{order}', [PedidoController::class, 'show'])->whereNumber('order')->name('orders.show');
+    Route::patch('/mis-pedidos/{order}/estado', [PedidoController::class, 'updateStatus'])->whereNumber('order')->name('orders.status');
 
-    Route::get('/portal-mayorista', [CommerceIntelligenceController::class, 'wholesale'])
+    Route::get('/portal-mayorista', [InteligenciaComercialController::class, 'wholesale'])
         ->middleware('role:administrador,ventas_mayoristas,cliente_mayorista')->name('smart.wholesale');
 
-    Route::get('/cotizaciones', [QuotationController::class, 'index'])
+    Route::get('/cotizaciones', [CotizacionController::class, 'index'])
         ->middleware('role:administrador,ventas_mayoristas,cliente_mayorista')->name('quotations.index');
-    Route::post('/cotizaciones', [QuotationController::class, 'store'])
+    Route::post('/cotizaciones', [CotizacionController::class, 'store'])
         ->middleware('role:administrador,ventas_mayoristas,cliente_mayorista')->name('quotations.store');
 });
 
 Route::prefix('gestion')->middleware(['auth', 'role:administrador'])->name('management.')->group(function (): void {
-    Route::get('/', ManagementDashboardController::class)->name('dashboard');
+    Route::get('/', AdministradorDashboardController::class)->name('dashboard');
+    Route::get('/cotizaciones', [CotizacionController::class, 'index'])->name('quotations');
 
-    Route::get('/productos', [ProductManagementController::class, 'index'])->name('products');
-    Route::post('/productos', [ProductManagementController::class, 'store'])->name('products.store');
-    Route::put('/productos/{product}', [ProductManagementController::class, 'update'])->whereNumber('product')->name('products.update');
-    Route::delete('/productos/{product}', [ProductManagementController::class, 'deactivate'])->whereNumber('product')->name('products.deactivate');
+    Route::get('/productos', [GestionProductosController::class, 'index'])->name('products');
+    Route::get('/productos/exportar/{format}', [GestionProductosController::class, 'export'])
+        ->whereIn('format', ['pdf', 'excel', 'csv'])->name('products.export');
+    Route::post('/productos', [GestionProductosController::class, 'store'])->name('products.store');
+    Route::put('/productos/{product}', [GestionProductosController::class, 'update'])->whereNumber('product')->name('products.update');
+    Route::delete('/productos/{product}', [GestionProductosController::class, 'deactivate'])->whereNumber('product')->name('products.deactivate');
 
-    Route::get('/usuarios', [UserManagementController::class, 'index'])->name('users');
-    Route::post('/usuarios', [UserManagementController::class, 'store'])->name('users.store');
-    Route::get('/auditoria', [AuditController::class, 'index'])->name('audit');
+    Route::get('/usuarios', [GestionUsuariosController::class, 'index'])->name('users');
+    Route::post('/usuarios', [GestionUsuariosController::class, 'store'])->name('users.store');
+    Route::get('/auditoria', [AuditoriaController::class, 'index'])->name('audit');
 
-    Route::get('/categorias', [CategoryController::class, 'index'])->name('categories');
-    Route::post('/categorias', [CategoryController::class, 'store'])->name('categories.store');
-    Route::put('/categorias/{category}', [CategoryController::class, 'update'])->name('categories.update');
-    Route::delete('/categorias/{category}', [CategoryController::class, 'deactivate'])->name('categories.deactivate');
+    Route::get('/categorias', [CategoriaController::class, 'index'])->name('categories');
+    Route::get('/categorias/exportar', [CategoriaController::class, 'export'])->name('categories.export');
+    Route::post('/categorias', [CategoriaController::class, 'store'])->name('categories.store');
+    Route::put('/categorias/{category}', [CategoriaController::class, 'update'])->name('categories.update');
+    Route::delete('/categorias/{category}', [CategoriaController::class, 'deactivate'])->name('categories.deactivate');
 
-    Route::get('/clientes', [CustomerController::class, 'index'])->name('customers');
-    Route::post('/clientes', [CustomerController::class, 'store'])->name('customers.store');
-    Route::put('/clientes/{customer}', [CustomerController::class, 'update'])->name('customers.update');
-    Route::delete('/clientes/{customer}', [CustomerController::class, 'deactivate'])->name('customers.deactivate');
+    Route::get('/clientes', [ClienteController::class, 'index'])->name('customers');
+    Route::post('/clientes', [ClienteController::class, 'store'])->name('customers.store');
+    Route::put('/clientes/{customer}', [ClienteController::class, 'update'])->name('customers.update');
+    Route::delete('/clientes/{customer}', [ClienteController::class, 'deactivate'])->name('customers.deactivate');
 
-    Route::get('/pedidos', [OrderController::class, 'index'])->name('orders');
-    Route::get('/cuenta', [AccountController::class, 'dashboard'])->name('account');
-    Route::put('/cuenta/perfil', [\App\Http\Controllers\AdminAccountController::class, 'updateProfile'])->name('account.profile');
-    Route::put('/cuenta/password', [\App\Http\Controllers\AdminAccountController::class, 'updatePassword'])->name('account.password');
+    Route::get('/pedidos', [PedidoController::class, 'index'])->name('orders');
+    Route::get('/ventas', [VentaController::class, 'index'])->name('sales');
+    Route::get('/ventas/exportar', [VentaController::class, 'export'])->name('sales.export');
+    Route::post('/ventas', [VentaController::class, 'store'])->name('sales.store');
+    Route::put('/ventas/{order}', [VentaController::class, 'update'])->whereNumber('order')->name('sales.update');
+    Route::get('/devoluciones-garantias', [DevolucionGarantiaController::class, 'index'])->name('returns');
+    Route::get('/devoluciones-garantias/exportar', [DevolucionGarantiaController::class, 'export'])->name('returns.export');
+    Route::post('/devoluciones-garantias', [DevolucionGarantiaController::class, 'store'])->name('returns.store');
+    Route::put('/devoluciones-garantias/{devolucionGarantia}', [DevolucionGarantiaController::class, 'update'])->whereNumber('devolucionGarantia')->name('returns.update');
+    Route::delete('/devoluciones-garantias/{devolucionGarantia}', [DevolucionGarantiaController::class, 'destroy'])->whereNumber('devolucionGarantia')->name('returns.destroy');
+    Route::get('/soporte-reclamos', [SoporteReclamoController::class, 'index'])->name('support');
+    Route::get('/cuenta', [CuentaController::class, 'dashboard'])->name('account');
+    Route::put('/cuenta/perfil', [CuentaAdministracionController::class, 'updateProfile'])->name('account.profile');
+    Route::put('/cuenta/password', [CuentaAdministracionController::class, 'updatePassword'])->name('account.password');
 });
 
-Route::get('/gestion/publicidad-inteligente', [CommerceIntelligenceController::class, 'ads'])
+Route::get('/gestion/publicidad-inteligente', [PublicidadInteligenteController::class, 'ads'])
     ->middleware(['auth', 'role:administrador,marketing'])->name('smart.ads');
 
 Route::prefix('gestion')->middleware(['auth', 'role:administrador,compras_logistica,ventas_minoristas'])->name('management.')->group(function (): void {
-    Route::get('/inventario', [InventoryController::class, 'index'])->name('inventory');
-    Route::post('/inventario/{product}', [InventoryController::class, 'adjust'])->whereNumber('product')->name('inventory.adjust');
+    Route::get('/inventario', [InventarioController::class, 'index'])->name('inventory');
+    Route::post('/inventario/{product}', [InventarioController::class, 'adjust'])->whereNumber('product')->name('inventory.adjust');
 });
 
 Route::prefix('gestion')->middleware(['auth', 'role:administrador,compras_logistica'])->name('management.')->group(function (): void {
-    Route::get('/proveedores', [SupplierController::class, 'index'])->name('suppliers');
-    Route::post('/proveedores', [SupplierController::class, 'store'])->name('suppliers.store');
-    Route::put('/proveedores/{supplier}', [SupplierController::class, 'update'])->name('suppliers.update');
-    Route::delete('/proveedores/{supplier}', [SupplierController::class, 'deactivate'])->name('suppliers.deactivate');
-    Route::get('/compras', [PurchaseController::class, 'index'])->name('purchases');
-    Route::post('/compras', [PurchaseController::class, 'store'])->name('purchases.store');
+    Route::get('/proveedores', [ProveedorController::class, 'index'])->name('suppliers');
+    Route::post('/proveedores', [ProveedorController::class, 'store'])->name('suppliers.store');
+    Route::put('/proveedores/{supplier}', [ProveedorController::class, 'update'])->name('suppliers.update');
+    Route::delete('/proveedores/{supplier}', [ProveedorController::class, 'deactivate'])->name('suppliers.deactivate');
+    Route::get('/compras', [CompraController::class, 'index'])->name('purchases');
+    Route::post('/compras', [CompraController::class, 'store'])->name('purchases.store');
 });
 
 Route::prefix('gestion')->middleware(['auth', 'role:administrador,marketing'])->name('management.')->group(function (): void {
-    Route::get('/campanas', [CampaignController::class, 'index'])->name('campaigns');
-    Route::post('/campanas', [CampaignController::class, 'store'])->name('campaigns.store');
-    Route::put('/campanas/{campaign}', [CampaignController::class, 'update'])->name('campaigns.update');
-    Route::delete('/campanas/{campaign}', [CampaignController::class, 'deactivate'])->name('campaigns.deactivate');
-    Route::get('/cupones', [CouponController::class, 'index'])->name('coupons');
-    Route::post('/cupones', [CouponController::class, 'store'])->name('coupons.store');
-    Route::get('/segmentos', [CustomerSegmentController::class, 'index'])->name('segments');
-    Route::post('/segmentos', [CustomerSegmentController::class, 'store'])->name('segments.store');
-    Route::get('/reportes', [ReportController::class, 'index'])->name('reports');
+    Route::get('/campanas', [CampaniaController::class, 'index'])->name('campaigns');
+    Route::post('/campanas', [CampaniaController::class, 'store'])->name('campaigns.store');
+    Route::put('/campanas/{campaign}', [CampaniaController::class, 'update'])->name('campaigns.update');
+    Route::delete('/campanas/{campaign}', [CampaniaController::class, 'deactivate'])->name('campaigns.deactivate');
+    Route::get('/cupones', [CuponController::class, 'index'])->name('coupons');
+    Route::post('/cupones', [CuponController::class, 'store'])->name('coupons.store');
+    Route::get('/segmentos', [SegmentoClienteController::class, 'index'])->name('segments');
+    Route::post('/segmentos', [SegmentoClienteController::class, 'store'])->name('segments.store');
+    Route::get('/reportes', [ReporteController::class, 'index'])->name('reports');
+    Route::get('/reportes/exportar', [ReporteController::class, 'export'])->name('reports.export');
+});
+
+Route::prefix('gestion')->middleware(['auth', 'role:administrador'])->name('management.')->group(function (): void {
+    Route::view('/pagos', 'gestion.pagos.listar')->name('payments');
+    Route::view('/facturacion', 'gestion.facturacion.listar')->name('billing');
+    Route::view('/reembolsos', 'gestion.reembolsos.listar')->name('refunds');
+    Route::view('/roles-permisos', 'gestion.roles-permisos.listar')->name('roles_permissions');
+    Route::view('/notificaciones', 'gestion.notificaciones.listar')->name('notifications');
+    Route::view('/integraciones', 'gestion.integraciones.listar')->name('integrations');
+    Route::view('/respaldos-mantenimiento', 'gestion.respaldos-mantenimiento.listar')->name('backups');
+    Route::view('/configuracion-empresa', 'gestion.configuracion-empresa.listar')->name('company_settings');
+    Route::view('/configuracion-comercial', 'gestion.configuracion-comercial.listar')->name('commercial_settings');
+    Route::view('/configuracion-seguridad', 'gestion.configuracion-seguridad.listar')->name('security_settings');
+    Route::view('/configuracion-general', 'gestion.configuracion-general.listar')->name('general_settings');
+    Route::view('/reportes-financieros', 'gestion.reportes-financieros.listar')->name('financial_reports');
+    Route::view('/analitica-clientes', 'gestion.analitica-clientes.listar')->name('customer_analytics');
+    Route::view('/metricas-marketing', 'gestion.metricas-marketing.listar')->name('marketing_metrics');
 });
 
 /*
@@ -144,69 +182,69 @@ Route::prefix('gestion')->middleware(['auth', 'role:administrador,marketing'])->
 | These aliases keep bookmarks and integrations from the previous application
 | working while the canonical implementation remains in the routes above.
 */
-Route::get('/catalog', [CatalogController::class, 'index'])->name('legacy.catalog');
-Route::get('/products/{product}', [CatalogController::class, 'show'])->whereNumber('product')->name('legacy.product');
-Route::get('/smart/recommend', [RecommendationController::class, 'index'])->name('legacy.recommendations');
-Route::get('/smart/compare', [ComparisonController::class, 'index'])->name('legacy.comparison');
-Route::get('/smart/optimizer', [CommerceIntelligenceController::class, 'optimizer'])->name('legacy.optimizer');
-Route::get('/smart/ads', [CommerceIntelligenceController::class, 'ads'])
+Route::get('/catalog', [CatalogoController::class, 'index'])->name('legacy.catalog');
+Route::get('/products/{product}', [CatalogoController::class, 'show'])->whereNumber('product')->name('legacy.product');
+Route::get('/smart/recommend', [RecomendacionController::class, 'index'])->name('legacy.recommendations');
+Route::get('/smart/compare', [ComparadorController::class, 'index'])->name('legacy.comparison');
+Route::get('/smart/optimizer', [InteligenciaComercialController::class, 'optimizer'])->name('legacy.optimizer');
+Route::get('/smart/ads', [PublicidadInteligenteController::class, 'ads'])
     ->middleware(['auth', 'role:administrador,marketing'])->name('legacy.ads');
-Route::get('/about', [PageController::class, 'about'])->name('legacy.about');
-Route::get('/contact', [PageController::class, 'contact'])->name('legacy.contact');
-Route::post('/contact', [PageController::class, 'sendContact'])->middleware('throttle:contact')->name('legacy.contact.store');
-Route::get('/login', [AuthController::class, 'loginForm'])->middleware('guest')->name('legacy.login');
-Route::post('/login', [AuthController::class, 'login'])->middleware(['guest', 'throttle:login'])->name('legacy.login.store');
-Route::get('/register', [AuthController::class, 'registerForm'])->middleware('guest')->name('legacy.register');
-Route::post('/register', [AuthController::class, 'register'])->middleware(['guest', 'throttle:register'])->name('legacy.register.store');
-Route::get('/logout', fn (): \Illuminate\Http\RedirectResponse => redirect()->route('login'))->name('legacy.logout.form');
-Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('legacy.logout');
+Route::get('/about', [PaginaController::class, 'about'])->name('legacy.about');
+Route::get('/contact', [PaginaController::class, 'contact'])->name('legacy.contact');
+Route::post('/contact', [PaginaController::class, 'sendContact'])->middleware('throttle:contact')->name('legacy.contact.store');
+Route::get('/login', [AutenticacionController::class, 'loginForm'])->middleware('guest')->name('legacy.login');
+Route::post('/login', [AutenticacionController::class, 'login'])->middleware(['guest', 'throttle:login'])->name('legacy.login.store');
+Route::get('/register', [AutenticacionController::class, 'registerForm'])->middleware('guest')->name('legacy.register');
+Route::post('/register', [AutenticacionController::class, 'register'])->middleware(['guest', 'throttle:register'])->name('legacy.register.store');
+Route::get('/logout', fn (): RedirectResponse => redirect()->route('login'))->name('legacy.logout.form');
+Route::post('/logout', [AutenticacionController::class, 'logout'])->middleware('auth')->name('legacy.logout');
 
 Route::middleware('auth')->group(function (): void {
-    Route::get('/account', [AccountController::class, 'dashboard'])->name('legacy.account');
-    Route::get('/cart', [CartController::class, 'index'])->name('legacy.cart');
-    Route::post('/cart', [CartController::class, 'updateLegacy'])->name('legacy.cart.update');
-    Route::get('/mayorista', [CommerceIntelligenceController::class, 'wholesale'])
+    Route::get('/account', [CuentaController::class, 'dashboard'])->name('legacy.account');
+    Route::get('/cart', [CarritoController::class, 'index'])->name('legacy.cart');
+    Route::post('/cart', [CarritoController::class, 'updateLegacy'])->name('legacy.cart.update');
+    Route::get('/mayorista', [InteligenciaComercialController::class, 'wholesale'])
         ->middleware('role:administrador,ventas_mayoristas,cliente_mayorista')->name('legacy.wholesale');
 });
 
-Route::get('/smart/assistant', [AssistantController::class, 'index'])->name('legacy.assistant');
-Route::post('/smart/assistant/reply', [AssistantController::class, 'ask'])->middleware('throttle:10,1')->name('legacy.assistant.reply');
+Route::get('/smart/assistant', [AsistenteController::class, 'index'])->name('legacy.assistant');
+Route::post('/smart/assistant/reply', [AsistenteController::class, 'ask'])->middleware('throttle:10,1')->name('legacy.assistant.reply');
 
 Route::prefix('admin')->middleware(['auth', 'role:administrador'])->name('legacy.admin.')->group(function (): void {
-    Route::get('/', ManagementDashboardController::class)->name('dashboard');
-    Route::get('/account', [AccountController::class, 'dashboard'])->name('account');
-    Route::post('/account/profile', [\App\Http\Controllers\AdminAccountController::class, 'updateProfile'])->name('account.profile');
-    Route::post('/account/password', [\App\Http\Controllers\AdminAccountController::class, 'updatePassword'])->name('account.password');
-    Route::get('/campaigns', [CampaignController::class, 'index'])->name('campaigns');
-    Route::post('/campaigns', [CampaignController::class, 'store'])->name('campaigns.store');
-    Route::post('/campaigns/{campaign}', [CampaignController::class, 'update'])->name('campaigns.update');
-    Route::post('/campaigns/{campaign}/deactivate', [CampaignController::class, 'deactivate'])->name('campaigns.deactivate');
-    Route::get('/products', [ProductManagementController::class, 'index'])->name('products');
-    Route::post('/products', [ProductManagementController::class, 'store'])->name('products.store');
-    Route::match(['post', 'put'], '/products/{product}', [ProductManagementController::class, 'update'])->name('products.update');
-    Route::post('/products/{product}/deactivate', [ProductManagementController::class, 'deactivate'])->name('products.deactivate');
-    Route::get('/orders', [OrderController::class, 'index'])->name('orders');
-    Route::get('/orders/{order}', [OrderController::class, 'show'])->whereNumber('order')->name('orders.show');
-    Route::match(['post', 'patch'], '/orders/{order}/status', [OrderController::class, 'updateStatus'])->whereNumber('order')->name('orders.status');
-    Route::get('/users', [UserManagementController::class, 'index'])->name('users');
-    Route::post('/users', [UserManagementController::class, 'store'])->name('users.store');
-    Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
-    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
-    Route::match(['post', 'put'], '/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
-    Route::post('/categories/{category}/deactivate', [CategoryController::class, 'deactivate'])->name('categories.deactivate');
-    Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers');
-    Route::post('/suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
-    Route::post('/suppliers/{supplier}', [SupplierController::class, 'update'])->name('suppliers.update');
-    Route::post('/suppliers/{supplier}/deactivate', [SupplierController::class, 'deactivate'])->name('suppliers.deactivate');
-    Route::get('/customers', [CustomerController::class, 'index'])->name('customers');
-    Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
-    Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory');
-    Route::post('/inventory', [InventoryController::class, 'adjustLegacy'])->name('inventory.store');
-    Route::get('/reports', [ReportController::class, 'index'])->name('reports');
-    Route::get('/audit', [AuditController::class, 'index'])->name('audit');
+    Route::get('/', AdministradorDashboardController::class)->name('dashboard');
+    Route::get('/account', [CuentaController::class, 'dashboard'])->name('account');
+    Route::post('/account/profile', [CuentaAdministracionController::class, 'updateProfile'])->name('account.profile');
+    Route::post('/account/password', [CuentaAdministracionController::class, 'updatePassword'])->name('account.password');
+    Route::get('/campaigns', [CampaniaController::class, 'index'])->name('campaigns');
+    Route::post('/campaigns', [CampaniaController::class, 'store'])->name('campaigns.store');
+    Route::post('/campaigns/{campaign}', [CampaniaController::class, 'update'])->name('campaigns.update');
+    Route::post('/campaigns/{campaign}/deactivate', [CampaniaController::class, 'deactivate'])->name('campaigns.deactivate');
+    Route::get('/products', [GestionProductosController::class, 'index'])->name('products');
+    Route::post('/products', [GestionProductosController::class, 'store'])->name('products.store');
+    Route::match(['post', 'put'], '/products/{product}', [GestionProductosController::class, 'update'])->name('products.update');
+    Route::post('/products/{product}/deactivate', [GestionProductosController::class, 'deactivate'])->name('products.deactivate');
+    Route::get('/orders', [PedidoController::class, 'index'])->name('orders');
+    Route::get('/orders/{order}', [PedidoController::class, 'show'])->whereNumber('order')->name('orders.show');
+    Route::match(['post', 'patch'], '/orders/{order}/status', [PedidoController::class, 'updateStatus'])->whereNumber('order')->name('orders.status');
+    Route::get('/users', [GestionUsuariosController::class, 'index'])->name('users');
+    Route::post('/users', [GestionUsuariosController::class, 'store'])->name('users.store');
+    Route::get('/categories', [CategoriaController::class, 'index'])->name('categories');
+    Route::post('/categories', [CategoriaController::class, 'store'])->name('categories.store');
+    Route::match(['post', 'put'], '/categories/{category}', [CategoriaController::class, 'update'])->name('categories.update');
+    Route::post('/categories/{category}/deactivate', [CategoriaController::class, 'deactivate'])->name('categories.deactivate');
+    Route::get('/suppliers', [ProveedorController::class, 'index'])->name('suppliers');
+    Route::post('/suppliers', [ProveedorController::class, 'store'])->name('suppliers.store');
+    Route::post('/suppliers/{supplier}', [ProveedorController::class, 'update'])->name('suppliers.update');
+    Route::post('/suppliers/{supplier}/deactivate', [ProveedorController::class, 'deactivate'])->name('suppliers.deactivate');
+    Route::get('/customers', [ClienteController::class, 'index'])->name('customers');
+    Route::post('/customers', [ClienteController::class, 'store'])->name('customers.store');
+    Route::get('/inventory', [InventarioController::class, 'index'])->name('inventory');
+    Route::post('/inventory', [InventarioController::class, 'adjustLegacy'])->name('inventory.store');
+    Route::get('/reports', [ReporteController::class, 'index'])->name('reports');
+    Route::get('/audit', [AuditoriaController::class, 'index'])->name('audit');
 });
 
 Route::middleware('auth')->group(function (): void {
-    Route::get('/panel', [AccountController::class, 'dashboard'])->name('legacy.panel');
-    Route::get('/panel/{module}', [AccountController::class, 'dashboard'])->name('legacy.panel.module');
+    Route::get('/panel', [CuentaController::class, 'dashboard'])->name('legacy.panel');
+    Route::get('/panel/{module}', [CuentaController::class, 'dashboard'])->name('legacy.panel.module');
 });
