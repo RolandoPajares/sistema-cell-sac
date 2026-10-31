@@ -1,0 +1,66 @@
+<?php
+
+return [
+    'key' => 'envios-entregas',
+    'area' => 'Operaciones comerciales',
+    'title' => 'Envíos y entregas',
+    'description' => 'Supervisa despachos, transportistas, seguimiento y cumplimiento de entregas.',
+    'icon' => 'bi-truck',
+    'record_singular' => 'envío',
+    'record_plural' => 'envíos',
+    'mode' => 'crud',
+    'kpis' => [
+        ['label' => 'Pendientes', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-hourglass-split', 'tone' => 'blue'],
+        ['label' => 'En tránsito', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-box-seam', 'tone' => 'purple'],
+        ['label' => 'Entregados', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-check2-circle', 'tone' => 'green'],
+        ['label' => 'Incidencias', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-exclamation-triangle', 'tone' => 'orange'],
+    ],
+    'analytics' => [
+        ['title' => 'Tendencia de envíos', 'icon' => 'bi-truck', 'description' => 'Preparación y entregas por periodo.', 'type' => 'line', 'labels' => ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4', 'Semana 5']],
+        ['title' => 'Estado de entregas', 'icon' => 'bi-pie-chart', 'description' => 'Distribución por estado operativo.', 'type' => 'donut', 'legend' => ['Pendientes', 'En tránsito', 'Entregados', 'Incidencias']],
+    ],
+    'columns' => ['Código', 'Pedido', 'Destino', 'Transportista', 'Estado', 'Entrega prevista'],
+    'fields' => [
+        ['label' => 'Código de envío', 'type' => 'text', 'placeholder' => 'Ej. ENV-0001', 'required' => true, 'wide' => false],
+        ['label' => 'Pedido asociado', 'type' => 'text', 'placeholder' => 'Número de pedido', 'required' => true, 'wide' => false],
+        ['label' => 'Transportista', 'type' => 'text', 'placeholder' => 'Empresa de transporte', 'required' => false, 'wide' => false],
+        ['label' => 'Estado', 'type' => 'select', 'placeholder' => 'Seleccionar estado', 'required' => true, 'wide' => false, 'options' => ['Pendiente', 'En tránsito', 'Entregado', 'Incidencia']],
+        ['label' => 'Fecha prevista', 'type' => 'date', 'placeholder' => '', 'required' => false, 'wide' => false],
+        ['label' => 'Observaciones', 'type' => 'textarea', 'placeholder' => 'Información adicional del envío', 'required' => false, 'wide' => true],
+    ],
+    'operacion_ui' => [
+        'breadcrumb' => ['Administración', 'Operaciones comerciales', 'Envíos y entregas'],
+        'title' => 'Gestión de envíos y entregas',
+        'description' => 'Supervisa despachos, transportistas, seguimiento y cumplimiento de entregas.',
+        'search_label' => 'Buscar envíos',
+        'search_placeholder' => 'Buscar pedido, guía o cliente...',
+        'actions' => [
+            ['label' => 'Exportar', 'icon' => 'bi-download', 'notice' => 'La exportación se habilitará cuando exista una fuente de datos integrada.'],
+            ['label' => 'Generar guías', 'icon' => 'bi-file-earmark-text', 'notice' => 'La generación de guías se habilitará cuando exista una fuente de datos integrada.'],
+            ['label' => 'Nuevo envío', 'icon' => 'bi-plus-lg', 'modal' => 'crear'],
+        ],
+        'kpis' => [
+            ['label' => 'Por despachar', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-truck', 'tone' => 'blue'],
+            ['label' => 'En tránsito', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-truck', 'tone' => 'orange'],
+            ['label' => 'Entregados hoy', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-check-circle', 'tone' => 'green'],
+            ['label' => 'Con incidencias', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-exclamation-triangle', 'tone' => 'red'],
+        ],
+        'filters' => [
+            ['label' => 'Fecha', 'placeholder' => 'Fecha: Esta semana', 'options' => ['Esta semana', 'Este mes', 'Últimos 90 días']],
+            ['label' => 'Transportista', 'placeholder' => 'Transportista: Todos', 'options' => ['Olva Courier', 'Shalom', 'Urbano']],
+            ['label' => 'Estado', 'placeholder' => 'Estado: Todos', 'options' => ['Por despachar', 'En tránsito', 'Entregado', 'Con incidencia']],
+        ],
+        'table_icon' => 'bi-clipboard2-check',
+        'table_title' => 'Control de envíos',
+        'table_count' => 'Sin registros',
+        'table_columns' => ['Envío', 'Pedido', 'Destinatario', 'Transportista', 'Despacho', 'Entrega estimada', 'Estado', 'Acciones'],
+        'empty_title' => 'No hay envíos para mostrar',
+        'empty_description' => 'Los envíos aparecerán cuando el módulo esté conectado con los pedidos y la logística.',
+        'table_footer' => 'Sin registros disponibles',
+        'panels' => [
+            ['title' => 'Alertas de entrega', 'subtitle' => 'Incidencias que requieren seguimiento.', 'link' => 'Ver todas', 'icon' => 'bi-exclamation-triangle', 'tone' => 'danger', 'empty_icon' => 'bi-check-circle', 'empty_title' => 'Sin alertas de entrega', 'empty' => 'La operación logística está al día.', 'notice' => 'Las alertas se mostrarán cuando exista una fuente de datos integrada.'],
+            ['title' => 'Próximos despachos', 'subtitle' => 'Planificación de salidas.', 'link' => 'Ver todos', 'icon' => 'bi-calendar-event', 'tone' => 'blue', 'empty_icon' => 'bi-calendar-check', 'empty_title' => 'Sin despachos programados', 'empty' => 'Los próximos despachos aparecerán aquí.', 'notice' => 'El calendario se habilitará con los registros reales.'],
+            ['title' => 'Rendimiento logístico', 'subtitle' => 'Seguimiento del cumplimiento.', 'link' => 'Ver historial', 'icon' => 'bi-bar-chart-line', 'tone' => 'green', 'type' => 'performance', 'metric' => 'Entregas a tiempo', 'empty' => 'Métrica pendiente de integración.', 'notice' => 'El historial estará disponible cuando se integren los movimientos.'],
+        ],
+    ],
+];

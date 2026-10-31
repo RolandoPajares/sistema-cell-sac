@@ -1,0 +1,1324 @@
+/* Vista ejecutiva de Gestión > Pedidos. Solo se activa en el layout administrativo. */
+.modulo-pedidos .admin-main {
+  max-width: none;
+  min-height: calc(100vh - var(--reference-header-height));
+  padding: 22px 24px 42px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(145, 210, 255, 0.38), transparent 32%),
+    linear-gradient(135deg, #edf7ff 0%, #eaf5ff 54%, #f8fbff 100%);
+}
+
+.pedidos-page {
+  width: 100%;
+  margin: 0 auto;
+  color: #10234c;
+}
+
+.pedidos-hero,
+.pedidos-card-header,
+.pedidos-period-card,
+.pedidos-toolbar,
+.pedidos-kpi,
+.pedidos-customer,
+.pedidos-status,
+.pedidos-pagination,
+.pedidos-per-page,
+.pedidos-status-chart,
+.pedidos-bar-row,
+.pedidos-recent-row,
+.pedidos-activity-row,
+.pedidos-alert-row {
+  display: flex;
+  align-items: center;
+}
+
+.pedidos-hero {
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 15px;
+}
+
+.pedidos-eyebrow {
+  display: inline-flex;
+  padding: 5px 10px;
+  border-radius: 999px;
+  color: #086ce8;
+  background: #dceeff;
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+
+.pedidos-hero h1 {
+  margin: 7px 0 0;
+  color: #101c51;
+  font-size: clamp(1.8rem, 2.4vw, 2.35rem);
+  letter-spacing: -0.05em;
+}
+
+.pedidos-hero h1 i {
+  margin-left: 5px;
+  color: #0874ed;
+  font-size: 0.84em;
+}
+
+.pedidos-hero p {
+  margin: 3px 0 0;
+  color: #61769d;
+  font-size: 0.77rem;
+}
+
+.pedidos-period-card {
+  min-width: 168px;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 13px;
+  border: 1px solid #d8e6f4;
+  border-radius: 9px;
+  color: #0b6fe9;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 7px 18px rgba(32, 94, 153, 0.07);
+}
+
+.pedidos-period-card > i:first-child {
+  font-size: 1.05rem;
+}
+
+.pedidos-period-card > i:last-child {
+  color: #6983a9;
+  font-size: 0.65rem;
+}
+
+.pedidos-period-card span {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.pedidos-period-card small,
+.pedidos-period-card strong {
+  display: block;
+}
+
+.pedidos-period-card small {
+  color: #7185a8;
+  font-size: 0.57rem;
+}
+
+.pedidos-period-card strong {
+  color: #17335f;
+  font-size: 0.66rem;
+}
+
+.pedidos-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 9px;
+  margin-bottom: 13px;
+}
+
+.pedidos-kpi {
+  min-width: 0;
+  min-height: 88px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  padding: 11px 10px;
+  overflow: hidden;
+  border: 1px solid #d8e7f5;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #fff, #f5faff);
+  box-shadow: 0 8px 20px rgba(34, 100, 163, 0.07);
+}
+
+.pedidos-kpi--orange {
+  background: linear-gradient(135deg, #fff, #fffaf0);
+}
+
+.pedidos-kpi--green {
+  background: linear-gradient(135deg, #fff, #effbf6);
+}
+
+.pedidos-kpi--purple {
+  background: linear-gradient(135deg, #fff, #f7f1ff);
+}
+
+.pedidos-kpi--red {
+  background: linear-gradient(135deg, #fff, #fff2f3);
+}
+
+.pedidos-kpi-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: #0874eb;
+  background: #e1f0ff;
+  font-size: 1.05rem;
+}
+
+.pedidos-kpi--orange .pedidos-kpi-icon {
+  color: #e99b00;
+  background: #fff0d3;
+}
+
+.pedidos-kpi--green .pedidos-kpi-icon {
+  color: #08a66b;
+  background: #d9f8e9;
+}
+
+.pedidos-kpi--purple .pedidos-kpi-icon {
+  color: #7137e8;
+  background: #eee3ff;
+}
+
+.pedidos-kpi--red .pedidos-kpi-icon {
+  color: #ef334f;
+  background: #ffe1e1;
+}
+
+.pedidos-kpi > div {
+  min-width: 0;
+}
+
+.pedidos-kpi small,
+.pedidos-kpi strong,
+.pedidos-kpi > div > span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pedidos-kpi small {
+  color: #263f6e;
+  font-size: 0.61rem;
+  font-weight: 800;
+}
+
+.pedidos-kpi strong {
+  margin: 2px 0 1px;
+  color: #081441;
+  font-size: clamp(1.12rem, 1.65vw, 1.42rem);
+  letter-spacing: -0.03em;
+}
+
+.pedidos-kpi > div > span {
+  color: #7185a8;
+  font-size: 0.54rem;
+}
+
+.pedidos-kpi-trend {
+  grid-column: 2;
+  margin-top: -2px;
+  color: #7185a8;
+  font-size: 0.54rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.pedidos-kpi-trend.is-positive {
+  color: #08a66b;
+}
+
+.pedidos-kpi-trend.is-negative {
+  color: #e73542;
+}
+
+.pedidos-toolbar {
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+
+.pedidos-primary-button,
+.pedidos-toolbar-button,
+.pedidos-more-filters,
+.pedidos-clear-filters {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px 13px;
+  border-radius: 8px;
+  font-size: 0.67rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.pedidos-primary-button {
+  border: 1px solid #086de8;
+  color: #fff;
+  background: linear-gradient(100deg, #0867ef, #087ff6);
+  box-shadow: 0 7px 16px rgba(8, 109, 239, 0.16);
+  cursor: pointer;
+}
+
+.pedidos-primary-button:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+}
+
+.pedidos-toolbar-button,
+.pedidos-more-filters {
+  border: 1px solid #d5e4f3;
+  color: #086de8;
+  background: #fff;
+  cursor: pointer;
+}
+
+.pedidos-toolbar-button:disabled {
+  color: #8da0bb;
+  background: #f7faff;
+  cursor: not-allowed;
+}
+
+.pedidos-toolbar-button:hover:not(:disabled),
+.pedidos-more-filters:hover,
+.pedidos-clear-filters:hover {
+  border-color: #83b8f2;
+  background: #edf6ff;
+}
+
+.pedidos-filters {
+  display: grid;
+  grid-template-columns: minmax(240px, 1.45fr) repeat(3, minmax(145px, 0.8fr)) auto auto;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 11px;
+  padding: 9px 11px;
+  border: 1px solid #dbe8f5;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 7px 18px rgba(34, 100, 163, 0.05);
+}
+
+.pedidos-filters label,
+.pedidos-filters select,
+.pedidos-search {
+  min-width: 0;
+}
+
+.pedidos-search,
+.pedidos-filters label:not(.pedidos-search) select {
+  width: 100%;
+  height: 36px;
+  border: 1px solid #d7e5f4;
+  border-radius: 7px;
+  color: #234576;
+  background: #fff;
+  font-size: 0.66rem;
+}
+
+.pedidos-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  color: #1e6ad5;
+}
+
+.pedidos-search input {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  color: #17376b;
+  background: transparent;
+  font: inherit;
+}
+
+.pedidos-search input::placeholder {
+  color: #7288aa;
+}
+
+.pedidos-filters label:not(.pedidos-search) select {
+  padding: 0 9px;
+  outline: 0;
+}
+
+.pedidos-clear-filters {
+  color: #6c80a3;
+  text-decoration: none;
+}
+
+.pedidos-list-card,
+.pedidos-insight-card,
+.pedidos-secondary-card {
+  min-width: 0;
+  overflow: hidden;
+  padding: 13px;
+  border: 1px solid #d7e6f5;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 9px 24px rgba(32, 94, 153, 0.07);
+}
+
+.pedidos-card-header {
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  margin-bottom: 10px;
+}
+
+.pedidos-card-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  min-width: 0;
+}
+
+.pedidos-card-title > i:first-child {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: #0875ed;
+  font-size: 1.12rem;
+}
+
+.pedidos-card-title h2 {
+  margin: 0;
+  color: #0d1b48;
+  font-size: 0.92rem;
+}
+
+.pedidos-card-title p {
+  margin: 3px 0 0;
+  color: #7185a8;
+  font-size: 0.63rem;
+}
+
+.pedidos-total-badge,
+.pedidos-insight-period {
+  flex: 0 0 auto;
+  color: #7185a8;
+  font-size: 0.59rem;
+}
+
+.pedidos-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.pedidos-table {
+  width: 100%;
+  min-width: 1160px;
+  border-collapse: collapse;
+  color: #18345f;
+  font-size: 0.59rem;
+  table-layout: fixed;
+}
+
+.pedidos-table th,
+.pedidos-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pedidos-table th {
+  padding: 8px 6px;
+  color: #2b4773;
+  background: #eef5fc;
+  font-size: 0.56rem;
+  font-weight: 800;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.pedidos-table th:first-child {
+  border-radius: 7px 0 0 7px;
+}
+
+.pedidos-table th:last-child {
+  border-radius: 0 7px 7px 0;
+}
+
+.pedidos-table th:nth-child(1),
+.pedidos-table td:nth-child(1) { width: 31px; }
+.pedidos-table th:nth-child(2),
+.pedidos-table td:nth-child(2) { width: 100px; }
+.pedidos-table th:nth-child(3),
+.pedidos-table td:nth-child(3) { width: 190px; }
+.pedidos-table th:nth-child(4),
+.pedidos-table td:nth-child(4) { width: 105px; }
+.pedidos-table th:nth-child(5),
+.pedidos-table td:nth-child(5) { width: 112px; }
+.pedidos-table th:nth-child(6),
+.pedidos-table td:nth-child(6) { width: 95px; }
+.pedidos-table th:nth-child(7),
+.pedidos-table td:nth-child(7) { width: 115px; }
+.pedidos-table th:nth-child(8),
+.pedidos-table td:nth-child(8) { width: 100px; }
+.pedidos-table th:nth-child(9),
+.pedidos-table td:nth-child(9) { width: 115px; }
+.pedidos-table th:nth-child(10),
+.pedidos-table td:nth-child(10) { width: 55px; }
+
+.pedidos-table td {
+  height: 47px;
+  padding: 6px;
+  border-bottom: 1px solid #eaf0f7;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.pedidos-table tbody tr:hover td {
+  background: #f7fbff;
+}
+
+.pedidos-checkbox {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  border: 1px solid #abc2df;
+  border-radius: 4px;
+  background: #fff;
+  vertical-align: middle;
+}
+
+.pedidos-number {
+  padding: 0;
+  border: 0;
+  color: #086de8;
+  background: transparent;
+  font-size: 0.61rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.pedidos-customer {
+  gap: 7px;
+  min-width: 0;
+}
+
+.pedidos-customer > b {
+  width: 27px;
+  height: 27px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  color: #1166c7;
+  background: #d9efff;
+  font-size: 0.57rem;
+}
+
+.pedidos-customer > span {
+  min-width: 0;
+}
+
+.pedidos-customer strong,
+.pedidos-customer small,
+.pedidos-date small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pedidos-customer strong {
+  color: #17335f;
+  font-size: 0.6rem;
+}
+
+.pedidos-customer small,
+.pedidos-date small {
+  margin-top: 2px;
+  color: #7185a8;
+  font-size: 0.53rem;
+}
+
+.pedidos-date {
+  color: #39587f;
+}
+
+.pedidos-channel {
+  color: #526f99;
+  font-size: 0.57rem;
+}
+
+.pedidos-channel i {
+  margin-right: 4px;
+  color: #0874ed;
+}
+
+.pedidos-total {
+  color: #10285a;
+  font-size: 0.62rem;
+}
+
+.pedidos-status {
+  justify-content: center;
+  gap: 4px;
+  min-height: 20px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 0.53rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.pedidos-status i {
+  font-size: 0.37rem;
+}
+
+.pedidos-status--pending {
+  color: #ae6b00;
+  background: #fff0cf;
+}
+
+.pedidos-status--preparing,
+.pedidos-status--sent {
+  color: #1268d2;
+  background: #dceeff;
+}
+
+.pedidos-status--paid,
+.pedidos-status--delivered {
+  color: #078953;
+  background: #dff8ec;
+}
+
+.pedidos-status--cancelled {
+  color: #df2738;
+  background: #ffe2e2;
+}
+
+.pedidos-status--muted {
+  color: #667b9e;
+  background: #edf1f6;
+}
+
+.pedidos-action-button {
+  width: 27px;
+  height: 27px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #d8e6f4;
+  border-radius: 7px;
+  color: #52739f;
+  background: #fff;
+  cursor: pointer;
+}
+
+.pedidos-action-button:hover {
+  border-color: #83b8f2;
+  color: #086de8;
+  background: #edf6ff;
+}
+
+.pedidos-empty {
+  height: 190px;
+  color: #7890b1 !important;
+  text-align: center;
+  white-space: normal !important;
+}
+
+.pedidos-empty i,
+.pedidos-empty strong,
+.pedidos-empty span {
+  display: block;
+}
+
+.pedidos-empty i {
+  margin-bottom: 7px;
+  color: #8da8c4;
+  font-size: 1.35rem;
+}
+
+.pedidos-empty strong {
+  color: #355477;
+  font-size: 0.76rem;
+}
+
+.pedidos-empty span {
+  margin-top: 4px;
+  font-size: 0.65rem;
+}
+
+.pedidos-pagination {
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 9px;
+  min-height: 38px;
+  padding-top: 10px;
+  color: #7185a8;
+  font-size: 0.6rem;
+}
+
+.pedidos-per-page {
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.pedidos-per-page select {
+  min-width: 49px;
+  height: 28px;
+  padding: 0 6px;
+  border: 1px solid #d8e4f2;
+  border-radius: 7px;
+  color: #1458ad;
+  background: #fff;
+  font-size: 0.6rem;
+  font-weight: 800;
+}
+
+.pedidos-pagination nav {
+  min-width: 0;
+  overflow: hidden;
+  margin-left: auto;
+}
+
+.pedidos-pagination nav > div:first-child,
+.pedidos-pagination nav p,
+.pedidos-pagination nav > div:last-child > div:first-child {
+  display: none !important;
+}
+
+.pedidos-pagination nav > div:last-child,
+.pedidos-pagination nav > div:last-child > div:last-child,
+.pedidos-pagination nav > div:last-child > div:last-child > span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pedidos-pagination nav > div:last-child > div:last-child > span > a,
+.pedidos-pagination nav > div:last-child > div:last-child > span > span {
+  min-width: 28px;
+  height: 28px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 6px;
+  border: 1px solid #d8e4f2;
+  border-radius: 7px;
+  color: #1458ad;
+  background: #fff;
+  font-size: 0.6rem;
+}
+
+.pedidos-pagination nav span[aria-current] {
+  color: #fff !important;
+  border-color: #086de8 !important;
+  background: #0875ed !important;
+}
+
+.pedidos-pagination nav svg {
+  width: 15px !important;
+  height: 15px !important;
+}
+
+.pedidos-pagination nav a:hover {
+  border-color: #83b8f2;
+  background: #edf6ff;
+}
+
+.pedidos-insights-grid,
+.pedidos-bottom-grid {
+  display: grid;
+  gap: 13px;
+  margin-top: 13px;
+}
+
+.pedidos-insights-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+}
+
+.pedidos-bottom-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.88fr);
+}
+
+.pedidos-insight-card,
+.pedidos-secondary-card {
+  padding: 13px;
+}
+
+.pedidos-status-chart {
+  width: min(100%, 500px);
+  justify-content: center;
+  gap: 30px;
+  min-height: 175px;
+  margin: 0 auto;
+}
+
+.pedidos-donut {
+  width: 132px;
+  height: 132px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+}
+
+.pedidos-donut::before {
+  width: 88px;
+  height: 88px;
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.pedidos-donut {
+  position: relative;
+}
+
+.pedidos-donut > span {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 2px;
+  text-align: center;
+}
+
+.pedidos-donut strong {
+  color: #122451;
+  font-size: 1.28rem;
+}
+
+.pedidos-donut small {
+  color: #7185a8;
+  font-size: 0.55rem;
+}
+
+.pedidos-legend {
+  width: min(100%, 260px);
+  flex: 0 1 260px;
+  min-width: 155px;
+}
+
+.pedidos-legend > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 36px;
+  gap: 8px;
+  align-items: center;
+  min-height: 25px;
+  border-bottom: 1px solid #edf2f8;
+  color: #526f99;
+  font-size: 0.58rem;
+}
+
+.pedidos-legend > div:last-child {
+  border-bottom: 0;
+}
+
+.pedidos-legend > div > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pedidos-legend strong {
+  color: #17335f;
+  font-size: 0.6rem;
+}
+
+.pedidos-legend small {
+  color: #7185a8;
+  text-align: right;
+}
+
+.pedidos-legend-dot {
+  width: 9px;
+  height: 9px;
+  display: inline-block;
+  margin-right: 5px;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.pedidos-legend-dot--yellow { background: #f5a900; }
+.pedidos-legend-dot--blue { background: #2b8df3; }
+.pedidos-legend-dot--purple { background: #7137e8; }
+.pedidos-legend-dot--green { background: #08a66b; }
+.pedidos-legend-dot--red { background: #ef334f; }
+
+.pedidos-bars {
+  width: min(100%, 650px);
+  display: grid;
+  gap: 15px;
+  padding: 18px 4px 12px;
+  margin: 0 auto;
+}
+
+.pedidos-bar-row {
+  gap: 9px;
+  color: #526f99;
+  font-size: 0.61rem;
+}
+
+.pedidos-bar-row > span {
+  width: 140px;
+  flex: 0 0 auto;
+}
+
+.pedidos-bar {
+  height: 10px;
+  flex: 1 1 auto;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e7eef7;
+}
+
+.pedidos-bar-fill {
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+}
+
+.pedidos-bar-fill--blue { background: linear-gradient(90deg, #0875ed, #60b5ff); }
+.pedidos-bar-fill--green { background: linear-gradient(90deg, #08a66b, #5cd8a2); }
+
+.pedidos-bar-row > strong {
+  width: 40px;
+  color: #17335f;
+  text-align: right;
+}
+
+.pedidos-bar-row > small {
+  width: 43px;
+  color: #7185a8;
+  text-align: right;
+}
+
+.pedidos-view-all {
+  padding: 0;
+  border: 0;
+  color: #086de8;
+  background: transparent;
+  font-size: 0.62rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.pedidos-recent-list,
+.pedidos-activity-list,
+.pedidos-alert-list {
+  min-height: 150px;
+  display: grid;
+  gap: 2px;
+  align-content: center;
+}
+
+.pedidos-recent-row {
+  width: 100%;
+  gap: 8px;
+  min-width: 0;
+  padding: 5px 3px;
+  border: 0;
+  border-bottom: 1px solid #edf2f8;
+  color: #17335f;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pedidos-recent-row:last-child {
+  border-bottom: 0;
+}
+
+.pedidos-recent-row img,
+.pedidos-recent-image {
+  width: 31px;
+  height: 35px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  object-fit: contain;
+  padding: 2px;
+  border: 1px solid #e1ebf5;
+  border-radius: 6px;
+  color: #0874eb;
+  background: #f6faff;
+}
+
+.pedidos-recent-row > span:not(.pedidos-recent-image) {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.pedidos-recent-row strong,
+.pedidos-recent-row small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pedidos-recent-row strong {
+  color: #086de8;
+  font-size: 0.6rem;
+}
+
+.pedidos-recent-row small {
+  margin-top: 2px;
+  color: #7185a8;
+  font-size: 0.54rem;
+}
+
+.pedidos-recent-row em {
+  flex: 0 0 auto;
+  font-style: normal;
+}
+
+.pedidos-activity-row {
+  gap: 8px;
+  min-height: 42px;
+  padding: 4px 2px;
+  border-bottom: 1px solid #edf2f8;
+}
+
+.pedidos-activity-row:last-child {
+  border-bottom: 0;
+}
+
+.pedidos-activity-icon,
+.pedidos-alert-icon {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 0.78rem;
+}
+
+.pedidos-activity-icon--pending { color: #ae6b00; background: #fff0cf; }
+.pedidos-activity-icon--preparing,
+.pedidos-activity-icon--sent { color: #1268d2; background: #dceeff; }
+.pedidos-activity-icon--delivered { color: #078953; background: #dff8ec; }
+.pedidos-activity-icon--cancelled { color: #df2738; background: #ffe2e2; }
+
+.pedidos-activity-row > span:last-child,
+.pedidos-alert-row > span:last-child {
+  min-width: 0;
+}
+
+.pedidos-activity-row strong,
+.pedidos-activity-row small,
+.pedidos-alert-row strong,
+.pedidos-alert-row small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pedidos-activity-row strong,
+.pedidos-alert-row strong {
+  color: #17335f;
+  font-size: 0.59rem;
+}
+
+.pedidos-activity-row small,
+.pedidos-alert-row small {
+  margin-top: 2px;
+  color: #7185a8;
+  font-size: 0.53rem;
+}
+
+.pedidos-alert-card .pedidos-card-title > i:first-child {
+  color: #ef334f;
+}
+
+.pedidos-alert-count {
+  min-width: 19px;
+  height: 19px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: #ef334f;
+  font-size: 0.56rem;
+  font-weight: 800;
+}
+
+.pedidos-alert-row {
+  gap: 8px;
+  min-height: 48px;
+  padding: 5px 2px;
+  border-bottom: 1px solid #edf2f8;
+}
+
+.pedidos-alert-row:last-child {
+  border-bottom: 0;
+}
+
+.pedidos-alert-icon--warning { color: #d18800; background: #fff0cf; }
+.pedidos-alert-icon--danger { color: #df2738; background: #ffe2e2; }
+.pedidos-alert-icon--purple { color: #7137e8; background: #eee3ff; }
+
+.pedidos-secondary-empty {
+  min-height: 150px;
+  display: grid;
+  place-content: center;
+  gap: 5px;
+  color: #7e95b6;
+  text-align: center;
+  font-size: 0.64rem;
+}
+
+.pedidos-dialog {
+  width: min(100% - 30px, 620px);
+  max-height: calc(100vh - 30px);
+  padding: 0;
+  overflow: auto;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  box-shadow: 0 24px 70px rgba(7, 35, 85, 0.3);
+}
+
+.pedidos-dialog::backdrop {
+  background: rgba(7, 24, 56, 0.52);
+  backdrop-filter: blur(2px);
+}
+
+.pedidos-dialog-card {
+  overflow: hidden;
+  border: 1px solid #d9e6f4;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.pedidos-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 19px 22px;
+  border-bottom: 1px solid #e1ebf6;
+}
+
+.pedidos-dialog-header h2 {
+  margin: 5px 0 1px;
+  color: #10204e;
+  font-size: 1.08rem;
+}
+
+.pedidos-dialog-header p {
+  margin: 0;
+  color: #6f83a6;
+  font-size: 0.67rem;
+}
+
+.pedidos-dialog-close {
+  width: 31px;
+  height: 31px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #d7e5f3;
+  border-radius: 8px;
+  color: #58759f;
+  background: #fff;
+  cursor: pointer;
+}
+
+.pedidos-dialog-body {
+  padding: 19px 22px 22px;
+}
+
+.pedidos-dialog-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.pedidos-dialog-summary > div {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+  border: 1px solid #e0ebf5;
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.pedidos-dialog-summary small {
+  color: #7187a9;
+  font-size: 0.59rem;
+}
+
+.pedidos-dialog-summary strong {
+  overflow: hidden;
+  color: #17335f;
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pedidos-dialog-body h3 {
+  margin: 0 0 7px;
+  color: #17335f;
+  font-size: 0.76rem;
+}
+
+.pedidos-dialog-products {
+  display: grid;
+  gap: 2px;
+  margin-bottom: 17px;
+}
+
+.pedidos-dialog-products > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #edf2f8;
+  color: #526f99;
+  font-size: 0.65rem;
+}
+
+.pedidos-dialog-products strong {
+  color: #17335f;
+}
+
+.pedidos-status-form {
+  display: flex;
+  align-items: end;
+  gap: 9px;
+  padding-top: 13px;
+  border-top: 1px solid #e1ebf6;
+}
+
+.pedidos-status-form label {
+  display: grid;
+  flex: 1 1 auto;
+  gap: 5px;
+  color: #1a315d;
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+
+.pedidos-status-form select {
+  width: 100%;
+  height: 37px;
+  padding: 0 9px;
+  border: 1px solid #d4e2f1;
+  border-radius: 8px;
+  color: #132855;
+  background: #fff;
+  font-size: 0.67rem;
+}
+
+@media (max-width: 1350px) {
+  .pedidos-kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .pedidos-filters {
+    grid-template-columns: minmax(210px, 1.45fr) repeat(3, minmax(125px, 0.82fr)) auto auto;
+  }
+}
+
+@media (max-width: 1050px) {
+  .pedidos-insights-grid,
+  .pedidos-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 800px) {
+  .modulo-pedidos .admin-main {
+    padding: 18px 16px 30px;
+  }
+
+  .pedidos-hero {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pedidos-period-card {
+    width: 100%;
+  }
+
+  .pedidos-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pedidos-search,
+  .pedidos-more-filters,
+  .pedidos-clear-filters {
+    grid-column: 1 / -1;
+  }
+
+  .pedidos-pagination {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pedidos-pagination nav {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .pedidos-pagination nav > div:last-child {
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 560px) {
+  .pedidos-kpi-grid,
+  .pedidos-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .pedidos-toolbar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pedidos-primary-button {
+    grid-column: 1 / -1;
+  }
+
+  .pedidos-toolbar-button {
+    width: 100%;
+  }
+
+  .pedidos-status-chart {
+    width: 100%;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .pedidos-donut {
+    align-self: center;
+  }
+
+  .pedidos-legend,
+  .pedidos-bars {
+    width: 100%;
+  }
+
+  .pedidos-bar-row > span {
+    width: 115px;
+  }
+
+  .pedidos-dialog {
+    width: min(100% - 18px, 620px);
+  }
+
+  .pedidos-dialog-header,
+  .pedidos-dialog-body {
+    padding-right: 15px;
+    padding-left: 15px;
+  }
+
+  .pedidos-dialog-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .pedidos-status-form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pedidos-status-form button {
+    width: 100%;
+  }
+}

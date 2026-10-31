@@ -11,12 +11,15 @@ use App\Http\Controllers\Gestion\Clientes\ClienteController;
 use App\Http\Controllers\Gestion\Compras\CompraController;
 use App\Http\Controllers\Gestion\Cotizaciones\CotizacionController;
 use App\Http\Controllers\Gestion\Cupones\CuponController;
+use App\Http\Controllers\Gestion\DevolucionesGarantias\DevolucionGarantiaController;
 use App\Http\Controllers\Gestion\Inventario\InventarioController;
 use App\Http\Controllers\Gestion\Productos\GestionProductosController;
 use App\Http\Controllers\Gestion\Proveedores\ProveedorController;
 use App\Http\Controllers\Gestion\Reportes\ReporteController;
+use App\Http\Controllers\Gestion\SoporteReclamos\SoporteReclamoController;
 use App\Http\Controllers\Gestion\Segmentos\SegmentoClienteController;
 use App\Http\Controllers\Gestion\Usuarios\GestionUsuariosController;
+use App\Http\Controllers\Gestion\Ventas\VentaController;
 use App\Http\Controllers\Paneles\Administrador\DashboardController as AdministradorDashboardController;
 use App\Http\Controllers\Publico\Asistente\AsistenteController;
 use App\Http\Controllers\Publico\Catalogo\CatalogoController;
@@ -85,8 +88,11 @@ Route::middleware('auth')->group(function (): void {
 
 Route::prefix('gestion')->middleware(['auth', 'role:administrador'])->name('management.')->group(function (): void {
     Route::get('/', AdministradorDashboardController::class)->name('dashboard');
+    Route::get('/cotizaciones', [CotizacionController::class, 'index'])->name('quotations');
 
     Route::get('/productos', [GestionProductosController::class, 'index'])->name('products');
+    Route::get('/productos/exportar/{format}', [GestionProductosController::class, 'export'])
+        ->whereIn('format', ['pdf', 'excel', 'csv'])->name('products.export');
     Route::post('/productos', [GestionProductosController::class, 'store'])->name('products.store');
     Route::put('/productos/{product}', [GestionProductosController::class, 'update'])->whereNumber('product')->name('products.update');
     Route::delete('/productos/{product}', [GestionProductosController::class, 'deactivate'])->whereNumber('product')->name('products.deactivate');
@@ -96,6 +102,7 @@ Route::prefix('gestion')->middleware(['auth', 'role:administrador'])->name('mana
     Route::get('/auditoria', [AuditoriaController::class, 'index'])->name('audit');
 
     Route::get('/categorias', [CategoriaController::class, 'index'])->name('categories');
+    Route::get('/categorias/exportar', [CategoriaController::class, 'export'])->name('categories.export');
     Route::post('/categorias', [CategoriaController::class, 'store'])->name('categories.store');
     Route::put('/categorias/{category}', [CategoriaController::class, 'update'])->name('categories.update');
     Route::delete('/categorias/{category}', [CategoriaController::class, 'deactivate'])->name('categories.deactivate');
@@ -106,6 +113,16 @@ Route::prefix('gestion')->middleware(['auth', 'role:administrador'])->name('mana
     Route::delete('/clientes/{customer}', [ClienteController::class, 'deactivate'])->name('customers.deactivate');
 
     Route::get('/pedidos', [PedidoController::class, 'index'])->name('orders');
+    Route::get('/ventas', [VentaController::class, 'index'])->name('sales');
+    Route::get('/ventas/exportar', [VentaController::class, 'export'])->name('sales.export');
+    Route::post('/ventas', [VentaController::class, 'store'])->name('sales.store');
+    Route::put('/ventas/{order}', [VentaController::class, 'update'])->whereNumber('order')->name('sales.update');
+    Route::get('/devoluciones-garantias', [DevolucionGarantiaController::class, 'index'])->name('returns');
+    Route::get('/devoluciones-garantias/exportar', [DevolucionGarantiaController::class, 'export'])->name('returns.export');
+    Route::post('/devoluciones-garantias', [DevolucionGarantiaController::class, 'store'])->name('returns.store');
+    Route::put('/devoluciones-garantias/{devolucionGarantia}', [DevolucionGarantiaController::class, 'update'])->whereNumber('devolucionGarantia')->name('returns.update');
+    Route::delete('/devoluciones-garantias/{devolucionGarantia}', [DevolucionGarantiaController::class, 'destroy'])->whereNumber('devolucionGarantia')->name('returns.destroy');
+    Route::get('/soporte-reclamos', [SoporteReclamoController::class, 'index'])->name('support');
     Route::get('/cuenta', [CuentaController::class, 'dashboard'])->name('account');
     Route::put('/cuenta/perfil', [CuentaAdministracionController::class, 'updateProfile'])->name('account.profile');
     Route::put('/cuenta/password', [CuentaAdministracionController::class, 'updatePassword'])->name('account.password');
@@ -139,6 +156,23 @@ Route::prefix('gestion')->middleware(['auth', 'role:administrador,marketing'])->
     Route::post('/segmentos', [SegmentoClienteController::class, 'store'])->name('segments.store');
     Route::get('/reportes', [ReporteController::class, 'index'])->name('reports');
     Route::get('/reportes/exportar', [ReporteController::class, 'export'])->name('reports.export');
+});
+
+Route::prefix('gestion')->middleware(['auth', 'role:administrador'])->name('management.')->group(function (): void {
+    Route::view('/pagos', 'gestion.pagos.listar')->name('payments');
+    Route::view('/facturacion', 'gestion.facturacion.listar')->name('billing');
+    Route::view('/reembolsos', 'gestion.reembolsos.listar')->name('refunds');
+    Route::view('/roles-permisos', 'gestion.roles-permisos.listar')->name('roles_permissions');
+    Route::view('/notificaciones', 'gestion.notificaciones.listar')->name('notifications');
+    Route::view('/integraciones', 'gestion.integraciones.listar')->name('integrations');
+    Route::view('/respaldos-mantenimiento', 'gestion.respaldos-mantenimiento.listar')->name('backups');
+    Route::view('/configuracion-empresa', 'gestion.configuracion-empresa.listar')->name('company_settings');
+    Route::view('/configuracion-comercial', 'gestion.configuracion-comercial.listar')->name('commercial_settings');
+    Route::view('/configuracion-seguridad', 'gestion.configuracion-seguridad.listar')->name('security_settings');
+    Route::view('/configuracion-general', 'gestion.configuracion-general.listar')->name('general_settings');
+    Route::view('/reportes-financieros', 'gestion.reportes-financieros.listar')->name('financial_reports');
+    Route::view('/analitica-clientes', 'gestion.analitica-clientes.listar')->name('customer_analytics');
+    Route::view('/metricas-marketing', 'gestion.metricas-marketing.listar')->name('marketing_metrics');
 });
 
 /*

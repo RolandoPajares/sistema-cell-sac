@@ -1,0 +1,472 @@
+.modulo-compras .admin-main {
+    max-width: none;
+    min-height: calc(100vh - var(--reference-header-height));
+    padding: 22px 24px 42px;
+    background:
+        radial-gradient(circle at 100% 0, rgba(146, 211, 255, 0.4), transparent 32%),
+        linear-gradient(135deg, #edf7ff 0%, #eaf5ff 54%, #f8fbff 100%);
+}
+
+.compras-page,
+.compras-page * {
+    box-sizing: border-box;
+}
+
+.compras-page {
+    width: 100%;
+    max-width: 1540px;
+    margin: 0 auto;
+    color: #102653;
+}
+
+.compras-hero,
+.compras-hero-actions,
+.compras-kpi,
+.compras-table-header,
+.compras-table-footer,
+.compras-bottom-grid,
+.compras-summary-card > header,
+.compras-recent-row {
+    display: flex;
+    align-items: center;
+}
+
+.compras-hero {
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 17px;
+}
+
+.compras-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    color: #5874a5;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.compras-breadcrumb a {
+    color: #0874ed;
+    text-decoration: none;
+}
+
+.compras-hero h1 {
+    margin: 8px 0 4px;
+    color: #101d50;
+    font-size: clamp(1.75rem, 2.45vw, 2.45rem);
+    letter-spacing: -0.05em;
+    line-height: 1.08;
+}
+
+.compras-hero p {
+    margin: 0;
+    color: #6079a5;
+    font-size: 0.8rem;
+}
+
+.compras-hero-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 7px;
+}
+
+.compras-primary-button,
+.compras-secondary-button,
+.compras-filter-button {
+    display: inline-flex;
+    min-height: 36px;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 12px;
+    border: 1px solid #c9dcef;
+    border-radius: 8px;
+    color: #173566;
+    background: rgba(255, 255, 255, 0.94);
+    font: inherit;
+    font-size: 0.69rem;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.compras-primary-button,
+.compras-filter-button {
+    border-color: #0879f2;
+    color: #fff;
+    background: linear-gradient(135deg, #0874ed, #158ff8);
+    box-shadow: 0 7px 17px rgba(13, 117, 236, 0.17);
+    cursor: pointer;
+}
+
+.compras-secondary-button:disabled,
+.compras-primary-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.compras-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 13px;
+}
+
+.compras-kpi {
+    min-width: 0;
+    min-height: 91px;
+    gap: 12px;
+    padding: 13px;
+    overflow: hidden;
+    border: 1px solid #dae8f4;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 8px 19px rgba(32, 94, 153, 0.06);
+}
+
+.compras-kpi-icon {
+    display: grid;
+    flex: 0 0 43px;
+    width: 43px;
+    height: 43px;
+    place-items: center;
+    border-radius: 11px;
+    font-size: 1.2rem;
+}
+
+.compras-kpi--blue .compras-kpi-icon { color: #0874ed; background: #e0efff; }
+.compras-kpi--orange .compras-kpi-icon { color: #e88d00; background: #fff0d7; }
+.compras-kpi--green .compras-kpi-icon { color: #08a66b; background: #d9f8e9; }
+.compras-kpi--purple .compras-kpi-icon { color: #7437e9; background: #eee2ff; }
+
+.compras-kpi > div {
+    display: grid;
+    min-width: 0;
+    gap: 2px;
+}
+
+.compras-kpi small,
+.compras-kpi > div > span {
+    overflow: hidden;
+    color: #6079a5;
+    font-size: 0.62rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.compras-kpi small {
+    color: #243f70;
+    font-weight: 800;
+}
+
+.compras-kpi strong {
+    overflow: hidden;
+    color: #0d1d50;
+    font-size: clamp(1.03rem, 1.45vw, 1.3rem);
+    letter-spacing: -0.035em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.compras-filters {
+    display: grid;
+    grid-template-columns: minmax(180px, 1.7fr) minmax(125px, 1fr) minmax(115px, 0.8fr) minmax(135px, 0.9fr) minmax(135px, 0.9fr) auto auto;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 12px;
+    padding: 10px;
+    border: 1px solid #dce9f5;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 8px 19px rgba(32, 94, 153, 0.045);
+}
+
+.compras-filters label {
+    display: flex;
+    min-width: 0;
+    min-height: 36px;
+    align-items: center;
+    overflow: hidden;
+    border: 1px solid #d5e4f2;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.compras-filters input,
+.compras-filters select {
+    width: 100%;
+    min-width: 0;
+    height: 34px;
+    padding: 0 9px;
+    border: 0;
+    outline: 0;
+    color: #193967;
+    background: transparent;
+    font: inherit;
+    font-size: 0.67rem;
+}
+
+.compras-filters select { cursor: pointer; }
+.compras-filters input::placeholder { color: #7a91b3; }
+
+.compras-search {
+    gap: 8px;
+    padding-left: 10px;
+}
+
+.compras-search i {
+    color: #0874ed;
+    font-size: 0.9rem;
+}
+
+.compras-search input { padding-left: 0; }
+.compras-date-filter input[type="date"] { padding-right: 5px; padding-left: 7px; color-scheme: light; font-size: 0.62rem; }
+.compras-filter-button { min-height: 36px; padding: 0 12px; }
+
+.compras-clear-button {
+    padding: 0 4px;
+    color: #176fdb;
+    font-size: 0.67rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.compras-clear-button:hover,
+.compras-breadcrumb a:hover { text-decoration: underline; }
+
+.compras-table-card,
+.compras-summary-card {
+    min-width: 0;
+    border: 1px solid #dce9f5;
+    border-radius: 11px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 8px 19px rgba(32, 94, 153, 0.055);
+}
+
+.compras-table-header {
+    justify-content: space-between;
+    gap: 12px;
+    padding: 13px 15px 11px;
+}
+
+.compras-table-header > div { display: flex; align-items: baseline; gap: 9px; }
+.compras-table-header h2,
+.compras-summary-card h2 { margin: 0; color: #122a5a; font-size: 0.86rem; letter-spacing: -0.02em; }
+.compras-table-header span { color: #7489aa; font-size: 0.64rem; }
+.compras-table-scroll { overflow-x: auto; }
+
+.compras-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.compras-table th {
+    padding: 9px 11px;
+    border-top: 1px solid #e6eef7;
+    border-bottom: 1px solid #e6eef7;
+    color: #6a80a4;
+    background: #f7faff;
+    font-size: 0.61rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.compras-table td {
+    padding: 8px 11px;
+    border-bottom: 1px solid #edf2f8;
+    color: #2b456f;
+    font-size: 0.65rem;
+    white-space: nowrap;
+}
+
+.compras-table tbody tr:last-child td { border-bottom: 0; }
+.compras-table tbody tr:hover td { background: #f8fbff; }
+.compras-table td > strong { color: #183566; }
+.compras-code { color: #176bce !important; font-size: 0.63rem; }
+.compras-supplier,
+.compras-table td > small { display: block; }
+.compras-supplier { max-width: 180px; overflow: hidden; color: #203b69; font-weight: 700; text-overflow: ellipsis; }
+.compras-table td > small { margin-top: 2px; color: #8395b0; font-size: 0.57rem; }
+
+.compras-status,
+.compras-reception {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 7px;
+    border-radius: 999px;
+    font-size: 0.58rem;
+    font-weight: 800;
+}
+
+.compras-status i,
+.compras-reception i { font-size: 0.5rem; }
+.compras-status--pending,
+.compras-reception--pending { color: #ae7100; background: #fff3d8; }
+.compras-status--approved { color: #1d67bc; background: #e7f2ff; }
+.compras-status--received,
+.compras-reception--received { color: #078452; background: #dff8ec; }
+.compras-status--partial,
+.compras-reception--partial { color: #b66b00; background: #fff0d7; }
+.compras-status--cancelled { color: #bf3543; background: #ffeaec; }
+.compras-status--muted,
+.compras-reception--muted { color: #62718a; background: #edf1f6; }
+
+.compras-row-details { position: relative; }
+
+.compras-row-details summary {
+    display: grid;
+    width: 28px;
+    height: 28px;
+    place-items: center;
+    border: 1px solid #bfdbff;
+    border-radius: 7px;
+    color: #0874ed;
+    background: #fff;
+    cursor: pointer;
+    list-style: none;
+}
+
+.compras-row-details summary::-webkit-details-marker { display: none; }
+.compras-row-details summary:hover { background: #edf6ff; }
+
+.compras-detail-popover {
+    position: absolute;
+    z-index: 4;
+    top: 33px;
+    right: 0;
+    width: min(320px, 80vw);
+    padding: 12px;
+    border: 1px solid #dce9f5;
+    border-radius: 9px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(21, 54, 101, 0.16);
+    white-space: normal;
+}
+
+.compras-detail-popover > strong,
+.compras-detail-popover > span { display: block; }
+.compras-detail-popover > strong { color: #183566; font-size: 0.74rem; }
+.compras-detail-popover > span,
+.compras-detail-popover p { margin: 4px 0 0; color: #6a80a4; font-size: 0.63rem; }
+.compras-detail-popover ul { display: grid; gap: 7px; margin: 9px 0 0; padding: 0; list-style: none; }
+.compras-detail-popover li { display: flex; justify-content: space-between; gap: 10px; color: #405b83; font-size: 0.64rem; }
+.compras-detail-popover li b,
+.compras-detail-popover p b { color: #17345f; white-space: nowrap; }
+.compras-detail-popover p { display: flex; justify-content: space-between; border-top: 1px solid #edf2f8; padding-top: 8px; }
+
+.compras-empty { height: 150px; text-align: center; white-space: normal !important; }
+.compras-empty i,
+.compras-empty strong,
+.compras-empty span { display: block; }
+.compras-empty i { margin-bottom: 7px; color: #8ba3c5; font-size: 1.3rem; }
+.compras-empty strong { color: #25416f; font-size: 0.76rem; }
+.compras-empty span { margin-top: 4px; color: #7a91b3; font-size: 0.65rem; }
+
+.compras-table-footer {
+    min-height: 45px;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 7px 14px;
+    border-top: 1px solid #e8eef6;
+    color: #7185a8;
+    font-size: 0.63rem;
+}
+
+.compras-table-footer nav { margin-left: auto; }
+.compras-table-footer nav > div:first-child { display: none; }
+.compras-table-footer nav > div:last-child { display: flex; align-items: center; gap: 4px; }
+.compras-table-footer nav span,
+.compras-table-footer nav a { display: grid; min-width: 27px; height: 27px; place-items: center; border: 1px solid #d8e6f4; border-radius: 6px; color: #42638f; background: #fff; font-size: 0.63rem; text-decoration: none; }
+.compras-table-footer nav span[aria-current="page"] { border-color: #0874ed; color: #fff; background: #0874ed; }
+
+.compras-bottom-grid {
+    align-items: stretch;
+    gap: 11px;
+    margin-top: 12px;
+}
+
+.compras-summary-card { flex: 1 1 0; padding: 12px 13px; }
+.compras-summary-card > header { gap: 8px; margin-bottom: 8px; }
+
+.compras-summary-icon {
+    display: grid;
+    flex: 0 0 29px;
+    width: 29px;
+    height: 29px;
+    place-items: center;
+    border-radius: 9px;
+    color: #0874ed;
+    background: #e5f1ff;
+}
+
+.compras-summary-icon--orange { color: #e88d00; background: #fff0d7; }
+.compras-summary-icon--blue { color: #0874ed; background: #e5f1ff; }
+.compras-summary-card h2 { font-size: 0.74rem; }
+.compras-summary-card header p { margin: 3px 0 0; color: #778bad; font-size: 0.59rem; }
+
+.compras-recent-row {
+    min-width: 0;
+    gap: 7px;
+    padding: 7px 0;
+    border-top: 1px solid #edf2f8;
+}
+
+.compras-recent-dot { flex: 0 0 7px; width: 7px; height: 7px; border-radius: 50%; background: #12ae76; }
+.compras-recent-dot--orange { background: #efa51b; }
+.compras-recent-row > div { min-width: 0; flex: 1; }
+.compras-recent-row strong,
+.compras-recent-row small { display: block; }
+.compras-recent-row strong { overflow: hidden; color: #25416f; font-size: 0.6rem; text-overflow: ellipsis; white-space: nowrap; }
+.compras-recent-row small { margin-top: 3px; color: #7a91b3; font-size: 0.57rem; }
+.compras-recent-row .compras-status { flex: 0 0 auto; }
+.compras-summary-empty { margin: 11px 0; color: #7185a8; font-size: 0.65rem; }
+
+.compras-product-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-top: 1px solid #edf2f8; }
+.compras-product-icon { display: grid; flex: 0 0 26px; width: 26px; height: 26px; place-items: center; border-radius: 8px; color: #0874ed; background: #eaf3ff; }
+.compras-product-row strong { min-width: 0; flex: 1; overflow: hidden; color: #25416f; font-size: 0.6rem; text-overflow: ellipsis; white-space: nowrap; }
+.compras-product-row > span:last-child { color: #6079a5; font-size: 0.57rem; white-space: nowrap; }
+
+.compras-create-dialog .admin-dialog-body { max-height: calc(100vh - 120px); overflow-y: auto; }
+.compras-create-dialog .form-card { max-width: none; margin: 0; box-shadow: none; }
+
+@media (max-width: 1180px) {
+    .compras-filters { grid-template-columns: minmax(200px, 1.5fr) repeat(2, minmax(130px, 1fr)) repeat(2, minmax(130px, 0.9fr)) auto; }
+    .compras-clear-button { grid-column: 1 / -1; justify-self: end; }
+}
+
+@media (max-width: 900px) {
+    .compras-bottom-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .compras-summary-card:last-child { grid-column: 1 / -1; }
+}
+
+@media (max-width: 850px) {
+    .compras-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .compras-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .compras-search { grid-column: 1 / -1; }
+    .compras-filter-button { min-height: 38px; }
+}
+
+@media (max-width: 600px) {
+    .modulo-compras .admin-main { padding: 16px 12px 28px; }
+    .compras-hero { align-items: flex-start; flex-direction: column; }
+    .compras-hero-actions { width: 100%; justify-content: stretch; }
+    .compras-hero-actions > button { flex: 1 1 auto; }
+    .compras-kpi-grid { gap: 8px; }
+    .compras-kpi { min-height: 83px; gap: 8px; padding: 10px; }
+    .compras-kpi-icon { flex-basis: 36px; width: 36px; height: 36px; font-size: 1rem; }
+    .compras-kpi strong { font-size: 1rem; }
+    .compras-kpi small,
+    .compras-kpi > div > span { font-size: 0.56rem; }
+    .compras-filters { gap: 6px; padding: 8px; }
+    .compras-filters input,
+    .compras-filters select { font-size: 0.62rem; }
+    .compras-table { min-width: 780px; }
+    .compras-table-footer { align-items: flex-start; flex-direction: column; }
+    .compras-table-footer nav { margin-left: 0; }
+    .compras-bottom-grid { display: flex; flex-direction: column; }
+}
