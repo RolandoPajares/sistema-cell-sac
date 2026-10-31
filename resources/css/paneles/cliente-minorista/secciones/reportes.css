@@ -1,0 +1,227 @@
+/* Vista "Reportes" del cliente minorista - Integrante 4 */
+
+.reporte-cliente {
+  --rep-oscuro: #003fb8;
+  --rep-azul: #1356e8;
+  --rep-celeste: #eaf2ff;
+
+  display: grid;
+  gap: 20px;
+}
+
+.reporte-cliente-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 26px 28px;
+  border-radius: 22px;
+  color: #fff;
+  background: linear-gradient(120deg, #003fb8, #1356e8);
+}
+
+.reporte-cliente-etiqueta {
+  display: inline-flex;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.reporte-cliente-cabecera h1 {
+  margin: 12px 0 6px;
+  font-size: 1.6rem;
+  color: #fff;
+}
+
+.reporte-cliente-cabecera p {
+  margin: 0;
+  color: #dbeafe;
+}
+
+.reporte-cliente-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  background: #fff;
+  color: var(--rep-oscuro);
+}
+
+/* tarjetas con los totales */
+.reporte-cliente-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.reporte-cliente-kpis article {
+  padding: 18px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-bottom: 4px solid var(--rep-azul);
+  border-radius: 16px;
+}
+
+.reporte-cliente-kpis small {
+  display: block;
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.reporte-cliente-kpis strong {
+  font-size: 1.35rem;
+  color: #0f172a;
+  white-space: nowrap;
+}
+
+.reporte-cliente-columnas {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 20px;
+}
+
+.admin-theme .admin-main .reporte-cliente-caja,
+.reporte-cliente-caja {
+  min-width: 0;
+  padding: 22px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+}
+
+.reporte-cliente-caja h2 {
+  margin: 0 0 16px;
+  font-size: 1.05rem;
+  color: #0f172a;
+}
+
+.reporte-cliente-caja h2 i {
+  color: var(--rep-azul);
+}
+
+/* gráfico de barras hecho con CSS */
+.reporte-cliente-barras {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  height: 220px;
+  align-items: end;
+}
+
+.reporte-cliente-barra {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100%;
+  gap: 6px;
+}
+
+.reporte-cliente-barra-valor {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--rep-oscuro);
+  white-space: nowrap;
+}
+
+.reporte-cliente-barra-relleno {
+  width: 100%;
+  max-width: 46px;
+  border-radius: 10px 10px 4px 4px;
+  background: linear-gradient(180deg, var(--rep-azul), var(--rep-oscuro));
+}
+
+.reporte-cliente-barra small {
+  color: #64748b;
+  font-weight: 600;
+}
+
+/* barras horizontales de estados */
+.reporte-cliente-estado {
+  display: grid;
+  grid-template-columns: 90px 1fr 30px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 0.88rem;
+}
+
+.reporte-cliente-estado-linea {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--rep-celeste);
+  overflow: hidden;
+}
+
+.reporte-cliente-estado-linea span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--rep-azul);
+}
+
+.reporte-cliente-estado b {
+  text-align: right;
+}
+
+/* tablas */
+.reporte-cliente-tabla-contenedor {
+  overflow-x: auto;
+}
+
+.reporte-cliente-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.reporte-cliente-tabla th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  color: #64748b;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.reporte-cliente-tabla td {
+  padding: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.reporte-cliente-tabla tbody tr:hover td {
+  background: #f8faff;
+}
+
+.reporte-cliente-vacio {
+  color: #64748b;
+  text-align: center;
+}
+
+@media (max-width: 1100px) {
+  .reporte-cliente-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .reporte-cliente-columnas {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .reporte-cliente-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .reporte-cliente-barras {
+    gap: 6px;
+  }
+}

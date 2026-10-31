@@ -8,8 +8,6 @@
     // pasos que sigue un pedido, para dibujar la barrita de progreso
     $pasos = ['Pendiente', 'En proceso', 'Enviado', 'Entregado'];
 
-    // si hubo error con la contraseña se abre directo la pestaña de seguridad
-    $abrirSeguridad = $errors->hasAny(['password', 'password_actual']);
 @endphp
 
 <section class="minorista-panel" aria-labelledby="minorista-titulo">
@@ -62,7 +60,7 @@
                     $pasoActual = array_search($pedido->estado, $pasos);
                     $cancelado = $pedido->estado === 'Cancelado';
                 @endphp
-                <article class="minorista-pedido {{ $cancelado ? 'minorista-pedido--cancelado' : '' }}">
+                <article class="minorista-pedido {{ $cancelado ? 'minorista-pedido--cancelado' : '' }}" data-pedido-resumen>
                     <div class="minorista-pedido-arriba">
                         <span class="minorista-pedido-icono"><i class="bi bi-phone"></i></span>
                         <div class="minorista-pedido-nombre">
@@ -116,50 +114,4 @@
             </section>
         </div>
     </div>
-
-    {{-- Cuenta: se cambia entre pestañas con JS --}}
-    <section id="mis-datos" class="minorista-caja minorista-cuenta">
-        <div class="minorista-pestanas" role="tablist">
-            <button type="button" class="{{ $abrirSeguridad ? '' : 'activo' }}" data-pestana-minorista="datos" role="tab"><i class="bi bi-person"></i> Mis datos</button>
-            <button type="button" class="{{ $abrirSeguridad ? 'activo' : '' }}" data-pestana-minorista="seguridad" role="tab"><i class="bi bi-shield-lock"></i> Seguridad</button>
-        </div>
-
-        <form method="post" action="{{ route('account.profile') }}" class="minorista-formulario" data-contenido-minorista="datos" @if ($abrirSeguridad) hidden @endif>
-            @csrf
-            @method('PUT')
-            <label>
-                Nombre
-                <input name="nombre" value="{{ old('nombre', $usuario->nombre) }}" required maxlength="120">
-            </label>
-            <label>
-                Correo
-                <input type="email" name="correo" value="{{ old('correo', $usuario->correo) }}" required maxlength="160">
-            </label>
-            <button class="minorista-boton minorista-boton--azul" type="submit"><i class="bi bi-save"></i> Guardar datos</button>
-        </form>
-
-        <form method="post" action="{{ route('account.password') }}" class="minorista-formulario" data-contenido-minorista="seguridad" @if (! $abrirSeguridad) hidden @endif>
-            @csrf
-            @method('PUT')
-            <label>
-                Contraseña actual
-                <span class="admin-password-input">
-                    <input type="password" name="password_actual" required>
-                    <button type="button" data-password-toggle aria-label="Mostrar contraseña"><i class="bi bi-eye"></i></button>
-                </span>
-            </label>
-            <label>
-                Nueva contraseña
-                <span class="admin-password-input">
-                    <input type="password" name="password" required minlength="10">
-                    <button type="button" data-password-toggle aria-label="Mostrar contraseña"><i class="bi bi-eye"></i></button>
-                </span>
-            </label>
-            <label>
-                Confirmar contraseña
-                <input type="password" name="password_confirmation" required>
-            </label>
-            <button class="minorista-boton minorista-boton--negro" type="submit"><i class="bi bi-key"></i> Cambiar contraseña</button>
-        </form>
-    </section>
 </section>

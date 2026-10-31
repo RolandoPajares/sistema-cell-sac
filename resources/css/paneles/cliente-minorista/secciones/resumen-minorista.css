@@ -412,85 +412,6 @@
   font-size: 0.9rem;
 }
 
-/* ---------- pestañas de la cuenta ---------- */
-.minorista-pestanas {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 18px;
-  border-bottom: 1px solid var(--min-borde);
-}
-
-.minorista-pestanas button {
-  padding: 10px 16px;
-  border: 0;
-  border-bottom: 3px solid transparent;
-  background: transparent;
-  color: var(--min-gris);
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.minorista-pestanas button.activo {
-  color: var(--min-azul);
-  border-bottom-color: var(--min-azul);
-}
-
-.minorista-formulario {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  align-items: end;
-}
-
-.minorista-formulario[hidden] {
-  display: none;
-}
-
-.minorista-formulario label {
-  display: grid;
-  gap: 6px;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: #334155;
-}
-
-.minorista-formulario input {
-  width: 100%;
-  padding: 11px 13px;
-  border: 1px solid #cbd5e1;
-  border-radius: 12px;
-  font: inherit;
-}
-
-.minorista-formulario input:focus {
-  outline: 2px solid var(--min-azul);
-  border-color: var(--min-azul);
-}
-
-.minorista-formulario .admin-password-input {
-  position: relative;
-  display: block;
-}
-
-.minorista-formulario .admin-password-input input {
-  padding-right: 44px;
-}
-
-.minorista-formulario .admin-password-input button {
-  position: absolute;
-  top: 50%;
-  right: 8px;
-  transform: translateY(-50%);
-  border: 0;
-  background: transparent;
-  color: var(--min-gris);
-  cursor: pointer;
-}
-
-.minorista-formulario > .minorista-boton {
-  justify-self: start;
-}
-
 /* el layout general le quita el padding a los section, aquí se lo devolvemos */
 .admin-theme .admin-main section.minorista-caja {
   padding: 22px;
@@ -521,10 +442,6 @@
     padding: 24px;
   }
 
-  .minorista-formulario {
-    grid-template-columns: 1fr;
-  }
-
   .minorista-pedido-arriba {
     flex-wrap: wrap;
   }
@@ -535,14 +452,4 @@
   .minorista-accesos {
     grid-template-columns: 1fr;
   }
-}
-
-/* el contenedor del ojito ya trae borde desde otro css, se lo quitamos
-   para que no salgan dos bordes */
-.admin-theme .admin-password-input {
-  min-height: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
 }
