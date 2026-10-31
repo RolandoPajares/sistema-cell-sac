@@ -2,3 +2,4 @@
 // Importar aquí scripts de compras, cotizaciones, recomendaciones, perfil y módulos exclusivos del cliente mayorista.
 
 import './secciones/resumen-mayorista.js';
+import './componentes/menu-lateral-desplegable.js';
