@@ -19,4 +19,17 @@ if (panelMinorista) {
     pestanas.forEach((pestana) => {
         pestana.addEventListener('click', () => mostrarPestana(pestana.dataset.pestanaMinorista));
     });
+
+    // si se entra desde el menú con #seguridad, se abre esa pestaña
+    const revisarAncla = () => {
+        if (window.location.hash === '#seguridad') {
+            mostrarPestana('seguridad');
+            panelMinorista.querySelector('#mis-datos')?.scrollIntoView({ behavior: 'smooth' });
+        } else if (window.location.hash === '#mis-datos') {
+            mostrarPestana('datos');
+        }
+    };
+
+    revisarAncla();
+    window.addEventListener('hashchange', revisarAncla);
 }

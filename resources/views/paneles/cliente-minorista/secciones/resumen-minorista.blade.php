@@ -118,7 +118,7 @@
     </div>
 
     {{-- Cuenta: se cambia entre pestañas con JS --}}
-    <section class="minorista-caja minorista-cuenta">
+    <section id="mis-datos" class="minorista-caja minorista-cuenta">
         <div class="minorista-pestanas" role="tablist">
             <button type="button" class="{{ $abrirSeguridad ? '' : 'activo' }}" data-pestana-minorista="datos" role="tab"><i class="bi bi-person"></i> Mis datos</button>
             <button type="button" class="{{ $abrirSeguridad ? 'activo' : '' }}" data-pestana-minorista="seguridad" role="tab"><i class="bi bi-shield-lock"></i> Seguridad</button>

@@ -136,7 +136,7 @@
 
     {{-- Datos de la cuenta y seguridad --}}
     <div class="mayorista-dos-columnas">
-        <form method="post" action="{{ route('account.profile') }}" class="mayorista-caja mayorista-formulario">
+        <form id="datos-mayorista" method="post" action="{{ route('account.profile') }}" class="mayorista-caja mayorista-formulario">
             @csrf
             @method('PUT')
             <div class="mayorista-caja-titulo"><h2><i class="bi bi-person-vcard"></i> Datos de contacto</h2></div>
@@ -151,7 +151,7 @@
             <button class="mayorista-boton mayorista-boton--azul" type="submit"><i class="bi bi-save"></i> Guardar datos</button>
         </form>
 
-        <form method="post" action="{{ route('account.password') }}" class="mayorista-caja mayorista-formulario">
+        <form id="seguridad-mayorista" method="post" action="{{ route('account.password') }}" class="mayorista-caja mayorista-formulario">
             @csrf
             @method('PUT')
             <div class="mayorista-caja-titulo"><h2><i class="bi bi-shield-lock"></i> Seguridad</h2></div>
