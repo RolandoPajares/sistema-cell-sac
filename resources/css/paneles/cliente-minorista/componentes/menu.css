@@ -1,19 +1,233 @@
-/* Titulos de los grupos del menú lateral del cliente minorista - Integrante 4 */
+/* Menú lateral desplegable del cliente minorista - Integrante 4 (Sebastián)
+   Mismo estilo que el menú del administrador (pedido por Rolando) */
 
-.menu-cliente-grupo {
-  margin: 14px 12px 6px;
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.6;
+.cliente-menu {
+  width: 100%;
+  min-width: 0;
+  max-height: calc(100vh - var(--reference-header-height, 70px) - 76px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 0 7px 14px;
+  scrollbar-color: rgba(255, 255, 255, 0.34) transparent;
+  scrollbar-width: thin;
 }
 
-.menu-cliente-grupo:first-child {
-  margin-top: 4px;
+/* solo el menú tiene scroll, no toda la barra */
+.admin-sidebar:has(.cliente-menu) {
+  overflow: hidden;
 }
 
-/* cuando el menú está cerrado no se muestran los titulos */
-.admin-app.is-sidebar-collapsed .menu-cliente-grupo {
+.admin-sidebar:has(.cliente-menu) .admin-sidebar-nav {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.cliente-menu__grupos {
+  display: grid;
+  gap: 10px;
+}
+
+/* ---------- botón "Mi panel", títulos de grupo y opciones ---------- */
+.cliente-menu .cliente-menu__inicio,
+.cliente-menu .cliente-menu__boton,
+.cliente-menu .cliente-menu__opcion {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  border: 0;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.92);
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  text-decoration: none;
+  transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.cliente-menu .cliente-menu__inicio {
+  min-height: 50px;
+  margin-bottom: 14px;
+  padding: 0 14px;
+  gap: 11px;
+  font-size: 0.94rem;
+  font-weight: 700;
+}
+
+.cliente-menu .cliente-menu__boton {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 14px;
+  gap: 10px;
+  justify-content: space-between;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.cliente-menu__boton-izq {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 10px;
+}
+
+.cliente-menu__inicio > i,
+.cliente-menu__boton-izq > i {
+  flex: 0 0 18px;
+  width: 18px;
+  color: #e0f5ff;
+  font-size: 0.98rem;
+  text-align: center;
+}
+
+/* flechita que gira al abrir */
+.cliente-menu__flecha {
+  flex: 0 0 auto;
+  color: rgba(221, 242, 255, 0.72);
+  font-size: 0.65rem;
+  transition: transform 0.18s ease;
+}
+
+.cliente-menu__grupo.is-open .cliente-menu__flecha {
+  transform: rotate(180deg);
+}
+
+/* activo: degradado celeste como el del admin */
+.cliente-menu__inicio:hover,
+.cliente-menu__inicio.is-active,
+.cliente-menu__grupo.is-active > .cliente-menu__boton {
+  color: #fff;
+  background: linear-gradient(90deg, #1494ff, #04bdf5);
+  box-shadow: 0 8px 20px rgba(0, 182, 255, 0.2);
+}
+
+.cliente-menu__boton:hover {
+  color: #fff;
+  background: rgba(49, 157, 235, 0.2);
+}
+
+.cliente-menu__inicio:focus-visible,
+.cliente-menu__boton:focus-visible,
+.cliente-menu__opcion:focus-visible {
+  outline: 2px solid #b8ecff;
+  outline-offset: 2px;
+}
+
+/* ---------- submenú ---------- */
+.cliente-menu__submenu {
+  display: grid;
+  margin: 2px 0 0 36px;
+}
+
+.cliente-menu__submenu[hidden] {
   display: none;
+}
+
+.cliente-menu__submenu:not([hidden]) {
+  animation: cliente-menu-abrir 0.18s ease-out;
+}
+
+.cliente-menu .cliente-menu__opcion {
+  min-height: 34px;
+  padding: 0 10px;
+  gap: 8px;
+  border-radius: 7px;
+  color: rgba(235, 247, 255, 0.86);
+  font-size: 0.82rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+
+.cliente-menu .cliente-menu__opcion:hover,
+.cliente-menu .cliente-menu__opcion.is-active {
+  color: #fff;
+  background: rgba(35, 157, 240, 0.28);
+}
+
+.cliente-menu .cliente-menu__opcion.is-active {
+  box-shadow: inset 3px 0 0 #c1f3ff;
+}
+
+.cliente-menu__texto {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@keyframes cliente-menu-abrir {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- menú cerrado (solo iconos) ---------- */
+.admin-app.is-sidebar-collapsed .cliente-menu {
+  overflow: visible;
+}
+
+.admin-app.is-sidebar-collapsed .cliente-menu__submenu,
+.admin-app.is-sidebar-collapsed .cliente-menu__texto,
+.admin-app.is-sidebar-collapsed .cliente-menu__flecha {
+  display: none;
+}
+
+.admin-app.is-sidebar-collapsed .cliente-menu__inicio,
+.admin-app.is-sidebar-collapsed .cliente-menu__boton {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+/* ---------- responsive (igual que el admin) ---------- */
+@media (max-width: 1180px) {
+  .cliente-menu {
+    padding-inline: 0;
+  }
+
+  .cliente-menu__texto,
+  .cliente-menu__flecha,
+  .cliente-menu__submenu {
+    display: none;
+  }
+
+  .cliente-menu__inicio,
+  .cliente-menu__boton {
+    justify-content: center;
+    padding-inline: 0;
+  }
+}
+
+@media (max-width: 800px) {
+  .cliente-menu {
+    max-height: calc(100vh - 82px);
+    padding: 0 2px 12px;
+  }
+
+  .cliente-menu__texto,
+  .cliente-menu__flecha {
+    display: block;
+  }
+
+  .cliente-menu__submenu:not([hidden]) {
+    display: grid;
+  }
+
+  .cliente-menu__inicio,
+  .cliente-menu__boton {
+    justify-content: flex-start;
+    padding-inline: 12px;
+  }
+
+  .cliente-menu__boton {
+    justify-content: space-between;
+  }
 }

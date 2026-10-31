@@ -2,3 +2,4 @@
 // Importar aquí scripts del catálogo, carrito, pedidos, perfil y módulos exclusivos del cliente minorista.
 
 import './secciones/resumen-minorista.js';
+import './componentes/menu-lateral-desplegable.js';
