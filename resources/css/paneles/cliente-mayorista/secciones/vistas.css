@@ -1,0 +1,34 @@
+/* Vistas del panel del cliente mayorista (resumen, perfil, reportes, configuración)
+   Integrante 4 - Sebastián */
+
+.cliente-vistas [data-cliente-vista]:not([hidden]) {
+  animation: cliente-vista-entrar 0.25s ease-out;
+}
+
+@keyframes cliente-vista-entrar {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* pedidos que se ocultan por la configuración "pedidos a mostrar" */
+.cliente-vistas .fuera-de-limite {
+  display: none;
+}
+
+/* vista compacta (se activa en Configuración) */
+.cliente-vistas.is-compacto section,
+.cliente-vistas.is-compacto article {
+  gap: 12px;
+}
+
+.cliente-vistas.is-compacto [class*="-caja"],
+.cliente-vistas.is-compacto [class*="-tarjeta"] {
+  padding: 14px !important;
+}

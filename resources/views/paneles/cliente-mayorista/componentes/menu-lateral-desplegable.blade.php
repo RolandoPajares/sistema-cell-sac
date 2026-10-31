@@ -42,12 +42,20 @@
             ],
         ],
         [
+            'clave' => 'reportes',
+            'titulo' => 'Reportes',
+            'icono' => 'bi-bar-chart-line',
+            'opciones' => [
+                $opcion('dashboard', 'Reporte de compras', 'bi-graph-up', '#reportes'),
+            ],
+        ],
+        [
             'clave' => 'cuenta',
             'titulo' => 'Mi cuenta',
             'icono' => 'bi-person-circle',
             'opciones' => [
-                $opcion('dashboard', 'Datos de contacto', 'bi-person-vcard', '#datos-mayorista'),
-                $opcion('dashboard', 'Seguridad', 'bi-shield-lock', '#seguridad-mayorista'),
+                $opcion('dashboard', 'Mi perfil', 'bi-person-vcard', '#perfil'),
+                $opcion('dashboard', 'Configuración', 'bi-gear', '#configuracion'),
                 $opcion('pages.contact', 'Hablar con un asesor', 'bi-headset'),
                 $opcion('home', 'Ir a la tienda', 'bi-house'),
             ],
@@ -60,7 +68,7 @@
 @endphp
 
 <div class="cliente-menu" data-cliente-menu>
-    <a class="cliente-menu__inicio {{ request()->routeIs('dashboard') ? 'is-active' : '' }}" href="{{ route('dashboard') }}" title="Mi panel">
+    <a class="cliente-menu__inicio {{ request()->routeIs('dashboard') ? 'is-active' : '' }}" href="{{ route('dashboard') }}#resumen" title="Mi panel" data-cliente-menu-vista="resumen">
         <i class="bi bi-speedometer2" aria-hidden="true"></i>
         <span class="cliente-menu__texto">Mi panel</span>
     </a>
@@ -82,7 +90,7 @@
                 <div class="cliente-menu__submenu" id="cliente-submenu-{{ $grupo['clave'] }}" data-cliente-menu-submenu @if (! $grupoActivo) hidden @endif>
                     @foreach ($grupo['opciones'] as $item)
                         @if ($item['existe'])
-                            <a class="cliente-menu__opcion {{ $estaActiva($item) ? 'is-active' : '' }}" href="{{ route($item['ruta']).$item['ancla'] }}" title="{{ $item['texto'] }}">
+                            <a class="cliente-menu__opcion {{ $estaActiva($item) ? 'is-active' : '' }}" href="{{ route($item['ruta']).$item['ancla'] }}" title="{{ $item['texto'] }}" @if ($item['ancla'] !== '') data-cliente-menu-vista="{{ ltrim($item['ancla'], '#') }}" @endif>
                                 <span class="cliente-menu__texto">{{ $item['texto'] }}</span>
                             </a>
                         @endif

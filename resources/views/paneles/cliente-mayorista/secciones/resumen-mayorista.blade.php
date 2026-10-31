@@ -82,7 +82,7 @@
                 <tbody>
                     @forelse ($pedidos->take(8) as $pedido)
                         @php($primerProducto = $pedido->details->first()?->product)
-                        <tr data-estado="{{ $pedido->estado }}">
+                        <tr data-estado="{{ $pedido->estado }}" data-pedido-resumen>
                             <td><b>#{{ $pedido->id }}</b></td>
                             <td>{{ $pedido->creado_en?->format('d/m/Y') }}</td>
                             <td>{{ $primerProducto?->nombre ?: 'Pedido CELL SAC' }}</td>
@@ -132,48 +132,5 @@
                 <li><i class="bi bi-check2-circle"></i> Seguimiento de todos tus pedidos</li>
             </ul>
         </section>
-    </div>
-
-    {{-- Datos de la cuenta y seguridad --}}
-    <div class="mayorista-dos-columnas">
-        <form id="datos-mayorista" method="post" action="{{ route('account.profile') }}" class="mayorista-caja mayorista-formulario">
-            @csrf
-            @method('PUT')
-            <div class="mayorista-caja-titulo"><h2><i class="bi bi-person-vcard"></i> Datos de contacto</h2></div>
-            <label>
-                Nombre o razón social
-                <input name="nombre" value="{{ old('nombre', $usuario->nombre) }}" required maxlength="120">
-            </label>
-            <label>
-                Correo
-                <input type="email" name="correo" value="{{ old('correo', $usuario->correo) }}" required maxlength="160">
-            </label>
-            <button class="mayorista-boton mayorista-boton--azul" type="submit"><i class="bi bi-save"></i> Guardar datos</button>
-        </form>
-
-        <form id="seguridad-mayorista" method="post" action="{{ route('account.password') }}" class="mayorista-caja mayorista-formulario">
-            @csrf
-            @method('PUT')
-            <div class="mayorista-caja-titulo"><h2><i class="bi bi-shield-lock"></i> Seguridad</h2></div>
-            <label>
-                Contraseña actual
-                <span class="admin-password-input">
-                    <input type="password" name="password_actual" required>
-                    <button type="button" data-password-toggle aria-label="Mostrar contraseña"><i class="bi bi-eye"></i></button>
-                </span>
-            </label>
-            <label>
-                Nueva contraseña
-                <span class="admin-password-input">
-                    <input type="password" name="password" required minlength="10">
-                    <button type="button" data-password-toggle aria-label="Mostrar contraseña"><i class="bi bi-eye"></i></button>
-                </span>
-            </label>
-            <label>
-                Confirmar contraseña
-                <input type="password" name="password_confirmation" required>
-            </label>
-            <button class="mayorista-boton mayorista-boton--negro" type="submit"><i class="bi bi-key"></i> Cambiar contraseña</button>
-        </form>
     </div>
 </section>

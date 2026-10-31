@@ -178,3 +178,20 @@
   background: transparent;
   box-shadow: none;
 }
+
+/* etiqueta "Cuenta activa" de la portada */
+.perfil-cliente-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: #fff;
+  color: #0b2a6f;
+}
+
+.perfil-cliente-caja .admin-password-input input {
+  padding-right: 44px;
+}
