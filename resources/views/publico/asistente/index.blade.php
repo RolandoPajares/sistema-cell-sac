@@ -15,4 +15,7 @@
             <x-inteligencia.asistente.chat />
         </div>
     </section>
+
+
+    
 @endsection

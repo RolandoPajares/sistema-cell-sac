@@ -21,6 +21,7 @@ class GuardarUsuarioRequest extends FormRequest
             'correo' => ['required', 'email', 'max:160', Rule::unique('users', 'correo')],
             'rol' => ['required', Rule::in(User::ROLES)],
             'password' => ['required', Password::min(12)->letters()->numbers()],
+            'password_confirmation' => ['nullable', 'same:password'],
             'documento' => ['required_if:rol,cliente_mayorista,cliente_minorista', 'nullable', 'string', 'max:20', Rule::unique('clientes', 'documento')],
             'razon_social' => ['nullable', 'string', 'max:160'],
             'telefono' => ['nullable', 'string', 'max:30'],

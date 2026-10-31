@@ -17,6 +17,7 @@ class GuardarCategoriaRequest extends FormRequest
         return [
             'nombre' => ['required', 'string', 'max:120', Rule::unique('categorias', 'nombre')],
             'descripcion' => ['nullable', 'string', 'max:500'],
+            'activo' => ['sometimes', 'boolean'],
         ];
     }
 }

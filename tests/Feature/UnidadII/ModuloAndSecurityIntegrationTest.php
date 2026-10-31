@@ -468,6 +468,7 @@ it('enforces the role matrix for protected module entry points', function (): vo
         'management.inventory' => ['administrador', 'compras_logistica', 'ventas_minoristas'],
         'management.purchases' => ['administrador', 'compras_logistica'],
         'management.suppliers' => ['administrador', 'compras_logistica'],
+        'management.quotations' => ['administrador'],
         'management.segments' => ['administrador', 'marketing'],
         'management.reports' => ['administrador', 'marketing'],
         'quotations.index' => ['administrador', 'ventas_mayoristas', 'cliente_mayorista'],
