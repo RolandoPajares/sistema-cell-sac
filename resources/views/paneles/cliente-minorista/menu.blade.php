@@ -1,16 +1,26 @@
 {{-- Menú específico del rol Cliente Minorista. La autorización sigue en PermisosRoles. --}}
+{{-- Los enlaces se separan en grupos para que el menú se entienda mejor --}}
 @php
-    $visibleRoutes = [
-        'home',
-        'catalog.index',
-        'dashboard',
-        'orders.index',
-        'recommendations',
-        'comparison',
-        'assistant',
-        'smart.optimizer',
+    $grupos = [
+        'Mi cuenta' => ['dashboard', 'orders.index'],
+        'Tienda' => ['home', 'catalog.index'],
+        'Te ayudamos a elegir' => ['recommendations', 'comparison', 'smart.optimizer', 'assistant'],
     ];
-    $links = array_values(array_filter($links ?? [], static fn (array $link): bool => in_array($link['route'], $visibleRoutes, true)));
+    $todos = collect($links ?? []);
 @endphp
 
-@include('components.panel.menu-enlaces', ['links' => $links])
+@foreach ($grupos as $nombreGrupo => $rutas)
+    @php
+        // solo se dejan los enlaces que el rol tiene permitidos, en el orden del grupo
+        $enlacesGrupo = collect($rutas)
+            ->map(fn (string $ruta) => $todos->firstWhere('route', $ruta))
+            ->filter()
+            ->values()
+            ->all();
+    @endphp
+
+    @if (count($enlacesGrupo) > 0)
+        <p class="menu-cliente-grupo">{{ $nombreGrupo }}</p>
+        @include('components.panel.menu-enlaces', ['links' => $enlacesGrupo])
+    @endif
+@endforeach

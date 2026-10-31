@@ -1,0 +1,19 @@
+/* Titulos de los grupos del menú lateral del cliente minorista - Integrante 4 */
+
+.menu-cliente-grupo {
+  margin: 14px 12px 6px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.menu-cliente-grupo:first-child {
+  margin-top: 4px;
+}
+
+/* cuando el menú está cerrado no se muestran los titulos */
+.admin-app.is-sidebar-collapsed .menu-cliente-grupo {
+  display: none;
+}

@@ -1,16 +1,26 @@
 {{-- Menú específico del rol Cliente Mayorista. La autorización sigue en PermisosRoles. --}}
+{{-- Los enlaces se separan en grupos para que el menú se entienda mejor --}}
 @php
-    $visibleRoutes = [
-        'home',
-        'dashboard',
-        'recommendations',
-        'comparison',
-        'assistant',
-        'smart.optimizer',
-        'smart.wholesale',
-        'quotations.index',
+    $grupos = [
+        'Mi empresa' => ['dashboard', 'home'],
+        'Compras' => ['quotations.index', 'smart.wholesale'],
+        'Herramientas' => ['recommendations', 'comparison', 'smart.optimizer', 'assistant'],
     ];
-    $links = array_values(array_filter($links ?? [], static fn (array $link): bool => in_array($link['route'], $visibleRoutes, true)));
+    $todos = collect($links ?? []);
 @endphp
 
-@include('components.panel.menu-enlaces', ['links' => $links])
+@foreach ($grupos as $nombreGrupo => $rutas)
+    @php
+        // solo se dejan los enlaces que el rol tiene permitidos, en el orden del grupo
+        $enlacesGrupo = collect($rutas)
+            ->map(fn (string $ruta) => $todos->firstWhere('route', $ruta))
+            ->filter()
+            ->values()
+            ->all();
+    @endphp
+
+    @if (count($enlacesGrupo) > 0)
+        <p class="menu-cliente-grupo">{{ $nombreGrupo }}</p>
+        @include('components.panel.menu-enlaces', ['links' => $enlacesGrupo])
+    @endif
+@endforeach

@@ -1,0 +1,548 @@
+/* Panel del cliente minorista - Integrante 4 (Sebastián)
+   Colores: azul de la marca, celeste, blanco y negro.
+   Es más claro que el del mayorista porque es para personas. */
+
+.minorista-panel {
+  --min-azul: #1356e8;
+  --min-azul-oscuro: #003fb8;
+  --min-celeste: #eaf2ff;
+  --min-negro: #0f172a;
+  --min-gris: #64748b;
+  --min-borde: #e2e8f0;
+
+  display: grid;
+  gap: 22px;
+  color: #111827;
+}
+
+/* ---------- banner ---------- */
+.minorista-banner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 30px 34px;
+  overflow: hidden;
+  border-radius: 24px;
+  color: #fff;
+  background: linear-gradient(120deg, var(--min-azul-oscuro), var(--min-azul) 60%, #4f8cff);
+}
+
+/* circulito decorativo */
+.minorista-banner::after {
+  content: "";
+  position: absolute;
+  right: -60px;
+  top: -60px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.minorista-banner-texto {
+  position: relative;
+  z-index: 1;
+}
+
+.minorista-banner img {
+  position: relative;
+  z-index: 1;
+  width: 230px;
+  max-width: 35%;
+  object-fit: contain;
+}
+
+.minorista-etiqueta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.minorista-banner h1 {
+  margin: 12px 0 6px;
+  font-size: 2rem;
+  color: #fff;
+}
+
+.minorista-banner p {
+  margin: 0;
+  color: #dbeafe;
+}
+
+.minorista-banner-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* ---------- botones ---------- */
+.minorista-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.minorista-boton:hover {
+  transform: translateY(-2px);
+}
+
+.minorista-boton--blanco {
+  background: #fff;
+  color: var(--min-azul);
+}
+
+.minorista-boton--borde {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.minorista-boton--azul {
+  background: var(--min-azul);
+  color: #fff;
+}
+
+.minorista-boton--negro {
+  background: var(--min-negro);
+  color: #fff;
+}
+
+/* ---------- resumen ---------- */
+.minorista-resumen {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.minorista-resumen article {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  background: #fff;
+  border: 1px solid var(--min-borde);
+  border-radius: 18px;
+  transition: 0.15s;
+}
+
+.minorista-resumen article:hover {
+  border-color: var(--min-azul);
+  box-shadow: 0 10px 22px rgba(19, 86, 232, 0.12);
+}
+
+.minorista-resumen article > i {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  background: var(--min-celeste);
+  color: var(--min-azul);
+}
+
+.minorista-resumen strong {
+  display: block;
+  font-size: 1.35rem;
+  color: var(--min-negro);
+}
+
+.minorista-resumen span {
+  font-size: 0.82rem;
+  color: var(--min-gris);
+}
+
+/* ---------- columnas ---------- */
+.minorista-columnas {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 22px;
+  align-items: start;
+}
+
+.minorista-lateral {
+  display: grid;
+  gap: 22px;
+}
+
+.minorista-caja {
+  padding: 22px;
+  background: #fff;
+  border: 1px solid var(--min-borde);
+  border-radius: 20px;
+}
+
+.minorista-caja-titulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.minorista-caja-titulo h2 {
+  margin: 0;
+  font-size: 1.08rem;
+  color: var(--min-negro);
+}
+
+.minorista-caja-titulo h2 i {
+  color: var(--min-azul);
+  margin-right: 4px;
+}
+
+.minorista-caja-titulo a {
+  color: var(--min-azul);
+  font-weight: 700;
+  font-size: 0.88rem;
+  text-decoration: none;
+}
+
+/* ---------- pedidos con progreso ---------- */
+.minorista-pedidos {
+  display: grid;
+  gap: 14px;
+}
+
+.minorista-pedidos .minorista-caja-titulo {
+  margin-bottom: 0;
+}
+
+.minorista-pedido {
+  padding: 16px;
+  border: 1px solid var(--min-borde);
+  border-radius: 16px;
+  background: #fbfdff;
+}
+
+.minorista-pedido-arriba {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.minorista-pedido-icono {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: var(--min-celeste);
+  color: var(--min-azul);
+}
+
+.minorista-pedido-nombre {
+  flex: 1;
+  min-width: 0;
+}
+
+.minorista-pedido-nombre b,
+.minorista-pedido-nombre small {
+  display: block;
+}
+
+.minorista-pedido-nombre small {
+  color: var(--min-gris);
+}
+
+.minorista-pedido-total {
+  text-align: right;
+}
+
+.minorista-pedido-total b {
+  display: block;
+  color: var(--min-negro);
+}
+
+.minorista-pedido-total a {
+  font-size: 0.82rem;
+  color: var(--min-azul);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* barrita de pasos del pedido */
+.minorista-progreso {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.minorista-progreso li {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-align: center;
+}
+
+/* linea entre los puntos */
+.minorista-progreso li::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: -50%;
+  width: 100%;
+  height: 3px;
+  background: var(--min-borde);
+  z-index: 0;
+}
+
+.minorista-progreso li:first-child::before {
+  display: none;
+}
+
+.minorista-progreso li span {
+  position: relative;
+  z-index: 1;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #cbd5e1;
+}
+
+.minorista-progreso li.hecho {
+  color: var(--min-negro);
+  font-weight: 700;
+}
+
+.minorista-progreso li.hecho span {
+  background: var(--min-azul);
+  border-color: var(--min-azul);
+}
+
+.minorista-progreso li.hecho::before {
+  background: var(--min-azul);
+}
+
+.minorista-pedido--cancelado {
+  opacity: 0.75;
+}
+
+.minorista-pedido-aviso {
+  margin: 12px 0 0;
+  font-size: 0.85rem;
+  color: var(--min-negro);
+}
+
+.minorista-vacio {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 26px;
+  text-align: center;
+  color: var(--min-gris);
+}
+
+.minorista-vacio > i {
+  font-size: 2.5rem;
+  color: var(--min-azul);
+}
+
+/* ---------- accesos ---------- */
+.minorista-accesos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.minorista-accesos a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--min-celeste);
+  color: var(--min-azul-oscuro);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: 0.15s;
+}
+
+.minorista-accesos a:hover {
+  background: var(--min-azul);
+  color: #fff;
+}
+
+/* ---------- SmartMatch ---------- */
+.minorista-smart {
+  border: 0;
+  color: #fff;
+  background: linear-gradient(150deg, var(--min-negro), #1e3a8a);
+}
+
+.minorista-smart > i {
+  font-size: 1.8rem;
+  color: #93c5fd;
+}
+
+.minorista-smart h2 {
+  margin: 8px 0 6px;
+  font-size: 1.1rem;
+  color: #fff;
+}
+
+.minorista-smart p {
+  margin: 0 0 16px;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+}
+
+/* ---------- pestañas de la cuenta ---------- */
+.minorista-pestanas {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--min-borde);
+}
+
+.minorista-pestanas button {
+  padding: 10px 16px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--min-gris);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.minorista-pestanas button.activo {
+  color: var(--min-azul);
+  border-bottom-color: var(--min-azul);
+}
+
+.minorista-formulario {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-items: end;
+}
+
+.minorista-formulario[hidden] {
+  display: none;
+}
+
+.minorista-formulario label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.minorista-formulario input {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  font: inherit;
+}
+
+.minorista-formulario input:focus {
+  outline: 2px solid var(--min-azul);
+  border-color: var(--min-azul);
+}
+
+.minorista-formulario .admin-password-input {
+  position: relative;
+  display: block;
+}
+
+.minorista-formulario .admin-password-input input {
+  padding-right: 44px;
+}
+
+.minorista-formulario .admin-password-input button {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: var(--min-gris);
+  cursor: pointer;
+}
+
+.minorista-formulario > .minorista-boton {
+  justify-self: start;
+}
+
+/* el layout general le quita el padding a los section, aquí se lo devolvemos */
+.admin-theme .admin-main section.minorista-caja {
+  padding: 22px;
+}
+
+.minorista-panel > *,
+.minorista-columnas > * {
+  min-width: 0;
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 1100px) {
+  .minorista-resumen {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .minorista-columnas {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .minorista-banner img {
+    display: none;
+  }
+
+  .minorista-banner {
+    padding: 24px;
+  }
+
+  .minorista-formulario {
+    grid-template-columns: 1fr;
+  }
+
+  .minorista-pedido-arriba {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .minorista-resumen,
+  .minorista-accesos {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* el contenedor del ojito ya trae borde desde otro css, se lo quitamos
+   para que no salgan dos bordes */
+.admin-theme .admin-password-input {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
