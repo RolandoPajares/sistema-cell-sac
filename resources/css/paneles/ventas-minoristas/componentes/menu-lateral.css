@@ -1,0 +1,284 @@
+/* Menú agrupado exclusivo del rol Ventas Minoristas. */
+
+[data-panel-role="ventas_minoristas"] .admin-sidebar:has(.ventas-role-menu--minoristas) {
+  overflow: hidden;
+}
+
+[data-panel-role="ventas_minoristas"] .admin-sidebar:has(.ventas-role-menu--minoristas) .admin-sidebar-nav {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu--minoristas {
+  width: 100%;
+  min-width: 0;
+  max-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 5px 14px;
+  scrollbar-color: rgba(255, 255, 255, 0.34) transparent;
+  scrollbar-width: thin;
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu--minoristas::-webkit-scrollbar {
+  width: 5px;
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu--minoristas::-webkit-scrollbar-thumb {
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.34);
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu__groups {
+  display: grid;
+  gap: 12px;
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu__group {
+  min-width: 0;
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu__group > summary::-webkit-details-marker {
+  display: none;
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu__group > summary::marker {
+  content: "";
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu .ventas-role-menu__dashboard,
+[data-panel-role="ventas_minoristas"] .ventas-role-menu .ventas-role-menu__summary,
+[data-panel-role="ventas_minoristas"] .ventas-role-menu .ventas-role-menu__item {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  border: 0;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.92);
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  text-decoration: none;
+  transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu .ventas-role-menu__dashboard {
+  min-height: 50px;
+  margin: 0 0 14px;
+  padding: 0 14px;
+  gap: 11px;
+  font-size: 0.94rem;
+  font-weight: 750;
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu__dashboard > i,
+[data-panel-role="ventas_minoristas"] .ventas-role-menu__summary-main > i {
+  display: grid;
+  flex: 0 0 19px;
+  width: 19px;
+  place-items: center;
+  color: #e0f5ff;
+  font-size: 1rem;
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu .ventas-role-menu__summary {
+  width: 100%;
+  min-height: 39px;
+  justify-content: space-between;
+  padding: 0 12px;
+  gap: 9px;
+  font-size: 0.82rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu__summary-main {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 10px;
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu__chevron {
+  flex: 0 0 auto;
+  color: rgba(221, 242, 255, 0.76);
+  font-size: 0.62rem;
+  transition: transform 0.18s ease;
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu__group[open] .ventas-role-menu__chevron {
+  transform: rotate(180deg);
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu__dashboard:hover,
+[data-panel-role="ventas_minoristas"] .ventas-role-menu__dashboard.is-active,
+[data-panel-role="ventas_minoristas"] .ventas-role-menu__group.is-active > .ventas-role-menu__summary {
+  color: #fff;
+  background: linear-gradient(90deg, #1494ff, #04bdf5);
+  box-shadow: 0 8px 20px rgba(0, 182, 255, 0.2);
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu__summary:hover {
+  color: #fff;
+  background: rgba(49, 157, 235, 0.22);
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu__dashboard:focus-visible,
+[data-panel-role="ventas_minoristas"] .ventas-role-menu__summary:focus-visible,
+[data-panel-role="ventas_minoristas"] .ventas-role-menu__item:focus-visible {
+  outline: 2px solid #b8ecff;
+  outline-offset: 2px;
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu__submenu {
+  position: relative;
+  display: grid;
+  gap: 1px;
+  margin: 3px 0 0 27px;
+  padding: 2px 0 3px 11px;
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu__submenu::before {
+  content: "";
+  position: absolute;
+  inset: 5px auto 7px 0;
+  width: 1px;
+  background: rgba(210, 240, 255, 0.28);
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu .ventas-role-menu__item {
+  min-height: 34px;
+  padding: 0 9px;
+  gap: 9px;
+  border-radius: 7px;
+  color: rgba(235, 247, 255, 0.84);
+  font-size: 0.78rem;
+  font-weight: 550;
+  line-height: 1.2;
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu__item-marker {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 6px;
+  width: 6px;
+  height: 6px;
+  margin-left: -15px;
+  border: 1px solid rgba(219, 244, 255, 0.85);
+  border-radius: 50%;
+  background: #0751bd;
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu .ventas-role-menu__item:hover,
+[data-panel-role="ventas_minoristas"] .ventas-role-menu .ventas-role-menu__item.is-active {
+  color: #fff;
+  background: rgba(35, 157, 240, 0.3);
+  box-shadow: none;
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu__item.is-active .ventas-role-menu__item-marker {
+  border-color: #fff;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(131, 221, 255, 0.2);
+}
+
+[data-panel-role="ventas_minoristas"] .ventas-role-menu__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Evita dos enlaces resaltados hacia el mismo dashboard. */
+[data-panel-role="ventas_minoristas"] .admin-sidebar-footer > a.is-active {
+  color: rgba(255, 255, 255, 0.92);
+  background: transparent;
+  box-shadow: none;
+}
+
+[data-panel-role="ventas_minoristas"] .admin-app.is-sidebar-collapsed .ventas-role-menu__submenu,
+[data-panel-role="ventas_minoristas"] .admin-app.is-sidebar-collapsed .ventas-role-menu__label,
+[data-panel-role="ventas_minoristas"] .admin-app.is-sidebar-collapsed .ventas-role-menu__chevron {
+  display: none;
+}
+
+[data-panel-role="ventas_minoristas"] .admin-app.is-sidebar-collapsed .ventas-role-menu__dashboard,
+[data-panel-role="ventas_minoristas"] .admin-app.is-sidebar-collapsed .ventas-role-menu__summary {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+@media (max-width: 1180px) {
+  [data-panel-role="ventas_minoristas"] .ventas-role-menu--minoristas {
+    padding-inline: 0;
+  }
+
+  [data-panel-role="ventas_minoristas"] .ventas-role-menu__label,
+  [data-panel-role="ventas_minoristas"] .ventas-role-menu__chevron,
+  [data-panel-role="ventas_minoristas"] .ventas-role-menu__submenu {
+    display: none;
+  }
+
+  [data-panel-role="ventas_minoristas"] .ventas-role-menu__dashboard,
+  [data-panel-role="ventas_minoristas"] .ventas-role-menu__summary {
+    justify-content: center;
+    padding-inline: 0;
+  }
+}
+
+@media (max-width: 800px) {
+  [data-panel-role="ventas_minoristas"] .ventas-role-menu--minoristas {
+    padding: 0 2px 12px;
+  }
+
+  [data-panel-role="ventas_minoristas"] .ventas-role-menu__label,
+  [data-panel-role="ventas_minoristas"] .ventas-role-menu__chevron {
+    display: block;
+  }
+
+  [data-panel-role="ventas_minoristas"] .ventas-role-menu__submenu {
+    display: grid;
+  }
+
+  [data-panel-role="ventas_minoristas"] .ventas-role-menu__dashboard,
+  [data-panel-role="ventas_minoristas"] .ventas-role-menu__summary {
+    justify-content: flex-start;
+    padding-inline: 12px;
+  }
+
+  [data-panel-role="ventas_minoristas"] .ventas-role-menu__summary {
+    justify-content: space-between;
+  }
+
+  [data-panel-role="ventas_minoristas"] .admin-app.is-sidebar-collapsed .ventas-role-menu__label,
+  [data-panel-role="ventas_minoristas"] .admin-app.is-sidebar-collapsed .ventas-role-menu__chevron {
+    display: block;
+  }
+
+  [data-panel-role="ventas_minoristas"] .admin-app.is-sidebar-collapsed .ventas-role-menu__submenu {
+    display: grid;
+  }
+
+  [data-panel-role="ventas_minoristas"] .admin-app.is-sidebar-collapsed .ventas-role-menu__dashboard,
+  [data-panel-role="ventas_minoristas"] .admin-app.is-sidebar-collapsed .ventas-role-menu__summary {
+    justify-content: flex-start;
+    padding-inline: 12px;
+  }
+
+  [data-panel-role="ventas_minoristas"] .admin-app.is-sidebar-collapsed .ventas-role-menu__summary {
+    justify-content: space-between;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-panel-role="ventas_minoristas"] .ventas-role-menu__dashboard,
+  [data-panel-role="ventas_minoristas"] .ventas-role-menu__summary,
+  [data-panel-role="ventas_minoristas"] .ventas-role-menu__item,
+  [data-panel-role="ventas_minoristas"] .ventas-role-menu__chevron {
+    transition: none;
+  }
+}

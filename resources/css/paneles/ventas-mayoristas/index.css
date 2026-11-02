@@ -1,2 +1,5 @@
 /* CELL SAC | VENTAS MAYORISTAS | RESPONSABLE: INTEGRANTE 3 */
 /* Importar aquí CSS de cotizaciones, pedidos, reportes visuales, perfil y módulos exclusivos de Ventas Mayoristas. */
+
+@import './componentes/menu-lateral.css';
+@import './secciones/resumen-comercial.css';
