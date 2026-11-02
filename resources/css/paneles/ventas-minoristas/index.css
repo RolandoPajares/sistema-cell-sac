@@ -1,4 +1,5 @@
 /* CELL SAC | VENTAS MINORISTAS | RESPONSABLE: INTEGRANTE 3 */
 /* Importar aquí CSS de ventas, pedidos, indicadores, perfil y módulos exclusivos de Ventas Minoristas. */
 
+@import './componentes/menu-lateral.css';
 @import './secciones/resumen-ventas.css';
