@@ -509,12 +509,66 @@ body.modulo-catalog .catalog-buy-button:disabled {
   opacity: 0.62;
 }
 
+/* ==========================================
+   PAGINACIÓN DEL CATÁLOGO
+========================================== */
+
 body.modulo-catalog .pagination {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 26px;
+    display: block;
+    width: 100%;
+    margin: 30px 0;
+}
+
+body.modulo-catalog .pagination nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+body.modulo-catalog .pagination nav > div {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+body.modulo-catalog .pagination svg {
+    display: block;
+    width: 18px !important;
+    height: 18px !important;
+    max-width: 18px !important;
+    max-height: 18px !important;
+}
+
+body.modulo-catalog .pagination a,
+body.modulo-catalog .pagination [aria-current="page"] > span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    min-height: 38px;
+    padding: 8px 12px;
+    border: 1px solid #e0e6ef;
+    border-radius: 9px;
+    background: #fff;
+    color: #102044;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+body.modulo-catalog .pagination a:hover {
+    background: #e8f1ff;
+    border-color: #075ee8;
+    color: #075ee8;
+}
+
+body.modulo-catalog .pagination [aria-current="page"] > span {
+    background: #075ee8;
+    border-color: #075ee8;
+    color: #fff;
+    font-weight: 800;
 }
 
 body.modulo-catalog .catalog-empty {
@@ -999,4 +1053,91 @@ body.modulo-catalog .catalog-modal-actions .btn:disabled {
   body.modulo-catalog .catalog-modal-actions {
     flex-direction: column;
   }
+}
+
+/* Alinear flecha anterior cuando está deshabilitada */
+body.modulo-catalog .pagination [aria-disabled="true"] {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    vertical-align: middle;
+    min-width: 38px;
+    min-height: 38px;
+    padding: 8px 12px;
+    box-sizing: border-box;
+    border: 1px solid #e0e6ef;
+    border-radius: 9px;
+    background: #fff;
+    color: #102044;
+    line-height: 1;
+}
+
+body.modulo-catalog .pagination [aria-disabled="true"] > span {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    line-height: 1;
+}
+
+body.modulo-catalog .pagination [aria-disabled="true"] svg {
+    width: 18px !important;
+    height: 18px !important;
+    display: block;
+    margin: 0;
+}
+
+/* ==========================================
+   CORRECCIÓN DEFINITIVA DEL LATERAL
+   CATÁLOGO PÚBLICO
+========================================== */
+
+body.modulo-catalog .catalog-sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    align-content: flex-start !important;
+    gap: 22px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 17px 14px !important;
+}
+
+body.modulo-catalog .catalog-sidebar > .catalog-filter-section,
+body.modulo-catalog .catalog-sidebar > .catalog-price-filter {
+    display: block !important;
+    position: static !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+}
+
+body.modulo-catalog .catalog-filter-section {
+    padding: 0 !important;
+}
+
+body.modulo-catalog .catalog-filter-section h2 {
+    margin: 0 0 10px !important;
+}
+
+body.modulo-catalog .catalog-filter-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+    height: auto !important;
+    min-height: 0 !important;
+}
+
+body.modulo-catalog .catalog-filter-list a {
+    flex: 0 0 auto !important;
+}
+
+body.modulo-catalog .catalog-price-filter {
+    display: grid !important;
+    gap: 8px !important;
+    padding-top: 14px !important;
+    border-top: 1px solid var(--catalog-line) !important;
 }

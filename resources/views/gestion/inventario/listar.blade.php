@@ -175,55 +175,294 @@
         </div>
     </section>
 
-    <dialog class="inventario-dialog" id="registrar-movimiento-inventario">
-        <div class="inventario-dialog-card">
-            <header class="inventario-dialog-header"><div class="inventario-card-title"><span class="inventario-dialog-icon"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></span><div><h2>Registrar movimiento</h2><p>Actualiza las existencias y conserva la trazabilidad.</p></div></div><button class="inventario-dialog-close" type="button" data-close-inventory-movement aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
-            <form method="post" action="{{ route('legacy.admin.inventory.store') }}" class="inventario-movement-form">
-                @csrf
-                <label><span>Producto <b>*</b></span><select name="producto_id" data-inventory-product-select required><option value="">Selecciona un producto</option>@foreach ($movementProducts as $product)<option value="{{ $product->id }}" @selected((string) old('producto_id') === (string) $product->id)>{{ $product->marca }} {{ $product->nombre }} · Stock: {{ $product->existencias }}</option>@endforeach</select></label>
-                <label><span>Tipo de movimiento <b>*</b></span><select name="tipo_movimiento" data-inventory-type-select required><option value="entrada" @selected(old('tipo_movimiento') === 'entrada')>Entrada</option><option value="salida" @selected(old('tipo_movimiento') === 'salida')>Salida</option><option value="ajuste" @selected(old('tipo_movimiento') === 'ajuste')>Ajuste</option></select></label>
-                <label><span>Cantidad <b>*</b></span><input type="number" name="cantidad" min="1" value="{{ old('cantidad') }}" required></label>
-                <label class="inventario-form-wide"><span>Motivo u observación <b>*</b></span><textarea name="notas" maxlength="500" rows="3" required>{{ old('notas') }}</textarea></label>
-                <footer class="inventario-dialog-footer"><button class="inventario-cancel-button" type="button" data-close-inventory-movement>Cancelar</button><button class="inventario-primary-button" type="submit"><i class="bi bi-check2" aria-hidden="true"></i> Guardar movimiento</button></footer>
-            </form>
-        </div>
-    </dialog>
+    
+@php
+    $oldMovementProduct = $movementProducts->firstWhere('id', old('producto_id'));
+@endphp
+
+<dialog class="inventario-dialog" id="registrar-movimiento-inventario">
+    <div class="inventario-dialog-card">
+
+        <header class="inventario-dialog-header">
+            <div class="inventario-card-title">
+                <span class="inventario-dialog-icon">
+                    <i class="bi bi-arrow-left-right" aria-hidden="true"></i>
+                </span>
+                <div>
+                    <h2>Registrar movimiento</h2>
+                    <p>Actualiza las existencias y conserva la trazabilidad.</p>
+                </div>
+            </div>
+
+            <button class="inventario-dialog-close" type="button"
+                data-close-inventory-movement aria-label="Cerrar">
+                <i class="bi bi-x-lg" aria-hidden="true"></i>
+            </button>
+        </header>
+
+        <form method="post"
+            action="{{ route('legacy.admin.inventory.store') }}"
+            class="inventario-movement-form">
+
+            @csrf
+
+            {{-- BUSCADOR DE PRODUCTOS --}}
+            <div class="inventario-product-autocomplete">
+
+                <label for="inventario-product-search">
+                    <span>Producto <b>*</b></span>
+                </label>
+
+                <input
+                    type="text"
+                    id="inventario-product-search"
+                    class="inventario-product-search"
+                    placeholder="Escribe el nombre o marca del producto..."
+                    autocomplete="off"
+                    required
+                    value="{{ $oldMovementProduct ? trim($oldMovementProduct->marca.' '.$oldMovementProduct->nombre) : '' }}"
+                    data-inventory-product-search
+                    role="combobox"
+                    aria-autocomplete="list"
+                    aria-expanded="false"
+                    aria-controls="inventario-product-results"
+                >
+
+                {{-- ID REAL DEL PRODUCTO QUE SE ENVIARÁ A LARAVEL --}}
+                <input
+                    type="hidden"
+                    name="producto_id"
+                    value="{{ old('producto_id') }}"
+                    data-inventory-product-select
+                >
+
+                {{-- RESULTADOS DE BÚSQUEDA --}}
+                <div
+                    class="inventario-product-results"
+                    id="inventario-product-results"
+                    data-inventory-product-results
+                    hidden
+                    role="listbox">
+
+                    @foreach ($movementProducts as $product)
+                        <button
+                            type="button"
+                            class="inventario-product-option"
+                            data-product-option
+                            data-product-id="{{ $product->id }}"
+                            data-product-label="{{ $product->marca }} {{ $product->nombre }}"
+                            data-product-search="{{ $product->marca }} {{ $product->nombre }}"
+                            role="option">
+
+                            <span>
+                                <strong>
+                                    {{ $product->marca }} {{ $product->nombre }}
+                                </strong>
+                                <small>
+                                    Stock disponible: {{ $product->existencias }}
+                                </small>
+                            </span>
+
+                            <i class="bi bi-arrow-return-left"
+                                aria-hidden="true"></i>
+                        </button>
+                    @endforeach
+
+                </div>
+            </div>
+
+            {{-- TIPO DE MOVIMIENTO --}}
+            <label>
+                <span>Tipo de movimiento <b>*</b></span>
+                <select name="tipo_movimiento" data-inventory-type-select required>
+                    <option value="entrada" @selected(old('tipo_movimiento') === 'entrada')>
+                        Entrada
+                    </option>
+                    <option value="salida" @selected(old('tipo_movimiento') === 'salida')>
+                        Salida
+                    </option>
+                    <option value="ajuste" @selected(old('tipo_movimiento') === 'ajuste')>
+                        Ajuste
+                    </option>
+                </select>
+            </label>
+
+            {{-- CANTIDAD --}}
+            <label>
+                <span>Cantidad <b>*</b></span>
+                <input
+                    type="number"
+                    name="cantidad"
+                    min="1"
+                    value="{{ old('cantidad') }}"
+                    required>
+            </label>
+
+            {{-- MOTIVO --}}
+            <label class="inventario-form-wide">
+                <span>Motivo u observación <b>*</b></span>
+                <textarea
+                    name="notas"
+                    maxlength="500"
+                    rows="3"
+                    required>{{ old('notas') }}</textarea>
+            </label>
+
+            {{-- BOTONES --}}
+            <footer class="inventario-dialog-footer">
+                <button class="inventario-cancel-button"
+                    type="button"
+                    data-close-inventory-movement>
+                    Cancelar
+                </button>
+
+                <button class="inventario-primary-button" type="submit">
+                    <i class="bi bi-check2" aria-hidden="true"></i>
+                    Guardar movimiento
+                </button>
+            </footer>
+
+        </form>
+    </div>
+</dialog>
+
 @endsection
 
 @push('scripts')
     <script>
-        (() => {
-            const dialog = document.querySelector('#registrar-movimiento-inventario');
-            const page = document.querySelector('[data-inventory-page]');
-            const productSelect = dialog?.querySelector('[data-inventory-product-select]');
-            const typeSelect = dialog?.querySelector('[data-inventory-type-select]');
+        
+(() => {
+    const dialog = document.querySelector('#registrar-movimiento-inventario');
+    const page = document.querySelector('[data-inventory-page]');
 
-            if (!dialog || !page || !productSelect || !typeSelect) {
-                return;
+    const productInput = dialog?.querySelector('[data-inventory-product-search]');
+    const productId = dialog?.querySelector('[data-inventory-product-select]');
+    const productResults = dialog?.querySelector('[data-inventory-product-results]');
+    const typeSelect = dialog?.querySelector('[data-inventory-type-select]');
+    const form = dialog?.querySelector('form');
+
+    if (!dialog || !page || !productInput || !productId || !productResults || !typeSelect) {
+        return;
+    }
+
+    const options = [...productResults.querySelectorAll('[data-product-option]')];
+
+    const normalize = (value) =>
+        value.normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .trim();
+
+    const selectProduct = (option) => {
+        productInput.value = option.dataset.productLabel;
+        productId.value = option.dataset.productId;
+        productResults.hidden = true;
+        productInput.setAttribute('aria-expanded', 'false');
+        productInput.setCustomValidity('');
+    };
+
+    const searchProducts = () => {
+        const query = normalize(productInput.value);
+
+        // Escribir de nuevo invalida la selección anterior.
+        productId.value = '';
+
+        let matches = 0;
+
+        options.forEach((option) => {
+            const text = normalize(option.dataset.productSearch);
+            const visible = query.length > 0 && text.includes(query)
+                && matches < 8;
+
+            option.hidden = !visible;
+
+            if (visible) matches++;
+        });
+
+        productResults.hidden = matches === 0;
+        productInput.setAttribute('aria-expanded', matches > 0 ? 'true' : 'false');
+    };
+
+    productInput.addEventListener('input', searchProducts);
+
+    productInput.addEventListener('focus', () => {
+        if (productInput.value.trim()) searchProducts();
+    });
+
+    productResults.addEventListener('click', (event) => {
+        const option = event.target.closest('[data-product-option]');
+
+        if (option) selectProduct(option);
+    });
+
+    productInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            productResults.hidden = true;
+            productInput.setAttribute('aria-expanded', 'false');
+        }
+
+        if (event.key === 'Enter' && !productResults.hidden) {
+            event.preventDefault();
+
+            const firstMatch = options.find(option => !option.hidden);
+
+            if (firstMatch) selectProduct(firstMatch);
+        }
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!productInput.contains(event.target) &&
+            !productResults.contains(event.target)) {
+            productResults.hidden = true;
+            productInput.setAttribute('aria-expanded', 'false');
+        }
+    });
+
+    page.querySelectorAll('[data-open-inventory-movement]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const selectedOption = options.find(
+                option => option.dataset.productId === button.dataset.inventoryProduct
+            );
+
+            if (selectedOption) {
+                selectProduct(selectedOption);
+            } else {
+                productInput.value = '';
+                productId.value = '';
             }
 
-            page.querySelectorAll('[data-open-inventory-movement]').forEach((button) => {
-                button.addEventListener('click', () => {
-                    if (button.dataset.inventoryProduct) {
-                        productSelect.value = button.dataset.inventoryProduct;
-                    }
-                    if (button.dataset.movementType) {
-                        typeSelect.value = button.dataset.movementType;
-                    }
-                    dialog.showModal();
-                });
-            });
+            typeSelect.value = button.dataset.movementType || 'entrada';
 
-            document.querySelectorAll('[data-close-inventory-movement]').forEach((button) => button.addEventListener('click', () => dialog.close()));
-            dialog.addEventListener('click', (event) => {
-                if (event.target === dialog) {
-                    dialog.close();
-                }
-            });
+            dialog.showModal();
+        });
+    });
 
-            @if ($errors->any())
-                dialog.showModal();
-            @endif
-        })();
+    form?.addEventListener('submit', (event) => {
+        if (!productId.value) {
+            event.preventDefault();
+            productInput.setCustomValidity('Selecciona un producto de la lista.');
+            productInput.reportValidity();
+            return;
+        }
+
+        productInput.setCustomValidity('');
+    });
+
+    productInput.addEventListener('input', () => {
+        productInput.setCustomValidity('');
+    });
+
+    document.querySelectorAll('[data-close-inventory-movement]')
+        .forEach(button => button.addEventListener('click', () => dialog.close()));
+
+    dialog.addEventListener('click', (event) => {
+        if (event.target === dialog) dialog.close();
+    });
+
+    @if ($errors->any())
+        dialog.showModal();
+    @endif
+})();
+
     </script>
 @endpush

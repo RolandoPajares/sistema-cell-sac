@@ -41,11 +41,6 @@
             </div>
         </header>
 
-        <nav class="campanias-tabs" aria-label="Secciones de campañas">
-            <span class="campanias-tab campanias-tab--active"><i class="bi bi-card-list" aria-hidden="true"></i> Lista de campañas</span>
-            <span class="campanias-tab"><i class="bi bi-bar-chart-fill" aria-hidden="true"></i> Análisis y métricas</span>
-        </nav>
-
         <form class="campanias-toolbar" method="get" action="{{ route('management.campaigns') }}">
             <label class="campanias-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar campañas</span><input type="search" name="buscar" value="{{ $filters['buscar'] ?? '' }}" placeholder="Buscar campañas..."></label>
             <label><span class="visually-hidden">Filtrar por ubicación</span><select name="ubicacion"><option value="">Todas las ubicaciones</option>@foreach ($locationLabels as $value => $label)<option value="{{ $value }}" @selected(($filters['ubicacion'] ?? null) === $value)>{{ $label }}</option>@endforeach</select></label>

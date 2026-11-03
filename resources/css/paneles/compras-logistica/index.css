@@ -1,2 +1,118 @@
-/* CELL SAC | COMPRAS Y LOGÍSTICA | RESPONSABLE: INTEGRANTE 2 */
-/* Importar aquí estilos exclusivos de compras, inventario, proveedores, logística y perfil; no modificar CSS global. */
+@import './dashboard.css';
+
+/* ==========================================
+   MENÚ LATERAL - COMPRAS Y LOGÍSTICA
+   Estilos exclusivos del rol
+========================================== */
+
+.cl-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    padding: 8px 0;
+}
+
+.cl-menu__link,
+.cl-menu__toggle {
+    width: 100%;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    border: 0;
+    border-radius: 13px;
+    background: transparent;
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background .25s ease, color .25s ease;
+}
+
+.cl-menu__link {
+    justify-content: flex-start;
+}
+
+.cl-menu__link > i,
+.cl-menu__group-title > i {
+    width: 23px;
+    flex-shrink: 0;
+    font-size: 19px;
+    text-align: center;
+}
+
+.cl-menu__link:hover,
+.cl-menu__toggle:hover {
+    background: rgba(255, 255, 255, .12);
+    color: #fff;
+}
+
+.cl-menu__link.is-active,
+.cl-menu__group.is-open > .cl-menu__toggle {
+    background: linear-gradient(100deg, #0789ed, #08bce9);
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(0, 174, 255, .2);
+}
+
+.cl-menu__group-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.cl-menu__group-title > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cl-menu__arrow {
+    flex-shrink: 0;
+    font-size: 13px;
+    transition: transform .25s ease;
+}
+
+.cl-menu__group.is-open .cl-menu__arrow {
+    transform: rotate(180deg);
+}
+
+.cl-menu__submenu {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 7px 0 7px 22px;
+}
+
+.cl-menu__submenu[hidden] {
+    display: none;
+}
+
+.cl-menu__sublink {
+    position: relative;
+    display: block;
+    padding: 11px 13px;
+    border-radius: 9px;
+    color: rgba(255, 255, 255, .85);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background .2s ease, color .2s ease;
+}
+
+.cl-menu__sublink:hover {
+    background: rgba(255, 255, 255, .12);
+    color: #fff;
+}
+
+.cl-menu__sublink.is-active {
+    background: rgba(13, 174, 242, .28);
+    color: #fff;
+    border-left: 3px solid #fff;
+    font-weight: 700;
+}

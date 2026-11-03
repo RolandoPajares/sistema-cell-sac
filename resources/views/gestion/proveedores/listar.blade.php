@@ -46,11 +46,6 @@
             </article>
         </section>
 
-        <nav class="proveedores-tabs" aria-label="Secciones de proveedores">
-            <span class="proveedores-tab proveedores-tab--active">Lista de proveedores</span>
-            <span class="proveedores-tab">Análisis y métricas</span>
-        </nav>
-
         <form class="proveedores-toolbar" method="get" action="{{ route('management.suppliers') }}">
             <label class="proveedores-search">
                 <i class="bi bi-search" aria-hidden="true"></i>
@@ -135,7 +130,12 @@
                                     <td class="proveedores-muted">{{ $supplier->ciudad ?: 'Sin ciudad' }}</td>
                                     <td><span class="proveedores-status proveedores-status--{{ $supplier->activo ? 'active' : 'inactive' }}"><i class="bi bi-circle-fill" aria-hidden="true"></i>{{ $supplier->activo ? 'Activo' : 'Inactivo' }}</span></td>
                                     <td class="proveedores-actions-cell">
-                                        <a class="proveedores-action" href="{{ request()->fullUrlWithQuery(['proveedor' => $supplier->id]) }}" title="Ver proveedor"><i class="bi bi-eye" aria-hidden="true"></i></a>
+                                        <a class="proveedores-action"
+   href="{{ request()->fullUrlWithQuery(['proveedor' => $supplier->id]) }}"
+   title="Ver proveedor"
+   aria-label="Ver detalles de {{ $supplier->nombre }}">
+    <i class="bi bi-eye" aria-hidden="true"></i>
+</a>
                                         <button class="proveedores-action" type="button" data-open-supplier-edit="{{ $supplier->id }}" title="Editar proveedor"><i class="bi bi-pencil" aria-hidden="true"></i></button>
                                         @if ($supplier->activo)
                                             <form method="post" action="{{ route('management.suppliers.deactivate', $supplier) }}">
@@ -171,51 +171,190 @@
                     </div>
                 </footer>
             </section>
-
-            <aside class="proveedores-detail-column">
-                <section class="proveedores-detail-card">
-                    <header class="proveedores-card-header">
-                        <h2>Detalle del proveedor <i class="bi bi-chevron-up" aria-hidden="true"></i></h2>
-                    </header>
-                    @if ($selectedSupplier)
-                        @php($selectedInitial = mb_strtoupper(mb_substr($selectedSupplier->nombre, 0, 1)))
-                        <div class="proveedores-detail-identity">
-                            <span class="proveedores-detail-avatar">{{ $selectedInitial }}</span>
-                            <div><strong>{{ $selectedSupplier->nombre }}</strong><span>RUC: {{ $selectedSupplier->ruc }}</span><small>Proveedor vinculado al catálogo.</small></div>
-                            <span class="proveedores-status proveedores-status--{{ $selectedSupplier->activo ? 'active' : 'inactive' }}">{{ $selectedSupplier->activo ? 'Activo' : 'Inactivo' }}</span>
-                        </div>
-                        <div class="proveedores-detail-actions">
-                            <button class="proveedores-toolbar-button" type="button" data-open-supplier-edit="{{ $selectedSupplier->id }}"><i class="bi bi-pencil" aria-hidden="true"></i> Editar</button>
-                            <a class="proveedores-more-button" href="#proveedores-info" aria-label="Ver información"><i class="bi bi-three-dots-vertical" aria-hidden="true"></i></a>
-                        </div>
-                        <nav class="proveedores-detail-tabs" aria-label="Detalle del proveedor"><span class="is-active">Información</span><span>Estadísticas</span><span>Órdenes</span><span>Productos</span></nav>
-                        <div class="proveedores-detail-section" id="proveedores-info">
-                            <h3>Información general</h3>
-                            <dl class="proveedores-info-list">
-                                <div><dt><i class="bi bi-person" aria-hidden="true"></i> Contacto</dt><dd>Área de compras</dd></div>
-                                <div><dt><i class="bi bi-envelope" aria-hidden="true"></i> Correo</dt><dd>{{ $selectedSupplier->correo }}</dd></div>
-                                <div><dt><i class="bi bi-telephone" aria-hidden="true"></i> Teléfono</dt><dd>{{ $selectedSupplier->telefono ?: 'No registrado' }}</dd></div>
-                                <div><dt><i class="bi bi-geo-alt" aria-hidden="true"></i> Ciudad</dt><dd>{{ $selectedSupplier->ciudad ?: 'No registrada' }}</dd></div>
-                                <div><dt><i class="bi bi-box-seam" aria-hidden="true"></i> Categorías</dt><dd class="proveedores-detail-tags">@forelse ($selectedCategories->take(3) as $categoryName)<span>{{ $categoryName }}</span>@empty<span>Sin categorías</span>@endforelse</dd></div>
-                            </dl>
-                        </div>
-                        <div class="proveedores-performance">
-                            <header><h3>Rendimiento de compras</h3><small>Datos registrados</small></header>
-                            <div class="proveedores-performance-grid">
-                                <div class="proveedores-progress-ring" style="--proveedores-progress: {{ $receivedPercent }}%"><strong>{{ $receivedPercent }}%</strong><span>Recibidas</span></div>
-                                <div class="proveedores-performance-stats">
-                                    <div><span><i class="bi bi-file-earmark-check-fill is-blue" aria-hidden="true"></i> Órdenes totales</span><b>{{ number_format($purchaseCount) }}</b></div>
-                                    <div><span><i class="bi bi-cash-coin is-green" aria-hidden="true"></i> Total comprado</span><b>S/ {{ number_format((float) ($selectedSupplier->purchases_total ?? 0), 2) }}</b></div>
-                                    <div><span><i class="bi bi-calendar3 is-purple" aria-hidden="true"></i> Última orden</span><b>{{ $selectedSupplier->latest_purchase_date ? \Illuminate\Support\Carbon::parse($selectedSupplier->latest_purchase_date)->format('d/m/Y') : 'Sin compras' }}</b></div>
-                                </div>
-                            </div>
-                        </div>
-                    @else
-                        <div class="proveedores-detail-empty"><i class="bi bi-truck" aria-hidden="true"></i><strong>Selecciona un proveedor</strong><span>Su información aparecerá aquí.</span></div>
-                    @endif
-                </section>
-            </aside>
         </div>
+
+        
+@if ($selectedSupplier)
+    @php($selectedInitial = mb_strtoupper(mb_substr($selectedSupplier->nombre, 0, 1)))
+
+    <dialog class="proveedores-dialog proveedores-detail-dialog" id="detalle-proveedor">
+        <div class="proveedores-dialog-card">
+
+            {{-- ENCABEZADO --}}
+            <header class="proveedores-dialog-header">
+                <div>
+                    <span>Compras y logística</span>
+                    <h2>Detalle del proveedor</h2>
+                    <p>{{ $selectedSupplier->nombre }}</p>
+                </div>
+
+                <button type="button"
+                        class="proveedores-dialog-close"
+                        data-close-supplier-dialog
+                        aria-label="Cerrar">
+                    <i class="bi bi-x-lg" aria-hidden="true"></i>
+                </button>
+            </header>
+
+            <div class="proveedores-dialog-body">
+
+                {{-- IDENTIDAD DEL PROVEEDOR --}}
+                <div class="proveedores-detail-identity">
+                    <span class="proveedores-detail-avatar">
+                        {{ $selectedInitial }}
+                    </span>
+
+                    <div>
+                        <strong>{{ $selectedSupplier->nombre }}</strong>
+                        <span>RUC: {{ $selectedSupplier->ruc }}</span>
+                        <small>Proveedor vinculado al catálogo.</small>
+                    </div>
+
+                    <span class="proveedores-status proveedores-status--{{ $selectedSupplier->activo ? 'active' : 'inactive' }}">
+                        {{ $selectedSupplier->activo ? 'Activo' : 'Inactivo' }}
+                    </span>
+                </div>
+
+                {{-- ACCIONES --}}
+                <div class="proveedores-detail-actions">
+                    <button class="proveedores-toolbar-button"
+                            type="button"
+                            data-open-supplier-edit="{{ $selectedSupplier->id }}">
+                        <i class="bi bi-pencil" aria-hidden="true"></i>
+                        Editar
+                    </button>
+                </div>
+
+                {{-- PESTAÑAS --}}
+                <nav class="proveedores-detail-tabs" aria-label="Detalle del proveedor">
+                    <span class="is-active">Información</span>
+                    <span>Estadísticas</span>
+                    <span>Órdenes</span>
+                    <span>Productos</span>
+                </nav>
+
+                {{-- INFORMACIÓN GENERAL --}}
+                <div class="proveedores-detail-section" id="proveedores-info">
+                    <h3>Información general</h3>
+
+                    <dl class="proveedores-info-list">
+                        <div>
+                            <dt><i class="bi bi-person"></i> Contacto</dt>
+                            <dd>Área de compras</dd>
+                        </div>
+
+                        <div>
+                            <dt><i class="bi bi-envelope"></i> Correo</dt>
+                            <dd>{{ $selectedSupplier->correo }}</dd>
+                        </div>
+
+                        <div>
+                            <dt><i class="bi bi-telephone"></i> Teléfono</dt>
+                            <dd>{{ $selectedSupplier->telefono ?: 'No registrado' }}</dd>
+                        </div>
+
+                        <div>
+                            <dt><i class="bi bi-geo-alt"></i> Ciudad</dt>
+                            <dd>{{ $selectedSupplier->ciudad ?: 'No registrada' }}</dd>
+                        </div>
+
+                        <div>
+                            <dt><i class="bi bi-box-seam"></i> Categorías</dt>
+                            <dd class="proveedores-detail-tags">
+                                @forelse ($selectedCategories->take(3) as $categoryName)
+                                    <span>{{ $categoryName }}</span>
+                                @empty
+                                    <span>Sin categorías</span>
+                                @endforelse
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+
+                {{-- RENDIMIENTO DE COMPRAS --}}
+                <div class="proveedores-performance">
+                    <header>
+                        <h3>Rendimiento de compras</h3>
+                        <small>Datos registrados</small>
+                    </header>
+
+                    <div class="proveedores-performance-grid">
+
+                        <div class="proveedores-progress-ring"
+                             style="--proveedores-progress: {{ $receivedPercent }}%">
+                            <strong>{{ $receivedPercent }}%</strong>
+                            <span>Recibidas</span>
+                        </div>
+
+                        <div class="proveedores-performance-stats">
+
+                            <div>
+                                <span>
+                                    <i class="bi bi-file-earmark-check-fill is-blue"></i>
+                                    Órdenes totales
+                                </span>
+                                <b>{{ number_format($purchaseCount) }}</b>
+                            </div>
+
+                            <div>
+                                <span>
+                                    <i class="bi bi-cash-coin is-green"></i>
+                                    Total comprado
+                                </span>
+                                <b>S/ {{ number_format((float) ($selectedSupplier->purchases_total ?? 0), 2) }}</b>
+                            </div>
+
+                            <div>
+                                <span>
+                                    <i class="bi bi-calendar3 is-purple"></i>
+                                    Última orden
+                                </span>
+                                <b>
+                                    {{ $selectedSupplier->latest_purchase_date
+                                        ? \Illuminate\Support\Carbon::parse($selectedSupplier->latest_purchase_date)->format('d/m/Y')
+                                        : 'Sin compras' }}
+                                </b>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </dialog>
+@endif
+
+
+        @if ($selectedSupplier)
+    <dialog class="proveedores-dialog proveedores-detail-dialog" id="detalle-proveedor">
+        <div class="proveedores-dialog-card">
+
+            <header class="proveedores-dialog-header">
+                <div>
+                    <span>Compras y logística</span>
+                    <h2>Detalle del proveedor</h2>
+                    <p>{{ $selectedSupplier->nombre }}</p>
+                </div>
+
+                <button type="button"
+                        class="proveedores-dialog-close"
+                        data-close-supplier-dialog
+                        aria-label="Cerrar">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </header>
+
+            <div class="proveedores-dialog-body">
+
+                {{-- AQUÍ CONSERVA EL CONTENIDO ACTUAL DEL DETALLE --}}
+                {{-- Desde proveedores-detail-identity --}}
+                {{-- Hasta proveedores-performance --}}
+
+            </div>
+        </div>
+    </dialog>
+@endif
 
         <div class="proveedores-bottom-grid">
             <section class="proveedores-secondary-card">
@@ -274,6 +413,19 @@
             };
 
             page.querySelector('[data-open-supplier-create]')?.addEventListener('click', () => openDialog(document.querySelector('#nuevo-proveedor')));
+            document.querySelectorAll('[data-close-supplier-dialog]').forEach(button => {
+    button.addEventListener('click', () => {
+        button.closest('dialog')?.close();
+    });
+});
+
+@if(isset($selectedSupplier))
+    const detalleProveedor = document.querySelector('#detalle-proveedor');
+
+    if (detalleProveedor) {
+        openDialog(detalleProveedor);
+    }
+@endif
             page.querySelectorAll('[data-open-supplier-edit]').forEach((button) => {
                 button.addEventListener('click', () => openDialog(document.querySelector(`#editar-proveedor-${button.dataset.openSupplierEdit}`)));
             });
