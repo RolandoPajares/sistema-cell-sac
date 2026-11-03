@@ -242,3 +242,59 @@
     font-size: 2rem;
   }
 }
+
+
+/* ==========================================
+   PUBLICIDAD INTELIGENTE
+   Mejorar espaciado interior de las tarjetas
+========================================== */
+
+/* Tarjetas principales: gráficos e insights */
+.publicidad-rejilla .panel,
+.publicidad-tablas .panel {
+    box-sizing: border-box;
+    min-width: 0;
+    padding: 22px !important;
+}
+
+/* Separación de los títulos */
+.publicidad-rejilla .panel h2,
+.publicidad-tablas .panel h2 {
+    margin-top: 0;
+    margin-bottom: 18px;
+}
+
+/* Contenido de las tarjetas */
+.publicidad-rejilla .panel p,
+.publicidad-tablas .panel p {
+    line-height: 1.6;
+}
+
+/* Listas de campañas */
+.publicidad-tablas ol {
+    padding-left: 25px;
+}
+
+.publicidad-tablas li {
+    padding: 10px 6px;
+}
+
+/* Tarjetas de indicadores */
+.publicidad-metricas article {
+    box-sizing: border-box;
+    padding: 16px 18px;
+}
+
+/* Tarjeta promocional del menú */
+.publicidad-convierte {
+    box-sizing: border-box;
+    padding: 20px !important;
+}
+
+/* Adaptación para pantallas pequeñas */
+@media (max-width: 760px) {
+    .publicidad-rejilla .panel,
+    .publicidad-tablas .panel {
+        padding: 16px !important;
+    }
+}

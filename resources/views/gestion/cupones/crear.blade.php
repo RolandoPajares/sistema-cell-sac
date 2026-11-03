@@ -1,4 +1,9 @@
-<form method="post" class="form-card compact-form" action="{{ route('management.coupons.store') }}">
+
+<form method="post"
+      class="form-card compact-form cupones-form"
+      action="{{ route('management.coupons.store') }}"
+      style="width:100%; max-width:none; box-sizing:border-box; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px;">
+
     @csrf
 
     <label>
@@ -16,25 +21,12 @@
 
     <label>
         Valor
-        <input
-            type="number"
-            name="valor"
-            step="0.01"
-            min="0.01"
-            required
-        >
+        <input type="number" name="valor" step="0.01" min="0.01" required>
     </label>
 
     <label>
         Compra mínima
-        <input
-            type="number"
-            name="minimo_compra"
-            step="0.01"
-            min="0"
-            value="0"
-            required
-        >
+        <input type="number" name="minimo_compra" step="0.01" min="0" value="0" required>
     </label>
 
     <label>
@@ -52,5 +44,20 @@
         <input type="datetime-local" name="finaliza_en" required>
     </label>
 
-    <button class="btn btn-primary">Guardar cupón</button>
+    <button class="btn btn-primary" type="submit"
+            style="grid-column:1/-1;">
+        Guardar cupón
+    </button>
 </form>
+
+<style>
+@media (max-width: 700px) {
+    .cupones-form {
+        grid-template-columns: 1fr !important;
+    }
+
+    .cupones-form button {
+        grid-column: 1 !important;
+    }
+}
+</style>

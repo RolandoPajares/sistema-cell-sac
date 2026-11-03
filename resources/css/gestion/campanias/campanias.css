@@ -1427,3 +1427,37 @@
     width: 100%;
   }
 }
+
+
+/* ==========================================
+   CORRECCIÓN DE ANCHO DEL FORMULARIO
+   Marketing - Campañas
+========================================== */
+
+.modulo-campanias .campanias-dialog {
+    width: min(1120px, calc(100vw - 32px));
+}
+
+.modulo-campanias .campanias-dialog form.compact-form {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+}
+
+.modulo-campanias .campanias-dialog .form-card {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+}
+
+.modulo-campanias .campanias-form-grid {
+    width: 100%;
+    max-width: none;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 20px;
+}
+
+.modulo-campanias .campanias-upload-card {
+    width: 100%;
+    min-width: 0;
+}
