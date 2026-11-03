@@ -1,3 +1,4 @@
+import './modulos/buscador-productos.js';
 
 /* ==========================================
    CELL SAC - COMPRAS Y LOGÍSTICA

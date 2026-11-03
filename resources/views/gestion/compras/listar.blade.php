@@ -35,8 +35,8 @@
                 <p>Controla las compras a proveedores y las recepciones que actualizan tu inventario.</p>
             </div>
             <div class="compras-hero-actions">
-                <button class="compras-secondary-button" type="button" disabled title="La importación de compras aún no está disponible."><i class="bi bi-upload" aria-hidden="true"></i> Importar</button>
-                <button class="compras-secondary-button" type="button" disabled title="La exportación de compras aún no está disponible."><i class="bi bi-download" aria-hidden="true"></i> Exportar</button>
+                <button class="compras-secondary-button" type="button"  title="La importación de compras aún no está disponible."><i class="bi bi-upload" aria-hidden="true"></i> Importar</button>
+                <button class="compras-secondary-button" type="button"  title="La exportación de compras aún no está disponible."><i class="bi bi-download" aria-hidden="true"></i> Exportar</button>
                 <button class="compras-primary-button" type="button" data-admin-dialog-open="nueva-compra" @disabled($suppliers->isEmpty() || $products->isEmpty())>
                     <i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva compra
                 </button>
@@ -126,19 +126,15 @@
                                 <td><span class="compras-status compras-status--{{ $statusClass($status) }}"><i class="bi bi-circle-fill" aria-hidden="true"></i>{{ $status }}</span></td>
                                 <td><span class="compras-reception compras-reception--{{ $statusClass($status) }}"><i class="bi bi-box-seam" aria-hidden="true"></i>{{ $receptionLabel($status) }}</span></td>
                                 <td>
-                                    <details class="compras-row-details">
-                                        <summary aria-label="Ver detalle de orden {{ $purchase->id }}" title="Ver detalle"><i class="bi bi-eye" aria-hidden="true"></i></summary>
-                                        <div class="compras-detail-popover">
-                                            <strong>Orden de compra</strong>
-                                            <span>{{ $supplierName }} · {{ $purchase->fecha_compra?->format('d/m/Y') ?? 'Fecha no disponible' }}</span>
-                                            <ul>
-                                                @foreach ($purchase->details as $detail)
-                                                    <li><span>{{ $detail->product?->nombre ?? 'Producto no disponible' }} × {{ $detail->cantidad }}</span><b>S/ {{ number_format((float) $detail->costo_unitario * (int) $detail->cantidad, 2) }}</b></li>
-                                                @endforeach
-                                            </ul>
-                                            <p>Total <b>S/ {{ number_format((float) $purchase->total, 2) }}</b></p>
-                                        </div>
-                                    </details>
+                                    <button
+    type="button"
+    class="compras-row-view"
+    data-admin-dialog-open="detalle-compra-{{ $purchase->id }}"
+    aria-label="Ver detalle de orden {{ $purchase->id }}"
+    title="Ver detalle"
+>
+    <i class="bi bi-eye" aria-hidden="true"></i>
+</button>
                                 </td>
                             </tr>
                         @empty
@@ -158,6 +154,97 @@
                 {{ $purchases->links() }}
             </footer>
         </section>
+
+        
+{{-- Ventanas modales de detalle de compras --}}
+@foreach ($purchases as $purchase)
+    @php
+        $supplierName = $purchase->supplier?->nombre ?? 'Proveedor no disponible';
+        $status = (string) $purchase->estado;
+    @endphp
+
+    <dialog
+        class="admin-dialog compras-detail-dialog"
+        id="detalle-compra-{{ $purchase->id }}"
+        aria-labelledby="detalle-compra-title-{{ $purchase->id }}"
+    >
+        <header class="admin-dialog-header">
+            <div>
+                <h2 id="detalle-compra-title-{{ $purchase->id }}">
+                    Detalle de compra
+                </h2>
+                <p>
+                    OC-{{ $purchase->fecha_compra?->format('y') ?? now()->format('y') }}-{{ str_pad((string) $purchase->id, 5, '0', STR_PAD_LEFT) }}
+                </p>
+            </div>
+
+            <button
+                class="admin-dialog-close"
+                type="button"
+                data-admin-dialog-close
+                aria-label="Cerrar ventana"
+            >
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </header>
+
+        <div class="admin-dialog-body">
+
+            <div class="compras-detail-info">
+                <div>
+                    <small>Proveedor</small>
+                    <strong>{{ $supplierName }}</strong>
+                    <span>RUC: {{ $purchase->supplier?->ruc ?? '—' }}</span>
+                </div>
+
+                <div>
+                    <small>Fecha de compra</small>
+                    <strong>
+                        {{ $purchase->fecha_compra?->format('d/m/Y') ?? '—' }}
+                    </strong>
+                </div>
+
+                <div>
+                    <small>Estado</small>
+                    <span class="compras-status compras-status--{{ $statusClass($status) }}">
+                        {{ $status }}
+                    </span>
+                </div>
+            </div>
+
+            <section class="compras-detail-products">
+                <h3>Productos de la orden</h3>
+
+                @foreach ($purchase->details as $detail)
+                    <article class="compras-detail-product">
+                        <div>
+                            <strong>
+                                {{ $detail->product?->nombre ?? 'Producto no disponible' }}
+                            </strong>
+                            <small>
+                                {{ $detail->cantidad }} unidades
+                                × S/ {{ number_format((float) $detail->costo_unitario, 2) }}
+                            </small>
+                        </div>
+
+                        <strong>
+                            S/ {{ number_format((float) $detail->costo_unitario * (int) $detail->cantidad, 2) }}
+                        </strong>
+                    </article>
+                @endforeach
+            </section>
+
+            <div class="compras-detail-total">
+                <span>Total de la compra</span>
+                <strong>
+                    S/ {{ number_format((float) $purchase->total, 2) }}
+                </strong>
+            </div>
+
+        </div>
+    </dialog>
+@endforeach
+
 
         <div class="compras-bottom-grid">
             <section class="compras-summary-card">

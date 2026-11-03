@@ -4,16 +4,15 @@
 
 @php
     $visibleRoutes = [
-        'home',
-        'dashboard',
-        'recommendations',
-        'comparison',
-        'assistant',
-        'smart.optimizer',
-        'management.inventory',
-        'management.suppliers',
-        'management.purchases',
-    ];
+    'home',
+    'recommendations',
+    'comparison',
+    'assistant',
+    'smart.optimizer',
+    'management.inventory',
+    'management.suppliers',
+    'management.purchases',
+];
 
     $links = array_values(array_filter(
         $links ?? [],
@@ -52,7 +51,7 @@
         ],
     ];
 
-    $directRoutes = ['home', 'dashboard'];
+    $directRoutes = ['home'];
 
     $activeGroup = null;
 
