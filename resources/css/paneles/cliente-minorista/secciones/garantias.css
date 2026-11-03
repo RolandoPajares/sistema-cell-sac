@@ -1,0 +1,215 @@
+/* Vista "Garantías" del cliente minorista - Integrante 4 */
+
+.garantia-cliente {
+  --gar-azul: #1356e8;
+  --gar-celeste: #eaf2ff;
+
+  display: grid;
+  gap: 20px;
+}
+
+.garantia-cliente-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 26px 28px;
+  border-radius: 22px;
+  color: #fff;
+  background: linear-gradient(120deg, #003fb8, #1356e8);
+}
+
+.garantia-cliente-etiqueta {
+  display: inline-flex;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.garantia-cliente-cabecera h1 {
+  margin: 12px 0 6px;
+  font-size: 1.6rem;
+  color: #fff;
+}
+
+.garantia-cliente-cabecera p {
+  margin: 0;
+  color: #dbeafe;
+}
+
+.garantia-cliente-contador {
+  display: grid;
+  justify-items: center;
+  padding: 14px 22px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.garantia-cliente-contador strong {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.garantia-cliente-contador span {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+}
+
+.garantia-cliente-lista {
+  display: grid;
+  gap: 12px;
+}
+
+/* cada producto con su barra de tiempo */
+.garantia-cliente-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-left: 5px solid var(--gar-azul);
+  border-radius: 16px;
+}
+
+.garantia-cliente-icono {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  font-size: 1.3rem;
+  color: var(--gar-azul);
+  background: var(--gar-celeste);
+}
+
+.garantia-cliente-info {
+  flex: 1;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.garantia-cliente-info small {
+  color: #64748b;
+}
+
+.garantia-cliente-barra {
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+.garantia-cliente-barra span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--gar-azul);
+}
+
+.garantia-cliente-estado {
+  display: grid;
+  justify-items: end;
+  text-align: right;
+}
+
+.garantia-cliente-estado strong {
+  font-size: 1.1rem;
+  color: #0f172a;
+}
+
+.garantia-cliente-estado small {
+  color: #64748b;
+}
+
+/* por vencer (30 días o menos) y vencidas en gris/negro */
+.garantia-cliente-item.is-por-vencer {
+  border-left-color: #0f172a;
+}
+
+.garantia-cliente-item.is-por-vencer .garantia-cliente-barra span {
+  background: #0f172a;
+}
+
+.garantia-cliente-item.is-vencida {
+  border-left-color: #94a3b8;
+  opacity: 0.7;
+}
+
+.garantia-cliente-item.is-vencida .garantia-cliente-icono {
+  color: #64748b;
+  background: #f1f5f9;
+}
+
+.garantia-cliente-vacio,
+.garantia-cliente-nota {
+  margin: 0;
+  color: #64748b;
+}
+
+.garantia-cliente-nota a {
+  font-weight: 700;
+  color: var(--gar-azul);
+}
+
+@media (max-width: 600px) {
+  .garantia-cliente-item {
+    flex-wrap: wrap;
+  }
+
+  .garantia-cliente-estado {
+    justify-items: start;
+    text-align: left;
+  }
+}
+
+/* ---------- botones de solicitud ---------- */
+.garantia-cliente-derecha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.garantia-cliente-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 12px;
+  font: inherit;
+  font-weight: 700;
+  color: #1356e8;
+  background: #fff;
+  cursor: pointer;
+}
+
+.garantia-cliente-revisar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 6px 11px;
+  border: 1px solid #c7d6f5;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--gar-azul);
+  background: #f5f8ff;
+  cursor: pointer;
+}
+
+.garantia-cliente-revisar:hover {
+  color: #fff;
+  background: var(--gar-azul);
+}
