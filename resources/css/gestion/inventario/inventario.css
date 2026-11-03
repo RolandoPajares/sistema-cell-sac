@@ -412,7 +412,7 @@
 
 .inventario-table {
   width: 100%;
-  min-width: 1090px;
+  min-width: 1250px;
   border-collapse: collapse;
   color: #18345f;
   font-size: 0.63rem;
@@ -443,54 +443,55 @@
   border-radius: 0 7px 7px 0;
 }
 
+/* Anchos optimizados para las 10 columnas */
 .inventario-table th:nth-child(1),
 .inventario-table td:nth-child(1) {
-  width: 34px;
+    width: 34px;
 }
 
 .inventario-table th:nth-child(2),
 .inventario-table td:nth-child(2) {
-  width: 24%;
+    width: 250px;
 }
 
 .inventario-table th:nth-child(3),
 .inventario-table td:nth-child(3) {
-  width: 10%;
+    width: 95px;
 }
 
 .inventario-table th:nth-child(4),
 .inventario-table td:nth-child(4) {
-  width: 10%;
+    width: 125px;
 }
 
 .inventario-table th:nth-child(5),
 .inventario-table td:nth-child(5) {
-  width: 11%;
+    width: 125px;
 }
 
 .inventario-table th:nth-child(6),
 .inventario-table td:nth-child(6) {
-  width: 9%;
+    width: 95px;
 }
 
 .inventario-table th:nth-child(7),
 .inventario-table td:nth-child(7) {
-  width: 11%;
+    width: 140px;
 }
 
 .inventario-table th:nth-child(8),
 .inventario-table td:nth-child(8) {
-  width: 14%;
+    width: 160px;
 }
 
 .inventario-table th:nth-child(9),
 .inventario-table td:nth-child(9) {
-  width: 9%;
+    width: 115px;
 }
 
 .inventario-table th:nth-child(10),
 .inventario-table td:nth-child(10) {
-  width: 105px;
+    width: 105px;
 }
 
 .inventario-table td {
@@ -1217,4 +1218,63 @@
   .inventario-alert-row .inventario-status {
     display: none;
   }
+}
+
+/* ==========================================
+   REFINAMIENTO DE ESPACIADO INTERIOR
+   Gestión de inventario
+========================================== */
+
+/* Tarjeta principal de inventario */
+.modulo-inventario .inventario-table-card {
+    padding: 18px 20px 16px !important;
+    box-sizing: border-box;
+}
+
+/* Encabezado: icono, título y botón */
+.modulo-inventario .inventario-table-card .inventario-card-header {
+    padding: 0 6px 5px;
+    gap: 16px;
+}
+
+/* Tabla: separación respecto a los bordes */
+.modulo-inventario .inventario-table-wrap {
+    width: 100%;
+    margin: 4px 0;
+    padding-bottom: 5px;
+    box-sizing: border-box;
+}
+
+/* Paginación */
+.modulo-inventario .inventario-pagination {
+    padding: 12px 6px 2px;
+    gap: 12px;
+}
+
+/* Selector de productos por página */
+.modulo-inventario .inventario-per-page-form {
+    gap: 9px;
+    margin: 0 5px;
+}
+
+/* Navegación de páginas */
+.modulo-inventario .inventario-pagination nav {
+    margin-right: 4px;
+}
+
+/* Tarjetas inferiores */
+.modulo-inventario .inventario-secondary-card {
+    padding: 18px 20px !important;
+    box-sizing: border-box;
+}
+
+/* Encabezados de tarjetas inferiores */
+.modulo-inventario .inventario-secondary-card .inventario-card-header {
+    padding: 0 4px 5px;
+}
+
+/* Contenido de alertas y movimientos */
+.modulo-inventario .inventario-alert-list,
+.modulo-inventario .inventario-recent-table-wrap {
+    margin-top: 8px;
 }
