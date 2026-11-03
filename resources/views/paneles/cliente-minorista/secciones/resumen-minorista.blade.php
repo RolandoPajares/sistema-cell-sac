@@ -48,7 +48,7 @@
 
     <div class="minorista-columnas">
         {{-- Pedidos recientes con seguimiento --}}
-        <section class="minorista-caja minorista-pedidos">
+        <section class="minorista-caja minorista-pedidos" data-cliente-ancla="seguimiento">
             <div class="minorista-caja-titulo">
                 <h2><i class="bi bi-truck"></i> Sigue tus pedidos</h2>
                 <a href="{{ route('orders.index') }}">Ver todos <i class="bi bi-chevron-right"></i></a>
@@ -69,7 +69,7 @@
                         </div>
                         <div class="minorista-pedido-total">
                             <b>S/ {{ number_format((float) $pedido->total, 2) }}</b>
-                            <a href="{{ route('orders.show', $pedido) }}">Ver detalle</a>
+                            <button type="button" class="minorista-ver" data-cliente-modal-abrir="modal-pedido-{{ $pedido->id }}">Ver detalle</button>
                         </div>
                     </div>
 
@@ -115,3 +115,43 @@
         </div>
     </div>
 </section>
+
+{{-- Modales: detalle rápido de cada pedido --}}
+@foreach ($pedidos->take(4) as $pedido)
+    <dialog class="cliente-modal" id="modal-pedido-{{ $pedido->id }}" aria-labelledby="modal-pedido-titulo-{{ $pedido->id }}">
+        <div class="cliente-modal__contenido">
+            <header class="cliente-modal__cabecera">
+                <span class="cliente-modal__icono"><i class="bi bi-receipt"></i></span>
+                <div class="cliente-modal__titulos">
+                    <h2 id="modal-pedido-titulo-{{ $pedido->id }}">Pedido #{{ $pedido->id }}</h2>
+                    <p>{{ $pedido->creado_en?->format('d/m/Y H:i') }} · Estado: {{ $pedido->estado }}</p>
+                </div>
+                <button type="button" class="cliente-modal__cerrar" data-cliente-modal-cerrar aria-label="Cerrar"><i class="bi bi-x-lg"></i></button>
+            </header>
+            <div class="cliente-modal__cuerpo">
+                <ul class="cliente-modal__lista">
+                    @foreach ($pedido->details as $detalle)
+                        <li>
+                            <i class="bi bi-phone"></i>
+                            <div>
+                                <b>{{ $detalle->product?->nombre ?? 'Producto' }}</b>
+                                <small>{{ $detalle->cantidad }} × S/ {{ number_format((float) $detalle->precio_unitario, 2) }}</small>
+                            </div>
+                            <b>S/ {{ number_format($detalle->cantidad * (float) $detalle->precio_unitario, 2) }}</b>
+                        </li>
+                    @endforeach
+                </ul>
+                <div class="cliente-modal__totales">
+                    @if ((float) ($pedido->descuento ?? 0) > 0)
+                        <div><span>Descuento {{ $pedido->cupon_codigo ? '('.$pedido->cupon_codigo.')' : '' }}</span><span>- S/ {{ number_format((float) $pedido->descuento, 2) }}</span></div>
+                    @endif
+                    <div><span>Total pagado</span><strong>S/ {{ number_format((float) $pedido->total, 2) }}</strong></div>
+                </div>
+            </div>
+            <footer class="cliente-modal__pie">
+                <button type="button" class="cliente-modal__boton cliente-modal__boton--suave" data-cliente-modal-cerrar>Cerrar</button>
+                <a class="cliente-modal__boton" href="{{ route('orders.show', $pedido) }}"><i class="bi bi-box-arrow-up-right"></i> Ver pedido completo</a>
+            </footer>
+        </div>
+    </dialog>
+@endforeach

@@ -12,6 +12,9 @@
         <div data-cliente-vista="promociones" hidden>
             @include('paneles.cliente-minorista.secciones.promociones')
         </div>
+        <div data-cliente-vista="garantias" hidden>
+            @include('paneles.cliente-minorista.secciones.garantias')
+        </div>
         <div data-cliente-vista="perfil" hidden>
             @include('paneles.cliente-minorista.secciones.perfil')
         </div>

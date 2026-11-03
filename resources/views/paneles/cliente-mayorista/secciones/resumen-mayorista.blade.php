@@ -56,7 +56,7 @@
     </div>
 
     {{-- Tabla de pedidos con filtro por estado (el filtro se hace con JS) --}}
-    <section class="mayorista-caja">
+    <section class="mayorista-caja" data-cliente-ancla="seguimiento">
         <div class="mayorista-caja-titulo">
             <h2><i class="bi bi-list-check"></i> Pedidos de la empresa</h2>
             <div class="mayorista-filtros" role="group" aria-label="Filtrar pedidos">
@@ -89,7 +89,7 @@
                             <td>{{ $pedido->details->sum('cantidad') ?: $pedido->details->count() }}</td>
                             <td><span class="mayorista-estado mayorista-estado--{{ \Illuminate\Support\Str::slug($pedido->estado) }}">{{ $pedido->estado }}</span></td>
                             <td><b>S/ {{ number_format((float) $pedido->total, 2) }}</b></td>
-                            <td><a class="mayorista-link" href="{{ route('orders.show', $pedido) }}">Ver <i class="bi bi-chevron-right"></i></a></td>
+                            <td><button type="button" class="mayorista-link" data-cliente-modal-abrir="modal-pedido-{{ $pedido->id }}"><i class="bi bi-eye"></i> Ver</button></td>
                         </tr>
                     @empty
                         <tr>
@@ -134,3 +134,43 @@
         </section>
     </div>
 </section>
+
+{{-- Modales: detalle rápido de cada pedido --}}
+@foreach ($pedidos->take(8) as $pedido)
+    <dialog class="cliente-modal" id="modal-pedido-{{ $pedido->id }}" aria-labelledby="modal-pedido-titulo-{{ $pedido->id }}">
+        <div class="cliente-modal__contenido">
+            <header class="cliente-modal__cabecera">
+                <span class="cliente-modal__icono"><i class="bi bi-receipt"></i></span>
+                <div class="cliente-modal__titulos">
+                    <h2 id="modal-pedido-titulo-{{ $pedido->id }}">Pedido #{{ $pedido->id }}</h2>
+                    <p>{{ $pedido->creado_en?->format('d/m/Y H:i') }} · Estado: {{ $pedido->estado }}</p>
+                </div>
+                <button type="button" class="cliente-modal__cerrar" data-cliente-modal-cerrar aria-label="Cerrar"><i class="bi bi-x-lg"></i></button>
+            </header>
+            <div class="cliente-modal__cuerpo">
+                <ul class="cliente-modal__lista">
+                    @foreach ($pedido->details as $detalle)
+                        <li>
+                            <i class="bi bi-phone"></i>
+                            <div>
+                                <b>{{ $detalle->product?->nombre ?? 'Producto' }}</b>
+                                <small>{{ $detalle->cantidad }} × S/ {{ number_format((float) $detalle->precio_unitario, 2) }}</small>
+                            </div>
+                            <b>S/ {{ number_format($detalle->cantidad * (float) $detalle->precio_unitario, 2) }}</b>
+                        </li>
+                    @endforeach
+                </ul>
+                <div class="cliente-modal__totales">
+                    @if ((float) ($pedido->descuento ?? 0) > 0)
+                        <div><span>Descuento {{ $pedido->cupon_codigo ? '('.$pedido->cupon_codigo.')' : '' }}</span><span>- S/ {{ number_format((float) $pedido->descuento, 2) }}</span></div>
+                    @endif
+                    <div><span>Total pagado</span><strong>S/ {{ number_format((float) $pedido->total, 2) }}</strong></div>
+                </div>
+            </div>
+            <footer class="cliente-modal__pie">
+                <button type="button" class="cliente-modal__boton cliente-modal__boton--suave" data-cliente-modal-cerrar>Cerrar</button>
+                <a class="cliente-modal__boton" href="{{ route('orders.show', $pedido) }}"><i class="bi bi-box-arrow-up-right"></i> Ver pedido completo</a>
+            </footer>
+        </div>
+    </dialog>
+@endforeach

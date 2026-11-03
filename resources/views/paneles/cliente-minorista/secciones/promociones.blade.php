@@ -26,6 +26,10 @@
 @endphp
 
 <section class="promo-cliente" aria-labelledby="promo-titulo">
+    <nav class="cliente-migas" aria-label="Ruta de navegación">
+        <span>Panel</span><i class="bi bi-chevron-right"></i><span>Ofertas y beneficios</span><i class="bi bi-chevron-right"></i><strong>Promociones</strong>
+    </nav>
+
     <header class="promo-cliente-banner">
         <div>
             <span class="promo-cliente-etiqueta"><i class="bi bi-tag"></i> Promociones</span>
@@ -39,7 +43,7 @@
     </header>
 
     {{-- cupones --}}
-    <article class="promo-cliente-caja">
+    <article class="promo-cliente-caja" data-cliente-ancla="cupones">
         <h2><i class="bi bi-ticket-perforated"></i> Cupones disponibles</h2>
         <div class="promo-cliente-cupones">
             @forelse ($cupones as $cupon)
@@ -68,7 +72,7 @@
     </article>
 
     {{-- productos en oferta --}}
-    <article class="promo-cliente-caja">
+    <article class="promo-cliente-caja" data-cliente-ancla="ofertas">
         <div class="promo-cliente-titulo">
             <h2><i class="bi bi-fire"></i> Productos en oferta</h2>
             <a href="{{ route('catalog.index') }}">Ver catálogo <i class="bi bi-chevron-right"></i></a>
@@ -103,7 +107,7 @@
 
     {{-- campañas --}}
     @if ($campanias->isNotEmpty())
-        <div class="promo-cliente-campanias">
+        <div class="promo-cliente-campanias" data-cliente-ancla="campanias">
             @foreach ($campanias as $campania)
                 <article class="promo-cliente-campania">
                     <div>

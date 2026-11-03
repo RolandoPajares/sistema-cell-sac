@@ -24,7 +24,7 @@
 
     // productos que más compró
     // cotizaciones que pidió la empresa
-    $cotizaciones = \App\Models\Comercio\Cotizacion::where('creado_por', auth()->id())
+    $cotizaciones = \App\Models\Comercio\Cotizacion::whereHas('customer', fn ($consulta) => $consulta->where('usuario_id', auth()->id()))
         ->latest('creado_en')
         ->get();
 
@@ -41,6 +41,10 @@
 @endphp
 
 <section class="reporte-cliente" aria-labelledby="reporte-titulo">
+    <nav class="cliente-migas" aria-label="Ruta de navegación">
+        <span>Panel</span><i class="bi bi-chevron-right"></i><span>Pedidos mayoristas</span><i class="bi bi-chevron-right"></i><strong>Historial de compras</strong>
+    </nav>
+
     <header class="reporte-cliente-cabecera">
         <div>
             <span class="reporte-cliente-etiqueta"><i class="bi bi-bar-chart-line"></i> Reportes</span>

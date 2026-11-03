@@ -9,6 +9,15 @@
         <div data-cliente-vista="resumen">
             @include('paneles.cliente-mayorista.secciones.resumen-mayorista')
         </div>
+        <div data-cliente-vista="cotizaciones" hidden>
+            @include('paneles.cliente-mayorista.secciones.cotizaciones')
+        </div>
+        <div data-cliente-vista="beneficios" hidden>
+            @include('paneles.cliente-mayorista.secciones.beneficios')
+        </div>
+        <div data-cliente-vista="garantias" hidden>
+            @include('paneles.cliente-mayorista.secciones.garantias')
+        </div>
         <div data-cliente-vista="perfil" hidden>
             @include('paneles.cliente-mayorista.secciones.perfil')
         </div>

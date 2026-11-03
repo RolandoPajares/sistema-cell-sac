@@ -453,3 +453,19 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* botón "Ver detalle" del pedido (abre un modal) */
+.minorista-ver {
+  padding: 0;
+  border: 0;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--min-azul);
+  background: none;
+  cursor: pointer;
+}
+
+.minorista-ver:hover {
+  text-decoration: underline;
+}

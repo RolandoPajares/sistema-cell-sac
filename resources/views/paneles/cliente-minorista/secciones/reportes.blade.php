@@ -37,6 +37,10 @@
 @endphp
 
 <section class="reporte-cliente" aria-labelledby="reporte-titulo">
+    <nav class="cliente-migas" aria-label="Ruta de navegación">
+        <span>Panel</span><i class="bi bi-chevron-right"></i><span>Mis compras</span><i class="bi bi-chevron-right"></i><strong>Historial de compras</strong>
+    </nav>
+
     <header class="reporte-cliente-cabecera">
         <div>
             <span class="reporte-cliente-etiqueta"><i class="bi bi-bar-chart-line"></i> Reportes</span>

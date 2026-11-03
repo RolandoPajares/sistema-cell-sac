@@ -440,3 +440,22 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* botón "Ver" de la tabla (abre el detalle en un modal) */
+button.mayorista-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 11px;
+  border: 1px solid #c7d6f5;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 0.85rem;
+  background: #f5f8ff;
+  cursor: pointer;
+}
+
+button.mayorista-link:hover {
+  color: #fff;
+  background: var(--may-azul);
+}
