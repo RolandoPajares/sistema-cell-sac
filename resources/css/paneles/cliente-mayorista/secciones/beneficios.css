@@ -1,0 +1,181 @@
+/* Vista "Beneficios mayoristas" del cliente mayorista - Integrante 4 */
+
+.benef-cliente {
+  display: grid;
+  gap: 20px;
+}
+
+.benef-cliente-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 26px 28px;
+  border-radius: 22px;
+  color: #fff;
+  background: linear-gradient(120deg, #0a0f1c, #0b2a6f 60%, #1d4ed8);
+}
+
+.benef-cliente-etiqueta {
+  display: inline-flex;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.benef-cliente-cabecera h1 {
+  margin: 12px 0 6px;
+  font-size: 1.6rem;
+  color: #fff;
+}
+
+.benef-cliente-cabecera p {
+  margin: 0;
+  color: #dbeafe;
+}
+
+.benef-cliente-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  color: #0b2a6f;
+  background: #fff;
+}
+
+.benef-cliente-columnas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.admin-theme .admin-main .benef-cliente-caja,
+.benef-cliente-caja {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  padding: 22px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+}
+
+.benef-cliente-caja h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #0a0f1c;
+}
+
+.benef-cliente-caja h2 i {
+  color: #1d4ed8;
+}
+
+.benef-cliente-caja p,
+.benef-cliente-caja > small {
+  margin: 0;
+  color: #64748b;
+}
+
+.benef-cliente-caja > a {
+  font-weight: 700;
+  text-decoration: none;
+  color: #1d4ed8;
+}
+
+/* tabla de escalas de descuento */
+.benef-cliente-escalas {
+  display: grid;
+  gap: 8px;
+}
+
+.benef-cliente-escalas div {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #e8efff;
+}
+
+.benef-cliente-escalas strong {
+  color: #0b2a6f;
+}
+
+.benef-cliente-cupones {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  gap: 12px;
+}
+
+.benef-cliente-cupon {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 2px dashed #c7d6f5;
+  border-radius: 12px;
+}
+
+.benef-cliente-cupon > strong {
+  min-width: 64px;
+  padding: 10px;
+  border-radius: 10px;
+  text-align: center;
+  color: #fff;
+  background: #0b2a6f;
+}
+
+.benef-cliente-cupon div {
+  flex: 1;
+  display: grid;
+}
+
+.benef-cliente-cupon small {
+  color: #64748b;
+}
+
+.benef-cliente-cupon button {
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  color: #fff;
+  background: #0a0f1c;
+}
+
+.benef-cliente-condiciones {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.benef-cliente-condiciones li {
+  display: flex;
+  gap: 10px;
+  color: #334155;
+}
+
+.benef-cliente-condiciones i {
+  color: #1d4ed8;
+}
+
+.benef-cliente-vacio {
+  margin: 0;
+  color: #64748b;
+}
+
+@media (max-width: 800px) {
+  .benef-cliente-columnas {
+    grid-template-columns: 1fr;
+  }
+}

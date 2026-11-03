@@ -1,0 +1,89 @@
+/* Vistas del panel del cliente minorista (resumen, perfil, reportes, configuración)
+   Integrante 4 - Sebastián */
+
+.cliente-vistas [data-cliente-vista]:not([hidden]) {
+  animation: cliente-vista-entrar 0.25s ease-out;
+}
+
+@keyframes cliente-vista-entrar {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* pedidos que se ocultan por la configuración "pedidos a mostrar" */
+.cliente-vistas .fuera-de-limite {
+  display: none;
+}
+
+/* vista compacta (se activa en Configuración) */
+.cliente-vistas.is-compacto section,
+.cliente-vistas.is-compacto article {
+  gap: 12px;
+}
+
+.cliente-vistas.is-compacto [class*="-caja"],
+.cliente-vistas.is-compacto [class*="-tarjeta"] {
+  padding: 14px !important;
+}
+
+/* ruta de navegación arriba de cada sección (como en administración) */
+.cliente-migas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: -6px;
+  font-size: 0.78rem;
+  color: #6f88ae;
+}
+
+.cliente-migas span:first-child {
+  font-weight: 800;
+  color: #1356e8;
+}
+
+.cliente-migas i {
+  font-size: 0.6rem;
+  color: #a4b9d1;
+}
+
+.cliente-migas strong {
+  color: #3d659b;
+}
+
+/* buscador de las tablas */
+.cliente-buscador {
+  position: relative;
+  display: block;
+  flex: 1;
+  max-width: 340px;
+}
+
+.cliente-buscador i {
+  position: absolute;
+  top: 50%;
+  left: 13px;
+  transform: translateY(-50%);
+  color: #94a3b8;
+}
+
+.cliente-buscador input {
+  width: 100%;
+  padding: 10px 12px 10px 38px;
+  border: 1px solid #cbd5e1;
+  border-radius: 11px;
+  font: inherit;
+  background: #fff;
+}
+
+.cliente-buscador input:focus {
+  outline: 3px solid rgba(29, 78, 216, 0.15);
+  border-color: #1356e8;
+}

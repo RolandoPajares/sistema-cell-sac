@@ -1,0 +1,305 @@
+/* Menú lateral desplegable del cliente minorista - Integrante 4 (Sebastián)
+   Mismo estilo que el menú del administrador (pedido por Rolando) */
+
+.cliente-menu {
+  width: 100%;
+  min-width: 0;
+  max-height: calc(100vh - var(--reference-header-height, 70px) - 20px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 0 7px 14px;
+  scrollbar-color: rgba(255, 255, 255, 0.34) transparent;
+  scrollbar-width: thin;
+}
+
+/* solo el menú tiene scroll, no toda la barra */
+.admin-sidebar:has(.cliente-menu) {
+  overflow: hidden;
+}
+
+.admin-sidebar:has(.cliente-menu) .admin-sidebar-nav {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.cliente-menu__grupos {
+  display: grid;
+  gap: 10px;
+}
+
+/* ---------- botón "Mi panel", títulos de grupo y opciones ---------- */
+.cliente-menu .cliente-menu__inicio,
+.cliente-menu .cliente-menu__boton,
+.cliente-menu .cliente-menu__opcion {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  border: 0;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.92);
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  text-decoration: none;
+  transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.cliente-menu .cliente-menu__inicio {
+  min-height: 50px;
+  margin-bottom: 14px;
+  padding: 0 14px;
+  gap: 11px;
+  font-size: 0.94rem;
+  font-weight: 700;
+}
+
+.cliente-menu .cliente-menu__boton {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 14px;
+  gap: 10px;
+  justify-content: space-between;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.cliente-menu__boton-izq {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 10px;
+}
+
+.cliente-menu__inicio > i,
+.cliente-menu__boton-izq > i {
+  flex: 0 0 18px;
+  width: 18px;
+  color: #e0f5ff;
+  font-size: 0.98rem;
+  text-align: center;
+}
+
+/* flechita que gira al abrir */
+.cliente-menu__flecha {
+  flex: 0 0 auto;
+  color: rgba(221, 242, 255, 0.72);
+  font-size: 0.65rem;
+  transition: transform 0.18s ease;
+}
+
+.cliente-menu__grupo.is-open .cliente-menu__flecha {
+  transform: rotate(180deg);
+}
+
+/* activo: celeste como en el diseño */
+.cliente-menu__inicio:hover,
+.cliente-menu__inicio.is-active {
+  color: #fff;
+  background: #08a7e5;
+  box-shadow: 0 5px 20px rgba(0, 162, 229, 0.24);
+}
+
+.cliente-menu__grupo.is-active > .cliente-menu__boton,
+.cliente-menu__boton:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.cliente-menu__inicio:focus-visible,
+.cliente-menu__boton:focus-visible,
+.cliente-menu__opcion:focus-visible {
+  outline: 2px solid #b8ecff;
+  outline-offset: 2px;
+}
+
+/* ---------- submenú ---------- */
+.cliente-menu__submenu {
+  display: grid;
+  gap: 3px;
+  margin: 1px 0 8px;
+  padding-left: 38px;
+}
+
+.cliente-menu__submenu[hidden] {
+  display: none;
+}
+
+.cliente-menu__submenu:not([hidden]) {
+  animation: cliente-menu-abrir 0.18s ease-out;
+}
+
+.cliente-menu .cliente-menu__opcion {
+  min-height: 35px;
+  padding: 0 11px;
+  gap: 8px;
+  justify-content: space-between;
+  padding-block: 8px;
+  border-radius: 8px;
+  color: #cfe4ff;
+  font-size: 0.86rem;
+  font-weight: 450;
+  line-height: 1.28;
+}
+
+/* en el submenú los textos largos bajan a la siguiente línea, como en el diseño */
+.cliente-menu__opcion .cliente-menu__texto {
+  white-space: normal;
+}
+
+
+.cliente-menu a.cliente-menu__opcion:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.cliente-menu .cliente-menu__opcion.is-active {
+  color: #fff;
+  font-weight: 690;
+  background: #1b64ad;
+}
+
+/* opciones que todavía no tienen backend (igual que el "Envíos y entregas" del admin) */
+.cliente-menu .cliente-menu__opcion--pronto {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.cliente-menu__opcion--pronto small {
+  flex-shrink: 0;
+  padding: 1px 7px;
+  border-radius: 99px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* nombre del rol arriba del menú */
+.cliente-menu__rol {
+  margin: 0 0 10px 15px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #a7cef5;
+}
+
+/* cerrar sesión al final del menú */
+.cliente-menu__salir {
+  margin: 12px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.cliente-menu__salir button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 10px;
+  color: #dbeafa;
+  background: transparent;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cliente-menu__salir button:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+/* el pie del menú general ya no hace falta porque "Cerrar sesión" está aquí */
+.admin-sidebar:has(.cliente-menu) .admin-sidebar-footer {
+  display: none;
+}
+
+.cliente-menu__texto {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@keyframes cliente-menu-abrir {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- menú cerrado (solo iconos) ---------- */
+.admin-app.is-sidebar-collapsed .cliente-menu {
+  overflow: visible;
+}
+
+.admin-app.is-sidebar-collapsed .cliente-menu__rol,
+.admin-app.is-sidebar-collapsed .cliente-menu__submenu,
+.admin-app.is-sidebar-collapsed .cliente-menu__texto,
+.admin-app.is-sidebar-collapsed .cliente-menu__flecha {
+  display: none;
+}
+
+.admin-app.is-sidebar-collapsed .cliente-menu__inicio,
+.admin-app.is-sidebar-collapsed .cliente-menu__boton,
+.admin-app.is-sidebar-collapsed .cliente-menu__salir button {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+/* ---------- responsive (igual que el admin) ---------- */
+@media (max-width: 1180px) {
+  .cliente-menu {
+    padding-inline: 0;
+  }
+
+  .cliente-menu__rol,
+  .cliente-menu__texto,
+  .cliente-menu__flecha,
+  .cliente-menu__submenu {
+    display: none;
+  }
+
+  .cliente-menu__inicio,
+  .cliente-menu__boton {
+    justify-content: center;
+    padding-inline: 0;
+  }
+}
+
+@media (max-width: 800px) {
+  .cliente-menu {
+    max-height: calc(100vh - 82px);
+    padding: 0 2px 12px;
+  }
+
+  .cliente-menu__rol,
+  .cliente-menu__texto,
+  .cliente-menu__flecha {
+    display: block;
+  }
+
+  .cliente-menu__submenu:not([hidden]) {
+    display: grid;
+  }
+
+  .cliente-menu__inicio,
+  .cliente-menu__boton {
+    justify-content: flex-start;
+    padding-inline: 12px;
+  }
+
+  .cliente-menu__boton {
+    justify-content: space-between;
+  }
+}

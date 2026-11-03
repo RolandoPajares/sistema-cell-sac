@@ -1,0 +1,205 @@
+/* Vista "Configuración" del cliente minorista - Integrante 4 */
+
+.config-cliente {
+  --cfg-oscuro: #003fb8;
+  --cfg-azul: #1356e8;
+  --cfg-celeste: #eaf2ff;
+
+  display: grid;
+  gap: 20px;
+}
+
+.config-cliente-cabecera {
+  padding: 26px 28px;
+  border-radius: 22px;
+  color: #fff;
+  background: linear-gradient(120deg, #003fb8, #1356e8);
+}
+
+.config-cliente-etiqueta {
+  display: inline-flex;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.config-cliente-cabecera h1 {
+  margin: 12px 0 6px;
+  font-size: 1.6rem;
+  color: #fff;
+}
+
+.config-cliente-cabecera p {
+  margin: 0;
+  color: #dbeafe;
+}
+
+.config-cliente-columnas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.admin-theme .admin-main .config-cliente-caja,
+.config-cliente-caja {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  padding: 22px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+}
+
+.config-cliente-caja h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #0f172a;
+}
+
+.config-cliente-caja h2 i {
+  color: var(--cfg-azul);
+}
+
+/* fila con texto a la izquierda y switch a la derecha */
+.config-cliente-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+.config-cliente-switch span {
+  display: grid;
+  gap: 2px;
+}
+
+.config-cliente-switch b {
+  font-size: 0.92rem;
+  color: #0f172a;
+}
+
+.config-cliente-switch small {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+/* el checkbox se dibuja como un interruptor */
+.config-cliente-switch input {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 24px;
+  margin: 0;
+  border-radius: 999px;
+  background: #cbd5e1;
+  appearance: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.config-cliente-switch input::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s;
+}
+
+.config-cliente-switch input:checked {
+  background: var(--cfg-azul);
+}
+
+.config-cliente-switch input:checked::after {
+  transform: translateX(20px);
+}
+
+.config-cliente-campo {
+  display: grid;
+  gap: 6px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.config-cliente-campo select {
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 11px;
+  font: inherit;
+  background: #fff;
+}
+
+.config-cliente-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.config-cliente-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--cfg-azul);
+  color: #fff;
+}
+
+.config-cliente-boton--borde {
+  background: #fff;
+  color: var(--cfg-azul);
+  border: 1px solid var(--cfg-azul);
+}
+
+.config-cliente-boton--negro {
+  background: #0f172a;
+}
+
+.config-cliente-mensaje {
+  font-weight: 700;
+  color: var(--cfg-azul);
+}
+
+.config-cliente-nota {
+  margin: -8px 0 0;
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.config-cliente-sesion {
+  grid-auto-flow: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.config-cliente-sesion p {
+  margin: 4px 0 0;
+  color: #64748b;
+}
+
+@media (max-width: 800px) {
+  .config-cliente-columnas {
+    grid-template-columns: 1fr;
+  }
+
+  .config-cliente-sesion {
+    grid-auto-flow: row;
+  }
+}

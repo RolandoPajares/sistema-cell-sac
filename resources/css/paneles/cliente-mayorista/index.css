@@ -1,2 +1,13 @@
 /* CELL SAC | CLIENTE MAYORISTA | RESPONSABLE: INTEGRANTE 4 */
 /* Importar aquí estilos de compras, cotizaciones, recomendaciones, perfil y módulos exclusivos del cliente mayorista. */
+
+@import './componentes/menu.css';
+@import './componentes/perfil.css';
+@import './componentes/modal.css';
+@import './secciones/vistas.css';
+@import './secciones/resumen-mayorista.css';
+@import './secciones/cotizaciones.css';
+@import './secciones/beneficios.css';
+@import './secciones/garantias.css';
+@import './secciones/reportes.css';
+@import './secciones/configuracion.css';

@@ -1,0 +1,233 @@
+/* Vista "Mis cotizaciones" del cliente mayorista - Integrante 4 */
+
+.cotiz-cliente {
+  display: grid;
+  gap: 20px;
+}
+
+.cotiz-cliente-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 26px 28px;
+  border-radius: 22px;
+  color: #fff;
+  background: linear-gradient(120deg, #0a0f1c, #0b2a6f);
+}
+
+.cotiz-cliente-etiqueta {
+  display: inline-flex;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.cotiz-cliente-cabecera h1 {
+  margin: 12px 0 6px;
+  font-size: 1.6rem;
+  color: #fff;
+}
+
+.cotiz-cliente-cabecera p {
+  margin: 0;
+  color: #dbeafe;
+}
+
+.cotiz-cliente-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 12px;
+  font: inherit;
+  cursor: pointer;
+  font-weight: 700;
+  text-decoration: none;
+  color: #0b2a6f;
+  background: #fff;
+}
+
+.cotiz-cliente-resumen {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.cotiz-cliente-resumen article {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-bottom: 4px solid #1d4ed8;
+  border-radius: 16px;
+}
+
+.cotiz-cliente-resumen article > span {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  font-size: 1.15rem;
+  color: #1d4ed8;
+  background: #e8efff;
+}
+
+.cotiz-cliente-resumen small {
+  display: block;
+  color: #64748b;
+}
+
+.cotiz-cliente-resumen strong {
+  font-size: 1.5rem;
+  color: #0a0f1c;
+}
+
+.admin-theme .admin-main .cotiz-cliente-caja,
+.cotiz-cliente-caja {
+  min-width: 0;
+  padding: 22px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+}
+
+.cotiz-cliente-herramientas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.cotiz-cliente-filtros {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: #f1f5f9;
+}
+
+.cotiz-cliente-filtros button {
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 9px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #64748b;
+  background: transparent;
+}
+
+.cotiz-cliente-filtros button.activo {
+  color: #fff;
+  background: #0b2a6f;
+}
+
+.cotiz-cliente-tabla-contenedor {
+  overflow-x: auto;
+}
+
+.cotiz-cliente-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.cotiz-cliente-tabla th {
+  padding: 11px 12px;
+  text-align: left;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  color: #fff;
+  background: #0a0f1c;
+}
+
+.cotiz-cliente-tabla th:first-child {
+  border-radius: 10px 0 0 10px;
+}
+
+.cotiz-cliente-tabla th:last-child {
+  border-radius: 0 10px 10px 0;
+}
+
+.cotiz-cliente-tabla td {
+  padding: 13px 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.cotiz-cliente-estado {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #334155;
+  background: #e2e8f0;
+}
+
+.cotiz-cliente-estado--pendiente {
+  color: #1d4ed8;
+  background: #e8efff;
+}
+
+.cotiz-cliente-estado--aprobada {
+  color: #fff;
+  background: #0b2a6f;
+}
+
+.cotiz-cliente-estado--vencida {
+  color: #fff;
+  background: #0a0f1c;
+}
+
+.cotiz-cliente-vacio {
+  padding: 26px 12px !important;
+  text-align: center;
+  color: #64748b;
+}
+
+.cotiz-cliente-vacio > i {
+  font-size: 2rem;
+  color: #1d4ed8;
+}
+
+.cotiz-cliente-ver {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid #c7d6f5;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1d4ed8;
+  background: #f5f8ff;
+  cursor: pointer;
+}
+
+.cotiz-cliente-ver:hover {
+  color: #fff;
+  background: #1d4ed8;
+}
+
+.cotiz-cliente-vacio a {
+  font-weight: 700;
+  color: #1d4ed8;
+}
+
+@media (max-width: 900px) {
+  .cotiz-cliente-resumen {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

@@ -1,2 +1,12 @@
 /* CELL SAC | CLIENTE MINORISTA | RESPONSABLE: INTEGRANTE 4 */
 /* Importar aquí estilos del catálogo, carrito, pedidos, perfil y módulos exclusivos del cliente minorista. */
+
+@import './componentes/menu.css';
+@import './componentes/perfil.css';
+@import './componentes/modal.css';
+@import './secciones/vistas.css';
+@import './secciones/resumen-minorista.css';
+@import './secciones/promociones.css';
+@import './secciones/garantias.css';
+@import './secciones/reportes.css';
+@import './secciones/configuracion.css';
