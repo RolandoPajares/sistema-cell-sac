@@ -1,0 +1,352 @@
+/* Ventanas modales del cliente mayorista (formularios que salen encima, como en administración)
+   Integrante 4 - Sebastián */
+
+.cliente-modal {
+  --modal-azul: #1d4ed8;
+  --modal-oscuro: #0a0f1c;
+  --modal-celeste: #e8efff;
+
+  width: min(560px, calc(100vw - 32px));
+  max-height: min(88vh, 760px);
+  padding: 0;
+  border: 0;
+  border-radius: 20px;
+  color: #0f172a;
+  background: #fff;
+  box-shadow: 0 30px 80px rgba(2, 12, 40, 0.35);
+  overflow: hidden;
+}
+
+.cliente-modal--ancho {
+  width: min(760px, calc(100vw - 32px));
+}
+
+/* fondo oscuro detrás del modal */
+.cliente-modal::backdrop {
+  background: rgba(8, 18, 45, 0.55);
+  backdrop-filter: blur(3px);
+}
+
+.cliente-modal[open] {
+  animation: cliente-modal-abrir 0.22s ease-out;
+}
+
+@keyframes cliente-modal-abrir {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.cliente-modal__contenido {
+  display: flex;
+  flex-direction: column;
+  max-height: inherit;
+}
+
+/* cabecera con icono, título y botón cerrar */
+.cliente-modal__cabecera {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #f8fbff, var(--modal-celeste));
+}
+
+.cliente-modal__icono {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  font-size: 1.25rem;
+  color: #fff;
+  background: linear-gradient(135deg, #0b2a6f, #1d4ed8);
+}
+
+.cliente-modal__titulos {
+  flex: 1;
+  min-width: 0;
+}
+
+.cliente-modal__titulos h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: var(--modal-oscuro);
+}
+
+.cliente-modal__titulos p {
+  margin: 4px 0 0;
+  font-size: 0.86rem;
+  color: #64748b;
+}
+
+.cliente-modal__cerrar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 10px;
+  font-size: 1.2rem;
+  color: #475569;
+  background: #fff;
+  cursor: pointer;
+}
+
+.cliente-modal__cerrar:hover {
+  color: #0f172a;
+  background: #e2e8f0;
+}
+
+/* cuerpo con los campos */
+.cliente-modal__cuerpo {
+  display: grid;
+  gap: 14px;
+  padding: 20px 24px;
+  overflow-y: auto;
+}
+
+.cliente-modal__cuerpo label,
+.cliente-modal__campo {
+  display: grid;
+  gap: 6px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.cliente-modal__cuerpo input,
+.cliente-modal__cuerpo select,
+.cliente-modal__cuerpo textarea {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 11px;
+  font: inherit;
+  font-weight: 400;
+  color: #0f172a;
+  background: #fff;
+}
+
+.cliente-modal__cuerpo textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.cliente-modal__cuerpo input:focus,
+.cliente-modal__cuerpo select:focus,
+.cliente-modal__cuerpo textarea:focus {
+  outline: 3px solid rgba(29, 78, 216, 0.18);
+  border-color: var(--modal-azul);
+}
+
+.cliente-modal__ayuda {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #64748b;
+}
+
+.cliente-modal__dos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* campo de contraseña con el ojito */
+.cliente-modal .admin-password-input {
+  position: relative;
+  display: block;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.cliente-modal .admin-password-input input {
+  padding-right: 44px;
+}
+
+.cliente-modal .admin-password-input button {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  border: 0;
+  color: #64748b;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* pie con los botones */
+.cliente-modal__pie {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px 20px;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.cliente-modal__boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 11px;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  color: #fff;
+  background: var(--modal-azul);
+  cursor: pointer;
+}
+
+.cliente-modal__boton:hover {
+  filter: brightness(1.08);
+}
+
+.cliente-modal__boton--suave {
+  color: #334155;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+}
+
+.cliente-modal__boton--peligro {
+  background: #0f172a;
+}
+
+/* lista de productos (detalle de pedido o cotización) */
+.cliente-modal__lista {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cliente-modal__lista li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 13px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.cliente-modal__lista li > i {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  color: var(--modal-azul);
+  background: var(--modal-celeste);
+}
+
+.cliente-modal__lista li div {
+  flex: 1;
+  display: grid;
+}
+
+.cliente-modal__lista small {
+  color: #64748b;
+}
+
+.cliente-modal__totales {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.cliente-modal__totales div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.cliente-modal__totales div:last-child:not(:first-child) {
+  padding-top: 6px;
+  border-top: 1px dashed #cbd5e1;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+/* filas para varios productos en la cotización */
+.cliente-modal__item {
+  display: grid;
+  grid-template-columns: 1fr 110px 40px;
+  gap: 10px;
+  align-items: end;
+}
+
+.cliente-modal__quitar {
+  height: 44px;
+  border: 1px solid #e2e8f0;
+  border-radius: 11px;
+  color: #64748b;
+  background: #fff;
+  cursor: pointer;
+}
+
+.cliente-modal__agregar {
+  justify-self: start;
+  padding: 8px 12px;
+  border: 1px dashed var(--modal-azul);
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 700;
+  color: var(--modal-azul);
+  background: var(--modal-celeste);
+  cursor: pointer;
+}
+
+@media (max-width: 560px) {
+  .cliente-modal__dos {
+    grid-template-columns: 1fr;
+  }
+
+  .cliente-modal__item {
+    grid-template-columns: 1fr 80px 40px;
+  }
+}
+
+/* texto solo para lectores de pantalla (no se ve) */
+.cliente-modal .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* en las filas de productos solo la primera muestra los títulos */
+.cliente-modal__item label {
+  gap: 0;
+}
+
+.cliente-modal__item--titulos {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+[data-items-cotizacion] {
+  display: grid;
+  gap: 10px;
+}

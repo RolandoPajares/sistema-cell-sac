@@ -74,6 +74,10 @@
 }
 
 .perfil-cliente-datos article {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
   padding: 18px;
   background: #fff;
   border: 1px solid #e2e8f0;
@@ -89,7 +93,7 @@
 
 .perfil-cliente-datos strong {
   color: #0f172a;
-  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
 .perfil-cliente-activo i {
@@ -194,4 +198,76 @@
 
 .perfil-cliente-caja .admin-password-input input {
   padding-right: 44px;
+}
+
+/* ---------- diseño tipo módulo (con modales) ---------- */
+.perfil-cliente-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.perfil-cliente-portada .perfil-cliente-boton--borde {
+  color: #fff;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.perfil-cliente-datos article > div {
+  min-width: 0;
+}
+
+.perfil-cliente-dato-icono {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  font-size: 1.15rem;
+  color: #1d4ed8;
+  background: #e8efff;
+}
+
+.perfil-cliente-datos {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.perfil-cliente-seguridad {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+}
+
+.perfil-cliente-seguridad > div {
+  flex: 1;
+  display: grid;
+  gap: 2px;
+  min-width: 200px;
+}
+
+.perfil-cliente-seguridad small {
+  color: #64748b;
+}
+
+.perfil-cliente-seguridad .perfil-cliente-estado {
+  color: #fff;
+  background: #0b2a6f;
+}
+
+@media (max-width: 1100px) {
+  .perfil-cliente-datos {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .perfil-cliente-datos {
+    grid-template-columns: 1fr;
+  }
 }
