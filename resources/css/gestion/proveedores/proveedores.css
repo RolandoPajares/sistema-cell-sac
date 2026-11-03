@@ -1336,3 +1336,175 @@
     grid-column: 1;
   }
 }
+
+/* ==========================================
+   BUSCADOR DE PROVEEDORES - CORRECCIÓN
+========================================== */
+
+.proveedores-search {
+    position: relative;
+    display: block;
+    min-width: 0;
+    width: 100%;
+}
+
+.proveedores-search > .visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+.proveedores-search input {
+    display: block;
+    width: 100%;
+    height: 46px;
+    box-sizing: border-box;
+    padding: 12px 14px 12px 42px;
+    line-height: 1.4;
+}
+
+.proveedores-search > i {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.proveedores-search > i {
+    display: none !important;
+}
+
+/* ==========================================
+   PROVEEDORES - TABLA A ANCHO COMPLETO
+========================================== */
+
+.modulo-proveedores .proveedores-main-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100%;
+    gap: 12px;
+}
+
+.modulo-proveedores .proveedores-list-card {
+    width: 100%;
+    min-width: 0;
+}
+
+/* ==========================================
+   MODAL - DETALLE DEL PROVEEDOR
+========================================== */
+
+.proveedores-detail-dialog {
+    width: min(680px, calc(100% - 32px));
+    max-width: 680px;
+}
+
+.proveedores-detail-dialog .proveedores-dialog-body {
+    padding: 22px;
+}
+
+.proveedores-detail-dialog .proveedores-detail-identity {
+    margin-bottom: 18px;
+}
+
+.proveedores-detail-dialog .proveedores-performance {
+    margin-top: 20px;
+    border-radius: 10px;
+}
+
+@media (max-width: 560px) {
+    .proveedores-detail-dialog {
+        width: calc(100% - 20px);
+    }
+
+    .proveedores-detail-dialog .proveedores-dialog-body {
+        padding: 15px;
+    }
+}
+
+/* ==========================================
+   PROVEEDORES - ESPACIADO INTERNO
+========================================== */
+
+/* Tarjeta de la lista de proveedores */
+.proveedores-list-card {
+    padding: 16px 20px !important;
+    box-sizing: border-box;
+}
+
+/* Encabezados de las tarjetas */
+.proveedores-list-card > header {
+    padding: 0 0 12px;
+}
+
+/* Tabla */
+.proveedores-list-card .proveedores-table-wrap {
+    margin-top: 10px;
+}
+
+/* Paginación */
+.proveedores-list-card .proveedores-pagination {
+    padding: 14px 0 2px;
+}
+
+/* Tarjetas inferiores */
+.proveedores-alerts-card,
+.proveedores-activity-card {
+    padding: 18px 20px !important;
+    box-sizing: border-box;
+}
+
+/* Separación entre título y descripción */
+.proveedores-alerts-card header,
+.proveedores-activity-card header {
+    margin-bottom: 14px;
+}
+
+/* Adaptación para pantallas pequeñas */
+@media (max-width: 700px) {
+    .proveedores-list-card,
+    .proveedores-alerts-card,
+    .proveedores-activity-card {
+        padding: 13px !important;
+    }
+}
+
+/* ==========================================
+   PROVEEDORES - ESPACIADO TARJETAS INFERIORES
+========================================== */
+
+body.modulo-proveedores .proveedores-secondary-card {
+    padding: 20px 24px !important;
+    box-sizing: border-box;
+}
+
+/* Encabezados */
+body.modulo-proveedores .proveedores-secondary-card .proveedores-card-header {
+    margin-bottom: 18px;
+}
+
+/* Mensaje cuando no hay alertas */
+body.modulo-proveedores .proveedores-secondary-empty {
+    padding: 24px 12px;
+    box-sizing: border-box;
+}
+
+/* Actividad reciente */
+body.modulo-proveedores .proveedores-activity-row {
+    padding: 16px;
+    margin-top: 10px;
+    box-sizing: border-box;
+}
+
+/* Lista de alertas */
+body.modulo-proveedores .proveedores-alert-row {
+    padding: 14px 12px;
+    box-sizing: border-box;
+}
