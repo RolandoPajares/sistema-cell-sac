@@ -60,9 +60,9 @@
             <article class="dashboard-kpi dashboard-kpi--stock">
                 <span class="dashboard-kpi-icon"><i class="bi bi-boxes" aria-hidden="true"></i></span>
                 <div>
-                    <small>Stock bajo</small>
+                    <small>Productos sin existencias</small>
                     <strong>{{ number_format($lowStock) }}</strong>
-                    <span class="dashboard-trend {{ $lowStock > 0 ? 'is-negative' : 'is-positive' }}"><i class="bi bi-{{ $lowStock > 0 ? 'exclamation-triangle' : 'check-circle' }}" aria-hidden="true"></i> {{ $lowStock > 0 ? 'Requiere atención' : 'Inventario saludable' }}</span>
+                    <span class="dashboard-trend {{ $activeProducts === 0 ? 'is-neutral' : ($lowStock > 0 ? 'is-negative' : 'is-positive') }}"><i class="bi bi-{{ $activeProducts === 0 ? 'inbox' : ($lowStock > 0 ? 'exclamation-triangle' : 'check-circle') }}" aria-hidden="true"></i> {{ $activeProducts === 0 ? 'Sin productos registrados' : ($lowStock > 0 ? 'Requiere reposición' : 'Existencias disponibles') }}</span>
                 </div>
             </article>
 
@@ -83,7 +83,7 @@
         <div class="dashboard-grid dashboard-grid--charts">
             <section class="dashboard-card dashboard-sales-card">
                 <header class="dashboard-card-header">
-                    <div class="dashboard-card-title"><i class="bi bi-bar-chart-line-fill" aria-hidden="true"></i><div><h2>Ventas de los últimos 12 meses</h2><p>Ingresos registrados en pedidos no cancelados.</p></div></div>
+                    <div class="dashboard-card-title"><i class="bi bi-bar-chart-line-fill" aria-hidden="true"></i><div><h2>Ventas de los últimos 12 meses</h2><p>Ventas confirmadas en MariaDB.</p></div></div>
                     <label class="dashboard-select-wrap">
                         <span class="visually-hidden">Periodo de ventas</span>
                         <select data-dashboard-range>
@@ -185,7 +185,7 @@
             </section>
 
             <section class="dashboard-card dashboard-list-card">
-                <header class="dashboard-card-header"><div class="dashboard-card-title"><i class="bi bi-exclamation-triangle-fill is-danger" aria-hidden="true"></i><div><h2>Alertas de inventario</h2><p>Productos con existencias mínimas.</p></div></div><a href="{{ route('management.inventory') }}">Ver todos</a></header>
+                <header class="dashboard-card-header"><div class="dashboard-card-title"><i class="bi bi-exclamation-triangle-fill is-danger" aria-hidden="true"></i><div><h2>Alertas de inventario</h2><p>Productos sin saldo físico en almacén.</p></div></div><a href="{{ route('management.inventory') }}">Ver todos</a></header>
                 <div class="dashboard-product-list">
                     @forelse ($lowStockProducts as $product)
                         <a href="{{ route('management.inventory') }}" class="dashboard-product-row">
@@ -195,28 +195,28 @@
                                 <span class="dashboard-product-placeholder"><i class="bi bi-phone" aria-hidden="true"></i></span>
                             @endif
                             <span><b>{{ $product->nombre }}</b><small>{{ $product->marca ?: 'Producto' }}</small></span>
-                            <strong>{{ number_format($product->existencias) }} {{ $product->existencias === 1 ? 'unidad' : 'unidades' }}</strong><i class="bi bi-chevron-right" aria-hidden="true"></i>
+                            <strong>{{ number_format((float) $product->existencias_alcance) }} {{ (float) $product->existencias_alcance === 1.0 ? 'unidad' : 'unidades' }}</strong><i class="bi bi-chevron-right" aria-hidden="true"></i>
                         </a>
                     @empty
-                        <div class="dashboard-empty-state"><i class="bi bi-shield-check" aria-hidden="true"></i><strong>Sin alertas de inventario</strong><span>Los productos activos superan el nivel mínimo.</span></div>
+                        <div class="dashboard-empty-state"><i class="bi bi-{{ $activeProducts === 0 ? 'inbox' : 'shield-check' }}" aria-hidden="true"></i><strong>{{ $activeProducts === 0 ? 'No hay productos registrados' : 'Sin alertas de inventario' }}</strong><span>{{ $activeProducts === 0 ? 'Registra productos para consultar sus existencias por almacén.' : 'Todos los productos activos tienen existencias disponibles.' }}</span></div>
                     @endforelse
                 </div>
             </section>
 
             <section class="dashboard-card dashboard-list-card">
-                <header class="dashboard-card-header"><div class="dashboard-card-title"><i class="bi bi-trophy-fill is-warning" aria-hidden="true"></i><div><h2>Productos más vendidos</h2><p>Ranking basado en pedidos registrados.</p></div></div><a href="{{ route('management.reports') }}">Ver todos</a></header>
+                <header class="dashboard-card-header"><div class="dashboard-card-title"><i class="bi bi-trophy-fill is-warning" aria-hidden="true"></i><div><h2>Productos más vendidos</h2><p>Ranking basado en ventas confirmadas.</p></div></div><a href="{{ route('management.reports') }}">Ver todos</a></header>
                 <ol class="dashboard-ranking-list">
-                    @forelse ($topProducts as $index => $sale)
+                    @forelse ($topProducts as $index => $venta)
                         <li><span class="dashboard-ranking-number">{{ $index + 1 }}</span>
-                            @if ($sale->product?->url_imagen)
-                                <img src="{{ \Illuminate\Support\Str::startsWith($sale->product->url_imagen, ['http://', 'https://']) ? $sale->product->url_imagen : asset($sale->product->url_imagen) }}" alt="{{ $sale->product->nombre }}">
+                            @if ($venta->producto?->url_imagen)
+                                <img src="{{ \Illuminate\Support\Str::startsWith($venta->producto->url_imagen, ['http://', 'https://']) ? $venta->producto->url_imagen : asset($venta->producto->url_imagen) }}" alt="{{ $venta->producto->nombre }}">
                             @else
                                 <span class="dashboard-product-placeholder"><i class="bi bi-phone" aria-hidden="true"></i></span>
                             @endif
-                            <span><b>{{ $sale->product?->nombre ?? 'Producto eliminado' }}</b><small>{{ number_format((int) $sale->units_sold) }} unidades vendidas</small></span><strong>S/ {{ number_format((float) $sale->revenue, 2) }}</strong>
+                            <span><b>{{ $venta->producto?->nombre ?? $venta->descripcion_historica }}</b><small>{{ number_format((int) $venta->unidades_vendidas) }} unidades vendidas</small></span><strong>S/ {{ number_format((float) $venta->importe_vendido, 2) }}</strong>
                         </li>
                     @empty
-                        <li class="dashboard-empty-state"><i class="bi bi-bar-chart" aria-hidden="true"></i><strong>Aún no hay ventas</strong><span>El ranking aparecerá cuando existan pedidos.</span></li>
+                        <li class="dashboard-empty-state"><i class="bi bi-bar-chart" aria-hidden="true"></i><strong>Aún no hay ventas</strong><span>El ranking aparecerá cuando existan ventas confirmadas.</span></li>
                     @endforelse
                 </ol>
             </section>

@@ -8,7 +8,8 @@ use App\Models\Catalogo\Categoria;
 use App\Models\Catalogo\Producto;
 use App\Models\Compras\Proveedor;
 use App\Models\Inventario\MovimientoInventario;
-use App\Servicios\RegistradorAuditoria;
+use App\Models\User;
+use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioInventario;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -18,96 +19,85 @@ use Illuminate\View\View;
 
 class InventarioController extends Controller
 {
-    public function __construct(private readonly ServicioInventario $inventoryService) {}
+    public function __construct(
+        private readonly ServicioInventario $inventoryService,
+        private readonly ServicioAutorizacion $authorization,
+    ) {}
 
     public function index(Request $request): View
     {
         $filters = $this->filters($request);
-        $products = $this->productQuery($filters)
-            ->with(['category', 'suppliers:id,nombre'])
+        $alcance = $this->inventoryService->alcanceConsulta($request->user());
+        $movementQuery = fn (): Builder => $this->authorization->scopeRecordsFor(
+            MovimientoInventario::query(),
+            $request->user(),
+            'gestion.inventario.consultar',
+        );
+        $products = $this->inventoryService->productosParaConsulta($alcance, $filters, true)
+            ->with(['category', 'suppliers:id,nombre', 'variants:id,producto_id,codigo_sku,nombre_color,estado'])
             ->orderBy('nombre')
             ->paginate($filters['por_pagina'])
             ->withQueryString();
-        $activeProducts = Producto::query()->where('activo', true)->count();
-        $lowStock = Producto::query()->where('activo', true)->where('existencias', '<=', 10)->count();
-        $movementsToday = MovimientoInventario::query()->whereDate('creado_en', today())->count();
-        $movementsYesterday = MovimientoInventario::query()->whereDate('creado_en', today()->subDay())->count();
-        $inventoryValue = (float) Producto::query()
-            ->where('activo', true)
-            ->selectRaw('COALESCE(SUM(existencias * precio), 0) as inventory_value')
-            ->value('inventory_value');
-        $latestMovements = $this->latestMovements($products->getCollection());
+        $resumen = $this->inventoryService->resumenConsulta($alcance);
+        $movementsToday = $movementQuery()->whereDate('creado_en', today())->count();
+        $movementsYesterday = $movementQuery()->whereDate('creado_en', today()->subDay())->count();
+        $latestMovements = $this->latestMovements($products->getCollection(), $request->user());
 
         return view('gestion.inventario.listar', [
             'products' => $products,
-            'categories' => Categoria::query()->where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
-            'suppliers' => Proveedor::query()->where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
-            'movementProducts' => Producto::query()
-                ->where('activo', true)
+            'categories' => Categoria::query()->where('empresa_id', $alcance['empresa_id'])->where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
+            'suppliers' => Proveedor::query()->where('empresa_id', $alcance['empresa_id'])->where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
+            'almacenes' => $this->inventoryService->almacenesParaConsulta($alcance),
+            'movementProducts' => $this->inventoryService->productosParaConsulta($alcance, [], true)
+                ->with('variants:id,producto_id,codigo_sku,nombre_color,estado')
                 ->orderBy('nombre')
-                ->get(['id', 'nombre', 'marca', 'existencias']),
+                ->get(),
             'latestMovements' => $latestMovements,
-            'lowStockProducts' => Producto::query()
-                ->where('activo', true)
-                ->where('existencias', '<=', 10)
+            'productosSinExistencias' => $this->inventoryService->productosParaConsulta($alcance, ['estado' => 'sin_existencias'], true)
                 ->with(['suppliers:id,nombre'])
-                ->orderBy('existencias')
+                ->orderBy('existencias_alcance')
                 ->orderBy('nombre')
                 ->limit(4)
                 ->get(),
-            'recentMovements' => MovimientoInventario::query()
+            'recentMovements' => $movementQuery()
                 ->with(['product:id,nombre,marca,etiqueta', 'user:id,nombre'])
                 ->latest('creado_en')
                 ->limit(5)
                 ->get(),
             'filters' => $filters,
-            'activeProducts' => $activeProducts,
-            'lowStock' => $lowStock,
+            'activeProducts' => $resumen['productos'],
+            'sinExistencias' => $resumen['sin_existencias'],
             'movementsToday' => $movementsToday,
             'movementsTrend' => $this->trendPercent($movementsToday, $movementsYesterday),
-            'inventoryValue' => $inventoryValue,
+            'inventoryValue' => $resumen['valor_catalogo'],
         ]);
     }
 
-    public function adjust(AjustarInventarioRequest $request, Producto $product, RegistradorAuditoria $audit): RedirectResponse
+    public function adjust(AjustarInventarioRequest $request, Producto $product): RedirectResponse
     {
         $data = $request->validated();
-        $before = (int) $product->existencias;
-        $this->inventoryService->adjust($product, $data['tipo_movimiento'], (int) $data['cantidad'], $data['notas'], $request->user());
-        $audit->record($request->user()->id, 'inventory.adjusted', 'productos', $product->id, ['existencias' => $before], ['existencias' => $product->fresh()->existencias], $request->ip());
+        $movimiento = isset($data['almacen_id'])
+            ? $this->inventoryService->registrarMovimientoEnAlmacen(
+                $product,
+                isset($data['variante_id']) ? (int) $data['variante_id'] : null,
+                (int) $data['almacen_id'],
+                $data['tipo_movimiento'],
+                (int) $data['cantidad'],
+                $data['notas'],
+                $request->user(),
+            )
+            : $this->inventoryService->adjust($product, $data['tipo_movimiento'], (int) $data['cantidad'], $data['notas'], $request->user());
 
-        return back()->with('status', 'Movimiento de inventario registrado.');
+        return back()->with('status', $movimiento === null
+            ? 'El conteo coincide con las existencias registradas; no se generó un movimiento.'
+            : 'Movimiento de inventario registrado.');
     }
 
-    public function adjustLegacy(AjustarInventarioRequest $request, RegistradorAuditoria $audit): RedirectResponse
+    public function adjustLegacy(AjustarInventarioRequest $request): RedirectResponse
     {
         $product = Producto::findOrFail((int) $request->input('producto_id'));
 
-        return $this->adjust($request, $product, $audit);
-    }
-
-    /**
-     * @param  array{buscar:?string,categoria:?int,estado:?string,proveedor:?int,por_pagina:int}  $filters
-     * @return Builder<Producto>
-     */
-    private function productQuery(array $filters): Builder
-    {
-        return Producto::query()
-            ->where('activo', true)
-            ->when($filters['buscar'], function (Builder $query, string $search): void {
-                $query->where(function (Builder $searchQuery) use ($search): void {
-                    $searchQuery
-                        ->where('nombre', 'like', '%'.$search.'%')
-                        ->orWhere('marca', 'like', '%'.$search.'%')
-                        ->orWhere('etiqueta', 'like', '%'.$search.'%')
-                        ->orWhere('categoria', 'like', '%'.$search.'%');
-                });
-            })
-            ->when($filters['categoria'], fn (Builder $query, int $categoryId): Builder => $query->where('categoria_id', $categoryId))
-            ->when($filters['proveedor'], fn (Builder $query, int $supplierId): Builder => $query->whereHas('suppliers', fn (Builder $supplierQuery): Builder => $supplierQuery->whereKey($supplierId)))
-            ->when($filters['estado'] === 'optimo', fn (Builder $query): Builder => $query->where('existencias', '>', 10))
-            ->when($filters['estado'] === 'bajo', fn (Builder $query): Builder => $query->whereBetween('existencias', [6, 10]))
-            ->when($filters['estado'] === 'critico', fn (Builder $query): Builder => $query->where('existencias', '<=', 5));
+        return $this->adjust($request, $product);
     }
 
     /**
@@ -122,7 +112,7 @@ class InventarioController extends Controller
         return [
             'buscar' => $search !== '' ? $search : null,
             'categoria' => $request->integer('categoria') ?: null,
-            'estado' => in_array($status, ['optimo', 'bajo', 'critico'], true) ? $status : null,
+            'estado' => in_array($status, ['con_existencias', 'sin_existencias'], true) ? $status : null,
             'proveedor' => $request->integer('proveedor') ?: null,
             'por_pagina' => in_array($perPage, [7, 8, 10, 20, 50], true) ? $perPage : 7,
         ];
@@ -132,13 +122,17 @@ class InventarioController extends Controller
      * @param  Collection<int, Producto>  $products
      * @return Collection<int, MovimientoInventario>
      */
-    private function latestMovements(Collection $products): Collection
+    private function latestMovements(Collection $products, User $user): Collection
     {
         if ($products->isEmpty()) {
             return collect();
         }
 
-        return MovimientoInventario::query()
+        return $this->authorization->scopeRecordsFor(
+            MovimientoInventario::query(),
+            $user,
+            'gestion.inventario.consultar',
+        )
             ->with('user:id,nombre')
             ->whereIn('producto_id', $products->modelKeys())
             ->latest('creado_en')

@@ -4,6 +4,7 @@ use App\Models\Catalogo\Categoria;
 use App\Models\Catalogo\Producto;
 use App\Models\Comunicacion\MensajeContacto;
 use App\Models\User;
+use Tests\SpanishAccessFixture;
 
 it('exposes the public modules migrated from the legacy application', function () {
     foreach ([
@@ -50,15 +51,15 @@ it('calculates an optimizer proposal from active catalog stock', function () {
 });
 
 it('protects administrative catalog modules by role', function () {
-    $admin = User::factory()->create(['rol' => 'administrador']);
-    $marketing = User::factory()->create(['rol' => 'marketing']);
+    $admin = SpanishAccessFixture::user('administrador');
+    $marketing = SpanishAccessFixture::user('marketing');
 
     $this->actingAs($admin)->get(route('management.categories'))->assertOk();
     $this->actingAs($marketing)->get(route('management.categories'))->assertForbidden();
 });
 
 it('exports authorized report data as an Excel-compatible CSV', function () {
-    $admin = User::factory()->create(['rol' => 'administrador']);
+    $admin = SpanishAccessFixture::user('administrador');
 
     $response = $this->actingAs($admin)->get(route('management.reports.export'));
 

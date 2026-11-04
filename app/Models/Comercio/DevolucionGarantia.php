@@ -23,8 +23,11 @@ class DevolucionGarantia extends Model
         'fecha_solicitud',
         'fecha_limite',
         'resolucion',
-        'creado_por',
+        'creado_por_usuario_id',
         'activo',
+        'empresa_id',
+        'sede_id',
+        'venta_id',
     ];
 
     public $timestamps = false;
@@ -56,6 +59,6 @@ class DevolucionGarantia extends Model
 
     public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'creado_por');
+        return $this->belongsTo(User::class, 'creado_por_usuario_id');
     }
 }

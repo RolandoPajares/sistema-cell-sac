@@ -17,8 +17,8 @@
                     </label>
 
                     <label class="productos-create-field productos-create-field--sku">
-                        <span>SKU <b>*</b></span>
-                        <input class="productos-create-input" name="etiqueta" value="{{ old('etiqueta', $product->etiqueta) }}" maxlength="80" required>
+                        <span>Etiqueta del producto</span>
+                        <input class="productos-create-input" name="etiqueta" value="{{ old('etiqueta', $product->etiqueta) }}" maxlength="80">
                     </label>
 
                     <label class="productos-create-field">
@@ -55,8 +55,9 @@
                     </label>
 
                     <label class="productos-create-field productos-create-field--compact">
-                        <span>Stock actual <b>*</b></span>
-                        <input class="productos-create-input" name="existencias" type="number" min="0" step="1" value="{{ old('existencias', $product->existencias) }}" required>
+                        <span>Existencias físicas en este alcance</span>
+                        <input class="productos-create-input" type="number" value="{{ number_format($product->existencias_alcance) }}" readonly>
+                        <small>Para ajustar el stock, selecciona el almacén desde <a href="{{ route('management.inventory') }}">Inventario</a>.</small>
                     </label>
 
                     <label class="productos-create-field productos-create-field--status">

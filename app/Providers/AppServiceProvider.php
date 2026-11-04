@@ -3,10 +3,13 @@
 namespace App\Providers;
 
 use App\Models\Marketing\Campania;
-use App\Soporte\PermisosRoles;
+use App\Models\User;
+use App\Servicios\ServicioAutorizacion;
+use App\Servicios\ServicioMenuDinamico;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -18,6 +21,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Model::preventLazyLoading(! app()->isProduction());
+
+        Gate::before(function ($user, string $ability): ?bool {
+            if ($user instanceof User && str_starts_with($ability, 'gestion.')) {
+                return app(ServicioAutorizacion::class)->allows($user, $ability);
+            }
+
+            return null;
+        });
 
         RateLimiter::for('login', fn (Request $request): Limit => Limit::perMinute(5)->by(mb_strtolower((string) $request->input('correo')).'|'.$request->ip()));
         RateLimiter::for('register', fn (Request $request): Limit => Limit::perMinute(3)->by($request->ip()));
@@ -46,12 +57,9 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer('layouts.administracion', function ($view): void {
             $user = auth()->user();
-            $view->with(
-                'sidebarLinks',
-                $user?->rol === 'administrador'
-                    ? PermisosRoles::administratorNavigation($user)
-                    : ($user ? PermisosRoles::navigation($user) : []),
-            );
+            $menu = app(ServicioMenuDinamico::class)->paraUsuario($user);
+
+            $view->with('sidebarLinks', $menu);
         });
     }
 }

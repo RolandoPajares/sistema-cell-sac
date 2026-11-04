@@ -3,12 +3,13 @@
 
     <label>
         Código
-        <input name="codigo" required>
+        <input name="codigo" value="{{ old('codigo') }}" maxlength="50" required>
+        @error('codigo')<small role="alert">{{ $message }}</small>@enderror
     </label>
 
     <label>
         Tipo
-        <select name="tipo_descuento">
+        <select name="tipo_descuento" required>
             <option value="porcentaje">Porcentaje</option>
             <option value="fijo">Monto fijo</option>
         </select>
@@ -22,7 +23,9 @@
             step="0.01"
             min="0.01"
             required
+            max="99999999.99"
         >
+        @error('valor')<small role="alert">{{ $message }}</small>@enderror
     </label>
 
     <label>
@@ -34,22 +37,27 @@
             min="0"
             value="0"
             required
+            max="99999999.99"
         >
+        @error('minimo_compra')<small role="alert">{{ $message }}</small>@enderror
     </label>
 
     <label>
         Límite usos
-        <input type="number" name="limite_usos" min="1">
+        <input type="number" name="limite_usos" min="1" max="4294967295">
+        @error('limite_usos')<small role="alert">{{ $message }}</small>@enderror
     </label>
 
     <label>
         Inicio
-        <input type="datetime-local" name="inicia_en" required>
+        <input type="datetime-local" name="inicia_en" value="{{ old('inicia_en') }}" required>
+        @error('inicia_en')<small role="alert">{{ $message }}</small>@enderror
     </label>
 
     <label>
         Fin
-        <input type="datetime-local" name="finaliza_en" required>
+        <input type="datetime-local" name="finaliza_en" value="{{ old('finaliza_en') }}" required>
+        @error('finaliza_en')<small role="alert">{{ $message }}</small>@enderror
     </label>
 
     <button class="btn btn-primary">Guardar cupón</button>

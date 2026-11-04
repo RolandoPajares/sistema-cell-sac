@@ -7,6 +7,7 @@ use App\Http\Requests\GuardarCotizacionRequest;
 use App\Models\Catalogo\Producto;
 use App\Models\Clientes\Cliente;
 use App\Models\Comercio\Cotizacion;
+use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioCotizaciones;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -15,7 +16,10 @@ use Illuminate\View\View;
 
 class CotizacionController extends Controller
 {
-    public function __construct(private readonly ServicioCotizaciones $quotationService) {}
+    public function __construct(
+        private readonly ServicioCotizaciones $quotationService,
+        private readonly ServicioAutorizacion $authorization,
+    ) {}
 
     public function index(Request $request): View
     {
@@ -24,8 +28,11 @@ class CotizacionController extends Controller
         }
 
         $query = Cotizacion::with('customer', 'details.product')->latest('creado_en')->latest('id');
-        if ($request->user()->rol === 'cliente_mayorista') {
+        $this->authorization->assertAllowed($request->user(), 'gestion.cotizaciones.consultar');
+        if ($this->authorization->hasRole($request->user(), 'cliente_mayorista')) {
             $query->whereHas('customer', fn ($builder) => $builder->where('usuario_id', $request->user()->id));
+        } else {
+            $query = $this->authorization->scopeRecordsFor($query, $request->user(), 'gestion.cotizaciones.consultar');
         }
 
         return view('gestion.cotizaciones.listar', [
@@ -45,7 +52,11 @@ class CotizacionController extends Controller
             'hasta' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:desde'],
         ]);
 
-        $activeQuotations = static fn (): Builder => Cotizacion::query()->where('activo', true);
+        $activeQuotations = fn (): Builder => $this->authorization->scopeRecordsFor(
+            Cotizacion::query()->where('activo', true),
+            $request->user(),
+            'gestion.cotizaciones.consultar',
+        );
         $applyFilters = static function (Builder $query) use ($filters): Builder {
             if (($filters['buscar'] ?? '') !== '') {
                 $search = trim($filters['buscar']);

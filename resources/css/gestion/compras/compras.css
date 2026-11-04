@@ -433,6 +433,18 @@
 
 .compras-create-dialog .admin-dialog-body { max-height: calc(100vh - 120px); overflow-y: auto; }
 .compras-create-dialog .form-card { max-width: none; margin: 0; box-shadow: none; }
+.compras-recent-row .compras-reception-open { flex: 0 0 auto; padding: 5px 8px; border: 1px solid #cfe0f4; border-radius: 7px; color: #086de8; background: #fff; font-size: 0.58rem; font-weight: 800; cursor: pointer; }
+.compras-reception-dialog { width: min(100% - 28px, 560px); max-height: calc(100vh - 28px); overflow: auto; }
+.compras-reception-body { display: grid; gap: 16px; }
+.compras-reception-warning { display: flex; align-items: flex-start; gap: 10px; padding: 12px; border: 1px solid #f1d9a8; border-radius: 9px; color: #805411; background: #fff9eb; }
+.compras-reception-warning > i { margin-top: 2px; color: #d58b12; }
+.compras-reception-warning p { margin: 0; font-size: 0.7rem; line-height: 1.5; }
+.compras-reception-body dl { display: grid; gap: 8px; margin: 0; }
+.compras-reception-body dl > div { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid #edf2f8; font-size: 0.7rem; }
+.compras-reception-body dt { color: #7185a8; font-weight: 700; }
+.compras-reception-body dd { margin: 0; color: #142954; font-weight: 800; text-align: right; overflow-wrap: anywhere; }
+.compras-reception-feedback { margin: 0; padding: 11px; border: 1px solid #bde8d3; border-radius: 8px; color: #176b49; background: #effbf5; font-size: 0.68rem; line-height: 1.5; }
+.compras-reception-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 22px 18px; border-top: 1px solid #e0ebf6; }
 
 @media (max-width: 1180px) {
     .compras-filters { grid-template-columns: minmax(200px, 1.5fr) repeat(2, minmax(130px, 1fr)) repeat(2, minmax(130px, 0.9fr)) auto; }
@@ -456,6 +468,7 @@
     .compras-hero { align-items: flex-start; flex-direction: column; }
     .compras-hero-actions { width: 100%; justify-content: stretch; }
     .compras-hero-actions > button { flex: 1 1 auto; }
+    .compras-recent-row .compras-reception-open { flex: 1 0 100%; width: 100%; margin-left: 14px; }
     .compras-kpi-grid { gap: 8px; }
     .compras-kpi { min-height: 83px; gap: 8px; padding: 10px; }
     .compras-kpi-icon { flex-basis: 36px; width: 36px; height: 36px; font-size: 1rem; }
@@ -469,4 +482,6 @@
     .compras-table-footer { align-items: flex-start; flex-direction: column; }
     .compras-table-footer nav { margin-left: 0; }
     .compras-bottom-grid { display: flex; flex-direction: column; }
+    .compras-reception-footer { align-items: stretch; flex-direction: column-reverse; }
+    .compras-reception-footer button { width: 100%; }
 }

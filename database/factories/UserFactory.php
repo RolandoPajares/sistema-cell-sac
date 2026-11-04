@@ -29,7 +29,7 @@ class UserFactory extends Factory
             'correo' => fake()->unique()->safeEmail(),
             'password' => static::$password ??= Hash::make('password'),
             'rol' => 'cliente_minorista',
-            'remember_token' => Str::random(10),
+            'token_recordatorio' => Str::random(10),
         ];
     }
 

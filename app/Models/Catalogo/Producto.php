@@ -28,7 +28,7 @@ class Producto extends Model
     protected $fillable = [
         'marca', 'nombre', 'categoria_id', 'categoria', 'precio', 'precio_original',
         'descuento', 'precio_oferta', 'url_imagen', 'existencias', 'almacenamiento',
-        'color', 'etiqueta', 'descripcion', 'activo', 'creado_en',
+        'color', 'etiqueta', 'descripcion', 'activo', 'creado_en', 'empresa_id',
     ];
 
     public $timestamps = false;
@@ -56,7 +56,7 @@ class Producto extends Model
 
     public function images(): HasMany
     {
-        return $this->hasMany(ImagenProducto::class, 'producto_id')->orderBy('orden');
+        return $this->hasMany(ImagenProducto::class, 'producto_id')->orderBy('orden')->orderBy('id');
     }
 
     public function features(): HasMany
@@ -76,11 +76,42 @@ class Producto extends Model
 
     public function suppliers(): BelongsToMany
     {
-        return $this->belongsToMany(Proveedor::class, 'producto_proveedor', 'producto_id', 'proveedor_id');
+        return $this->belongsToMany(Proveedor::class, 'productos_proveedores', 'producto_id', 'proveedor_id');
     }
 
     public function getEffectivePriceAttribute(): string
     {
         return (string) ($this->precio_oferta ?? $this->precio);
+    }
+
+    public function getUrlImagenPrincipalAttribute(): ?string
+    {
+        $rutaImagenGaleria = $this->relationLoaded('images')
+            ? $this->images->first()?->ruta_imagen
+            : null;
+        $rutaImagen = $rutaImagenGaleria ?: $this->url_imagen;
+
+        return static::urlPublicaDeImagen(is_string($rutaImagen) ? $rutaImagen : null);
+    }
+
+    public static function urlPublicaDeImagen(?string $rutaImagen): ?string
+    {
+        $rutaImagen = trim((string) $rutaImagen);
+
+        if ($rutaImagen === '') {
+            return null;
+        }
+
+        if (preg_match('/^https?:\/\//i', $rutaImagen) === 1) {
+            return $rutaImagen;
+        }
+
+        $rutaNormalizada = ltrim($rutaImagen, '/');
+
+        if (str_starts_with($rutaNormalizada, 'storage/') || str_starts_with($rutaNormalizada, 'assets/')) {
+            return asset($rutaNormalizada);
+        }
+
+        return asset('assets/cell-legacy/'.$rutaNormalizada);
     }
 }

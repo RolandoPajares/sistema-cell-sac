@@ -97,7 +97,7 @@ return new class extends Migration
 
         Schema::create('clientes', function (Blueprint $table): void {
             $table->increments('id');
-            $table->foreignId('usuario_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('usuario_id')->nullable()->constrained(DB::getDriverName() === 'sqlite' ? 'usuarios' : 'users')->nullOnDelete();
             $table->string('tipo', 20)->default('minorista')->index();
             $table->string('documento', 20)->unique();
             $table->string('razon_social', 160)->nullable();
@@ -131,7 +131,7 @@ return new class extends Migration
         Schema::create('compras', function (Blueprint $table): void {
             $table->increments('id');
             $table->unsignedInteger('proveedor_id');
-            $table->foreignId('creado_por')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('creado_por')->nullable()->constrained(DB::getDriverName() === 'sqlite' ? 'usuarios' : 'users')->nullOnDelete();
             $table->decimal('total', 12, 2)->default(0);
             $table->string('estado', 30)->default('Pendiente')->index();
             $table->date('fecha_compra')->index();
@@ -153,7 +153,7 @@ return new class extends Migration
         Schema::create('cotizaciones', function (Blueprint $table): void {
             $table->increments('id');
             $table->unsignedInteger('cliente_id');
-            $table->foreignId('creado_por')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('creado_por')->nullable()->constrained(DB::getDriverName() === 'sqlite' ? 'usuarios' : 'users')->nullOnDelete();
             $table->decimal('total', 12, 2)->default(0);
             $table->string('estado', 30)->default('Borrador')->index();
             $table->string('notas', 500)->nullable();
@@ -174,7 +174,7 @@ return new class extends Migration
 
         Schema::create('pedidos', function (Blueprint $table): void {
             $table->increments('id');
-            $table->foreignId('usuario_id')->constrained('users')->restrictOnDelete();
+            $table->foreignId('usuario_id')->constrained(DB::getDriverName() === 'sqlite' ? 'usuarios' : 'users')->restrictOnDelete();
             $table->decimal('total', 10, 2);
             $table->decimal('subtotal', 10, 2)->default(0);
             $table->decimal('descuento', 10, 2)->default(0);
@@ -224,7 +224,7 @@ return new class extends Migration
         Schema::create('movimientos_inventario', function (Blueprint $table): void {
             $table->increments('id');
             $table->unsignedInteger('producto_id');
-            $table->foreignId('usuario_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('usuario_id')->nullable()->constrained(DB::getDriverName() === 'sqlite' ? 'usuarios' : 'users')->nullOnDelete();
             $table->string('tipo_movimiento', 20)->index();
             $table->integer('cantidad');
             $table->string('notas', 500);
@@ -287,7 +287,7 @@ return new class extends Migration
         Schema::create('eventos_campana', function (Blueprint $table): void {
             $table->id();
             $table->unsignedInteger('campana_id');
-            $table->foreignId('usuario_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('usuario_id')->nullable()->constrained(DB::getDriverName() === 'sqlite' ? 'usuarios' : 'users')->nullOnDelete();
             $table->string('tipo', 20)->index();
             $table->string('sesion_hash', 64)->nullable()->index();
             $table->timestamp('creado_en')->useCurrent();
@@ -297,7 +297,7 @@ return new class extends Migration
 
         Schema::create('registros_auditoria', function (Blueprint $table): void {
             $table->bigIncrements('id');
-            $table->foreignId('usuario_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('usuario_id')->nullable()->constrained(DB::getDriverName() === 'sqlite' ? 'usuarios' : 'users')->nullOnDelete();
             $table->string('accion', 80);
             $table->string('entidad', 80)->index();
             $table->unsignedInteger('entidad_id')->nullable();
@@ -420,7 +420,7 @@ return new class extends Migration
             Schema::create('eventos_campana', function (Blueprint $table): void {
                 $table->id();
                 $table->unsignedInteger('campana_id');
-                $table->foreignId('usuario_id')->nullable()->constrained('users')->nullOnDelete();
+                $table->foreignId('usuario_id')->nullable()->constrained(DB::getDriverName() === 'sqlite' ? 'usuarios' : 'users')->nullOnDelete();
                 $table->string('tipo', 20)->index();
                 $table->string('sesion_hash', 64)->nullable()->index();
                 $table->timestamp('creado_en')->useCurrent();

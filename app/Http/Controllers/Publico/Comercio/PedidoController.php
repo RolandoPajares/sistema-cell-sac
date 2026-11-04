@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Publico\Comercio;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ActualizarEstadoPedidoRequest;
 use App\Models\Comercio\Pedido;
+use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioPedidos;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -14,25 +15,37 @@ use Illuminate\View\View;
 
 class PedidoController extends Controller
 {
-    public function __construct(private readonly ServicioPedidos $orderService) {}
+    public function __construct(
+        private readonly ServicioPedidos $orderService,
+        private readonly ServicioAutorizacion $authorization,
+    ) {}
 
     public function index(Request $request): View
     {
-        $role = $request->user()->rol;
+        $user = $request->user();
 
-        if ($role === 'administrador') {
+        if ($this->authorization->hasRole($user, 'administrador')
+            && $this->authorization->allowsGlobal($user, 'gestion.pedidos.consultar')) {
             return $this->adminIndex($request);
         }
 
         $query = Pedido::with('details.product', 'user')->latest('creado_en')->latest('id');
 
-        if ($role === 'ventas_minoristas') {
-            $query->whereHas('user', fn ($builder) => $builder->where('rol', 'cliente_minorista'));
-        } elseif ($role === 'ventas_mayoristas') {
-            $query->whereHas('user', fn ($builder) => $builder->where('rol', 'cliente_mayorista'));
-        } elseif (str_starts_with($role, 'cliente_')) {
+        $query = $this->authorization->scopeRecordsFor($query, $request->user(), 'gestion.pedidos.consultar', 'usuario_id');
+
+        $tiposCliente = [];
+        if ($this->authorization->hasRole($user, 'ventas_minoristas')) {
+            $tiposCliente[] = 'cliente_minorista';
+        }
+        if ($this->authorization->hasRole($user, 'ventas_mayoristas')) {
+            $tiposCliente[] = 'cliente_mayorista';
+        }
+
+        if ($tiposCliente !== []) {
+            $query->whereHas('user.rolesVigentes', fn (Builder $builder): Builder => $builder->whereIn('codigo', $tiposCliente));
+        } elseif ($this->authorization->hasRole($user, 'cliente_minorista') || $this->authorization->hasRole($user, 'cliente_mayorista')) {
             $query->whereBelongsTo($request->user(), 'user');
-        } elseif ($role !== 'administrador') {
+        } else {
             abort(403);
         }
 
@@ -42,7 +55,7 @@ class PedidoController extends Controller
     private function adminIndex(Request $request): View
     {
         $filters = $this->adminFilters($request);
-        $orders = $this->adminOrderQuery($filters)
+        $orders = $this->adminOrderQuery($request, $filters)
             ->with([
                 'user:id,nombre,correo,rol',
                 'details.product:id,nombre,marca,url_imagen',
@@ -51,20 +64,20 @@ class PedidoController extends Controller
             ->latest('id')
             ->paginate($filters['por_pagina'])
             ->withQueryString();
-        $statusCounts = Pedido::query()
+        $statusCounts = $this->scopedOrders($request)
             ->selectRaw('estado, COUNT(*) as total')
             ->groupBy('estado')
             ->pluck('total', 'estado');
         $totalOrders = (int) $statusCounts->sum();
-        $todayOrders = Pedido::query()->whereDate('creado_en', today())->count();
-        $yesterdayOrders = Pedido::query()->whereDate('creado_en', today()->subDay())->count();
-        $paidOrders = $this->countStatuses($statusCounts, ['En proceso', 'Enviado', 'Entregado']);
+        $todayOrders = $this->scopedOrders($request)->whereDate('creado_en', today())->count();
+        $yesterdayOrders = $this->scopedOrders($request)->whereDate('creado_en', today()->subDay())->count();
+        $paidOrders = null;
         $pendingOrders = $this->countStatuses($statusCounts, ['Pendiente']);
         $shippingOrders = $this->countStatuses($statusCounts, ['Enviado']);
         $deliveredOrders = $this->countStatuses($statusCounts, ['Entregado']);
         $cancelledOrders = $this->countStatuses($statusCounts, ['Cancelado']);
         $statusSummary = $this->statusSummary($statusCounts, $totalOrders);
-        $customerSummary = $this->customerSummary($totalOrders);
+        $customerSummary = $this->customerSummary($request, $totalOrders);
 
         return view('publico.comercio.pedidos', [
             'orders' => $orders,
@@ -79,13 +92,13 @@ class PedidoController extends Controller
             'cancelledOrders' => $cancelledOrders,
             'statusSummary' => $statusSummary,
             'customerSummary' => $customerSummary,
-            'recentOrders' => Pedido::query()
+            'recentOrders' => $this->scopedOrders($request)
                 ->with(['user:id,nombre,correo', 'details.product:id,nombre,marca,url_imagen'])
                 ->latest('creado_en')
                 ->latest('id')
                 ->limit(5)
                 ->get(),
-            'staleOrders' => Pedido::query()
+            'staleOrders' => $this->scopedOrders($request)
                 ->whereNotIn('estado', ['Entregado', 'Cancelado'])
                 ->where('creado_en', '<', now()->subHours(48))
                 ->count(),
@@ -113,9 +126,9 @@ class PedidoController extends Controller
      * @param  array{buscar:?string,estado:?string,periodo:string,canal:?string,por_pagina:int}  $filters
      * @return Builder<Pedido>
      */
-    private function adminOrderQuery(array $filters): Builder
+    private function adminOrderQuery(Request $request, array $filters): Builder
     {
-        return Pedido::query()
+        return $this->scopedOrders($request)
             ->when($filters['buscar'], function (Builder $query, string $search): void {
                 $query->where(function (Builder $searchQuery) use ($search): void {
                     $searchQuery
@@ -126,6 +139,7 @@ class PedidoController extends Controller
                 });
             })
             ->when($filters['estado'], fn (Builder $query, string $status): Builder => $query->where('estado', $status))
+            ->when($filters['canal'] !== null, fn (Builder $query): Builder => $query->where('canal', $filters['canal']))
             ->when($filters['periodo'] !== 'all', fn (Builder $query): Builder => $query->where('creado_en', '>=', now()->subDays((int) $filters['periodo'] - 1)->startOfDay()));
     }
 
@@ -134,6 +148,9 @@ class PedidoController extends Controller
      */
     private function adminFilters(Request $request): array
     {
+        $validatedChannel = $request->validate([
+            'canal' => ['nullable', 'string', 'max:30'],
+        ])['canal'] ?? null;
         $statusMap = [
             'pendiente' => 'Pendiente',
             'en_proceso' => 'En proceso',
@@ -150,7 +167,7 @@ class PedidoController extends Controller
             'buscar' => $search !== '' ? $search : null,
             'estado' => $statusMap[$status] ?? null,
             'periodo' => in_array($period, ['7', '30', '90', 'all'], true) ? $period : '30',
-            'canal' => $request->string('canal')->toString() === 'tienda_online' ? 'tienda_online' : null,
+            'canal' => is_string($validatedChannel) && trim($validatedChannel) !== '' ? trim($validatedChannel) : null,
             'por_pagina' => in_array($perPage, [10, 20, 50], true) ? $perPage : 10,
         ];
     }
@@ -191,10 +208,10 @@ class PedidoController extends Controller
     /**
      * @return array<int, array{label:string,count:int,percent:float,color:string}>
      */
-    private function customerSummary(int $totalOrders): array
+    private function customerSummary(Request $request, int $totalOrders): array
     {
-        $minoristOrders = Pedido::query()->whereHas('user', fn (Builder $query): Builder => $query->where('rol', 'cliente_minorista'))->count();
-        $mayoristOrders = Pedido::query()->whereHas('user', fn (Builder $query): Builder => $query->where('rol', 'cliente_mayorista'))->count();
+        $minoristOrders = $this->scopedOrders($request)->whereHas('user.rolesVigentes', fn (Builder $query): Builder => $query->where('codigo', 'cliente_minorista'))->count();
+        $mayoristOrders = $this->scopedOrders($request)->whereHas('user.rolesVigentes', fn (Builder $query): Builder => $query->where('codigo', 'cliente_mayorista'))->count();
 
         return array_map(
             static fn (string $label, int $count, string $color): array => [
@@ -207,6 +224,12 @@ class PedidoController extends Controller
             [$minoristOrders, $mayoristOrders],
             ['blue', 'green'],
         );
+    }
+
+    /** @return Builder<Pedido> */
+    private function scopedOrders(Request $request): Builder
+    {
+        return $this->authorization->scopeRecordsFor(Pedido::query(), $request->user(), 'gestion.pedidos.consultar', 'usuario_id');
     }
 
     private function trendPercent(int $current, int $previous): ?float

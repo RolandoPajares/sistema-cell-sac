@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Tests\RefreshSpanishTestDatabase;
 use Tests\TestCase;
 
 /*
@@ -15,7 +15,7 @@ use Tests\TestCase;
 */
 
 pest()->extend(TestCase::class)
-    ->use(LazilyRefreshDatabase::class)
+    ->use(RefreshSpanishTestDatabase::class)
     ->in('Feature');
 
 /*

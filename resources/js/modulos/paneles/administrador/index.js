@@ -1,5 +1,15 @@
 import '../../../../css/paneles/administrador/index.css';
 import './componentes/menu-lateral-desplegable.js';
+import './dashboard-global/dashboard-global.js';
+import './organizacion/organizacion.js';
+import './seguridad/seguridad.js';
+import './operaciones-comerciales/operaciones-comerciales.js';
+import './inventario-logistica/inventario-logistica.js';
+import './inventario-logistica/transferencias.js';
+import './finanzas-facturacion/finanzas-facturacion.js';
+import './ecommerce-marketing/ecommerce-marketing.js';
+import './analisis-auditoria/analisis-auditoria.js';
+import './configuracion-sistema/configuracion-sistema.js';
 import './administracion/index.js';
 import './analisis/index.js';
 import './configuracion/index.js';

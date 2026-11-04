@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Http\Requests;
+
+use App\Models\User;
+use App\Servicios\ServicioAutorizacion;
+use Illuminate\Foundation\Http\FormRequest;
+
+class ConfirmarPagoEfectivoRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return $this->user() instanceof User
+            && app(ServicioAutorizacion::class)->hasRole($this->user(), 'administrador')
+            && app(ServicioAutorizacion::class)->allowsRoute($this);
+    }
+
+    /** @return array<string, array<int, string>> */
+    public function rules(): array
+    {
+        return [
+            'importe_contado' => ['required', 'regex:/\A(?:0|[1-9][0-9]{0,12})(?:\.[0-9]{1,2})?\z/'],
+            'observacion' => ['required', 'string', 'max:500'],
+        ];
+    }
+
+    /** @return array<string, string> */
+    public function messages(): array
+    {
+        return [
+            'importe_contado.required' => 'Declara el efectivo contado antes de confirmar.',
+            'importe_contado.regex' => 'El efectivo contado debe tener hasta dos decimales.',
+            'observacion.required' => 'Documenta la verificación del efectivo.',
+            'observacion.max' => 'La observación no puede superar 500 caracteres.',
+        ];
+    }
+}

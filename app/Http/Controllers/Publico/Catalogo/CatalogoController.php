@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\FiltroCatalogoRequest;
 use App\Models\Catalogo\Producto;
 use App\Servicios\ServicioCatalogo;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class CatalogoController extends Controller
@@ -14,17 +15,23 @@ class CatalogoController extends Controller
     {
         $filters = $request->validated();
 
+        $products = $catalogService->query($filters)->paginate(20)->withQueryString();
+        $catalogService->agregarDisponibilidad($products->getCollection(), $request->user());
+
         return view('publico.catalogo.index', [
-            'products' => $catalogService->query($filters)->paginate(20)->withQueryString(),
+            'products' => $products,
             ...$catalogService->filterOptions(),
             'query' => (string) ($filters['q'] ?? ''),
         ]);
     }
 
-    public function show(Producto $product): View
+    public function show(Request $request, Producto $product, ServicioCatalogo $catalogService): View
     {
         abort_unless($product->activo, 404);
 
-        return view('publico.catalogo.detalle', ['product' => $product->load('category', 'images', 'features', 'variants.images')]);
+        $product->load('category', 'images', 'features', 'variants.images');
+        $catalogService->agregarDisponibilidad($product->newCollection([$product]), $request->user());
+
+        return view('publico.catalogo.detalle', ['product' => $product]);
     }
 }

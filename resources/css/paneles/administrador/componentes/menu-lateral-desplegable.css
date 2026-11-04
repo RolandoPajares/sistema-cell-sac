@@ -40,7 +40,7 @@
 
 .admin-menu-desplegable__groups {
   display: grid;
-  gap: 14px;
+  gap: 28px;
 }
 
 .admin-menu-desplegable__group {
@@ -170,6 +170,11 @@
   white-space: nowrap;
 }
 
+body[data-panel-role="administrador"] .admin-menu-desplegable__item > i {
+  flex: 0 0 16px;
+  text-align: center;
+}
+
 .admin-menu-desplegable .admin-menu-desplegable__item:hover,
 .admin-menu-desplegable .admin-menu-desplegable__item.is-active {
   color: #fff;
@@ -277,5 +282,156 @@
 
   .admin-menu-desplegable__submenu {
     display: grid;
+  }
+}
+
+@media (min-width: 801px) and (max-width: 1180px) {
+  body[data-panel-role="administrador"] .admin-sidebar:has(.admin-menu-desplegable):is(:hover, :focus-within) {
+    width: var(--reference-sidebar-width);
+  }
+
+  body[data-panel-role="administrador"] .admin-sidebar:is(:hover, :focus-within) .admin-menu-desplegable__label,
+  body[data-panel-role="administrador"] .admin-sidebar:is(:hover, :focus-within) .admin-menu-desplegable__chevron {
+    display: block;
+  }
+
+  body[data-panel-role="administrador"] .admin-sidebar:is(:hover, :focus-within) .admin-menu-desplegable__toggle,
+  body[data-panel-role="administrador"] .admin-sidebar:is(:hover, :focus-within) .admin-menu-desplegable__item {
+    justify-content: flex-start;
+    padding-inline: 12px;
+  }
+
+  body[data-panel-role="administrador"] .admin-sidebar:is(:hover, :focus-within) .admin-menu-desplegable__submenu:not([hidden]) {
+    display: grid;
+  }
+}
+
+@media (min-width: 1181px) {
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-collapsed .admin-sidebar:has(.admin-menu-desplegable):is(:hover, :focus-within) {
+    width: var(--reference-sidebar-width);
+  }
+
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-collapsed .admin-sidebar:is(:hover, :focus-within) .admin-menu-desplegable {
+    overflow-y: auto;
+  }
+
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-collapsed .admin-sidebar:is(:hover, :focus-within) .admin-menu-desplegable__label,
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-collapsed .admin-sidebar:is(:hover, :focus-within) .admin-menu-desplegable__chevron {
+    display: block;
+  }
+
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-collapsed .admin-sidebar:is(:hover, :focus-within) .admin-menu-desplegable__toggle,
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-collapsed .admin-sidebar:is(:hover, :focus-within) .admin-menu-desplegable__item {
+    justify-content: flex-start;
+    padding-inline: 12px;
+  }
+
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-collapsed .admin-sidebar:is(:hover, :focus-within) .admin-menu-desplegable__submenu:not([hidden]) {
+    display: grid;
+  }
+}
+
+@media (min-width: 801px) {
+  body[data-panel-role="administrador"] .admin-app:not(.is-sidebar-collapsed) {
+    grid-template-columns: var(--reference-sidebar-width) minmax(0, 1fr);
+  }
+
+  body[data-panel-role="administrador"] .admin-app:not(.is-sidebar-collapsed) .admin-sidebar {
+    width: var(--reference-sidebar-width);
+  }
+
+  body[data-panel-role="administrador"] .admin-app:not(.is-sidebar-collapsed) .admin-menu-desplegable__label,
+  body[data-panel-role="administrador"] .admin-app:not(.is-sidebar-collapsed) .admin-menu-desplegable__chevron {
+    display: block;
+  }
+
+  body[data-panel-role="administrador"] .admin-app:not(.is-sidebar-collapsed) .admin-menu-desplegable__toggle,
+  body[data-panel-role="administrador"] .admin-app:not(.is-sidebar-collapsed) .admin-menu-desplegable__item {
+    justify-content: space-between;
+    padding-inline: 12px;
+  }
+
+  body[data-panel-role="administrador"] .admin-app:not(.is-sidebar-collapsed) .admin-menu-desplegable__dashboard {
+    justify-content: flex-start;
+    padding-inline: 12px;
+  }
+
+  body[data-panel-role="administrador"] .admin-app:not(.is-sidebar-collapsed) .admin-menu-desplegable__item {
+    justify-content: flex-start;
+  }
+
+  body[data-panel-role="administrador"] .admin-app:not(.is-sidebar-collapsed) .admin-menu-desplegable__submenu:not([hidden]) {
+    display: grid;
+  }
+
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-collapsed .admin-sidebar:has(.admin-menu-desplegable):is(:hover, :focus-within) {
+    width: 82px;
+  }
+
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-collapsed .admin-sidebar:is(:hover, :focus-within) .admin-menu-desplegable__label,
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-collapsed .admin-sidebar:is(:hover, :focus-within) .admin-menu-desplegable__chevron,
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-collapsed .admin-sidebar:is(:hover, :focus-within) .admin-menu-desplegable__submenu {
+    display: none;
+  }
+
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-collapsed .admin-sidebar:is(:hover, :focus-within) .admin-menu-desplegable__toggle,
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-collapsed .admin-sidebar:is(:hover, :focus-within) .admin-menu-desplegable__item {
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  body[data-panel-role="administrador"] .admin-sidebar-resizer {
+    position: fixed;
+    z-index: 90;
+    top: var(--reference-header-height);
+    bottom: 0;
+    left: calc(var(--reference-sidebar-width) - 6px);
+    width: 12px;
+    background: transparent;
+    cursor: col-resize;
+    touch-action: none;
+    user-select: none;
+    transition: left 0.24s ease;
+  }
+
+  body[data-panel-role="administrador"] .admin-sidebar-resizer:focus-visible {
+    outline: 2px solid #b8ecff;
+    outline-offset: -2px;
+  }
+
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-collapsed .admin-sidebar-resizer {
+    left: 76px;
+  }
+
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-resizing,
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-resizing .admin-sidebar,
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-resizing .admin-sidebar-resizer {
+    transition: none;
+  }
+}
+
+@media (max-width: 800px) {
+  .admin-sidebar-resizer {
+    display: none;
+  }
+
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-collapsed .admin-sidebar {
+    width: min(82vw, 280px);
+  }
+
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-collapsed .admin-menu-desplegable__label,
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-collapsed .admin-menu-desplegable__chevron {
+    display: block;
+  }
+
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-collapsed .admin-menu-desplegable__submenu:not([hidden]) {
+    display: grid;
+  }
+
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-collapsed .admin-menu-desplegable__dashboard,
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-collapsed .admin-menu-desplegable__toggle,
+  body[data-panel-role="administrador"] .admin-app.is-sidebar-collapsed .admin-menu-desplegable__item {
+    justify-content: flex-start;
+    padding-inline: 12px;
   }
 }

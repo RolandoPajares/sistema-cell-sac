@@ -33,6 +33,7 @@ abstract class PanelDashboardController extends Controller
         return $this->panelService->roleDashboard(
             $user,
             (array) $request->session()->get('cart', []),
+            $this->role(),
         );
     }
 }

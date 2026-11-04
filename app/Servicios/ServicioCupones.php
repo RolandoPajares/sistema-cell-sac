@@ -1,0 +1,140 @@
+<?php
+
+namespace App\Servicios;
+
+use App\Models\Comercio\Cupon;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+
+class ServicioCupones
+{
+    /**
+     * @param  array{buscar?:?string,tipo?:?string,estado?:?string,vigencia?:?string}  $filters
+     * @return Builder<Cupon>
+     */
+    public function query(array $filters): Builder
+    {
+        $query = Cupon::query()
+            ->when($filters['buscar'] ?? null, fn (Builder $query, string $search): Builder => $query->where('codigo', 'like', '%'.$search.'%'))
+            ->when($filters['tipo'] ?? null, fn (Builder $query, string $type): Builder => $query->where('tipo_descuento', $type));
+
+        $now = now();
+        match ($filters['estado'] ?? null) {
+            'Activo' => $query->where('activo', true)
+                ->where('inicia_en', '<=', $now)
+                ->where('finaliza_en', '>=', $now)
+                ->where(fn (Builder $query): Builder => $query->whereNull('limite_usos')->orWhereColumn('usos', '<', 'limite_usos')),
+            'Programado' => $query->where('activo', true)->where('inicia_en', '>', $now),
+            'Finalizado' => $query->where(fn (Builder $query): Builder => $query->where('activo', false)
+                ->orWhere('finaliza_en', '<', $now)
+                ->orWhere(fn (Builder $query): Builder => $query->whereNotNull('limite_usos')->whereColumn('usos', '>=', 'limite_usos'))),
+            default => null,
+        };
+
+        match ($filters['vigencia'] ?? null) {
+            'este_mes' => $query->whereBetween('finaliza_en', [now()->startOfMonth(), now()->endOfMonth()]),
+            'proximos_30_dias' => $query->whereBetween('finaliza_en', [now(), now()->addDays(30)]),
+            'historico' => $query->where('finaliza_en', '<', now()),
+            default => null,
+        };
+
+        return $query;
+    }
+
+    /** @return array{total:int,activos:int,canjes:int,proximos:iterable,mas_usados:iterable} */
+    public function dashboard(): array
+    {
+        $now = now();
+
+        return [
+            'total' => Cupon::query()->count(),
+            'activos' => Cupon::query()->where('activo', true)->where('inicia_en', '<=', $now)->where('finaliza_en', '>=', $now)
+                ->where(fn (Builder $query): Builder => $query->whereNull('limite_usos')->orWhereColumn('usos', '<', 'limite_usos'))->count(),
+            'canjes' => (int) Cupon::query()->sum('usos'),
+            'proximos' => Cupon::query()->where('activo', true)->whereBetween('finaliza_en', [$now, $now->copy()->addDays(30)])
+                ->orderBy('finaliza_en')->orderBy('id')->limit(4)->get(),
+            'mas_usados' => Cupon::query()->where('usos', '>', 0)->orderByDesc('usos')->orderBy('id')->limit(5)->get(),
+        ];
+    }
+
+    /** @param array<string, mixed> $attributes */
+    public function register(array $attributes, User $actor, ?string $ip): Cupon
+    {
+        $this->authorization()->assertAllowed($actor, 'gestion.cupones.crear');
+        $attributes['codigo'] = mb_strtoupper((string) $attributes['codigo']);
+        $this->assertCouponRules($attributes, 0);
+
+        return DB::transaction(function () use ($attributes, $actor, $ip): Cupon {
+            $coupon = Cupon::query()->create($attributes + ['activo' => true, 'usos' => 0]);
+            app(RegistradorAuditoria::class)->record(
+                $actor->getKey(), 'coupon.created', 'cupones', $coupon->getKey(), null,
+                $coupon->only(['codigo', 'tipo_descuento', 'valor', 'minimo_compra', 'limite_usos', 'inicia_en', 'finaliza_en']), $ip,
+            );
+
+            return $coupon;
+        }, 3);
+    }
+
+    /** @param array<string, mixed> $attributes */
+    public function update(Cupon $coupon, array $attributes, User $actor, ?string $ip): Cupon
+    {
+        $this->authorization()->assertAllowed($actor, 'gestion.cupones.actualizar');
+
+        return DB::transaction(function () use ($coupon, $attributes, $actor, $ip): Cupon {
+            $lockedCoupon = Cupon::query()->whereKey($coupon->getKey())->lockForUpdate()->firstOrFail();
+            $this->assertCouponRules($attributes, (int) $lockedCoupon->usos);
+            $before = $lockedCoupon->only(['tipo_descuento', 'valor', 'minimo_compra', 'limite_usos', 'inicia_en', 'finaliza_en']);
+            $lockedCoupon->update($attributes + ['actualizado_en' => now()]);
+            app(RegistradorAuditoria::class)->record(
+                $actor->getKey(), 'coupon.updated', 'cupones', $lockedCoupon->getKey(), $before,
+                $lockedCoupon->only(array_keys($before)), $ip,
+            );
+
+            return $lockedCoupon->refresh();
+        }, 3);
+    }
+
+    public function deactivate(Cupon $coupon, User $actor, ?string $ip): Cupon
+    {
+        $this->authorization()->assertAllowed($actor, 'gestion.cupones.eliminar');
+
+        return DB::transaction(function () use ($coupon, $actor, $ip): Cupon {
+            $lockedCoupon = Cupon::query()->whereKey($coupon->getKey())->lockForUpdate()->firstOrFail();
+            if (! $lockedCoupon->activo) {
+                return $lockedCoupon;
+            }
+
+            $lockedCoupon->update(['activo' => false, 'actualizado_en' => now()]);
+            app(RegistradorAuditoria::class)->record(
+                $actor->getKey(), 'coupon.deactivated', 'cupones', $lockedCoupon->getKey(), ['activo' => true], ['activo' => false], $ip,
+            );
+
+            return $lockedCoupon->refresh();
+        }, 3);
+    }
+
+    public function status(Cupon $coupon): string
+    {
+        if (! $coupon->activo || $coupon->finaliza_en->isPast()
+            || ($coupon->limite_usos !== null && (int) $coupon->usos >= (int) $coupon->limite_usos)) {
+            return 'Finalizado';
+        }
+
+        return $coupon->inicia_en->isFuture() ? 'Programado' : 'Activo';
+    }
+
+    /** @param array<string, mixed> $attributes */
+    private function assertCouponRules(array $attributes, int $registeredUses): void
+    {
+        abort_if(($attributes['tipo_descuento'] ?? null) === 'porcentaje' && (float) ($attributes['valor'] ?? 0) > 100, 422, 'El descuento porcentual no puede superar el 100 %.');
+        if (isset($attributes['limite_usos'])) {
+            abort_if((int) $attributes['limite_usos'] < $registeredUses, 422, 'El límite de usos no puede ser inferior a los canjes ya registrados.');
+        }
+    }
+
+    private function authorization(): ServicioAutorizacion
+    {
+        return app(ServicioAutorizacion::class);
+    }
+}

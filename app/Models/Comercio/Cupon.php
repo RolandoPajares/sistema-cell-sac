@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Cupon extends Model
 {
+    public const CREATED_AT = 'creado_en';
+
+    public const UPDATED_AT = 'actualizado_en';
+
     protected $table = 'cupones';
 
     protected $fillable = [

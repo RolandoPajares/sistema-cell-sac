@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DetalleCompra extends Model
 {
-    protected $table = 'compra_detalles';
+    protected $table = 'detalles_compras';
 
-    protected $fillable = ['compra_id', 'producto_id', 'cantidad', 'costo_unitario'];
+    protected $fillable = ['compra_id', 'producto_id', 'variante_id', 'cantidad', 'costo_unitario'];
 
     public $timestamps = false;
 

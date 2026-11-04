@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ImagenVariante extends Model
 {
-    protected $table = 'variante_imagenes';
+    protected $table = 'imagenes_variantes';
 
     protected $fillable = ['variante_id', 'ruta_imagen', 'imagen_principal', 'orden', 'fecha_creacion'];
 

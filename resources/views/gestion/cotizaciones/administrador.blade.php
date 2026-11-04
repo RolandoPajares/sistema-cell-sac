@@ -106,6 +106,7 @@
                             @php
                                 $status = (string) $quotation->estado;
                                 $customerName = $quotation->customer?->nombre_contacto ?? 'Cliente no disponible';
+                                $quotationReference = 'COT-' . ($quotation->creado_en?->format('Y') ?? now()->format('Y')) . '-' . str_pad((string) $quotation->id, 4, '0', STR_PAD_LEFT);
                             @endphp
                             <tr>
                                 <td><strong class="cotizaciones-code">COT-{{ $quotation->creado_en?->format('Y') ?? now()->format('Y') }}-{{ str_pad((string) $quotation->id, 4, '0', STR_PAD_LEFT) }}</strong></td>
@@ -129,6 +130,17 @@
                                             @if ($quotation->notas)
                                                 <p>{{ $quotation->notas }}</p>
                                             @endif
+                                            <div class="cotizaciones-demo-actions" aria-label="Acciones demostrativas de cotización">
+                                                @if (in_array($status, ['Borrador', 'Pendiente'], true))
+                                                    <button type="button" data-quotation-demo-action="enviar" data-reference="{{ $quotationReference }}" data-customer="{{ $customerName }}">Enviar cotización</button>
+                                                @endif
+                                                @if (in_array($status, ['Pendiente', 'Enviada'], true))
+                                                    <button type="button" data-quotation-demo-action="aprobar" data-reference="{{ $quotationReference }}" data-customer="{{ $customerName }}">Aprobar cotización</button>
+                                                @endif
+                                                @if ($status === 'Aprobada')
+                                                    <button type="button" data-quotation-demo-action="convertir" data-reference="{{ $quotationReference }}" data-customer="{{ $customerName }}">Convertir en venta</button>
+                                                @endif
+                                            </div>
                                         </div>
                                     </details>
                                 </td>
@@ -191,5 +203,66 @@
                 @endif
             </div>
         </dialog>
+
+        <dialog class="admin-dialog cotizaciones-demo-dialog" id="accion-demostrativa-cotizacion" aria-labelledby="accion-demostrativa-title" data-quotation-demo-dialog>
+            <header class="admin-dialog-header">
+                <div><h2 id="accion-demostrativa-title" data-quotation-demo-title>Acción de cotización</h2><p data-quotation-demo-description>Revisa la acción seleccionada.</p></div>
+                <button class="admin-dialog-close" type="button" data-close-quotation-demo aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+            </header>
+            <div class="admin-dialog-body cotizaciones-demo-body">
+                <div class="cotizaciones-demo-warning"><i class="bi bi-info-circle" aria-hidden="true"></i><p>Interfaz demostrativa: no se enviará, aprobará ni convertirá la cotización y no se crearán ventas.</p></div>
+                <dl><div><dt>Cotización</dt><dd data-quotation-demo-reference>—</dd></div><div><dt>Cliente</dt><dd data-quotation-demo-customer>—</dd></div></dl>
+                <p class="cotizaciones-demo-feedback" data-quotation-demo-feedback role="status" aria-live="polite" hidden></p>
+            </div>
+            <footer class="cotizaciones-demo-footer"><button class="cotizaciones-filter-button" type="button" data-close-quotation-demo>Cancelar</button><button class="cotizaciones-primary-button" type="button" data-confirm-quotation-demo>Confirmar (demostración)</button></footer>
+        </dialog>
     </section>
 @endsection
+
+@push('scripts')
+    <script>
+        (() => {
+            const dialog = document.querySelector('[data-quotation-demo-dialog]');
+            if (!dialog) {
+                return;
+            }
+
+            const actionTitles = {
+                enviar: ['Preparar envío de cotización', 'El envío real requiere una integración de comunicación.'],
+                aprobar: ['Revisar aprobación de cotización', 'La aprobación real requiere una política y una acción autorizada.'],
+                convertir: ['Revisar conversión a venta', 'La conversión real requiere un flujo transaccional autorizado.'],
+            };
+            const title = dialog.querySelector('[data-quotation-demo-title]');
+            const description = dialog.querySelector('[data-quotation-demo-description]');
+            const reference = dialog.querySelector('[data-quotation-demo-reference]');
+            const customer = dialog.querySelector('[data-quotation-demo-customer]');
+            const feedback = dialog.querySelector('[data-quotation-demo-feedback]');
+            let selectedAction = '';
+
+            document.querySelectorAll('[data-quotation-demo-action]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    selectedAction = button.dataset.quotationDemoAction ?? '';
+                    const copy = actionTitles[selectedAction] ?? ['Acción de cotización', 'La integración de esta acción está pendiente.'];
+                    title.textContent = copy[0];
+                    description.textContent = copy[1];
+                    reference.textContent = button.dataset.reference ?? '—';
+                    customer.textContent = button.dataset.customer ?? 'Cliente no disponible';
+                    feedback.hidden = true;
+                    dialog.showModal();
+                });
+            });
+
+            dialog.querySelectorAll('[data-close-quotation-demo]').forEach((button) => button.addEventListener('click', () => dialog.close()));
+            dialog.querySelector('[data-confirm-quotation-demo]')?.addEventListener('click', () => {
+                const actions = { enviar: 'no se envió', aprobar: 'no se aprobó', convertir: 'no se convirtió en venta' };
+                feedback.textContent = `Integración pendiente: ${actions[selectedAction] ?? 'no se ejecutó la acción'}; la cotización y las ventas reales no cambiaron.`;
+                feedback.hidden = false;
+            });
+            dialog.addEventListener('click', (event) => {
+                if (event.target === dialog) {
+                    dialog.close();
+                }
+            });
+        })();
+    </script>
+@endpush

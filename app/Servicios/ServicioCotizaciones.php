@@ -10,14 +10,27 @@ use Illuminate\Support\Facades\DB;
 
 class ServicioCotizaciones
 {
+    public function __construct(private readonly ServicioAutorizacion $authorization) {}
+
     public function create(array $data, User $user): Cotizacion
     {
+        $this->authorization->assertAllowed($user, 'gestion.cotizaciones.crear');
+
         return DB::transaction(function () use ($data, $user): Cotizacion {
             $customerId = $data['cliente_id'] ?? Cliente::whereBelongsTo($user, 'user')->where('tipo', 'mayorista')->value('id');
             abort_unless($customerId, 422, 'El usuario debe tener un perfil de cliente mayorista.');
 
             $customer = Cliente::findOrFail($customerId);
-            abort_unless(in_array($user->rol, ['administrador', 'ventas_mayoristas'], true) || $customer->usuario_id === $user->id, 403);
+            $isOwner = (int) $customer->usuario_id === (int) $user->id
+                && $this->authorization->hasRole($user, 'cliente_mayorista');
+            $isAuthorizedEmployee = ($this->authorization->hasRole($user, 'administrador') || $this->authorization->hasRole($user, 'ventas_mayoristas'))
+                && $this->authorization->allowsRecord(
+                    $user,
+                    'gestion.cotizaciones.crear',
+                    is_numeric($customer->empresa_id) ? (int) $customer->empresa_id : null,
+                    $this->authorization->activeSiteIdFor($user),
+                );
+            abort_unless($isOwner || $isAuthorizedEmployee, 403);
 
             $items = collect($data['items']);
             $products = Producto::whereIn('id', $items->pluck('producto_id'))->orderBy('id')->lockForUpdate()->get()->keyBy('id');
@@ -34,12 +47,13 @@ class ServicioCotizaciones
 
             $quotation = Cotizacion::create([
                 'cliente_id' => $customer->id,
-                'creado_por' => $user->id,
+                'creado_por_usuario_id' => $user->id,
                 'total' => $total,
                 'estado' => 'Borrador',
                 'notas' => $data['notas'] ?? null,
                 'activo' => true,
                 'creado_en' => now(),
+                ...$this->authorization->operationScopeAttributes($user, 'cotizaciones'),
             ]);
 
             foreach ($lines as [$productId, $quantity, $price]) {

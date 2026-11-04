@@ -25,7 +25,7 @@
                 <h1>Clientes <i class="bi bi-people" aria-hidden="true"></i></h1>
                 <p>Gestiona perfiles minoristas y mayoristas vinculados a la operación.</p>
             </div>
-            <div class="clientes-actions"><button class="clientes-export-button" type="button" disabled><i class="bi bi-upload" aria-hidden="true"></i> Exportar</button><button class="clientes-primary-button" type="button" data-open-client-create><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo cliente</button></div>
+            <div class="clientes-actions"><button class="clientes-export-button" type="button" disabled><i class="bi bi-upload" aria-hidden="true"></i> Exportar</button><button class="clientes-export-button" type="button" data-open-client-import><i class="bi bi-file-earmark-arrow-up" aria-hidden="true"></i> Importar</button><button class="clientes-primary-button" type="button" data-open-client-create><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo cliente</button></div>
         </header>
 
         <section class="clientes-kpi-grid" aria-label="Resumen de clientes">
@@ -87,11 +87,45 @@
         </div>
     </section>
 
-    <dialog class="clientes-dialog" id="nuevo-cliente"><div class="clientes-dialog-card"><header class="clientes-dialog-header"><div><span class="clientes-eyebrow">CRM</span><h2>Registrar nuevo cliente</h2><p>Completa la información comercial y de contacto.</p></div><button class="clientes-dialog-close" type="button" data-close-client-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>@include('gestion.clientes.crear')</div></dialog>
+    <dialog class="clientes-dialog" id="nuevo-cliente" aria-labelledby="cliente-crear-titulo"><div class="clientes-dialog-card"><header class="clientes-dialog-header"><div><span class="clientes-eyebrow">CRM</span><h2 id="cliente-crear-titulo">Registrar nuevo cliente</h2><p>Completa la información comercial y de contacto.</p></div><button class="clientes-dialog-close" type="button" data-close-client-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>@include('gestion.clientes.crear')</div></dialog>
+    <dialog class="clientes-dialog clientes-import-dialog" id="importar-clientes" aria-labelledby="clientes-import-title" data-client-import-dialog>
+        <div class="clientes-dialog-card">
+            <header class="clientes-dialog-header clientes-import-header">
+                <div class="clientes-import-heading"><span class="clientes-import-icon"><i class="bi bi-file-earmark-arrow-up" aria-hidden="true"></i></span><div><span class="clientes-eyebrow">CRM · Importación masiva</span><h2 id="clientes-import-title">Importar clientes</h2><p>Prepara una plantilla y revisa ejemplos antes de una futura integración.</p></div></div>
+                <button class="clientes-dialog-close" type="button" data-close-client-dialog aria-label="Cerrar importación"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+            </header>
+            <div class="clientes-import-body">
+                <div class="clientes-import-demo-note"><i class="bi bi-info-circle" aria-hidden="true"></i><span>Asistente visual. El archivo no se lee, procesa, transmite ni guarda.</span></div>
+                <nav class="clientes-import-steps" aria-label="Etapas de importación">
+                    <span data-client-import-indicator="0"><b>1</b> Plantilla</span><i aria-hidden="true"></i><span data-client-import-indicator="1"><b>2</b> Archivo</span><i aria-hidden="true"></i><span data-client-import-indicator="2"><b>3</b> Vista previa</span><i aria-hidden="true"></i><span data-client-import-indicator="3"><b>4</b> Validaciones</span><i aria-hidden="true"></i><span data-client-import-indicator="4"><b>5</b> Confirmar</span>
+                </nav>
+                <section class="clientes-import-stage" data-client-import-stage="0">
+                    <h3>1. Descargar plantilla</h3><p>CSV UTF-8 compatible con Excel. Requeridos: tipo, documento, nombre de contacto y correo. Opcionales: razón social, teléfono y ciudad. Importa perfiles de cliente; no crea cuentas de usuario.</p>
+                    <button class="clientes-export-button clientes-import-download" type="button" data-client-import-download><i class="bi bi-download" aria-hidden="true"></i> Descargar plantilla CSV</button>
+                </section>
+                <section class="clientes-import-stage" data-client-import-stage="1" hidden>
+                    <h3>2. Seleccionar archivo</h3><label class="clientes-import-field" for="clientes-import-file"><span>Archivo CSV o XLSX</span><input id="clientes-import-file" type="file" accept=".csv,.xlsx" data-client-import-file></label>
+                    <small class="clientes-import-hint">La selección se usa solo para mostrar esta etapa. No se abre ni se envía el archivo.</small><p class="clientes-import-file-name" data-client-import-file-name>No se ha seleccionado un archivo.</p>
+                </section>
+                <section class="clientes-import-stage" data-client-import-stage="2" hidden>
+                    <h3>3. Vista previa ilustrativa</h3><p>Estas filas son ejemplos estáticos; no proceden del archivo seleccionado.</p>
+                    <div class="clientes-import-table-wrap"><table><thead><tr><th>Tipo</th><th>Documento</th><th>Nombre de contacto</th><th>Razón social</th><th>Correo</th><th>Teléfono</th><th>Ciudad</th></tr></thead><tbody><tr><td>minorista</td><td>DOC-DEMO-01</td><td>Cliente Demo Uno</td><td>Comercial de ejemplo</td><td>uno@example.test</td><td>000000001</td><td>Lima</td></tr><tr class="is-warning"><td>mayorista</td><td>DOC-DEMO-01</td><td>Cliente Demo Dos</td><td>Distribución de ejemplo</td><td>dos@example.test</td><td>000000002</td><td>Arequipa</td></tr></tbody></table></div>
+                </section>
+                <section class="clientes-import-stage" data-client-import-stage="3" hidden>
+                    <h3>4. Validaciones ilustrativas</h3><ul class="clientes-import-validation-list"><li class="is-valid"><i class="bi bi-check-circle" aria-hidden="true"></i> Tipo permitido: minorista o mayorista.</li><li class="is-valid"><i class="bi bi-check-circle" aria-hidden="true"></i> Documento, nombre de contacto y correo son obligatorios.</li><li><i class="bi bi-info-circle" aria-hidden="true"></i> Razón social, teléfono y ciudad son opcionales.</li><li class="is-warning"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i> El documento repetido aparece solo en estos ejemplos; no se consultan clientes reales.</li><li><i class="bi bi-info-circle" aria-hidden="true"></i> El correo debe tener formato válido; la validación real requiere backend.</li></ul>
+                </section>
+                <section class="clientes-import-stage" data-client-import-stage="4" hidden>
+                    <h3>5. Confirmar importación</h3><p>Archivo seleccionado: <strong data-client-import-final-file>—</strong></p><label class="clientes-import-ack"><input type="checkbox" data-client-import-ack> Confirmo que revisé la vista previa y las advertencias ilustrativas.</label><p class="clientes-import-feedback" data-client-import-feedback role="status" aria-live="polite" hidden></p>
+                </section>
+                <p class="clientes-import-error" data-client-import-error role="alert" hidden></p>
+            </div>
+            <footer class="clientes-dialog-footer clientes-import-footer"><button class="clientes-cancel-button" type="button" data-close-client-dialog>Cancelar</button><button class="clientes-cancel-button" type="button" data-client-import-previous hidden>Anterior</button><button class="clientes-primary-button" type="button" data-client-import-next>Siguiente</button><button class="clientes-primary-button" type="button" data-client-import-confirm hidden>Confirmar importación (demostración)</button></footer>
+        </div>
+    </dialog>
     @foreach ($customers as $customer)
         @php $type = $typeFor($customer->tipo); @endphp
-        <dialog class="clientes-dialog" id="cliente-editar-{{ $customer->id }}"><div class="clientes-dialog-card"><header class="clientes-dialog-header"><div><span class="clientes-eyebrow">CRM</span><h2>Editar cliente</h2><p>Actualiza la información de {{ $customer->nombre_contacto }}.</p></div><button class="clientes-dialog-close" type="button" data-close-client-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>@include('gestion.clientes.editar', ['customer' => $customer])</div></dialog>
-        <dialog class="clientes-dialog clientes-view-dialog" id="cliente-{{ $customer->id }}"><div class="clientes-dialog-card"><header class="clientes-dialog-header"><div><span class="clientes-eyebrow">{{ $type['label'] }}</span><h2>{{ $customer->nombre_contacto }}</h2><p>{{ $customer->correo }} · {{ $customer->ciudad ?: 'Ciudad no registrada' }}</p></div><button class="clientes-dialog-close" type="button" data-close-client-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="clientes-view-body"><div class="clientes-view-identity"><b class="clientes-avatar clientes-avatar--{{ $type['class'] }}">{{ $initialsFor($customer->nombre_contacto) }}</b><div><h3>{{ $customer->nombre_contacto }}</h3><p>{{ $customer->razon_social ?: 'Perfil de cliente registrado en el sistema.' }}</p></div></div><div class="clientes-view-grid"><div><small>Tipo</small><strong>{{ $type['label'] }}</strong></div><div><small>Documento</small><strong>{{ $customer->documento }}</strong></div><div><small>Teléfono</small><strong>{{ $customer->telefono ?: 'No registrado' }}</strong></div><div><small>Estado</small><span class="clientes-status clientes-status--{{ $customer->activo ? 'active' : 'inactive' }}">{{ $customer->activo ? 'Activo' : 'Inactivo' }}</span></div></div><div class="clientes-view-contact"><small>Dirección comercial</small><p>{{ $customer->ciudad ?: 'Ciudad no registrada' }}</p></div></div><footer class="clientes-dialog-footer"><button class="clientes-cancel-button" type="button" data-close-client-dialog>Cerrar</button><button class="clientes-primary-button" type="button" data-open-client-edit="cliente-editar-{{ $customer->id }}"><i class="bi bi-pencil" aria-hidden="true"></i> Editar cliente</button></footer></div></dialog>
+        <dialog class="clientes-dialog" id="cliente-editar-{{ $customer->id }}" aria-labelledby="cliente-editar-titulo-{{ $customer->id }}"><div class="clientes-dialog-card"><header class="clientes-dialog-header"><div><span class="clientes-eyebrow">CRM</span><h2 id="cliente-editar-titulo-{{ $customer->id }}">Editar cliente</h2><p>Actualiza la información de {{ $customer->nombre_contacto }}.</p></div><button class="clientes-dialog-close" type="button" data-close-client-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>@include('gestion.clientes.editar', ['customer' => $customer])</div></dialog>
+        <dialog class="clientes-dialog clientes-view-dialog" id="cliente-{{ $customer->id }}" aria-labelledby="cliente-detalle-titulo-{{ $customer->id }}"><div class="clientes-dialog-card"><header class="clientes-dialog-header"><div><span class="clientes-eyebrow">{{ $type['label'] }}</span><h2 id="cliente-detalle-titulo-{{ $customer->id }}">{{ $customer->nombre_contacto }}</h2><p>{{ $customer->correo }} · {{ $customer->ciudad ?: 'Ciudad no registrada' }}</p></div><button class="clientes-dialog-close" type="button" data-close-client-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="clientes-view-body"><div class="clientes-view-identity"><b class="clientes-avatar clientes-avatar--{{ $type['class'] }}">{{ $initialsFor($customer->nombre_contacto) }}</b><div><h3>{{ $customer->nombre_contacto }}</h3><p>{{ $customer->razon_social ?: 'Perfil de cliente registrado en el sistema.' }}</p></div></div><div class="clientes-view-grid"><div><small>Tipo</small><strong>{{ $type['label'] }}</strong></div><div><small>Documento</small><strong>{{ $customer->documento }}</strong></div><div><small>Teléfono</small><strong>{{ $customer->telefono ?: 'No registrado' }}</strong></div><div><small>Estado</small><span class="clientes-status clientes-status--{{ $customer->activo ? 'active' : 'inactive' }}">{{ $customer->activo ? 'Activo' : 'Inactivo' }}</span></div></div><div class="clientes-view-contact"><small>Dirección comercial</small><p>{{ $customer->ciudad ?: 'Ciudad no registrada' }}</p></div></div><footer class="clientes-dialog-footer"><button class="clientes-cancel-button" type="button" data-close-client-dialog>Cerrar</button><button class="clientes-primary-button" type="button" data-open-client-edit="cliente-editar-{{ $customer->id }}"><i class="bi bi-pencil" aria-hidden="true"></i> Editar cliente</button></footer></div></dialog>
     @endforeach
 @endsection
 
@@ -100,12 +134,92 @@
         (() => {
             const page = document.querySelector('[data-client-page]');
             const createDialog = document.querySelector('#nuevo-cliente');
+            const importDialog = page?.querySelector('[data-client-import-dialog]');
 
             if (!page || !createDialog) {
                 return;
             }
 
             page.querySelectorAll('[data-open-client-create]').forEach((button) => button.addEventListener('click', () => createDialog.showModal()));
+            const importStages = [...(importDialog?.querySelectorAll('[data-client-import-stage]') ?? [])];
+            const importIndicators = [...(importDialog?.querySelectorAll('[data-client-import-indicator]') ?? [])];
+            const importFile = importDialog?.querySelector('[data-client-import-file]');
+            const importError = importDialog?.querySelector('[data-client-import-error]');
+            const importPrevious = importDialog?.querySelector('[data-client-import-previous]');
+            const importNext = importDialog?.querySelector('[data-client-import-next]');
+            const importConfirm = importDialog?.querySelector('[data-client-import-confirm]');
+            const importFileName = importDialog?.querySelector('[data-client-import-file-name]');
+            const importFinalFile = importDialog?.querySelector('[data-client-import-final-file]');
+            const importAcknowledgement = importDialog?.querySelector('[data-client-import-ack]');
+            const importFeedback = importDialog?.querySelector('[data-client-import-feedback]');
+            let importStep = 0;
+            let selectedImportFileName = '';
+            const renderImportStep = (step) => {
+                importStep = step;
+                importStages.forEach((stage) => { stage.hidden = Number(stage.dataset.clientImportStage) !== step; });
+                importIndicators.forEach((indicator) => indicator.classList.toggle('is-current', Number(indicator.dataset.clientImportIndicator) === step));
+                importPrevious.hidden = step === 0;
+                importNext.hidden = step === 4;
+                importConfirm.hidden = step !== 4;
+                importError.hidden = true;
+                importFeedback.hidden = true;
+                importFinalFile.textContent = selectedImportFileName || '—';
+            };
+            const resetImportWizard = () => {
+                selectedImportFileName = '';
+                importFile.value = '';
+                importFileName.textContent = 'No se ha seleccionado un archivo.';
+                importAcknowledgement.checked = false;
+                importConfirm.disabled = false;
+                renderImportStep(0);
+            };
+            page.querySelector('[data-open-client-import]')?.addEventListener('click', () => {
+                resetImportWizard();
+                importDialog.showModal();
+            });
+            importDialog?.querySelector('[data-client-import-download]')?.addEventListener('click', () => {
+                const csv = '\uFEFFtipo,documento,nombre_contacto,razon_social,correo,telefono,ciudad\r\n';
+                const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'plantilla-clientes.csv';
+                link.click();
+                window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+            });
+            importFile?.addEventListener('change', () => {
+                const file = importFile.files?.[0] ?? null;
+                if (file && !/\.(csv|xlsx)$/i.test(file.name)) {
+                    selectedImportFileName = '';
+                    importFile.value = '';
+                    importFileName.textContent = 'No se ha seleccionado un archivo.';
+                    importError.textContent = 'Selecciona un archivo CSV o XLSX.';
+                    importError.hidden = false;
+                    return;
+                }
+                selectedImportFileName = file?.name ?? '';
+                importFileName.textContent = file ? `Seleccionado: ${file.name}` : 'No se ha seleccionado un archivo.';
+                importError.hidden = true;
+            });
+            importPrevious?.addEventListener('click', () => renderImportStep(Math.max(0, importStep - 1)));
+            importNext?.addEventListener('click', () => {
+                if (importStep === 1 && !selectedImportFileName) {
+                    importError.textContent = 'Selecciona un archivo para continuar con la vista previa ilustrativa.';
+                    importError.hidden = false;
+                    return;
+                }
+                renderImportStep(Math.min(4, importStep + 1));
+            });
+            importConfirm?.addEventListener('click', () => {
+                if (!importAcknowledgement.checked) {
+                    importError.textContent = 'Confirma que revisaste la vista previa y sus advertencias.';
+                    importError.hidden = false;
+                    return;
+                }
+                importFeedback.textContent = 'Funcionalidad visual. Integración pendiente. No se realizaron cambios. No se cargaron, procesaron ni guardaron archivos o clientes.';
+                importFeedback.hidden = false;
+                importConfirm.disabled = true;
+                importError.hidden = true;
+            });
             document.querySelectorAll('[data-open-client-edit]').forEach((button) => button.addEventListener('click', () => document.getElementById(button.dataset.openClientEdit)?.showModal()));
             document.querySelectorAll('[data-open-client-view]').forEach((button) => button.addEventListener('click', () => document.getElementById(button.dataset.openClientView)?.showModal()));
             document.querySelectorAll('.clientes-dialog').forEach((dialog) => {

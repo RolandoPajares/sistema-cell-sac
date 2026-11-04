@@ -2,13 +2,15 @@
 
 namespace App\Http\Requests;
 
+use App\Servicios\ServicioAutorizacion;
 use Illuminate\Foundation\Http\FormRequest;
 
 class GuardarCotizacionRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return in_array($this->user()?->rol, ['administrador', 'ventas_mayoristas', 'cliente_mayorista'], true);
+        return $this->user() !== null
+            && app(ServicioAutorizacion::class)->allows($this->user(), 'gestion.cotizaciones.crear');
     }
 
     public function rules(): array

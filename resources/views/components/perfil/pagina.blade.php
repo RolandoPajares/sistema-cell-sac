@@ -6,6 +6,7 @@
     $profileRoute = $role === 'administrador' ? 'management.account.profile' : 'account.profile';
     $passwordRoute = $role === 'administrador' ? 'management.account.password' : 'account.password';
     $backRoute = $role === 'administrador' ? 'management.account' : 'dashboard';
+    $isAdministrator = $role === 'administrador';
 @endphp
 
 <section class="admin-page">
@@ -19,10 +20,24 @@
 
     @if ($mode === 'mostrar')
         <section class="form-card profile-card">
+            @if ($user->foto_perfil)
+                <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($user->foto_perfil) }}" alt="Fotografía de {{ $user->nombre }}" width="96" height="96" style="border-radius:50%;object-fit:cover">
+            @else
+                <span class="avatar-grande">{{ mb_strtoupper(mb_substr($user->nombre, 0, 1)) }}</span>
+            @endif
             <h2>{{ $user->nombre }}</h2>
             <p>{{ $user->correo }}</p>
             <p><strong>Rol:</strong> {{ str_replace('_', ' ', $role) }}</p>
             <a class="btn btn-primary" href="{{ route($backRoute) }}">Editar perfil</a>
+            @if ($isAdministrator)
+                <nav class="profile-account-links" aria-label="Seguridad y actividad de la cuenta">
+                    <a href="{{ route('management.account.security') }}">Seguridad de la cuenta</a>
+                    <a href="{{ route('management.account.sessions') }}">Sesiones y dispositivos</a>
+                    <a href="{{ route('management.account.preferences') }}">Preferencias</a>
+                    <a href="{{ route('management.account.notifications') }}">Mis notificaciones</a>
+                    <a href="{{ route('management.account.activity') }}">Mi actividad reciente</a>
+                </nav>
+            @endif
         </section>
     @else
         <div class="two-column">
@@ -52,7 +67,20 @@
                 </label>
                 <button class="btn btn-primary" type="submit">Guardar perfil</button>
             </form>
-            <form method="post" action="{{ route($passwordRoute) }}" class="form-card">
+            @if ($isAdministrator)
+                <form method="post" action="{{ route('management.account.avatar') }}" class="form-card" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
+                    <h2>Fotografía de perfil</h2>
+                    @if ($user->foto_perfil)
+                        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($user->foto_perfil) }}" alt="Fotografía actual de {{ $user->nombre }}" width="96" height="96" style="border-radius:50%;object-fit:cover">
+                    @endif
+                    <label>Seleccionar imagen<input type="file" name="foto_perfil" accept="image/jpeg,image/png,image/webp" required></label>
+                    <small>JPG, PNG o WebP. Máximo 2 MB.</small>
+                    <button class="btn btn-primary" type="submit">Actualizar fotografía</button>
+                </form>
+            @endif
+            <form method="post" action="{{ route($passwordRoute) }}" class="form-card" id="cambiar-contrasena">
                 @csrf
                 @method('PUT')
                 <h2>Cambiar contraseña</h2>

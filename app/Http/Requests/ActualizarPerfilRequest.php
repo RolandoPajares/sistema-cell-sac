@@ -16,7 +16,7 @@ class ActualizarPerfilRequest extends FormRequest
     {
         return [
             'nombre' => ['required', 'string', 'max:120'],
-            'correo' => ['required', 'email', 'max:160', Rule::unique('users', 'correo')->ignore($this->user())],
+            'correo' => ['required', 'email', 'max:160', Rule::unique('usuarios', 'correo')->ignore($this->user())],
         ];
     }
 }

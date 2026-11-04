@@ -12,7 +12,7 @@
 
         <label class="admin-form-group">
             <span>Cantidad</span>
-            <input type="number" name="cantidad" min="1" required>
+            <input type="number" name="cantidad" min="0" required>
         </label>
 
         <label class="admin-form-group is-full">

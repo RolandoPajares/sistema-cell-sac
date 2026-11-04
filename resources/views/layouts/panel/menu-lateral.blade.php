@@ -1,5 +1,5 @@
 @php
-    $isAdministrator = auth()->user()?->rol === 'administrador';
+    $isAdministrator = auth()->user()?->isRole('administrador') ?? false;
     $brandRoute = $isAdministrator ? 'management.dashboard' : 'dashboard';
     $accountRoute = $isAdministrator ? 'management.account' : 'dashboard';
     $menuViews = [
@@ -11,7 +11,8 @@
         'cliente_mayorista' => 'paneles.cliente-mayorista.menu',
         'cliente_minorista' => 'paneles.cliente-minorista.menu',
     ];
-    $menuView = $menuViews[auth()->user()?->rol] ?? 'components.panel.menu-enlaces';
+    $menuView = $isAdministrator ? 'paneles.administrador.menu' : ($menuViews[auth()->user()?->rol] ?? 'components.panel.menu-enlaces');
+    $usesDynamicMenu = ($links['dinamico'] ?? false) === true;
 @endphp
 
 <aside class="admin-sidebar" id="adminSidebar" aria-label="Navegación del panel">
@@ -26,7 +27,14 @@
     </div>
 
     <nav class="admin-sidebar-nav">
-        @include($menuView, ['links' => $links ?? []])
+        @if ($isAdministrator)
+            @include($menuView, ['links' => $links ?? []])
+        @elseif ($usesDynamicMenu)
+            @vite(['resources/css/paneles/administrador/index.css'])
+            <x-panel.menu-dinamico :menu="$links" />
+        @else
+            @include($menuView, ['links' => $links ?? []])
+        @endif
     </nav>
 
     <div class="admin-sidebar-footer">
@@ -43,3 +51,6 @@
         </form>
     </div>
 </aside>
+@if ($isAdministrator)
+    <div class="admin-sidebar-resizer" data-admin-sidebar-resizer role="separator" aria-orientation="vertical" tabindex="0" aria-label="Ajustar ancho de la barra lateral" aria-controls="adminSidebar" aria-valuemin="82" aria-valuemax="480" aria-valuenow="298"></div>
+@endif

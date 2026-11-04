@@ -7,7 +7,9 @@ use App\Http\Requests\ActualizarClienteRequest;
 use App\Http\Requests\GuardarClienteRequest;
 use App\Models\Clientes\Cliente;
 use App\Models\Comercio\Pedido;
+use App\Models\User;
 use App\Servicios\RegistradorAuditoria;
+use App\Servicios\ServicioAutorizacion;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,10 +18,18 @@ use Illuminate\View\View;
 
 class ClienteController extends Controller
 {
+    public function __construct(private readonly ServicioAutorizacion $autorizacion) {}
+
     public function index(Request $request): View
     {
+        $usuario = $request->user();
+        abort_unless($usuario instanceof User, 403);
         $filters = $this->filters($request);
-        $customers = $this->customerQuery($filters)
+        $consultaClientes = fn (): Builder => $this->consultaClientesEnAlcance($usuario, 'gestion.clientes.consultar');
+        $consultaPedidos = fn (): Builder => $this->autorizacion->scopeRecordsFor(
+            Pedido::query(), $usuario, 'gestion.pedidos.consultar', 'usuario_id',
+        );
+        $customers = $this->customerQuery($filters, $usuario)
             ->with('user:id,nombre,correo,rol')
             ->orderBy('nombre_contacto')
             ->paginate($filters['por_pagina'])
@@ -27,28 +37,30 @@ class ClienteController extends Controller
         $userIds = $customers->getCollection()->pluck('usuario_id')->filter()->values();
         $lastPurchases = $userIds->isEmpty()
             ? collect()
-            : Pedido::query()
+            : $consultaPedidos()
                 ->whereIn('usuario_id', $userIds)
                 ->latest('creado_en')
                 ->latest('id')
                 ->get(['id', 'usuario_id', 'total', 'creado_en'])
                 ->groupBy('usuario_id')
                 ->map(static fn (Collection $orders): ?Pedido => $orders->first());
-        $totalPurchases = (float) Pedido::query()->sum('total');
-        $lastPurchase = Pedido::query()->latest('creado_en')->latest('id')->first(['id', 'total', 'creado_en']);
-        $recentOrders = Pedido::query()->with('user:id,nombre')->latest('creado_en')->latest('id')->limit(3)->get(['id', 'usuario_id', 'total', 'creado_en']);
-        $recentCustomers = Cliente::query()->latest('creado_en')->limit(3)->get(['id', 'nombre_contacto', 'correo', 'creado_en']);
+        $totalPurchases = (float) $consultaPedidos()->sum('total');
+        $lastPurchase = $consultaPedidos()->latest('creado_en')->latest('id')->first(['id', 'total', 'creado_en']);
+        $recentOrders = $consultaPedidos()->with('user:id,nombre')->latest('creado_en')->latest('id')->limit(3)
+            ->get(['id', 'usuario_id', 'total', 'creado_en']);
+        $recentCustomers = $consultaClientes()->latest('creado_en')->limit(3)
+            ->get(['id', 'nombre_contacto', 'correo', 'creado_en']);
         $recentActivity = $this->recentActivity($recentOrders, $recentCustomers);
 
         return view('gestion.clientes.listar', [
             'customers' => $customers,
             'filters' => $filters,
-            'cities' => Cliente::query()->whereNotNull('ciudad')->where('ciudad', '<>', '')->distinct()->orderBy('ciudad')->pluck('ciudad'),
-            'totalCustomers' => Cliente::query()->count(),
-            'activeCustomers' => Cliente::query()->where('activo', true)->count(),
-            'wholesaleCustomers' => Cliente::query()->where('tipo', 'mayorista')->count(),
-            'retailCustomers' => Cliente::query()->where('tipo', 'minorista')->count(),
-            'activeAccounts' => Cliente::query()->where('activo', true)->whereNotNull('usuario_id')->count(),
+            'cities' => $consultaClientes()->whereNotNull('ciudad')->where('ciudad', '<>', '')->distinct()->orderBy('ciudad')->pluck('ciudad'),
+            'totalCustomers' => $consultaClientes()->count(),
+            'activeCustomers' => $consultaClientes()->where('activo', true)->count(),
+            'wholesaleCustomers' => $consultaClientes()->where('tipo', 'mayorista')->count(),
+            'retailCustomers' => $consultaClientes()->where('tipo', 'minorista')->count(),
+            'activeAccounts' => $consultaClientes()->where('activo', true)->whereNotNull('usuario_id')->count(),
             'totalPurchases' => $totalPurchases,
             'lastPurchase' => $lastPurchase,
             'lastPurchases' => $lastPurchases,
@@ -58,25 +70,39 @@ class ClienteController extends Controller
 
     public function store(GuardarClienteRequest $request, RegistradorAuditoria $audit): RedirectResponse
     {
-        $customer = Cliente::create($request->validated() + ['activo' => true, 'creado_en' => now()]);
-        $audit->record($request->user()->id, 'customer.created', 'clientes', $customer->id, null, $customer->only(['tipo', 'documento', 'nombre_contacto', 'correo']), $request->ip());
+        $usuario = $request->user();
+        abort_unless($usuario instanceof User, 403);
+        $customer = Cliente::create($request->validated() + [
+            'activo' => true,
+            'creado_en' => now(),
+            ...$this->autorizacion->operationScopeAttributes($usuario, 'clientes'),
+        ]);
+        $audit->record($usuario->id, 'customer.created', 'clientes', $customer->id, null, $customer->only(['tipo', 'documento', 'nombre_contacto', 'correo']), $request->ip());
 
         return back()->with('status', 'Cliente registrado.');
     }
 
     public function update(ActualizarClienteRequest $request, Cliente $customer, RegistradorAuditoria $audit): RedirectResponse
     {
+        $usuario = $request->user();
+        abort_unless($usuario instanceof User, 403);
+        $this->verificarAccesoCliente($customer, $usuario, 'gestion.clientes.actualizar');
+
         $before = $customer->only(['tipo', 'documento', 'nombre_contacto', 'correo', 'activo']);
         $customer->update($request->validated());
-        $audit->record($request->user()->id, 'customer.updated', 'clientes', $customer->id, $before, $customer->only(array_keys($before)), $request->ip());
+        $audit->record($usuario->id, 'customer.updated', 'clientes', $customer->id, $before, $customer->only(array_keys($before)), $request->ip());
 
         return back()->with('status', 'Cliente actualizado.');
     }
 
-    public function deactivate(Cliente $customer, RegistradorAuditoria $audit): RedirectResponse
+    public function deactivate(Request $request, Cliente $customer, RegistradorAuditoria $audit): RedirectResponse
     {
+        $usuario = $request->user();
+        abort_unless($usuario instanceof User, 403);
+        $this->verificarAccesoCliente($customer, $usuario, 'gestion.clientes.eliminar');
+
         $customer->update(['activo' => false]);
-        $audit->record(request()->user()->id, 'customer.deactivated', 'clientes', $customer->id, ['activo' => true], ['activo' => false], request()->ip());
+        $audit->record($usuario->id, 'customer.deactivated', 'clientes', $customer->id, ['activo' => true], ['activo' => false], $request->ip());
 
         return back()->with('status', 'Cliente desactivado.');
     }
@@ -85,9 +111,9 @@ class ClienteController extends Controller
      * @param  array{buscar:?string,tipo:?string,estado:?string,ciudad:?string,por_pagina:int}  $filters
      * @return Builder<Cliente>
      */
-    private function customerQuery(array $filters): Builder
+    private function customerQuery(array $filters, User $usuario): Builder
     {
-        return Cliente::query()
+        return $this->consultaClientesEnAlcance($usuario, 'gestion.clientes.consultar')
             ->when($filters['buscar'], function (Builder $query, string $search): void {
                 $query->where(function (Builder $searchQuery) use ($search): void {
                     $searchQuery
@@ -102,6 +128,32 @@ class ClienteController extends Controller
             ->when($filters['estado'] === 'activo', fn (Builder $query): Builder => $query->where('activo', true))
             ->when($filters['estado'] === 'inactivo', fn (Builder $query): Builder => $query->where('activo', false))
             ->when($filters['ciudad'], fn (Builder $query, string $city): Builder => $query->where('ciudad', $city));
+    }
+
+    private function verificarAccesoCliente(Cliente $cliente, User $usuario, string $permiso): void
+    {
+        $visible = $this->consultaClientesEnAlcance($usuario, $permiso)
+            ->whereKey($cliente->getKey())
+            ->exists();
+
+        abort_unless($visible, 404);
+    }
+
+    private function consultaClientesEnAlcance(User $usuario, string $permiso): Builder
+    {
+        if ($this->autorizacion->allowsGlobal($usuario, $permiso)) {
+            return $this->autorizacion->scopeRecordsFor(Cliente::query(), $usuario, $permiso);
+        }
+
+        $ubicacion = $this->autorizacion->operationSite($usuario);
+        abort_unless(
+            $ubicacion['empresa_id'] !== null
+                && $ubicacion['sede_id'] !== null
+                && $this->autorizacion->allowsRecord($usuario, $permiso, $ubicacion['empresa_id'], $ubicacion['sede_id']),
+            403,
+        );
+
+        return Cliente::query()->where('clientes.empresa_id', $ubicacion['empresa_id']);
     }
 
     /**

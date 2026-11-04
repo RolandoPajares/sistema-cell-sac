@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ImagenProducto extends Model
 {
-    protected $table = 'producto_imagen_referencia';
+    protected $table = 'referencias_imagenes_productos';
 
     protected $fillable = ['producto_id', 'ruta_imagen', 'orden', 'actualizado_en'];
 

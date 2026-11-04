@@ -6,10 +6,10 @@ use App\Models\Clientes\Cliente;
 use App\Models\Comercio\Cotizacion;
 use App\Models\Compras\Compra;
 use App\Models\Compras\Proveedor;
-use App\Models\User;
+use Tests\SpanishAccessFixture;
 
 it('renders each management module with its canonical list view', function () {
-    $admin = User::factory()->create(['rol' => 'administrador']);
+    $admin = SpanishAccessFixture::user('administrador');
     $viewsByRoute = [
         'management.audit' => 'gestion.auditoria.listar',
         'management.campaigns' => 'gestion.campanias.listar',
@@ -36,7 +36,8 @@ it('renders each management module with its canonical list view', function () {
 });
 
 it('filters the administrator quotation dashboard and calculates real status totals', function () {
-    $admin = User::factory()->administrator()->create();
+    $admin = SpanishAccessFixture::user('administrador');
+    $scope = SpanishAccessFixture::organization();
     $customer = Cliente::create([
         'tipo' => 'mayorista',
         'documento' => 'RUC-900001',
@@ -44,23 +45,28 @@ it('filters the administrator quotation dashboard and calculates real status tot
         'correo' => 'cliente.cotizaciones@example.test',
         'activo' => true,
         'creado_en' => now(),
+        'empresa_id' => $scope['empresa_id'],
     ]);
 
     Cotizacion::create([
         'cliente_id' => $customer->id,
-        'creado_por' => $admin->id,
+        'creado_por_usuario_id' => $admin->id,
         'total' => 320,
         'estado' => 'Borrador',
         'activo' => true,
         'creado_en' => now(),
+        'empresa_id' => $scope['empresa_id'],
+        'sede_id' => $scope['sede_id'],
     ]);
     $approved = Cotizacion::create([
         'cliente_id' => $customer->id,
-        'creado_por' => $admin->id,
+        'creado_por_usuario_id' => $admin->id,
         'total' => 680,
         'estado' => 'Aprobada',
         'activo' => true,
         'creado_en' => now(),
+        'empresa_id' => $scope['empresa_id'],
+        'sede_id' => $scope['sede_id'],
     ]);
 
     $this->actingAs($admin)
@@ -81,13 +87,15 @@ it('filters the administrator quotation dashboard and calculates real status tot
 });
 
 it('filters purchases and calculates their dashboard totals', function () {
-    $administrator = User::factory()->administrator()->create();
+    $administrator = SpanishAccessFixture::user('administrador');
+    $scope = SpanishAccessFixture::organization();
     $firstSupplier = Proveedor::create([
         'nombre' => 'Proveedor principal',
         'ruc' => 'RUC-900101',
         'correo' => 'principal@example.test',
         'activo' => true,
         'creado_en' => now(),
+        'empresa_id' => $scope['empresa_id'],
     ]);
     $secondSupplier = Proveedor::create([
         'nombre' => 'Proveedor secundario',
@@ -95,17 +103,21 @@ it('filters purchases and calculates their dashboard totals', function () {
         'correo' => 'secundario@example.test',
         'activo' => true,
         'creado_en' => now(),
+        'empresa_id' => $scope['empresa_id'],
     ]);
     $category = Categoria::factory()->create();
     $product = Producto::factory()->create(['categoria_id' => $category->id]);
     $received = Compra::create([
         'proveedor_id' => $firstSupplier->id,
-        'creado_por' => $administrator->id,
+        'creado_por_usuario_id' => $administrator->id,
         'total' => 320,
         'estado' => 'Recibida',
         'fecha_compra' => now()->toDateString(),
         'activo' => true,
         'creado_en' => now(),
+        'empresa_id' => $scope['empresa_id'],
+        'sede_id' => $scope['sede_id'],
+        'almacen_id' => $scope['almacen_id'],
     ]);
     $received->details()->create([
         'producto_id' => $product->id,
@@ -114,12 +126,15 @@ it('filters purchases and calculates their dashboard totals', function () {
     ]);
     $pending = Compra::create([
         'proveedor_id' => $secondSupplier->id,
-        'creado_por' => $administrator->id,
+        'creado_por_usuario_id' => $administrator->id,
         'total' => 180,
         'estado' => 'Pendiente',
         'fecha_compra' => now()->toDateString(),
         'activo' => true,
         'creado_en' => now(),
+        'empresa_id' => $scope['empresa_id'],
+        'sede_id' => $scope['sede_id'],
+        'almacen_id' => $scope['almacen_id'],
     ]);
     $pending->details()->create([
         'producto_id' => $product->id,

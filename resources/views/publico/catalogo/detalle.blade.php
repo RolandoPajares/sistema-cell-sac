@@ -6,10 +6,13 @@
 @section('content')
 @php
     $categoryName = $product->category?->nombre ?: $product->categoria;
-    $imageItems = $product->images->map(function ($image): array {
-        $path = ltrim((string) preg_replace('~^assets/~', '', $image->ruta_imagen), '/');
-        return ['url' => asset('assets/cell-legacy/'.$path), 'path' => $path];
-    });
+    $rutasImagenes = $product->images->pluck('ruta_imagen');
+    if ($rutasImagenes->isEmpty() && $product->url_imagen) {
+        $rutasImagenes = collect([$product->url_imagen]);
+    }
+    $imageItems = $rutasImagenes->map(fn (string $rutaImagen): array => [
+        'url' => \App\Models\Catalogo\Producto::urlPublicaDeImagen($rutaImagen),
+    ]);
     $primaryImage = $imageItems->first()['url'] ?? null;
     $salePrice = (float) ($product->precio_oferta ?? $product->precio);
     $originalPrice = (float) ($product->precio_original ?? $product->precio);
@@ -34,7 +37,7 @@
             <div class="detail-info">
                 <div class="product-detail-heading"><div class="product-detail-meta"><span>{{ $product->marca }}</span><span>{{ $categoryName }}</span>@if($product->etiqueta)<span class="product-detail-badge">{{ $product->etiqueta }}</span>@endif</div><h1>{{ $product->nombre }}</h1></div>
                 <div class="product-detail-price"><strong>S/ {{ number_format($salePrice, 2) }}</strong>@if($discount > 0)<div class="product-detail-old-price"><del>S/ {{ number_format($originalPrice, 2) }}</del><span class="product-detail-discount">-{{ $discount }}%</span></div>@endif</div>
-                <p class="product-detail-stock {{ $product->existencias > 0 ? 'is-available' : 'is-unavailable' }}"><i class="bi {{ $product->existencias > 0 ? 'bi-check-circle' : 'bi-x-circle' }}" aria-hidden="true"></i>{{ $product->existencias > 0 ? $product->existencias.' unidades disponibles' : 'Sin stock' }}</p>
+                <p class="product-detail-stock {{ $product->existencias_disponibles > 0 ? 'is-available' : 'is-unavailable' }}"><i class="bi {{ $product->existencias_disponibles > 0 ? 'bi-check-circle' : 'bi-x-circle' }}" aria-hidden="true"></i>{{ $product->existencias_disponibles > 0 ? $product->existencias_disponibles.' unidades disponibles' : 'Sin stock' }}</p>
                 @auth
                     <form
                         class="product-detail-cart"
@@ -46,10 +49,10 @@
                         <button
                             class="product-detail-buy"
                             type="submit"
-                            @disabled($product->existencias <= 0)
+                            @disabled($product->existencias_disponibles <= 0)
                         >
                             <i class="bi bi-cart3" aria-hidden="true"></i>
-                            {{ $product->existencias > 0 ? 'Agregar al carrito' : 'Sin stock' }}
+                            {{ $product->existencias_disponibles > 0 ? 'Agregar al carrito' : 'Sin stock' }}
                         </button>
                     </form>
                 @else

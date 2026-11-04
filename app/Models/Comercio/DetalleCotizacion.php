@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DetalleCotizacion extends Model
 {
-    protected $table = 'cotizacion_detalles';
+    protected $table = 'detalles_cotizaciones';
 
     protected $fillable = ['cotizacion_id', 'producto_id', 'cantidad', 'precio_unitario'];
 

@@ -4,40 +4,240 @@
 @section('body_class', auth()->user()?->rol === 'administrador' ? 'modulo-segmentos' : '')
 
 @section('content')
-    @if (auth()->user()?->rol !== 'administrador')
-        <section class="container content-page">
-            <h1>Segmentación de clientes</h1>
-            <p class="notice">Organiza audiencias para tus acciones comerciales.</p>
-            @include('gestion.segmentos.crear', ['roles' => $roles])
-            @foreach ($segments as $segment)
-                <article class="data-row">
-                    <strong>{{ $segment->nombre }}</strong>
-                    <span>{{ ucfirst($segment->tipo ?: 'Manual') }}</span>
-                    <span>{{ $segment->activo ? 'Activo' : 'Inactivo' }}</span>
-                </article>
-            @endforeach
-            {{ $segments->links() }}
-        </section>
-    @else
-    <section class="admin-marketing-module admin-segmentos-page" data-pending-module="segmentos">
-        <header class="admin-marketing-header"><nav class="admin-marketing-breadcrumb" aria-label="Ruta de navegación"><span>Administración</span><i class="bi bi-chevron-right" aria-hidden="true"></i><span>Marketing</span><i class="bi bi-chevron-right" aria-hidden="true"></i><strong>Segmentos de clientes</strong></nav><div class="admin-marketing-heading-row"><div><span class="admin-marketing-eyebrow"><i class="bi bi-people" aria-hidden="true"></i> Marketing</span><h1>Gestión de segmentos de clientes</h1><p>Organiza audiencias por comportamiento y compras para acciones comerciales más precisas.</p></div><div class="admin-marketing-actions"><button class="admin-marketing-button admin-marketing-button--secondary" type="button" data-pending-notice="La exportación se habilitará con los segmentos conectados."><i class="bi bi-download" aria-hidden="true"></i> Exportar</button><button class="admin-marketing-button admin-marketing-button--secondary" type="button" data-pending-notice="La actualización automática se habilitará con reglas de comportamiento."><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Actualizar segmentos</button><button class="admin-marketing-button admin-marketing-button--primary" type="button" data-pending-open="crear"><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo segmento</button></div></div></header>
+@if (auth()->user()?->rol !== 'administrador')
+<section class="container content-page">
+    <h1>Segmentación de clientes</h1>
+    <p class="notice">Organiza audiencias para tus acciones comerciales.</p>
+    @include('gestion.segmentos.crear', ['roles' => $roles])
+    @foreach ($segments as $segment)
+    <article class="data-row">
+        <strong>{{ $segment->nombre }}</strong>
+        <span>{{ ucfirst($segment->tipo ?: 'Manual') }}</span>
+        <span>{{ $segment->activo ? 'Activo' : 'Inactivo' }}</span>
+    </article>
+    @endforeach
+    {{ $segments->links() }}
+</section>
+@else
+<section class="admin-marketing-module admin-segmentos-page" data-pending-module="segmentos" data-em-segment-page>
+    <header class="admin-marketing-header">
+        <nav class="admin-marketing-breadcrumb" aria-label="Ruta de navegación"><span>Administración</span><i class="bi bi-chevron-right" aria-hidden="true"></i><span>Marketing</span><i class="bi bi-chevron-right" aria-hidden="true"></i><strong>Segmentos de clientes</strong></nav>
+        <div class="admin-marketing-heading-row">
+            <div><span class="admin-marketing-eyebrow"><i class="bi bi-people" aria-hidden="true"></i> Marketing</span>
+                <h1>Gestión de segmentos de clientes</h1>
+                <p>Organiza audiencias por comportamiento y compras para acciones comerciales más precisas.</p>
+            </div>
+            <div class="admin-marketing-actions"><button class="admin-marketing-button admin-marketing-button--secondary" type="button" data-pending-notice="La exportación se habilitará con los segmentos conectados."><i class="bi bi-download" aria-hidden="true"></i> Exportar</button><button class="admin-marketing-button admin-marketing-button--secondary" type="button" data-pending-notice="La actualización automática se habilitará con reglas de comportamiento."><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Actualizar segmentos</button><button class="admin-marketing-button admin-marketing-button--primary" type="button" data-pending-open="crear"><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo segmento</button></div>
+        </div>
+    </header>
 
-        <section class="admin-marketing-kpis" aria-label="Indicadores de segmentación"><article class="admin-marketing-kpi admin-marketing-kpi--blue"><span><i class="bi bi-people" aria-hidden="true"></i></span><div><small>Segmentos creados</small><strong>{{ number_format($segments->total()) }}</strong><em>Registros en el sistema</em></div></article><article class="admin-marketing-kpi admin-marketing-kpi--orange"><span><i class="bi bi-people-fill" aria-hidden="true"></i></span><div><small>Clientes clasificados</small><strong>—</strong><em>Requiere métricas de clientes</em></div></article><article class="admin-marketing-kpi admin-marketing-kpi--purple"><span><i class="bi bi-arrow-repeat" aria-hidden="true"></i></span><div><small>Segmentos dinámicos</small><strong>—</strong><em>Actualización automática</em></div></article><article class="admin-marketing-kpi admin-marketing-kpi--green"><span><i class="bi bi-bullseye" aria-hidden="true"></i></span><div><small>Segmentos activos</small><strong>—</strong><em>Estado pendiente de integración</em></div></article></section>
-
-        <form class="admin-marketing-filters" data-pending-form><label class="admin-marketing-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar segmentos</span><input type="search" placeholder="Buscar segmento, criterio o etiqueta..." data-pending-search></label><label><span class="visually-hidden">Tipo</span><select data-pending-filter><option>Tipo: Todos</option><option>Dinámico</option><option>Manual</option></select></label><label><span class="visually-hidden">Estado</span><select data-pending-filter><option>Estado: Todos</option><option>Activo</option><option>En revisión</option></select></label><label><span class="visually-hidden">Clientes</span><select data-pending-filter><option>Clientes: Todos</option><option>Frecuentes</option><option>Nuevos</option><option>Inactivos</option></select></label><button class="admin-marketing-filter-button" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i> Filtrar</button><button class="admin-marketing-clear-button" type="button" data-pending-notice="Los filtros se limpiarán cuando el módulo tenga criterios conectados.">Limpiar filtros</button></form>
-
-        <section class="admin-marketing-table-card"><header class="admin-marketing-card-header"><div><span class="admin-marketing-card-icon"><i class="bi bi-people" aria-hidden="true"></i></span><div><h2>Listado de segmentos</h2><p>{{ number_format($segments->total()) }} segmentos disponibles para administrar.</p></div></div><span class="admin-marketing-count">{{ number_format($segments->total()) }} segmentos</span></header><div class="admin-marketing-table-wrap"><table class="admin-marketing-table"><thead><tr><th>Segmento</th><th>Criterio principal</th><th>Tipo</th><th>Clientes</th><th>Conversión</th><th>Actualización</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
-            @forelse ($segments as $segment)
-                <tr><td><strong>{{ $segment->nombre }}</strong><small>Audiencia administrada</small></td><td>{{ implode(', ', $segment->criterios['roles'] ?? []) ?: 'Criterios de rol' }}</td><td><span class="admin-marketing-status admin-marketing-status--blue">{{ ucfirst($segment->tipo ?: 'Manual') }}</span></td><td>—</td><td>—</td><td>Sin actividad</td><td><span class="admin-marketing-status admin-marketing-status--active"><i class="bi bi-circle-fill" aria-hidden="true"></i>{{ $segment->activo ? 'Activo' : 'Inactivo' }}</span></td><td class="admin-marketing-row-actions"><button type="button" data-pending-notice="La vista detallada se habilitará con las métricas del segmento."><i class="bi bi-eye" aria-hidden="true"></i><span>Ver</span></button><button type="button" data-pending-notice="La edición se habilitará cuando exista el endpoint de actualización."><i class="bi bi-pencil" aria-hidden="true"></i><span>Editar</span></button><button class="is-danger" type="button" data-pending-notice="La eliminación se habilitará con el flujo de desactivación."><i class="bi bi-trash3" aria-hidden="true"></i><span>Eliminar</span></button></td></tr>
-            @empty
-                <tr><td colspan="8"><div class="admin-marketing-empty"><span><i class="bi bi-people" aria-hidden="true"></i></span><strong>No hay segmentos para mostrar</strong><p>Crea un segmento para organizar audiencias y campañas con mayor precisión.</p><button type="button" class="admin-marketing-empty-button" data-pending-open="crear"><i class="bi bi-plus-lg" aria-hidden="true"></i> Crear segmento</button></div></td></tr>
-            @endforelse
-        </tbody></table></div><footer class="admin-marketing-table-footer"><span>Mostrando {{ $segments->firstItem() ?? 0 }} a {{ $segments->lastItem() ?? 0 }} de {{ number_format($segments->total()) }} segmentos</span>{{ $segments->links() }}</footer></section>
-
-        <section class="admin-marketing-bottom-grid"><article class="admin-marketing-summary-card"><header><div><span class="admin-marketing-summary-icon admin-marketing-summary-icon--blue"><i class="bi bi-bar-chart" aria-hidden="true"></i></span><div><h2>Distribución de clientes</h2><p>Clasificación por comportamiento.</p></div></div><button type="button" data-pending-notice="La distribución se mostrará al conectar los datos de clientes.">Ver distribución <i class="bi bi-arrow-right" aria-hidden="true"></i></button></header><div class="admin-marketing-summary-empty"><i class="bi bi-people" aria-hidden="true"></i><strong>Sin distribución disponible</strong><span>Los clientes aparecerán al integrar sus criterios.</span></div></article><article class="admin-marketing-summary-card"><header><div><span class="admin-marketing-summary-icon admin-marketing-summary-icon--orange"><i class="bi bi-award" aria-hidden="true"></i></span><div><h2>Segmentos de alto valor</h2><p>Audiencias prioritarias.</p></div></div><button type="button" data-pending-notice="El ranking se calculará con compras y conversiones.">Ver ranking <i class="bi bi-arrow-right" aria-hidden="true"></i></button></header><div class="admin-marketing-summary-empty"><i class="bi bi-stars" aria-hidden="true"></i><strong>Sin ranking todavía</strong><span>El valor se calculará con datos comerciales.</span></div></article><article class="admin-marketing-summary-card"><header><div><span class="admin-marketing-summary-icon admin-marketing-summary-icon--purple"><i class="bi bi-clock-history" aria-hidden="true"></i></span><div><h2>Actividad de segmentación</h2><p>Últimos cambios aplicados.</p></div></div><button type="button" data-pending-notice="La actividad aparecerá al registrar actualizaciones.">Ver actividad <i class="bi bi-arrow-right" aria-hidden="true"></i></button></header><div class="admin-marketing-summary-empty"><i class="bi bi-clock" aria-hidden="true"></i><strong>Sin actividad reciente</strong><span>Las actualizaciones aparecerán aquí.</span></div></article></section>
-
-        <dialog class="admin-marketing-dialog gestion-pendiente-modal" data-pending-modal="crear" aria-labelledby="segmentos-crear-title"><div class="admin-marketing-dialog-card"><header><div><span class="admin-marketing-dialog-icon"><i class="bi bi-people" aria-hidden="true"></i></span><div><small>Marketing</small><h2 id="segmentos-crear-title">Nuevo segmento</h2><p>Define una audiencia para tus campañas.</p></div></div><button type="button" data-pending-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="admin-marketing-dialog-body">@include('gestion.segmentos.crear', ['roles' => $roles])</div></div></dialog>
-        <div class="gestion-pendiente-feedback" data-pending-feedback role="status" aria-live="polite" hidden></div>
+    <section class="admin-marketing-kpis" aria-label="Indicadores de segmentación">
+        <article class="admin-marketing-kpi admin-marketing-kpi--blue"><span><i class="bi bi-people" aria-hidden="true"></i></span>
+            <div><small>Segmentos creados</small><strong>{{ number_format($segments->total()) }}</strong><em>Registros en el sistema</em></div>
+        </article>
+        <article class="admin-marketing-kpi admin-marketing-kpi--orange"><span><i class="bi bi-people-fill" aria-hidden="true"></i></span>
+            <div><small>Clientes clasificados</small><strong>—</strong><em>Requiere métricas de clientes</em></div>
+        </article>
+        <article class="admin-marketing-kpi admin-marketing-kpi--purple"><span><i class="bi bi-arrow-repeat" aria-hidden="true"></i></span>
+            <div><small>Segmentos dinámicos</small><strong>—</strong><em>Actualización automática</em></div>
+        </article>
+        <article class="admin-marketing-kpi admin-marketing-kpi--green"><span><i class="bi bi-bullseye" aria-hidden="true"></i></span>
+            <div><small>Segmentos activos</small><strong>—</strong><em>Estado pendiente de integración</em></div>
+        </article>
     </section>
-    @endif
+
+    <form class="admin-marketing-filters" data-pending-form><label class="admin-marketing-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar segmentos</span><input type="search" placeholder="Buscar segmento, criterio o etiqueta..." data-pending-search></label><label><span class="visually-hidden">Tipo</span><select data-pending-filter>
+                <option>Tipo: Todos</option>
+                <option>Dinámico</option>
+                <option>Manual</option>
+            </select></label><label><span class="visually-hidden">Estado</span><select data-pending-filter>
+                <option>Estado: Todos</option>
+                <option>Activo</option>
+                <option>En revisión</option>
+            </select></label><label><span class="visually-hidden">Clientes</span><select data-pending-filter>
+                <option>Clientes: Todos</option>
+                <option>Frecuentes</option>
+                <option>Nuevos</option>
+                <option>Inactivos</option>
+            </select></label><button class="admin-marketing-filter-button" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i> Filtrar</button><button class="admin-marketing-clear-button" type="button" data-pending-notice="Los filtros se limpiarán cuando el módulo tenga criterios conectados.">Limpiar filtros</button></form>
+
+    <section class="admin-marketing-table-card">
+        <header class="admin-marketing-card-header">
+            <div><span class="admin-marketing-card-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
+                <div>
+                    <h2>Listado de segmentos</h2>
+                    <p>{{ number_format($segments->total()) }} segmentos disponibles para administrar.</p>
+                </div>
+            </div><span class="admin-marketing-count">{{ number_format($segments->total()) }} segmentos</span>
+        </header>
+        <div class="admin-marketing-table-wrap">
+            <table class="admin-marketing-table">
+                <thead>
+                    <tr>
+                        <th>Segmento</th>
+                        <th>Criterio principal</th>
+                        <th>Tipo</th>
+                        <th>Clientes</th>
+                        <th>Conversión</th>
+                        <th>Actualización</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($segments as $segment)
+                    <tr>
+                        <td><strong>{{ $segment->nombre }}</strong><small>Audiencia administrada</small></td>
+                        <td>{{ implode(', ', $segment->criterios['roles'] ?? []) ?: 'Criterios de rol' }}</td>
+                        <td><span class="admin-marketing-status admin-marketing-status--blue">{{ ucfirst($segment->tipo ?: 'Manual') }}</span></td>
+                        <td>—</td>
+                        <td>—</td>
+                        <td>Sin actividad</td>
+                        <td><span class="admin-marketing-status admin-marketing-status--active"><i class="bi bi-circle-fill" aria-hidden="true"></i>{{ $segment->activo ? 'Activo' : 'Inactivo' }}</span></td>
+                        <td class="admin-marketing-row-actions" data-em-segment-row data-em-segment-name="{{ $segment->nombre }}" data-em-segment-type="{{ $segment->tipo ?: 'Manual' }}" data-em-segment-active="{{ $segment->activo ? 'Activo' : 'Inactivo' }}" data-em-segment-roles="{{ implode('|', array_map('strval', $segment->criterios['roles'] ?? [])) }}"><button type="button" data-em-segment-action="detail"><i class="bi bi-eye" aria-hidden="true"></i><span>Ver</span></button><button type="button" data-em-segment-action="edit"><i class="bi bi-pencil" aria-hidden="true"></i><span>Editar</span></button><button class="is-danger" type="button" data-em-segment-action="remove"><i class="bi bi-trash3" aria-hidden="true"></i><span>Eliminar</span></button></td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="8">
+                            <div class="admin-marketing-empty"><span><i class="bi bi-people" aria-hidden="true"></i></span><strong>No hay segmentos para mostrar</strong>
+                                <p>Crea un segmento para organizar audiencias y campañas con mayor precisión.</p><button type="button" class="admin-marketing-empty-button" data-pending-open="crear"><i class="bi bi-plus-lg" aria-hidden="true"></i> Crear segmento</button>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <footer class="admin-marketing-table-footer"><span>Mostrando {{ $segments->firstItem() ?? 0 }} a {{ $segments->lastItem() ?? 0 }} de {{ number_format($segments->total()) }} segmentos</span>{{ $segments->links() }}</footer>
+    </section>
+
+    <section class="admin-marketing-bottom-grid">
+        <article class="admin-marketing-summary-card">
+            <header>
+                <div><span class="admin-marketing-summary-icon admin-marketing-summary-icon--blue"><i class="bi bi-bar-chart" aria-hidden="true"></i></span>
+                    <div>
+                        <h2>Distribución de clientes</h2>
+                        <p>Clasificación por comportamiento.</p>
+                    </div>
+                </div><button type="button" data-pending-notice="La distribución se mostrará al conectar los datos de clientes.">Ver distribución <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+            </header>
+            <div class="admin-marketing-summary-empty"><i class="bi bi-people" aria-hidden="true"></i><strong>Sin distribución disponible</strong><span>Los clientes aparecerán al integrar sus criterios.</span></div>
+        </article>
+        <article class="admin-marketing-summary-card">
+            <header>
+                <div><span class="admin-marketing-summary-icon admin-marketing-summary-icon--orange"><i class="bi bi-award" aria-hidden="true"></i></span>
+                    <div>
+                        <h2>Segmentos de alto valor</h2>
+                        <p>Audiencias prioritarias.</p>
+                    </div>
+                </div><button type="button" data-pending-notice="El ranking se calculará con compras y conversiones.">Ver ranking <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+            </header>
+            <div class="admin-marketing-summary-empty"><i class="bi bi-stars" aria-hidden="true"></i><strong>Sin ranking todavía</strong><span>El valor se calculará con datos comerciales.</span></div>
+        </article>
+        <article class="admin-marketing-summary-card">
+            <header>
+                <div><span class="admin-marketing-summary-icon admin-marketing-summary-icon--purple"><i class="bi bi-clock-history" aria-hidden="true"></i></span>
+                    <div>
+                        <h2>Actividad de segmentación</h2>
+                        <p>Últimos cambios aplicados.</p>
+                    </div>
+                </div><button type="button" data-pending-notice="La actividad aparecerá al registrar actualizaciones.">Ver actividad <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+            </header>
+            <div class="admin-marketing-summary-empty"><i class="bi bi-clock" aria-hidden="true"></i><strong>Sin actividad reciente</strong><span>Las actualizaciones aparecerán aquí.</span></div>
+        </article>
+    </section>
+
+    <dialog class="admin-marketing-dialog gestion-pendiente-modal" data-pending-modal="crear" aria-labelledby="segmentos-crear-title">
+        <div class="admin-marketing-dialog-card">
+            <header>
+                <div><span class="admin-marketing-dialog-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
+                    <div><small>Marketing</small>
+                        <h2 id="segmentos-crear-title">Nuevo segmento</h2>
+                        <p>Define una audiencia para tus campañas.</p>
+                    </div>
+                </div><button type="button" data-pending-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+            </header>
+            <div class="admin-marketing-dialog-body">@include('gestion.segmentos.crear', ['roles' => $roles])</div>
+        </div>
+    </dialog>
+    <dialog class="admin-marketing-dialog gestion-pendiente-modal em-marketing-dialog" data-em-segment-dialog="detail" aria-labelledby="em-segment-detail-title">
+        <div class="admin-marketing-dialog-card">
+            <header>
+                <div><span class="admin-marketing-dialog-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
+                    <div><small>Marketing · Consulta</small>
+                        <h2 id="em-segment-detail-title">Detalle del segmento</h2>
+                        <p>Criterios configurados en el registro seleccionado.</p>
+                    </div>
+                </div><button type="button" data-em-segment-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+            </header>
+            <div class="admin-marketing-dialog-body">
+                <div class="em-marketing-dialog__notice">Solo se muestra la configuración guardada. No se consultan clientes ni se calcula el tamaño de la audiencia.</div>
+                <dl class="em-marketing-dialog__details">
+                    <div>
+                        <dt>Nombre</dt>
+                        <dd data-em-segment-detail="name">—</dd>
+                    </div>
+                    <div>
+                        <dt>Tipo</dt>
+                        <dd data-em-segment-detail="type">—</dd>
+                    </div>
+                    <div>
+                        <dt>Roles incluidos</dt>
+                        <dd data-em-segment-detail="roles">—</dd>
+                    </div>
+                    <div>
+                        <dt>Estado</dt>
+                        <dd data-em-segment-detail="active">—</dd>
+                    </div>
+                </dl>
+                <p class="em-marketing-dialog__feedback" data-em-segment-detail-note role="status" aria-live="polite">Métricas y pertenencia de clientes pendientes de integración.</p>
+            </div>
+            <footer class="em-marketing-dialog__footer"><button type="button" class="admin-marketing-button admin-marketing-button--secondary" data-em-segment-close>Cerrar</button></footer>
+        </div>
+    </dialog>
+    <dialog class="admin-marketing-dialog gestion-pendiente-modal em-marketing-dialog" data-em-segment-dialog="edit" aria-labelledby="em-segment-edit-title">
+        <div class="admin-marketing-dialog-card">
+            <header>
+                <div><span class="admin-marketing-dialog-icon"><i class="bi bi-sliders" aria-hidden="true"></i></span>
+                    <div><small>Marketing · Edición visual</small>
+                        <h2 id="em-segment-edit-title">Editar reglas del segmento</h2>
+                        <p>Los criterios disponibles reflejan los roles admitidos actualmente.</p>
+                    </div>
+                </div><button type="button" data-em-segment-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+            </header>
+            <div class="admin-marketing-dialog-body">
+                <div class="em-marketing-dialog__notice">La edición no se guarda ni modifica asignaciones reales de clientes. No se comprueba si otro segmento ya usa este nombre.</div>
+                <div class="em-marketing-dialog__grid"><label class="em-marketing-dialog__full">Nombre del segmento<input type="text" maxlength="120" required data-em-segment-edit-name></label>
+                    <fieldset class="em-marketing-dialog__roles">
+                        <legend>Roles incluidos *</legend>@foreach ($roles as $role)<label><input type="checkbox" value="{{ $role }}" data-em-segment-role> {{ str_replace('_', ' ', $role) }}</label>@endforeach
+                    </fieldset>
+                </div>
+                <div class="em-marketing-dialog__preview"><strong>Vista previa ilustrativa</strong><span data-em-segment-preview>Selecciona uno o más roles para describir la regla. No se buscarán clientes.</span></div>
+                <p class="em-marketing-dialog__error" data-em-segment-edit-error role="alert" hidden></p>
+                <p class="em-marketing-dialog__feedback" data-em-segment-edit-feedback role="status" aria-live="polite" hidden></p>
+            </div>
+            <footer class="em-marketing-dialog__footer"><button type="button" class="admin-marketing-button admin-marketing-button--secondary" data-em-segment-close>Cancelar</button><button type="button" class="admin-marketing-button admin-marketing-button--primary" data-em-segment-edit-confirm>Confirmar cambios (demostración)</button></footer>
+        </div>
+    </dialog>
+    <dialog class="admin-marketing-dialog gestion-pendiente-modal em-marketing-dialog" data-em-segment-dialog="remove" aria-labelledby="em-segment-remove-title">
+        <div class="admin-marketing-dialog-card">
+            <header>
+                <div><span class="admin-marketing-dialog-icon"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i></span>
+                    <div><small>Marketing · Confirmación</small>
+                        <h2 id="em-segment-remove-title">Eliminar segmento</h2>
+                        <p>Revisa el posible impacto antes de continuar.</p>
+                    </div>
+                </div><button type="button" data-em-segment-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+            </header>
+            <div class="admin-marketing-dialog-body">
+                <div class="em-marketing-dialog__warning"><strong>La eliminación real aún no está integrada.</strong><span>Retirar un segmento podría afectar campañas que lo tengan asociado. No se consultan ni modifican esas relaciones desde esta confirmación.</span></div>
+                <p class="em-marketing-dialog__record">Segmento seleccionado: <strong data-em-segment-remove-name>—</strong></p><label class="em-marketing-dialog__check"><input type="checkbox" data-em-segment-remove-ack> Entiendo que esta confirmación no elimina el segmento.</label>
+                <p class="em-marketing-dialog__feedback" data-em-segment-remove-feedback role="status" aria-live="polite" hidden></p>
+            </div>
+            <footer class="em-marketing-dialog__footer"><button type="button" class="admin-marketing-button admin-marketing-button--secondary" data-em-segment-close>Volver</button><button type="button" class="admin-marketing-button admin-marketing-button--primary" data-em-segment-remove-confirm>Confirmar (demostración)</button></footer>
+        </div>
+    </dialog>
+    <div class="gestion-pendiente-feedback" data-pending-feedback role="status" aria-live="polite" hidden></div>
+</section>
+@endif
 @endsection

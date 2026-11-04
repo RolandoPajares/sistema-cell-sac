@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\User;
+use App\Servicios\ServicioAutorizacion;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -10,7 +11,7 @@ class GuardarSegmentoClienteRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return in_array($this->user()?->rol, ['administrador', 'marketing'], true);
+        return $this->user() !== null && app(ServicioAutorizacion::class)->allowsRoute($this);
     }
 
     public function rules(): array

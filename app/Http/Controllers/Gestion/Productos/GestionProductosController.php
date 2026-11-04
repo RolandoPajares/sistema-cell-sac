@@ -4,129 +4,196 @@ namespace App\Http\Controllers\Gestion\Productos;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ActualizarProductoRequest;
+use App\Http\Requests\GuardarImagenVarianteRequest;
 use App\Http\Requests\GuardarProductoRequest;
+use App\Http\Requests\GuardarVarianteProductoRequest;
 use App\Models\Catalogo\Categoria;
 use App\Models\Catalogo\Producto;
+use App\Models\Catalogo\VarianteProducto;
 use App\Models\Compras\Proveedor;
+use App\Models\User;
+use App\Servicios\ExportadorTabular;
 use App\Servicios\RegistradorAuditoria;
+use App\Servicios\ServicioAutorizacion;
+use App\Servicios\ServicioCatalogo;
+use App\Servicios\ServicioInventario;
+use App\Servicios\ServicioVariantesProducto;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 class GestionProductosController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, ServicioInventario $inventario): View
     {
         $filters = $this->filters($request);
+        $alcance = $inventario->alcanceConsulta($request->user(), 'gestion.productos.consultar');
+        $resumen = $inventario->resumenProductos($alcance);
         $now = now();
         $currentMonthStart = $now->copy()->startOfMonth();
         $currentMonthEnd = $now->copy()->endOfMonth();
         $previousMonthStart = $now->copy()->subMonthNoOverflow()->startOfMonth();
         $previousMonthEnd = $now->copy()->subMonthNoOverflow()->endOfMonth();
-        $activeProducts = Producto::query()->where('activo', true)->count();
-        $productsAddedThisMonth = Producto::query()
+        $productosEmpresa = Producto::query()->where('empresa_id', $alcance['empresa_id']);
+        $productosAgregadosEsteMes = (clone $productosEmpresa)
             ->where('activo', true)
             ->whereBetween('creado_en', [$currentMonthStart, $currentMonthEnd])
             ->count();
-        $productsAddedPreviousMonth = Producto::query()
+        $productosAgregadosMesAnterior = (clone $productosEmpresa)
             ->where('activo', true)
             ->whereBetween('creado_en', [$previousMonthStart, $previousMonthEnd])
             ->count();
-        $outOfStock = Producto::query()->where('activo', true)->where('existencias', 0)->count();
-        $lowStock = Producto::query()
-            ->where('activo', true)
-            ->whereBetween('existencias', [1, 5])
-            ->count();
-        $categoryCount = Categoria::query()->where('activo', true)->count();
-        $inventoryValue = (float) Producto::query()
-            ->where('activo', true)
-            ->selectRaw('COALESCE(SUM(existencias * COALESCE(precio_oferta, precio)), 0) as inventory_value')
-            ->value('inventory_value');
-        $offerCount = Producto::query()
-            ->where('activo', true)
-            ->whereNotNull('precio_oferta')
-            ->whereColumn('precio_oferta', '<', 'precio')
-            ->count();
+        $categoryCount = Categoria::query()->where('empresa_id', $alcance['empresa_id'])->where('activo', true)->count();
+        $paginaProductos = $this->productQuery($filters, $alcance, $inventario)
+            ->with([
+                'category' => function (BelongsTo $relacion) use ($alcance): void {
+                    $relacion->where('empresa_id', $alcance['empresa_id']);
+                },
+                'suppliers' => function (BelongsToMany $relacion) use ($alcance): void {
+                    $relacion->where('empresa_id', $alcance['empresa_id']);
+                },
+                'variants:id,producto_id,codigo_sku,codigo_barras,nombre_color,codigo_color,estado,controla_serie',
+                'variants.images',
+            ])
+            ->orderByDesc('productos.id')
+            ->paginate($filters['por_pagina'])
+            ->withQueryString();
+        $idsProductos = $paginaProductos->getCollection()
+            ->pluck('id')
+            ->map(static fn (mixed $id): int => (int) $id)
+            ->all();
+        $saldosPorVariante = $inventario->saldosPorVariante($alcance, $idsProductos);
+
+        foreach ($paginaProductos->getCollection() as $producto) {
+            foreach ($producto->variants as $variante) {
+                $saldo = $saldosPorVariante->get($variante->id);
+                $variante->setAttribute('existencias_alcance', (float) ($saldo->cantidad_fisica ?? 0));
+                $variante->setAttribute('existencias_reservadas_alcance', (float) ($saldo->cantidad_reservada ?? 0));
+            }
+        }
 
         return view('gestion.productos.listar', [
-            'products' => $this->productQuery($filters)
-                ->with(['category', 'suppliers'])
-                ->orderByDesc('id')
-                ->paginate($filters['por_pagina'])
-                ->withQueryString(),
-            'categories' => Categoria::query()->where('activo', true)->orderBy('nombre')->get(),
+            'products' => $paginaProductos,
+            'categories' => Categoria::query()->where('empresa_id', $alcance['empresa_id'])->where('activo', true)->orderBy('nombre')->get(),
             'brands' => Producto::query()
+                ->where('empresa_id', $alcance['empresa_id'])
+                ->where('activo', true)
                 ->whereNotNull('marca')
                 ->where('marca', '<>', '')
                 ->distinct()
                 ->orderBy('marca')
                 ->pluck('marca'),
-            'suppliers' => Proveedor::query()->where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
+            'suppliers' => Proveedor::query()->where('empresa_id', $alcance['empresa_id'])->where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
             'filters' => $filters,
-            'activeProducts' => $activeProducts,
-            'productsTrendPercent' => $this->trendPercent($productsAddedThisMonth, $productsAddedPreviousMonth),
-            'outOfStock' => $outOfStock,
-            'lowStock' => $lowStock,
+            'activeProducts' => $resumen['productos_activos'],
+            'productsTrendPercent' => $this->trendPercent($productosAgregadosEsteMes, $productosAgregadosMesAnterior),
+            'productsWithStock' => $resumen['productos_con_existencias'],
+            'outOfStock' => $resumen['productos_sin_existencias'],
             'categoryCount' => $categoryCount,
-            'inventoryValue' => $inventoryValue,
-            'offerCount' => $offerCount,
+            'inventoryValue' => $resumen['valor_inventario'],
+            'offerCount' => $resumen['productos_en_oferta'],
         ]);
     }
 
-    public function export(Request $request, string $format): Response|StreamedResponse
+    public function export(Request $request, string $format, ServicioInventario $inventario, ?ExportadorTabular $exporter = null): Response|StreamedResponse
     {
         $filters = $this->filters($request);
-        $products = $this->productQuery($filters)->orderBy('id');
+        $alcance = $inventario->alcanceConsulta($request->user(), 'gestion.productos.exportar');
+        $products = $this->productQuery($filters, $alcance, $inventario)->orderBy('productos.id');
 
         return match ($format) {
             'csv' => $this->downloadCsv($products),
-            'excel' => $this->downloadExcel($products->get()),
-            'pdf' => $this->downloadPdf($products->get()),
+            'excel' => $this->downloadCorporateReport($products->get(), 'excel', $filters, $alcance, $request, $exporter ?? new ExportadorTabular),
+            'pdf' => $this->downloadCorporateReport($products->get(), 'pdf', $filters, $alcance, $request, $exporter ?? new ExportadorTabular),
             default => abort(404),
         };
     }
 
-    public function store(GuardarProductoRequest $request, RegistradorAuditoria $audit): RedirectResponse
-    {
+    public function store(
+        GuardarProductoRequest $request,
+        RegistradorAuditoria $audit,
+        ServicioInventario $inventory,
+        ServicioAutorizacion $authorization,
+        ServicioCatalogo $catalogo,
+    ): RedirectResponse {
         $validated = $request->validated();
         $supplierId = $validated['proveedor_id'] ?? null;
         $data = $this->attributes($validated);
+        $rutaImagenGuardada = null;
 
         if ($request->hasFile('imagen')) {
-            $data['url_imagen'] = 'storage/'.$request->file('imagen')->store('productos', 'public');
+            $rutaImagenGuardada = $request->file('imagen')->store('productos', 'public');
+            abort_if($rutaImagenGuardada === false, 500, 'No se pudo guardar la imagen del producto.');
+            $data['url_imagen'] = 'storage/'.$rutaImagenGuardada;
         }
 
-        $product = Producto::create($data + ['activo' => true, 'creado_en' => now()]);
-        $product->suppliers()->sync($supplierId ? [$supplierId] : []);
-        $audit->record($request->user()->id, 'product.created', 'productos', $product->id, null, $product->only(['marca', 'nombre', 'categoria_id', 'precio', 'existencias']), $request->ip());
+        try {
+            DB::transaction(function () use ($data, $supplierId, $request, $audit, $inventory, $authorization, $catalogo): void {
+                $product = Producto::create($data + [
+                    'activo' => true,
+                    'creado_en' => now(),
+                    ...$authorization->operationScopeAttributes($request->user(), 'productos'),
+                ]);
+                $product->suppliers()->sync($supplierId ? [$supplierId] : []);
+                $inventory->registerNewProduct($product, $request->user());
+                $catalogo->sincronizarImagenPortada($product);
+                $audit->record($request->user()->id, 'product.created', 'productos', $product->id, null, $product->only(['marca', 'nombre', 'categoria_id', 'precio', 'existencias', 'url_imagen']), $request->ip());
+            }, 3);
+        } catch (Throwable $excepcion) {
+            if (is_string($rutaImagenGuardada)) {
+                Storage::disk('public')->delete($rutaImagenGuardada);
+            }
+
+            throw $excepcion;
+        }
 
         return back()
-            ->with('status', 'Producto guardado.')
+            ->with('status', 'Producto guardado. Registra las existencias desde el módulo Inventario.')
             ->with('open_product_modal', $request->boolean('continue'));
     }
 
-    public function update(ActualizarProductoRequest $request, Producto $product, RegistradorAuditoria $audit): RedirectResponse
+    public function update(ActualizarProductoRequest $request, Producto $product, RegistradorAuditoria $audit, ServicioCatalogo $catalogo): RedirectResponse
     {
         $this->authorize('update', $product);
         $validated = $request->validated();
-        $before = $product->only(['marca', 'nombre', 'categoria_id', 'precio', 'precio_oferta', 'existencias']);
+        $before = $product->only(['marca', 'nombre', 'categoria_id', 'precio', 'precio_oferta', 'url_imagen']);
         $data = $this->attributes($validated);
+        $rutaImagenGuardada = null;
 
         if ($request->hasFile('imagen')) {
-            $data['url_imagen'] = 'storage/'.$request->file('imagen')->store('productos', 'public');
+            $rutaImagenGuardada = $request->file('imagen')->store('productos', 'public');
+            abort_if($rutaImagenGuardada === false, 500, 'No se pudo guardar la imagen del producto.');
+            $data['url_imagen'] = 'storage/'.$rutaImagenGuardada;
         }
 
-        $product->update($data);
+        try {
+            DB::transaction(function () use ($product, $data, $validated, $request, $audit, $before, $catalogo): void {
+                $product->update($data);
 
-        if (array_key_exists('proveedor_id', $validated)) {
-            $product->suppliers()->sync($validated['proveedor_id'] ? [$validated['proveedor_id']] : []);
+                if (array_key_exists('proveedor_id', $validated)) {
+                    $product->suppliers()->sync($validated['proveedor_id'] ? [$validated['proveedor_id']] : []);
+                }
+
+                $catalogo->sincronizarImagenPortada($product);
+                $audit->record($request->user()->id, 'product.updated', 'productos', $product->id, $before, $product->only(array_keys($before)), $request->ip());
+            }, 3);
+        } catch (Throwable $excepcion) {
+            if (is_string($rutaImagenGuardada)) {
+                Storage::disk('public')->delete($rutaImagenGuardada);
+            }
+
+            throw $excepcion;
         }
-
-        $audit->record($request->user()->id, 'product.updated', 'productos', $product->id, $before, $product->only(array_keys($before)), $request->ip());
 
         return back()->with('status', 'Producto actualizado.');
     }
@@ -140,6 +207,92 @@ class GestionProductosController extends Controller
         return back()->with('status', 'Producto desactivado; su historial comercial se conserva.');
     }
 
+    public function registrarVariante(
+        GuardarVarianteProductoRequest $request,
+        Producto $product,
+        ServicioInventario $inventario,
+        ServicioAutorizacion $autorizacion,
+        ServicioVariantesProducto $variantes,
+    ): RedirectResponse {
+        $usuario = $this->usuarioConAccesoProducto($request, $product, $inventario, $autorizacion);
+        $variantes->registrar($product, $request->validated(), $usuario, $request->ip());
+
+        return back()->with('status', 'Variante registrada.')->with('open_variant_manager', $product->id);
+    }
+
+    public function actualizarVariante(
+        GuardarVarianteProductoRequest $request,
+        Producto $product,
+        VarianteProducto $variante,
+        ServicioInventario $inventario,
+        ServicioAutorizacion $autorizacion,
+        ServicioVariantesProducto $variantes,
+    ): RedirectResponse {
+        $usuario = $this->usuarioConAccesoProducto($request, $product, $inventario, $autorizacion);
+        $variantes->actualizar($product, $variante, $request->validated(), $usuario, $request->ip());
+
+        return back()->with('status', 'Variante actualizada.')->with('open_variant_manager', $product->id);
+    }
+
+    public function desactivarVariante(
+        Request $request,
+        Producto $product,
+        VarianteProducto $variante,
+        ServicioInventario $inventario,
+        ServicioAutorizacion $autorizacion,
+        ServicioVariantesProducto $variantes,
+    ): RedirectResponse {
+        $usuario = $this->usuarioConAccesoProducto($request, $product, $inventario, $autorizacion);
+        $variantes->desactivar($product, $variante, $usuario, $request->ip());
+
+        return back()->with('status', 'Variante desactivada.')->with('open_variant_manager', $product->id);
+    }
+
+    public function registrarImagenVariante(
+        GuardarImagenVarianteRequest $request,
+        Producto $product,
+        VarianteProducto $variante,
+        ServicioInventario $inventario,
+        ServicioAutorizacion $autorizacion,
+        ServicioVariantesProducto $variantes,
+    ): RedirectResponse {
+        $usuario = $this->usuarioConAccesoProducto($request, $product, $inventario, $autorizacion);
+        $archivo = $request->file('imagen');
+        abort_unless($archivo instanceof UploadedFile, 422, 'Selecciona una imagen válida.');
+
+        $variantes->registrarImagen(
+            $product,
+            $variante,
+            $archivo,
+            $request->boolean('imagen_principal'),
+            $usuario,
+            $request->ip(),
+        );
+
+        return back()
+            ->with('status', 'Imagen de variante registrada.')
+            ->with('open_variant_manager', $product->id)
+            ->with('abrir_editor_variante', $variante->id);
+    }
+
+    public function eliminarImagenVariante(
+        Request $request,
+        Producto $product,
+        VarianteProducto $variante,
+        int $imagen,
+        ServicioInventario $inventario,
+        ServicioAutorizacion $autorizacion,
+        ServicioVariantesProducto $variantes,
+    ): RedirectResponse {
+        $usuario = $this->usuarioConAccesoProducto($request, $product, $inventario, $autorizacion);
+        $variantes->eliminarImagen($product, $variante, $imagen, $usuario, $request->ip());
+
+        return back()
+            ->with('status', 'Imagen de variante eliminada.')
+            ->with('open_variant_manager', $product->id)
+            ->with('abrir_editor_variante', $variante->id);
+    }
+
     /** @param array<string, mixed> $data */
     private function attributes(array $data): array
     {
@@ -150,32 +303,35 @@ class GestionProductosController extends Controller
         return $data;
     }
 
-    /**
-     * @param  array{buscar:?string,categoria:?int,stock:?string,estado:?string,por_pagina:int}  $filters
-     * @return Builder<Producto>
-     */
-    private function productQuery(array $filters): Builder
-    {
-        return Producto::query()
-            ->when($filters['buscar'], function (Builder $query, string $search): void {
-                $query->where(function (Builder $searchQuery) use ($search): void {
-                    $searchQuery
-                        ->where('nombre', 'like', '%'.$search.'%')
-                        ->orWhere('marca', 'like', '%'.$search.'%')
-                        ->orWhere('etiqueta', 'like', '%'.$search.'%')
-                        ->orWhere('categoria', 'like', '%'.$search.'%');
-                });
-            })
-            ->when($filters['categoria'], fn (Builder $query, int $categoryId): Builder => $query->where('categoria_id', $categoryId))
-            ->when($filters['estado'] === 'activo', fn (Builder $query): Builder => $query->where('activo', true))
-            ->when($filters['estado'] === 'inactivo', fn (Builder $query): Builder => $query->where('activo', false))
-            ->when($filters['stock'] === 'sin_stock', fn (Builder $query): Builder => $query->where('existencias', 0))
-            ->when($filters['stock'] === 'bajo', fn (Builder $query): Builder => $query->whereBetween('existencias', [1, 5]))
-            ->when($filters['stock'] === 'disponible', fn (Builder $query): Builder => $query->where('existencias', '>', 5));
+    private function usuarioConAccesoProducto(
+        Request $request,
+        Producto $product,
+        ServicioInventario $inventario,
+        ServicioAutorizacion $autorizacion,
+    ): User {
+        $usuario = $request->user();
+        abort_unless($usuario instanceof User, 403);
+
+        $permiso = $autorizacion->permissionForRoute($request);
+        abort_unless($permiso !== null, 403);
+        $alcance = $inventario->alcanceConsulta($usuario, $permiso);
+        abort_unless((int) $product->empresa_id === $alcance['empresa_id'], 404);
+
+        return $usuario;
     }
 
     /**
-     * @return array{buscar:?string,categoria:?int,stock:?string,estado:?string,por_pagina:int}
+     * @param  array{buscar:?string,categoria:?int,stock:?string,estado:?string,oferta:bool,por_pagina:int}  $filters
+     * @param  array{empresa_id:int,sede_id:?int}  $alcance
+     * @return Builder<Producto>
+     */
+    private function productQuery(array $filters, array $alcance, ServicioInventario $inventario): Builder
+    {
+        return $inventario->productosParaConsulta($alcance, $filters, true, true);
+    }
+
+    /**
+     * @return array{buscar:?string,categoria:?int,stock:?string,estado:?string,oferta:bool,por_pagina:int}
      */
     private function filters(Request $request): array
     {
@@ -187,8 +343,9 @@ class GestionProductosController extends Controller
         return [
             'buscar' => $search !== '' ? $search : null,
             'categoria' => $request->integer('categoria') ?: null,
-            'stock' => in_array($stock, ['sin_stock', 'bajo', 'disponible'], true) ? $stock : null,
+            'stock' => in_array($stock, ['sin_stock', 'con_stock'], true) ? $stock : null,
             'estado' => in_array($status, ['activo', 'inactivo'], true) ? $status : null,
+            'oferta' => $request->boolean('oferta'),
             'por_pagina' => in_array($perPage, [8, 10, 20, 50], true) ? $perPage : 8,
         ];
     }
@@ -221,6 +378,60 @@ class GestionProductosController extends Controller
 
             fclose($output);
         }, 'catalogo-productos.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    /**
+     * @param  Collection<int, Producto>  $products
+     * @param  array{buscar:?string,categoria:?int,stock:?string,estado:?string,oferta:bool,por_pagina:int}  $filters
+     * @param  array{empresa_id:int,sede_id:?int}  $alcance
+     */
+    private function downloadCorporateReport(Collection $products, string $format, array $filters, array $alcance, Request $request, ExportadorTabular $exporter): Response
+    {
+        $rows = $products->map(fn (Producto $product): array => $this->exportRow($product))->all();
+        $stockTotal = array_sum(array_map(static fn (array $row): int => (int) ($row[5] ?? 0), $rows));
+        $outOfStockCount = count(array_filter($rows, static fn (array $row): bool => (int) ($row[5] ?? 0) === 0));
+        $stockLabel = match ($filters['stock']) {
+            'sin_stock' => 'Sin stock',
+            'con_stock' => 'Con existencias',
+            default => 'Todos',
+        };
+        $statusLabel = match ($filters['estado']) {
+            'activo' => 'Activos',
+            'inactivo' => 'Inactivos',
+            default => 'Todos',
+        };
+        $columns = ['ID', 'Producto', 'Marca', 'Categoría', 'Precio de venta PEN', 'Stock', 'Estado'];
+        $report = [
+            'title' => 'REPORTE DE PRODUCTOS',
+            'subtitle' => 'Catálogo de productos con los filtros de consulta aplicados.',
+            'module' => 'Inventario y Logística / Productos',
+            'report_name' => 'Reporte de productos',
+            'period' => 'Sin período temporal; catálogo actual',
+            'filters' => [
+                'Búsqueda' => $filters['buscar'] ?? 'Todos',
+                'Categoría' => $filters['categoria'] === null ? 'Todas' : 'ID '.$filters['categoria'],
+                'Stock' => $stockLabel,
+                'Estado' => $statusLabel,
+            ],
+            'generated_by' => (string) ($request->user()?->nombre ?? 'No disponible'),
+            'role' => (string) ($request->user()?->rol ?? 'No disponible'),
+            'scope' => $alcance['sede_id'] === null
+                ? 'Empresa '.$alcance['empresa_id']
+                : 'Sede '.$alcance['sede_id'].' · empresa '.$alcance['empresa_id'],
+            'indicators' => [
+                ['label' => 'Productos incluidos', 'value' => count($rows)],
+                ['label' => 'Existencias reportadas', 'value' => $stockTotal],
+                ['label' => 'Productos sin stock', 'value' => $outOfStockCount],
+            ],
+            'column_types' => [0 => 'integer', 4 => 'currency', 5 => 'integer'],
+            'summary_row' => [
+                'label' => 'Productos del conjunto filtrado: '.count($rows),
+                'values' => ['', '', '', '', '', $stockTotal, ''],
+            ],
+            'observations' => ['El precio corresponde al precio de venta vigente; no es un costo contable ni un valor confirmado de inventario.'],
+        ];
+
+        return $exporter->download($format, 'productos', $columns, $rows, $report);
     }
 
     /**
@@ -286,14 +497,16 @@ class GestionProductosController extends Controller
      */
     private function exportRow(Producto $product): array
     {
+        $existencias = (float) ($product->existencias_alcance ?? 0);
+
         return [
             $product->id,
             $product->nombre,
             $product->marca,
             $product->categoria ?: 'Sin categoría',
             number_format((float) $product->effective_price, 2, '.', ''),
-            $product->existencias,
-            $product->activo ? ($product->existencias === 0 ? 'Sin stock' : ($product->precio_oferta ? 'Oferta' : 'Activo')) : 'Inactivo',
+            $existencias,
+            $product->activo ? ($existencias <= 0 ? 'Sin stock' : ($product->precio_oferta ? 'Oferta' : 'Activo')) : 'Inactivo',
         ];
     }
 

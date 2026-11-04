@@ -1,0 +1,5647 @@
+{
+    "base": "md_tecnologia_digital_cell",
+    "fecha_utc": "2026-11-04T18:00:49+00:00",
+    "tablas": {
+        "pantallas": [
+            {
+                "id": 1,
+                "modulo_id": 1,
+                "codigo": "admin.dashboard",
+                "nombre": "Dashboard global",
+                "ruta": "management.dashboard",
+                "icono": "bi-speedometer2",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 2,
+                "modulo_id": 2,
+                "codigo": "admin.company",
+                "nombre": "Datos de la empresa",
+                "ruta": "management.company_settings",
+                "icono": "bi-building",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 3,
+                "modulo_id": 2,
+                "codigo": "admin.sites",
+                "nombre": "Sedes",
+                "ruta": null,
+                "icono": "bi-buildings",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 4,
+                "modulo_id": 2,
+                "codigo": "admin.warehouses",
+                "nombre": "Almacenes",
+                "ruta": null,
+                "icono": "bi-house-gear",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 5,
+                "modulo_id": 2,
+                "codigo": "admin.staff",
+                "nombre": "Personal por sede",
+                "ruta": null,
+                "icono": "bi-person-workspace",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 6,
+                "modulo_id": 2,
+                "codigo": "admin.responsibles",
+                "nombre": "Responsables de sede",
+                "ruta": null,
+                "icono": "bi-person-badge",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 7,
+                "modulo_id": 3,
+                "codigo": "admin.users",
+                "nombre": "Gestión de usuarios",
+                "ruta": "management.users",
+                "icono": "bi-people",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 8,
+                "modulo_id": 3,
+                "codigo": "admin.roles",
+                "nombre": "Roles y permisos",
+                "ruta": "management.roles_permissions",
+                "icono": "bi-key",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 9,
+                "modulo_id": 3,
+                "codigo": "admin.user_assignments",
+                "nombre": "Asignaciones globales y por sede",
+                "ruta": "management.user_assignments",
+                "icono": "bi-person-gear",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 10,
+                "modulo_id": 3,
+                "codigo": "admin.menus",
+                "nombre": "Menús y submenús dinámicos",
+                "ruta": "management.menus",
+                "icono": "bi-list-nested",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 11,
+                "modulo_id": 3,
+                "codigo": "admin.modules",
+                "nombre": "Módulos y pantallas",
+                "ruta": "management.modules",
+                "icono": "bi-grid-3x3-gap",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 12,
+                "modulo_id": 3,
+                "codigo": "admin.delegation",
+                "nombre": "Políticas de aprobación y delegación",
+                "ruta": null,
+                "icono": "bi-person-lock",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 13,
+                "modulo_id": 3,
+                "codigo": "admin.sessions",
+                "nombre": "Sesiones y accesos",
+                "ruta": null,
+                "icono": "bi-pc-display-horizontal",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 14,
+                "modulo_id": 3,
+                "codigo": "admin.account_status",
+                "nombre": "Bloqueo y reactivación de cuentas",
+                "ruta": "management.users",
+                "icono": "bi-person-lock",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 15,
+                "modulo_id": 7,
+                "codigo": "admin.retail_sales",
+                "nombre": "Ventas minoristas",
+                "ruta": "management.sales",
+                "icono": "bi-cart-check",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 16,
+                "modulo_id": 7,
+                "codigo": "admin.wholesale_sales",
+                "nombre": "Ventas mayoristas",
+                "ruta": null,
+                "icono": "bi-box-seam",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 17,
+                "modulo_id": 8,
+                "codigo": "admin.online_orders",
+                "nombre": "Pedidos online",
+                "ruta": "management.orders",
+                "icono": "bi-bag-check",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 18,
+                "modulo_id": 9,
+                "codigo": "admin.purchases",
+                "nombre": "Compras",
+                "ruta": "management.purchases",
+                "icono": "bi-cart-plus",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 19,
+                "modulo_id": 10,
+                "codigo": "admin.quotations",
+                "nombre": "Cotizaciones",
+                "ruta": "management.quotations",
+                "icono": "bi-file-earmark-text",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 20,
+                "modulo_id": 11,
+                "codigo": "admin.customers",
+                "nombre": "Clientes",
+                "ruta": "management.customers",
+                "icono": "bi-people",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 21,
+                "modulo_id": 12,
+                "codigo": "admin.suppliers",
+                "nombre": "Proveedores",
+                "ruta": "management.suppliers",
+                "icono": "bi-truck",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 22,
+                "modulo_id": 13,
+                "codigo": "admin.returns",
+                "nombre": "Devoluciones y garantías",
+                "ruta": "management.returns",
+                "icono": "bi-arrow-counterclockwise",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 23,
+                "modulo_id": 4,
+                "codigo": "admin.products",
+                "nombre": "Productos y categorías",
+                "ruta": "management.products",
+                "icono": "bi-phone",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 24,
+                "modulo_id": 5,
+                "codigo": "admin.categories",
+                "nombre": "Categorías",
+                "ruta": "management.categories",
+                "icono": "bi-diagram-3",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 25,
+                "modulo_id": 6,
+                "codigo": "admin.inventory",
+                "nombre": "Inventario por almacén",
+                "ruta": "management.inventory",
+                "icono": "bi-boxes",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 26,
+                "modulo_id": 6,
+                "codigo": "admin.stock_movements",
+                "nombre": "Movimientos de inventario",
+                "ruta": "management.inventory",
+                "icono": "bi-arrow-left-right",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 27,
+                "modulo_id": 6,
+                "codigo": "admin.transfers",
+                "nombre": "Transferencias entre sedes",
+                "ruta": "management.inventory.preview.transfers",
+                "icono": "bi-arrow-left-right",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 28,
+                "modulo_id": 6,
+                "codigo": "admin.shipments",
+                "nombre": "Envíos y entregas",
+                "ruta": null,
+                "icono": "bi-truck",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 29,
+                "modulo_id": 6,
+                "codigo": "admin.imei",
+                "nombre": "IMEI y números de serie",
+                "ruta": null,
+                "icono": "bi-upc-scan",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 30,
+                "modulo_id": 20,
+                "codigo": "admin.payments",
+                "nombre": "Pagos y cobros",
+                "ruta": "management.payments",
+                "icono": "bi-credit-card",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 31,
+                "modulo_id": 20,
+                "codigo": "admin.cash_registers",
+                "nombre": "Cajas, aperturas y cierres",
+                "ruta": "management.payments",
+                "icono": "bi-cash-stack",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 32,
+                "modulo_id": 20,
+                "codigo": "admin.receivables",
+                "nombre": "Cuentas por cobrar y pagar",
+                "ruta": "management.payments",
+                "icono": "bi-journal-text",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 33,
+                "modulo_id": 22,
+                "codigo": "admin.refunds",
+                "nombre": "Reembolsos",
+                "ruta": "management.refunds",
+                "icono": "bi-arrow-return-left",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 34,
+                "modulo_id": 21,
+                "codigo": "admin.electronic_invoices",
+                "nombre": "Facturas y boletas electrónicas",
+                "ruta": "management.billing",
+                "icono": "bi-receipt",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 35,
+                "modulo_id": 21,
+                "codigo": "admin.credit_debit_notes",
+                "nombre": "Notas de crédito y débito",
+                "ruta": "management.billing",
+                "icono": "bi-file-earmark-minus",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 36,
+                "modulo_id": 21,
+                "codigo": "admin.series",
+                "nombre": "Series y correlativos",
+                "ruta": "management.billing",
+                "icono": "bi-123",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 37,
+                "modulo_id": 21,
+                "codigo": "admin.sunat",
+                "nombre": "Seguimiento SUNAT",
+                "ruta": "management.billing",
+                "icono": "bi-cloud-check",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 38,
+                "modulo_id": 28,
+                "codigo": "admin.public_catalog",
+                "nombre": "Catálogo público",
+                "ruta": "catalog.index",
+                "icono": "bi-shop",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 39,
+                "modulo_id": 4,
+                "codigo": "admin.prices",
+                "nombre": "Precios minoristas y mayoristas",
+                "ruta": "management.products",
+                "icono": "bi-tags",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 40,
+                "modulo_id": 15,
+                "codigo": "admin.campaigns",
+                "nombre": "Campañas publicitarias",
+                "ruta": "management.campaigns",
+                "icono": "bi-megaphone",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 41,
+                "modulo_id": 16,
+                "codigo": "admin.promotions",
+                "nombre": "Promociones y cupones",
+                "ruta": "management.coupons",
+                "icono": "bi-ticket-perforated",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 42,
+                "modulo_id": 17,
+                "codigo": "admin.segments",
+                "nombre": "Segmentación de clientes",
+                "ruta": "management.segments",
+                "icono": "bi-diagram-3",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 43,
+                "modulo_id": 26,
+                "codigo": "admin.store_settings",
+                "nombre": "Configuración de la tienda virtual",
+                "ruta": "management.commercial_settings",
+                "icono": "bi-sliders",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 44,
+                "modulo_id": 18,
+                "codigo": "admin.reports",
+                "nombre": "Reportes globales",
+                "ruta": "management.reports",
+                "icono": "bi-bar-chart",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 45,
+                "modulo_id": 18,
+                "codigo": "admin.site_reports",
+                "nombre": "Reportes por sede",
+                "ruta": null,
+                "icono": "bi-buildings",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 46,
+                "modulo_id": 19,
+                "codigo": "admin.audit",
+                "nombre": "Auditoría de operaciones",
+                "ruta": "management.audit",
+                "icono": "bi-shield-check",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 47,
+                "modulo_id": 19,
+                "codigo": "admin.role_history",
+                "nombre": "Historial de roles y permisos",
+                "ruta": null,
+                "icono": "bi-clock-history",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 48,
+                "modulo_id": 19,
+                "codigo": "admin.security_events",
+                "nombre": "Eventos de seguridad",
+                "ruta": "management.audit",
+                "icono": "bi-shield-exclamation",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 49,
+                "modulo_id": 18,
+                "codigo": "admin.exports",
+                "nombre": "Exportaciones autorizadas",
+                "ruta": "management.reports",
+                "icono": "bi-download",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 50,
+                "modulo_id": 26,
+                "codigo": "admin.general_settings",
+                "nombre": "Configuración general",
+                "ruta": "management.general_settings",
+                "icono": "bi-gear",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 51,
+                "modulo_id": 24,
+                "codigo": "admin.integrations",
+                "nombre": "Integraciones",
+                "ruta": "management.integrations",
+                "icono": "bi-plug",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 52,
+                "modulo_id": 23,
+                "codigo": "admin.notifications",
+                "nombre": "Notificaciones del sistema",
+                "ruta": null,
+                "icono": "bi-bell",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 53,
+                "modulo_id": 26,
+                "codigo": "admin.security_settings",
+                "nombre": "Configuración de seguridad",
+                "ruta": "management.security_settings",
+                "icono": "bi-shield-lock",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 54,
+                "modulo_id": 25,
+                "codigo": "admin.backups",
+                "nombre": "Respaldos y recuperación",
+                "ruta": "management.backups",
+                "icono": "bi-database-gear",
+                "habilitada": 0,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 55,
+                "modulo_id": 29,
+                "codigo": "account.profile",
+                "nombre": "Mi perfil",
+                "ruta": "management.account",
+                "icono": "bi-person-circle",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 56,
+                "modulo_id": 1,
+                "codigo": "account.dashboard",
+                "nombre": "Mi panel",
+                "ruta": "dashboard",
+                "icono": "bi-house",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 57,
+                "modulo_id": 8,
+                "codigo": "account.orders",
+                "nombre": "Mis pedidos",
+                "ruta": "orders.index",
+                "icono": "bi-bag-check",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 58,
+                "modulo_id": 10,
+                "codigo": "account.quotations",
+                "nombre": "Mis cotizaciones",
+                "ruta": "quotations.index",
+                "icono": "bi-file-earmark-text",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 59,
+                "modulo_id": 29,
+                "codigo": "account.edit",
+                "nombre": "Editar datos personales",
+                "ruta": "management.account",
+                "icono": "bi-person",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 60,
+                "modulo_id": 29,
+                "codigo": "account.security",
+                "nombre": "Seguridad de la cuenta",
+                "ruta": "management.account.security",
+                "icono": "bi-shield-check",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 61,
+                "modulo_id": 29,
+                "codigo": "account.sessions",
+                "nombre": "Sesiones y dispositivos activos",
+                "ruta": "management.account.sessions",
+                "icono": "bi-pc-display-horizontal",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 62,
+                "modulo_id": 29,
+                "codigo": "account.preferences",
+                "nombre": "Preferencias de visualización",
+                "ruta": "management.account.preferences",
+                "icono": "bi-sliders",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 63,
+                "modulo_id": 29,
+                "codigo": "account.activity",
+                "nombre": "Mi actividad reciente",
+                "ruta": "management.account.activity",
+                "icono": "bi-clock-history",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            },
+            {
+                "id": 64,
+                "modulo_id": 14,
+                "codigo": "support.reclamos",
+                "nombre": "Soporte y reclamos",
+                "ruta": "management.support",
+                "icono": "bi-headset",
+                "habilitada": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:32"
+            }
+        ],
+        "permisos": [
+            {
+                "id": 1,
+                "modulo_id": 1,
+                "pantalla_id": null,
+                "codigo": "gestion.panel.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Panel global",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 2,
+                "modulo_id": 2,
+                "pantalla_id": null,
+                "codigo": "gestion.organizacion.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Organización y sedes",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 3,
+                "modulo_id": 2,
+                "pantalla_id": null,
+                "codigo": "gestion.organizacion.actualizar",
+                "accion": "actualizar",
+                "nombre": "Actualizar - Organización y sedes",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 4,
+                "modulo_id": 3,
+                "pantalla_id": null,
+                "codigo": "gestion.seguridad.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Seguridad y delegación",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 5,
+                "modulo_id": 3,
+                "pantalla_id": null,
+                "codigo": "gestion.seguridad.crear",
+                "accion": "crear",
+                "nombre": "Crear - Seguridad y delegación",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 6,
+                "modulo_id": 3,
+                "pantalla_id": null,
+                "codigo": "gestion.seguridad.actualizar",
+                "accion": "actualizar",
+                "nombre": "Actualizar - Seguridad y delegación",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 7,
+                "modulo_id": 3,
+                "pantalla_id": null,
+                "codigo": "gestion.seguridad.eliminar",
+                "accion": "eliminar",
+                "nombre": "Eliminar - Seguridad y delegación",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 8,
+                "modulo_id": 3,
+                "pantalla_id": null,
+                "codigo": "gestion.seguridad.asignar",
+                "accion": "asignar",
+                "nombre": "Asignar - Seguridad y delegación",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 9,
+                "modulo_id": 3,
+                "pantalla_id": null,
+                "codigo": "gestion.seguridad.revocar",
+                "accion": "revocar",
+                "nombre": "Revocar - Seguridad y delegación",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 10,
+                "modulo_id": 3,
+                "pantalla_id": null,
+                "codigo": "gestion.seguridad.activar",
+                "accion": "activar",
+                "nombre": "Activar - Seguridad y delegación",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 11,
+                "modulo_id": 3,
+                "pantalla_id": null,
+                "codigo": "gestion.seguridad.exportar",
+                "accion": "exportar",
+                "nombre": "Exportar - Seguridad y delegación",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 12,
+                "modulo_id": 4,
+                "pantalla_id": null,
+                "codigo": "gestion.productos.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Productos y catálogo",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 13,
+                "modulo_id": 4,
+                "pantalla_id": null,
+                "codigo": "gestion.productos.crear",
+                "accion": "crear",
+                "nombre": "Crear - Productos y catálogo",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 14,
+                "modulo_id": 4,
+                "pantalla_id": null,
+                "codigo": "gestion.productos.actualizar",
+                "accion": "actualizar",
+                "nombre": "Actualizar - Productos y catálogo",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 15,
+                "modulo_id": 4,
+                "pantalla_id": null,
+                "codigo": "gestion.productos.eliminar",
+                "accion": "eliminar",
+                "nombre": "Eliminar - Productos y catálogo",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 16,
+                "modulo_id": 4,
+                "pantalla_id": null,
+                "codigo": "gestion.productos.activar",
+                "accion": "activar",
+                "nombre": "Activar - Productos y catálogo",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 17,
+                "modulo_id": 4,
+                "pantalla_id": null,
+                "codigo": "gestion.productos.exportar",
+                "accion": "exportar",
+                "nombre": "Exportar - Productos y catálogo",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 18,
+                "modulo_id": 5,
+                "pantalla_id": null,
+                "codigo": "gestion.categorias.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Categorías",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 19,
+                "modulo_id": 5,
+                "pantalla_id": null,
+                "codigo": "gestion.categorias.crear",
+                "accion": "crear",
+                "nombre": "Crear - Categorías",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 20,
+                "modulo_id": 5,
+                "pantalla_id": null,
+                "codigo": "gestion.categorias.actualizar",
+                "accion": "actualizar",
+                "nombre": "Actualizar - Categorías",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 21,
+                "modulo_id": 5,
+                "pantalla_id": null,
+                "codigo": "gestion.categorias.eliminar",
+                "accion": "eliminar",
+                "nombre": "Eliminar - Categorías",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 22,
+                "modulo_id": 5,
+                "pantalla_id": null,
+                "codigo": "gestion.categorias.activar",
+                "accion": "activar",
+                "nombre": "Activar - Categorías",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 23,
+                "modulo_id": 5,
+                "pantalla_id": null,
+                "codigo": "gestion.categorias.exportar",
+                "accion": "exportar",
+                "nombre": "Exportar - Categorías",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 24,
+                "modulo_id": 6,
+                "pantalla_id": null,
+                "codigo": "gestion.inventario.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Inventario y logística",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 25,
+                "modulo_id": 6,
+                "pantalla_id": null,
+                "codigo": "gestion.inventario.ajustar",
+                "accion": "ajustar",
+                "nombre": "Ajustar - Inventario y logística",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 26,
+                "modulo_id": 6,
+                "pantalla_id": null,
+                "codigo": "gestion.inventario.transferir",
+                "accion": "transferir",
+                "nombre": "Transferir - Inventario y logística",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 27,
+                "modulo_id": 6,
+                "pantalla_id": null,
+                "codigo": "gestion.inventario.aprobar",
+                "accion": "aprobar",
+                "nombre": "Aprobar - Inventario y logística",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 28,
+                "modulo_id": 6,
+                "pantalla_id": null,
+                "codigo": "gestion.inventario.exportar",
+                "accion": "exportar",
+                "nombre": "Exportar - Inventario y logística",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 29,
+                "modulo_id": 7,
+                "pantalla_id": null,
+                "codigo": "gestion.ventas.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Ventas",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 30,
+                "modulo_id": 7,
+                "pantalla_id": null,
+                "codigo": "gestion.ventas.crear",
+                "accion": "crear",
+                "nombre": "Crear - Ventas",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 31,
+                "modulo_id": 7,
+                "pantalla_id": null,
+                "codigo": "gestion.ventas.actualizar",
+                "accion": "actualizar",
+                "nombre": "Actualizar - Ventas",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 32,
+                "modulo_id": 7,
+                "pantalla_id": null,
+                "codigo": "gestion.ventas.anular",
+                "accion": "anular",
+                "nombre": "Anular - Ventas",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 33,
+                "modulo_id": 7,
+                "pantalla_id": null,
+                "codigo": "gestion.ventas.exportar",
+                "accion": "exportar",
+                "nombre": "Exportar - Ventas",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 34,
+                "modulo_id": 8,
+                "pantalla_id": null,
+                "codigo": "gestion.pedidos.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Pedidos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 35,
+                "modulo_id": 8,
+                "pantalla_id": null,
+                "codigo": "gestion.pedidos.crear",
+                "accion": "crear",
+                "nombre": "Crear - Pedidos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 36,
+                "modulo_id": 8,
+                "pantalla_id": null,
+                "codigo": "gestion.pedidos.actualizar",
+                "accion": "actualizar",
+                "nombre": "Actualizar - Pedidos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 37,
+                "modulo_id": 8,
+                "pantalla_id": null,
+                "codigo": "gestion.pedidos.aprobar",
+                "accion": "aprobar",
+                "nombre": "Aprobar - Pedidos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 38,
+                "modulo_id": 8,
+                "pantalla_id": null,
+                "codigo": "gestion.pedidos.anular",
+                "accion": "anular",
+                "nombre": "Anular - Pedidos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 39,
+                "modulo_id": 8,
+                "pantalla_id": null,
+                "codigo": "gestion.pedidos.exportar",
+                "accion": "exportar",
+                "nombre": "Exportar - Pedidos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 40,
+                "modulo_id": 9,
+                "pantalla_id": null,
+                "codigo": "gestion.compras.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Compras",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 41,
+                "modulo_id": 9,
+                "pantalla_id": null,
+                "codigo": "gestion.compras.crear",
+                "accion": "crear",
+                "nombre": "Crear - Compras",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 42,
+                "modulo_id": 9,
+                "pantalla_id": null,
+                "codigo": "gestion.compras.actualizar",
+                "accion": "actualizar",
+                "nombre": "Actualizar - Compras",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 43,
+                "modulo_id": 9,
+                "pantalla_id": null,
+                "codigo": "gestion.compras.aprobar",
+                "accion": "aprobar",
+                "nombre": "Aprobar - Compras",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 44,
+                "modulo_id": 9,
+                "pantalla_id": null,
+                "codigo": "gestion.compras.anular",
+                "accion": "anular",
+                "nombre": "Anular - Compras",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 45,
+                "modulo_id": 9,
+                "pantalla_id": null,
+                "codigo": "gestion.compras.recibir",
+                "accion": "recibir",
+                "nombre": "Recibir - Compras",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 46,
+                "modulo_id": 9,
+                "pantalla_id": null,
+                "codigo": "gestion.compras.exportar",
+                "accion": "exportar",
+                "nombre": "Exportar - Compras",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 47,
+                "modulo_id": 10,
+                "pantalla_id": null,
+                "codigo": "gestion.cotizaciones.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Cotizaciones",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 48,
+                "modulo_id": 10,
+                "pantalla_id": null,
+                "codigo": "gestion.cotizaciones.crear",
+                "accion": "crear",
+                "nombre": "Crear - Cotizaciones",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 49,
+                "modulo_id": 10,
+                "pantalla_id": null,
+                "codigo": "gestion.cotizaciones.actualizar",
+                "accion": "actualizar",
+                "nombre": "Actualizar - Cotizaciones",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 50,
+                "modulo_id": 10,
+                "pantalla_id": null,
+                "codigo": "gestion.cotizaciones.aprobar",
+                "accion": "aprobar",
+                "nombre": "Aprobar - Cotizaciones",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 51,
+                "modulo_id": 10,
+                "pantalla_id": null,
+                "codigo": "gestion.cotizaciones.anular",
+                "accion": "anular",
+                "nombre": "Anular - Cotizaciones",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 52,
+                "modulo_id": 10,
+                "pantalla_id": null,
+                "codigo": "gestion.cotizaciones.exportar",
+                "accion": "exportar",
+                "nombre": "Exportar - Cotizaciones",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 53,
+                "modulo_id": 11,
+                "pantalla_id": null,
+                "codigo": "gestion.clientes.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Clientes",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 54,
+                "modulo_id": 11,
+                "pantalla_id": null,
+                "codigo": "gestion.clientes.crear",
+                "accion": "crear",
+                "nombre": "Crear - Clientes",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 55,
+                "modulo_id": 11,
+                "pantalla_id": null,
+                "codigo": "gestion.clientes.actualizar",
+                "accion": "actualizar",
+                "nombre": "Actualizar - Clientes",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 56,
+                "modulo_id": 11,
+                "pantalla_id": null,
+                "codigo": "gestion.clientes.eliminar",
+                "accion": "eliminar",
+                "nombre": "Eliminar - Clientes",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 57,
+                "modulo_id": 11,
+                "pantalla_id": null,
+                "codigo": "gestion.clientes.exportar",
+                "accion": "exportar",
+                "nombre": "Exportar - Clientes",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 58,
+                "modulo_id": 12,
+                "pantalla_id": null,
+                "codigo": "gestion.proveedores.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Proveedores",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 59,
+                "modulo_id": 12,
+                "pantalla_id": null,
+                "codigo": "gestion.proveedores.crear",
+                "accion": "crear",
+                "nombre": "Crear - Proveedores",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 60,
+                "modulo_id": 12,
+                "pantalla_id": null,
+                "codigo": "gestion.proveedores.actualizar",
+                "accion": "actualizar",
+                "nombre": "Actualizar - Proveedores",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 61,
+                "modulo_id": 12,
+                "pantalla_id": null,
+                "codigo": "gestion.proveedores.eliminar",
+                "accion": "eliminar",
+                "nombre": "Eliminar - Proveedores",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 62,
+                "modulo_id": 12,
+                "pantalla_id": null,
+                "codigo": "gestion.proveedores.exportar",
+                "accion": "exportar",
+                "nombre": "Exportar - Proveedores",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 63,
+                "modulo_id": 13,
+                "pantalla_id": null,
+                "codigo": "gestion.devoluciones.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Devoluciones y garantías",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 64,
+                "modulo_id": 13,
+                "pantalla_id": null,
+                "codigo": "gestion.devoluciones.crear",
+                "accion": "crear",
+                "nombre": "Crear - Devoluciones y garantías",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 65,
+                "modulo_id": 13,
+                "pantalla_id": null,
+                "codigo": "gestion.devoluciones.actualizar",
+                "accion": "actualizar",
+                "nombre": "Actualizar - Devoluciones y garantías",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 66,
+                "modulo_id": 13,
+                "pantalla_id": null,
+                "codigo": "gestion.devoluciones.eliminar",
+                "accion": "eliminar",
+                "nombre": "Eliminar - Devoluciones y garantías",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 67,
+                "modulo_id": 13,
+                "pantalla_id": null,
+                "codigo": "gestion.devoluciones.aprobar",
+                "accion": "aprobar",
+                "nombre": "Aprobar - Devoluciones y garantías",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 68,
+                "modulo_id": 13,
+                "pantalla_id": null,
+                "codigo": "gestion.devoluciones.anular",
+                "accion": "anular",
+                "nombre": "Anular - Devoluciones y garantías",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 69,
+                "modulo_id": 13,
+                "pantalla_id": null,
+                "codigo": "gestion.devoluciones.exportar",
+                "accion": "exportar",
+                "nombre": "Exportar - Devoluciones y garantías",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 70,
+                "modulo_id": 14,
+                "pantalla_id": null,
+                "codigo": "gestion.soporte.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Soporte y reclamos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 71,
+                "modulo_id": 14,
+                "pantalla_id": null,
+                "codigo": "gestion.soporte.crear",
+                "accion": "crear",
+                "nombre": "Crear - Soporte y reclamos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 72,
+                "modulo_id": 14,
+                "pantalla_id": null,
+                "codigo": "gestion.soporte.actualizar",
+                "accion": "actualizar",
+                "nombre": "Actualizar - Soporte y reclamos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 73,
+                "modulo_id": 14,
+                "pantalla_id": null,
+                "codigo": "gestion.soporte.aprobar",
+                "accion": "aprobar",
+                "nombre": "Aprobar - Soporte y reclamos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 74,
+                "modulo_id": 14,
+                "pantalla_id": null,
+                "codigo": "gestion.soporte.anular",
+                "accion": "anular",
+                "nombre": "Anular - Soporte y reclamos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 75,
+                "modulo_id": 15,
+                "pantalla_id": null,
+                "codigo": "gestion.campanias.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Campañas",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 76,
+                "modulo_id": 15,
+                "pantalla_id": null,
+                "codigo": "gestion.campanias.crear",
+                "accion": "crear",
+                "nombre": "Crear - Campañas",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 77,
+                "modulo_id": 15,
+                "pantalla_id": null,
+                "codigo": "gestion.campanias.actualizar",
+                "accion": "actualizar",
+                "nombre": "Actualizar - Campañas",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 78,
+                "modulo_id": 15,
+                "pantalla_id": null,
+                "codigo": "gestion.campanias.eliminar",
+                "accion": "eliminar",
+                "nombre": "Eliminar - Campañas",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 79,
+                "modulo_id": 15,
+                "pantalla_id": null,
+                "codigo": "gestion.campanias.activar",
+                "accion": "activar",
+                "nombre": "Activar - Campañas",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 80,
+                "modulo_id": 15,
+                "pantalla_id": null,
+                "codigo": "gestion.campanias.configurar",
+                "accion": "configurar",
+                "nombre": "Configurar - Campañas",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 81,
+                "modulo_id": 15,
+                "pantalla_id": null,
+                "codigo": "gestion.campanias.exportar",
+                "accion": "exportar",
+                "nombre": "Exportar - Campañas",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 82,
+                "modulo_id": 16,
+                "pantalla_id": null,
+                "codigo": "gestion.cupones.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Promociones y cupones",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 83,
+                "modulo_id": 16,
+                "pantalla_id": null,
+                "codigo": "gestion.cupones.crear",
+                "accion": "crear",
+                "nombre": "Crear - Promociones y cupones",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 84,
+                "modulo_id": 16,
+                "pantalla_id": null,
+                "codigo": "gestion.cupones.actualizar",
+                "accion": "actualizar",
+                "nombre": "Actualizar - Promociones y cupones",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 85,
+                "modulo_id": 16,
+                "pantalla_id": null,
+                "codigo": "gestion.cupones.eliminar",
+                "accion": "eliminar",
+                "nombre": "Eliminar - Promociones y cupones",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 86,
+                "modulo_id": 16,
+                "pantalla_id": null,
+                "codigo": "gestion.cupones.activar",
+                "accion": "activar",
+                "nombre": "Activar - Promociones y cupones",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 87,
+                "modulo_id": 16,
+                "pantalla_id": null,
+                "codigo": "gestion.cupones.exportar",
+                "accion": "exportar",
+                "nombre": "Exportar - Promociones y cupones",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 88,
+                "modulo_id": 17,
+                "pantalla_id": null,
+                "codigo": "gestion.segmentos.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Segmentos de clientes",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 89,
+                "modulo_id": 17,
+                "pantalla_id": null,
+                "codigo": "gestion.segmentos.crear",
+                "accion": "crear",
+                "nombre": "Crear - Segmentos de clientes",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 90,
+                "modulo_id": 17,
+                "pantalla_id": null,
+                "codigo": "gestion.segmentos.actualizar",
+                "accion": "actualizar",
+                "nombre": "Actualizar - Segmentos de clientes",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 91,
+                "modulo_id": 17,
+                "pantalla_id": null,
+                "codigo": "gestion.segmentos.eliminar",
+                "accion": "eliminar",
+                "nombre": "Eliminar - Segmentos de clientes",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 92,
+                "modulo_id": 18,
+                "pantalla_id": null,
+                "codigo": "gestion.reportes.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Reportes",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 93,
+                "modulo_id": 18,
+                "pantalla_id": null,
+                "codigo": "gestion.reportes.exportar",
+                "accion": "exportar",
+                "nombre": "Exportar - Reportes",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 94,
+                "modulo_id": 19,
+                "pantalla_id": null,
+                "codigo": "gestion.auditoria.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Auditoría",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 95,
+                "modulo_id": 19,
+                "pantalla_id": null,
+                "codigo": "gestion.auditoria.exportar",
+                "accion": "exportar",
+                "nombre": "Exportar - Auditoría",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 96,
+                "modulo_id": 20,
+                "pantalla_id": null,
+                "codigo": "gestion.pagos.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Pagos y cobros",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 97,
+                "modulo_id": 20,
+                "pantalla_id": null,
+                "codigo": "gestion.pagos.crear",
+                "accion": "crear",
+                "nombre": "Crear - Pagos y cobros",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 98,
+                "modulo_id": 20,
+                "pantalla_id": null,
+                "codigo": "gestion.pagos.actualizar",
+                "accion": "actualizar",
+                "nombre": "Actualizar - Pagos y cobros",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 99,
+                "modulo_id": 20,
+                "pantalla_id": null,
+                "codigo": "gestion.pagos.aprobar",
+                "accion": "aprobar",
+                "nombre": "Aprobar - Pagos y cobros",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 100,
+                "modulo_id": 20,
+                "pantalla_id": null,
+                "codigo": "gestion.pagos.anular",
+                "accion": "anular",
+                "nombre": "Anular - Pagos y cobros",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 101,
+                "modulo_id": 20,
+                "pantalla_id": null,
+                "codigo": "gestion.pagos.exportar",
+                "accion": "exportar",
+                "nombre": "Exportar - Pagos y cobros",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 102,
+                "modulo_id": 21,
+                "pantalla_id": null,
+                "codigo": "gestion.facturacion.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Facturación electrónica",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 103,
+                "modulo_id": 21,
+                "pantalla_id": null,
+                "codigo": "gestion.facturacion.crear",
+                "accion": "crear",
+                "nombre": "Crear - Facturación electrónica",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 104,
+                "modulo_id": 21,
+                "pantalla_id": null,
+                "codigo": "gestion.facturacion.actualizar",
+                "accion": "actualizar",
+                "nombre": "Actualizar - Facturación electrónica",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 105,
+                "modulo_id": 21,
+                "pantalla_id": null,
+                "codigo": "gestion.facturacion.aprobar",
+                "accion": "aprobar",
+                "nombre": "Aprobar - Facturación electrónica",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 106,
+                "modulo_id": 21,
+                "pantalla_id": null,
+                "codigo": "gestion.facturacion.anular",
+                "accion": "anular",
+                "nombre": "Anular - Facturación electrónica",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 107,
+                "modulo_id": 21,
+                "pantalla_id": null,
+                "codigo": "gestion.facturacion.emitir",
+                "accion": "emitir",
+                "nombre": "Emitir - Facturación electrónica",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 108,
+                "modulo_id": 21,
+                "pantalla_id": null,
+                "codigo": "gestion.facturacion.exportar",
+                "accion": "exportar",
+                "nombre": "Exportar - Facturación electrónica",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 109,
+                "modulo_id": 22,
+                "pantalla_id": null,
+                "codigo": "gestion.reembolsos.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Reembolsos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 110,
+                "modulo_id": 22,
+                "pantalla_id": null,
+                "codigo": "gestion.reembolsos.crear",
+                "accion": "crear",
+                "nombre": "Crear - Reembolsos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 111,
+                "modulo_id": 22,
+                "pantalla_id": null,
+                "codigo": "gestion.reembolsos.aprobar",
+                "accion": "aprobar",
+                "nombre": "Aprobar - Reembolsos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 112,
+                "modulo_id": 22,
+                "pantalla_id": null,
+                "codigo": "gestion.reembolsos.anular",
+                "accion": "anular",
+                "nombre": "Anular - Reembolsos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 113,
+                "modulo_id": 23,
+                "pantalla_id": null,
+                "codigo": "gestion.notificaciones.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Notificaciones",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 114,
+                "modulo_id": 23,
+                "pantalla_id": null,
+                "codigo": "gestion.notificaciones.actualizar",
+                "accion": "actualizar",
+                "nombre": "Actualizar - Notificaciones",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 115,
+                "modulo_id": 23,
+                "pantalla_id": null,
+                "codigo": "gestion.notificaciones.configurar",
+                "accion": "configurar",
+                "nombre": "Configurar - Notificaciones",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 116,
+                "modulo_id": 24,
+                "pantalla_id": null,
+                "codigo": "gestion.integraciones.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Integraciones",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 117,
+                "modulo_id": 24,
+                "pantalla_id": null,
+                "codigo": "gestion.integraciones.actualizar",
+                "accion": "actualizar",
+                "nombre": "Actualizar - Integraciones",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 118,
+                "modulo_id": 24,
+                "pantalla_id": null,
+                "codigo": "gestion.integraciones.configurar",
+                "accion": "configurar",
+                "nombre": "Configurar - Integraciones",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 119,
+                "modulo_id": 25,
+                "pantalla_id": null,
+                "codigo": "gestion.respaldos.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Respaldos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 120,
+                "modulo_id": 25,
+                "pantalla_id": null,
+                "codigo": "gestion.respaldos.crear",
+                "accion": "crear",
+                "nombre": "Crear - Respaldos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 121,
+                "modulo_id": 25,
+                "pantalla_id": null,
+                "codigo": "gestion.respaldos.restaurar",
+                "accion": "restaurar",
+                "nombre": "Restaurar - Respaldos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 122,
+                "modulo_id": 25,
+                "pantalla_id": null,
+                "codigo": "gestion.respaldos.exportar",
+                "accion": "exportar",
+                "nombre": "Exportar - Respaldos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 123,
+                "modulo_id": 26,
+                "pantalla_id": null,
+                "codigo": "gestion.configuracion.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Configuración",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 124,
+                "modulo_id": 26,
+                "pantalla_id": null,
+                "codigo": "gestion.configuracion.actualizar",
+                "accion": "actualizar",
+                "nombre": "Actualizar - Configuración",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 125,
+                "modulo_id": 26,
+                "pantalla_id": null,
+                "codigo": "gestion.configuracion.configurar",
+                "accion": "configurar",
+                "nombre": "Configurar - Configuración",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 126,
+                "modulo_id": 27,
+                "pantalla_id": null,
+                "codigo": "gestion.analitica.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Análisis",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 127,
+                "modulo_id": 27,
+                "pantalla_id": null,
+                "codigo": "gestion.analitica.exportar",
+                "accion": "exportar",
+                "nombre": "Exportar - Análisis",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 128,
+                "modulo_id": 28,
+                "pantalla_id": null,
+                "codigo": "gestion.catalogo.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Ecommerce público",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 129,
+                "modulo_id": 29,
+                "pantalla_id": null,
+                "codigo": "gestion.cuenta.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Cuenta personal",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 130,
+                "modulo_id": 29,
+                "pantalla_id": null,
+                "codigo": "gestion.cuenta.actualizar",
+                "accion": "actualizar",
+                "nombre": "Actualizar - Cuenta personal",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 131,
+                "modulo_id": 1,
+                "pantalla_id": 1,
+                "codigo": "pantalla.admin.dashboard.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Dashboard global",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 132,
+                "modulo_id": 3,
+                "pantalla_id": 7,
+                "codigo": "pantalla.admin.users.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Gestión de usuarios",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 133,
+                "modulo_id": 3,
+                "pantalla_id": 8,
+                "codigo": "pantalla.admin.roles.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Roles y permisos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 134,
+                "modulo_id": 3,
+                "pantalla_id": 9,
+                "codigo": "pantalla.admin.user_assignments.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Asignaciones globales y por sede",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 135,
+                "modulo_id": 3,
+                "pantalla_id": 10,
+                "codigo": "pantalla.admin.menus.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Menús y submenús dinámicos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 136,
+                "modulo_id": 3,
+                "pantalla_id": 11,
+                "codigo": "pantalla.admin.modules.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Módulos y pantallas",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 137,
+                "modulo_id": 3,
+                "pantalla_id": 14,
+                "codigo": "pantalla.admin.account_status.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Bloqueo y reactivación de cuentas",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 138,
+                "modulo_id": 7,
+                "pantalla_id": 15,
+                "codigo": "pantalla.admin.retail_sales.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Ventas minoristas",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 139,
+                "modulo_id": 8,
+                "pantalla_id": 17,
+                "codigo": "pantalla.admin.online_orders.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Pedidos online",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 140,
+                "modulo_id": 9,
+                "pantalla_id": 18,
+                "codigo": "pantalla.admin.purchases.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Compras",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 141,
+                "modulo_id": 10,
+                "pantalla_id": 19,
+                "codigo": "pantalla.admin.quotations.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Cotizaciones",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 142,
+                "modulo_id": 11,
+                "pantalla_id": 20,
+                "codigo": "pantalla.admin.customers.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Clientes",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 143,
+                "modulo_id": 12,
+                "pantalla_id": 21,
+                "codigo": "pantalla.admin.suppliers.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Proveedores",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 144,
+                "modulo_id": 13,
+                "pantalla_id": 22,
+                "codigo": "pantalla.admin.returns.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Devoluciones y garantías",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 145,
+                "modulo_id": 4,
+                "pantalla_id": 23,
+                "codigo": "pantalla.admin.products.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Productos y categorías",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 146,
+                "modulo_id": 5,
+                "pantalla_id": 24,
+                "codigo": "pantalla.admin.categories.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Categorías",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 147,
+                "modulo_id": 6,
+                "pantalla_id": 25,
+                "codigo": "pantalla.admin.inventory.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Inventario por almacén",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 148,
+                "modulo_id": 6,
+                "pantalla_id": 26,
+                "codigo": "pantalla.admin.stock_movements.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Movimientos de inventario",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 149,
+                "modulo_id": 6,
+                "pantalla_id": 27,
+                "codigo": "pantalla.admin.transfers.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Transferencias entre sedes",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 150,
+                "modulo_id": 28,
+                "pantalla_id": 38,
+                "codigo": "pantalla.admin.public_catalog.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Catálogo público",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 151,
+                "modulo_id": 4,
+                "pantalla_id": 39,
+                "codigo": "pantalla.admin.prices.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Precios minoristas y mayoristas",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 152,
+                "modulo_id": 15,
+                "pantalla_id": 40,
+                "codigo": "pantalla.admin.campaigns.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Campañas publicitarias",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 153,
+                "modulo_id": 16,
+                "pantalla_id": 41,
+                "codigo": "pantalla.admin.promotions.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Promociones y cupones",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 154,
+                "modulo_id": 17,
+                "pantalla_id": 42,
+                "codigo": "pantalla.admin.segments.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Segmentación de clientes",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 155,
+                "modulo_id": 18,
+                "pantalla_id": 44,
+                "codigo": "pantalla.admin.reports.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Reportes globales",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 156,
+                "modulo_id": 19,
+                "pantalla_id": 46,
+                "codigo": "pantalla.admin.audit.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Auditoría de operaciones",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 157,
+                "modulo_id": 18,
+                "pantalla_id": 49,
+                "codigo": "pantalla.admin.exports.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Exportaciones autorizadas",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 158,
+                "modulo_id": 29,
+                "pantalla_id": 55,
+                "codigo": "pantalla.account.profile.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Mi perfil",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 159,
+                "modulo_id": 1,
+                "pantalla_id": 56,
+                "codigo": "pantalla.account.dashboard.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Mi panel",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 160,
+                "modulo_id": 8,
+                "pantalla_id": 57,
+                "codigo": "pantalla.account.orders.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Mis pedidos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 161,
+                "modulo_id": 10,
+                "pantalla_id": 58,
+                "codigo": "pantalla.account.quotations.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Mis cotizaciones",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 162,
+                "modulo_id": 29,
+                "pantalla_id": 59,
+                "codigo": "pantalla.account.edit.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Editar datos personales",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 163,
+                "modulo_id": 29,
+                "pantalla_id": 60,
+                "codigo": "pantalla.account.security.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Seguridad de la cuenta",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 164,
+                "modulo_id": 29,
+                "pantalla_id": 61,
+                "codigo": "pantalla.account.sessions.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Sesiones y dispositivos activos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 165,
+                "modulo_id": 29,
+                "pantalla_id": 62,
+                "codigo": "pantalla.account.preferences.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Preferencias de visualización",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 166,
+                "modulo_id": 29,
+                "pantalla_id": 63,
+                "codigo": "pantalla.account.activity.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Mi actividad reciente",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 167,
+                "modulo_id": 14,
+                "pantalla_id": 64,
+                "codigo": "pantalla.support.reclamos.consultar",
+                "accion": "consultar",
+                "nombre": "Consultar - Soporte y reclamos",
+                "es_sistema": 1,
+                "activo": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            }
+        ],
+        "roles_permisos": [
+            {
+                "rol_id": 15,
+                "permiso_id": 1,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 2,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 3,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 4,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 5,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 6,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 7,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 8,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 9,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 10,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 11,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 12,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 13,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 14,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 15,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 16,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 17,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 18,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 19,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 20,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 21,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 22,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 23,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 24,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 25,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 26,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 27,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 28,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 29,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 30,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 31,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 32,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 33,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 34,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 35,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 36,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 37,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 38,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 39,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 40,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 41,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 42,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 43,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 44,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 45,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 46,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 47,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 48,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 49,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 50,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 51,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 52,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 53,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 54,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 55,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 56,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 57,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 58,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 59,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 60,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 61,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 62,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 63,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 64,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 65,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 66,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 67,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 68,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 69,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 70,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 71,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 72,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 73,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 74,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 75,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 76,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 77,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 78,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 79,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 80,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 81,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 82,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 83,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 84,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 85,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 86,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 87,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 88,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 89,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 90,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 91,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 92,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 93,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 94,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 95,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 96,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 97,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 98,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 99,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 100,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 101,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 102,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 103,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 104,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 105,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 106,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 107,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 108,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 109,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 110,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 111,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 112,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 113,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 114,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 115,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 116,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 117,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 118,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 119,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 120,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 121,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 122,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 123,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 124,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 125,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 126,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 127,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 128,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 129,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 130,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 131,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 132,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 133,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 134,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 135,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 136,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 137,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 138,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 139,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 140,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 141,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 142,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 143,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 144,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 145,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 146,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 147,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 148,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 149,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 150,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 151,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 152,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 153,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 154,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 155,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 156,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 157,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 158,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 159,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 160,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 161,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 162,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 163,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 164,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 165,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 166,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 15,
+                "permiso_id": 167,
+                "alcance": "empresa",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 16,
+                "permiso_id": 12,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 16,
+                "permiso_id": 24,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 16,
+                "permiso_id": 25,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 16,
+                "permiso_id": 26,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 16,
+                "permiso_id": 40,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 16,
+                "permiso_id": 41,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 16,
+                "permiso_id": 43,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 16,
+                "permiso_id": 58,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 16,
+                "permiso_id": 59,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 16,
+                "permiso_id": 60,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 16,
+                "permiso_id": 92,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 16,
+                "permiso_id": 93,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 16,
+                "permiso_id": 140,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 16,
+                "permiso_id": 143,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 16,
+                "permiso_id": 145,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 16,
+                "permiso_id": 147,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 16,
+                "permiso_id": 148,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 16,
+                "permiso_id": 159,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 17,
+                "permiso_id": 12,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 17,
+                "permiso_id": 34,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 17,
+                "permiso_id": 36,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 17,
+                "permiso_id": 47,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 17,
+                "permiso_id": 48,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 17,
+                "permiso_id": 50,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 17,
+                "permiso_id": 52,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 17,
+                "permiso_id": 53,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 17,
+                "permiso_id": 128,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 17,
+                "permiso_id": 139,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 17,
+                "permiso_id": 142,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 17,
+                "permiso_id": 150,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 17,
+                "permiso_id": 159,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 17,
+                "permiso_id": 161,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 18,
+                "permiso_id": 12,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 18,
+                "permiso_id": 18,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 18,
+                "permiso_id": 24,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 18,
+                "permiso_id": 29,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 18,
+                "permiso_id": 30,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 18,
+                "permiso_id": 31,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 18,
+                "permiso_id": 32,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 18,
+                "permiso_id": 34,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 18,
+                "permiso_id": 36,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 18,
+                "permiso_id": 53,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 18,
+                "permiso_id": 92,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 18,
+                "permiso_id": 93,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 18,
+                "permiso_id": 138,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 18,
+                "permiso_id": 139,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 18,
+                "permiso_id": 142,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 18,
+                "permiso_id": 145,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 18,
+                "permiso_id": 146,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 18,
+                "permiso_id": 147,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 18,
+                "permiso_id": 159,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 19,
+                "permiso_id": 75,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 19,
+                "permiso_id": 76,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 19,
+                "permiso_id": 77,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 19,
+                "permiso_id": 78,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 19,
+                "permiso_id": 80,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 19,
+                "permiso_id": 82,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 19,
+                "permiso_id": 83,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 19,
+                "permiso_id": 84,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 19,
+                "permiso_id": 85,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 19,
+                "permiso_id": 87,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 19,
+                "permiso_id": 88,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 19,
+                "permiso_id": 89,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 19,
+                "permiso_id": 90,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 19,
+                "permiso_id": 91,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 19,
+                "permiso_id": 92,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 19,
+                "permiso_id": 93,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 19,
+                "permiso_id": 126,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 19,
+                "permiso_id": 127,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 19,
+                "permiso_id": 152,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 19,
+                "permiso_id": 153,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 19,
+                "permiso_id": 154,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 19,
+                "permiso_id": 155,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 19,
+                "permiso_id": 159,
+                "alcance": "sede",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 20,
+                "permiso_id": 34,
+                "alcance": "propio",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 20,
+                "permiso_id": 47,
+                "alcance": "propio",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 20,
+                "permiso_id": 48,
+                "alcance": "propio",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 20,
+                "permiso_id": 128,
+                "alcance": "propio",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 20,
+                "permiso_id": 150,
+                "alcance": "propio",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 20,
+                "permiso_id": 159,
+                "alcance": "propio",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 20,
+                "permiso_id": 160,
+                "alcance": "propio",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 20,
+                "permiso_id": 161,
+                "alcance": "propio",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 21,
+                "permiso_id": 34,
+                "alcance": "propio",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 21,
+                "permiso_id": 35,
+                "alcance": "propio",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 21,
+                "permiso_id": 128,
+                "alcance": "propio",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 21,
+                "permiso_id": 150,
+                "alcance": "propio",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 21,
+                "permiso_id": 159,
+                "alcance": "propio",
+                "creado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "rol_id": 21,
+                "permiso_id": 160,
+                "alcance": "propio",
+                "creado_en": "2026-11-04 15:57:33"
+            }
+        ],
+        "elementos_menu": [
+            {
+                "id": 1,
+                "menu_id": 1,
+                "padre_id": null,
+                "pantalla_id": null,
+                "permiso_id": null,
+                "codigo": "grupo.organizacion",
+                "etiqueta": "Organización y sedes",
+                "icono": "bi-buildings",
+                "tipo": "grupo",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 2,
+                "menu_id": 1,
+                "padre_id": 1,
+                "pantalla_id": 2,
+                "permiso_id": null,
+                "codigo": "admin.company",
+                "etiqueta": "Datos de la empresa",
+                "icono": "bi-building",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 3,
+                "menu_id": 1,
+                "padre_id": 1,
+                "pantalla_id": 3,
+                "permiso_id": null,
+                "codigo": "admin.sites",
+                "etiqueta": "Sedes",
+                "icono": "bi-buildings",
+                "tipo": "pantalla",
+                "orden": 2,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 4,
+                "menu_id": 1,
+                "padre_id": 1,
+                "pantalla_id": 4,
+                "permiso_id": null,
+                "codigo": "admin.warehouses",
+                "etiqueta": "Almacenes",
+                "icono": "bi-house-gear",
+                "tipo": "pantalla",
+                "orden": 3,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 5,
+                "menu_id": 1,
+                "padre_id": 1,
+                "pantalla_id": 5,
+                "permiso_id": null,
+                "codigo": "admin.staff",
+                "etiqueta": "Personal por sede",
+                "icono": "bi-person-workspace",
+                "tipo": "pantalla",
+                "orden": 4,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 6,
+                "menu_id": 1,
+                "padre_id": 1,
+                "pantalla_id": 6,
+                "permiso_id": null,
+                "codigo": "admin.responsibles",
+                "etiqueta": "Responsables de sede",
+                "icono": "bi-person-badge",
+                "tipo": "pantalla",
+                "orden": 5,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 7,
+                "menu_id": 1,
+                "padre_id": null,
+                "pantalla_id": null,
+                "permiso_id": null,
+                "codigo": "grupo.seguridad",
+                "etiqueta": "Seguridad y delegación",
+                "icono": "bi-shield-lock",
+                "tipo": "grupo",
+                "orden": 2,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 8,
+                "menu_id": 1,
+                "padre_id": 7,
+                "pantalla_id": 7,
+                "permiso_id": 132,
+                "codigo": "admin.users",
+                "etiqueta": "Gestión de usuarios",
+                "icono": "bi-people",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 9,
+                "menu_id": 1,
+                "padre_id": 7,
+                "pantalla_id": 8,
+                "permiso_id": 133,
+                "codigo": "admin.roles",
+                "etiqueta": "Roles y permisos",
+                "icono": "bi-key",
+                "tipo": "pantalla",
+                "orden": 2,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 10,
+                "menu_id": 1,
+                "padre_id": 7,
+                "pantalla_id": 9,
+                "permiso_id": 134,
+                "codigo": "admin.user_assignments",
+                "etiqueta": "Asignaciones globales y por sede",
+                "icono": "bi-person-gear",
+                "tipo": "pantalla",
+                "orden": 3,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 11,
+                "menu_id": 1,
+                "padre_id": 7,
+                "pantalla_id": 10,
+                "permiso_id": 135,
+                "codigo": "admin.menus",
+                "etiqueta": "Menús y submenús dinámicos",
+                "icono": "bi-list-nested",
+                "tipo": "pantalla",
+                "orden": 4,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 12,
+                "menu_id": 1,
+                "padre_id": 7,
+                "pantalla_id": 11,
+                "permiso_id": 136,
+                "codigo": "admin.modules",
+                "etiqueta": "Módulos y pantallas",
+                "icono": "bi-grid-3x3-gap",
+                "tipo": "pantalla",
+                "orden": 5,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 13,
+                "menu_id": 1,
+                "padre_id": 7,
+                "pantalla_id": 12,
+                "permiso_id": null,
+                "codigo": "admin.delegation",
+                "etiqueta": "Políticas de aprobación y delegación",
+                "icono": "bi-person-lock",
+                "tipo": "pantalla",
+                "orden": 6,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 14,
+                "menu_id": 1,
+                "padre_id": 7,
+                "pantalla_id": 13,
+                "permiso_id": null,
+                "codigo": "admin.sessions",
+                "etiqueta": "Sesiones y accesos",
+                "icono": "bi-pc-display-horizontal",
+                "tipo": "pantalla",
+                "orden": 7,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 15,
+                "menu_id": 1,
+                "padre_id": 7,
+                "pantalla_id": 14,
+                "permiso_id": 137,
+                "codigo": "admin.account_status",
+                "etiqueta": "Bloqueo y reactivación de cuentas",
+                "icono": "bi-person-lock",
+                "tipo": "pantalla",
+                "orden": 8,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 16,
+                "menu_id": 1,
+                "padre_id": null,
+                "pantalla_id": null,
+                "permiso_id": null,
+                "codigo": "grupo.operaciones",
+                "etiqueta": "Operaciones comerciales",
+                "icono": "bi-briefcase",
+                "tipo": "grupo",
+                "orden": 3,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 17,
+                "menu_id": 1,
+                "padre_id": 16,
+                "pantalla_id": 15,
+                "permiso_id": 138,
+                "codigo": "admin.retail_sales",
+                "etiqueta": "Ventas minoristas",
+                "icono": "bi-cart-check",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 18,
+                "menu_id": 1,
+                "padre_id": 16,
+                "pantalla_id": 16,
+                "permiso_id": null,
+                "codigo": "admin.wholesale_sales",
+                "etiqueta": "Ventas mayoristas",
+                "icono": "bi-box-seam",
+                "tipo": "pantalla",
+                "orden": 2,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 19,
+                "menu_id": 1,
+                "padre_id": 16,
+                "pantalla_id": 17,
+                "permiso_id": 139,
+                "codigo": "admin.online_orders",
+                "etiqueta": "Pedidos online",
+                "icono": "bi-bag-check",
+                "tipo": "pantalla",
+                "orden": 3,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 20,
+                "menu_id": 1,
+                "padre_id": 16,
+                "pantalla_id": 18,
+                "permiso_id": 140,
+                "codigo": "admin.purchases",
+                "etiqueta": "Compras",
+                "icono": "bi-cart-plus",
+                "tipo": "pantalla",
+                "orden": 4,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 21,
+                "menu_id": 1,
+                "padre_id": 16,
+                "pantalla_id": 19,
+                "permiso_id": 141,
+                "codigo": "admin.quotations",
+                "etiqueta": "Cotizaciones",
+                "icono": "bi-file-earmark-text",
+                "tipo": "pantalla",
+                "orden": 5,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 22,
+                "menu_id": 1,
+                "padre_id": 16,
+                "pantalla_id": 20,
+                "permiso_id": 142,
+                "codigo": "admin.customers",
+                "etiqueta": "Clientes",
+                "icono": "bi-people",
+                "tipo": "pantalla",
+                "orden": 6,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 23,
+                "menu_id": 1,
+                "padre_id": 16,
+                "pantalla_id": 21,
+                "permiso_id": 143,
+                "codigo": "admin.suppliers",
+                "etiqueta": "Proveedores",
+                "icono": "bi-truck",
+                "tipo": "pantalla",
+                "orden": 7,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 24,
+                "menu_id": 1,
+                "padre_id": 16,
+                "pantalla_id": 22,
+                "permiso_id": 144,
+                "codigo": "admin.returns",
+                "etiqueta": "Devoluciones y garantías",
+                "icono": "bi-arrow-counterclockwise",
+                "tipo": "pantalla",
+                "orden": 8,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 25,
+                "menu_id": 1,
+                "padre_id": 16,
+                "pantalla_id": 64,
+                "permiso_id": 167,
+                "codigo": "support.reclamos",
+                "etiqueta": "Soporte y reclamos",
+                "icono": "bi-headset",
+                "tipo": "pantalla",
+                "orden": 9,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 26,
+                "menu_id": 1,
+                "padre_id": null,
+                "pantalla_id": null,
+                "permiso_id": null,
+                "codigo": "grupo.inventario",
+                "etiqueta": "Inventario y logística",
+                "icono": "bi-boxes",
+                "tipo": "grupo",
+                "orden": 4,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 27,
+                "menu_id": 1,
+                "padre_id": 26,
+                "pantalla_id": 23,
+                "permiso_id": 145,
+                "codigo": "admin.products",
+                "etiqueta": "Productos y categorías",
+                "icono": "bi-phone",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 28,
+                "menu_id": 1,
+                "padre_id": 26,
+                "pantalla_id": 24,
+                "permiso_id": 146,
+                "codigo": "admin.categories",
+                "etiqueta": "Categorías",
+                "icono": "bi-diagram-3",
+                "tipo": "pantalla",
+                "orden": 2,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 29,
+                "menu_id": 1,
+                "padre_id": 26,
+                "pantalla_id": 25,
+                "permiso_id": 147,
+                "codigo": "admin.inventory",
+                "etiqueta": "Inventario por almacén",
+                "icono": "bi-boxes",
+                "tipo": "pantalla",
+                "orden": 3,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 30,
+                "menu_id": 1,
+                "padre_id": 26,
+                "pantalla_id": 26,
+                "permiso_id": 148,
+                "codigo": "admin.stock_movements",
+                "etiqueta": "Movimientos de inventario",
+                "icono": "bi-arrow-left-right",
+                "tipo": "pantalla",
+                "orden": 4,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 31,
+                "menu_id": 1,
+                "padre_id": 26,
+                "pantalla_id": 27,
+                "permiso_id": 149,
+                "codigo": "admin.transfers",
+                "etiqueta": "Transferencias entre sedes",
+                "icono": "bi-arrow-left-right",
+                "tipo": "pantalla",
+                "orden": 5,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 32,
+                "menu_id": 1,
+                "padre_id": 26,
+                "pantalla_id": 28,
+                "permiso_id": null,
+                "codigo": "admin.shipments",
+                "etiqueta": "Envíos y entregas",
+                "icono": "bi-truck",
+                "tipo": "pantalla",
+                "orden": 6,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 33,
+                "menu_id": 1,
+                "padre_id": 26,
+                "pantalla_id": 29,
+                "permiso_id": null,
+                "codigo": "admin.imei",
+                "etiqueta": "IMEI y números de serie",
+                "icono": "bi-upc-scan",
+                "tipo": "pantalla",
+                "orden": 7,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 34,
+                "menu_id": 1,
+                "padre_id": null,
+                "pantalla_id": null,
+                "permiso_id": null,
+                "codigo": "grupo.finanzas",
+                "etiqueta": "Finanzas y facturación",
+                "icono": "bi-wallet2",
+                "tipo": "grupo",
+                "orden": 5,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 35,
+                "menu_id": 1,
+                "padre_id": 34,
+                "pantalla_id": 30,
+                "permiso_id": null,
+                "codigo": "admin.payments",
+                "etiqueta": "Pagos y cobros",
+                "icono": "bi-credit-card",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 36,
+                "menu_id": 1,
+                "padre_id": 34,
+                "pantalla_id": 31,
+                "permiso_id": null,
+                "codigo": "admin.cash_registers",
+                "etiqueta": "Cajas, aperturas y cierres",
+                "icono": "bi-cash-stack",
+                "tipo": "pantalla",
+                "orden": 2,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 37,
+                "menu_id": 1,
+                "padre_id": 34,
+                "pantalla_id": 32,
+                "permiso_id": null,
+                "codigo": "admin.receivables",
+                "etiqueta": "Cuentas por cobrar y pagar",
+                "icono": "bi-journal-text",
+                "tipo": "pantalla",
+                "orden": 3,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 38,
+                "menu_id": 1,
+                "padre_id": 34,
+                "pantalla_id": 33,
+                "permiso_id": null,
+                "codigo": "admin.refunds",
+                "etiqueta": "Reembolsos",
+                "icono": "bi-arrow-return-left",
+                "tipo": "pantalla",
+                "orden": 4,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 39,
+                "menu_id": 1,
+                "padre_id": 34,
+                "pantalla_id": 34,
+                "permiso_id": null,
+                "codigo": "admin.electronic_invoices",
+                "etiqueta": "Facturas y boletas electrónicas",
+                "icono": "bi-receipt",
+                "tipo": "pantalla",
+                "orden": 5,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 40,
+                "menu_id": 1,
+                "padre_id": 34,
+                "pantalla_id": 35,
+                "permiso_id": null,
+                "codigo": "admin.credit_debit_notes",
+                "etiqueta": "Notas de crédito y débito",
+                "icono": "bi-file-earmark-minus",
+                "tipo": "pantalla",
+                "orden": 6,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 41,
+                "menu_id": 1,
+                "padre_id": 34,
+                "pantalla_id": 36,
+                "permiso_id": null,
+                "codigo": "admin.series",
+                "etiqueta": "Series y correlativos",
+                "icono": "bi-123",
+                "tipo": "pantalla",
+                "orden": 7,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 42,
+                "menu_id": 1,
+                "padre_id": 34,
+                "pantalla_id": 37,
+                "permiso_id": null,
+                "codigo": "admin.sunat",
+                "etiqueta": "Seguimiento SUNAT",
+                "icono": "bi-cloud-check",
+                "tipo": "pantalla",
+                "orden": 8,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 43,
+                "menu_id": 1,
+                "padre_id": null,
+                "pantalla_id": null,
+                "permiso_id": null,
+                "codigo": "grupo.ecommerce",
+                "etiqueta": "Ecommerce y marketing",
+                "icono": "bi-shop",
+                "tipo": "grupo",
+                "orden": 6,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 44,
+                "menu_id": 1,
+                "padre_id": 43,
+                "pantalla_id": 38,
+                "permiso_id": 150,
+                "codigo": "admin.public_catalog",
+                "etiqueta": "Catálogo público",
+                "icono": "bi-shop",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 45,
+                "menu_id": 1,
+                "padre_id": 43,
+                "pantalla_id": 39,
+                "permiso_id": 151,
+                "codigo": "admin.prices",
+                "etiqueta": "Precios minoristas y mayoristas",
+                "icono": "bi-tags",
+                "tipo": "pantalla",
+                "orden": 2,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 46,
+                "menu_id": 1,
+                "padre_id": 43,
+                "pantalla_id": 40,
+                "permiso_id": 152,
+                "codigo": "admin.campaigns",
+                "etiqueta": "Campañas publicitarias",
+                "icono": "bi-megaphone",
+                "tipo": "pantalla",
+                "orden": 3,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 47,
+                "menu_id": 1,
+                "padre_id": 43,
+                "pantalla_id": 41,
+                "permiso_id": 153,
+                "codigo": "admin.promotions",
+                "etiqueta": "Promociones y cupones",
+                "icono": "bi-ticket-perforated",
+                "tipo": "pantalla",
+                "orden": 4,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 48,
+                "menu_id": 1,
+                "padre_id": 43,
+                "pantalla_id": 42,
+                "permiso_id": 154,
+                "codigo": "admin.segments",
+                "etiqueta": "Segmentación de clientes",
+                "icono": "bi-diagram-3",
+                "tipo": "pantalla",
+                "orden": 5,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 49,
+                "menu_id": 1,
+                "padre_id": 43,
+                "pantalla_id": 43,
+                "permiso_id": null,
+                "codigo": "admin.store_settings",
+                "etiqueta": "Configuración de la tienda virtual",
+                "icono": "bi-sliders",
+                "tipo": "pantalla",
+                "orden": 6,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 50,
+                "menu_id": 1,
+                "padre_id": null,
+                "pantalla_id": null,
+                "permiso_id": null,
+                "codigo": "grupo.analisis",
+                "etiqueta": "Análisis y auditoría",
+                "icono": "bi-graph-up-arrow",
+                "tipo": "grupo",
+                "orden": 7,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 51,
+                "menu_id": 1,
+                "padre_id": 50,
+                "pantalla_id": 44,
+                "permiso_id": 155,
+                "codigo": "admin.reports",
+                "etiqueta": "Reportes globales",
+                "icono": "bi-bar-chart",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 52,
+                "menu_id": 1,
+                "padre_id": 50,
+                "pantalla_id": 45,
+                "permiso_id": null,
+                "codigo": "admin.site_reports",
+                "etiqueta": "Reportes por sede",
+                "icono": "bi-buildings",
+                "tipo": "pantalla",
+                "orden": 2,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 53,
+                "menu_id": 1,
+                "padre_id": 50,
+                "pantalla_id": 46,
+                "permiso_id": 156,
+                "codigo": "admin.audit",
+                "etiqueta": "Auditoría de operaciones",
+                "icono": "bi-shield-check",
+                "tipo": "pantalla",
+                "orden": 3,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 54,
+                "menu_id": 1,
+                "padre_id": 50,
+                "pantalla_id": 47,
+                "permiso_id": null,
+                "codigo": "admin.role_history",
+                "etiqueta": "Historial de roles y permisos",
+                "icono": "bi-clock-history",
+                "tipo": "pantalla",
+                "orden": 4,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 55,
+                "menu_id": 1,
+                "padre_id": 50,
+                "pantalla_id": 48,
+                "permiso_id": null,
+                "codigo": "admin.security_events",
+                "etiqueta": "Eventos de seguridad",
+                "icono": "bi-shield-exclamation",
+                "tipo": "pantalla",
+                "orden": 5,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 56,
+                "menu_id": 1,
+                "padre_id": 50,
+                "pantalla_id": 49,
+                "permiso_id": 157,
+                "codigo": "admin.exports",
+                "etiqueta": "Exportaciones autorizadas",
+                "icono": "bi-download",
+                "tipo": "pantalla",
+                "orden": 6,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 57,
+                "menu_id": 1,
+                "padre_id": null,
+                "pantalla_id": null,
+                "permiso_id": null,
+                "codigo": "grupo.configuracion",
+                "etiqueta": "Configuración del sistema",
+                "icono": "bi-gear",
+                "tipo": "grupo",
+                "orden": 8,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 58,
+                "menu_id": 1,
+                "padre_id": 57,
+                "pantalla_id": 50,
+                "permiso_id": null,
+                "codigo": "admin.general_settings",
+                "etiqueta": "Configuración general",
+                "icono": "bi-gear",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 59,
+                "menu_id": 1,
+                "padre_id": 57,
+                "pantalla_id": 51,
+                "permiso_id": null,
+                "codigo": "admin.integrations",
+                "etiqueta": "Integraciones",
+                "icono": "bi-plug",
+                "tipo": "pantalla",
+                "orden": 2,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 60,
+                "menu_id": 1,
+                "padre_id": 57,
+                "pantalla_id": 52,
+                "permiso_id": null,
+                "codigo": "admin.notifications",
+                "etiqueta": "Notificaciones del sistema",
+                "icono": "bi-bell",
+                "tipo": "pantalla",
+                "orden": 3,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 61,
+                "menu_id": 1,
+                "padre_id": 57,
+                "pantalla_id": 53,
+                "permiso_id": null,
+                "codigo": "admin.security_settings",
+                "etiqueta": "Configuración de seguridad",
+                "icono": "bi-shield-lock",
+                "tipo": "pantalla",
+                "orden": 4,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 62,
+                "menu_id": 1,
+                "padre_id": 57,
+                "pantalla_id": 54,
+                "permiso_id": null,
+                "codigo": "admin.backups",
+                "etiqueta": "Respaldos y recuperación",
+                "icono": "bi-database-gear",
+                "tipo": "pantalla",
+                "orden": 5,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 63,
+                "menu_id": 1,
+                "padre_id": null,
+                "pantalla_id": 1,
+                "permiso_id": 131,
+                "codigo": "item.admin.dashboard",
+                "etiqueta": "Dashboard global",
+                "icono": "bi-speedometer2",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 64,
+                "menu_id": 2,
+                "padre_id": null,
+                "pantalla_id": 56,
+                "permiso_id": 159,
+                "codigo": "item.account.dashboard",
+                "etiqueta": "Mi panel",
+                "icono": "bi-house",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 65,
+                "menu_id": 2,
+                "padre_id": null,
+                "pantalla_id": 25,
+                "permiso_id": 147,
+                "codigo": "item.admin.inventory",
+                "etiqueta": "Inventario por almacén",
+                "icono": "bi-boxes",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 66,
+                "menu_id": 2,
+                "padre_id": null,
+                "pantalla_id": 26,
+                "permiso_id": 148,
+                "codigo": "item.admin.stock_movements",
+                "etiqueta": "Movimientos de inventario",
+                "icono": "bi-arrow-left-right",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 67,
+                "menu_id": 2,
+                "padre_id": null,
+                "pantalla_id": 21,
+                "permiso_id": 143,
+                "codigo": "item.admin.suppliers",
+                "etiqueta": "Proveedores",
+                "icono": "bi-truck",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 68,
+                "menu_id": 2,
+                "padre_id": null,
+                "pantalla_id": 18,
+                "permiso_id": 140,
+                "codigo": "item.admin.purchases",
+                "etiqueta": "Compras",
+                "icono": "bi-cart-plus",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 69,
+                "menu_id": 2,
+                "padre_id": null,
+                "pantalla_id": 23,
+                "permiso_id": 145,
+                "codigo": "item.admin.products",
+                "etiqueta": "Productos y categorías",
+                "icono": "bi-phone",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 70,
+                "menu_id": 3,
+                "padre_id": null,
+                "pantalla_id": 56,
+                "permiso_id": 159,
+                "codigo": "item.account.dashboard",
+                "etiqueta": "Mi panel",
+                "icono": "bi-house",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 71,
+                "menu_id": 3,
+                "padre_id": null,
+                "pantalla_id": 38,
+                "permiso_id": 150,
+                "codigo": "item.admin.public_catalog",
+                "etiqueta": "Catálogo público",
+                "icono": "bi-shop",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 72,
+                "menu_id": 3,
+                "padre_id": null,
+                "pantalla_id": 58,
+                "permiso_id": 161,
+                "codigo": "item.account.quotations",
+                "etiqueta": "Mis cotizaciones",
+                "icono": "bi-file-earmark-text",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 73,
+                "menu_id": 3,
+                "padre_id": null,
+                "pantalla_id": 17,
+                "permiso_id": 139,
+                "codigo": "item.admin.online_orders",
+                "etiqueta": "Pedidos online",
+                "icono": "bi-bag-check",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 74,
+                "menu_id": 3,
+                "padre_id": null,
+                "pantalla_id": 20,
+                "permiso_id": 142,
+                "codigo": "item.admin.customers",
+                "etiqueta": "Clientes",
+                "icono": "bi-people",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 75,
+                "menu_id": 4,
+                "padre_id": null,
+                "pantalla_id": 56,
+                "permiso_id": 159,
+                "codigo": "item.account.dashboard",
+                "etiqueta": "Mi panel",
+                "icono": "bi-house",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 76,
+                "menu_id": 4,
+                "padre_id": null,
+                "pantalla_id": 23,
+                "permiso_id": 145,
+                "codigo": "item.admin.products",
+                "etiqueta": "Productos y categorías",
+                "icono": "bi-phone",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 77,
+                "menu_id": 4,
+                "padre_id": null,
+                "pantalla_id": 24,
+                "permiso_id": 146,
+                "codigo": "item.admin.categories",
+                "etiqueta": "Categorías",
+                "icono": "bi-diagram-3",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 78,
+                "menu_id": 4,
+                "padre_id": null,
+                "pantalla_id": 25,
+                "permiso_id": 147,
+                "codigo": "item.admin.inventory",
+                "etiqueta": "Inventario por almacén",
+                "icono": "bi-boxes",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 79,
+                "menu_id": 4,
+                "padre_id": null,
+                "pantalla_id": 15,
+                "permiso_id": 138,
+                "codigo": "item.admin.retail_sales",
+                "etiqueta": "Ventas minoristas",
+                "icono": "bi-cart-check",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 80,
+                "menu_id": 4,
+                "padre_id": null,
+                "pantalla_id": 17,
+                "permiso_id": 139,
+                "codigo": "item.admin.online_orders",
+                "etiqueta": "Pedidos online",
+                "icono": "bi-bag-check",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 81,
+                "menu_id": 4,
+                "padre_id": null,
+                "pantalla_id": 20,
+                "permiso_id": 142,
+                "codigo": "item.admin.customers",
+                "etiqueta": "Clientes",
+                "icono": "bi-people",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 82,
+                "menu_id": 5,
+                "padre_id": null,
+                "pantalla_id": 56,
+                "permiso_id": 159,
+                "codigo": "item.account.dashboard",
+                "etiqueta": "Mi panel",
+                "icono": "bi-house",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 83,
+                "menu_id": 5,
+                "padre_id": null,
+                "pantalla_id": 40,
+                "permiso_id": 152,
+                "codigo": "item.admin.campaigns",
+                "etiqueta": "Campañas publicitarias",
+                "icono": "bi-megaphone",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 84,
+                "menu_id": 5,
+                "padre_id": null,
+                "pantalla_id": 41,
+                "permiso_id": 153,
+                "codigo": "item.admin.promotions",
+                "etiqueta": "Promociones y cupones",
+                "icono": "bi-ticket-perforated",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 85,
+                "menu_id": 5,
+                "padre_id": null,
+                "pantalla_id": 42,
+                "permiso_id": 154,
+                "codigo": "item.admin.segments",
+                "etiqueta": "Segmentación de clientes",
+                "icono": "bi-diagram-3",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 86,
+                "menu_id": 5,
+                "padre_id": null,
+                "pantalla_id": 44,
+                "permiso_id": 155,
+                "codigo": "item.admin.reports",
+                "etiqueta": "Reportes globales",
+                "icono": "bi-bar-chart",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 87,
+                "menu_id": 6,
+                "padre_id": null,
+                "pantalla_id": 56,
+                "permiso_id": 159,
+                "codigo": "item.account.dashboard",
+                "etiqueta": "Mi panel",
+                "icono": "bi-house",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 88,
+                "menu_id": 6,
+                "padre_id": null,
+                "pantalla_id": 38,
+                "permiso_id": 150,
+                "codigo": "item.admin.public_catalog",
+                "etiqueta": "Catálogo público",
+                "icono": "bi-shop",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 89,
+                "menu_id": 6,
+                "padre_id": null,
+                "pantalla_id": 58,
+                "permiso_id": 161,
+                "codigo": "item.account.quotations",
+                "etiqueta": "Mis cotizaciones",
+                "icono": "bi-file-earmark-text",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 90,
+                "menu_id": 6,
+                "padre_id": null,
+                "pantalla_id": 57,
+                "permiso_id": 160,
+                "codigo": "item.account.orders",
+                "etiqueta": "Mis pedidos",
+                "icono": "bi-bag-check",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 91,
+                "menu_id": 7,
+                "padre_id": null,
+                "pantalla_id": 56,
+                "permiso_id": 159,
+                "codigo": "item.account.dashboard",
+                "etiqueta": "Mi panel",
+                "icono": "bi-house",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 92,
+                "menu_id": 7,
+                "padre_id": null,
+                "pantalla_id": 38,
+                "permiso_id": 150,
+                "codigo": "item.admin.public_catalog",
+                "etiqueta": "Catálogo público",
+                "icono": "bi-shop",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            },
+            {
+                "id": 93,
+                "menu_id": 7,
+                "padre_id": null,
+                "pantalla_id": 57,
+                "permiso_id": 160,
+                "codigo": "item.account.orders",
+                "etiqueta": "Mis pedidos",
+                "icono": "bi-bag-check",
+                "tipo": "pantalla",
+                "orden": 1,
+                "habilitado": 1,
+                "creado_en": null,
+                "actualizado_en": "2026-11-04 15:57:33"
+            }
+        ]
+    }
+}

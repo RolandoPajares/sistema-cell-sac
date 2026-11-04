@@ -1,3 +1,4 @@
+@php($userPreferences = (array) (auth()->user()?->preferencias ?? []))
 <!doctype html>
 <html lang="es">
     <head>
@@ -10,7 +11,7 @@
         @stack('styles')
     </head>
     <body class="admin-body admin-theme @yield('body_class')" data-panel-role="{{ auth()->user()?->rol }}">
-        <div class="admin-layout admin-app" data-admin-app>
+        <div class="admin-layout admin-app" data-admin-app data-user-compact-menu="{{ array_key_exists('menu_compacto', $userPreferences) ? ($userPreferences['menu_compacto'] ? '1' : '0') : '' }}">
             @include('layouts.panel.menu-lateral', ['links' => $sidebarLinks ?? []])
             <div class="admin-shell admin-content-shell">
                 @include('layouts.panel.encabezado')

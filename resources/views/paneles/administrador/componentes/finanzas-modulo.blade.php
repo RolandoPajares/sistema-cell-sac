@@ -161,7 +161,7 @@
             <article class="admin-finance-summary-card">
                 <header>
                     <div><span class="admin-finance-summary-icon admin-finance-summary-icon--{{ $summary['tone'] }}"><i class="bi {{ $summary['icon'] }}" aria-hidden="true"></i></span><h2>{{ $summary['title'] }}</h2></div>
-                    <button type="button" data-pending-notice="Este resumen se habilitará al integrar datos financieros."><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+                    <button type="button" aria-label="Ver resumen: {{ $summary['title'] }}" data-pending-notice="Este resumen se habilitará al integrar datos financieros."><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
                 </header>
                 <div class="admin-finance-summary-empty"><i class="bi bi-bar-chart-line" aria-hidden="true"></i><strong>{{ $summary['text'] }}</strong><span>Sin datos integrados</span></div>
             </article>

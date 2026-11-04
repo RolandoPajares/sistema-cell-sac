@@ -8,15 +8,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class VarianteProducto extends Model
 {
-    protected $table = 'producto_variantes';
+    protected $table = 'variantes_productos';
 
-    protected $fillable = ['producto_id', 'nombre_color', 'codigo_color', 'stock', 'estado', 'fecha_creacion'];
+    protected $fillable = ['producto_id', 'codigo_sku', 'codigo_barras', 'nombre_color', 'codigo_color', 'existencias', 'controla_serie', 'estado', 'fecha_creacion'];
 
     public $timestamps = false;
 
     protected function casts(): array
     {
-        return ['fecha_creacion' => 'datetime'];
+        return ['existencias' => 'integer', 'controla_serie' => 'boolean', 'fecha_creacion' => 'datetime'];
     }
 
     public function product(): BelongsTo
@@ -26,6 +26,6 @@ class VarianteProducto extends Model
 
     public function images(): HasMany
     {
-        return $this->hasMany(ImagenVariante::class, 'variante_id')->orderBy('orden');
+        return $this->hasMany(ImagenVariante::class, 'variante_id')->orderBy('orden')->orderBy('id');
     }
 }

@@ -10,43 +10,50 @@ use App\Models\Clientes\Cliente;
 use App\Models\Comercio\DevolucionGarantia;
 use App\Models\Comercio\Pedido;
 use App\Servicios\RegistradorAuditoria;
+use App\Servicios\ServicioAutorizacion;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DevolucionGarantiaController extends Controller
 {
+    public function __construct(private readonly ServicioAutorizacion $authorization) {}
+
     public function index(Request $request): View
     {
         $filters = $this->filters($request);
-        $returnsQuery = $this->applyFilters(DevolucionGarantia::query()->where('activo', true), $filters);
+        $returnsQuery = $this->applyFilters($this->authorization->scopeRecordsFor(
+            DevolucionGarantia::query()->where('activo', true),
+            $request->user(),
+            'gestion.devoluciones.consultar',
+        ), $filters);
         $returns = (clone $returnsQuery)
             ->with(['customer:id,nombre_contacto,razon_social', 'product:id,nombre', 'order:id'])
             ->latest('fecha_solicitud')
             ->latest('id')
             ->paginate(8)
             ->withQueryString();
-        $allReturns = DevolucionGarantia::query()->where('activo', true);
+        $allReturns = $this->authorization->scopeRecordsFor(
+            DevolucionGarantia::query()->where('activo', true),
+            $request->user(),
+            'gestion.devoluciones.consultar',
+        );
         $module = require resource_path('views/gestion/devoluciones-garantias/datos.php');
+        $pedidosFormulario = $this->authorization->scopeRecordsFor(Pedido::query(), $request->user(), 'gestion.pedidos.consultar')
+            ->whereNotNull('cliente_id')->with(['user:id,nombre', 'details:pedido_id,producto_id'])
+            ->latest('creado_en')->latest('id')->limit(100)
+            ->get(['id', 'usuario_id', 'cliente_id', 'creado_en']);
         $module['form_data'] = [
-            'customers' => Cliente::query()
-                ->where('activo', true)
-                ->orderBy('nombre_contacto')
-                ->get(['id', 'nombre_contacto', 'razon_social']),
-            'orders' => Pedido::query()
-                ->with('user:id,nombre')
-                ->latest('creado_en')
-                ->latest('id')
-                ->limit(100)
-                ->get(['id', 'usuario_id', 'creado_en']),
-            'products' => Producto::query()
-                ->active()
-                ->orderBy('nombre')
-                ->get(['id', 'nombre']),
+            'customers' => Cliente::query()->whereIn('id', $pedidosFormulario->pluck('cliente_id'))
+                ->where('activo', true)->orderBy('nombre_contacto')->get(['id', 'nombre_contacto', 'razon_social']),
+            'orders' => $pedidosFormulario,
+            'products' => Producto::query()->whereIn('id', $pedidosFormulario->flatMap(fn (Pedido $pedido) => $pedido->details->pluck('producto_id'))->unique())
+                ->active()->orderBy('nombre')->get(['id', 'nombre']),
         ];
         $module['operacion_ui']['backend'] = true;
         $module['operacion_ui']['filter_action'] = route('management.returns');
@@ -78,37 +85,69 @@ class DevolucionGarantiaController extends Controller
 
     public function store(GuardarDevolucionGarantiaRequest $request, RegistradorAuditoria $audit): RedirectResponse
     {
-        $returnRequest = DevolucionGarantia::create($request->validated() + [
-            'creado_por' => $request->user()->id,
-            'activo' => true,
-            'creado_en' => now(),
-        ]);
-        $audit->record($request->user()->id, 'return.created', 'devoluciones_garantias', $returnRequest->id, null, $returnRequest->only(['codigo', 'pedido_id', 'cliente_id', 'producto_id', 'tipo', 'estado']), $request->ip());
+        $order = Pedido::query()->findOrFail($request->integer('pedido_id'));
+        $this->assertOrderInScope($request, $order, 'gestion.devoluciones.crear');
+
+        DB::transaction(function () use ($request, $order, $audit): void {
+            $returnRequest = DevolucionGarantia::create($request->validated() + [
+                'creado_por_usuario_id' => $request->user()->id,
+                'activo' => true,
+                'empresa_id' => $order->empresa_id,
+                'sede_id' => $order->sede_id,
+            ]);
+            $audit->record($request->user()->id, 'return.created', 'devoluciones_garantias', $returnRequest->id, null, $returnRequest->only(['codigo', 'pedido_id', 'cliente_id', 'producto_id', 'tipo', 'estado']), $request->ip());
+        }, 3);
 
         return redirect()->route('management.returns')->with('status', 'Solicitud registrada correctamente.');
     }
 
     public function update(ActualizarDevolucionGarantiaRequest $request, DevolucionGarantia $devolucionGarantia, RegistradorAuditoria $audit): RedirectResponse
     {
-        $before = $devolucionGarantia->only(['codigo', 'pedido_id', 'cliente_id', 'producto_id', 'tipo', 'motivo', 'estado', 'fecha_solicitud', 'fecha_limite', 'resolucion']);
-        $devolucionGarantia->update($request->validated());
-        $audit->record($request->user()->id, 'return.updated', 'devoluciones_garantias', $devolucionGarantia->id, $before, $devolucionGarantia->only(array_keys($before)), $request->ip());
+        abort_unless($this->authorization->allowsRecord(
+            $request->user(),
+            'gestion.devoluciones.actualizar',
+            is_numeric($devolucionGarantia->empresa_id) ? (int) $devolucionGarantia->empresa_id : null,
+            is_numeric($devolucionGarantia->sede_id) ? (int) $devolucionGarantia->sede_id : null,
+        ), 403);
+        $order = Pedido::query()->findOrFail($request->integer('pedido_id'));
+        $this->assertOrderInScope($request, $order, 'gestion.devoluciones.actualizar');
+
+        abort_unless($devolucionGarantia->activo, 404);
+        DB::transaction(function () use ($request, $order, $devolucionGarantia, $audit): void {
+            $before = $devolucionGarantia->only(['codigo', 'pedido_id', 'cliente_id', 'producto_id', 'tipo', 'motivo', 'estado', 'fecha_solicitud', 'fecha_limite', 'resolucion']);
+            $devolucionGarantia->update($request->validated() + ['empresa_id' => $order->empresa_id, 'sede_id' => $order->sede_id]);
+            $audit->record($request->user()->id, 'return.updated', 'devoluciones_garantias', $devolucionGarantia->id, $before, $devolucionGarantia->only(array_keys($before)), $request->ip());
+        }, 3);
 
         return redirect()->route('management.returns')->with('status', 'Solicitud actualizada correctamente.');
     }
 
-    public function destroy(DevolucionGarantia $devolucionGarantia, RegistradorAuditoria $audit): RedirectResponse
+    public function destroy(Request $request, DevolucionGarantia $devolucionGarantia, RegistradorAuditoria $audit): RedirectResponse
     {
-        $before = $devolucionGarantia->only(['codigo', 'pedido_id', 'cliente_id', 'producto_id', 'tipo', 'estado']);
-        $devolucionGarantia->delete();
-        $audit->record(request()->user()->id, 'return.deleted', 'devoluciones_garantias', $devolucionGarantia->id, $before, null, request()->ip());
+        abort_unless($this->authorization->allowsRecord(
+            $request->user(),
+            'gestion.devoluciones.eliminar',
+            is_numeric($devolucionGarantia->empresa_id) ? (int) $devolucionGarantia->empresa_id : null,
+            is_numeric($devolucionGarantia->sede_id) ? (int) $devolucionGarantia->sede_id : null,
+        ), 403);
 
-        return redirect()->route('management.returns')->with('status', 'Solicitud eliminada correctamente.');
+        abort_unless($devolucionGarantia->activo, 404);
+        DB::transaction(function () use ($request, $devolucionGarantia, $audit): void {
+            $before = $devolucionGarantia->only(['codigo', 'pedido_id', 'cliente_id', 'producto_id', 'tipo', 'estado', 'activo']);
+            $devolucionGarantia->update(['activo' => false]);
+            $audit->record($request->user()->id, 'return.deactivated', 'devoluciones_garantias', $devolucionGarantia->id, $before, ['activo' => false], $request->ip());
+        }, 3);
+
+        return redirect()->route('management.returns')->with('status', 'Solicitud desactivada correctamente.');
     }
 
     public function export(Request $request): StreamedResponse
     {
-        $returns = $this->applyFilters(DevolucionGarantia::query()->where('activo', true), $this->filters($request))
+        $returns = $this->applyFilters($this->authorization->scopeRecordsFor(
+            DevolucionGarantia::query()->where('activo', true),
+            $request->user(),
+            'gestion.devoluciones.exportar',
+        ), $this->filters($request))
             ->with(['customer:id,nombre_contacto,razon_social', 'product:id,nombre'])
             ->orderBy('fecha_solicitud')
             ->orderBy('id')
@@ -138,6 +177,22 @@ class DevolucionGarantiaController extends Controller
 
             fclose($output);
         }, 'devoluciones-garantias.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    private function assertOrderInScope(Request $request, Pedido $order, string $permission): void
+    {
+        abort_unless($this->authorization->allowsRecord(
+            $request->user(),
+            $permission,
+            is_numeric($order->empresa_id) ? (int) $order->empresa_id : null,
+            is_numeric($order->sede_id) ? (int) $order->sede_id : null,
+        ), 403);
+
+        abort_unless($order->cliente_id !== null && (int) $order->cliente_id === $request->integer('cliente_id'), 422, 'El cliente no corresponde al pedido.');
+
+        if ($request->filled('producto_id')) {
+            abort_unless($order->details()->where('producto_id', $request->integer('producto_id'))->exists(), 422, 'El producto no corresponde al pedido.');
+        }
     }
 
     /**

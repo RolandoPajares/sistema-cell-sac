@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Servicios\ServicioAutorizacion;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -9,7 +10,7 @@ class GuardarCategoriaRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->isRole('administrador') ?? false;
+        return $this->user() !== null && app(ServicioAutorizacion::class)->allowsRoute($this);
     }
 
     public function rules(): array
