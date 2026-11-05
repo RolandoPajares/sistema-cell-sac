@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Gestion\Compras;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\GuardarCompraRequest;
+use App\Http\Requests\ImportarComprasRequest;
 use App\Http\Requests\RegistrarRecepcionParcialCompraRequest;
 use App\Models\Catalogo\Producto;
 use App\Models\Compras\Compra;
@@ -17,6 +18,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -297,6 +299,61 @@ class CompraController extends Controller
         $request->session()->forget('compra_token');
 
         return back()->with('status', 'Compra registrada como pendiente; aún no se ha recibido mercadería.');
+    }
+
+    public function import(ImportarComprasRequest $request): RedirectResponse
+    {
+        $expected = ['proveedor_id', 'fecha_compra', 'producto_id', 'variante_id', 'cantidad', 'costo_unitario'];
+        $handle = fopen($request->file('archivo')->getRealPath(), 'rb');
+        abort_unless($handle !== false, 422, 'No se pudo leer el archivo CSV.');
+        $header = fgetcsv($handle);
+        $header = is_array($header) ? array_map(static fn ($value): string => trim((string) $value), $header) : [];
+        if ($header !== $expected) {
+            fclose($handle);
+            throw ValidationException::withMessages(['archivo' => 'El CSV debe contener exactamente: '.implode(',', $expected).'.']);
+        }
+        $rows = [];
+        while (($row = fgetcsv($handle)) !== false) {
+            if (count($row) === 1 && trim((string) $row[0]) === '') continue;
+            if (count($row) !== count($expected)) {
+                fclose($handle);
+                throw ValidationException::withMessages(['archivo' => 'El CSV contiene una fila con columnas inválidas.']);
+            }
+            $data = array_combine($expected, array_map(static fn ($value): string => trim((string) $value), $row));
+            $validator = validator($data, [
+                'proveedor_id' => ['required', 'integer', 'min:1'], 'fecha_compra' => ['required', 'date_format:Y-m-d'],
+                'producto_id' => ['required', 'integer', 'min:1'], 'variante_id' => ['nullable', 'integer', 'min:1'],
+                'cantidad' => ['required', 'integer', 'min:1', 'max:1000'], 'costo_unitario' => ['required', 'regex:/\A\d{1,8}(?:\.\d{1,2})?\z/'],
+            ]);
+            if ($validator->fails()) {
+                fclose($handle);
+                throw ValidationException::withMessages(['archivo' => 'Fila inválida: '.implode(' ', $validator->errors()->all())]);
+            }
+            $rows[] = $data;
+            if (count($rows) > 100) {
+                fclose($handle);
+                throw ValidationException::withMessages(['archivo' => 'El archivo no puede superar 100 líneas.']);
+            }
+        }
+        fclose($handle);
+        if ($rows === []) throw ValidationException::withMessages(['archivo' => 'El CSV no contiene líneas de compra.']);
+
+        DB::transaction(function () use ($rows, $request): void {
+            foreach ($rows as $data) {
+                $token = bin2hex(random_bytes(32));
+                $request->session()->put('compra_token', $token);
+                $this->purchaseService->registrar([
+                    'proveedor_id' => (int) $data['proveedor_id'], 'fecha_compra' => $data['fecha_compra'],
+                    'items' => [[
+                        'producto_id' => (int) $data['producto_id'],
+                        'variante_id' => $data['variante_id'] === '' ? null : (int) $data['variante_id'],
+                        'cantidad' => (int) $data['cantidad'], 'costo_unitario' => $data['costo_unitario'],
+                    ]],
+                ], $request->user(), $token, $request->ip());
+            }
+        }, 3);
+
+        return back()->with('status', count($rows).' compra(s) importada(s) correctamente.');
     }
 
     public function approve(Request $request, Compra $compra): RedirectResponse

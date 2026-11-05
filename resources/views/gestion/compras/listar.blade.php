@@ -35,7 +35,7 @@
                 <p>Controla las compras a proveedores y las recepciones que actualizan tu inventario.</p>
             </div>
             <div class="compras-hero-actions">
-                <button class="compras-secondary-button" type="button" disabled title="La importación de compras aún no está disponible."><i class="bi bi-upload" aria-hidden="true"></i> Importar</button>
+                <button class="compras-secondary-button" type="button" data-admin-dialog-open="importar-compras"><i class="bi bi-upload" aria-hidden="true"></i> Importar</button>
                 <details class="compras-export-menu"><summary class="compras-secondary-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar</summary><div class="compras-export-options"><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'excel'])) }}">Excel (.xlsx)</a><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'pdf'])) }}">PDF (.pdf)</a><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'csv'])) }}">CSV (.csv)</a></div></details>
                 <button class="compras-primary-button" type="button" data-admin-dialog-open="nueva-compra" @disabled(! $canCreate || $suppliers->isEmpty() || $products->isEmpty())>
                     <i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva compra
@@ -250,6 +250,11 @@
                     <p class="compras-summary-empty">Para registrar una compra, agrega al menos un proveedor activo y un producto disponible.</p>
                 @endif
             </div>
+        </dialog>
+
+        <dialog class="admin-dialog compras-create-dialog" id="importar-compras" aria-labelledby="importar-compras-title">
+            <header class="admin-dialog-header"><div><h2 id="importar-compras-title">Importar compras</h2><p>Importa líneas reales con validación y transacción.</p></div><button class="admin-dialog-close" type="button" data-admin-dialog-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
+            <div class="admin-dialog-body"><form method="post" action="{{ route('management.purchases.import') }}" enctype="multipart/form-data" class="form-card">@csrf<p>Columnas exactas: <code>proveedor_id,fecha_compra,producto_id,variante_id,cantidad,costo_unitario</code>.</p><label>Archivo CSV<input type="file" name="archivo" accept=".csv,text/csv" required></label><footer class="compras-form-actions"><button type="button" class="compras-secondary-button" data-admin-dialog-close>Cancelar</button><button type="submit" class="compras-primary-button"><i class="bi bi-upload" aria-hidden="true"></i> Importar</button></footer></form></div>
         </dialog>
 
     </section>

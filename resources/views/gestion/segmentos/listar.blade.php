@@ -28,7 +28,7 @@
                 <h1>Gestión de segmentos de clientes</h1>
                 <p>Organiza audiencias por comportamiento y compras para acciones comerciales más precisas.</p>
             </div>
-            <div class="admin-marketing-actions"><a class="admin-marketing-button admin-marketing-button--secondary" href="{{ route('management.segments', request()->query()) }}"><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Actualizar</a><button class="admin-marketing-button admin-marketing-button--primary" type="button" data-pending-open="crear"><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo segmento</button></div>
+            <div class="admin-marketing-actions"><a class="admin-marketing-button admin-marketing-button--secondary" href="{{ route('management.segments', request()->query()) }}"><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Actualizar</a><details class="admin-marketing-export-menu"><summary class="admin-marketing-button admin-marketing-button--secondary"><i class="bi bi-download" aria-hidden="true"></i> Exportar</summary><div class="admin-marketing-export-options"><a href="{{ route('management.segments.export', array_merge(request()->query(), ['format' => 'excel'])) }}">Excel (.xlsx)</a><a href="{{ route('management.segments.export', array_merge(request()->query(), ['format' => 'pdf'])) }}">PDF (.pdf)</a><a href="{{ route('management.segments.export', array_merge(request()->query(), ['format' => 'csv'])) }}">CSV (.csv)</a></div></details><button class="admin-marketing-button admin-marketing-button--primary" type="button" data-pending-open="crear"><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo segmento</button></div>
         </div>
     </header>
 

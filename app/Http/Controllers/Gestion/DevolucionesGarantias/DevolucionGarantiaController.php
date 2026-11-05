@@ -36,8 +36,8 @@ class DevolucionGarantiaController extends Controller
         ), $filters);
         $returns = (clone $returnsQuery)
             ->with(['customer:id,nombre_contacto,razon_social', 'product:id,nombre', 'order:id'])
-            ->latest('fecha_solicitud')
-            ->latest('id')
+            ->when($filters['orden'] === 'antiguos', fn (Builder $query): Builder => $query->orderBy('fecha_solicitud')->orderBy('id'))
+            ->when($filters['orden'] !== 'antiguos', fn (Builder $query): Builder => $query->latest('fecha_solicitud')->latest('id'))
             ->paginate(8)
             ->withQueryString();
         $allReturns = $this->authorization->scopeRecordsFor(
@@ -62,6 +62,10 @@ class DevolucionGarantiaController extends Controller
         $module['operacion_ui']['clear_action'] = route('management.returns');
         $module['operacion_ui']['filter_route'] = 'management.returns';
         $module['operacion_ui']['filter_values'] = $filters;
+        $module['operacion_ui']['sort_options'] = [
+            'recientes' => 'Más recientes',
+            'antiguos' => 'Más antiguos',
+        ];
         $module['operacion_ui']['table_count'] = $returns->total().' registros';
         $module['operacion_ui']['table_footer'] = $returns->total() > 0
             ? 'Mostrando '.$returns->firstItem().' a '.$returns->lastItem().' de '.$returns->total().' solicitudes'
@@ -80,6 +84,20 @@ class DevolucionGarantiaController extends Controller
             ->whereNotNull('fecha_limite')
             ->whereDate('fecha_limite', '<', today())
             ->count();
+        $priorityCount = (clone $allReturns)->whereNotIn('estado', ['Resuelta', 'Rechazada'])
+            ->whereNotNull('fecha_limite')->whereDate('fecha_limite', '<', today())->count();
+        $upcomingCount = (clone $allReturns)->whereNotIn('estado', ['Resuelta', 'Rechazada'])
+            ->whereNotNull('fecha_limite')->whereBetween('fecha_limite', [today(), today()->addDays(30)])->count();
+        $resolvedCount = (clone $allReturns)->where('estado', 'Resuelta')->count();
+        $module['operacion_ui']['panels'][0]['empty'] = $priorityCount > 0
+            ? $priorityCount.' solicitud(es) fuera de plazo requieren atención.'
+            : 'No hay solicitudes fuera de plazo.';
+        $module['operacion_ui']['panels'][1]['empty'] = $upcomingCount > 0
+            ? $upcomingCount.' vencimiento(s) dentro de los próximos 30 días.'
+            : 'No hay vencimientos próximos.';
+        $module['operacion_ui']['panels'][2]['empty'] = $resolvedCount > 0
+            ? $resolvedCount.' caso(s) resuelto(s) registrados en MariaDB.'
+            : 'No hay casos resueltos registrados.';
         $module['operacion_ui']['rows'] = $returns->getCollection()->map(fn (DevolucionGarantia $return): array => $this->tableRow($return))->all();
 
         return view('gestion.devoluciones-garantias.listar', compact('module'));
@@ -152,8 +170,8 @@ class DevolucionGarantiaController extends Controller
             'gestion.devoluciones.exportar',
         ), $this->filters($request))
             ->with(['customer:id,nombre_contacto,razon_social', 'product:id,nombre'])
-            ->orderBy('fecha_solicitud')
-            ->orderBy('id')
+            ->when($this->filters($request)['orden'] === 'antiguos', fn (Builder $query): Builder => $query->orderBy('fecha_solicitud')->orderBy('id'))
+            ->when($this->filters($request)['orden'] !== 'antiguos', fn (Builder $query): Builder => $query->latest('fecha_solicitud')->latest('id'))
             ->get();
         $rows = $returns->map(static fn (DevolucionGarantia $returnRequest): array => [
             $returnRequest->codigo,
@@ -205,12 +223,14 @@ class DevolucionGarantiaController extends Controller
         $search = trim($request->string('buscar')->toString());
         $type = trim($request->string('tipo')->toString());
         $status = trim($request->string('estado')->toString());
+        $order = trim($request->string('orden')->toString());
 
         return [
             'buscar' => $search !== '' ? $search : null,
             'periodo' => in_array($period, ['Esta semana', 'Este mes', 'Últimos 90 días'], true) ? $period : 'Este mes',
             'tipo' => in_array($type, ['Devolución', 'Garantía', 'Cambio'], true) ? $type : null,
             'estado' => in_array($status, ['Recibida', 'En evaluación', 'Aprobada', 'Rechazada', 'Resuelta'], true) ? $status : null,
+            'orden' => in_array($order, ['recientes', 'antiguos'], true) ? $order : 'recientes',
             'desde' => $from->startOfDay(),
             'hasta' => $to->endOfDay(),
         ];
