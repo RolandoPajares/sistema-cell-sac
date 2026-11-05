@@ -10,6 +10,10 @@ return new class extends Migration
     public function up(): void
     {
         $addChecks = static function (): void {
+            if (DB::getDriverName() !== 'mysql') {
+                return;
+            }
+
             $checks = [
                 'ck_responsables_recurso' => "(tipo_recurso = 'sede' AND almacen_id IS NULL) OR (tipo_recurso = 'almacen' AND almacen_id IS NOT NULL)",
                 'ck_responsables_vigencia' => 'vigente_hasta IS NULL OR vigente_hasta >= vigente_desde',
