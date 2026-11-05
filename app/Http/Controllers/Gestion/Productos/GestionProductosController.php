@@ -11,6 +11,7 @@ use App\Models\Catalogo\Categoria;
 use App\Models\Catalogo\Producto;
 use App\Models\Catalogo\VarianteProducto;
 use App\Models\Compras\Proveedor;
+use App\Models\Organizacion\Empresa;
 use App\Models\User;
 use App\Servicios\ExportadorTabular;
 use App\Servicios\RegistradorAuditoria;
@@ -34,6 +35,69 @@ use Throwable;
 
 class GestionProductosController extends Controller
 {
+    public function preciosCanales(Request $request, ServicioInventario $inventario): View
+    {
+        $filtros = $request->validate([
+            'buscar' => ['nullable', 'string', 'max:100'],
+            'categoria' => ['nullable', 'integer'],
+            'marca' => ['nullable', 'string', 'max:80'],
+            'estado' => ['nullable', 'in:activo,inactivo'],
+            'canal' => ['nullable', 'in:minorista,mayorista'],
+        ]);
+        $alcance = $inventario->alcanceConsulta($request->user(), 'gestion.productos.consultar');
+        $consultaBase = $inventario->productosParaConsulta($alcance, [], true, true);
+        $consultaFiltrada = $inventario->productosParaConsulta($alcance, [
+            'buscar' => $filtros['buscar'] ?? null,
+            'categoria' => isset($filtros['categoria']) ? (int) $filtros['categoria'] : null,
+            'estado' => $filtros['estado'] ?? null,
+        ], true, true)->when($filtros['marca'] ?? null, static fn (Builder $consulta, string $marca): Builder => $consulta->where('productos.marca', $marca));
+        $paginacion = (clone $consultaFiltrada)->with([
+            'category:id,nombre',
+            'variants:id,producto_id,codigo_sku',
+        ])->orderBy('productos.nombre')->orderBy('productos.id')->paginate(20)->withQueryString();
+        $empresa = Empresa::query()->findOrFail($alcance['empresa_id']);
+        $productos = $paginacion->getCollection()->map(static function (Producto $producto) use ($empresa): array {
+            $precioBase = (float) $producto->precio;
+            $precioMinorista = (float) ($producto->precio_oferta ?? $producto->precio);
+            $existenciasDisponibles = max(0, (float) $producto->existencias_alcance - (float) $producto->existencias_reservadas);
+
+            return [
+                'id' => (int) $producto->getKey(),
+                'nombre' => $producto->nombre,
+                'sku' => $producto->variants->pluck('codigo_sku')->filter()->implode(', ') ?: 'Sin SKU registrado',
+                'categoria' => $producto->category?->nombre ?? 'Sin categoría',
+                'marca' => $producto->marca,
+                'base' => $empresa->moneda_base.' '.number_format($precioBase, 2, '.', ','),
+                'minorista' => $empresa->moneda_base.' '.number_format($precioMinorista, 2, '.', ','),
+                'mayorista' => 'No registrado en MariaDB',
+                'stock' => rtrim(rtrim(number_format($existenciasDisponibles, 3, '.', ''), '0'), '.'),
+                'estado' => $producto->activo ? 'Activo' : 'Inactivo',
+                'icono' => 'bi-box-seam',
+                'activo' => (bool) $producto->activo,
+                'en_oferta' => $producto->precio_oferta !== null && (float) $producto->precio_oferta < $precioBase,
+            ];
+        })->all();
+        $productosFiltrados = (clone $consultaBase)->count();
+        $promedioBase = (float) (clone $consultaBase)->avg('productos.precio');
+        $promedioVigente = (float) (clone $consultaBase)->selectRaw('AVG(COALESCE(productos.precio_oferta, productos.precio)) AS promedio')->value('promedio');
+        $ofertas = (clone $consultaBase)->whereNotNull('productos.precio_oferta')
+            ->whereColumn('productos.precio_oferta', '<', 'productos.precio')->count();
+
+        return view('paneles.administrador.ecommerce-marketing.precios.listar', [
+            'productos' => $productos,
+            'paginacion' => $paginacion,
+            'filtros' => $filtros,
+            'categorias' => Categoria::query()->where('empresa_id', $alcance['empresa_id'])->where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
+            'marcas' => (clone $consultaBase)->whereNotNull('productos.marca')->where('productos.marca', '<>', '')
+                ->distinct()->orderBy('productos.marca')->pluck('productos.marca'),
+            'monedaBase' => $empresa->moneda_base,
+            'productosConPrecio' => $productosFiltrados,
+            'promedioBase' => $empresa->moneda_base.' '.number_format($promedioBase, 2, '.', ','),
+            'promedioMinorista' => $empresa->moneda_base.' '.number_format($promedioVigente, 2, '.', ','),
+            'productosEnOferta' => $ofertas,
+        ]);
+    }
+
     public function index(Request $request, ServicioInventario $inventario): View
     {
         $filters = $this->filters($request);

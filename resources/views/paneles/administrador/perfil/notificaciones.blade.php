@@ -6,15 +6,30 @@
         <header class="admin-page-head"><div><span class="eyebrow">Cuenta personal</span><h1>Mis notificaciones</h1><p>Avisos asociados a tu cuenta.</p></div></header>
         @include('paneles.administrador.perfil.navegacion')
         @unless ($available)
-            <div class="admin-alert admin-alert--error" role="status">Las notificaciones persistentes requieren la migración de seguridad de cuenta.</div>
+            <div class="admin-alert admin-alert--error" role="status">La tabla de notificaciones no está disponible en la base de datos.</div>
         @else
             <div class="form-card">
-                @forelse ($notifications as $notification)
-                    <article class="notification-row"><div><strong>{{ data_get($notification->data, 'title', class_basename($notification->type)) }}</strong><p>{{ data_get($notification->data, 'message', 'Aviso del sistema') }}</p><small>{{ $notification->created_at?->diffForHumans() }}</small></div>@if (! $notification->read_at)<form method="post" action="{{ route('management.account.notifications.read', $notification->id) }}">@csrf @method('PATCH')<button class="btn btn-outline-primary btn-sm" type="submit">Marcar como leída</button></form>@else<span class="badge text-bg-light">Leída</span>@endif</article>
+                @forelse ($notificaciones as $notificacion)
+                    <article class="notification-row">
+                        <div>
+                            <strong>{{ $notificacion->nombreTipo() }}</strong>
+                            <p>{{ $notificacion->datosLegibles() }}</p>
+                            <small>{{ $notificacion->creado_en?->diffForHumans() }}</small>
+                        </div>
+                        @if (! $notificacion->leido_en)
+                            <form method="post" action="{{ route('management.account.notifications.read', $notificacion->id) }}">
+                                @csrf
+                                @method('PATCH')
+                                <button class="btn btn-outline-primary btn-sm" type="submit">Marcar como leída</button>
+                            </form>
+                        @else
+                            <span class="badge text-bg-light">Leída</span>
+                        @endif
+                    </article>
                 @empty
-                    <p>No tienes notificaciones.</p>
+                    <p>No tienes notificaciones registradas.</p>
                 @endforelse
-                {{ $notifications->links() }}
+                {{ $notificaciones->links() }}
             </div>
         @endunless
     </section>

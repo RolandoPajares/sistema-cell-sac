@@ -11,12 +11,14 @@ use App\Models\Catalogo\Producto;
 use App\Models\Clientes\Cliente;
 use App\Models\Comercio\Pedido;
 use App\Models\Comercio\Venta;
+use App\Models\Finanzas\MedioPago;
 use App\Models\Organizacion\Sede;
 use App\Servicios\ConsultaVentas;
 use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioVentas;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
@@ -90,6 +92,121 @@ class VentaController extends Controller
             'canCreate' => $canCreate,
             'editOrder' => null,
         ]);
+    }
+
+    public function panelMayorista(Request $request): View
+    {
+        return $this->panelPorTipoCliente($request, 'mayorista');
+    }
+
+    public function panelMinorista(Request $request): View
+    {
+        return $this->panelPorTipoCliente($request, 'minorista');
+    }
+
+    private function panelPorTipoCliente(Request $request, string $tipoCliente): View
+    {
+        $usuarioActual = $request->user();
+        abort_unless($usuarioActual !== null, 403);
+        $this->autorizacion->assertAllowed($usuarioActual, 'gestion.ventas.consultar');
+
+        $filtros = $request->validate([
+            'buscar' => ['nullable', 'string', 'max:120'],
+            'estado' => ['nullable', 'string', 'max:30'],
+            'canal' => ['nullable', 'in:ecommerce,presencial'],
+            'pago' => ['nullable', 'integer', 'min:1', 'exists:medios_pago,id'],
+        ]);
+        $consultaBase = $this->ventas->query($usuarioActual, [])->whereHas('cliente', fn ($consulta) => $consulta->where('tipo', $tipoCliente));
+        $consultaFiltrada = $this->ventas->query($usuarioActual, $filtros)->whereHas('cliente', fn ($consulta) => $consulta->where('tipo', $tipoCliente));
+        if (isset($filtros['pago'])) {
+            $consultaFiltrada->whereHas('pagos', fn ($consulta) => $consulta->where('medio_pago_id', $filtros['pago']));
+        }
+        $ventasDelMes = (clone $consultaBase)->whereBetween('ventas.fecha_venta', [now()->startOfMonth(), now()->endOfMonth()]);
+        $cantidadDelMes = (clone $ventasDelMes)->count();
+        $ventasDelMesEnSoles = (clone $ventasDelMes)->where('ventas.moneda', 'PEN');
+        $cantidadVentasDelMesEnSoles = (clone $ventasDelMesEnSoles)->count();
+        $importeDelMes = (float) (clone $ventasDelMesEnSoles)->sum('ventas.total');
+        $importeMesAnterior = (float) (clone $consultaBase)->where('ventas.moneda', 'PEN')
+            ->whereBetween('ventas.fecha_venta', [now()->subMonthNoOverflow()->startOfMonth(), now()->subMonthNoOverflow()->endOfMonth()])->sum('ventas.total');
+        $ventasMesAnterior = (clone $consultaBase)->whereBetween('ventas.fecha_venta', [now()->subMonthNoOverflow()->startOfMonth(), now()->subMonthNoOverflow()->endOfMonth()])->count();
+        $tendenciaImporte = $importeMesAnterior > 0 ? round((($importeDelMes - $importeMesAnterior) / $importeMesAnterior) * 100, 1).'%' : 'Sin comparación';
+        $tendenciaCantidad = $ventasMesAnterior > 0 ? round((($cantidadDelMes - $ventasMesAnterior) / $ventasMesAnterior) * 100, 1).'%' : 'Sin comparación';
+
+        $ventas = (clone $consultaFiltrada)->with(['cliente', 'usuario', 'pedido', 'pagos.medioPago'])
+            ->orderByDesc('ventas.fecha_venta')->orderByDesc('ventas.id')->limit(10)->get();
+        $estados = (clone $consultaBase)->select('ventas.estado')->distinct()->orderBy('ventas.estado')->pluck('estado');
+        $mediosPago = MedioPago::query()->whereHas('pagos', fn ($consulta) => $consulta->whereIn('venta_id', (clone $consultaBase)->select('ventas.id')))
+            ->orderBy('nombre')->get(['id', 'nombre']);
+        $canales = collect();
+        if (Schema::hasColumn('ventas', 'canal')) {
+            $canales = (clone $consultaBase)->whereNotNull('ventas.canal')->distinct()->orderBy('ventas.canal')->pluck('ventas.canal');
+        } elseif (Schema::hasColumn('pedidos', 'canal')) {
+            $canales = (clone $consultaBase)->whereHas('pedido', fn ($consulta) => $consulta->whereNotNull('canal'))
+                ->join('pedidos', 'pedidos.id', '=', 'ventas.pedido_id')->distinct()->orderBy('pedidos.canal')->pluck('pedidos.canal');
+        }
+        $consultaCanales = (clone $consultaBase)->leftJoin('pedidos', 'pedidos.id', '=', 'ventas.pedido_id');
+        $campoCanal = Schema::hasColumn('ventas', 'canal') ? 'COALESCE(ventas.canal, pedidos.canal)' : 'pedidos.canal';
+        $resumenCanales = $consultaCanales->selectRaw($campoCanal.' AS canal, COUNT(*) AS cantidad')
+            ->groupByRaw($campoCanal)->orderByDesc('cantidad')->get();
+        $conteosEstado = (clone $consultaBase)->select('ventas.estado')->selectRaw('COUNT(*) AS cantidad')
+            ->groupBy('ventas.estado')->orderBy('ventas.estado')->get();
+        $ventasPorCliente = DB::table('ventas')->join('clientes', 'clientes.id', '=', 'ventas.cliente_id')
+            ->whereIn('ventas.id', (clone $consultaBase)->select('ventas.id'))
+            ->select('clientes.razon_social', 'clientes.nombre_contacto', 'ventas.moneda')
+            ->selectRaw('SUM(ventas.total) AS importe')
+            ->groupBy('clientes.id', 'clientes.razon_social', 'clientes.nombre_contacto', 'ventas.moneda')
+            ->orderByDesc('importe')->limit(5)->get();
+
+        $datos = [
+            'titulo' => $tipoCliente === 'mayorista' ? 'Ventas mayoristas' : 'Ventas minoristas', 'icono' => $tipoCliente === 'mayorista' ? 'bi-people' : 'bi-shop',
+            'descripcion' => 'Consulta las ventas registradas para clientes '.($tipoCliente === 'mayorista' ? 'mayoristas.' : 'minoristas.'),
+            'acciones' => [['texto' => 'Nueva venta '.($tipoCliente === 'mayorista' ? 'mayorista' : 'minorista'), 'icono' => 'bi-plus-lg', 'primaria' => true, 'ruta' => route('management.sales')], ['texto' => 'Nueva cotización', 'icono' => 'bi-file-earmark-text', 'ruta' => route('management.quotations')]],
+            'datos_reales' => true,
+            'metricas' => [
+                ['titulo' => 'Ingresos PEN del mes', 'valor' => 'PEN '.number_format($importeDelMes, 2), 'icono' => 'bi-coin', 'tendencia' => $tendenciaImporte],
+                ['titulo' => 'Ventas del mes', 'valor' => (string) $cantidadDelMes, 'icono' => 'bi-cart3', 'tono' => 'verde', 'tendencia' => $tendenciaCantidad],
+                ['titulo' => $tipoCliente === 'mayorista' ? 'Clientes empresariales activos' : 'Clientes minoristas activos', 'valor' => (string) (clone $consultaBase)->whereHas('cliente', fn ($consulta) => $consulta->where('activo', true))->distinct('ventas.cliente_id')->count('ventas.cliente_id'), 'icono' => $tipoCliente === 'mayorista' ? 'bi-buildings' : 'bi-people', 'tono' => 'rojo', 'tendencia' => 'Dato actual'],
+                ['titulo' => 'Ticket promedio PEN del mes', 'valor' => 'PEN '.number_format($cantidadVentasDelMesEnSoles > 0 ? $importeDelMes / $cantidadVentasDelMesEnSoles : 0, 2), 'icono' => 'bi-tag', 'tono' => 'violeta', 'tendencia' => 'Dato actual'],
+            ],
+            'buscar' => 'Buscar por cliente, código de venta o asesor…',
+            'filtros' => [
+                ['titulo' => 'Canal', 'campo' => 'canal', 'todos' => 'Todos los canales', 'opciones' => $canales->all()],
+                ['titulo' => 'Estado', 'campo' => 'estado', 'todos' => 'Todos los estados', 'opciones' => $estados->all()],
+                ['titulo' => 'Medio de pago', 'campo' => 'pago', 'todos' => 'Todos los medios de pago', 'opciones' => $mediosPago->map(fn (MedioPago $medio): array => ['valor' => (string) $medio->id, 'etiqueta' => $medio->nombre])->all()],
+            ],
+            'tablaTitulo' => 'Ventas '.($tipoCliente === 'mayorista' ? 'mayoristas' : 'minoristas').' registradas', 'tablaIcono' => 'bi-cart3',
+            'total' => (clone $consultaFiltrada)->count(),
+            'columnas' => ['Venta', 'Empresa / cliente', 'Asesor', 'Fecha', 'Total', 'Medio de pago', 'Estado'],
+            'filas' => $ventas->map(static function (Venta $venta): array {
+                $cliente = $venta->cliente?->razon_social ?: $venta->cliente?->nombre_contacto ?: 'Sin cliente asociado';
+                $estado = (string) $venta->estado;
+                $canal = $venta->canal ?? $venta->pedido?->canal ?? '';
+
+                return [
+                    'celdas' => [
+                        ['texto' => $venta->codigo, 'tono' => 'azul'], $cliente,
+                        $venta->usuario?->nombre ?? 'Sin asesor registrado',
+                        $venta->fecha_venta?->format('d/m/Y') ?? '—',
+                        $venta->moneda.' '.number_format((float) $venta->total, 2),
+                        ['texto' => $venta->pagos->pluck('medioPago.nombre')->filter()->unique()->join(', ') ?: 'Sin pago registrado', 'tono' => 'azul'],
+                        ['texto' => $estado, 'tono' => in_array(mb_strtolower($estado), ['confirmada', 'completada'], true) ? 'verde' : 'ambar'],
+                    ],
+                    'filtros' => ['canal' => $canal, 'estado' => $estado, 'pago' => $venta->pagos->pluck('medio_pago_id')->unique()->implode(',')],
+                ];
+            })->all(),
+            'formTitulo' => 'Nueva venta '.($tipoCliente === 'mayorista' ? 'mayorista' : 'minorista'), 'formIcono' => 'bi-cart3', 'formAccion' => 'Abrir formulario de venta',
+            'formCampos' => [['etiqueta' => 'Empresa / cliente', 'ayuda' => 'Los clientes mayoristas se consultan desde la gestión de ventas'], ['etiqueta' => 'Productos', 'ayuda' => 'Los productos y existencias se consultan desde la gestión de ventas'], ['etiqueta' => 'Cantidad', 'ayuda' => 'Completa la venta en el formulario autorizado', 'tipo' => 'input']],
+            'rutaFormulario' => route('management.sales'),
+            'anillo' => ['titulo' => 'Ventas por canal', 'icono' => 'bi-bar-chart', 'valor' => 'PEN '.number_format($importeDelMes, 2), 'subtitulo' => 'Ingresos registrados este mes', 'gradiente' => 'conic-gradient(#178bfa 0 100%)', 'filas' => $resumenCanales->isEmpty() ? [['Sin canal registrado', '0']] : $resumenCanales->map(fn ($fila): array => [$fila->canal ?: 'Sin canal registrado', (string) $fila->cantidad])->all()],
+            'grafico' => ['titulo' => 'Ventas por estado', 'icono' => 'bi-bar-chart', 'barras' => $conteosEstado->isEmpty() ? [['Sin registros', '0', 0]] : $conteosEstado->map(fn ($fila): array => [$fila->estado, (string) $fila->cantidad, (int) round(((int) $fila->cantidad / max(1, (int) $conteosEstado->max('cantidad'))) * 100)])->all()],
+            'ranking' => ['titulo' => 'Clientes con mayor venta registrada', 'icono' => 'bi-trophy', 'filas' => $ventasPorCliente->isEmpty() ? [['Sin registros', 'PEN 0.00']] : $ventasPorCliente->map(fn (object $fila): array => [$fila->razon_social ?: $fila->nombre_contacto, $fila->moneda.' '.number_format((float) $fila->importe, 2)])->all()],
+        ];
+
+        $vista = $tipoCliente === 'mayorista'
+            ? 'paneles.administrador.operaciones-comerciales.ventas-mayoristas.listar'
+            : 'paneles.administrador.operaciones-comerciales.ventas-minoristas.listar';
+
+        return view($vista, compact('datos', 'filtros'));
     }
 
     public function store(GuardarVentaRequest $request): RedirectResponse

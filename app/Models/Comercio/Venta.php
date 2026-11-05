@@ -3,6 +3,8 @@
 namespace App\Models\Comercio;
 
 use App\Models\Clientes\Cliente;
+use App\Models\Finanzas\Pago;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -27,6 +29,11 @@ class Venta extends Model
         return $this->belongsTo(Cliente::class, 'cliente_id');
     }
 
+    public function usuario(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'usuario_id');
+    }
+
     public function pedido(): BelongsTo
     {
         return $this->belongsTo(Pedido::class, 'pedido_id');
@@ -35,5 +42,10 @@ class Venta extends Model
     public function detalles(): HasMany
     {
         return $this->hasMany(DetalleVenta::class, 'venta_id');
+    }
+
+    public function pagos(): HasMany
+    {
+        return $this->hasMany(Pago::class, 'venta_id');
     }
 }

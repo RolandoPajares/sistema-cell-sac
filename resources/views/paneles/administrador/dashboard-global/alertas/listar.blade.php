@@ -4,42 +4,110 @@
 @section('body_class', 'modulo-dashboard-global')
 
 @section('content')
-@php
-    $alertasPorTipo = [
-        ['nombre' => 'Inventario', 'valor' => '37.5%', 'color' => '#0767f5'],
-        ['nombre' => 'Pedidos', 'valor' => '18.8%', 'color' => '#0bc4ee'],
-        ['nombre' => 'Seguridad', 'valor' => '12.5%', 'color' => '#9b82f6'],
-        ['nombre' => 'Otros', 'valor' => '31.2%', 'color' => '#77bbfb'],
-    ];
-@endphp
 <section class="tc-dg" data-dashboard-global="alertas">
-    @include('paneles.administrador.dashboard-global.componentes.cabecera', ['titulo' => 'Alertas y notificaciones', 'icono' => 'bi-bell', 'descripcion' => 'Monitorea eventos importantes, incidencias y recordatorios del sistema.'])
-    @include('paneles.administrador.dashboard-global.componentes.aviso-diseno')
+    @include('paneles.administrador.dashboard-global.componentes.cabecera', ['titulo' => 'Alertas y notificaciones', 'icono' => 'bi-bell', 'descripcion' => 'Consulta las notificaciones persistidas para la cuenta administrativa actual.'])
 
-    <div class="tc-dg__tabs" role="tablist" aria-label="Tipos de alertas" data-alert-tabs>
-        <button type="button" role="tab" aria-selected="true" data-alert-tab="todas"><i class="bi bi-exclamation-triangle"></i> Todas <span>(27)</span></button>
-        <button type="button" role="tab" aria-selected="false" data-alert-tab="inventario"><i class="bi bi-box-seam"></i> Inventario <span>(12)</span></button>
-        <button type="button" role="tab" aria-selected="false" data-alert-tab="pedidos"><i class="bi bi-cart3"></i> Pedidos <span>(5)</span></button>
-        <button type="button" role="tab" aria-selected="false" data-alert-tab="seguridad"><i class="bi bi-shield-check"></i> Seguridad <span>(3)</span></button>
-        <button type="button" role="tab" aria-selected="false" data-alert-tab="sistema"><i class="bi bi-gear"></i> Sistema <span>(4)</span></button>
-    </div>
+    @unless ($disponible)
+        <div class="tc-dg__empty" role="status">La tabla notificaciones no está disponible en la base de datos.</div>
+    @else
+        <form id="filtro-estado-alertas" method="GET" action="{{ route('management.dashboard.alerts') }}">
+            @if ($busqueda !== null && $busqueda !== '')
+                <input type="hidden" name="buscar" value="{{ $busqueda }}">
+            @endif
+        </form>
 
-    <div class="tc-dg__metrics tc-dg__metrics--four">
-        @include('paneles.administrador.dashboard-global.componentes.metrica', ['titulo' => 'Alertas críticas', 'icono' => 'bi-exclamation-triangle', 'tono' => 'rojo', 'valor' => '8', 'detalle' => '↑ 33.3% vs. mes anterior'])
-        @include('paneles.administrador.dashboard-global.componentes.metrica', ['titulo' => 'No leídas', 'icono' => 'bi-bell', 'valor' => '27', 'detalle' => '↓ 18.2% vs. mes anterior'])
-        @include('paneles.administrador.dashboard-global.componentes.metrica', ['titulo' => 'Vencimientos', 'icono' => 'bi-calendar-event', 'tono' => 'ambar', 'valor' => '14', 'detalle' => '↑ 27.3% vs. mes anterior'])
-        @include('paneles.administrador.dashboard-global.componentes.metrica', ['titulo' => 'Incidencias resueltas', 'icono' => 'bi-check-circle', 'tono' => 'verde', 'valor' => '96', 'detalle' => '↑ 22.4% vs. mes anterior'])
-    </div>
+        <div class="tc-dg__tabs" role="tablist" aria-label="Estado de notificaciones">
+            <button type="submit" form="filtro-estado-alertas" name="estado" value="todas" role="tab" aria-selected="{{ $estado === 'todas' ? 'true' : 'false' }}"><i class="bi bi-bell"></i> Todas <span>({{ number_format($resumen['total']) }})</span></button>
+            <button type="submit" form="filtro-estado-alertas" name="estado" value="no_leidas" role="tab" aria-selected="{{ $estado === 'no_leidas' ? 'true' : 'false' }}"><i class="bi bi-bell-fill"></i> No leídas <span>({{ number_format($resumen['no_leidas']) }})</span></button>
+            <button type="submit" form="filtro-estado-alertas" name="estado" value="leidas" role="tab" aria-selected="{{ $estado === 'leidas' ? 'true' : 'false' }}"><i class="bi bi-envelope-open"></i> Leídas <span>({{ number_format($resumen['leidas']) }})</span></button>
+        </div>
 
-    <div class="tc-dg__grid tc-dg__grid--alerts">
-        <article class="tc-dg__card"><div class="tc-dg__card-head"><i class="bi bi-bell"></i><div><h2>Alertas y notificaciones (27)</h2><p>Ejemplos de alertas recientes.</p></div><span>Todas las alertas</span></div><div class="tc-dg__alert-list" data-alert-list><button class="is-selected" type="button" data-alert-kind="inventario" data-alert-title="Stock crítico: iPhone 15 (128 GB)" data-alert-description="El inventario de ejemplo está por debajo del mínimo configurado."><i class="bi bi-exclamation-triangle"></i><span><strong>Stock crítico: iPhone 15 (128 GB)</strong><small>El inventario está por debajo del mínimo (5 unidades).</small></span><b>Crítica</b><time>Hoy, 12:46</time></button><button type="button" data-alert-kind="inventario" data-alert-title="Vencimiento de garantía" data-alert-description="Tres equipos de ejemplo vencerán en los próximos 7 días."><i class="bi bi-calendar-event"></i><span><strong>Vencimiento de garantía</strong><small>3 equipos con garantía por vencer.</small></span><b>Inventario</b><time>Hoy, 11:20</time></button><button type="button" data-alert-kind="pedidos" data-alert-title="Pedido con retraso" data-alert-description="Un pedido de ejemplo supera el tiempo de entrega estimado."><i class="bi bi-cart3"></i><span><strong>Pedido #PD-2841 con retraso</strong><small>Supera el tiempo estimado de entrega.</small></span><b>Pedidos</b><time>Hoy, 10:18</time></button><button type="button" data-alert-kind="seguridad" data-alert-title="Intento de acceso no autorizado" data-alert-description="Ejemplo de un evento de acceso que requiere revisión."><i class="bi bi-shield-exclamation"></i><span><strong>Intento de acceso no autorizado</strong><small>Se detectó un inicio de sesión fallido.</small></span><b>Seguridad</b><time>Ayer, 19:37</time></button><button type="button" data-alert-kind="sistema" data-alert-title="Tarea programada con error" data-alert-description="Ejemplo de una sincronización de inventario fallida."><i class="bi bi-gear"></i><span><strong>Tarea programada con error</strong><small>Falló una sincronización de inventario.</small></span><b>Sistema</b><time>Ayer, 17:05</time></button><p class="tc-dg__alert-empty" hidden data-alert-empty>No hay ejemplos en esta categoría.</p></div></article>
-        <article class="tc-dg__card tc-dg__alert-detail"><div class="tc-dg__card-head"><i class="bi bi-exclamation-triangle"></i><div><h2 data-alert-detail-title>Stock crítico: iPhone 15 (128 GB)</h2><p>Detalle del evento seleccionado (ejemplo).</p></div><span>Crítica</span></div><p class="tc-dg__detail-label">Descripción</p><p class="tc-dg__detail-copy" data-alert-detail-description>El inventario de ejemplo está por debajo del mínimo configurado.</p><div class="tc-dg__detail-grid"><div><i class="bi bi-box-seam"></i><small>Producto</small><strong>iPhone 15 (128 GB)</strong></div><div><i class="bi bi-box"></i><small>Stock actual</small><strong>5 unidades</strong></div><div><i class="bi bi-geo-alt"></i><small>Sede</small><strong>Tienda online</strong></div><div><i class="bi bi-tag"></i><small>Categoría</small><strong>Celulares</strong></div></div><p class="tc-dg__recommendation"><i class="bi bi-lightbulb"></i><span><strong>Recomendación de ejemplo</strong> Genera una orden de compra o transfiere stock al integrar el inventario por sede.</span></p><div class="tc-dg__alert-actions"><button type="button" disabled>Marcar como leída</button><button type="button" disabled>Asignar</button><button type="button" disabled>Resolver</button></div></article>
-    </div>
+        <form class="tc-dg__filters" method="GET" action="{{ route('management.dashboard.alerts') }}">
+            <label><span><i class="bi bi-search"></i> Buscar notificaciones</span><input type="search" name="buscar" value="{{ $busqueda }}" maxlength="120"></label>
+            <label><span><i class="bi bi-funnel"></i> Estado</span><select name="estado">
+                <option value="todas" @selected($estado === 'todas')>Todas</option>
+                <option value="no_leidas" @selected($estado === 'no_leidas')>No leídas</option>
+                <option value="leidas" @selected($estado === 'leidas')>Leídas</option>
+            </select></label>
+            <button type="submit"><i class="bi bi-arrow-repeat"></i> Aplicar filtros</button>
+        </form>
 
-    <div class="tc-dg__grid tc-dg__grid--thirds">
-        <article class="tc-dg__card"><div class="tc-dg__card-head"><i class="bi bi-calendar3"></i><div><h2>Recordatorios (3)</h2><p>Ejemplos de vencimientos importantes.</p></div></div><div class="tc-dg__task-list"><span>Renovar licencias del sistema <b>En 3 días</b></span><span>Revisión de accesos de usuarios <b>En 4 días</b></span><span>Cierre mensual de inventario <b>En 8 días</b></span></div></article>
-        <article class="tc-dg__card"><div class="tc-dg__card-head"><i class="bi bi-gear"></i><div><h2>Tareas automáticas (4)</h2><p>Ejemplos de procesos programados.</p></div></div><div class="tc-dg__task-list"><span>Sincronización de inventario <b>Activa</b></span><span>Respaldo de base de datos <b>Activa</b></span><span>Envío de reportes por correo <b>Activa</b></span></div></article>
-        <article class="tc-dg__card"><div class="tc-dg__card-head"><i class="bi bi-bar-chart"></i><div><h2>Alertas por tipo</h2><p>Ejemplo de distribución por categoría.</p></div></div><div class="tc-dg__chart">@include('paneles.administrador.dashboard-global.componentes.anillo', ['centro' => '64', 'etiqueta' => 'Alertas totales', 'gradiente' => 'conic-gradient(#0767f5 0 37%, #0bc4ee 37% 56%, #9b82f6 56% 69%, #77bbfb 69% 82%, #8ce5db 82% 100%)', 'leyenda' => $alertasPorTipo])</div></article>
-    </div>
+        <div class="tc-dg__metrics tc-dg__metrics--four">
+            @include('paneles.administrador.dashboard-global.componentes.metrica', ['titulo' => 'Notificaciones', 'icono' => 'bi-bell', 'valor' => number_format($resumen['total']), 'detalle' => 'Registros asociados a esta cuenta'])
+            @include('paneles.administrador.dashboard-global.componentes.metrica', ['titulo' => 'No leídas', 'icono' => 'bi-envelope-exclamation', 'tono' => 'rojo', 'valor' => number_format($resumen['no_leidas']), 'detalle' => 'Según leido_en en MariaDB'])
+            @include('paneles.administrador.dashboard-global.componentes.metrica', ['titulo' => 'Leídas', 'icono' => 'bi-envelope-open', 'tono' => 'verde', 'valor' => number_format($resumen['leidas']), 'detalle' => 'Según leido_en en MariaDB'])
+            @include('paneles.administrador.dashboard-global.componentes.metrica', ['titulo' => 'Tipos registrados', 'icono' => 'bi-tags', 'tono' => 'violeta', 'valor' => number_format($resumen['tipos']), 'detalle' => 'Tipos distintos almacenados'])
+        </div>
+
+        <form id="seleccionar-notificacion" method="GET" action="{{ route('management.dashboard.alerts') }}">
+            <input type="hidden" name="estado" value="{{ $estado }}">
+            @if ($busqueda !== null && $busqueda !== '')
+                <input type="hidden" name="buscar" value="{{ $busqueda }}">
+            @endif
+        </form>
+
+        <div class="tc-dg__grid tc-dg__grid--alerts">
+            <article class="tc-dg__card">
+                <div class="tc-dg__card-head"><i class="bi bi-bell"></i><div><h2>Notificaciones ({{ number_format($resumen['total']) }})</h2><p>Registros de la cuenta administrativa autenticada.</p></div><span>{{ $estado === 'todas' ? 'Todas' : ($estado === 'no_leidas' ? 'No leídas' : 'Leídas') }}</span></div>
+                <div class="tc-dg__alert-list">
+                    @forelse ($notificaciones as $notificacion)
+                        <button class="{{ $notificacionSeleccionada?->is($notificacion) ? 'is-selected' : '' }}" type="submit" form="seleccionar-notificacion" name="notificacion" value="{{ $notificacion->id }}">
+                            <i class="bi {{ $notificacion->leido_en ? 'bi-envelope-open' : 'bi-bell-fill' }}"></i>
+                            <span><strong>{{ $notificacion->nombreTipo() }}</strong><small>{{ $notificacion->datosLegibles() }}</small></span>
+                            <b>{{ $notificacion->leido_en ? 'Leída' : 'No leída' }}</b>
+                            <time>{{ $notificacion->creado_en?->format('d/m/Y H:i') ?? 'Fecha no informada' }}</time>
+                        </button>
+                    @empty
+                        <p class="tc-dg__alert-empty">
+                            @if ($resumen['total'] === 0)
+                                No hay notificaciones registradas.
+                            @else
+                                No hay notificaciones que coincidan con los filtros aplicados.
+                            @endif
+                        </p>
+                    @endforelse
+                </div>
+                {{ $notificaciones->links() }}
+            </article>
+
+            <article class="tc-dg__card tc-dg__alert-detail">
+                @if ($notificacionSeleccionada)
+                    <div class="tc-dg__card-head"><i class="bi bi-bell"></i><div><h2>{{ $notificacionSeleccionada->nombreTipo() }}</h2><p>Datos persistidos en la notificación seleccionada.</p></div><span>{{ $notificacionSeleccionada->leido_en ? 'Leída' : 'No leída' }}</span></div>
+                    <p class="tc-dg__detail-label">Datos de la notificación</p>
+                    <p class="tc-dg__detail-copy">{{ $notificacionSeleccionada->datosLegibles() }}</p>
+                    <div class="tc-dg__detail-grid">
+                        <div><i class="bi bi-tag"></i><small>Tipo</small><strong>{{ $notificacionSeleccionada->tipo }}</strong></div>
+                        <div><i class="bi bi-envelope"></i><small>Lectura</small><strong>{{ $notificacionSeleccionada->leido_en ? 'Leída' : 'Pendiente de lectura' }}</strong></div>
+                        <div><i class="bi bi-calendar-event"></i><small>Creada</small><strong>{{ $notificacionSeleccionada->creado_en?->format('d/m/Y H:i') ?? 'Fecha no informada' }}</strong></div>
+                        <div><i class="bi bi-fingerprint"></i><small>Identificador</small><strong>{{ $notificacionSeleccionada->id }}</strong></div>
+                    </div>
+                    @unless ($notificacionSeleccionada->leido_en)
+                        <div class="tc-dg__alert-actions">
+                            <form method="POST" action="{{ route('management.account.notifications.read', $notificacionSeleccionada->id) }}">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit">Marcar como leída</button>
+                            </form>
+                        </div>
+                    @endunless
+                @else
+                    <div class="tc-dg__card-head"><i class="bi bi-bell-slash"></i><div><h2>Detalle de notificación</h2><p>Selecciona un registro para consultar sus datos.</p></div></div>
+                    <p class="tc-dg__empty">No hay notificaciones para mostrar.</p>
+                @endif
+            </article>
+        </div>
+
+        <div class="tc-dg__grid tc-dg__grid--thirds">
+            <article class="tc-dg__card"><div class="tc-dg__card-head"><i class="bi bi-pie-chart"></i><div><h2>Notificaciones por tipo</h2><p>Distribución calculada desde registros reales.</p></div></div><div class="tc-dg__chart">
+                @if ($resumen['distribucion'] === [])
+                    <p class="tc-dg__empty">No hay datos para construir la distribución.</p>
+                @else
+                    @include('paneles.administrador.dashboard-global.componentes.anillo', ['centro' => number_format($resumen['total']), 'etiqueta' => 'Notificaciones', 'gradiente' => $resumen['gradiente'], 'leyenda' => $resumen['distribucion']])
+                @endif
+            </div></article>
+            <article class="tc-dg__card"><div class="tc-dg__card-head"><i class="bi bi-envelope-check"></i><div><h2>Estado de lectura</h2><p>Conteo actual del destinatario autenticado.</p></div></div><div class="tc-dg__task-list"><span>No leídas <b>{{ number_format($resumen['no_leidas']) }}</b></span><span>Leídas <b>{{ number_format($resumen['leidas']) }}</b></span></div></article>
+            <article class="tc-dg__card"><div class="tc-dg__card-head"><i class="bi bi-person-check"></i><div><h2>Alcance de consulta</h2><p>Los registros quedan aislados por destinatario.</p></div></div><div class="tc-dg__task-list"><span>Cuenta consultada <b>Autenticada</b></span><a href="{{ route('management.account.notifications') }}">Ver mis notificaciones <i class="bi bi-arrow-right"></i></a></div></article>
+        </div>
+    @endunless
 </section>
 @endsection

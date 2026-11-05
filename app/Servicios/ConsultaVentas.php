@@ -26,7 +26,8 @@ class ConsultaVentas
                     $query->where('ventas.codigo', 'like', '%'.$busqueda.'%')
                         ->orWhereHas('cliente', fn (Builder $cliente) => $cliente
                             ->where('razon_social', 'like', '%'.$busqueda.'%')
-                            ->orWhere('nombre_contacto', 'like', '%'.$busqueda.'%'));
+                            ->orWhere('nombre_contacto', 'like', '%'.$busqueda.'%'))
+                        ->orWhereHas('usuario', fn (Builder $usuario) => $usuario->where('nombre', 'like', '%'.$busqueda.'%'));
                 });
             })
             ->when($filtros['estado'] ?? null, fn (Builder $query, string $estado) => $query->where('ventas.estado', $estado))

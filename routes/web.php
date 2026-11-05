@@ -13,6 +13,7 @@ use App\Http\Controllers\Gestion\Compras\CompraController;
 use App\Http\Controllers\Gestion\Cotizaciones\CotizacionController;
 use App\Http\Controllers\Gestion\Cupones\CuponController;
 use App\Http\Controllers\Gestion\DevolucionesGarantias\DevolucionGarantiaController;
+use App\Http\Controllers\Gestion\FacturacionController;
 use App\Http\Controllers\Gestion\FinanzasController;
 use App\Http\Controllers\Gestion\Inventario\InventarioController;
 use App\Http\Controllers\Gestion\Inventario\TransferenciaExistenciaController;
@@ -31,10 +32,13 @@ use App\Http\Controllers\Gestion\SesionCajaController;
 use App\Http\Controllers\Gestion\SoporteReclamos\SoporteReclamoController;
 use App\Http\Controllers\Gestion\Usuarios\GestionUsuariosController;
 use App\Http\Controllers\Gestion\Ventas\VentaController;
+use App\Http\Controllers\Paneles\Administrador\AlertasGlobalesController;
 use App\Http\Controllers\Paneles\Administrador\DashboardController as AdministradorDashboardController;
 use App\Http\Controllers\Paneles\Administrador\DashboardGlobalPedidosController;
 use App\Http\Controllers\Paneles\Administrador\DashboardGlobalSedesController;
 use App\Http\Controllers\Paneles\Administrador\DashboardGlobalVentasController;
+use App\Http\Controllers\Paneles\Administrador\DispositivosController;
+use App\Http\Controllers\Paneles\Administrador\EnviosPedidosController;
 use App\Http\Controllers\Publico\Asistente\AsistenteController;
 use App\Http\Controllers\Publico\Catalogo\CatalogoController;
 use App\Http\Controllers\Publico\Catalogo\ComparadorController;
@@ -115,7 +119,7 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
         ->middleware('role:administrador')->name('dashboard.sites');
     Route::get('/dashboard-global/sedes/exportar/{format}', [DashboardGlobalSedesController::class, 'export'])
         ->whereIn('format', ['pdf', 'excel', 'csv'])->middleware('role:administrador')->name('reports.dashboard_sites.export');
-    Route::get('/dashboard-global/alertas', static fn (): View => view('paneles.administrador.dashboard-global.alertas.listar'))
+    Route::get('/dashboard-global/alertas', [AlertasGlobalesController::class, 'mostrar'])
         ->middleware('role:administrador')->name('dashboard.alerts');
     Route::get('/organizacion/empresa', [EmpresaController::class, 'index'])
         ->middleware(['role:administrador', 'permiso:ruta'])->name('company_settings.data');
@@ -141,30 +145,30 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
         ->middleware(['role:administrador', 'permiso:ruta', 'permiso:pantalla.admin.staff.consultar'])->name('company_settings.staff');
     Route::get('/organizacion/responsables', static fn (): View => view('paneles.administrador.organizacion.responsables.listar'))
         ->middleware(['role:administrador', 'permiso:ruta', 'permiso:pantalla.admin.responsibles.consultar'])->name('company_settings.responsibles');
-    Route::get('/seguridad-diseno/usuarios', static fn (): View => view('paneles.administrador.seguridad.usuarios.listar'))
+    Route::get('/seguridad-diseno/usuarios', static fn (): RedirectResponse => redirect()->route('management.users'))
         ->middleware('role:administrador')->name('roles_permissions.preview.users');
-    Route::get('/seguridad-diseno/roles', static fn (): View => view('paneles.administrador.seguridad.roles.listar'))
+    Route::get('/seguridad-diseno/roles', static fn (): RedirectResponse => redirect()->route('management.roles_permissions'))
         ->middleware('role:administrador')->name('roles_permissions.preview.roles');
-    Route::get('/seguridad-diseno/matriz', static fn (): View => view('paneles.administrador.seguridad.matriz.listar'))
+    Route::get('/seguridad-diseno/matriz', static fn (): RedirectResponse => redirect()->route('management.roles_permissions'))
         ->middleware('role:administrador')->name('roles_permissions.preview.matrix');
-    Route::get('/seguridad-diseno/asignaciones', static fn (): View => view('paneles.administrador.seguridad.asignaciones.listar'))
+    Route::get('/seguridad-diseno/asignaciones', static fn (): RedirectResponse => redirect()->route('management.user_assignments'))
         ->middleware('role:administrador')->name('roles_permissions.preview.assignments');
-    Route::get('/seguridad-diseno/asignaciones-sede', static fn (): View => view('paneles.administrador.seguridad.asignaciones-sede.listar'))
+    Route::get('/seguridad-diseno/asignaciones-sede', static fn (): RedirectResponse => redirect()->route('management.user_assignments'))
         ->middleware('role:administrador')->name('roles_permissions.preview.site_assignments');
-    Route::get('/seguridad-diseno/menus', static fn (): View => view('paneles.administrador.seguridad.menus.listar'))
+    Route::get('/seguridad-diseno/menus', static fn (): RedirectResponse => redirect()->route('management.menus'))
         ->middleware('role:administrador')->name('roles_permissions.preview.menus');
-    Route::get('/seguridad-diseno/modulos', static fn (): View => view('paneles.administrador.seguridad.modulos.listar'))
+    Route::get('/seguridad-diseno/modulos', static fn (): RedirectResponse => redirect()->route('management.modules'))
         ->middleware('role:administrador')->name('roles_permissions.preview.modules');
     Route::get('/seguridad-diseno/politicas', static fn (): View => view('paneles.administrador.seguridad.politicas.listar'))
         ->middleware('role:administrador')->name('roles_permissions.preview.policies');
     Route::get('/seguridad-diseno/sesiones', static fn (): View => view('paneles.administrador.seguridad.sesiones.listar'))
         ->middleware('role:administrador')->name('roles_permissions.preview.sessions');
-    Route::get('/seguridad-diseno/bloqueos', static fn (): View => view('paneles.administrador.seguridad.bloqueos.listar'))
+    Route::get('/seguridad-diseno/bloqueos', static fn (): RedirectResponse => redirect()->route('management.users', ['estado' => 'inactivo']))
         ->middleware('role:administrador')->name('roles_permissions.preview.blocks');
     Route::get('/cotizaciones', [CotizacionController::class, 'index'])->name('quotations');
 
     Route::get('/productos', [GestionProductosController::class, 'index'])->name('products');
-    Route::get('/ecommerce/diseno/precios', static fn (): View => view('paneles.administrador.ecommerce-marketing.precios.listar'))
+    Route::get('/ecommerce/diseno/precios', [GestionProductosController::class, 'preciosCanales'])
         ->middleware('role:administrador')->name('products.preview.prices');
     Route::get('/ecommerce/diseno/tienda', static fn (): View => view('paneles.administrador.ecommerce-marketing.tienda.listar'))
         ->middleware('role:administrador')->name('products.preview.store_settings');
@@ -208,9 +212,9 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
 
     Route::get('/pedidos', [PedidoController::class, 'index'])->name('orders');
     Route::get('/ventas', [VentaController::class, 'index'])->name('sales');
-    Route::get('/ventas/diseno/minoristas', static fn (): View => view('paneles.administrador.operaciones-comerciales.ventas-minoristas.listar'))
+    Route::get('/ventas/diseno/minoristas', [VentaController::class, 'panelMinorista'])
         ->middleware('role:administrador')->name('sales.preview.retail');
-    Route::get('/ventas/diseno/mayoristas', static fn (): View => view('paneles.administrador.operaciones-comerciales.ventas-mayoristas.listar'))
+    Route::get('/ventas/diseno/mayoristas', [VentaController::class, 'panelMayorista'])
         ->middleware('role:administrador')->name('sales.preview.wholesale');
     Route::get('/ventas/exportar', [VentaController::class, 'export'])->name('sales.export');
     Route::post('/ventas', [VentaController::class, 'store'])->name('sales.store');
@@ -255,9 +259,9 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::post('/inventario/transferencias/{transfer}/reject', [TransferenciaExistenciaController::class, 'reject'])->whereNumber('transfer')->name('inventory.transfer_reject');
     Route::post('/inventario/transferencias/{transfer}/cancel', [TransferenciaExistenciaController::class, 'cancel'])->whereNumber('transfer')->name('inventory.transfer_cancel');
     Route::post('/inventario/transferencias/{transfer}/close', [TransferenciaExistenciaController::class, 'close'])->whereNumber('transfer')->name('inventory.transfer_close');
-    Route::get('/inventario/diseno/envios', static fn (): View => view('paneles.administrador.inventario-logistica.envios.listar'))
+    Route::get('/inventario/diseno/envios', [EnviosPedidosController::class, 'mostrar'])
         ->middleware('role:administrador')->name('inventory.preview.shipments');
-    Route::get('/inventario/diseno/series', static fn (): View => view('paneles.administrador.inventario-logistica.series.listar'))
+    Route::get('/inventario/diseno/series', [DispositivosController::class, 'mostrar'])
         ->middleware('role:administrador')->name('inventory.preview.serials');
     Route::post('/inventario/{product}', [InventarioController::class, 'adjust'])->whereNumber('product')->name('inventory.adjust');
 });
@@ -305,7 +309,7 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::get('/pagos/{pago}', [FinanzasController::class, 'detallePago'])->whereNumber('pago')->name('payments.show');
     Route::patch('/pagos/{pago}/anular', [FinanzasController::class, 'anularPago'])->whereNumber('pago')->name('payments.cancel');
     Route::patch('/pagos/{pago}/confirmar-efectivo', [FinanzasController::class, 'confirmarPagoEfectivo'])->whereNumber('pago')->name('payments.cash.update');
-    Route::get('/facturacion', static fn (): View => view('gestion.facturacion.listar'))->name('billing');
+    Route::get('/facturacion', [FacturacionController::class, 'index'])->name('billing');
     Route::get('/reembolsos', [FinanzasController::class, 'reembolsos'])->name('refunds');
     Route::get('/reembolsos/exportar/{format}', [FinanzasController::class, 'exportarReembolsos'])
         ->where('format', 'csv')->name('refunds.export');

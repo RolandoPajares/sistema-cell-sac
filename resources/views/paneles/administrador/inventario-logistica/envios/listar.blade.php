@@ -1,29 +1,125 @@
-﻿@extends('layouts.administracion')
-@section('title', 'Envíos y entregas — Vista de diseño')
-@section('body_class', 'modulo-inventario-logistica')
-@section('content')
-@php
-    $pagina = [
-        'modo' => 'envios', 'titulo' => 'Envíos y entregas', 'icono' => 'bi-truck', 'descripcion' => 'Controla los despachos, rutas, estado del transporte y confirmación de entregas.',
-        'acciones' => [['texto' => 'Nuevo envío', 'icono' => 'bi-plus-lg', 'primaria' => true, 'modal' => 'envio'], ['texto' => 'Programar ruta', 'icono' => 'bi-calendar3', 'modal' => 'ruta']],
-        'metricas' => [['titulo' => 'Pedidos por despachar', 'valor' => '48', 'icono' => 'bi-box-seam', 'detalle' => 'Cifra ilustrativa', 'tendencia' => '↑ 12 %'], ['titulo' => 'Envíos en ruta', 'valor' => '27', 'icono' => 'bi-truck', 'detalle' => 'Cifra ilustrativa', 'tendencia' => '↓ 8 %'], ['titulo' => 'Entregas completadas', 'valor' => '316', 'icono' => 'bi-check-circle', 'tono' => 'verde', 'detalle' => 'Cifra ilustrativa', 'tendencia' => '↑ 14 %'], ['titulo' => 'Incidencias del día', 'valor' => '6', 'icono' => 'bi-exclamation-triangle', 'tono' => 'rojo', 'detalle' => 'Cifra ilustrativa', 'tendencia' => '↑ 50 %']],
-        'buscar' => 'Buscar por código, cliente, guía o destino…', 'filtros' => [['titulo' => 'Transportista', 'campo' => 'transportista', 'todos' => 'Todos', 'opciones' => ['Olva Courier', 'Shalom', 'Serpost']], ['titulo' => 'Destino', 'campo' => 'destino', 'todos' => 'Todos', 'opciones' => ['Lima', 'Arequipa', 'Trujillo', 'Cusco', 'Piura', 'Chiclayo', 'Ica', 'Huancayo']], ['titulo' => 'Estado', 'campo' => 'estado', 'todos' => 'Todos', 'opciones' => ['En ruta', 'Despachado', 'Programado', 'Entregado', 'Incidencia']], ['titulo' => 'Tipo de entrega', 'campo' => 'tipo', 'todos' => 'Todos', 'opciones' => ['Estándar', 'Express']]],
-        'tablaTitulo' => 'Envíos programados', 'tablaIcono' => 'bi-calendar3', 'total' => 48, 'columnas' => ['Código', 'Cliente / Destino', 'Transportista', 'Salida', 'Entrega estimada', 'Estado', 'Tipo'],
-        'filas' => [
-            ['celdas' => ['ENV-008726', 'TechStore Lima · Lima', 'Olva Courier', '27 ene. 2025, 09:00', '27 ene. 2025, 17:00', ['texto' => 'En ruta'], 'Estándar'], 'filtros' => ['transportista' => 'Olva Courier', 'destino' => 'Lima', 'estado' => 'En ruta', 'tipo' => 'Estándar']],
-            ['celdas' => ['ENV-008725', 'Celulares Express · Arequipa', 'Shalom', '27 ene. 2025, 08:30', '27 ene. 2025, 18:00', ['texto' => 'Despachado'], 'Express'], 'filtros' => ['transportista' => 'Shalom', 'destino' => 'Arequipa', 'estado' => 'Despachado', 'tipo' => 'Express']],
-            ['celdas' => ['ENV-008724', 'Mobile Center · Trujillo', 'Olva Courier', '27 ene. 2025, 05:00', '28 ene. 2025, 12:00', ['texto' => 'Programado', 'tono' => 'ambar'], 'Estándar'], 'filtros' => ['transportista' => 'Olva Courier', 'destino' => 'Trujillo', 'estado' => 'Programado', 'tipo' => 'Estándar']],
-            ['celdas' => ['ENV-008723', 'Tecnología Sur · Cusco', 'Serpost', '27 ene. 2025, 07:45', '28 ene. 2025, 17:00', ['texto' => 'Entregado', 'tono' => 'verde'], 'Estándar'], 'filtros' => ['transportista' => 'Serpost', 'destino' => 'Cusco', 'estado' => 'Entregado', 'tipo' => 'Estándar']],
-            ['celdas' => ['ENV-008722', 'Innova Cel · Chiclayo', 'Shalom', '26 ene. 2025, 16:20', '27 ene. 2025, 14:00', ['texto' => 'Entregado', 'tono' => 'verde'], 'Express'], 'filtros' => ['transportista' => 'Shalom', 'destino' => 'Chiclayo', 'estado' => 'Entregado', 'tipo' => 'Express']],
-            ['celdas' => ['ENV-008721', 'Smart Store · Piura', 'Olva Courier', '26 ene. 2025, 15:40', '27 ene. 2025, 16:00', ['texto' => 'Incidencia', 'tono' => 'rojo'], 'Estándar'], 'filtros' => ['transportista' => 'Olva Courier', 'destino' => 'Piura', 'estado' => 'Incidencia', 'tipo' => 'Estándar']],
-            ['celdas' => ['ENV-008720', 'Cell Mundo · Ica', 'Serpost', '26 ene. 2025, 14:30', '27 ene. 2025, 18:00', ['texto' => 'En ruta'], 'Estándar'], 'filtros' => ['transportista' => 'Serpost', 'destino' => 'Ica', 'estado' => 'En ruta', 'tipo' => 'Estándar']],
-            ['celdas' => ['ENV-008719', 'Digital Mobile · Huancayo', 'Shalom', '26 ene. 2025, 13:15', '27 ene. 2025, 17:00', ['texto' => 'Despachado'], 'Express'], 'filtros' => ['transportista' => 'Shalom', 'destino' => 'Huancayo', 'estado' => 'Despachado', 'tipo' => 'Express']],
-        ],
-        'formTitulo' => 'Programación rápida', 'formIcono' => 'bi-truck', 'formAccion' => 'Programar envío',
-        'formCampos' => [['etiqueta' => 'Cliente', 'ayuda' => 'Seleccionar cliente…', 'requerido' => true, 'ancho' => 'completo'], ['etiqueta' => 'Dirección', 'ayuda' => 'Ingresar dirección de entrega…', 'tipo' => 'input', 'requerido' => true, 'ancho' => 'completo'], ['etiqueta' => 'Transportista', 'ayuda' => 'Seleccionar transportista…', 'requerido' => true, 'ancho' => 'completo'], ['etiqueta' => 'Método de entrega', 'ayuda' => 'Seleccionar método…', 'requerido' => true, 'ancho' => 'completo'], ['etiqueta' => 'Fecha', 'ayuda' => 'Seleccionar fecha', 'requerido' => true], ['etiqueta' => 'Franja horaria', 'ayuda' => 'Todo el día'], ['etiqueta' => 'Observaciones', 'ayuda' => 'Indicaciones de entrega…', 'tipo' => 'textarea', 'ancho' => 'completo']],
-        'paneles' => [['titulo' => 'Entregas por estado', 'icono' => 'bi-pie-chart', 'tipo' => 'anillo', 'valor' => '343', 'unidad' => 'Entregas', 'gradiente' => 'conic-gradient(#36c96b 0 62%, #168cf9 62% 80%, #ffc63f 80% 94%, #ed3144 94% 100%)', 'filas' => [['Entregadas', '62,4 %'], ['En ruta', '18,1 %'], ['Programadas', '13,7 %'], ['Con incidencia', '5,8 %']]], ['titulo' => 'Rutas con mayor volumen', 'icono' => 'bi-arrow-left-right', 'tipo' => 'barras', 'filas' => [['Lima – Arequipa', '128', 95], ['Lima – Trujillo', '96', 72], ['Lima – Chiclayo', '67', 50], ['Lima – Cusco', '52', 39], ['Lima – Piura', '48', 36]]], ['titulo' => 'Incidencias recientes', 'icono' => 'bi-exclamation-triangle', 'tipo' => 'ranking', 'filas' => [['ENV-008721 · Retraso en tránsito', 'Abierta'], ['ENV-008717 · Dirección incompleta', 'Abierta'], ['ENV-008706 · Cliente no ubicado', 'Seguimiento']]]],
-    ];
-@endphp
-@include('paneles.administrador.inventario-logistica.componentes.pagina', ['pagina' => $pagina])
-@endsection
+@extends('layouts.administracion')
 
+@section('title', 'Envíos y entregas')
+@section('body_class', 'modulo-inventario-logistica')
+
+@section('content')
+<section class="tc-il">
+    <header class="tc-il__header">
+        <div>
+            <span class="tc-il__breadcrumb"><i class="bi bi-house" aria-hidden="true"></i> Inventario y logística <i class="bi bi-chevron-right" aria-hidden="true"></i> Ecommerce</span>
+            <h1><i class="bi bi-truck" aria-hidden="true"></i> Envíos y entregas</h1>
+            <p>Consulta de envíos de pedidos y sus últimos eventos registrados.</p>
+        </div>
+    </header>
+
+    <div class="tc-il__notice" role="status">
+        <i class="bi bi-info-circle" aria-hidden="true"></i>
+        <span>El catálogo RBAC mantiene deshabilitada la entrada admin.shipments. Esta vista es de consulta y no altera estados de entrega.</span>
+    </div>
+
+    <div class="tc-il__metrics">
+        <article class="tc-il__metric"><span class="tc-il__metric-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span><div><small>Envíos registrados</small><strong>{{ number_format($resumen['total'], 0, ',', ' ') }}</strong><span>En sedes autorizadas</span></div></article>
+        <article class="tc-il__metric tc-il__metric--verde"><span class="tc-il__metric-icon"><i class="bi bi-upc" aria-hidden="true"></i></span><div><small>Con seguimiento</small><strong>{{ number_format($resumen['con_seguimiento'], 0, ',', ' ') }}</strong><span>Números guardados</span></div></article>
+        <article class="tc-il__metric tc-il__metric--violeta"><span class="tc-il__metric-icon"><i class="bi bi-file-earmark-text" aria-hidden="true"></i></span><div><small>Con guía de remisión</small><strong>{{ number_format($resumen['con_guia'], 0, ',', ' ') }}</strong><span>Referencias almacenadas</span></div></article>
+        <article class="tc-il__metric tc-il__metric--ambar"><span class="tc-il__metric-icon"><i class="bi bi-signpost-split" aria-hidden="true"></i></span><div><small>Modalidades registradas</small><strong>{{ number_format($resumen['modalidades'], 0, ',', ' ') }}</strong><span>Valores presentes en MariaDB</span></div></article>
+    </div>
+
+    <form class="tc-il__filters" method="GET" action="{{ route('management.inventory.preview.shipments') }}">
+        <label class="tc-il__search">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input type="search" name="buscar" value="{{ request('buscar') }}" maxlength="100" placeholder="Buscar por código, pedido, transportista o seguimiento" aria-label="Buscar envíos">
+        </label>
+        <div class="tc-il__filter-fields">
+            <label>
+                <span>Estado</span>
+                <select name="estado">
+                    <option value="">Todos los estados registrados</option>
+                    @foreach ($estados as $estado)
+                        <option value="{{ $estado }}" @selected(request('estado') === $estado)>{{ $estado }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <label>
+                <span>Modalidad</span>
+                <select name="modalidad">
+                    <option value="">Todas las modalidades registradas</option>
+                    @foreach ($modalidades as $modalidad)
+                        <option value="{{ $modalidad }}" @selected(request('modalidad') === $modalidad)>{{ $modalidad }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <button type="submit" class="tc-il__button tc-il__button--primary"><i class="bi bi-funnel" aria-hidden="true"></i> Aplicar filtros</button>
+            @if (request()->hasAny(['buscar', 'estado', 'modalidad']))
+                <a class="tc-il__button" href="{{ route('management.inventory.preview.shipments') }}">Limpiar filtros</a>
+            @endif
+        </div>
+    </form>
+
+    <div class="tc-il__main-grid">
+        <article class="tc-il__card tc-il__table-card">
+            <div class="tc-il__card-heading">
+                <h2><i class="bi bi-truck" aria-hidden="true"></i> Envíos registrados</h2>
+                <small>{{ number_format($envios->total(), 0, ',', ' ') }} resultados</small>
+            </div>
+            <div class="tc-il__table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Pedido</th>
+                            <th>Almacén / sede</th>
+                            <th>Transportista / servicio</th>
+                            <th>Seguimiento</th>
+                            <th>Estado</th>
+                            <th>Último evento</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($envios as $envio)
+                            <tr>
+                                <td>{{ $envio->codigo }}</td>
+                                <td>Pedido #{{ $envio->pedido_id }}</td>
+                                <td>{{ $envio->almacen?->nombre ?? '—' }}@if ($envio->almacen?->sede?->nombre) / {{ $envio->almacen->sede->nombre }}@endif</td>
+                                <td>{{ $envio->transportista ?: '—' }}@if ($envio->servicio) / {{ $envio->servicio }}@endif</td>
+                                <td>{{ $envio->numero_seguimiento ?: '—' }}</td>
+                                <td><span class="tc-il__pill">{{ $envio->estado }}</span></td>
+                                <td>
+                                    @if ($envio->ultimoEvento)
+                                        {{ $envio->ultimoEvento->estado }}@if ($envio->ultimoEvento->descripcion) — {{ $envio->ultimoEvento->descripcion }}@endif
+                                        <small>{{ $envio->ultimoEvento->ocurrido_en?->format('d/m/Y H:i') }}</small>
+                                    @else
+                                        Sin eventos registrados
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="tc-il__empty">
+                                    @if ($resumen['total'] === 0)
+                                        No hay envíos registrados para las sedes autorizadas.
+                                    @else
+                                        No se encontraron envíos con los filtros seleccionados.
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            @if ($envios->hasPages())
+                <div class="tc-il__pagination">{{ $envios->links() }}</div>
+            @endif
+        </article>
+
+        <article class="tc-il__card">
+            <div class="tc-il__card-heading"><h2><i class="bi bi-pie-chart" aria-hidden="true"></i> Envíos por estado</h2></div>
+            @forelse ($distribucion as $grupo)
+                <div class="tc-il__card-heading"><span>{{ $grupo['estado'] }}</span><strong>{{ number_format($grupo['cantidad'], 0, ',', ' ') }}</strong></div>
+            @empty
+                <p class="tc-il__empty">Todavía no hay estados de envío registrados.</p>
+            @endforelse
+        </article>
+    </div>
+</section>
+@endsection

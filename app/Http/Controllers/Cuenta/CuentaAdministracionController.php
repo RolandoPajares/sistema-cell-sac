@@ -9,6 +9,7 @@ use App\Http\Requests\ActualizarPerfilRequest;
 use App\Http\Requests\ActualizarPreferenciasRequest;
 use App\Models\Auditoria\RegistroAuditoria;
 use App\Servicios\RegistradorAuditoria;
+use App\Servicios\ServicioNotificaciones;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -147,21 +148,21 @@ class CuentaAdministracionController extends Controller
         return view('paneles.administrador.perfil.actividad', compact('activity', 'available'));
     }
 
-    public function notifications(Request $request): View
+    public function notifications(Request $request, ServicioNotificaciones $servicio): View
     {
-        $available = Schema::hasTable('notifications');
-        $notifications = $available ? $request->user()->notifications()->latest()->paginate(20) : collect();
+        $available = Schema::hasTable('notificaciones');
+        $notificaciones = $available ? $servicio->listarDelUsuario($request->user()) : collect();
 
-        return view('paneles.administrador.perfil.notificaciones', compact('notifications', 'available'));
+        return view('paneles.administrador.perfil.notificaciones', compact('notificaciones', 'available'));
     }
 
-    public function markNotificationRead(Request $request, string $notificationId, RegistradorAuditoria $audit): RedirectResponse
+    public function markNotificationRead(Request $request, string $notificationId, ServicioNotificaciones $servicio): RedirectResponse
     {
-        abort_unless(Schema::hasTable('notifications'), 503, 'Las notificaciones requieren la migración de seguridad.');
-        $notification = $request->user()->notifications()->whereKey($notificationId)->firstOrFail();
-        $notification->markAsRead();
-        $audit->record($request->user()->getKey(), 'marcar_notificacion_leida', 'notifications', null, ['leida' => false], ['leida' => true], $request->ip());
+        abort_unless(Schema::hasTable('notificaciones'), 503, 'La tabla de notificaciones no está disponible.');
+        $marcadaComoLeida = $servicio->marcarComoLeida($request->user(), $notificationId, $request->ip());
 
-        return back()->with('status', 'Notificación marcada como leída.');
+        return back()->with('status', $marcadaComoLeida
+            ? 'Notificación marcada como leída.'
+            : 'La notificación ya estaba leída.');
     }
 }

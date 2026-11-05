@@ -246,6 +246,55 @@ it('builds role-specific menus from the database and enforces route permissions'
     expect(DB::table('modulos')->where('codigo', 'seguridad')->value('habilitado'))->toBe(1);
 });
 
+it('abre las gestiones de seguridad reales y elimina los resultados simulados de sus alias', function (): void {
+    $administrador = SpanishAccessFixture::user('administrador');
+    $this->seed(RbacInicialSeeder::class);
+
+    foreach ([
+        'management.users',
+        'management.roles_permissions',
+        'management.user_assignments',
+        'management.menus',
+        'management.modules',
+    ] as $rutaOperativa) {
+        $this->actingAs($administrador)->get(route($rutaOperativa))->assertOk();
+    }
+
+    $redireccionesOperativas = [
+        'management.roles_permissions.preview.users' => ['management.users', []],
+        'management.roles_permissions.preview.roles' => ['management.roles_permissions', []],
+        'management.roles_permissions.preview.matrix' => ['management.roles_permissions', []],
+        'management.roles_permissions.preview.assignments' => ['management.user_assignments', []],
+        'management.roles_permissions.preview.site_assignments' => ['management.user_assignments', []],
+        'management.roles_permissions.preview.menus' => ['management.menus', []],
+        'management.roles_permissions.preview.modules' => ['management.modules', []],
+        'management.roles_permissions.preview.blocks' => ['management.users', ['estado' => 'inactivo']],
+    ];
+
+    foreach ($redireccionesOperativas as $rutaAnterior => [$rutaOperativa, $parametros]) {
+        $this->actingAs($administrador)
+            ->get(route($rutaAnterior))
+            ->assertRedirect(route($rutaOperativa, $parametros));
+    }
+
+    $this->actingAs($administrador)
+        ->get(route('management.roles_permissions.preview.policies'))
+        ->assertOk()
+        ->assertSee('El esquema actual no contiene una entidad')
+        ->assertDontSee('Compras Demo');
+
+    $this->actingAs($administrador)
+        ->get(route('management.roles_permissions.preview.sessions'))
+        ->assertOk()
+        ->assertSee('El catálogo RBAC mantiene deshabilitado el submenú global')
+        ->assertDontSee('Administrador Demo');
+
+    $usuarioMarketing = SpanishAccessFixture::user('marketing');
+    $this->actingAs($usuarioMarketing)
+        ->get(route('management.roles_permissions.preview.users'))
+        ->assertForbidden();
+});
+
 it('does not expose view-only placeholders as working administrative modules', function (): void {
     $administrator = User::factory()->administrator()->create();
 

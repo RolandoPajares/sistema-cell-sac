@@ -1,28 +1,137 @@
 @extends('layouts.administracion')
-@section('title', 'Control de IMEI y series — Vista de diseño')
+
+@section('title', 'Control de IMEI y series')
 @section('body_class', 'modulo-inventario-logistica')
+
 @section('content')
-@php
-    $pagina = [
-        'modo' => 'series', 'titulo' => 'Control de IMEI y series', 'icono' => 'bi-phone', 'descripcion' => 'Trazabilidad de equipos, números de serie e IMEI, garantías y gestión de stock.',
-        'acciones' => [['texto' => 'Registrar serie', 'icono' => 'bi-plus-lg', 'primaria' => true, 'modal' => 'serie'], ['texto' => 'Importar lote', 'icono' => 'bi-upload', 'modal' => 'importar-series']],
-        'metricas' => [['titulo' => 'Equipos registrados', 'valor' => '12 846', 'icono' => 'bi-boxes', 'detalle' => 'vs. mes anterior', 'tendencia' => '↑ 6,8 %'], ['titulo' => 'IMEI disponibles', 'valor' => '9 532', 'icono' => 'bi-phone', 'tono' => 'verde', 'detalle' => 'vs. mes anterior', 'tendencia' => '↑ 8,1 %'], ['titulo' => 'Series comprometidas', 'valor' => '3 102', 'icono' => 'bi-link-45deg', 'tono' => 'violeta', 'detalle' => 'vs. mes anterior', 'tendencia' => '↓ 2,4 %'], ['titulo' => 'Alertas de duplicidad', 'valor' => '27', 'icono' => 'bi-exclamation-triangle', 'tono' => 'rojo', 'detalle' => 'vs. mes anterior', 'tendencia' => '↑ 35,0 %']],
-        'buscar' => 'Buscar por IMEI, serie, producto o modelo…', 'filtros' => [['titulo' => 'Producto', 'campo' => 'producto', 'todos' => 'Todos los productos', 'opciones' => ['Smartphone', 'Tablet', 'Smartwatch']], ['titulo' => 'Marca', 'campo' => 'marca', 'todos' => 'Todas las marcas', 'opciones' => ['Samsung', 'Xiaomi', 'Apple', 'Motorola']], ['titulo' => 'Almacén', 'campo' => 'almacen', 'todos' => 'Todos los almacenes', 'opciones' => ['Almacén Principal', 'Sede Norte', 'Sede Sur']], ['titulo' => 'Estado', 'campo' => 'estado', 'todos' => 'Todos los estados', 'opciones' => ['Disponible', 'Reservado', 'Comprometido', 'En garantía', 'Duplicado']]],
-        'tablaTitulo' => 'IMEI y series registradas', 'tablaIcono' => 'bi-list-ul', 'total' => 12846, 'columnas' => ['IMEI / Serie', 'Producto', 'Marca / Modelo', 'Almacén', 'Estado', 'Garantía', 'Último movimiento'],
-        'filas' => [
-            ['celdas' => ['358240051234567', 'Smartphone', 'Samsung / Galaxy A54', 'Almacén Principal', ['texto' => 'Disponible', 'tono' => 'verde'], 'Hasta 15/08/2026', 'Ingreso · 15/08/2025'], 'filtros' => ['producto' => 'Smartphone', 'marca' => 'Samsung', 'almacen' => 'Almacén Principal', 'estado' => 'Disponible']],
-            ['celdas' => ['358240051234568', 'Smartphone', 'Samsung / Galaxy A54', 'Sede Norte', ['texto' => 'Reservado', 'tono' => 'azul'], 'Hasta 15/08/2026', 'Reserva · 22/08/2025'], 'filtros' => ['producto' => 'Smartphone', 'marca' => 'Samsung', 'almacen' => 'Sede Norte', 'estado' => 'Reservado']],
-            ['celdas' => ['866327061987654', 'Smartphone', 'Xiaomi / Redmi Note 13', 'Sede Sur', ['texto' => 'Comprometido', 'tono' => 'ambar'], 'Hasta 10/06/2026', 'Venta · 21/08/2025'], 'filtros' => ['producto' => 'Smartphone', 'marca' => 'Xiaomi', 'almacen' => 'Sede Sur', 'estado' => 'Comprometido']],
-            ['celdas' => ['F9K2L8M4Q7R6', 'Tablet', 'Apple / iPad 10,2', 'Almacén Principal', ['texto' => 'Disponible', 'tono' => 'verde'], 'Hasta 28/09/2026', 'Ingreso · 20/08/2025'], 'filtros' => ['producto' => 'Tablet', 'marca' => 'Apple', 'almacen' => 'Almacén Principal', 'estado' => 'Disponible']],
-            ['celdas' => ['351359982345671', 'Smartphone', 'Motorola / Moto G84', 'Sede Norte', ['texto' => 'En garantía', 'tono' => 'gris'], 'Hasta 05/04/2026', 'Garantía · 19/08/2025'], 'filtros' => ['producto' => 'Smartphone', 'marca' => 'Motorola', 'almacen' => 'Sede Norte', 'estado' => 'En garantía']],
-            ['celdas' => ['355665110987432', 'Smartphone', 'Apple / iPhone 15', 'Almacén Principal', ['texto' => 'Disponible', 'tono' => 'verde'], 'Hasta 30/11/2026', 'Ingreso · 18/08/2025'], 'filtros' => ['producto' => 'Smartphone', 'marca' => 'Apple', 'almacen' => 'Almacén Principal', 'estado' => 'Disponible']],
-            ['celdas' => ['R58M90Z1P4D2', 'Smartwatch', 'Samsung / Galaxy Watch6', 'Sede Norte', ['texto' => 'Reservado', 'tono' => 'azul'], 'Hasta 12/07/2026', 'Reserva · 22/08/2025'], 'filtros' => ['producto' => 'Smartwatch', 'marca' => 'Samsung', 'almacen' => 'Sede Norte', 'estado' => 'Reservado']],
-            ['celdas' => ['866327061987655', 'Smartphone', 'Xiaomi / Poco X6 Pro', 'Almacén Principal', ['texto' => 'Duplicado', 'tono' => 'rojo'], 'Hasta 10/06/2026', 'Alerta · 22/08/2025'], 'filtros' => ['producto' => 'Smartphone', 'marca' => 'Xiaomi', 'almacen' => 'Almacén Principal', 'estado' => 'Duplicado']],
-        ],
-        'formTitulo' => 'Registro rápido de serie', 'formIcono' => 'bi-plus-square', 'formAccion' => 'Registrar serie',
-        'formCampos' => [['etiqueta' => 'Producto', 'ayuda' => 'Selecciona un producto', 'requerido' => true, 'ancho' => 'completo'], ['etiqueta' => 'Marca / Modelo', 'ayuda' => 'Selecciona marca y modelo', 'requerido' => true, 'ancho' => 'completo'], ['etiqueta' => 'IMEI o serie', 'ayuda' => 'Ingresa el IMEI o número de serie', 'tipo' => 'input', 'requerido' => true, 'ancho' => 'completo'], ['etiqueta' => 'Almacén', 'ayuda' => 'Selecciona un almacén', 'requerido' => true], ['etiqueta' => 'Condición', 'ayuda' => 'Nuevo', 'requerido' => true], ['etiqueta' => 'Observaciones', 'ayuda' => 'Procedencia, estado o referencia…', 'tipo' => 'textarea', 'ancho' => 'completo']],
-        'paneles' => [['titulo' => 'Series por estado', 'icono' => 'bi-pie-chart', 'tipo' => 'anillo', 'valor' => '12 846', 'unidad' => 'Equipos', 'gradiente' => 'conic-gradient(#38c96e 0 74%, #168cf9 74% 83%, #ffc83e 83% 92%, #9ba5b7 92% 98%, #ed3144 98% 100%)', 'filas' => [['Disponible', '74,2 %'], ['Reservado', '9,4 %'], ['Comprometido', '8,6 %'], ['En garantía', '6,0 %'], ['Duplicado', '0,2 %']]], ['titulo' => 'Marcas con mayor trazabilidad', 'icono' => 'bi-bar-chart', 'tipo' => 'barras', 'filas' => [['Samsung', '3 421', 91], ['Apple', '2 485', 67], ['Xiaomi', '2 010', 54], ['Motorola', '1 266', 35], ['Huawei', '972', 26]]], ['titulo' => 'Alertas de inconsistencias', 'icono' => 'bi-exclamation-triangle', 'tipo' => 'ranking', 'filas' => [['Duplicidad de serie', 'Pendiente'], ['Formato de serie inválido', 'En revisión'], ['Serie sin producto asociado', 'Pendiente']]]],
-    ];
-@endphp
-@include('paneles.administrador.inventario-logistica.componentes.pagina', ['pagina' => $pagina])
+<section class="tc-il">
+    <header class="tc-il__header">
+        <div>
+            <span class="tc-il__breadcrumb"><i class="bi bi-house" aria-hidden="true"></i> Inventario y logística <i class="bi bi-chevron-right" aria-hidden="true"></i> Trazabilidad</span>
+            <h1><i class="bi bi-phone" aria-hidden="true"></i> Control de IMEI y series</h1>
+            <p>Consulta de equipos serializados registrados en las sedes autorizadas.</p>
+        </div>
+    </header>
+
+    <div class="tc-il__notice" role="status">
+        <i class="bi bi-info-circle" aria-hidden="true"></i>
+        <span>Los equipos serializados deben vincularse a una entrada real de inventario. Este panel no genera existencias por separado.</span>
+    </div>
+
+    <div class="tc-il__metrics">
+        <article class="tc-il__metric"><span class="tc-il__metric-icon"><i class="bi bi-boxes" aria-hidden="true"></i></span><div><small>Equipos registrados</small><strong>{{ number_format($resumen['total'], 0, ',', ' ') }}</strong><span>En sedes autorizadas</span></div></article>
+        <article class="tc-il__metric tc-il__metric--verde"><span class="tc-il__metric-icon"><i class="bi bi-upc-scan" aria-hidden="true"></i></span><div><small>Con IMEI</small><strong>{{ number_format($resumen['con_imei'], 0, ',', ' ') }}</strong><span>Identificadores consultados</span></div></article>
+        <article class="tc-il__metric tc-il__metric--violeta"><span class="tc-il__metric-icon"><i class="bi bi-upc" aria-hidden="true"></i></span><div><small>Con número de serie</small><strong>{{ number_format($resumen['con_serie'], 0, ',', ' ') }}</strong><span>Identificadores consultados</span></div></article>
+        <article class="tc-il__metric tc-il__metric--ambar"><span class="tc-il__metric-icon"><i class="bi bi-list-check" aria-hidden="true"></i></span><div><small>Estados registrados</small><strong>{{ number_format($resumen['estados'], 0, ',', ' ') }}</strong><span>Valores presentes en MariaDB</span></div></article>
+    </div>
+
+    <form class="tc-il__filters" method="GET" action="{{ route('management.inventory.preview.serials') }}">
+        <label class="tc-il__search">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input type="search" name="buscar" value="{{ request('buscar') }}" maxlength="100" placeholder="Buscar por IMEI, serie, producto o variante" aria-label="Buscar dispositivos">
+        </label>
+        <div class="tc-il__filter-fields">
+            <label>
+                <span>Producto</span>
+                <select name="producto">
+                    <option value="">Todos los productos</option>
+                    @foreach ($productos as $producto)
+                        <option value="{{ $producto->id }}" @selected((string) request('producto') === (string) $producto->id)>{{ $producto->marca }} / {{ $producto->nombre }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <label>
+                <span>Almacén</span>
+                <select name="almacen">
+                    <option value="">Todos los almacenes autorizados</option>
+                    @foreach ($almacenes as $almacen)
+                        <option value="{{ $almacen->id }}" @selected((string) request('almacen') === (string) $almacen->id)>{{ $almacen->nombre }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <label>
+                <span>Estado</span>
+                <select name="estado">
+                    <option value="">Todos los estados</option>
+                    @foreach ($estados as $estado)
+                        <option value="{{ $estado }}" @selected(request('estado') === $estado)>{{ $estado }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <button type="submit" class="tc-il__button tc-il__button--primary"><i class="bi bi-funnel" aria-hidden="true"></i> Aplicar filtros</button>
+            @if (request()->hasAny(['buscar', 'producto', 'almacen', 'estado']))
+                <a class="tc-il__button" href="{{ route('management.inventory.preview.serials') }}">Limpiar filtros</a>
+            @endif
+        </div>
+    </form>
+
+    <div class="tc-il__main-grid">
+        <article class="tc-il__card tc-il__table-card">
+            <div class="tc-il__card-heading">
+                <h2><i class="bi bi-list-ul" aria-hidden="true"></i> IMEI y series registradas</h2>
+                <small>{{ number_format($dispositivos->total(), 0, ',', ' ') }} resultados</small>
+            </div>
+            <div class="tc-il__table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>IMEI / serie</th>
+                            <th>Producto</th>
+                            <th>Variante</th>
+                            <th>Almacén</th>
+                            <th>Estado</th>
+                            <th>Ingreso</th>
+                            <th>Último movimiento</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($dispositivos as $dispositivo)
+                            <tr>
+                                <td>{{ $dispositivo->identificadorLegible() }}</td>
+                                <td>{{ $dispositivo->producto?->marca }} / {{ $dispositivo->producto?->nombre }}</td>
+                                <td>{{ $dispositivo->variante?->codigo_sku ?: $dispositivo->variante?->nombre_color ?: '—' }}</td>
+                                <td>{{ $dispositivo->almacen?->nombre ?? '—' }}@if ($dispositivo->almacen?->sede?->nombre) / {{ $dispositivo->almacen->sede->nombre }}@endif</td>
+                                <td><span class="tc-il__pill">{{ $dispositivo->estado }}</span></td>
+                                <td>{{ $dispositivo->fecha_ingreso?->format('d/m/Y H:i') ?? '—' }}</td>
+                                <td>
+                                    @if ($dispositivo->ultimoMovimiento)
+                                        {{ $dispositivo->ultimoMovimiento->estado_anterior ? $dispositivo->ultimoMovimiento->estado_anterior.' → ' : '' }}{{ $dispositivo->ultimoMovimiento->estado_nuevo }}
+                                        <small>{{ $dispositivo->ultimoMovimiento->creado_en?->format('d/m/Y H:i') }}</small>
+                                    @else
+                                        Sin movimiento vinculado
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="tc-il__empty">
+                                    @if ($resumen['total'] === 0)
+                                        No hay dispositivos registrados para las sedes autorizadas.
+                                    @else
+                                        No se encontraron dispositivos con los filtros seleccionados.
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            @if ($dispositivos->hasPages())
+                <div class="tc-il__pagination">{{ $dispositivos->links() }}</div>
+            @endif
+        </article>
+
+        <article class="tc-il__card">
+            <div class="tc-il__card-heading"><h2><i class="bi bi-pie-chart" aria-hidden="true"></i> Equipos por estado</h2></div>
+            @forelse ($distribucion as $grupo)
+                <div class="tc-il__card-heading">
+                    <span>{{ $grupo['estado'] }}</span>
+                    <strong>{{ number_format($grupo['cantidad'], 0, ',', ' ') }}</strong>
+                </div>
+            @empty
+                <p class="tc-il__empty">Todavía no hay estados de equipos registrados.</p>
+            @endforelse
+        </article>
+    </div>
+</section>
 @endsection

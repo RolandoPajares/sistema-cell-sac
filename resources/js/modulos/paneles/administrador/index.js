@@ -1,6 +1,5 @@
 import '../../../../css/paneles/administrador/index.css';
 import './componentes/menu-lateral-desplegable.js';
-import './dashboard-global/dashboard-global.js';
 import './organizacion/organizacion.js';
 import './seguridad/seguridad.js';
 import './operaciones-comerciales/operaciones-comerciales.js';
