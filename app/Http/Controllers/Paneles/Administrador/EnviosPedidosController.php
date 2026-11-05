@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Paneles\Administrador;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ListadoEnviosPedidosRequest;
+use App\Http\Requests\ActualizarEstadoEnvioPedidoRequest;
+use App\Models\Comercio\EnvioPedido;
 use App\Servicios\ServicioEnviosPedidos;
 use App\Servicios\ExportadorTabular;
 use App\Servicios\RegistradorAuditoria;
@@ -35,5 +37,12 @@ final class EnviosPedidosController extends Controller
         $audit->record($solicitud->user()->getKey(), 'exportar', 'envios_pedidos', null, null, ['formato' => $format, 'cantidad' => count($rows)], $solicitud->ip());
 
         return $response;
+    }
+
+    public function actualizarEstado(ActualizarEstadoEnvioPedidoRequest $solicitud, EnvioPedido $envioPedido): \Illuminate\Http\RedirectResponse
+    {
+        $this->envios->actualizarEstado($envioPedido, $solicitud->validated(), $solicitud->user(), $solicitud->ip());
+
+        return back()->with('status', 'Estado de envío actualizado y evento registrado.');
     }
 }

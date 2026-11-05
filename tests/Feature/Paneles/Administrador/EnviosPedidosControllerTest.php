@@ -3,6 +3,8 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use App\Models\Comercio\EnvioPedido;
+use App\Servicios\ServicioEnviosPedidos;
 use Tests\SpanishAccessFixture;
 
 function prepararEsquemaEnviosParaPrueba(): void
@@ -184,4 +186,30 @@ it('pagina los envíos consultados y deniega a roles sin acceso administrativo',
     $this->actingAs($usuarioMarketing)
         ->get(route('management.inventory.preview.shipments'))
         ->assertForbidden();
+});
+
+it('actualiza el estado, registra el evento y respeta la idempotencia externa', function (): void {
+    prepararEsquemaEnviosParaPrueba();
+    $organizacion = SpanishAccessFixture::organization();
+    $administrador = SpanishAccessFixture::user('administrador');
+    $envioId = crearEnvioParaPrueba($organizacion, 'ENV-ESTADO-001');
+    $envio = EnvioPedido::query()->findOrFail($envioId);
+
+    $service = app(ServicioEnviosPedidos::class);
+    $event = $service->actualizarEstado($envio, [
+        'estado' => 'despachado',
+        'descripcion' => 'Despacho confirmado',
+        'identificador_externo' => 'evento-001',
+        'ocurrido_en' => now()->toDateTimeString(),
+    ], $administrador, '127.0.0.1');
+
+    $repeat = $service->actualizarEstado($envio->fresh(), [
+        'estado' => 'despachado',
+        'descripcion' => 'No debe duplicarse',
+        'identificador_externo' => 'evento-001',
+    ], $administrador, '127.0.0.1');
+
+    expect($repeat->getKey())->toBe($event->getKey())
+        ->and(DB::table('envios_pedidos')->where('id', $envioId)->value('estado'))->toBe('despachado')
+        ->and(DB::table('eventos_envios_pedidos')->where('envio_pedido_id', $envioId)->where('identificador_externo', 'evento-001')->count())->toBe(1);
 });
