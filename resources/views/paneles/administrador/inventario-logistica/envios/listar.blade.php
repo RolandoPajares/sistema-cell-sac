@@ -16,7 +16,11 @@
 
     <div class="tc-il__notice" role="status">
         <i class="bi bi-info-circle" aria-hidden="true"></i>
-        <span>El catálogo RBAC mantiene deshabilitada la entrada admin.shipments. Esta vista es de consulta y no altera estados de entrega.</span>
+        @if (Route::has('management.inventory.shipments.status.update'))
+            <span>Los cambios de estado registran un evento histórico y quedan limitados a las sedes autorizadas.</span>
+        @else
+            <span>La consulta está operativa. La actualización de estados quedará disponible cuando el integrador conecte su ruta RBAC.</span>
+        @endif
     </div>
 
     <div class="tc-il__metrics">
@@ -74,6 +78,7 @@
                             <th>Seguimiento</th>
                             <th>Estado</th>
                             <th>Último evento</th>
+                            <th>Operación</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -93,10 +98,34 @@
                                         Sin eventos registrados
                                     @endif
                                 </td>
+                                <td>
+                                    @if (Route::has('management.inventory.shipments.status.update'))
+                                        <details>
+                                            <summary class="tc-il__button">Actualizar</summary>
+                                            <form method="POST" action="{{ route('management.inventory.shipments.status.update', $envio) }}">
+                                                @csrf
+                                                @method('PATCH')
+                                                <label>Estado
+                                                    <select name="estado" required>
+                                                        @foreach (['pendiente' => 'Pendiente', 'preparando' => 'Preparando', 'despachado' => 'Despachado', 'en_transito' => 'En tránsito', 'entregado' => 'Entregado', 'incidencia' => 'Incidencia', 'cancelado' => 'Cancelado'] as $status => $label)
+                                                            <option value="{{ $status }}" @selected($envio->estado === $status)>{{ $label }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </label>
+                                                <label>Descripción
+                                                    <textarea name="descripcion" maxlength="500" rows="2" placeholder="Motivo o detalle del evento"></textarea>
+                                                </label>
+                                                <button type="submit" class="tc-il__button tc-il__button--primary">Registrar estado</button>
+                                            </form>
+                                        </details>
+                                    @else
+                                        <span aria-label="Actualización pendiente de integración">Pendiente de ruta</span>
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="tc-il__empty">
+                                <td colspan="8" class="tc-il__empty">
                                     @if ($resumen['total'] === 0)
                                         No hay envíos registrados para las sedes autorizadas.
                                     @else
