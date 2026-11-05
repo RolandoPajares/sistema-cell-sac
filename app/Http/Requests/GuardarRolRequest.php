@@ -26,7 +26,7 @@ class GuardarRolRequest extends FormRequest
     {
         return [
             'codigo' => ['required', 'string', 'max:40', 'regex:/^[a-z][a-z0-9_]*$/', 'not_in:superadministrador', Rule::unique('roles', 'codigo')],
-            'nombre' => ['required', 'string', 'max:120'],
+            'nombre' => ['required', 'string', 'max:120', Rule::unique('roles', 'nombre')],
             'descripcion' => ['nullable', 'string', 'max:255'],
             'alcance_permitido' => ['required', 'in:empresa,sede,propio'],
         ];
