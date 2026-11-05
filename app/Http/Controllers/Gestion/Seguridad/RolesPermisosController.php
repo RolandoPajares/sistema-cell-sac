@@ -11,6 +11,7 @@ use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioDelegacion;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;

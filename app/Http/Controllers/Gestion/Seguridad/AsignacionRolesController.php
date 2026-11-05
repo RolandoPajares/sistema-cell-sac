@@ -38,6 +38,7 @@ final class AsignacionRolesController extends Controller
     ): RedirectResponse {
         $data = $request->validated();
         $role = Rol::query()->findOrFail($data['rol_id']);
+        abort_unless($delegacion->puedeAdministrarUsuario($request->user(), $user), 403, 'No puedes administrar una cuenta con privilegios superiores a los tuyos.');
         abort_unless($delegacion->puedeAsignarRol($request->user(), $role), 403, 'El rol solicitado concede privilegios superiores a los que puedes delegar.');
 
         if ($role->alcance_permitido === 'sede') {
