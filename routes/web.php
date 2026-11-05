@@ -323,7 +323,7 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::patch('/inventario/envios/{envioPedido}/estado', [EnviosPedidosController::class, 'actualizarEstado'])
         ->whereNumber('envioPedido')
         ->middleware(['role:administrador', 'permiso:ruta'])
-        ->name('shipments.status.update');
+        ->name('inventory.shipments.status.update');
     Route::get('/inventario/diseno/envios/{envio}', [EnviosPedidosController::class, 'detalle'])
         ->whereNumber('envio')
         ->middleware(['role:administrador', 'permiso:ruta', 'permiso:pantalla.admin.shipments.consultar'])->name('inventory.preview.shipments.show');
