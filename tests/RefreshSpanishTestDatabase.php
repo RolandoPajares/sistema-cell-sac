@@ -96,42 +96,54 @@ trait RefreshSpanishTestDatabase
             });
         }
 
-        Schema::create('roles_permisos', function (Blueprint $table): void {
-            $table->unsignedBigInteger('rol_id');
-            $table->unsignedBigInteger('permiso_id');
-            $table->string('alcance', 20)->default('sede');
-            $table->timestamp('creado_en')->useCurrent();
-            $table->primary(['rol_id', 'permiso_id', 'alcance']);
-        });
+        if (! Schema::hasTable('roles_permisos')) {
+            Schema::create('roles_permisos', function (Blueprint $table): void {
+                $table->unsignedBigInteger('rol_id');
+                $table->unsignedBigInteger('permiso_id');
+                $table->string('alcance', 20)->default('sede');
+                $table->timestamp('creado_en')->useCurrent();
+                $table->primary(['rol_id', 'permiso_id', 'alcance']);
+            });
+        }
         if (! Schema::hasColumn('roles_menus', 'creado_en')) {
             Schema::table('roles_menus', function (Blueprint $table): void {
                 $table->timestamp('creado_en')->nullable();
             });
         }
-        Schema::create('usuarios_roles', function (Blueprint $table): void {
-            $table->unsignedBigInteger('usuario_id');
-            $table->unsignedBigInteger('rol_id');
-            $table->unsignedBigInteger('asignado_por_usuario_id')->nullable();
-            $table->timestamp('asignado_en')->useCurrent();
-            $table->timestamp('vigente_hasta')->nullable();
-            $table->boolean('activo')->default(true);
-            $table->primary(['usuario_id', 'rol_id']);
-        });
-        Schema::create('usuarios_sedes_roles', function (Blueprint $table): void {
-            $table->unsignedBigInteger('usuario_id');
-            $table->unsignedBigInteger('sede_id');
-            $table->unsignedBigInteger('rol_id');
-            $table->string('alcance_asignacion', 20)->default('sede');
-            $table->unsignedBigInteger('asignado_por_usuario_id')->nullable();
-            $table->timestamp('asignado_en')->useCurrent();
-            $table->timestamp('vigente_hasta')->nullable();
-            $table->boolean('activo')->default(true);
-            $table->primary(['usuario_id', 'sede_id', 'rol_id']);
-        });
-        Schema::create('versiones_inicializacion_control_acceso', function (Blueprint $table): void {
-            $table->string('codigo', 80)->primary();
-            $table->timestamp('aplicado_en')->useCurrent();
-        });
+        if (! Schema::hasTable('usuarios_roles')) {
+            Schema::create('usuarios_roles', function (Blueprint $table): void {
+                $table->unsignedBigInteger('usuario_id');
+                $table->unsignedBigInteger('rol_id');
+                $table->unsignedBigInteger('asignado_por_usuario_id')->nullable();
+                $table->timestamp('asignado_en')->useCurrent();
+                $table->timestamp('vigente_hasta')->nullable();
+                $table->boolean('activo')->default(true);
+                $table->primary(['usuario_id', 'rol_id']);
+            });
+        }
+        if (! Schema::hasTable('usuarios_sedes_roles')) {
+            Schema::create('usuarios_sedes_roles', function (Blueprint $table): void {
+                $table->unsignedBigInteger('usuario_id');
+                $table->unsignedBigInteger('sede_id');
+                $table->unsignedBigInteger('rol_id');
+                $table->string('alcance_asignacion', 20)->default('sede');
+                $table->unsignedBigInteger('asignado_por_usuario_id')->nullable();
+                $table->timestamp('asignado_en')->useCurrent();
+                $table->timestamp('vigente_hasta')->nullable();
+                $table->boolean('activo')->default(true);
+                $table->primary(['usuario_id', 'sede_id', 'rol_id']);
+            });
+        } elseif (! Schema::hasColumn('usuarios_sedes_roles', 'alcance_asignacion')) {
+            Schema::table('usuarios_sedes_roles', function (Blueprint $table): void {
+                $table->string('alcance_asignacion', 20)->default('sede');
+            });
+        }
+        if (! Schema::hasTable('versiones_inicializacion_control_acceso')) {
+            Schema::create('versiones_inicializacion_control_acceso', function (Blueprint $table): void {
+                $table->string('codigo', 80)->primary();
+                $table->timestamp('aplicado_en')->useCurrent();
+            });
+        }
 
         if (! Schema::hasColumn('cupones', 'creado_en')) {
             Schema::table('cupones', function (Blueprint $table): void {

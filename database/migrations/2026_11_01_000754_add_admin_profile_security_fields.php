@@ -8,44 +8,49 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (! Schema::hasTable('users') || ! Schema::hasTable('registros_auditoria')) {
-            throw new RuntimeException('The users and registros_auditoria legacy tables are required before applying account security fields.');
+        $userTable = Schema::hasTable('usuarios') ? 'usuarios' : 'users';
+
+        if (! Schema::hasTable($userTable) || ! Schema::hasTable('registros_auditoria')) {
+            throw new RuntimeException('The application user table and registros_auditoria are required before applying account security fields.');
         }
-        if (Schema::hasTable('sesiones_usuario')) {
-            throw new RuntimeException('The sesiones_usuario table already exists; inspect it before applying the security migration.');
+        $sessionTable = $userTable === 'usuarios' ? 'sesiones_usuarios' : 'sesiones_usuario';
+        if (Schema::hasTable($sessionTable)) {
+            throw new RuntimeException('The '.$sessionTable.' table already exists; inspect it before applying the security migration.');
         }
 
-        Schema::table('users', function (Blueprint $table): void {
-            if (! Schema::hasColumn('users', 'foto_perfil')) {
+        Schema::table($userTable, function (Blueprint $table) use ($userTable): void {
+            if (! Schema::hasColumn($userTable, 'foto_perfil')) {
                 $table->string('foto_perfil', 500)->nullable();
             }
 
-            if (! Schema::hasColumn('users', 'preferencias')) {
+            if (! Schema::hasColumn($userTable, 'preferencias')) {
                 $table->json('preferencias')->nullable();
             }
 
-            if (! Schema::hasColumn('users', 'activo')) {
+            if (! Schema::hasColumn($userTable, 'activo')) {
                 $table->boolean('activo')->default(true)->index();
             }
 
-            if (! Schema::hasColumn('users', 'bloqueado_hasta')) {
+            if (! Schema::hasColumn($userTable, 'bloqueado_hasta')) {
                 $table->dateTime('bloqueado_hasta')->nullable();
             }
 
-            if (! Schema::hasColumn('users', 'rbac_controlado')) {
-                $table->boolean('rbac_controlado')->default(false)->index();
+            $controlColumn = $userTable === 'usuarios' ? 'acceso_controlado' : 'rbac_controlado';
+            if (! Schema::hasColumn($userTable, $controlColumn)) {
+                $table->boolean($controlColumn)->default(false)->index();
             }
         });
 
-        Schema::create('sesiones_usuario', function (Blueprint $table): void {
+        Schema::create($sessionTable, function (Blueprint $table) use ($userTable, $sessionTable): void {
             $table->id();
-            $table->foreignId('usuario_id')->constrained('users')->cascadeOnDelete();
-            $table->char('identificador_hash', 64)->unique();
+            $table->foreignId('usuario_id')->constrained($userTable)->cascadeOnDelete();
+            $table->char($sessionTable === 'sesiones_usuarios' ? 'resumen_identificador' : 'identificador_hash', 64)->unique();
             $table->string('direccion_ip', 45)->nullable();
             $table->text('agente_usuario')->nullable();
             $table->timestamp('ultimo_acceso')->useCurrent();
             $table->timestamp('revocada_en')->nullable();
-            $table->timestamps();
+            $table->dateTime('creado_en')->useCurrent();
+            $table->dateTime('actualizado_en')->useCurrent();
             $table->index(['usuario_id', 'revocada_en', 'ultimo_acceso']);
         });
 
