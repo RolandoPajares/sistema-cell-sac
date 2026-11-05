@@ -19,6 +19,7 @@ Esta matriz registra únicamente resultados observados en esta rama. No declara 
 | JavaScript seguro | Ausencia de `eval()` y `document.write` | 1 caso frontend | APROBADA | Ninguna |
 | API catálogo | Lectura versionada, rate limiting, recursos JSON y producto activo | `ApiContractTest.php` — 3 casos, 166 aserciones junto con frontend | APROBADA | Ninguna |
 | RBAC / unitarias | Autorización, 403, sesiones, asignaciones, revocación, CRUD y alcance empresa/sede | 46 casos, 569 aserciones (Agente 4) | APROBADA | Feature aún requiere MariaDB aislada |
+| RBAC / rutas | Cobertura de rutas `management.*`: `auth`, `sesion.usuario`, `permiso:ruta` y exclusiones controladas | `bd8d521` — 13 casos, 667 aserciones (Agente 4) | APROBADA | No sustituye persistencia Feature |
 | RBAC / vistas administrativas | `RbacDinamicoTest.php`, `ViewsTest.php`, `DispositivosControllerTest.php` | 29 casos intentados | BLOQUEADA | El setup SQLite falla al ejecutar `information_schema.table_constraints` de la migración de responsables |
 | Unit / regresión | Suite `tests/Unit` | 126 casos | APROBADA | 118 aprobados, 3.688 aserciones; 8 omitidos por ausencia de MariaDB aislada |
 | MariaDB aislada | Suites MariaDB aisladas seleccionadas | 6 casos | NO EJECUTADA | 6 omitidos: no existen variables `TECHNOLOGY_CELL_QA_*` para una instancia aislada |
