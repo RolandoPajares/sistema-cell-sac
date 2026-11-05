@@ -1,7 +1,7 @@
 # Matriz de cobertura QA — evidencia de la rama `agent/documentacion-pruebas`
 
 Fecha de corte: 2026-11-05  
-Commits de evidencia: `aa776e6`, `dee2e36`
+Commits de evidencia: `3481c46`, `ae71520`, `7724c3e`, `debed4a`
 
 Esta matriz registra únicamente resultados observados en esta rama. No declara como funcional una característica que no pudo ejecutarse.
 
@@ -18,6 +18,7 @@ Esta matriz registra únicamente resultados observados en esta rama. No declara 
 | Cliente HTTP | CSRF, `Accept: application/json` y errores no-2xx | 1 caso frontend | APROBADA | Ninguna |
 | JavaScript seguro | Ausencia de `eval()` y `document.write` | 1 caso frontend | APROBADA | Ninguna |
 | API catálogo | Lectura versionada, rate limiting, recursos JSON y producto activo | `ApiContractTest.php` — 3 casos, 166 aserciones junto con frontend | APROBADA | Ninguna |
+| RBAC / unitarias | Autorización, 403, sesiones, asignaciones, revocación, CRUD y alcance empresa/sede | 46 casos, 569 aserciones (Agente 4) | APROBADA | Feature aún requiere MariaDB aislada |
 | RBAC / vistas administrativas | `RbacDinamicoTest.php`, `ViewsTest.php`, `DispositivosControllerTest.php` | 29 casos intentados | BLOQUEADA | El setup SQLite falla al ejecutar `information_schema.table_constraints` de la migración de responsables |
 | Unit / regresión | Suite `tests/Unit` | 126 casos | APROBADA | 118 aprobados, 3.688 aserciones; 8 omitidos por ausencia de MariaDB aislada |
 | MariaDB aislada | Suites MariaDB aisladas seleccionadas | 6 casos | NO EJECUTADA | 6 omitidos: no existen variables `TECHNOLOGY_CELL_QA_*` para una instancia aislada |
