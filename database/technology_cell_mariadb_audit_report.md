@@ -18,6 +18,8 @@ Las dos migraciones del 2026-11-03 sí coinciden exactamente con las columnas ex
 
 Durante la primera ejecución se detectó y corrigió una guardia que podía insertar una fila por el comportamiento de `MAX()` sobre un conjunto vacío; la comprobación posterior confirmó las dos filas y se normalizó su batch a `10`. No se alteraron datos de negocio.
 
+Matriz pendiente: las 18 restantes son `2026_10_10_171500_create_cell_sac_commerce_tables`, `2026_10_10_172618_migrate_legacy_users_to_laravel_users`, `2026_10_28_203424_create_devoluciones_garantias_table`, `2026_11_01_000753_create_enterprise_rbac_tables`, `2026_11_01_000754_add_admin_profile_security_fields`, `2026_11_01_013915_create_rbac_seed_versions_table`, `2026_11_01_014019_add_business_operation_site_scope_columns`, `2026_11_01_015103_reconcile_devoluciones_garantias_foreign_key_types` y `2026_11_01_015104`–`2026_11_01_015113`. El grupo `2026_11_01_015104`–`015113` referencia nombres legacy o estructuras que deben compararse migración por migración; no se puede marcar en bloque.
+
 La única tabla legacy existente en la base activa es `compra_detalles`; está vacía y no tiene referencias activas. No se elimina ni se renombra por esta auditoría. Las tablas `producto_variantes`, `cotizacion_detalles` y `detalle_pedidos` no existen.
 
 ## Tablas adicionales activas
