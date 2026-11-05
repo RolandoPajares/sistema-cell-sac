@@ -8,23 +8,25 @@ use Illuminate\Support\Facades\Schema;
 use Tests\SpanishAccessFixture;
 
 it('cierra la vigencia anterior y conserva el relevo al reasignar recurso y cargo', function (): void {
-    Schema::create('responsables_organizacionales', function (Blueprint $tabla): void {
-        $tabla->bigIncrements('id');
-        $tabla->unsignedBigInteger('empresa_id');
-        $tabla->unsignedBigInteger('sede_id');
-        $tabla->string('tipo_recurso');
-        $tabla->unsignedBigInteger('almacen_id')->nullable();
-        $tabla->unsignedBigInteger('responsable_usuario_id');
-        $tabla->string('cargo', 100);
-        $tabla->date('vigente_desde');
-        $tabla->date('vigente_hasta')->nullable();
-        $tabla->string('motivo', 500);
-        $tabla->unsignedBigInteger('reemplaza_asignacion_id')->nullable();
-        $tabla->unsignedBigInteger('asignado_por_usuario_id')->nullable();
-        $tabla->boolean('activo')->default(true);
-        $tabla->timestamp('creado_en')->nullable();
-        $tabla->timestamp('actualizado_en')->nullable();
-    });
+    if (! Schema::hasTable('responsables_organizacionales')) {
+        Schema::create('responsables_organizacionales', function (Blueprint $tabla): void {
+            $tabla->bigIncrements('id');
+            $tabla->unsignedBigInteger('empresa_id');
+            $tabla->unsignedBigInteger('sede_id');
+            $tabla->string('tipo_recurso');
+            $tabla->unsignedBigInteger('almacen_id')->nullable();
+            $tabla->unsignedBigInteger('responsable_usuario_id');
+            $tabla->string('cargo', 100);
+            $tabla->date('vigente_desde');
+            $tabla->date('vigente_hasta')->nullable();
+            $tabla->string('motivo', 500);
+            $tabla->unsignedBigInteger('reemplaza_asignacion_id')->nullable();
+            $tabla->unsignedBigInteger('asignado_por_usuario_id')->nullable();
+            $tabla->boolean('activo')->default(true);
+            $tabla->timestamp('creado_en')->nullable();
+            $tabla->timestamp('actualizado_en')->nullable();
+        });
+    }
 
     $administrador = SpanishAccessFixture::user('administrador');
     $primerResponsable = SpanishAccessFixture::user('marketing');
