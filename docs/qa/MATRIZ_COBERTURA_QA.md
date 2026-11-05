@@ -14,6 +14,9 @@ Esta matriz registra únicamente resultados observados en esta rama. No declara 
 | Seguridad web | Formularios mutantes Blade incluyen CSRF | 1 caso | APROBADA | Los formularios GET se excluyen correctamente |
 | Seguridad web | Grupo `/gestion` exige autenticación, cuenta activa, sesión y permiso de ruta | 1 caso | APROBADA | Ninguna |
 | Seguridad HTTP | Operaciones mutantes principales no están declaradas como GET | 1 caso | APROBADA | Ninguna |
+| Seguridad frontend | Escape HTML en asistente, ventas, CSV y descripción de producto | `SeguridadFrontendTest.php` — 6 casos, 147 aserciones | APROBADA | Ninguna |
+| Cliente HTTP | CSRF, `Accept: application/json` y errores no-2xx | 1 caso frontend | APROBADA | Ninguna |
+| JavaScript seguro | Ausencia de `eval()` y `document.write` | 1 caso frontend | APROBADA | Ninguna |
 | RBAC / vistas administrativas | `RbacDinamicoTest.php`, `ViewsTest.php`, `DispositivosControllerTest.php` | 29 casos intentados | BLOQUEADA | El setup SQLite falla al ejecutar `information_schema.table_constraints` de la migración de responsables |
 | Unit / regresión | Suite `tests/Unit` | 117 casos | APROBADA | 109 aprobados, 3.522 aserciones; 8 omitidos por ausencia de MariaDB aislada |
 | MariaDB aislada | Suites MariaDB aisladas seleccionadas | 6 casos | NO EJECUTADA | 6 omitidos: no existen variables `TECHNOLOGY_CELL_QA_*` para una instancia aislada |
