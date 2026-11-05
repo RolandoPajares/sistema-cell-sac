@@ -140,7 +140,7 @@ class RolesPermisosController extends Controller
             $hasGlobalAssignments = $locked->usuarios()->wherePivot('activo', true)->exists();
             $hasSiteAssignments = Schema::hasTable('usuarios_sedes_roles') && DB::table('usuarios_sedes_roles')
                 ->where('rol_id', $locked->getKey())->where('activo', true)->exists();
-            abort_if(!$activo && ($hasGlobalAssignments || $hasSiteAssignments), 409, 'Revoca primero las asignaciones activas de este rol.');
+            abort_if(! $activo && ($hasGlobalAssignments || $hasSiteAssignments), 409, 'Revoca primero las asignaciones activas de este rol.');
             abort_unless($delegacion->puedeDelegarPermisos($request->user(), $locked->permisos()->pluck('permisos.id')->all(), $locked->alcance_permitido), 403);
             $before = ['activo' => (bool) $locked->activo];
             $locked->update(['activo' => $activo]);
