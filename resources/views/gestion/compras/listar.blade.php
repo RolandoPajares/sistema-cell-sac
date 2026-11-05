@@ -36,8 +36,8 @@
             </div>
             <div class="compras-hero-actions">
                 <button class="compras-secondary-button" type="button" disabled title="La importación de compras aún no está disponible."><i class="bi bi-upload" aria-hidden="true"></i> Importar</button>
-                <button class="compras-secondary-button" type="button" disabled title="La exportación de compras aún no está disponible."><i class="bi bi-download" aria-hidden="true"></i> Exportar</button>
-                <button class="compras-primary-button" type="button" data-admin-dialog-open="nueva-compra" @disabled($suppliers->isEmpty() || $products->isEmpty())>
+                <details class="compras-export-menu"><summary class="compras-secondary-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar</summary><div class="compras-export-options"><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'excel'])) }}">Excel (.xlsx)</a><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'pdf'])) }}">PDF (.pdf)</a><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'csv'])) }}">CSV (.csv)</a></div></details>
+                <button class="compras-primary-button" type="button" data-admin-dialog-open="nueva-compra" @disabled(! $canCreate || $suppliers->isEmpty() || $products->isEmpty())>
                     <i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva compra
                 </button>
             </div>
@@ -115,6 +115,7 @@
                         @forelse ($purchases as $purchase)
                             @php
                                 $status = (string) $purchase->estado;
+                                $estadoRecepcion = $purchase->estado === 'Aprobada' && (int) $purchase->cantidad_recibida_total > 0 ? 'Parcial' : $status;
                                 $supplierName = $purchase->supplier?->nombre ?? 'Proveedor no disponible';
                             @endphp
                             <tr>
@@ -124,21 +125,52 @@
                                 <td>{{ $purchase->details_count }} {{ $purchase->details_count === 1 ? 'producto' : 'productos' }}</td>
                                 <td><strong>S/ {{ number_format((float) $purchase->total, 2) }}</strong></td>
                                 <td><span class="compras-status compras-status--{{ $statusClass($status) }}"><i class="bi bi-circle-fill" aria-hidden="true"></i>{{ $status }}</span></td>
-                                <td><span class="compras-reception compras-reception--{{ $statusClass($status) }}"><i class="bi bi-box-seam" aria-hidden="true"></i>{{ $receptionLabel($status) }}</span></td>
+                                <td><span class="compras-reception compras-reception--{{ $statusClass($estadoRecepcion) }}"><i class="bi bi-box-seam" aria-hidden="true"></i>{{ $receptionLabel($estadoRecepcion) }}</span></td>
                                 <td>
-                                    <details class="compras-row-details">
+                                    <details class="compras-row-details" id="detalle-compra-{{ $purchase->id }}">
                                         <summary aria-label="Ver detalle de orden {{ $purchase->id }}" title="Ver detalle"><i class="bi bi-eye" aria-hidden="true"></i></summary>
                                         <div class="compras-detail-popover">
                                             <strong>Orden de compra</strong>
                                             <span>{{ $supplierName }} · {{ $purchase->fecha_compra?->format('d/m/Y') ?? 'Fecha no disponible' }}</span>
                                             <ul>
                                                 @foreach ($purchase->details as $detail)
-                                                    <li><span>{{ $detail->product?->nombre ?? 'Producto no disponible' }} × {{ $detail->cantidad }}</span><b>S/ {{ number_format((float) $detail->costo_unitario * (int) $detail->cantidad, 2) }}</b></li>
+                                                    <li><span>{{ $detail->product?->nombre ?? 'Producto no disponible' }} × {{ $detail->cantidad }}<small>Recibidas: {{ $detail->cantidad_recibida }} · Pendientes: {{ $detail->cantidad_pendiente }}</small></span><b>S/ {{ number_format((float) $detail->costo_unitario * (int) $detail->cantidad, 2) }}</b></li>
                                                 @endforeach
                                             </ul>
                                             <p>Total <b>S/ {{ number_format((float) $purchase->total, 2) }}</b></p>
+                                            @if ($purchase->estado === 'Aprobada' && in_array($purchase->id, $recibibles, true) && isset($tokensRecepcion[$purchase->id]) && $purchase->details->contains(fn ($detail) => $detail->cantidad_pendiente > 0))
+                                                <details class="compras-partial-reception" id="recepcion-parcial-{{ $purchase->id }}">
+                                                    <summary>Registrar recepción parcial</summary>
+                                                    <form method="post" action="{{ route('management.purchases.receive_partial', $purchase) }}">
+                                                        @csrf
+                                                        <input type="hidden" name="token_recepcion" value="{{ $tokensRecepcion[$purchase->id] }}">
+                                                        @foreach ($purchase->details as $indice => $detail)
+                                                            @if ($detail->cantidad_pendiente > 0)
+                                                                <label>
+                                                                    {{ $detail->product?->nombre ?? 'Producto no disponible' }} · pendiente {{ $detail->cantidad_pendiente }}
+                                                                    <input type="hidden" name="items[{{ $indice }}][detalle_compra_id]" value="{{ $detail->id }}">
+                                                                    <input type="number" name="items[{{ $indice }}][cantidad]" min="0" max="{{ $detail->cantidad_pendiente }}" value="0" required>
+                                                                    @if ($detail->variante?->controla_serie)
+                                                                        <textarea name="items[{{ $indice }}][identificadores]" maxlength="30000" rows="3" placeholder="Un equipo por línea: IMEI:15dígitos, SERIE:valor o IMEI:15dígitos|SERIE:valor"></textarea>
+                                                                    @endif
+                                                                </label>
+                                                            @endif
+                                                        @endforeach
+                                                        <label>Observación de recepción <textarea name="observaciones" maxlength="500" rows="2" placeholder="Obligatoria si quedan unidades pendientes"></textarea></label>
+                                                        <button class="compras-reception-open" type="submit">Guardar cantidades recibidas</button>
+                                                    </form>
+                                                </details>
+                                            @endif
                                         </div>
                                     </details>
+                                    @if ($purchase->estado === 'Pendiente' && in_array($purchase->id, $aprobables))
+                                        <form method="post" action="{{ route('management.purchases.approve', $purchase) }}">@csrf <button class="compras-reception-open" type="submit">Aprobar</button></form>
+                                        @if (in_array($purchase->id, $anulables, true))<form method="post" action="{{ route('management.purchases.cancel', $purchase) }}" onsubmit="return confirm('¿Anular esta compra pendiente? Se conservará la auditoría.')">@csrf <button class="compras-reception-open" type="submit">Anular</button></form>@endif
+                                    @elseif ($purchase->estado === 'Aprobada' && in_array($purchase->id, $recibibles, true) && $purchase->details->contains(fn ($detail) => $detail->cantidad_pendiente > 0 && $detail->variante?->controla_serie))
+                                        <button class="compras-reception-open" type="button" onclick="document.getElementById('detalle-compra-{{ $purchase->id }}').open = true; document.getElementById('recepcion-parcial-{{ $purchase->id }}').open = true;">Recibir</button>
+                                    @elseif ($purchase->estado === 'Aprobada' && in_array($purchase->id, $recibibles, true))
+                                        <form method="post" action="{{ route('management.purchases.receive', $purchase) }}" onsubmit="return confirm('¿Confirmas la recepción completa de esta compra?')">@csrf <button class="compras-reception-open" type="submit">Recibir</button></form>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
@@ -163,10 +195,20 @@
             <section class="compras-summary-card">
                 <header><span class="compras-summary-icon compras-summary-icon--orange"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i></span><div><h2>Seguimiento de compras</h2><p>Órdenes que requieren recepción</p></div></header>
                 @forelse ($pendingPurchaseRecords as $pending)
+                    @php
+                        $pendingReference = 'OC-' . ($pending->fecha_compra?->format('y') ?? now()->format('y')) . '-' . str_pad((string) $pending->id, 5, '0', STR_PAD_LEFT);
+                        $pendingSupplierName = $pending->supplier?->nombre ?? 'Proveedor no disponible';
+                    @endphp
                     <div class="compras-recent-row">
                         <span class="compras-recent-dot compras-recent-dot--orange"></span>
-                        <div><strong>OC-{{ $pending->fecha_compra?->format('y') ?? now()->format('y') }}-{{ str_pad((string) $pending->id, 5, '0', STR_PAD_LEFT) }} · {{ $pending->supplier?->nombre ?? 'Proveedor no disponible' }}</strong><small>{{ $pending->details_count }} {{ $pending->details_count === 1 ? 'producto' : 'productos' }} · S/ {{ number_format((float) $pending->total, 2) }}</small></div>
+                        <div><strong>{{ $pendingReference }} · {{ $pendingSupplierName }}</strong><small>{{ $pending->details_count }} {{ $pending->details_count === 1 ? 'producto' : 'productos' }} · S/ {{ number_format((float) $pending->total, 2) }}</small></div>
                         <span class="compras-status compras-status--{{ $statusClass((string) $pending->estado) }}">{{ $pending->estado }}</span>
+                        @if ($pending->estado === 'Pendiente' && in_array($pending->id, $aprobables))
+                            <form method="post" action="{{ route('management.purchases.approve', $pending) }}">@csrf <button class="compras-reception-open" type="submit">Aprobar</button></form>
+                            @if (in_array($pending->id, $anulables, true))<form method="post" action="{{ route('management.purchases.cancel', $pending) }}" onsubmit="return confirm('¿Anular esta compra pendiente? Se conservará la auditoría.')">@csrf <button class="compras-reception-open" type="submit">Anular</button></form>@endif
+                        @elseif ($pending->estado === 'Aprobada' && in_array($pending->id, $recibibles))
+                            <form method="post" action="{{ route('management.purchases.receive', $pending) }}" onsubmit="return confirm('¿Confirmas la recepción completa de esta compra?')">@csrf <button class="compras-reception-open" type="submit">Recibir mercadería</button></form>
+                        @endif
                     </div>
                 @empty
                     <p class="compras-summary-empty">No hay órdenes pendientes de recepción.</p>
@@ -198,7 +240,7 @@
 
         <dialog class="admin-dialog compras-create-dialog" id="nueva-compra" aria-labelledby="nueva-compra-title">
             <header class="admin-dialog-header">
-                <div><h2 id="nueva-compra-title">Registrar compra</h2><p>Registra la compra recibida y actualiza el inventario.</p></div>
+                <div><h2 id="nueva-compra-title">Registrar compra</h2><p>La compra quedará pendiente. La aprobación y recepción son pasos separados.</p></div>
                 <button class="admin-dialog-close" type="button" data-admin-dialog-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
             </header>
             <div class="admin-dialog-body">
@@ -209,5 +251,6 @@
                 @endif
             </div>
         </dialog>
+
     </section>
 @endsection

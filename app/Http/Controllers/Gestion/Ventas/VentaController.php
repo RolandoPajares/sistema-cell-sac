@@ -4,237 +4,379 @@ namespace App\Http\Controllers\Gestion\Ventas;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ActualizarVentaRequest;
+use App\Http\Requests\AnularVentaRequest;
+use App\Http\Requests\ConfirmarVentaCotizacionRequest;
+use App\Http\Requests\ConvertirCotizacionRequest;
+use App\Http\Requests\FiltroVentaRequest;
 use App\Http\Requests\GuardarVentaRequest;
 use App\Models\Catalogo\Producto;
-use App\Models\Comercio\DetallePedido;
-use App\Models\Comercio\Pedido;
-use App\Models\User;
+use App\Models\Clientes\Cliente;
+use App\Models\Comercio\Cotizacion;
+use App\Models\Comercio\Venta;
+use App\Models\Finanzas\MedioPago;
+use App\Models\Organizacion\Sede;
+use App\Servicios\ConsultaVentas;
+use App\Servicios\ExportadorTabular;
+use App\Servicios\RegistradorAuditoria;
+use App\Servicios\ServicioAutorizacion;
+use App\Servicios\ServicioCotizaciones;
 use App\Servicios\ServicioVentas;
 use Carbon\CarbonImmutable;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 class VentaController extends Controller
 {
-    public function __construct(private readonly ServicioVentas $salesService) {}
+    public function __construct(
+        private readonly ConsultaVentas $ventas,
+        private readonly ServicioVentas $registro,
+        private readonly ServicioAutorizacion $autorizacion,
+        private readonly ServicioCotizaciones $cotizaciones,
+    ) {}
 
-    public function index(Request $request): View
+    public function index(FiltroVentaRequest $request): View
     {
-        $filters = $this->filters($request);
-        $ordersQuery = $this->orderQuery($filters);
-        $salesQuery = $this->salesQuery($filters);
-        $summary = (clone $salesQuery)
-            ->selectRaw('COALESCE(SUM(total), 0) as total_sales, COUNT(*) as realized_sales')
-            ->first();
-        $totalSales = (float) ($summary?->total_sales ?? 0);
-        $realizedSales = (int) ($summary?->realized_sales ?? 0);
-        $ordersCount = (clone $ordersQuery)->count();
-        $customersServed = (int) (clone $ordersQuery)
-            ->whereNotNull('usuario_id')
-            ->distinct()
-            ->count('usuario_id');
-        $orders = (clone $ordersQuery)
-            ->with([
-                'user:id,nombre,correo',
-                'details.product:id,nombre,url_imagen',
-            ])
-            ->withCount('details')
-            ->latest('creado_en')
-            ->latest('id')
-            ->paginate(10)
-            ->withQueryString();
+        $filtros = $this->filters($request->validated());
+        $query = $this->ventas->query($request->user(), $filtros);
+        $estados = $this->ventas->query($request->user(), array_replace($filtros, ['estado' => null]))
+            ->select('ventas.estado')->distinct()->orderBy('ventas.estado')->pluck('estado');
+        $customers = collect();
+        $products = collect();
+        $canCreate = false;
+        $canUpdate = $this->autorizacion->allows($request->user(), 'gestion.ventas.actualizar');
         $editOrder = null;
-        $editOrderId = $request->integer('editar');
-
-        if ($editOrderId > 0) {
-            $editOrder = Pedido::query()
-                ->with(['user:id,nombre,correo', 'details.product:id,nombre,precio,precio_oferta,existencias,url_imagen'])
-                ->find($editOrderId);
+        if (Schema::hasColumns('ventas', ['canal', 'observaciones'])
+            && ($this->autorizacion->allows($request->user(), 'gestion.ventas.crear') || $canUpdate)) {
+            try {
+                $ubicacion = $this->autorizacion->operationLocation($request->user());
+                $ubicacionValida = $ubicacion['empresa_id'] !== null && $ubicacion['sede_id'] !== null && $ubicacion['almacen_id'] !== null;
+                $canCreate = $ubicacionValida && $this->autorizacion->allows($request->user(), 'gestion.ventas.crear')
+                    && $this->autorizacion->allowsRecord($request->user(), 'gestion.ventas.crear', $ubicacion['empresa_id'], $ubicacion['sede_id']);
+                $canUpdate = $ubicacionValida && $canUpdate
+                    && $this->autorizacion->allowsRecord($request->user(), 'gestion.ventas.actualizar', $ubicacion['empresa_id'], $ubicacion['sede_id']);
+            } catch (HttpExceptionInterface) {
+                $canCreate = false;
+                $canUpdate = false;
+            }
+            if ($canCreate || $canUpdate) {
+                $customers = Cliente::query()->where('empresa_id', $ubicacion['empresa_id'])->where('activo', true)->orderBy('razon_social')->orderBy('id')->get();
+                $saldos = DB::table('existencias_almacen')->where('empresa_id', $ubicacion['empresa_id'])
+                    ->where('sede_id', $ubicacion['sede_id'])->where('almacen_id', $ubicacion['almacen_id'])
+                    ->selectRaw('producto_id, MIN(cantidad_fisica - cantidad_reservada) AS disponible')
+                    ->groupBy('producto_id')->havingRaw('COUNT(*) = 1')->get()->keyBy('producto_id');
+                $products = Producto::query()->active()->where('empresa_id', $ubicacion['empresa_id'])
+                    ->whereIn('id', $saldos->keys())->orderBy('nombre')->get();
+                $products->each(static function (Producto $producto) use ($saldos): void {
+                    $producto->existencias = max(0, (int) floor((float) $saldos->get($producto->id)->disponible));
+                });
+                if ($canCreate && ! is_string($request->session()->get('venta_token'))) {
+                    $request->session()->put('venta_token', bin2hex(random_bytes(32)));
+                }
+                if ($request->filled('editar')) {
+                    abort_unless(Schema::hasColumns('ventas', ['pedido_id', 'descuento', 'impuestos']), 404);
+                    abort_unless($canUpdate && ctype_digit((string) $request->query('editar')), 404);
+                    $editOrder = $this->autorizacion->scopeRecordsFor(
+                        Venta::query()->whereKey((int) $request->query('editar'))->where('ventas.estado', 'borrador')
+                            ->where('ventas.canal', 'presencial')->whereNull('ventas.pedido_id')
+                            ->where('ventas.descuento', 0)->where('ventas.impuestos', 0),
+                        $request->user(), 'gestion.ventas.actualizar',
+                    )->where('ventas.empresa_id', $ubicacion['empresa_id'])->where('ventas.sede_id', $ubicacion['sede_id'])
+                        ->where('ventas.almacen_id', $ubicacion['almacen_id'])->with(['detalles.producto', 'cliente', 'usuario'])->first();
+                    abort_unless($editOrder !== null, 404);
+                }
+            }
         }
 
+        $orders = (clone $query)->with(['cliente', 'pedido:id,canal', 'detalles'])->withCount('detalles')
+            ->orderByDesc('ventas.fecha_venta')->orderByDesc('ventas.id')->paginate(10)->withQueryString();
+        $cancelables = $this->autorizacion->scopeRecordsFor(
+            Venta::query()->whereIn('ventas.id', $orders->getCollection()->modelKeys()), $request->user(), 'gestion.ventas.anular',
+        )->pluck('ventas.id')->all();
+        $editables = [];
+        if (Schema::hasColumns('ventas', ['canal', 'pedido_id', 'descuento', 'impuestos'])) {
+            $editables = $this->autorizacion->scopeRecordsFor(
+                Venta::query()->whereIn('ventas.id', $orders->getCollection()->modelKeys())->where('ventas.estado', 'borrador')
+                    ->where('ventas.canal', 'presencial')->whereNull('ventas.pedido_id')
+                    ->where('ventas.descuento', 0)->where('ventas.impuestos', 0),
+                $request->user(), 'gestion.ventas.actualizar',
+            )->pluck('ventas.id')->all();
+        }
+        $confirmables = [];
+        if ($this->autorizacion->allows($request->user(), 'gestion.ventas.crear')
+            && Schema::hasColumns('ventas', ['pedido_id', 'canal'])) {
+            $confirmables = $this->autorizacion->scopeRecordsFor(
+                Venta::query()->whereIn('ventas.id', $orders->getCollection()->modelKeys())
+                    ->where('ventas.estado', 'borrador')->whereNotNull('ventas.pedido_id')->where('ventas.canal', 'presencial'),
+                $request->user(), 'gestion.ventas.crear',
+            )->pluck('ventas.id')->all();
+        }
+        $dispositivosPorDetalle = collect();
+        if ($confirmables !== [] && Schema::hasColumns('dispositivos', ['id', 'producto_id', 'variante_id', 'almacen_actual_id', 'estado'])) {
+            foreach ($orders->getCollection()->whereIn('id', $confirmables) as $ventaPendiente) {
+                foreach ($ventaPendiente->detalles as $detalle) {
+                    $varianteId = $detalle->variante_id === null ? null : (int) $detalle->variante_id;
+                    $dispositivosDisponibles = DB::table('dispositivos')->where('producto_id', $detalle->producto_id)
+                        ->when($varianteId === null, fn ($consulta) => $consulta->whereNull('variante_id'), fn ($consulta) => $consulta->where('variante_id', $varianteId))
+                        ->where('almacen_actual_id', $ventaPendiente->almacen_id)->where('estado', 'disponible')
+                        ->orderBy('id')->get(['id', 'imei', 'numero_serie']);
+                    $requiereDispositivos = DB::table('dispositivos')->where('producto_id', $detalle->producto_id)
+                        ->when($varianteId === null, fn ($consulta) => $consulta->whereNull('variante_id'), fn ($consulta) => $consulta->where('variante_id', $varianteId))->exists()
+                        || ($varianteId !== null
+                        && (bool) DB::table('variantes_productos')->where('id', $varianteId)->value('controla_serie'));
+                    $dispositivosPorDetalle->put($detalle->getKey(), [
+                        'requiere' => $requiereDispositivos, 'dispositivos' => $dispositivosDisponibles,
+                    ]);
+                }
+            }
+        }
+        $filtrosDisponibles = array_replace($filtros, ['cliente_id' => null, 'sede_id' => null]);
+        $clientesDisponibles = Cliente::query()->whereIn('id', $this->ventas->query($request->user(), $filtrosDisponibles)->select('ventas.cliente_id'))
+            ->orderBy('razon_social')->orderBy('id')->get(['id', 'razon_social', 'nombre_contacto']);
+        $sedesDisponibles = Sede::query()->whereIn('id', $this->ventas->query($request->user(), $filtrosDisponibles)->select('ventas.sede_id'))
+            ->orderBy('nombre')->orderBy('id')->get(['id', 'nombre']);
+
         return view('gestion.ventas.listar', [
-            'filters' => $filters,
+            ...$this->ventas->resumen($request->user(), $filtros),
+            'filters' => $filtros,
+            'estados' => $estados,
             'orders' => $orders,
-            'totalSales' => $totalSales,
-            'realizedSales' => $realizedSales,
-            'customersServed' => $customersServed,
-            'averageTicket' => $realizedSales > 0 ? $totalSales / $realizedSales : 0,
-            'ordersCount' => $ordersCount,
-            'salesTrend' => $this->salesTrend($filters),
-            'channelSummary' => $this->channelSummary($ordersCount),
-            'latestSales' => (clone $ordersQuery)
-                ->with('user:id,nombre,correo')
-                ->latest('creado_en')
-                ->latest('id')
-                ->limit(5)
-                ->get(),
-            'topProducts' => $this->topProducts($filters),
-            'customers' => User::query()
-                ->whereIn('rol', ['cliente_minorista', 'cliente_mayorista'])
-                ->orderBy('nombre')
-                ->get(['id', 'nombre', 'correo', 'rol']),
-            'products' => Producto::query()
-                ->active()
-                ->orderBy('nombre')
-                ->get(['id', 'nombre', 'marca', 'precio', 'precio_oferta', 'existencias', 'url_imagen']),
+            'cancelables' => $cancelables,
+            'editables' => $editables,
+            'confirmables' => $confirmables,
+            'dispositivosPorDetalle' => $dispositivosPorDetalle,
+            'clientesDisponibles' => $clientesDisponibles,
+            'sedesDisponibles' => $sedesDisponibles,
+            'latestSales' => (clone $query)->with('cliente')->orderByDesc('ventas.fecha_venta')->orderByDesc('ventas.id')->limit(5)->get(),
+            'customers' => $customers,
+            'products' => $products,
+            'canCreate' => $canCreate,
             'editOrder' => $editOrder,
         ]);
     }
 
+    public function panelMayorista(Request $request): View
+    {
+        return $this->panelPorTipoCliente($request, 'mayorista');
+    }
+
+    public function panelMinorista(Request $request): View
+    {
+        return $this->panelPorTipoCliente($request, 'minorista');
+    }
+
+    private function panelPorTipoCliente(Request $request, string $tipoCliente): View
+    {
+        $usuarioActual = $request->user();
+        abort_unless($usuarioActual !== null, 403);
+        $this->autorizacion->assertAllowed($usuarioActual, 'gestion.ventas.consultar');
+
+        $filtros = $request->validate([
+            'buscar' => ['nullable', 'string', 'max:120'],
+            'estado' => ['nullable', 'string', 'max:30'],
+            'canal' => ['nullable', 'in:ecommerce,presencial'],
+            'pago' => ['nullable', 'integer', 'min:1', 'exists:medios_pago,id'],
+        ]);
+        $consultaBase = $this->ventas->query($usuarioActual, [])->whereHas('cliente', fn ($consulta) => $consulta->where('tipo', $tipoCliente));
+        $consultaFiltrada = $this->ventas->query($usuarioActual, $filtros)->whereHas('cliente', fn ($consulta) => $consulta->where('tipo', $tipoCliente));
+        if (isset($filtros['pago'])) {
+            $consultaFiltrada->whereHas('pagos', fn ($consulta) => $consulta->where('medio_pago_id', $filtros['pago']));
+        }
+        $ventasDelMes = (clone $consultaBase)->whereBetween('ventas.fecha_venta', [now()->startOfMonth(), now()->endOfMonth()]);
+        $cantidadDelMes = (clone $ventasDelMes)->count();
+        $ventasDelMesEnSoles = (clone $ventasDelMes)->where('ventas.moneda', 'PEN');
+        $cantidadVentasDelMesEnSoles = (clone $ventasDelMesEnSoles)->count();
+        $importeDelMes = (float) (clone $ventasDelMesEnSoles)->sum('ventas.total');
+        $importeMesAnterior = (float) (clone $consultaBase)->where('ventas.moneda', 'PEN')
+            ->whereBetween('ventas.fecha_venta', [now()->subMonthNoOverflow()->startOfMonth(), now()->subMonthNoOverflow()->endOfMonth()])->sum('ventas.total');
+        $ventasMesAnterior = (clone $consultaBase)->whereBetween('ventas.fecha_venta', [now()->subMonthNoOverflow()->startOfMonth(), now()->subMonthNoOverflow()->endOfMonth()])->count();
+        $tendenciaImporte = $importeMesAnterior > 0 ? round((($importeDelMes - $importeMesAnterior) / $importeMesAnterior) * 100, 1).'%' : 'Sin comparación';
+        $tendenciaCantidad = $ventasMesAnterior > 0 ? round((($cantidadDelMes - $ventasMesAnterior) / $ventasMesAnterior) * 100, 1).'%' : 'Sin comparación';
+
+        $ventas = (clone $consultaFiltrada)->with(['cliente', 'usuario', 'pedido', 'pagos.medioPago'])
+            ->orderByDesc('ventas.fecha_venta')->orderByDesc('ventas.id')->limit(10)->get();
+        $estados = (clone $consultaBase)->select('ventas.estado')->distinct()->orderBy('ventas.estado')->pluck('estado');
+        $mediosPago = MedioPago::query()->whereHas('pagos', fn ($consulta) => $consulta->whereIn('venta_id', (clone $consultaBase)->select('ventas.id')))
+            ->orderBy('nombre')->get(['id', 'nombre']);
+        $canales = collect();
+        if (Schema::hasColumn('ventas', 'canal')) {
+            $canales = (clone $consultaBase)->whereNotNull('ventas.canal')->distinct()->orderBy('ventas.canal')->pluck('ventas.canal');
+        } elseif (Schema::hasColumn('pedidos', 'canal')) {
+            $canales = (clone $consultaBase)->whereHas('pedido', fn ($consulta) => $consulta->whereNotNull('canal'))
+                ->join('pedidos', 'pedidos.id', '=', 'ventas.pedido_id')->distinct()->orderBy('pedidos.canal')->pluck('pedidos.canal');
+        }
+        $consultaCanales = (clone $consultaBase)->leftJoin('pedidos', 'pedidos.id', '=', 'ventas.pedido_id');
+        $campoCanal = Schema::hasColumn('ventas', 'canal') ? 'COALESCE(ventas.canal, pedidos.canal)' : 'pedidos.canal';
+        $resumenCanales = $consultaCanales->selectRaw($campoCanal.' AS canal, COUNT(*) AS cantidad')
+            ->groupByRaw($campoCanal)->orderByDesc('cantidad')->get();
+        $conteosEstado = (clone $consultaBase)->select('ventas.estado')->selectRaw('COUNT(*) AS cantidad')
+            ->groupBy('ventas.estado')->orderBy('ventas.estado')->get();
+        $ventasPorCliente = DB::table('ventas')->join('clientes', 'clientes.id', '=', 'ventas.cliente_id')
+            ->whereIn('ventas.id', (clone $consultaBase)->select('ventas.id'))
+            ->select('clientes.razon_social', 'clientes.nombre_contacto', 'ventas.moneda')
+            ->selectRaw('SUM(ventas.total) AS importe')
+            ->groupBy('clientes.id', 'clientes.razon_social', 'clientes.nombre_contacto', 'ventas.moneda')
+            ->orderByDesc('importe')->limit(5)->get();
+
+        $datos = [
+            'titulo' => $tipoCliente === 'mayorista' ? 'Ventas mayoristas' : 'Ventas minoristas', 'icono' => $tipoCliente === 'mayorista' ? 'bi-people' : 'bi-shop',
+            'descripcion' => 'Consulta las ventas registradas para clientes '.($tipoCliente === 'mayorista' ? 'mayoristas.' : 'minoristas.'),
+            'acciones' => [['texto' => 'Nueva venta '.($tipoCliente === 'mayorista' ? 'mayorista' : 'minorista'), 'icono' => 'bi-plus-lg', 'primaria' => true, 'ruta' => route('management.sales')], ['texto' => 'Nueva cotización', 'icono' => 'bi-file-earmark-text', 'ruta' => route('management.quotations')]],
+            'datos_reales' => true,
+            'metricas' => [
+                ['titulo' => 'Ingresos PEN del mes', 'valor' => 'PEN '.number_format($importeDelMes, 2), 'icono' => 'bi-coin', 'tendencia' => $tendenciaImporte],
+                ['titulo' => 'Ventas del mes', 'valor' => (string) $cantidadDelMes, 'icono' => 'bi-cart3', 'tono' => 'verde', 'tendencia' => $tendenciaCantidad],
+                ['titulo' => $tipoCliente === 'mayorista' ? 'Clientes empresariales activos' : 'Clientes minoristas activos', 'valor' => (string) (clone $consultaBase)->whereHas('cliente', fn ($consulta) => $consulta->where('activo', true))->distinct('ventas.cliente_id')->count('ventas.cliente_id'), 'icono' => $tipoCliente === 'mayorista' ? 'bi-buildings' : 'bi-people', 'tono' => 'rojo', 'tendencia' => 'Dato actual'],
+                ['titulo' => 'Ticket promedio PEN del mes', 'valor' => 'PEN '.number_format($cantidadVentasDelMesEnSoles > 0 ? $importeDelMes / $cantidadVentasDelMesEnSoles : 0, 2), 'icono' => 'bi-tag', 'tono' => 'violeta', 'tendencia' => 'Dato actual'],
+            ],
+            'buscar' => 'Buscar por cliente, código de venta o asesor…',
+            'filtros' => [
+                ['titulo' => 'Canal', 'campo' => 'canal', 'todos' => 'Todos los canales', 'opciones' => $canales->all()],
+                ['titulo' => 'Estado', 'campo' => 'estado', 'todos' => 'Todos los estados', 'opciones' => $estados->all()],
+                ['titulo' => 'Medio de pago', 'campo' => 'pago', 'todos' => 'Todos los medios de pago', 'opciones' => $mediosPago->map(fn (MedioPago $medio): array => ['valor' => (string) $medio->id, 'etiqueta' => $medio->nombre])->all()],
+            ],
+            'tablaTitulo' => 'Ventas '.($tipoCliente === 'mayorista' ? 'mayoristas' : 'minoristas').' registradas', 'tablaIcono' => 'bi-cart3',
+            'total' => (clone $consultaFiltrada)->count(),
+            'columnas' => ['Venta', 'Empresa / cliente', 'Asesor', 'Fecha', 'Total', 'Medio de pago', 'Estado'],
+            'filas' => $ventas->map(static function (Venta $venta): array {
+                $cliente = $venta->cliente?->razon_social ?: $venta->cliente?->nombre_contacto ?: 'Sin cliente asociado';
+                $estado = (string) $venta->estado;
+                $canal = $venta->canal ?? $venta->pedido?->canal ?? '';
+
+                return [
+                    'celdas' => [
+                        ['texto' => $venta->codigo, 'tono' => 'azul'], $cliente,
+                        $venta->usuario?->nombre ?? 'Sin asesor registrado',
+                        $venta->fecha_venta?->format('d/m/Y') ?? '—',
+                        $venta->moneda.' '.number_format((float) $venta->total, 2),
+                        ['texto' => $venta->pagos->pluck('medioPago.nombre')->filter()->unique()->join(', ') ?: 'Sin pago registrado', 'tono' => 'azul'],
+                        ['texto' => $estado, 'tono' => in_array(mb_strtolower($estado), ['confirmada', 'completada'], true) ? 'verde' : 'ambar'],
+                    ],
+                    'filtros' => ['canal' => $canal, 'estado' => $estado, 'pago' => $venta->pagos->pluck('medio_pago_id')->unique()->implode(',')],
+                ];
+            })->all(),
+            'formTitulo' => 'Nueva venta '.($tipoCliente === 'mayorista' ? 'mayorista' : 'minorista'), 'formIcono' => 'bi-cart3', 'formAccion' => 'Abrir formulario de venta',
+            'formCampos' => [['etiqueta' => 'Empresa / cliente', 'ayuda' => 'Los clientes mayoristas se consultan desde la gestión de ventas'], ['etiqueta' => 'Productos', 'ayuda' => 'Los productos y existencias se consultan desde la gestión de ventas'], ['etiqueta' => 'Cantidad', 'ayuda' => 'Completa la venta en el formulario autorizado', 'tipo' => 'input']],
+            'rutaFormulario' => route('management.sales'),
+            'anillo' => ['titulo' => 'Ventas por canal', 'icono' => 'bi-bar-chart', 'valor' => 'PEN '.number_format($importeDelMes, 2), 'subtitulo' => 'Ingresos registrados este mes', 'gradiente' => 'conic-gradient(#178bfa 0 100%)', 'filas' => $resumenCanales->isEmpty() ? [['Sin canal registrado', '0']] : $resumenCanales->map(fn ($fila): array => [$fila->canal ?: 'Sin canal registrado', (string) $fila->cantidad])->all()],
+            'grafico' => ['titulo' => 'Ventas por estado', 'icono' => 'bi-bar-chart', 'barras' => $conteosEstado->isEmpty() ? [['Sin registros', '0', 0]] : $conteosEstado->map(fn ($fila): array => [$fila->estado, (string) $fila->cantidad, (int) round(((int) $fila->cantidad / max(1, (int) $conteosEstado->max('cantidad'))) * 100)])->all()],
+            'ranking' => ['titulo' => 'Clientes con mayor venta registrada', 'icono' => 'bi-trophy', 'filas' => $ventasPorCliente->isEmpty() ? [['Sin registros', 'PEN 0.00']] : $ventasPorCliente->map(fn (object $fila): array => [$fila->razon_social ?: $fila->nombre_contacto, $fila->moneda.' '.number_format((float) $fila->importe, 2)])->all()],
+        ];
+
+        $vista = $tipoCliente === 'mayorista'
+            ? 'paneles.administrador.operaciones-comerciales.ventas-mayoristas.listar'
+            : 'paneles.administrador.operaciones-comerciales.ventas-minoristas.listar';
+
+        return view($vista, compact('datos', 'filtros'));
+    }
+
     public function store(GuardarVentaRequest $request): RedirectResponse
     {
-        $validated = $request->validated();
-        $customer = User::query()
-            ->whereIn('rol', ['cliente_minorista', 'cliente_mayorista'])
-            ->findOrFail($validated['cliente_id']);
+        abort_unless(Schema::hasColumns('ventas', ['canal', 'observaciones']), 503, 'La migración de canal y observaciones está pendiente de autorización y aplicación.');
+        $datos = $request->validated();
+        $venta = $this->registro->registrarFisica($datos, $request->user(), $datos['venta_token'], $request->ip());
+        $request->session()->forget('venta_token');
 
-        $this->salesService->register(
-            $customer,
-            $validated['items'],
+        return redirect()->route('management.sales')->with('status', 'Venta '.$venta->codigo.' confirmada. No se registró ningún pago.');
+    }
+
+    public function convertirCotizacion(ConvertirCotizacionRequest $request, Cotizacion $quotation): RedirectResponse
+    {
+        $venta = $this->cotizaciones->convertirAventa($quotation, (int) $request->validated('almacen_id'), $request->user(), $request->ip());
+
+        return redirect()->route('management.sales')->with('status', 'La cotizacion se convirtio en la venta '.$venta->codigo.' como borrador. No se descontaron existencias.');
+    }
+
+    public function confirmarBorrador(ConfirmarVentaCotizacionRequest $request, Venta $venta): RedirectResponse
+    {
+        $ventaConfirmada = $this->registro->confirmarBorradorCotizacion(
+            $venta,
             $request->user(),
-            $validated['tipo_venta'],
-            $validated['fecha_venta'],
-            $validated['observaciones'] ?? null,
             $request->ip(),
+            $request->validated('dispositivos') ?? [],
         );
 
-        return redirect()->route('management.sales')->with('status', 'Venta registrada correctamente.');
+        return redirect()->route('management.sales')->with('status', 'La venta '.$ventaConfirmada->codigo.' fue confirmada y sus existencias se descontaron una sola vez. No se registro pago.');
     }
 
-    public function update(ActualizarVentaRequest $request, Pedido $order): RedirectResponse
+    public function update(ActualizarVentaRequest $request, Venta $order): RedirectResponse
     {
-        $validated = $request->validated();
-        $customer = User::query()
-            ->whereIn('rol', ['cliente_minorista', 'cliente_mayorista'])
-            ->findOrFail($validated['cliente_id']);
+        $venta = $this->registro->actualizarBorrador($order, $request->validated(), $request->user(), $request->ip());
 
-        $this->salesService->update(
-            $order,
-            $customer,
-            $validated['items'],
-            $request->user(),
-            $validated['tipo_venta'],
-            $validated['fecha_venta'],
-            $validated['observaciones'] ?? null,
-            $request->ip(),
-        );
-
-        return redirect()->route('management.sales')->with('status', 'Venta actualizada correctamente.');
+        return redirect()->route('management.sales')->with('status', 'Se actualizaron los datos de la venta '.$venta->codigo.'.');
     }
 
-    public function export(Request $request): StreamedResponse
+    public function cancel(AnularVentaRequest $request, Venta $venta): RedirectResponse
     {
-        $filters = $this->filters($request);
-        $orders = $this->orderQuery($filters)
-            ->select(['id', 'usuario_id', 'total', 'estado', 'creado_en'])
-            ->orderBy('creado_en')
-            ->orderBy('id')
-            ->cursor();
+        $this->registro->anular($venta, $request->user(), $request->validated('motivo'), $request->ip());
 
-        return response()->streamDownload(function () use ($orders): void {
-            $output = fopen('php://output', 'w');
-
-            if ($output === false) {
-                return;
-            }
-
-            fwrite($output, "\xEF\xBB\xBF");
-            fputcsv($output, ['id', 'usuario_id', 'total', 'estado', 'fecha', 'canal']);
-
-            foreach ($orders as $order) {
-                fputcsv($output, [
-                    $order->id,
-                    $order->usuario_id,
-                    $order->total,
-                    $order->estado,
-                    $order->creado_en?->toDateTimeString(),
-                    'Tienda online',
-                ]);
-            }
-
-            fclose($output);
-        }, 'ventas.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+        return redirect()->route('management.sales')->with('status', 'La venta está anulada.');
     }
 
-    /**
-     * @param  array{buscar:?string,estado:?string,canal:?string,desde:string,hasta:string,from:CarbonImmutable,to:CarbonImmutable}  $filters
-     * @return Builder<Pedido>
-     */
-    private function orderQuery(array $filters): Builder
+    public function export(FiltroVentaRequest $request, string $format = 'csv', ?ExportadorTabular $exporter = null, ?RegistradorAuditoria $audit = null): Response|StreamedResponse
     {
-        return $this->applyOrderFilters(Pedido::query(), $filters);
+        abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
+        $ventas = $this->ventas->query($request->user(), $this->filters($request->validated()))
+            ->with(['cliente:id,razon_social,nombre_contacto', 'pedido:id,canal'])
+            ->orderBy('ventas.fecha_venta')->orderBy('ventas.id')->limit(5000)->get();
+        $safe = static function (?string $value): string {
+            $value ??= '';
+
+            return preg_match('/^[\s\x00-\x1f]*[=+\-@]/u', $value) ? "'".$value : $value;
+        };
+        $rows = $ventas->map(fn (Venta $venta): array => [
+            $safe($venta->codigo),
+            $venta->fecha_venta?->toDateTimeString(),
+            $safe($venta->cliente?->razon_social ?: $venta->cliente?->nombre_contacto),
+            $venta->total,
+            $safe($venta->moneda),
+            $safe($venta->estado),
+            $safe($venta->canal ?: $venta->pedido?->canal),
+        ])->all();
+        $filters = $this->filters($request->validated());
+        $response = ($exporter ?? app(ExportadorTabular::class))->download($format, 'ventas-'.now()->format('Ymd'),
+            ['Código', 'Fecha', 'Cliente', 'Total', 'Moneda', 'Estado', 'Canal'],
+            $rows,
+            [
+                'title' => 'REPORTE DE VENTAS',
+                'subtitle' => 'Ventas reales consultadas desde MariaDB.',
+                'module' => 'Operaciones Comerciales',
+                'report_name' => 'Ventas',
+                'filters' => $filters,
+                'generated_by' => (string) $request->user()->nombre,
+                'role' => 'Usuario autorizado',
+                'scope' => 'Empresa, sede, almacén y permisos RBAC vigentes.',
+                'indicators' => [['label' => 'Ventas incluidas', 'value' => count($rows)]],
+            ]);
+        ($audit ?? app(RegistradorAuditoria::class))->record($request->user()->getKey(), 'exportar', 'ventas', null, null, ['formato' => $format, 'filtros' => $filters, 'cantidad' => count($rows)], $request->ip());
+
+        return $response;
     }
 
-    /**
-     * @param  array{buscar:?string,estado:?string,canal:?string,desde:string,hasta:string,from:CarbonImmutable,to:CarbonImmutable}  $filters
-     * @return Builder<Pedido>
-     */
-    private function salesQuery(array $filters): Builder
-    {
-        return $this->applyOrderFilters(Pedido::query(), $filters)
-            ->whereNotIn('estado', ['Cancelado', 'Cancelada']);
-    }
-
-    /**
-     * @param  Builder<Pedido>  $query
-     * @param  array{buscar:?string,estado:?string,canal:?string,desde:string,hasta:string,from:CarbonImmutable,to:CarbonImmutable}  $filters
-     * @return Builder<Pedido>
-     */
-    private function applyOrderFilters(Builder $query, array $filters): Builder
-    {
-        return $query
-            ->when($filters['buscar'], function (Builder $query, string $search): void {
-                $query->where(function (Builder $searchQuery) use ($search): void {
-                    $searchQuery
-                        ->when(ctype_digit($search), fn (Builder $query): Builder => $query->whereKey((int) $search))
-                        ->orWhereHas('user', function (Builder $userQuery) use ($search): void {
-                            $userQuery
-                                ->where('nombre', 'like', '%'.$search.'%')
-                                ->orWhere('correo', 'like', '%'.$search.'%');
-                        });
-                });
-            })
-            ->when($filters['estado'], fn (Builder $query, string $status): Builder => $query->where('estado', $status))
-            ->whereBetween('creado_en', [$filters['from'], $filters['to']]);
-    }
-
-    /**
-     * @return array{buscar:?string,estado:?string,canal:?string,desde:string,hasta:string,from:CarbonImmutable,to:CarbonImmutable}
-     */
-    private function filters(Request $request): array
+    private function filters(array $input): array
     {
         $today = CarbonImmutable::today();
-        $defaultFrom = $today->subDays(29);
-        $from = $this->parseDate($request->string('desde')->toString(), $defaultFrom);
-        $to = $this->parseDate($request->string('hasta')->toString(), $today);
-
-        if ($from->greaterThan($to)) {
-            [$from, $to] = [$to, $from];
+        $to = $this->parseDate((string) ($input['hasta'] ?? ''), $today);
+        $defaultFrom = filled($input['hasta'] ?? null) ? $to->subDays(29) : $today->subDays(29);
+        $from = $this->parseDate((string) ($input['desde'] ?? ''), $defaultFrom);
+        if ($from->greaterThan($to) && filled($input['desde'] ?? null)) {
+            $to = $from;
         }
-
-        $statusMap = [
-            'pendiente' => 'Pendiente',
-            'en_proceso' => 'En proceso',
-            'enviado' => 'Enviado',
-            'entregado' => 'Entregado',
-            'cancelado' => 'Cancelado',
-        ];
-        $status = $request->string('estado')->toString();
-        $search = trim($request->string('buscar')->toString());
-        $channel = $request->string('canal')->toString();
+        $canal = (string) ($input['canal'] ?? '');
 
         return [
-            'buscar' => $search !== '' ? $search : null,
-            'estado' => $statusMap[$status] ?? null,
-            'canal' => $channel === 'tienda_online' ? 'tienda_online' : null,
-            'desde' => $from->toDateString(),
-            'hasta' => $to->toDateString(),
-            'from' => $from->startOfDay(),
-            'to' => $to->endOfDay(),
+            'buscar' => mb_substr(trim((string) ($input['buscar'] ?? '')), 0, 120) ?: null,
+            'estado' => mb_substr(trim((string) ($input['estado'] ?? '')), 0, 30) ?: null,
+            'canal' => in_array($canal, ['ecommerce', 'presencial'], true) ? $canal : null,
+            'cliente_id' => (int) ($input['cliente_id'] ?? 0) > 0 ? (int) $input['cliente_id'] : null,
+            'sede_id' => (int) ($input['sede_id'] ?? 0) > 0 ? (int) $input['sede_id'] : null,
+            'desde' => $from->toDateString(), 'hasta' => $to->toDateString(),
+            'from' => $from->startOfDay(), 'to' => $to->endOfDay(),
         ];
     }
 
@@ -243,7 +385,6 @@ class VentaController extends Controller
         if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
             return $fallback;
         }
-
         try {
             $date = CarbonImmutable::createFromFormat('!Y-m-d', $value);
         } catch (\Throwable) {
@@ -251,97 +392,5 @@ class VentaController extends Controller
         }
 
         return $date instanceof CarbonImmutable && $date->format('Y-m-d') === $value ? $date : $fallback;
-    }
-
-    /**
-     * @param  array{buscar:?string,estado:?string,canal:?string,desde:string,hasta:string,from:CarbonImmutable,to:CarbonImmutable}  $filters
-     * @return array<int, array{label:string,sales:float,orders:int,sales_height:float,orders_height:float}>
-     */
-    private function salesTrend(array $filters): array
-    {
-        $rows = $this->salesQuery($filters)
-            ->selectRaw('DATE(creado_en) as day, COALESCE(SUM(total), 0) as sales, COUNT(*) as orders')
-            ->groupByRaw('DATE(creado_en)')
-            ->orderBy('day')
-            ->get()
-            ->keyBy('day');
-        $days = $filters['from']->startOfDay()->diffInDays($filters['to']->startOfDay()) + 1;
-        $points = [];
-
-        for ($index = 0; $index < min($days, 31); $index++) {
-            $date = $filters['from']->startOfDay()->addDays($index);
-            $row = $rows->get($date->toDateString());
-            $points[] = [
-                'label' => $date->format('d M'),
-                'sales' => (float) ($row?->sales ?? 0),
-                'orders' => (int) ($row?->orders ?? 0),
-            ];
-        }
-
-        if ($days > 31) {
-            $points = $rows->map(static function (object $row): array {
-                $date = CarbonImmutable::parse((string) $row->day);
-
-                return [
-                    'label' => $date->format('d M'),
-                    'sales' => (float) $row->sales,
-                    'orders' => (int) $row->orders,
-                ];
-            })->values()->all();
-        }
-
-        $maxSales = max(1, ...array_column($points, 'sales'));
-        $maxOrders = max(1, ...array_column($points, 'orders'));
-
-        return array_map(static function (array $point) use ($maxSales, $maxOrders): array {
-            return $point + [
-                'sales_height' => $point['sales'] > 0 ? max(6, round(($point['sales'] / $maxSales) * 100, 2)) : 0,
-                'orders_height' => $point['orders'] > 0 ? max(6, round(($point['orders'] / $maxOrders) * 100, 2)) : 0,
-            ];
-        }, $points);
-    }
-
-    /**
-     * @return array<int, array{label:string,count:int,percent:float,color:string}>
-     */
-    private function channelSummary(int $ordersCount): array
-    {
-        return [[
-            'label' => 'Tienda online',
-            'count' => $ordersCount,
-            'percent' => $ordersCount > 0 ? 100.0 : 0.0,
-            'color' => '#1784f5',
-        ]];
-    }
-
-    /**
-     * @param  array{buscar:?string,estado:?string,canal:?string,desde:string,hasta:string,from:CarbonImmutable,to:CarbonImmutable}  $filters
-     * @return array<int, array{name:string,units:int,revenue:float,image:?string}>
-     */
-    private function topProducts(array $filters): array
-    {
-        $details = DetallePedido::query()
-            ->whereHas('order', function (Builder $query) use ($filters): void {
-                $this->applyOrderFilters($query->whereNotIn('estado', ['Cancelado', 'Cancelada']), $filters);
-            })
-            ->with('product:id,nombre,url_imagen')
-            ->get();
-
-        return $details
-            ->groupBy('producto_id')
-            ->map(static function (Collection $productDetails): array {
-                $product = $productDetails->first()?->product;
-
-                return [
-                    'name' => $product?->nombre ?? 'Producto',
-                    'units' => (int) $productDetails->sum(static fn (DetallePedido $detail): int => (int) $detail->cantidad),
-                    'revenue' => (float) $productDetails->sum(static fn (DetallePedido $detail): float => (float) $detail->cantidad * (float) $detail->precio_unitario),
-                    'image' => $product?->url_imagen,
-                ];
-            })
-            ->sortByDesc('revenue')
-            ->take(5)
-            ->values()
-            ->all();
     }
 }

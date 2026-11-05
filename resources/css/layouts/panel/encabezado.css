@@ -294,6 +294,12 @@
   font-size: 1.2rem;
 }
 
+.admin-user .admin-avatar--photo {
+  display: block;
+  object-fit: cover;
+  background: #dcecff;
+}
+
 .admin-user-copy {
   min-width: 0;
 }

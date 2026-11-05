@@ -1,0 +1,293 @@
+<?php
+
+namespace App\Http\Controllers\Paneles\Administrador;
+
+use App\Http\Controllers\Controller;
+use App\Models\Auditoria\RegistroAuditoria;
+use App\Models\Comercio\Pedido;
+use App\Models\User;
+use App\Servicios\ExportadorTabular;
+use App\Servicios\RegistradorAuditoria;
+use App\Servicios\ServicioAutorizacion;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rule;
+use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
+final class DashboardGlobalPedidosController extends Controller
+{
+    private const MAX_EXPORT_ROWS = 5000;
+
+    public function index(Request $request, ServicioAutorizacion $authorization): View
+    {
+        $this->authorizeDashboard($request->user(), $authorization);
+        $filters = $this->filters($request, $authorization);
+        $orders = $this->orders($request->user(), $filters, $authorization)
+            ->with('user:id,nombre')
+            ->get();
+        $byStatus = $orders->groupBy(static fn (Pedido $order): string => $order->estado)
+            ->map(static fn (Collection $group): int => $group->count());
+        $byChannel = $this->hasChannel()
+            ? $orders->groupBy(static fn (Pedido $order): string => $order->canal ?: 'Sin canal')
+                ->map(static fn (Collection $group): int => $group->count())
+            : collect();
+        $activity = Schema::hasTable('registros_auditoria')
+            ? RegistroAuditoria::query()->latest('creado_en')->limit(5)->get(['accion', 'entidad', 'entidad_id', 'creado_en'])
+            : collect();
+        $availableOrders = $this->orders($request->user(), $filters, $authorization, false);
+
+        return view('paneles.administrador.dashboard-global.pedidos.listar', [
+            'filters' => $filters,
+            'sites' => $this->availableSites($request->user(), $authorization),
+            'channels' => $this->hasChannel() ? (clone $availableOrders)->whereNotNull('canal')->distinct()->orderBy('canal')->pluck('canal') : collect(),
+            'statuses' => (clone $availableOrders)->distinct()->orderBy('estado')->pluck('estado'),
+            'hasSite' => $this->hasSite(),
+            'hasChannel' => $this->hasChannel(),
+            'orders' => $orders,
+            'byStatus' => $byStatus,
+            'byChannel' => $byChannel,
+            'activity' => $activity,
+            'canExport' => $authorization->allows($request->user(), 'gestion.reportes.exportar'),
+        ]);
+    }
+
+    public function export(Request $request, string $format, ExportadorTabular $exporter, ServicioAutorizacion $authorization, RegistradorAuditoria $auditor): Response|StreamedResponse
+    {
+        $this->authorizeDashboard($request->user(), $authorization);
+        $authorization->assertAllowed($request->user(), 'gestion.reportes.exportar');
+        abort_unless(in_array($format, ['pdf', 'excel', 'csv'], true), 404);
+        $filters = $this->filters($request, $authorization);
+        $orders = $this->orders($request->user(), $filters, $authorization);
+        abort_if((clone $orders)->limit(self::MAX_EXPORT_ROWS + 1)->pluck('id')->count() > self::MAX_EXPORT_ROWS, 422, 'El período supera el límite de exportación. Reduce los filtros.');
+
+        $hasChannel = $this->hasChannel();
+        $hasSite = $this->hasSite();
+        $columns = ['Pedido', 'Fecha', 'Estado'];
+        if ($hasChannel) {
+            $columns[] = 'Canal';
+        }
+        $siteColumnIndex = null;
+        if ($hasSite) {
+            $siteColumnIndex = count($columns);
+            $columns[] = 'Sede ID';
+        }
+        $columns[] = 'Importe del pedido PEN (no cobro)';
+        $columnTypes = [0 => 'integer', 1 => 'datetime'];
+        if ($siteColumnIndex !== null) {
+            $columnTypes[$siteColumnIndex] = 'integer';
+        }
+        $columnTypes[count($columns) - 1] = 'currency';
+
+        $rows = $orders->orderByDesc('creado_en')->get()->map(static function (Pedido $order) use ($format, $hasChannel, $hasSite): array {
+            $row = [
+                $order->id,
+                $order->creado_en?->format('Y-m-d H:i') ?? '',
+                self::safeExportText((string) $order->estado, $format),
+            ];
+            if ($hasChannel) {
+                $row[] = self::safeExportText((string) ($order->canal ?? ''), $format);
+            }
+            if ($hasSite) {
+                $row[] = $order->sede_id ?? '';
+            }
+            $row[] = number_format((float) $order->total, 2, '.', '');
+
+            return $row;
+        })->all();
+        $statuses = array_unique(array_map(static fn (array $row): string => (string) ($row[2] ?? ''), $rows));
+        $report = [
+            'title' => 'REPORTE DE PEDIDOS',
+            'subtitle' => 'Detalle de pedidos filtrados; el importe nominal no representa un cobro confirmado.',
+            'module' => 'Dashboard Global / Pedidos',
+            'report_name' => 'Reporte de pedidos',
+            'period' => 'Últimos '.$filters['periodo'].' días',
+            'filters' => [
+                'Período' => $filters['periodo'].' días',
+                'Estado' => $filters['estado'] ?? 'Todos',
+                'Canal' => $filters['canal'] ?? 'Todos',
+                'Sede' => $filters['sede'] === null ? 'Todas las sedes autorizadas' : 'ID '.$filters['sede'],
+            ],
+            'generated_by' => (string) $request->user()->nombre,
+            'role' => 'Administrador',
+            'scope' => $filters['sede'] === null ? 'Sedes accesibles para el usuario según autorización.' : 'Sede autorizada ID '.$filters['sede'],
+            'indicators' => [
+                ['label' => 'Pedidos incluidos', 'value' => count($rows)],
+                ['label' => 'Estados distintos', 'value' => count($statuses)],
+            ],
+            'column_types' => $columnTypes,
+            'summary_row' => [
+                'label' => 'Pedidos del conjunto filtrado: '.count($rows),
+                'values' => [],
+            ],
+            'observations' => ['El importe mostrado proviene del total del pedido y no acredita un pago.'],
+        ];
+        $response = $exporter->download($format, 'pedidos-'.$filters['periodo'].'-dias', $columns, $rows, $report);
+
+        $auditor->record((int) $request->user()->getKey(), 'exportar', 'pedidos', null, null, [
+            'formato' => $format,
+            'periodo' => $filters['periodo'],
+            'sede_id' => $filters['sede'],
+            'cantidad' => count($rows),
+        ], $request->ip());
+
+        return $response;
+    }
+
+    /** @return array{periodo:int,estado:?string,canal:?string,sede:?int} */
+    private function filters(Request $request, ServicioAutorizacion $authorization): array
+    {
+        $data = $request->validate([
+            'periodo' => ['nullable', 'integer', Rule::in([7, 30, 90])],
+            'estado' => ['nullable', 'string', 'max:40'],
+            'canal' => ['nullable', 'string', 'max:30'],
+            'sede' => ['nullable', 'integer', 'min:1'],
+        ], [
+            'periodo.in' => 'El período debe ser de 7, 30 o 90 días.',
+            'sede.integer' => 'La sede seleccionada no es válida.',
+        ]);
+
+        $filters = [
+            'periodo' => (int) ($data['periodo'] ?? 7),
+            'estado' => $data['estado'] ?? null,
+            'canal' => $data['canal'] ?? null,
+            'sede' => isset($data['sede']) ? (int) $data['sede'] : null,
+        ];
+        abort_if($filters['sede'] !== null && ! $this->hasSite(), 422, 'El filtro de sede no está disponible.');
+        abort_if($filters['canal'] !== null && ! $this->hasChannel(), 422, 'El filtro de canal no está disponible.');
+
+        $availableSites = $this->availableSites($request->user(), $authorization);
+        if ($filters['sede'] !== null) {
+            abort_unless($availableSites->contains('id', $filters['sede']), 403);
+        }
+
+        $availableOrders = $this->orders($request->user(), $filters, $authorization, false);
+        if ($filters['estado'] !== null) {
+            abort_unless((clone $availableOrders)->where('estado', $filters['estado'])->exists(), 422, 'El estado seleccionado no existe en el período autorizado.');
+        }
+        if ($filters['canal'] !== null) {
+            abort_unless((clone $availableOrders)->where('canal', $filters['canal'])->exists(), 422, 'El canal seleccionado no existe en el período autorizado.');
+        }
+
+        return $filters;
+    }
+
+    /** @param array{periodo:int,estado:?string,canal:?string,sede:?int} $filters */
+    private function orders(User $user, array $filters, ServicioAutorizacion $authorization, bool $applySelectedFilters = true): Builder
+    {
+        $query = Pedido::query()
+            ->where('creado_en', '>=', Carbon::now()->subDays($filters['periodo'])->startOfDay())
+            ->where('creado_en', '<=', now())
+            ->when($applySelectedFilters ? $filters['estado'] : null, static fn (Builder $query, string $status): Builder => $query->where('estado', $status))
+            ->when($applySelectedFilters ? $filters['canal'] : null, static fn (Builder $query, string $channel): Builder => $query->where('canal', $channel))
+            ->when($applySelectedFilters ? $filters['sede'] : null, static fn (Builder $query, int $siteId): Builder => $query->where('sede_id', $siteId))
+            ->orderByDesc('creado_en');
+
+        if ($authorization->isSeeded()) {
+            $isGlobalAdministrator = $this->hasGlobalAdministratorAssignment($user);
+            if ($isGlobalAdministrator) {
+                if (Schema::hasColumn('pedidos', 'empresa_id')) {
+                    $companyId = $authorization->activeCompanyId();
+                    $companyId === null ? $query->whereRaw('1 = 0') : $query->where('empresa_id', $companyId);
+                }
+            } else {
+                abort_unless($this->hasSite(), 403);
+                $query->whereIn('sede_id', $this->assignedSiteIds($user, $authorization));
+            }
+            if (! $isGlobalAdministrator && Schema::hasColumn('pedidos', 'empresa_id') && Schema::hasTable('sedes') && Schema::hasColumn('sedes', 'empresa_id')) {
+                $query->whereExists(static function ($siteQuery): void {
+                    $siteQuery->selectRaw('1')->from('sedes as dashboard_sedes')
+                        ->whereColumn('dashboard_sedes.id', 'pedidos.sede_id')
+                        ->whereColumn('dashboard_sedes.empresa_id', 'pedidos.empresa_id');
+                });
+            }
+        }
+
+        return $query;
+    }
+
+    private function authorizeDashboard(User $user, ServicioAutorizacion $authorization): void
+    {
+        abort_unless($authorization->hasRole($user, 'administrador'), 403);
+        $authorization->assertAllowed($user, 'gestion.panel.consultar');
+    }
+
+    /** @return Collection<int, object> */
+    private function availableSites(User $user, ServicioAutorizacion $authorization): Collection
+    {
+        if (! $this->hasSite()) {
+            return collect();
+        }
+
+        return DB::table('sedes')
+            ->when(Schema::hasColumn('sedes', 'activa'), static fn ($query) => $query->where('activa', true))
+            ->when(
+                Schema::hasTable('empresas') && Schema::hasColumn('sedes', 'empresa_id') && Schema::hasColumn('empresas', 'activo'),
+                static fn ($query) => $query->join('empresas as dashboard_empresas', 'dashboard_empresas.id', '=', 'sedes.empresa_id')
+                    ->where('dashboard_empresas.activo', true),
+            )
+            ->when($authorization->isSeeded() && ! $this->hasGlobalAdministratorAssignment($user), fn ($query) => $query->whereIn('sedes.id', $this->assignedSiteIds($user, $authorization)))
+            ->orderBy('sedes.nombre')
+            ->get(['sedes.id', 'sedes.nombre']);
+    }
+
+    private function hasGlobalAdministratorAssignment(User $user): bool
+    {
+        return DB::table('usuarios_roles')->join('roles', 'roles.id', '=', 'usuarios_roles.rol_id')
+            ->where('usuarios_roles.usuario_id', $user->getKey())
+            ->where('roles.codigo', 'administrador')
+            ->where('roles.activo', true)
+            ->where('usuarios_roles.activo', true)
+            ->where(static fn ($query) => $query->whereNull('usuarios_roles.vigente_hasta')->orWhere('usuarios_roles.vigente_hasta', '>', now()))
+            ->exists();
+    }
+
+    /** @return array<int, int> */
+    private function assignedSiteIds(User $user, ServicioAutorizacion $authorization): array
+    {
+        $siteAssignments = DB::table('usuarios_sedes_roles')
+            ->join('roles', 'roles.id', '=', 'usuarios_sedes_roles.rol_id')
+            ->join('sedes as dashboard_sedes', 'dashboard_sedes.id', '=', 'usuarios_sedes_roles.sede_id')
+            ->when(Schema::hasColumn('sedes', 'activa'), static fn ($query) => $query->where('dashboard_sedes.activa', true))
+            ->when(
+                Schema::hasTable('empresas') && Schema::hasColumn('sedes', 'empresa_id') && Schema::hasColumn('empresas', 'activo'),
+                static fn ($query) => $query->join('empresas as dashboard_empresas', 'dashboard_empresas.id', '=', 'dashboard_sedes.empresa_id')
+                    ->where('dashboard_empresas.activo', true),
+            )
+            ->where('usuarios_sedes_roles.usuario_id', $user->getKey())
+            ->where('roles.codigo', 'administrador')
+            ->where('roles.activo', true)
+            ->where('usuarios_sedes_roles.activo', true)
+            ->where(static fn ($query) => $query->whereNull('usuarios_sedes_roles.vigente_hasta')->orWhere('usuarios_sedes_roles.vigente_hasta', '>', now()))
+            ->distinct();
+        $siteIds = $siteAssignments->pluck('usuarios_sedes_roles.sede_id')->map(static fn ($id): int => (int) $id)->all();
+        $activeSiteId = $authorization->activeSiteIdFor($user);
+
+        return $activeSiteId === null ? $siteIds : array_values(array_intersect($siteIds, [$activeSiteId]));
+    }
+
+    private function hasSite(): bool
+    {
+        return Schema::hasTable('sedes') && Schema::hasColumn('pedidos', 'sede_id');
+    }
+
+    private function hasChannel(): bool
+    {
+        return Schema::hasColumn('pedidos', 'canal');
+    }
+
+    private static function safeExportText(string $value, string $format): string
+    {
+        $clean = trim(preg_replace('/[\p{C}\p{Z}]+/u', ' ', $value) ?? '');
+        if ($format === 'pdf') {
+            $clean = mb_convert_encoding(mb_convert_encoding($clean, 'Windows-1252', 'UTF-8'), 'UTF-8', 'Windows-1252');
+        }
+
+        return preg_match('/^[=+\-@]/u', $clean) === 1 ? "'".$clean : $clean;
+    }
+}

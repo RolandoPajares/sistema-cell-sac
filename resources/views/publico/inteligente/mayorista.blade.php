@@ -4,12 +4,8 @@
 @section('body_class', 'modulo-mayorista')
 
 @php
-    $imageUrl = static function ($product): string {
-        $path = $product->images->first()?->ruta_imagen ?: $product->url_imagen;
-        $path = ltrim((string) preg_replace('~^assets/~', '', $path ?: 'img/marca/logo.jpeg'), '/');
-
-        return asset('assets/cell-legacy/'.$path);
-    };
+    $urlImagenPrincipal = static fn ($producto): string => $producto->url_imagen_principal
+        ?: asset('assets/cell-legacy/img/marca/logo.jpeg');
 @endphp
 
 @section('content')
@@ -69,7 +65,7 @@
                 @forelse ($products as $product)
                     <article>
                         <span>Disponible</span>
-                        <img class="mayorista-product-photo" src="{{ $imageUrl($product) }}" alt="{{ $product->marca }} {{ $product->nombre }}" loading="lazy">
+                        <img class="mayorista-product-photo" src="{{ $urlImagenPrincipal($product) }}" alt="{{ $product->marca }} {{ $product->nombre }}" loading="lazy">
                         <small>{{ $product->marca }}</small>
                         <h3>{{ $product->nombre }}</h3>
                         <p>1–9 und. <b>S/ {{ number_format((float) $product->effective_price, 2) }}</b><br>10–49 und. <b>S/ {{ number_format($product->wholesale_price_10, 2) }}</b><br>50+ und. <b>S/ {{ number_format($product->wholesale_price_50, 2) }}</b></p>

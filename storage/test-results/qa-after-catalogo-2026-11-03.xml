@@ -1,0 +1,586 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="C:\xampp\htdocs\dwa2\sistema-cell-sac\phpunit.xml" tests="168" assertions="984" errors="5" failures="29" skipped="7" time="12.481499">
+    <testsuite name="Unit" tests="106" assertions="802" errors="0" failures="0" skipped="6" time="10.225556">
+      <testsuite name="Tests\Unit\CajasOperativasTest" file="tests\Unit\CajasOperativasTest.php" tests="9" assertions="43" errors="0" failures="0" skipped="0" time="0.470056">
+        <testcase name="crea, edita y desactiva cajas reales con auditoría e idempotencia" file="tests\Unit\CajasOperativasTest.php::crea, edita y desactiva cajas reales con auditoría e idempotencia" class="Tests\Unit\CajasOperativasTest" classname="Tests.Unit.CajasOperativasTest" assertions="4" time="0.143968"/>
+        <testcase name="impide duplicados, sedes ajenas y ausencia de permiso" file="tests\Unit\CajasOperativasTest.php::impide duplicados, sedes ajenas y ausencia de permiso" class="Tests\Unit\CajasOperativasTest" classname="Tests.Unit.CajasOperativasTest" assertions="4" time="0.048621"/>
+        <testcase name="bloquea cambios con sesión abierta y revierte el registro cuando falla la auditoría" file="tests\Unit\CajasOperativasTest.php::bloquea cambios con sesión abierta y revierte el registro cuando falla la auditoría" class="Tests\Unit\CajasOperativasTest" classname="Tests.Unit.CajasOperativasTest" assertions="5" time="0.031761"/>
+        <testcase name="lista y filtra únicamente las cajas visibles por sede" file="tests\Unit\CajasOperativasTest.php::lista y filtra únicamente las cajas visibles por sede" class="Tests\Unit\CajasOperativasTest" classname="Tests.Unit.CajasOperativasTest" assertions="4" time="0.062953"/>
+        <testcase name="valida código, sede y nombre con mensajes en español" file="tests\Unit\CajasOperativasTest.php::valida código, sede y nombre con mensajes en español" class="Tests\Unit\CajasOperativasTest" classname="Tests.Unit.CajasOperativasTest" assertions="4" time="0.022385"/>
+        <testcase name="abre una sesión una sola vez y no admite otra simultánea para la misma caja" file="tests\Unit\CajasOperativasTest.php::abre una sesión una sola vez y no admite otra simultánea para la misma caja" class="Tests\Unit\CajasOperativasTest" classname="Tests.Unit.CajasOperativasTest" assertions="6" time="0.037644"/>
+        <testcase name="registra entradas y salidas idempotentes y bloquea importes inválidos o sobregiros" file="tests\Unit\CajasOperativasTest.php::registra entradas y salidas idempotentes y bloquea importes inválidos o sobregiros" class="Tests\Unit\CajasOperativasTest" classname="Tests.Unit.CajasOperativasTest" assertions="6" time="0.043734"/>
+        <testcase name="detecta diferencia de arqueo y cierra solo con efectivo conforme" file="tests\Unit\CajasOperativasTest.php::detecta diferencia de arqueo y cierra solo con efectivo conforme" class="Tests\Unit\CajasOperativasTest" classname="Tests.Unit.CajasOperativasTest" assertions="7" time="0.048361"/>
+        <testcase name="revierte una entrada de caja cuando falla el registro de auditoría" file="tests\Unit\CajasOperativasTest.php::revierte una entrada de caja cuando falla el registro de auditoría" class="Tests\Unit\CajasOperativasTest" classname="Tests.Unit.CajasOperativasTest" assertions="3" time="0.030629"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\ConsultasFinancierasQueryTest" file="tests\Unit\ConsultasFinancierasQueryTest.php" tests="15" assertions="69" errors="0" failures="0" skipped="0" time="0.527494">
+        <testcase name="filtra pagos con las columnas y tipos definidos en el sql" file="tests\Unit\ConsultasFinancierasQueryTest.php::filtra pagos con las columnas y tipos definidos en el sql" class="Tests\Unit\ConsultasFinancierasQueryTest" classname="Tests.Unit.ConsultasFinancierasQueryTest" assertions="1" time="0.025232"/>
+        <testcase name="limita los reembolsos a pagos visibles y aplica filtros de fecha y estado" file="tests\Unit\ConsultasFinancierasQueryTest.php::limita los reembolsos a pagos visibles y aplica filtros de fecha y estado" class="Tests\Unit\ConsultasFinancierasQueryTest" classname="Tests.Unit.ConsultasFinancierasQueryTest" assertions="1" time="0.021367"/>
+        <testcase name="arma el listado de pagos desde Eloquent sin ofrecer acciones de escritura" file="tests\Unit\ConsultasFinancierasQueryTest.php::arma el listado de pagos desde Eloquent sin ofrecer acciones de escritura" class="Tests\Unit\ConsultasFinancierasQueryTest" classname="Tests.Unit.ConsultasFinancierasQueryTest" assertions="7" time="0.052012"/>
+        <testcase name="registra un pago pendiente una sola vez sin modificar el pedido" file="tests\Unit\ConsultasFinancierasQueryTest.php::registra un pago pendiente una sola vez sin modificar el pedido" class="Tests\Unit\ConsultasFinancierasQueryTest" classname="Tests.Unit.ConsultasFinancierasQueryTest" assertions="6" time="0.032614"/>
+        <testcase name="confirma efectivo contado una sola vez y enlaza el movimiento de caja" file="tests\Unit\ConsultasFinancierasQueryTest.php::confirma efectivo contado una sola vez y enlaza el movimiento de caja" class="Tests\Unit\ConsultasFinancierasQueryTest" classname="Tests.Unit.ConsultasFinancierasQueryTest" assertions="7" time="0.044799"/>
+        <testcase name="mantiene una transferencia bancaria declarada pendiente y exige cuenta y referencia" file="tests\Unit\ConsultasFinancierasQueryTest.php::mantiene una transferencia bancaria declarada pendiente y exige cuenta y referencia" class="Tests\Unit\ConsultasFinancierasQueryTest" classname="Tests.Unit.ConsultasFinancierasQueryTest" assertions="6" time="0.041563"/>
+        <testcase name="impide confirmar efectivo distinto o en una caja cerrada" file="tests\Unit\ConsultasFinancierasQueryTest.php::impide confirmar efectivo distinto o en una caja cerrada" class="Tests\Unit\ConsultasFinancierasQueryTest" classname="Tests.Unit.ConsultasFinancierasQueryTest" assertions="4" time="0.038871"/>
+        <testcase name="revierte la confirmación y el movimiento si falla la auditoría" file="tests\Unit\ConsultasFinancierasQueryTest.php::revierte la confirmación y el movimiento si falla la auditoría" class="Tests\Unit\ConsultasFinancierasQueryTest" classname="Tests.Unit.ConsultasFinancierasQueryTest" assertions="3" time="0.035076"/>
+        <testcase name="rechaza reutilizar identificadores, superar saldo o usar medios sin conciliación" file="tests\Unit\ConsultasFinancierasQueryTest.php::rechaza reutilizar identificadores, superar saldo o usar medios sin conciliación" class="Tests\Unit\ConsultasFinancierasQueryTest" classname="Tests.Unit.ConsultasFinancierasQueryTest" assertions="4" time="0.044675"/>
+        <testcase name="impide registrar pagos sin permiso o sobre un documento de otra sede" file="tests\Unit\ConsultasFinancierasQueryTest.php::impide registrar pagos sin permiso o sobre un documento de otra sede" class="Tests\Unit\ConsultasFinancierasQueryTest" classname="Tests.Unit.ConsultasFinancierasQueryTest" assertions="3" time="0.026403"/>
+        <testcase name="solicita y aprueba un reembolso una sola vez con ingreso de caja comprobado" file="tests\Unit\ConsultasFinancierasQueryTest.php::solicita y aprueba un reembolso una sola vez con ingreso de caja comprobado" class="Tests\Unit\ConsultasFinancierasQueryTest" classname="Tests.Unit.ConsultasFinancierasQueryTest" assertions="11" time="0.053191"/>
+        <testcase name="impide reembolsar un cobro de otro pedido" file="tests\Unit\ConsultasFinancierasQueryTest.php::impide reembolsar un cobro de otro pedido" class="Tests\Unit\ConsultasFinancierasQueryTest" classname="Tests.Unit.ConsultasFinancierasQueryTest" assertions="2" time="0.019404"/>
+        <testcase name="ofrece formularios únicamente con documentos y medios elegibles de la sede" file="tests\Unit\ConsultasFinancierasQueryTest.php::ofrece formularios únicamente con documentos y medios elegibles de la sede" class="Tests\Unit\ConsultasFinancierasQueryTest" classname="Tests.Unit.ConsultasFinancierasQueryTest" assertions="8" time="0.039706"/>
+        <testcase name="anula solicitudes pendientes de forma idempotente sin cambiar dinero ni documentos" file="tests\Unit\ConsultasFinancierasQueryTest.php::anula solicitudes pendientes de forma idempotente sin cambiar dinero ni documentos" class="Tests\Unit\ConsultasFinancierasQueryTest" classname="Tests.Unit.ConsultasFinancierasQueryTest" assertions="4" time="0.030655"/>
+        <testcase name="revierte el registro de pago si falla la auditoría dentro de la transacción" file="tests\Unit\ConsultasFinancierasQueryTest.php::revierte el registro de pago si falla la auditoría dentro de la transacción" class="Tests\Unit\ConsultasFinancierasQueryTest" classname="Tests.Unit.ConsultasFinancierasQueryTest" assertions="2" time="0.021925"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\DashboardGlobalExportTest" file="tests\Unit\DashboardGlobalExportTest.php" tests="9" assertions="49" errors="0" failures="0" skipped="0" time="1.873891">
+        <testcase name="exporta csv con encabezados y evita fórmulas de hoja de cálculo" file="tests\Unit\DashboardGlobalExportTest.php::exporta csv con encabezados y evita fórmulas de hoja de cálculo" class="Tests\Unit\DashboardGlobalExportTest" classname="Tests.Unit.DashboardGlobalExportTest" assertions="6" time="0.029570"/>
+        <testcase name="exporta un libro excel xlsx válido" file="tests\Unit\DashboardGlobalExportTest.php::exporta un libro excel xlsx válido" class="Tests\Unit\DashboardGlobalExportTest" classname="Tests.Unit.DashboardGlobalExportTest" assertions="6" time="0.067849"/>
+        <testcase name="exporta un documento pdf con estructura básica" file="tests\Unit\DashboardGlobalExportTest.php::exporta un documento pdf con estructura básica" class="Tests\Unit\DashboardGlobalExportTest" classname="Tests.Unit.DashboardGlobalExportTest" assertions="2" time="0.738876"/>
+        <testcase name="separa pedidos registrados de no cancelados y deja pendientes los cobros" file="tests\Unit\DashboardGlobalExportTest.php::separa pedidos registrados de no cancelados y deja pendientes los cobros" class="Tests\Unit\DashboardGlobalExportTest" classname="Tests.Unit.DashboardGlobalExportTest" assertions="6" time="0.027709"/>
+        <testcase name="usa siete días comerciales de Lima y excluye registros futuros" file="tests\Unit\DashboardGlobalExportTest.php::usa siete días comerciales de Lima y excluye registros futuros" class="Tests\Unit\DashboardGlobalExportTest" classname="Tests.Unit.DashboardGlobalExportTest" assertions="2" time="0.020407"/>
+        <testcase name="exporta los mismos pedidos filtrados sin presentar importes como cobros" file="tests\Unit\DashboardGlobalExportTest.php::exporta los mismos pedidos filtrados sin presentar importes como cobros" class="Tests\Unit\DashboardGlobalExportTest" classname="Tests.Unit.DashboardGlobalExportTest" assertions="18" time="0.859241"/>
+        <testcase name="limita pedidos a sedes de empresas activas y aplica permisos de exportación" file="tests\Unit\DashboardGlobalExportTest.php::limita pedidos a sedes de empresas activas y aplica permisos de exportación" class="Tests\Unit\DashboardGlobalExportTest" classname="Tests.Unit.DashboardGlobalExportTest" assertions="6" time="0.033016"/>
+        <testcase name="rechaza acceso al dashboard y a la exportación sin rol administrador" file="tests\Unit\DashboardGlobalExportTest.php::rechaza acceso al dashboard y a la exportación sin rol administrador" class="Tests\Unit\DashboardGlobalExportTest" classname="Tests.Unit.DashboardGlobalExportTest" assertions="2" time="0.009311"/>
+        <testcase name="rechaza exportaciones mayores al límite sin cargar todos los pedidos" file="tests\Unit\DashboardGlobalExportTest.php::rechaza exportaciones mayores al límite sin cargar todos los pedidos" class="Tests\Unit\DashboardGlobalExportTest" classname="Tests.Unit.DashboardGlobalExportTest" assertions="1" time="0.087913"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\DashboardGlobalPedidosTest" file="tests\Unit\DashboardGlobalPedidosTest.php" tests="3" assertions="8" errors="0" failures="0" skipped="0" time="0.836214">
+        <testcase name="filtra pedidos reales por estado y sede en una base temporal sqlite" file="tests\Unit\DashboardGlobalPedidosTest.php::filtra pedidos reales por estado y sede en una base temporal sqlite" class="Tests\Unit\DashboardGlobalPedidosTest" classname="Tests.Unit.DashboardGlobalPedidosTest" assertions="3" time="0.021275"/>
+        <testcase name="restringe el dashboard al alcance de sede asignado al administrador" file="tests\Unit\DashboardGlobalPedidosTest.php::restringe el dashboard al alcance de sede asignado al administrador" class="Tests\Unit\DashboardGlobalPedidosTest" classname="Tests.Unit.DashboardGlobalPedidosTest" assertions="3" time="0.023189"/>
+        <testcase name="exporta pedidos y registra la operación en auditoría temporal" file="tests\Unit\DashboardGlobalPedidosTest.php::exporta pedidos y registra la operación en auditoría temporal" class="Tests\Unit\DashboardGlobalPedidosTest" classname="Tests.Unit.DashboardGlobalPedidosTest" assertions="2" time="0.791749"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\DashboardGlobalSedesTest" file="tests\Unit\DashboardGlobalSedesTest.php" tests="2" assertions="6" errors="0" failures="0" skipped="0" time="0.031093">
+        <testcase name="agrupa importes reales por sede y excluye pedidos cancelados en sqlite temporal" file="tests\Unit\DashboardGlobalSedesTest.php::agrupa importes reales por sede y excluye pedidos cancelados en sqlite temporal" class="Tests\Unit\DashboardGlobalSedesTest" classname="Tests.Unit.DashboardGlobalSedesTest" assertions="4" time="0.017415"/>
+        <testcase name="muestra estado vacio cuando la copia heredada no tiene sedes" file="tests\Unit\DashboardGlobalSedesTest.php::muestra estado vacio cuando la copia heredada no tiene sedes" class="Tests\Unit\DashboardGlobalSedesTest" classname="Tests.Unit.DashboardGlobalSedesTest" assertions="2" time="0.013678"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\EsquemaEspanolRbacTest" file="tests\Unit\EsquemaEspanolRbacTest.php" tests="32" assertions="450" errors="0" failures="0" skipped="0" time="4.068957">
+        <testcase name="it authenticates using the Spanish password and remember-token columns" file="tests\Unit\EsquemaEspanolRbacTest.php::it authenticates using the Spanish password and remember-token columns" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="9" time="0.031545"/>
+        <testcase name="it signs in an active user and rejects a blocked user against the Spanish schema" file="tests\Unit\EsquemaEspanolRbacTest.php::it signs in an active user and rejects a blocked user against the Spanish schema" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="10" time="0.076922"/>
+        <testcase name="it updates the authenticated profile and password using the imported user columns" file="tests\Unit\EsquemaEspanolRbacTest.php::it updates the authenticated profile and password using the imported user columns" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="7" time="0.039622"/>
+        <testcase name="it records and revokes an application session using the Spanish schema" file="tests\Unit\EsquemaEspanolRbacTest.php::it records and revokes an application session using the Spanish schema" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="5" time="0.019618"/>
+        <testcase name="it loads catalog and order relations from the Spanish table names" file="tests\Unit\EsquemaEspanolRbacTest.php::it loads catalog and order relations from the Spanish table names" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="7" time="0.045362"/>
+        <testcase name="it denies a legacy administrator when RBAC is not initialized" file="tests\Unit\EsquemaEspanolRbacTest.php::it denies a legacy administrator when RBAC is not initialized" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="7" time="0.030325"/>
+        <testcase name="it selects the dashboard from assigned roles instead of the legacy role field" file="tests\Unit\EsquemaEspanolRbacTest.php::it selects the dashboard from assigned roles instead of the legacy role field" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="3" time="0.024483"/>
+        <testcase name="it initializes RBAC idempotently without assigning any roles to existing users" file="tests\Unit\EsquemaEspanolRbacTest.php::it initializes RBAC idempotently without assigning any roles to existing users" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="8" time="0.051240"/>
+        <testcase name="it refuses initialization over an unversioned RBAC catalog" file="tests\Unit\EsquemaEspanolRbacTest.php::it refuses initialization over an unversioned RBAC catalog" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="5" time="0.015911"/>
+        <testcase name="it initializes an empty installation only with explicit confirmation and never duplicates it" file="tests\Unit\EsquemaEspanolRbacTest.php::it initializes an empty installation only with explicit confirmation and never duplicates it" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="40" time="0.148494"/>
+        <testcase name="it refuses first-time initialization when an account already exists" file="tests\Unit\EsquemaEspanolRbacTest.php::it refuses first-time initialization when an account already exists" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="6" time="0.018639"/>
+        <testcase name="it rolls back the entire initialization if its audit record cannot be created" file="tests\Unit\EsquemaEspanolRbacTest.php::it rolls back the entire initialization if its audit record cannot be created" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="18" time="0.049349"/>
+        <testcase name="it assigns and revokes a site role with audited snapshots" file="tests\Unit\EsquemaEspanolRbacTest.php::it assigns and revokes a site role with audited snapshots" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="11" time="0.681605"/>
+        <testcase name="it updates a non-system role permission set without modifying the administrator role" file="tests\Unit\EsquemaEspanolRbacTest.php::it updates a non-system role permission set without modifying the administrator role" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="6" time="0.239276"/>
+        <testcase name="it lists current role assignments and creates a site user without trusting the legacy role field" file="tests\Unit\EsquemaEspanolRbacTest.php::it lists current role assignments and creates a site user without trusting the legacy role field" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="11" time="0.251328"/>
+        <testcase name="it immediately rejects a revoked global role even with a legacy administrator field" file="tests\Unit\EsquemaEspanolRbacTest.php::it immediately rejects a revoked global role even with a legacy administrator field" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="7" time="0.021030"/>
+        <testcase name="it limits global order queries to the sole configured active company and consistent sites" file="tests\Unit\EsquemaEspanolRbacTest.php::it limits global order queries to the sole configured active company and consistent sites" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="8" time="0.026852"/>
+        <testcase name="it limits a site role to its active assignment and never treats it as global" file="tests\Unit\EsquemaEspanolRbacTest.php::it limits a site role to its active assignment and never treats it as global" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="8" time="0.026788"/>
+        <testcase name="it excludes buyers with revoked RBAC roles from sales order access despite their legacy role" file="tests\Unit\EsquemaEspanolRbacTest.php::it excludes buyers with revoked RBAC roles from sales order access despite their legacy role" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="6" time="0.032468"/>
+        <testcase name="it reads only authorized site balances and never substitutes the legacy product stock" file="tests\Unit\EsquemaEspanolRbacTest.php::it reads only authorized site balances and never substitutes the legacy product stock" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="16" time="0.066770"/>
+        <testcase name="it adjusts the warehouse balance to zero atomically without fabricating variants or SKUs" file="tests\Unit\EsquemaEspanolRbacTest.php::it adjusts the warehouse balance to zero atomically without fabricating variants or SKUs" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="53" time="0.136796"/>
+        <testcase name="it reads and exports only authorised sales, independently of orders and without mixing currencies" file="tests\Unit\EsquemaEspanolRbacTest.php::it reads and exports only authorised sales, independently of orders and without mixing currencies" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="37" time="0.211408"/>
+        <testcase name="it reads purchase line totals from the Spanish table within the authorised site" file="tests\Unit\EsquemaEspanolRbacTest.php::it reads purchase line totals from the Spanish table within the authorised site" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="4" time="0.049804"/>
+        <testcase name="it registers, approves and receives a purchase once with distinct permissions and atomic inventory" file="tests\Unit\EsquemaEspanolRbacTest.php::it registers, approves and receives a purchase once with distinct permissions and atomic inventory" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="31" time="0.543997"/>
+        <testcase name="it confirms a physical sale once, deducts stock, and does not create an order or payment" file="tests\Unit\EsquemaEspanolRbacTest.php::it confirms a physical sale once, deducts stock, and does not create an order or payment" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="63" time="0.811240"/>
+        <testcase name="it does not report a sale as registered while the sales ledger is not integrated" file="tests\Unit\EsquemaEspanolRbacTest.php::it does not report a sale as registered while the sales ledger is not integrated" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="5" time="0.018811"/>
+        <testcase name="it accepts zero only for an inventory adjustment" file="tests\Unit\EsquemaEspanolRbacTest.php::it accepts zero only for an inventory adjustment" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="4" time="0.025428"/>
+        <testcase name="it does not create a public user when the customer role is missing" file="tests\Unit\EsquemaEspanolRbacTest.php::it does not create a public user when the customer role is missing" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="4" time="0.022087"/>
+        <testcase name="it assigns only the server-selected customer role at public registration" file="tests\Unit\EsquemaEspanolRbacTest.php::it assigns only the server-selected customer role at public registration" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="6" time="0.023307"/>
+        <testcase name="it shows operational warehouse availability in the public catalog and API without exposing serialized stock" file="tests\Unit\EsquemaEspanolRbacTest.php::it shows operational warehouse availability in the public catalog and API without exposing serialized stock" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="19" time="0.038153"/>
+        <testcase name="it does not disclose assistant order and sales totals through the legacy role" file="tests\Unit\EsquemaEspanolRbacTest.php::it does not disclose assistant order and sales totals through the legacy role" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="10" time="0.029818"/>
+        <testcase name="it preserves return requests and records their real creator using the imported Spanish columns" file="tests\Unit\EsquemaEspanolRbacTest.php::it preserves return requests and records their real creator using the imported Spanish columns" class="Tests\Unit\EsquemaEspanolRbacTest" classname="Tests.Unit.EsquemaEspanolRbacTest" assertions="16" time="0.260480"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\ExportadorTabularTest" file="tests\Unit\ExportadorTabularTest.php" tests="4" assertions="73" errors="0" failures="0" skipped="0" time="1.687020">
+        <testcase name="genera un xlsx corporativo con metadatos, formatos numéricos e imágenes seguras" file="tests\Unit\ExportadorTabularTest.php::genera un xlsx corporativo con metadatos, formatos numéricos e imágenes seguras" class="Tests\Unit\ExportadorTabularTest" classname="Tests.Unit.ExportadorTabularTest" assertions="30" time="0.069830"/>
+        <testcase name="evita solapar indicadores y conserva los metadatos en el área imprimible" file="tests\Unit\ExportadorTabularTest.php::evita solapar indicadores y conserva los metadatos en el área imprimible" class="Tests\Unit\ExportadorTabularTest" classname="Tests.Unit.ExportadorTabularTest" assertions="10" time="0.064143"/>
+        <testcase name="genera un pdf A4 paginado con encabezado repetido, resumen y pie institucional" file="tests\Unit\ExportadorTabularTest.php::genera un pdf A4 paginado con encabezado repetido, resumen y pie institucional" class="Tests\Unit\ExportadorTabularTest" classname="Tests.Unit.ExportadorTabularTest" assertions="24" time="0.747947"/>
+        <testcase name="no dibuja una barra si el porcentaje principal está fuera del rango válido" file="tests\Unit\ExportadorTabularTest.php::no dibuja una barra si el porcentaje principal está fuera del rango válido" class="Tests\Unit\ExportadorTabularTest" classname="Tests.Unit.ExportadorTabularTest" assertions="9" time="0.805101"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\Gestion\Cupones\ServicioCuponesTest" file="tests\Unit\Gestion\Cupones\ServicioCuponesTest.php" tests="4" assertions="11" errors="0" failures="0" skipped="0" time="0.069980">
+        <testcase name="it filters persisted coupons using code, discount type and current validity" file="tests\Unit\Gestion\Cupones\ServicioCuponesTest.php::it filters persisted coupons using code, discount type and current validity" class="Tests\Unit\Gestion\Cupones\ServicioCuponesTest" classname="Tests.Unit.Gestion.Cupones.ServicioCuponesTest" assertions="2" time="0.018466"/>
+        <testcase name="it registers a normalized coupon and writes one audit event" file="tests\Unit\Gestion\Cupones\ServicioCuponesTest.php::it registers a normalized coupon and writes one audit event" class="Tests\Unit\Gestion\Cupones\ServicioCuponesTest" classname="Tests.Unit.Gestion.Cupones.ServicioCuponesTest" assertions="3" time="0.014859"/>
+        <testcase name="it rejects invalid percentage values and usage limits below existing redemptions" file="tests\Unit\Gestion\Cupones\ServicioCuponesTest.php::it rejects invalid percentage values and usage limits below existing redemptions" class="Tests\Unit\Gestion\Cupones\ServicioCuponesTest" classname="Tests.Unit.Gestion.Cupones.ServicioCuponesTest" assertions="3" time="0.017643"/>
+        <testcase name="it updates and deactivates coupons without deleting their canje history" file="tests\Unit\Gestion\Cupones\ServicioCuponesTest.php::it updates and deactivates coupons without deleting their canje history" class="Tests\Unit\Gestion\Cupones\ServicioCuponesTest" classname="Tests.Unit.Gestion.Cupones.ServicioCuponesTest" assertions="3" time="0.019013"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\Gestion\Inventario\ServicioTransferenciasExistenciasTest" file="tests\Unit\Gestion\Inventario\ServicioTransferenciasExistenciasTest.php" tests="7" assertions="44" errors="0" failures="0" skipped="0" time="0.420540">
+        <testcase name="it moves only dispatched and received units, supports partial receipts, and closes after full reconciliation" file="tests\Unit\Gestion\Inventario\ServicioTransferenciasExistenciasTest.php::it moves only dispatched and received units, supports partial receipts, and closes after full reconciliation" class="Tests\Unit\Gestion\Inventario\ServicioTransferenciasExistenciasTest" classname="Tests.Unit.Gestion.Inventario.ServicioTransferenciasExistenciasTest" assertions="13" time="0.092069"/>
+        <testcase name="it requires identified serials at dispatch and receipt and records device movements" file="tests\Unit\Gestion\Inventario\ServicioTransferenciasExistenciasTest.php::it requires identified serials at dispatch and receipt and records device movements" class="Tests\Unit\Gestion\Inventario\ServicioTransferenciasExistenciasTest" classname="Tests.Unit.Gestion.Inventario.ServicioTransferenciasExistenciasTest" assertions="6" time="0.053288"/>
+        <testcase name="it blocks discrepancy returns until the independent quantity reconciliation column exists" file="tests\Unit\Gestion\Inventario\ServicioTransferenciasExistenciasTest.php::it blocks discrepancy returns until the independent quantity reconciliation column exists" class="Tests\Unit\Gestion\Inventario\ServicioTransferenciasExistenciasTest" classname="Tests.Unit.Gestion.Inventario.ServicioTransferenciasExistenciasTest" assertions="3" time="0.038887"/>
+        <testcase name="it closes a short receipt only after a documented quantity reconciliation without adding stock" file="tests\Unit\Gestion\Inventario\ServicioTransferenciasExistenciasTest.php::it closes a short receipt only after a documented quantity reconciliation without adding stock" class="Tests\Unit\Gestion\Inventario\ServicioTransferenciasExistenciasTest" classname="Tests.Unit.Gestion.Inventario.ServicioTransferenciasExistenciasTest" assertions="10" time="0.075923"/>
+        <testcase name="it requires the IMEI when reconciling a serialized transfer discrepancy" file="tests\Unit\Gestion\Inventario\ServicioTransferenciasExistenciasTest.php::it requires the IMEI when reconciling a serialized transfer discrepancy" class="Tests\Unit\Gestion\Inventario\ServicioTransferenciasExistenciasTest" classname="Tests.Unit.Gestion.Inventario.ServicioTransferenciasExistenciasTest" assertions="4" time="0.050377"/>
+        <testcase name="it closes a fully received partial dispatch only with a documented unshipped difference" file="tests\Unit\Gestion\Inventario\ServicioTransferenciasExistenciasTest.php::it closes a fully received partial dispatch only with a documented unshipped difference" class="Tests\Unit\Gestion\Inventario\ServicioTransferenciasExistenciasTest" classname="Tests.Unit.Gestion.Inventario.ServicioTransferenciasExistenciasTest" assertions="3" time="0.058708"/>
+        <testcase name="it cancels before dispatch without stock effects and rejects cancellation after dispatch" file="tests\Unit\Gestion\Inventario\ServicioTransferenciasExistenciasTest.php::it cancels before dispatch without stock effects and rejects cancellation after dispatch" class="Tests\Unit\Gestion\Inventario\ServicioTransferenciasExistenciasTest" classname="Tests.Unit.Gestion.Inventario.ServicioTransferenciasExistenciasTest" assertions="5" time="0.051288"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\Gestion\Productos\GestionProductosControllerTest" file="tests\Unit\Gestion\Productos\GestionProductosControllerTest.php" tests="1" assertions="13" errors="0" failures="0" skipped="0" time="0.064573">
+        <testcase name="exporta productos filtrados en xlsx real y conserva csv operativo" file="tests\Unit\Gestion\Productos\GestionProductosControllerTest.php::exporta productos filtrados en xlsx real y conserva csv operativo" class="Tests\Unit\Gestion\Productos\GestionProductosControllerTest" classname="Tests.Unit.Gestion.Productos.GestionProductosControllerTest" assertions="13" time="0.064573"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\Gestion\Ventas\FiltroVentaRequestTest" file="tests\Unit\Gestion\Ventas\FiltroVentaRequestTest.php" tests="2" assertions="6" errors="0" failures="0" skipped="0" time="0.026020">
+        <testcase name="it rejects invalid sales filter dates, channels and identifiers with Spanish messages" file="tests\Unit\Gestion\Ventas\FiltroVentaRequestTest.php::it rejects invalid sales filter dates, channels and identifiers with Spanish messages" class="Tests\Unit\Gestion\Ventas\FiltroVentaRequestTest" classname="Tests.Unit.Gestion.Ventas.FiltroVentaRequestTest" assertions="5" time="0.011350"/>
+        <testcase name="it accepts the public sales filters used by both the list and its export" file="tests\Unit\Gestion\Ventas\FiltroVentaRequestTest.php::it accepts the public sales filters used by both the list and its export" class="Tests\Unit\Gestion\Ventas\FiltroVentaRequestTest" classname="Tests.Unit.Gestion.Ventas.FiltroVentaRequestTest" assertions="1" time="0.014670"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\InicializadorMariaAisladaTest" file="tests\Unit\InicializadorMariaAisladaTest.php" tests="1" assertions="0" errors="0" failures="0" skipped="1" time="0.011878">
+        <testcase name="it inicializa solo una instalacion MariaDB aislada y rechaza datos parciales" file="tests\Unit\InicializadorMariaAisladaTest.php::it inicializa solo una instalacion MariaDB aislada y rechaza datos parciales" class="Tests\Unit\InicializadorMariaAisladaTest" classname="Tests.Unit.InicializadorMariaAisladaTest" assertions="0" time="0.011878">
+          <skipped/>
+        </testcase>
+      </testsuite>
+      <testsuite name="Tests\Unit\IntegracionMariaDbTechnologyCellTest" file="tests\Unit\IntegracionMariaDbTechnologyCellTest.php" tests="3" assertions="0" errors="0" failures="0" skipped="3" time="0.000000">
+        <testcase name="it loads the inherited roles and protects administrative routes with the database menu" file="tests\Unit\IntegracionMariaDbTechnologyCellTest.php::it loads the inherited roles and protects administrative routes with the database menu" class="Tests\Unit\IntegracionMariaDbTechnologyCellTest" classname="Tests.Unit.IntegracionMariaDbTechnologyCellTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="it refuses a second site to unassigned employees and preserves single-site stock operations" file="tests\Unit\IntegracionMariaDbTechnologyCellTest.php::it refuses a second site to unassigned employees and preserves single-site stock operations" class="Tests\Unit\IntegracionMariaDbTechnologyCellTest" classname="Tests.Unit.IntegracionMariaDbTechnologyCellTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+        <testcase name="it keeps ecommerce checkout and the three stock balances synchronized" file="tests\Unit\IntegracionMariaDbTechnologyCellTest.php::it keeps ecommerce checkout and the three stock balances synchronized" class="Tests\Unit\IntegracionMariaDbTechnologyCellTest" classname="Tests.Unit.IntegracionMariaDbTechnologyCellTest" assertions="0" time="0.000000">
+          <skipped/>
+        </testcase>
+      </testsuite>
+      <testsuite name="Tests\Unit\IntegracionTransferenciasMariaDbAisladaTest" file="tests\Unit\IntegracionTransferenciasMariaDbAisladaTest.php" tests="1" assertions="0" errors="0" failures="0" skipped="1" time="0.008889">
+        <testcase name="it checks MariaDB nullable-variant uniqueness and transfer reconciliation migration on an isolated MariaDB 10.4.32" file="tests\Unit\IntegracionTransferenciasMariaDbAisladaTest.php::it checks MariaDB nullable-variant uniqueness and transfer reconciliation migration on an isolated MariaDB 10.4.32" class="Tests\Unit\IntegracionTransferenciasMariaDbAisladaTest" classname="Tests.Unit.IntegracionTransferenciasMariaDbAisladaTest" assertions="0" time="0.008889">
+          <skipped/>
+        </testcase>
+      </testsuite>
+      <testsuite name="Tests\Unit\MariaFinanzasAisladaTest" file="tests\Unit\MariaFinanzasAisladaTest.php" tests="1" assertions="0" errors="0" failures="0" skipped="1" time="0.009019">
+        <testcase name="it comprueba login caja arqueo y pagos manuales en MariaDB aislado" file="tests\Unit\MariaFinanzasAisladaTest.php::it comprueba login caja arqueo y pagos manuales en MariaDB aislado" class="Tests\Unit\MariaFinanzasAisladaTest" classname="Tests.Unit.MariaFinanzasAisladaTest" assertions="0" time="0.009019">
+          <skipped/>
+        </testcase>
+      </testsuite>
+      <testsuite name="Tests\Unit\RbacAuthorizationTest" file="tests\Unit\RbacAuthorizationTest.php" tests="12" assertions="30" errors="0" failures="0" skipped="0" time="0.119933">
+        <testcase name="it declares exactly the seven supported roles" file="tests\Unit\RbacAuthorizationTest.php::it declares exactly the seven supported roles" class="Tests\Unit\RbacAuthorizationTest" classname="Tests.Unit.RbacAuthorizationTest" assertions="2" time="0.008491"/>
+        <testcase name="it keeps navigation visibility aligned with role modules" file="tests\Unit\RbacAuthorizationTest.php::it keeps navigation visibility aligned with role modules" class="Tests\Unit\RbacAuthorizationTest" classname="Tests.Unit.RbacAuthorizationTest" assertions="5" time="0.011739"/>
+        <testcase name="it denies middleware when only an unassigned legacy role is declared" file="tests\Unit\RbacAuthorizationTest.php::it denies middleware when only an unassigned legacy role is declared" class="Tests\Unit\RbacAuthorizationTest" classname="Tests.Unit.RbacAuthorizationTest" assertions="1" time="0.013588"/>
+        <testsuite name="it denies product writes when roles have no RBAC assignments" tests="7" assertions="14" errors="0" failures="0" skipped="0" time="0.067405">
+          <testcase name="it denies product writes when roles have no RBAC assignments with data set &quot;dataset &quot;administrator&quot;&quot;" file="tests\Unit\RbacAuthorizationTest.php::it denies product writes when roles have no RBAC assignments with data set &quot;dataset &quot;administrator&quot;&quot;" class="Tests\Unit\RbacAuthorizationTest" classname="Tests.Unit.RbacAuthorizationTest" assertions="2" time="0.010906"/>
+          <testcase name="it denies product writes when roles have no RBAC assignments with data set &quot;dataset &quot;marketing&quot;&quot;" file="tests\Unit\RbacAuthorizationTest.php::it denies product writes when roles have no RBAC assignments with data set &quot;dataset &quot;marketing&quot;&quot;" class="Tests\Unit\RbacAuthorizationTest" classname="Tests.Unit.RbacAuthorizationTest" assertions="2" time="0.009770"/>
+          <testcase name="it denies product writes when roles have no RBAC assignments with data set &quot;dataset &quot;purchasing&quot;&quot;" file="tests\Unit\RbacAuthorizationTest.php::it denies product writes when roles have no RBAC assignments with data set &quot;dataset &quot;purchasing&quot;&quot;" class="Tests\Unit\RbacAuthorizationTest" classname="Tests.Unit.RbacAuthorizationTest" assertions="2" time="0.009333"/>
+          <testcase name="it denies product writes when roles have no RBAC assignments with data set &quot;dataset &quot;wholesale sales&quot;&quot;" file="tests\Unit\RbacAuthorizationTest.php::it denies product writes when roles have no RBAC assignments with data set &quot;dataset &quot;wholesale sales&quot;&quot;" class="Tests\Unit\RbacAuthorizationTest" classname="Tests.Unit.RbacAuthorizationTest" assertions="2" time="0.009159"/>
+          <testcase name="it denies product writes when roles have no RBAC assignments with data set &quot;dataset &quot;retail sales&quot;&quot;" file="tests\Unit\RbacAuthorizationTest.php::it denies product writes when roles have no RBAC assignments with data set &quot;dataset &quot;retail sales&quot;&quot;" class="Tests\Unit\RbacAuthorizationTest" classname="Tests.Unit.RbacAuthorizationTest" assertions="2" time="0.009711"/>
+          <testcase name="it denies product writes when roles have no RBAC assignments with data set &quot;dataset &quot;wholesale customer&quot;&quot;" file="tests\Unit\RbacAuthorizationTest.php::it denies product writes when roles have no RBAC assignments with data set &quot;dataset &quot;wholesale customer&quot;&quot;" class="Tests\Unit\RbacAuthorizationTest" classname="Tests.Unit.RbacAuthorizationTest" assertions="2" time="0.009259"/>
+          <testcase name="it denies product writes when roles have no RBAC assignments with data set &quot;dataset &quot;retail customer&quot;&quot;" file="tests\Unit\RbacAuthorizationTest.php::it denies product writes when roles have no RBAC assignments with data set &quot;dataset &quot;retail customer&quot;&quot;" class="Tests\Unit\RbacAuthorizationTest" classname="Tests.Unit.RbacAuthorizationTest" assertions="2" time="0.009266"/>
+        </testsuite>
+        <testcase name="it denies order visibility when legacy roles have no RBAC assignments" file="tests\Unit\RbacAuthorizationTest.php::it denies order visibility when legacy roles have no RBAC assignments" class="Tests\Unit\RbacAuthorizationTest" classname="Tests.Unit.RbacAuthorizationTest" assertions="4" time="0.009006"/>
+        <testcase name="it denies order status updates when legacy roles have no RBAC assignments" file="tests\Unit\RbacAuthorizationTest.php::it denies order status updates when legacy roles have no RBAC assignments" class="Tests\Unit\RbacAuthorizationTest" classname="Tests.Unit.RbacAuthorizationTest" assertions="4" time="0.009703"/>
+      </testsuite>
+    </testsuite>
+    <testsuite name="Feature" tests="62" assertions="182" errors="5" failures="29" skipped="1" time="2.255943">
+      <testsuite name="Tests\Feature\Api\CatalogoControllerTest" file="tests\Feature\Api\CatalogoControllerTest.php" tests="5" assertions="71" errors="0" failures="0" skipped="0" time="0.305010">
+        <testcase name="it returns only active catalog products through the versioned API" file="tests\Feature\Api\CatalogoControllerTest.php::it returns only active catalog products through the versioned API" class="Tests\Feature\Api\CatalogoControllerTest" classname="Tests.Feature.Api.CatalogoControllerTest" assertions="5" time="0.192404"/>
+        <testcase name="it returns a not found response for an inactive API catalog product" file="tests\Feature\Api\CatalogoControllerTest.php::it returns a not found response for an inactive API catalog product" class="Tests\Feature\Api\CatalogoControllerTest" classname="Tests.Feature.Api.CatalogoControllerTest" assertions="1" time="0.012489"/>
+        <testcase name="it rejects unsupported catalog sorting values in the API" file="tests\Feature\Api\CatalogoControllerTest.php::it rejects unsupported catalog sorting values in the API" class="Tests\Feature\Api\CatalogoControllerTest" classname="Tests.Feature.Api.CatalogoControllerTest" assertions="3" time="0.012268"/>
+        <testcase name="it rate limits repeated catalog API requests" file="tests\Feature\Api\CatalogoControllerTest.php::it rate limits repeated catalog API requests" class="Tests\Feature\Api\CatalogoControllerTest" classname="Tests.Feature.Api.CatalogoControllerTest" assertions="61" time="0.073953"/>
+        <testcase name="example" file="tests\Feature\Api\CatalogoControllerTest.php::example" class="Tests\Feature\Api\CatalogoControllerTest" classname="Tests.Feature.Api.CatalogoControllerTest" assertions="1" time="0.013896"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\CellSacCommerceTest" file="tests\Feature\CellSacCommerceTest.php" tests="9" assertions="23" errors="0" failures="4" skipped="0" time="0.187201">
+        <testcase name="it registers public accounts only as retail customers" file="tests\Feature\CellSacCommerceTest.php::it registers public accounts only as retail customers" class="Tests\Feature\CellSacCommerceTest" classname="Tests.Feature.CellSacCommerceTest" assertions="1" time="0.064727">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">it registers public accounts only as retail customersExpected response status code [201, 301, 302, 303, 307, 308] but received 503.
+Failed asserting that false is true.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:208
+at tests\Feature\CellSacCommerceTest.php:28</failure>
+        </testcase>
+        <testcase name="it filters the active Eloquent catalog and hides inactive products" file="tests\Feature\CellSacCommerceTest.php::it filters the active Eloquent catalog and hides inactive products" class="Tests\Feature\CellSacCommerceTest" classname="Tests.Feature.CellSacCommerceTest" assertions="5" time="0.019690"/>
+        <testcase name="it creates a pending order and decrements stock atomically at checkout" file="tests\Feature\CellSacCommerceTest.php::it creates a pending order and decrements stock atomically at checkout" class="Tests\Feature\CellSacCommerceTest" classname="Tests.Feature.CellSacCommerceTest" assertions="1" time="0.015839">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">it creates a pending order and decrements stock atomically at checkoutExpected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:208
+at tests\Feature\CellSacCommerceTest.php:48</failure>
+        </testcase>
+        <testcase name="it applies a valid coupon once and records the discounted total" file="tests\Feature\CellSacCommerceTest.php::it applies a valid coupon once and records the discounted total" class="Tests\Feature\CellSacCommerceTest" classname="Tests.Feature.CellSacCommerceTest" assertions="1" time="0.018798">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">it applies a valid coupon once and records the discounted totalExpected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:208
+at tests\Feature\CellSacCommerceTest.php:73</failure>
+        </testcase>
+        <testcase name="it forbids a customer from viewing another user order" file="tests\Feature\CellSacCommerceTest.php::it forbids a customer from viewing another user order" class="Tests\Feature\CellSacCommerceTest" classname="Tests.Feature.CellSacCommerceTest" assertions="1" time="0.015693"/>
+        <testcase name="it blocks non-admin roles from product administration" file="tests\Feature\CellSacCommerceTest.php::it blocks non-admin roles from product administration" class="Tests\Feature\CellSacCommerceTest" classname="Tests.Feature.CellSacCommerceTest" assertions="1" time="0.012508"/>
+        <testcase name="it does not disclose private order summaries to public assistant visitors" file="tests\Feature\CellSacCommerceTest.php::it does not disclose private order summaries to public assistant visitors" class="Tests\Feature\CellSacCommerceTest" classname="Tests.Feature.CellSacCommerceTest" assertions="3" time="0.014121"/>
+        <testcase name="it limits customer assistant order summaries to the authenticated customer" file="tests\Feature\CellSacCommerceTest.php::it limits customer assistant order summaries to the authenticated customer" class="Tests\Feature\CellSacCommerceTest" classname="Tests.Feature.CellSacCommerceTest" assertions="2" time="0.015744">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">it limits customer assistant order summaries to the authenticated customerFailed asserting that two strings are identical.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\AssertableJsonString.php:258
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:882
+at tests\Feature\CellSacCommerceTest.php:138</failure>
+        </testcase>
+        <testcase name="it preserves the seven supported roles" file="tests\Feature\CellSacCommerceTest.php::it preserves the seven supported roles" class="Tests\Feature\CellSacCommerceTest" classname="Tests.Feature.CellSacCommerceTest" assertions="8" time="0.010081"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\ConsultasFinancierasTest" file="tests\Feature\ConsultasFinancierasTest.php" tests="2" assertions="12" errors="0" failures="0" skipped="0" time="0.024802">
+        <testcase name="los filtros financieros validan periodo, estado y rangos de fecha" file="tests\Feature\ConsultasFinancierasTest.php::los filtros financieros validan periodo, estado y rangos de fecha" class="Tests\Feature\ConsultasFinancierasTest" classname="Tests.Feature.ConsultasFinancierasTest" assertions="5" time="0.012745"/>
+        <testcase name="el servidor rechaza solicitudes financieras mal formadas con mensajes claros" file="tests\Feature\ConsultasFinancierasTest.php::el servidor rechaza solicitudes financieras mal formadas con mensajes claros" class="Tests\Feature\ConsultasFinancierasTest" classname="Tests.Feature.ConsultasFinancierasTest" assertions="7" time="0.012057"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\Gestion\ViewsTest" file="tests\Feature\Gestion\ViewsTest.php" tests="3" assertions="3" errors="0" failures="3" skipped="0" time="0.052281">
+        <testcase name="it renders each management module with its canonical list view" file="tests\Feature\Gestion\ViewsTest.php::it renders each management module with its canonical list view" class="Tests\Feature\Gestion\ViewsTest" classname="Tests.Feature.Gestion.ViewsTest" assertions="1" time="0.014552">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">it renders each management module with its canonical list viewExpected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:183
+at vendor\laravel\framework\src\Illuminate\Testing\Concerns\AssertsStatusCodes.php:16
+at tests\Feature\Gestion\ViewsTest.php:33</failure>
+        </testcase>
+        <testcase name="it filters the administrator quotation dashboard and calculates real status totals" file="tests\Feature\Gestion\ViewsTest.php::it filters the administrator quotation dashboard and calculates real status totals" class="Tests\Feature\Gestion\ViewsTest" classname="Tests.Feature.Gestion.ViewsTest" assertions="1" time="0.021019">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">it filters the administrator quotation dashboard and calculates real status totalsExpected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:183
+at vendor\laravel\framework\src\Illuminate\Testing\Concerns\AssertsStatusCodes.php:16
+at tests\Feature\Gestion\ViewsTest.php:68</failure>
+        </testcase>
+        <testcase name="it filters purchases and calculates their dashboard totals" file="tests\Feature\Gestion\ViewsTest.php::it filters purchases and calculates their dashboard totals" class="Tests\Feature\Gestion\ViewsTest" classname="Tests.Feature.Gestion.ViewsTest" assertions="1" time="0.016710">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">it filters purchases and calculates their dashboard totalsExpected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:183
+at vendor\laravel\framework\src\Illuminate\Testing\Concerns\AssertsStatusCodes.php:16
+at tests\Feature\Gestion\ViewsTest.php:135</failure>
+        </testcase>
+      </testsuite>
+      <testsuite name="Tests\Feature\IntegracionVentasComprasMariaAisladaTest" file="tests\Feature\IntegracionVentasComprasMariaAisladaTest.php" tests="1" assertions="0" errors="0" failures="0" skipped="1" time="0.009572">
+        <testcase name="it tests the migration and commercial transactions exclusively on an isolated MariaDB" file="tests\Feature\IntegracionVentasComprasMariaAisladaTest.php::it tests the migration and commercial transactions exclusively on an isolated MariaDB" class="Tests\Feature\IntegracionVentasComprasMariaAisladaTest" classname="Tests.Feature.IntegracionVentasComprasMariaAisladaTest" assertions="0" time="0.009572">
+          <skipped/>
+        </testcase>
+      </testsuite>
+      <testsuite name="Tests\Feature\MigrationCoverageTest" file="tests\Feature\MigrationCoverageTest.php" tests="6" assertions="16" errors="0" failures="2" skipped="0" time="0.113321">
+        <testcase name="it exposes the public modules migrated from the legacy application" file="tests\Feature\MigrationCoverageTest.php::it exposes the public modules migrated from the legacy application" class="Tests\Feature\MigrationCoverageTest" classname="Tests.Feature.MigrationCoverageTest" assertions="8" time="0.045180"/>
+        <testcase name="it stores contact requests through the Laravel service flow" file="tests\Feature\MigrationCoverageTest.php::it stores contact requests through the Laravel service flow" class="Tests\Feature\MigrationCoverageTest" classname="Tests.Feature.MigrationCoverageTest" assertions="3" time="0.011594"/>
+        <testcase name="it calculates an optimizer proposal from active catalog stock" file="tests\Feature\MigrationCoverageTest.php::it calculates an optimizer proposal from active catalog stock" class="Tests\Feature\MigrationCoverageTest" classname="Tests.Feature.MigrationCoverageTest" assertions="2" time="0.013788"/>
+        <testcase name="it protects administrative catalog modules by role" file="tests\Feature\MigrationCoverageTest.php::it protects administrative catalog modules by role" class="Tests\Feature\MigrationCoverageTest" classname="Tests.Feature.MigrationCoverageTest" assertions="1" time="0.013197">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">it protects administrative catalog modules by roleExpected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:183
+at vendor\laravel\framework\src\Illuminate\Testing\Concerns\AssertsStatusCodes.php:16
+at tests\Feature\MigrationCoverageTest.php:56</failure>
+        </testcase>
+        <testcase name="it exports authorized report data as an Excel-compatible CSV" file="tests\Feature\MigrationCoverageTest.php::it exports authorized report data as an Excel-compatible CSV" class="Tests\Feature\MigrationCoverageTest" classname="Tests.Feature.MigrationCoverageTest" assertions="1" time="0.013500">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">it exports authorized report data as an Excel-compatible CSVExpected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:183
+at vendor\laravel\framework\src\Illuminate\Testing\Concerns\AssertsStatusCodes.php:16
+at tests\Feature\MigrationCoverageTest.php:66</failure>
+        </testcase>
+        <testcase name="it forbids customer roles from exporting internal reports" file="tests\Feature\MigrationCoverageTest.php::it forbids customer roles from exporting internal reports" class="Tests\Feature\MigrationCoverageTest" classname="Tests.Feature.MigrationCoverageTest" assertions="1" time="0.016061"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\Paneles\DashboardControllerTest" file="tests\Feature\Paneles\DashboardControllerTest.php" tests="9" assertions="9" errors="0" failures="8" skipped="0" time="0.116354">
+        <testsuite name="it renders the role dashboard from the shared account entry point" tests="6" assertions="6" errors="0" failures="6" skipped="0" time="0.075787">
+          <testcase name="it renders the role dashboard from the shared account entry point with data set &quot;('marketing', 'paneles.marketing.dashboard')&quot;" file="tests\Feature\Paneles\DashboardControllerTest.php::it renders the role dashboard from the shared account entry point with data set &quot;('marketing', 'paneles.marketing.dashboard')&quot;" class="Tests\Feature\Paneles\DashboardControllerTest" classname="Tests.Feature.Paneles.DashboardControllerTest" assertions="1" time="0.014618">
+            <failure type="PHPUnit\Framework\ExpectationFailedException">it renders the role dashboard from the shared account entry point with data set "('marketing', 'paneles.marketing.dashboard')"Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:183
+at vendor\laravel\framework\src\Illuminate\Testing\Concerns\AssertsStatusCodes.php:16
+at tests\Feature\Paneles\DashboardControllerTest.php:10</failure>
+          </testcase>
+          <testcase name="it renders the role dashboard from the shared account entry point with data set &quot;('compras_logistica', 'paneles.compras-logistica.dashboard')&quot;" file="tests\Feature\Paneles\DashboardControllerTest.php::it renders the role dashboard from the shared account entry point with data set &quot;('compras_logistica', 'paneles.compras-logistica.dashboard')&quot;" class="Tests\Feature\Paneles\DashboardControllerTest" classname="Tests.Feature.Paneles.DashboardControllerTest" assertions="1" time="0.011728">
+            <failure type="PHPUnit\Framework\ExpectationFailedException">it renders the role dashboard from the shared account entry point with data set "('compras_logistica', 'paneles.compras-logistica.dashboard')"Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:183
+at vendor\laravel\framework\src\Illuminate\Testing\Concerns\AssertsStatusCodes.php:16
+at tests\Feature\Paneles\DashboardControllerTest.php:10</failure>
+          </testcase>
+          <testcase name="it renders the role dashboard from the shared account entry point with data set &quot;('ventas_mayoristas', 'paneles.ventas-mayoristas.dashboard')&quot;" file="tests\Feature\Paneles\DashboardControllerTest.php::it renders the role dashboard from the shared account entry point with data set &quot;('ventas_mayoristas', 'paneles.ventas-mayoristas.dashboard')&quot;" class="Tests\Feature\Paneles\DashboardControllerTest" classname="Tests.Feature.Paneles.DashboardControllerTest" assertions="1" time="0.012495">
+            <failure type="PHPUnit\Framework\ExpectationFailedException">it renders the role dashboard from the shared account entry point with data set "('ventas_mayoristas', 'paneles.ventas-mayoristas.dashboard')"Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:183
+at vendor\laravel\framework\src\Illuminate\Testing\Concerns\AssertsStatusCodes.php:16
+at tests\Feature\Paneles\DashboardControllerTest.php:10</failure>
+          </testcase>
+          <testcase name="it renders the role dashboard from the shared account entry point with data set &quot;('ventas_minoristas', 'paneles.ventas-minoristas.dashboard')&quot;" file="tests\Feature\Paneles\DashboardControllerTest.php::it renders the role dashboard from the shared account entry point with data set &quot;('ventas_minoristas', 'paneles.ventas-minoristas.dashboard')&quot;" class="Tests\Feature\Paneles\DashboardControllerTest" classname="Tests.Feature.Paneles.DashboardControllerTest" assertions="1" time="0.011944">
+            <failure type="PHPUnit\Framework\ExpectationFailedException">it renders the role dashboard from the shared account entry point with data set "('ventas_minoristas', 'paneles.ventas-minoristas.dashboard')"Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:183
+at vendor\laravel\framework\src\Illuminate\Testing\Concerns\AssertsStatusCodes.php:16
+at tests\Feature\Paneles\DashboardControllerTest.php:10</failure>
+          </testcase>
+          <testcase name="it renders the role dashboard from the shared account entry point with data set &quot;('cliente_mayorista', 'paneles.cliente-mayorista.dashboard')&quot;" file="tests\Feature\Paneles\DashboardControllerTest.php::it renders the role dashboard from the shared account entry point with data set &quot;('cliente_mayorista', 'paneles.cliente-mayorista.dashboard')&quot;" class="Tests\Feature\Paneles\DashboardControllerTest" classname="Tests.Feature.Paneles.DashboardControllerTest" assertions="1" time="0.012886">
+            <failure type="PHPUnit\Framework\ExpectationFailedException">it renders the role dashboard from the shared account entry point with data set "('cliente_mayorista', 'paneles.cliente-mayorista.dashboard')"Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:183
+at vendor\laravel\framework\src\Illuminate\Testing\Concerns\AssertsStatusCodes.php:16
+at tests\Feature\Paneles\DashboardControllerTest.php:10</failure>
+          </testcase>
+          <testcase name="it renders the role dashboard from the shared account entry point with data set &quot;('cliente_minorista', 'paneles.cliente-minorista.dashboard')&quot;" file="tests\Feature\Paneles\DashboardControllerTest.php::it renders the role dashboard from the shared account entry point with data set &quot;('cliente_minorista', 'paneles.cliente-minorista.dashboard')&quot;" class="Tests\Feature\Paneles\DashboardControllerTest" classname="Tests.Feature.Paneles.DashboardControllerTest" assertions="1" time="0.012115">
+            <failure type="PHPUnit\Framework\ExpectationFailedException">it renders the role dashboard from the shared account entry point with data set "('cliente_minorista', 'paneles.cliente-minorista.dashboard')"Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:183
+at vendor\laravel\framework\src\Illuminate\Testing\Concerns\AssertsStatusCodes.php:16
+at tests\Feature\Paneles\DashboardControllerTest.php:10</failure>
+          </testcase>
+        </testsuite>
+        <testcase name="it renders the administrator dashboard through both existing admin entry points" file="tests\Feature\Paneles\DashboardControllerTest.php::it renders the administrator dashboard through both existing admin entry points" class="Tests\Feature\Paneles\DashboardControllerTest" classname="Tests.Feature.Paneles.DashboardControllerTest" assertions="1" time="0.011038">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">it renders the administrator dashboard through both existing admin entry pointsExpected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:183
+at vendor\laravel\framework\src\Illuminate\Testing\Concerns\AssertsStatusCodes.php:16
+at tests\Feature\Paneles\DashboardControllerTest.php:27</failure>
+        </testcase>
+        <testcase name="it keeps the administrator account configuration on the account route" file="tests\Feature\Paneles\DashboardControllerTest.php::it keeps the administrator account configuration on the account route" class="Tests\Feature\Paneles\DashboardControllerTest" classname="Tests.Feature.Paneles.DashboardControllerTest" assertions="1" time="0.016869">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">it keeps the administrator account configuration on the account routeExpected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:183
+at vendor\laravel\framework\src\Illuminate\Testing\Concerns\AssertsStatusCodes.php:16
+at tests\Feature\Paneles\DashboardControllerTest.php:42</failure>
+        </testcase>
+        <testcase name="it forbids non administrators from the administrator dashboard route" file="tests\Feature\Paneles\DashboardControllerTest.php::it forbids non administrators from the administrator dashboard route" class="Tests\Feature\Paneles\DashboardControllerTest" classname="Tests.Feature.Paneles.DashboardControllerTest" assertions="1" time="0.012659"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\Publico\Comercio\PedidoControllerTest" file="tests\Feature\Publico\Comercio\PedidoControllerTest.php" tests="7" assertions="30" errors="0" failures="0" skipped="0" time="1.000367">
+        <testcase name="it filters stored ecommerce orders without confusing buyer type with channel" file="tests\Feature\Publico\Comercio\PedidoControllerTest.php::it filters stored ecommerce orders without confusing buyer type with channel" class="Tests\Feature\Publico\Comercio\PedidoControllerTest" classname="Tests.Feature.Publico.Comercio.PedidoControllerTest" assertions="3" time="0.174365"/>
+        <testcase name="it combines channel status and period filters without broadening the result" file="tests\Feature\Publico\Comercio\PedidoControllerTest.php::it combines channel status and period filters without broadening the result" class="Tests\Feature\Publico\Comercio\PedidoControllerTest" classname="Tests.Feature.Publico.Comercio.PedidoControllerTest" assertions="4" time="0.171879"/>
+        <testcase name="it returns no rows for an unknown channel instead of dropping that filter" file="tests\Feature\Publico\Comercio\PedidoControllerTest.php::it returns no rows for an unknown channel instead of dropping that filter" class="Tests\Feature\Publico\Comercio\PedidoControllerTest" classname="Tests.Feature.Publico.Comercio.PedidoControllerTest" assertions="4" time="0.261074"/>
+        <testcase name="it rejects malformed channel filters instead of ignoring them" file="tests\Feature\Publico\Comercio\PedidoControllerTest.php::it rejects malformed channel filters instead of ignoring them" class="Tests\Feature\Publico\Comercio\PedidoControllerTest" classname="Tests.Feature.Publico.Comercio.PedidoControllerTest" assertions="3" time="0.049943"/>
+        <testcase name="it shows payment as unverified for pending delivered and cancelled orders without financial records" file="tests\Feature\Publico\Comercio\PedidoControllerTest.php::it shows payment as unverified for pending delivered and cancelled orders without financial records" class="Tests\Feature\Publico\Comercio\PedidoControllerTest" classname="Tests.Feature.Publico.Comercio.PedidoControllerTest" assertions="6" time="0.158078"/>
+        <testcase name="it restricts an authorized site role to its assigned site and denies insufficient scope" file="tests\Feature\Publico\Comercio\PedidoControllerTest.php::it restricts an authorized site role to its assigned site and denies insufficient scope" class="Tests\Feature\Publico\Comercio\PedidoControllerTest" classname="Tests.Feature.Publico.Comercio.PedidoControllerTest" assertions="5" time="0.086318"/>
+        <testcase name="it excludes a buyer after RBAC revocation even if the legacy role remains" file="tests\Feature\Publico\Comercio\PedidoControllerTest.php::it excludes a buyer after RBAC revocation even if the legacy role remains" class="Tests\Feature\Publico\Comercio\PedidoControllerTest" classname="Tests.Feature.Publico.Comercio.PedidoControllerTest" assertions="5" time="0.098709"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\RbacDinamicoTest" file="tests\Feature\RbacDinamicoTest.php" tests="6" assertions="1" errors="5" failures="0" skipped="0" time="0.223912">
+        <testcase name="it seeds the seven existing roles and organization idempotently" file="tests\Feature\RbacDinamicoTest.php::it seeds the seven existing roles and organization idempotently" class="Tests\Feature\RbacDinamicoTest" classname="Tests.Feature.RbacDinamicoTest" assertions="0" time="0.153800">
+          <error type="RuntimeException">it seeds the seven existing roles and organization idempotentlyRuntimeException: Run the organization and RBAC migrations before RbacInicialSeeder. Missing table: roles_permisos&#13;
+at database\seeders\RbacInicialSeeder.php:21
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:36
+at vendor\laravel\framework\src\Illuminate\Container\Util.php:43
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:96
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:35
+at vendor\laravel\framework\src\Illuminate\Container\Container.php:803
+at vendor\laravel\framework\src\Illuminate\Database\Seeder.php:184
+at vendor\laravel\framework\src\Illuminate\Database\Seeder.php:191
+at vendor\laravel\framework\src\Illuminate\Database\Console\Seeds\SeedCommand.php:89
+at vendor\laravel\framework\src\Illuminate\Database\Eloquent\Concerns\GuardsAttributes.php:188
+at vendor\laravel\framework\src\Illuminate\Database\Console\Seeds\SeedCommand.php:88
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:36
+at vendor\laravel\framework\src\Illuminate\Container\Util.php:43
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:96
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:35
+at vendor\laravel\framework\src\Illuminate\Container\Container.php:803
+at vendor\laravel\framework\src\Illuminate\Console\Command.php:292
+at vendor\symfony\console\Command\Command.php:285
+at vendor\laravel\framework\src\Illuminate\Console\Command.php:261
+at vendor\symfony\console\Application.php:1121
+at vendor\symfony\console\Application.php:379
+at vendor\symfony\console\Application.php:218
+at vendor\laravel\framework\src\Illuminate\Console\Application.php:165
+at vendor\laravel\framework\src\Illuminate\Foundation\Console\Kernel.php:447
+at vendor\laravel\framework\src\Illuminate\Testing\PendingCommand.php:452
+at vendor\laravel\framework\src\Illuminate\Testing\PendingCommand.php:676
+at vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\InteractsWithConsole.php:85
+at vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase.php:410
+at tests\Feature\RbacDinamicoTest.php:11</error>
+        </testcase>
+        <testcase name="it does not restore revoked privileges or overwrite customized menus on a repeat seed" file="tests\Feature\RbacDinamicoTest.php::it does not restore revoked privileges or overwrite customized menus on a repeat seed" class="Tests\Feature\RbacDinamicoTest" classname="Tests.Feature.RbacDinamicoTest" assertions="0" time="0.012494">
+          <error type="RuntimeException">it does not restore revoked privileges or overwrite customized menus on a repeat seedRuntimeException: Run the organization and RBAC migrations before RbacInicialSeeder. Missing table: roles_permisos&#13;
+at database\seeders\RbacInicialSeeder.php:21
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:36
+at vendor\laravel\framework\src\Illuminate\Container\Util.php:43
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:96
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:35
+at vendor\laravel\framework\src\Illuminate\Container\Container.php:803
+at vendor\laravel\framework\src\Illuminate\Database\Seeder.php:184
+at vendor\laravel\framework\src\Illuminate\Database\Seeder.php:191
+at vendor\laravel\framework\src\Illuminate\Database\Console\Seeds\SeedCommand.php:89
+at vendor\laravel\framework\src\Illuminate\Database\Eloquent\Concerns\GuardsAttributes.php:188
+at vendor\laravel\framework\src\Illuminate\Database\Console\Seeds\SeedCommand.php:88
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:36
+at vendor\laravel\framework\src\Illuminate\Container\Util.php:43
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:96
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:35
+at vendor\laravel\framework\src\Illuminate\Container\Container.php:803
+at vendor\laravel\framework\src\Illuminate\Console\Command.php:292
+at vendor\symfony\console\Command\Command.php:285
+at vendor\laravel\framework\src\Illuminate\Console\Command.php:261
+at vendor\symfony\console\Application.php:1121
+at vendor\symfony\console\Application.php:379
+at vendor\symfony\console\Application.php:218
+at vendor\laravel\framework\src\Illuminate\Console\Application.php:165
+at vendor\laravel\framework\src\Illuminate\Foundation\Console\Kernel.php:447
+at vendor\laravel\framework\src\Illuminate\Testing\PendingCommand.php:452
+at vendor\laravel\framework\src\Illuminate\Testing\PendingCommand.php:676
+at vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\InteractsWithConsole.php:85
+at vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase.php:410
+at tests\Feature\RbacDinamicoTest.php:30</error>
+        </testcase>
+        <testcase name="it restricts assigned employee permissions to their company site and customer permissions to owned records" file="tests\Feature\RbacDinamicoTest.php::it restricts assigned employee permissions to their company site and customer permissions to owned records" class="Tests\Feature\RbacDinamicoTest" classname="Tests.Feature.RbacDinamicoTest" assertions="0" time="0.012675">
+          <error type="RuntimeException">it restricts assigned employee permissions to their company site and customer permissions to owned recordsRuntimeException: Run the organization and RBAC migrations before RbacInicialSeeder. Missing table: roles_permisos&#13;
+at database\seeders\RbacInicialSeeder.php:21
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:36
+at vendor\laravel\framework\src\Illuminate\Container\Util.php:43
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:96
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:35
+at vendor\laravel\framework\src\Illuminate\Container\Container.php:803
+at vendor\laravel\framework\src\Illuminate\Database\Seeder.php:184
+at vendor\laravel\framework\src\Illuminate\Database\Seeder.php:191
+at vendor\laravel\framework\src\Illuminate\Database\Console\Seeds\SeedCommand.php:89
+at vendor\laravel\framework\src\Illuminate\Database\Eloquent\Concerns\GuardsAttributes.php:188
+at vendor\laravel\framework\src\Illuminate\Database\Console\Seeds\SeedCommand.php:88
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:36
+at vendor\laravel\framework\src\Illuminate\Container\Util.php:43
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:96
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:35
+at vendor\laravel\framework\src\Illuminate\Container\Container.php:803
+at vendor\laravel\framework\src\Illuminate\Console\Command.php:292
+at vendor\symfony\console\Command\Command.php:285
+at vendor\laravel\framework\src\Illuminate\Console\Command.php:261
+at vendor\symfony\console\Application.php:1121
+at vendor\symfony\console\Application.php:379
+at vendor\symfony\console\Application.php:218
+at vendor\laravel\framework\src\Illuminate\Console\Application.php:165
+at vendor\laravel\framework\src\Illuminate\Foundation\Console\Kernel.php:447
+at vendor\laravel\framework\src\Illuminate\Testing\PendingCommand.php:452
+at vendor\laravel\framework\src\Illuminate\Testing\PendingCommand.php:676
+at vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\InteractsWithConsole.php:85
+at vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase.php:410
+at tests\Feature\RbacDinamicoTest.php:57</error>
+        </testcase>
+        <testcase name="it builds role-specific menus from the database and enforces route permissions" file="tests\Feature\RbacDinamicoTest.php::it builds role-specific menus from the database and enforces route permissions" class="Tests\Feature\RbacDinamicoTest" classname="Tests.Feature.RbacDinamicoTest" assertions="0" time="0.019713">
+          <error type="RuntimeException">it builds role-specific menus from the database and enforces route permissionsRuntimeException: Run the organization and RBAC migrations before RbacInicialSeeder. Missing table: roles_permisos&#13;
+at database\seeders\RbacInicialSeeder.php:21
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:36
+at vendor\laravel\framework\src\Illuminate\Container\Util.php:43
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:96
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:35
+at vendor\laravel\framework\src\Illuminate\Container\Container.php:803
+at vendor\laravel\framework\src\Illuminate\Database\Seeder.php:184
+at vendor\laravel\framework\src\Illuminate\Database\Seeder.php:191
+at vendor\laravel\framework\src\Illuminate\Database\Console\Seeds\SeedCommand.php:89
+at vendor\laravel\framework\src\Illuminate\Database\Eloquent\Concerns\GuardsAttributes.php:188
+at vendor\laravel\framework\src\Illuminate\Database\Console\Seeds\SeedCommand.php:88
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:36
+at vendor\laravel\framework\src\Illuminate\Container\Util.php:43
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:96
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:35
+at vendor\laravel\framework\src\Illuminate\Container\Container.php:803
+at vendor\laravel\framework\src\Illuminate\Console\Command.php:292
+at vendor\symfony\console\Command\Command.php:285
+at vendor\laravel\framework\src\Illuminate\Console\Command.php:261
+at vendor\symfony\console\Application.php:1121
+at vendor\symfony\console\Application.php:379
+at vendor\symfony\console\Application.php:218
+at vendor\laravel\framework\src\Illuminate\Console\Application.php:165
+at vendor\laravel\framework\src\Illuminate\Foundation\Console\Kernel.php:447
+at vendor\laravel\framework\src\Illuminate\Testing\PendingCommand.php:452
+at vendor\laravel\framework\src\Illuminate\Testing\PendingCommand.php:676
+at vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\InteractsWithConsole.php:85
+at vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase.php:410
+at tests\Feature\RbacDinamicoTest.php:111</error>
+        </testcase>
+        <testcase name="it does not expose view-only placeholders as working administrative modules" file="tests\Feature\RbacDinamicoTest.php::it does not expose view-only placeholders as working administrative modules" class="Tests\Feature\RbacDinamicoTest" classname="Tests.Feature.RbacDinamicoTest" assertions="1" time="0.012328"/>
+        <testcase name="it preserves the last active global administrator assignment" file="tests\Feature\RbacDinamicoTest.php::it preserves the last active global administrator assignment" class="Tests\Feature\RbacDinamicoTest" classname="Tests.Feature.RbacDinamicoTest" assertions="0" time="0.012902">
+          <error type="RuntimeException">it preserves the last active global administrator assignmentRuntimeException: Run the organization and RBAC migrations before RbacInicialSeeder. Missing table: roles_permisos&#13;
+at database\seeders\RbacInicialSeeder.php:21
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:36
+at vendor\laravel\framework\src\Illuminate\Container\Util.php:43
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:96
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:35
+at vendor\laravel\framework\src\Illuminate\Container\Container.php:803
+at vendor\laravel\framework\src\Illuminate\Database\Seeder.php:184
+at vendor\laravel\framework\src\Illuminate\Database\Seeder.php:191
+at vendor\laravel\framework\src\Illuminate\Database\Console\Seeds\SeedCommand.php:89
+at vendor\laravel\framework\src\Illuminate\Database\Eloquent\Concerns\GuardsAttributes.php:188
+at vendor\laravel\framework\src\Illuminate\Database\Console\Seeds\SeedCommand.php:88
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:36
+at vendor\laravel\framework\src\Illuminate\Container\Util.php:43
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:96
+at vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:35
+at vendor\laravel\framework\src\Illuminate\Container\Container.php:803
+at vendor\laravel\framework\src\Illuminate\Console\Command.php:292
+at vendor\symfony\console\Command\Command.php:285
+at vendor\laravel\framework\src\Illuminate\Console\Command.php:261
+at vendor\symfony\console\Application.php:1121
+at vendor\symfony\console\Application.php:379
+at vendor\symfony\console\Application.php:218
+at vendor\laravel\framework\src\Illuminate\Console\Application.php:165
+at vendor\laravel\framework\src\Illuminate\Foundation\Console\Kernel.php:447
+at vendor\laravel\framework\src\Illuminate\Testing\PendingCommand.php:452
+at vendor\laravel\framework\src\Illuminate\Testing\PendingCommand.php:676
+at vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\InteractsWithConsole.php:85
+at vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase.php:410
+at tests\Feature\RbacDinamicoTest.php:156</error>
+        </testcase>
+      </testsuite>
+      <testsuite name="Tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest" file="tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php" tests="14" assertions="17" errors="0" failures="12" skipped="0" time="0.223122">
+        <testcase name="it completes the administrator category lifecycle and records audit events" file="tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php::it completes the administrator category lifecycle and records audit events" class="Tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest" classname="Tests.Feature.UnidadII.ModuloAndSecurityIntegrationTest" assertions="1" time="0.015801">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">it completes the administrator category lifecycle and records audit eventsExpected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:208
+at tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php:37</failure>
+        </testcase>
+        <testcase name="it completes the administrator client lifecycle" file="tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php::it completes the administrator client lifecycle" class="Tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest" classname="Tests.Feature.UnidadII.ModuloAndSecurityIntegrationTest" assertions="1" time="0.014559">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">it completes the administrator client lifecycleExpected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:208
+at tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php:78</failure>
+        </testcase>
+        <testcase name="it completes the administrator product lifecycle" file="tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php::it completes the administrator product lifecycle" class="Tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest" classname="Tests.Feature.UnidadII.ModuloAndSecurityIntegrationTest" assertions="1" time="0.013002">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">it completes the administrator product lifecycleExpected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:208
+at tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php:120</failure>
+        </testcase>
+        <testcase name="it creates an administrator-managed wholesale user and customer profile atomically" file="tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php::it creates an administrator-managed wholesale user and customer profile atomically" class="Tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest" classname="Tests.Feature.UnidadII.ModuloAndSecurityIntegrationTest" assertions="1" time="0.012139">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">it creates an administrator-managed wholesale user and customer profile atomicallyExpected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:208
+at tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php:162</failure>
+        </testcase>
+        <testcase name="it completes the supplier lifecycle for purchasing roles" file="tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php::it completes the supplier lifecycle for purchasing roles" class="Tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest" classname="Tests.Feature.UnidadII.ModuloAndSecurityIntegrationTest" assertions="1" time="0.014457">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">it completes the supplier lifecycle for purchasing rolesExpected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:208
+at tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php:185</failure>
+        </testcase>
+        <testcase name="it adjusts inventory and rejects a movement that would create negative stock" file="tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php::it adjusts inventory and rejects a movement that would create negative stock" class="Tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest" classname="Tests.Feature.UnidadII.ModuloAndSecurityIntegrationTest" assertions="1" time="0.019392">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">it adjusts inventory and rejects a movement that would create negative stockExpected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:208
+at tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php:220</failure>
+        </testcase>
+        <testcase name="it receives a purchase, creates details and increments inventory" file="tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php::it receives a purchase, creates details and increments inventory" class="Tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest" classname="Tests.Feature.UnidadII.ModuloAndSecurityIntegrationTest" assertions="1" time="0.013550">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">it receives a purchase, creates details and increments inventoryExpected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:208
+at tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php:261</failure>
+        </testcase>
+        <testcase name="it rolls back a purchase when a later detail cannot be found" file="tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php::it rolls back a purchase when a later detail cannot be found" class="Tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest" classname="Tests.Feature.UnidadII.ModuloAndSecurityIntegrationTest" assertions="1" time="0.039488">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">it rolls back a purchase when a later detail cannot be foundFailed asserting that an instance of class Error is an instance of class Illuminate\Database\Eloquent\ModelNotFoundException.&#13;
+at tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php:297</failure>
+        </testcase>
+        <testcase name="it cancels an order and restores its inventory" file="tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php::it cancels an order and restores its inventory" class="Tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest" classname="Tests.Feature.UnidadII.ModuloAndSecurityIntegrationTest" assertions="1" time="0.016759">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">it cancels an order and restores its inventoryExpected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:208
+at tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php:323</failure>
+        </testcase>
+        <testcase name="it creates a wholesale quotation with details and ownership" file="tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php::it creates a wholesale quotation with details and ownership" class="Tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest" classname="Tests.Feature.UnidadII.ModuloAndSecurityIntegrationTest" assertions="1" time="0.013863">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">it creates a wholesale quotation with details and ownershipExpected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:208
+at tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php:354</failure>
+        </testcase>
+        <testcase name="it creates campaigns, coupons and customer segments for marketing" file="tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php::it creates campaigns, coupons and customer segments for marketing" class="Tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest" classname="Tests.Feature.UnidadII.ModuloAndSecurityIntegrationTest" assertions="1" time="0.014857">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">it creates campaigns, coupons and customer segments for marketingExpected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:208
+at tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php:386</failure>
+        </testcase>
+        <testcase name="it supports multiple suppliers for one product through the Eloquent pivot" file="tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php::it supports multiple suppliers for one product through the Eloquent pivot" class="Tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest" classname="Tests.Feature.UnidadII.ModuloAndSecurityIntegrationTest" assertions="3" time="0.011714"/>
+        <testcase name="it enforces the role matrix for protected module entry points" file="tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php::it enforces the role matrix for protected module entry points" class="Tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest" classname="Tests.Feature.UnidadII.ModuloAndSecurityIntegrationTest" assertions="1" time="0.011306">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">it enforces the role matrix for protected module entry pointsExpected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.&#13;
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:46
+at vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:183
+at vendor\laravel\framework\src\Illuminate\Testing\Concerns\AssertsStatusCodes.php:16
+at tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php:462</failure>
+        </testcase>
+        <testcase name="it rejects unauthorized product writes before persistence" file="tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest.php::it rejects unauthorized product writes before persistence" class="Tests\Feature\UnidadII\ModuloAndSecurityIntegrationTest" classname="Tests.Feature.UnidadII.ModuloAndSecurityIntegrationTest" assertions="2" time="0.012234"/>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+</testsuites>

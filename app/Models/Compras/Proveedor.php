@@ -11,7 +11,7 @@ class Proveedor extends Model
 {
     protected $table = 'proveedores';
 
-    protected $fillable = ['nombre', 'ruc', 'correo', 'telefono', 'ciudad', 'activo', 'creado_en'];
+    protected $fillable = ['nombre', 'ruc', 'correo', 'telefono', 'ciudad', 'activo', 'creado_en', 'empresa_id'];
 
     public $timestamps = false;
 
@@ -22,7 +22,7 @@ class Proveedor extends Model
 
     public function products(): BelongsToMany
     {
-        return $this->belongsToMany(Producto::class, 'producto_proveedor', 'proveedor_id', 'producto_id');
+        return $this->belongsToMany(Producto::class, 'productos_proveedores', 'proveedor_id', 'producto_id');
     }
 
     public function purchases(): HasMany

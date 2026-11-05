@@ -14,7 +14,7 @@ class Cliente extends Model
 
     protected $fillable = [
         'usuario_id', 'tipo', 'documento', 'razon_social', 'nombre_contacto',
-        'correo', 'telefono', 'ciudad', 'activo', 'creado_en',
+        'correo', 'telefono', 'ciudad', 'activo', 'creado_en', 'empresa_id',
     ];
 
     public $timestamps = false;

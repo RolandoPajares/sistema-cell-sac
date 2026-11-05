@@ -17,7 +17,7 @@ class RegistroRequest extends FormRequest
     {
         return [
             'nombre' => ['required', 'string', 'max:120'],
-            'correo' => ['required', 'email', 'max:160', Rule::unique('users', 'correo')],
+            'correo' => ['required', 'email', 'max:160', Rule::unique('usuarios', 'correo')],
             'password' => ['required', 'confirmed', Password::min(10)->letters()->numbers()],
         ];
     }

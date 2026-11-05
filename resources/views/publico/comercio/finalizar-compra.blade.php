@@ -16,9 +16,11 @@
                 <p>Este proyecto registra una solicitud de compra; no procesa pagos en línea.</p>
                 @foreach($lines as $line)<div class="data-row"><span>{{ $line['product']->nombre }} × {{ $line['quantity'] }}</span><strong>S/ {{ number_format($line['subtotal'], 2) }}</strong></div>@endforeach
                 <div class="cart-total"><b>Total</b><strong>S/ {{ number_format($total, 2) }}</strong></div>
+                @unless($puedeConfirmar)<p>La disponibilidad cambió. Revisa las cantidades en tu carrito antes de confirmar.</p>@endunless
                 <form method="post" action="{{ route('checkout') }}">
                     @csrf
-                    <button class="btn btn-primary" style="width:100%">
+                    <input type="hidden" name="checkout_token" value="{{ $checkoutToken }}">
+                    <button class="btn btn-primary" style="width:100%" @disabled(! $puedeConfirmar)>
                         Confirmar pedido
                     </button>
                 </form>

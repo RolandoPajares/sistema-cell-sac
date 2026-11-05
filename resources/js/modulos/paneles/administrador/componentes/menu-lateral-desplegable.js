@@ -5,6 +5,41 @@ if (menuAdministrador && menuAdministrador.dataset.adminMenuInicializado !== 'tr
 
     const grupos = [...menuAdministrador.querySelectorAll('[data-admin-menu-group]')];
     const botonesGrupo = grupos.map((grupo) => grupo.querySelector('[data-admin-menu-toggle]')).filter(Boolean);
+    const recordarEstado = document.body.dataset.panelRole === 'administrador';
+
+    const claveGrupo = (grupo) => {
+        const submenu = grupo.querySelector('[data-admin-menu-submenu]');
+
+        return submenu?.id ? `technology-cell-admin-menu:${submenu.id}` : null;
+    };
+
+    const estadoGuardado = (grupo) => {
+        const clave = claveGrupo(grupo);
+
+        if (!recordarEstado || !clave) {
+            return null;
+        }
+
+        try {
+            return sessionStorage.getItem(clave);
+        } catch {
+            return null;
+        }
+    };
+
+    const guardarEstado = (grupo, abierto) => {
+        const clave = claveGrupo(grupo);
+
+        if (!recordarEstado || !clave) {
+            return;
+        }
+
+        try {
+            sessionStorage.setItem(clave, abierto ? 'abierto' : 'cerrado');
+        } catch {
+            return;
+        }
+    };
 
     const actualizarGrupo = (grupo, abierto) => {
         const boton = grupo.querySelector('[data-admin-menu-toggle]');
@@ -26,10 +61,13 @@ if (menuAdministrador && menuAdministrador.dataset.adminMenuInicializado !== 'tr
             return;
         }
 
-        actualizarGrupo(grupo, boton.getAttribute('aria-expanded') === 'true');
+        const guardado = estadoGuardado(grupo);
+        actualizarGrupo(grupo, guardado === null ? boton.getAttribute('aria-expanded') === 'true' : guardado === 'abierto');
 
         boton.addEventListener('click', () => {
-            actualizarGrupo(grupo, boton.getAttribute('aria-expanded') !== 'true');
+            const abierto = boton.getAttribute('aria-expanded') !== 'true';
+            actualizarGrupo(grupo, abierto);
+            guardarEstado(grupo, abierto);
         });
 
         boton.addEventListener('keydown', (event) => {

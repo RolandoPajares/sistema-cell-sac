@@ -6,6 +6,9 @@ class ActualizarProductoRequest extends GuardarProductoRequest
 {
     public function rules(): array
     {
-        return parent::rules();
+        $reglas = parent::rules();
+        unset($reglas['existencias']);
+
+        return $reglas;
     }
 }

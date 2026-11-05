@@ -6,7 +6,7 @@
 @section('content')
 @php($module = require resource_path('views/gestion/analitica-clientes/datos.php'))
 
-@if (auth()->user()?->rol === 'administrador')
+@if (auth()->user()?->isRole('administrador'))
     @include('paneles.administrador.analisis.analitica-clientes.listar', ['module' => $module])
 @else
     @include('gestion.componentes.modulo-pendiente', ['module' => $module])

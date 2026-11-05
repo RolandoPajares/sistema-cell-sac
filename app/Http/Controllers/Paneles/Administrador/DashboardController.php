@@ -6,11 +6,14 @@ use App\Http\Controllers\Paneles\PanelDashboardController;
 use App\Models\Auditoria\RegistroAuditoria;
 use App\Models\Catalogo\Producto;
 use App\Models\Clientes\Cliente;
-use App\Models\Comercio\DetallePedido;
 use App\Models\Comercio\Pedido;
 use App\Models\Compras\Proveedor;
 use App\Models\Marketing\Campania;
 use App\Models\User;
+use App\Servicios\ConsultaVentas;
+use App\Servicios\ServicioAutorizacion;
+use App\Servicios\ServicioInventario;
+use App\Servicios\ServicioPaneles;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -19,6 +22,15 @@ use Illuminate\Support\Facades\DB;
 
 final class DashboardController extends PanelDashboardController
 {
+    public function __construct(
+        ServicioPaneles $panelService,
+        private readonly ServicioAutorizacion $autorizacion,
+        private readonly ServicioInventario $servicioInventario,
+        private readonly ConsultaVentas $consultaVentas,
+    ) {
+        parent::__construct($panelService);
+    }
+
     protected function role(): string
     {
         return 'administrador';
@@ -40,44 +52,61 @@ final class DashboardController extends PanelDashboardController
         $previousMonthStart = $now->copy()->subMonthNoOverflow()->startOfMonth();
         $previousMonthEnd = $now->copy()->subMonthNoOverflow()->endOfMonth();
 
-        $salesThisMonth = (float) Pedido::query()
-            ->where('estado', '!=', 'Cancelado')
+        $consultaPedidos = fn (): Builder => $this->autorizacion->scopeRecordsFor(
+            Pedido::query(), $user, 'gestion.pedidos.consultar', 'usuario_id',
+        );
+        $consultaProductos = fn (): Builder => $this->autorizacion->scopeRecordsFor(
+            Producto::query(), $user, 'gestion.productos.consultar',
+        );
+        $consultaProveedores = fn (): Builder => $this->autorizacion->scopeRecordsFor(
+            Proveedor::query(), $user, 'gestion.proveedores.consultar',
+        );
+        $consultaClientes = fn (): Builder => $this->autorizacion->scopeRecordsFor(
+            Cliente::query(), $user, 'gestion.clientes.consultar',
+        );
+        $consultaCampanias = fn (): Builder => $this->autorizacion->scopeRecordsFor(
+            Campania::query(), $user, 'gestion.campanias.consultar',
+        );
+        $consultaAuditoria = fn (): Builder => $this->autorizacion->scopeRecordsFor(
+            RegistroAuditoria::query(), $user, 'gestion.auditoria.consultar',
+        );
+        $alcanceInventario = $this->servicioInventario->alcanceConsulta($user);
+        $inicioGraficaVentas = $now->copy()->startOfMonth()->subMonths(11);
+        $totalesVentasMensuales = $this->consultaVentas->obtenerTotalesMensualesConfirmados(
+            $user,
+            $inicioGraficaVentas,
+            $currentMonthEnd,
+        );
+
+        $salesThisMonth = $totalesVentasMensuales->get($now->format('Y-m'), 0.0);
+        $salesPreviousMonth = $totalesVentasMensuales->get($previousMonthStart->format('Y-m'), 0.0);
+
+        $ordersCount = $consultaPedidos()->count();
+        $ordersThisMonth = $consultaPedidos()
             ->whereBetween('creado_en', [$currentMonthStart, $currentMonthEnd])
-            ->sum('total');
-        $salesPreviousMonth = (float) Pedido::query()
-            ->where('estado', '!=', 'Cancelado')
+            ->count();
+        $ordersPreviousMonth = $consultaPedidos()
             ->whereBetween('creado_en', [$previousMonthStart, $previousMonthEnd])
-            ->sum('total');
-
-        $ordersCount = Pedido::query()->count();
-        $ordersThisMonth = Pedido::query()
-            ->whereBetween('creado_en', [$currentMonthStart, $currentMonthEnd])
-            ->count();
-        $ordersPreviousMonth = Pedido::query()
-            ->whereBetween('creado_en', [$previousMonthStart, $previousMonthEnd])
             ->count();
 
-        $activeProducts = Producto::query()->where('activo', true)->count();
-        $productsAddedThisMonth = Producto::query()
+        $activeProducts = $consultaProductos()->where('activo', true)->count();
+        $productsAddedThisMonth = $consultaProductos()
             ->where('activo', true)
             ->whereBetween('creado_en', [$currentMonthStart, $currentMonthEnd])
             ->count();
-        $lowStock = Producto::query()
-            ->where('activo', true)
-            ->where('existencias', '<=', 5)
-            ->count();
-        $suppliersCount = Proveedor::query()->where('activo', true)->count();
+        $productosSinExistencias = $this->servicioInventario->resumenConsulta($alcanceInventario)['sin_existencias'];
+        $suppliersCount = $consultaProveedores()->where('activo', true)->count();
 
-        $newCustomers = Cliente::query()
+        $newCustomers = $consultaClientes()
             ->where('activo', true)
             ->whereBetween('creado_en', [$currentMonthStart, $currentMonthEnd])
             ->count();
-        $newCustomersPreviousMonth = Cliente::query()
+        $newCustomersPreviousMonth = $consultaClientes()
             ->where('activo', true)
             ->whereBetween('creado_en', [$previousMonthStart, $previousMonthEnd])
             ->count();
 
-        $monthlySales = $this->monthlySales($now);
+        $monthlySales = $this->monthlySales($totalesVentasMensuales, $now);
         $maxMonthlySales = max(1.0, (float) max(array_column($monthlySales, 'value')));
         $salesChartMax = max(5000.0, ceil($maxMonthlySales / 5000) * 5000);
 
@@ -88,7 +117,7 @@ final class DashboardController extends PanelDashboardController
             'En proceso' => '#f59e0b',
             'Cancelado' => '#ff4d5e',
         ];
-        $orderStatuses = Pedido::query()
+        $orderStatuses = $consultaPedidos()
             ->select('estado', DB::raw('COUNT(*) as total'))
             ->groupBy('estado')
             ->orderByDesc('total')
@@ -102,53 +131,41 @@ final class DashboardController extends PanelDashboardController
         $orderStatusTotal = (int) $orderStatuses->sum('total');
         $orderStatusChart = $this->statusChart($orderStatuses, $orderStatusTotal);
 
-        $recentOrders = Pedido::query()
+        $recentOrders = $consultaPedidos()
             ->with('user:id,nombre,correo')
             ->latest('creado_en')
             ->latest('id')
             ->limit(5)
             ->get();
-        $lowStockProducts = Producto::query()
-            ->where('activo', true)
-            ->where('existencias', '<=', 5)
-            ->orderBy('existencias')
-            ->orderBy('nombre')
-            ->limit(5)
-            ->get(['id', 'nombre', 'marca', 'url_imagen', 'existencias']);
-        $topProducts = DetallePedido::query()
-            ->select([
-                'producto_id',
-                DB::raw('SUM(cantidad) as units_sold'),
-                DB::raw('SUM(cantidad * precio_unitario) as revenue'),
-            ])
-            ->whereHas('order', static fn (Builder $query): Builder => $query->where('estado', '!=', 'Cancelado'))
-            ->with('product:id,nombre,marca,url_imagen')
-            ->groupBy('producto_id')
-            ->orderByDesc('units_sold')
+        $productosSinExistenciasListado = $this->servicioInventario
+            ->productosParaConsulta($alcanceInventario, ['estado' => 'sin_existencias'], true)
+            ->orderBy('existencias_alcance')
+            ->orderBy('productos.nombre')
             ->limit(5)
             ->get();
+        $topProducts = $this->consultaVentas->obtenerProductosMasVendidos($user);
 
-        $campaigns = Campania::query()
+        $campaigns = $consultaCampanias()
             ->where('activo', true)
             ->orderByDesc('vistas')
             ->limit(4)
             ->get(['id', 'nombre', 'titulo', 'vistas', 'clics', 'finaliza_en']);
         $campaignMaxViews = max(1, (int) $campaigns->max('vistas'));
 
-        $recentActivity = RegistroAuditoria::query()
+        $recentActivity = $consultaAuditoria()
             ->with('user:id,nombre')
             ->latest('creado_en')
             ->limit(6)
             ->get(['id', 'usuario_id', 'accion', 'entidad', 'entidad_id', 'creado_en']);
 
-        $pendingOrders = Pedido::query()
+        $pendingOrders = $consultaPedidos()
             ->whereIn('estado', ['Pendiente', 'En proceso'])
             ->count();
-        $expiringCampaigns = Campania::query()
+        $expiringCampaigns = $consultaCampanias()
             ->where('activo', true)
             ->whereBetween('finaliza_en', [$now, $now->copy()->addDays(7)])
             ->count();
-        $reminders = $this->reminders($lowStock, $pendingOrders, $expiringCampaigns);
+        $reminders = $this->reminders($productosSinExistencias, $pendingOrders, $expiringCampaigns);
 
         return [
             'role' => $user->rol,
@@ -163,7 +180,7 @@ final class DashboardController extends PanelDashboardController
             'ordersTrendPercent' => $this->trendPercent($ordersThisMonth, $ordersPreviousMonth),
             'activeProducts' => $activeProducts,
             'productsAddedThisMonth' => $productsAddedThisMonth,
-            'lowStock' => $lowStock,
+            'lowStock' => $productosSinExistencias,
             'newCustomers' => $newCustomers,
             'newCustomersTrendPercent' => $this->trendPercent($newCustomers, $newCustomersPreviousMonth),
             'monthlySales' => $monthlySales,
@@ -173,7 +190,7 @@ final class DashboardController extends PanelDashboardController
             'orderStatusTotal' => $orderStatusTotal,
             'orderStatusChart' => $orderStatusChart,
             'recentOrders' => $recentOrders,
-            'lowStockProducts' => $lowStockProducts,
+            'lowStockProducts' => $productosSinExistenciasListado,
             'topProducts' => $topProducts,
             'campaigns' => $campaigns,
             'campaignMaxViews' => $campaignMaxViews,
@@ -185,15 +202,9 @@ final class DashboardController extends PanelDashboardController
     /**
      * @return array<int, array{key:string, label:string, value:float}>
      */
-    private function monthlySales(Carbon $now): array
+    private function monthlySales(Collection $totales, Carbon $now): array
     {
         $start = $now->copy()->startOfMonth()->subMonths(11);
-        $totals = Pedido::query()
-            ->where('estado', '!=', 'Cancelado')
-            ->whereBetween('creado_en', [$start, $now->copy()->endOfMonth()])
-            ->get(['total', 'creado_en'])
-            ->groupBy(static fn (Pedido $order): string => $order->creado_en?->format('Y-m') ?? '')
-            ->map(static fn (Collection $orders): float => (float) $orders->sum('total'));
 
         $labels = [
             1 => 'Ene', 2 => 'Feb', 3 => 'Mar', 4 => 'Abr', 5 => 'May', 6 => 'Jun',
@@ -207,7 +218,7 @@ final class DashboardController extends PanelDashboardController
             $months[] = [
                 'key' => $key,
                 'label' => $labels[(int) $cursor->format('n')],
-                'value' => (float) ($totals[$key] ?? 0),
+                'value' => (float) ($totales[$key] ?? 0),
             ];
             $cursor->addMonth();
         }

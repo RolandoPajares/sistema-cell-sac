@@ -1,2 +1,2 @@
-@include('gestion.componentes.modulo-pendiente-eliminar', ['module' => $module])
+<div class="gestion-pendiente-modal-shell"><header class="gestion-pendiente-modal-header"><div><h2 id="soporte-reclamos-eliminar-title">Cerrar ticket</h2><p>El caso se conservará para trazabilidad.</p></div><button type="button" data-pending-close aria-label="Cerrar">×</button></header><form method="POST" action="" data-pending-backend-form>@csrf @method('PATCH')<div class="gestion-pendiente-modal-body"><p>¿Confirmas cerrar este caso?</p></div><footer class="gestion-pendiente-modal-footer"><button type="button" data-pending-close>Cancelar</button><button type="submit">Cerrar caso</button></footer></form></div>
 

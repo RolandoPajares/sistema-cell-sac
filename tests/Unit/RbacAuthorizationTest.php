@@ -9,6 +9,10 @@ use App\Policies\ProductoPolicy;
 use App\Soporte\PermisosRoles;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Tests\TestCase;
+
+uses(TestCase::class);
 
 /**
  * @param  array<string, mixed>  $attributes
@@ -65,18 +69,17 @@ it('keeps navigation visibility aligned with role modules', function (): void {
         ->and(PermisosRoles::canView($retailCustomer, 'usuarios'))->toBeFalse();
 });
 
-it('allows middleware only when the authenticated role is declared', function (): void {
-    $middleware = new AsegurarRol;
+it('denies middleware when only an unassigned legacy role is declared', function (): void {
+    $middleware = app(AsegurarRol::class);
     $request = Request::create('/gestion', 'GET');
     $request->setUserResolver(fn (): User => unsavedUser(['rol' => 'administrador']));
     $next = fn (Request $request): Response => new Response('ok');
 
-    $response = $middleware->handle($request, $next, 'administrador');
-
-    expect($response->getStatusCode())->toBe(200);
+    expect(fn () => $middleware->handle($request, $next, 'administrador'))
+        ->toThrow(HttpException::class);
 });
 
-it('allows product writes only to administrators', function (string $role, bool $allowed): void {
+it('denies product writes when roles have no RBAC assignments', function (string $role, bool $allowed): void {
     $user = unsavedUser(['rol' => $role]);
     $product = unsavedProduct();
     $policy = new ProductoPolicy;
@@ -84,7 +87,7 @@ it('allows product writes only to administrators', function (string $role, bool 
     expect($policy->update($user, $product))->toBe($allowed)
         ->and($policy->delete($user, $product))->toBe($allowed);
 })->with([
-    'administrator' => ['administrador', true],
+    'administrator' => ['administrador', false],
     'marketing' => ['marketing', false],
     'purchasing' => ['compras_logistica', false],
     'wholesale sales' => ['ventas_mayoristas', false],
@@ -93,7 +96,7 @@ it('allows product writes only to administrators', function (string $role, bool 
     'retail customer' => ['cliente_minorista', false],
 ]);
 
-it('limits order visibility to owners and their authorized sales role', function (): void {
+it('denies order visibility when legacy roles have no RBAC assignments', function (): void {
     $owner = unsavedUser(['id' => 1, 'rol' => 'cliente_minorista']);
     $retailSales = unsavedUser(['id' => 2, 'rol' => 'ventas_minoristas']);
     $wholesaleCustomer = unsavedUser(['id' => 3, 'rol' => 'cliente_mayorista']);
@@ -102,13 +105,13 @@ it('limits order visibility to owners and their authorized sales role', function
     $order->setRelation('user', $owner);
     $policy = new PedidoPolicy;
 
-    expect($policy->view($owner, $order))->toBeTrue()
-        ->and($policy->view($retailSales, $order))->toBeTrue()
+    expect($policy->view($owner, $order))->toBeFalse()
+        ->and($policy->view($retailSales, $order))->toBeFalse()
         ->and($policy->view($wholesaleSales, $order))->toBeFalse()
         ->and($policy->view($wholesaleCustomer, $order))->toBeFalse();
 });
 
-it('limits order status updates to administrators and matching sales roles', function (): void {
+it('denies order status updates when legacy roles have no RBAC assignments', function (): void {
     $retailCustomer = unsavedUser(['id' => 1, 'rol' => 'cliente_minorista']);
     $administrator = unsavedUser(['id' => 2, 'rol' => 'administrador']);
     $retailSales = unsavedUser(['id' => 3, 'rol' => 'ventas_minoristas']);
@@ -117,8 +120,8 @@ it('limits order status updates to administrators and matching sales roles', fun
     $order->setRelation('user', $retailCustomer);
     $policy = new PedidoPolicy;
 
-    expect($policy->updateStatus($administrator, $order))->toBeTrue()
-        ->and($policy->updateStatus($retailSales, $order))->toBeTrue()
+    expect($policy->updateStatus($administrator, $order))->toBeFalse()
+        ->and($policy->updateStatus($retailSales, $order))->toBeFalse()
         ->and($policy->updateStatus($marketing, $order))->toBeFalse()
         ->and($policy->updateStatus($retailCustomer, $order))->toBeFalse();
 });

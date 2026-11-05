@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Servicios\ServicioAutorizacion;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -9,7 +10,8 @@ class ActualizarEstadoPedidoRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return in_array($this->user()?->rol, ['administrador', 'ventas_minoristas', 'ventas_mayoristas'], true);
+        return $this->user() !== null
+            && app(ServicioAutorizacion::class)->allows($this->user(), 'gestion.pedidos.actualizar');
     }
 
     public function rules(): array

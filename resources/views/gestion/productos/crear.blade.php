@@ -17,8 +17,8 @@
                     </label>
 
                     <label class="productos-create-field productos-create-field--sku">
-                        <span>SKU <b>*</b></span>
-                        <input class="productos-create-input" name="etiqueta" value="{{ old('etiqueta') }}" placeholder="Ej. IP15P-128-BLK" maxlength="80" required>
+                        <span>Etiqueta del producto</span>
+                        <input class="productos-create-input" name="etiqueta" value="{{ old('etiqueta') }}" maxlength="80">
                     </label>
 
                     <label class="productos-create-field">
@@ -55,8 +55,8 @@
                     </label>
 
                     <label class="productos-create-field productos-create-field--compact">
-                        <span>Stock inicial <b>*</b></span>
-                        <input class="productos-create-input" name="existencias" type="number" min="0" step="1" value="{{ old('existencias', 0) }}" required>
+                        <span>Existencias iniciales (se registran en Inventario)</span>
+                        <input class="productos-create-input" name="existencias" type="number" min="0" step="1" value="0" readonly aria-label="Las existencias iniciales se registran desde el módulo Inventario">
                     </label>
 
                     <label class="productos-create-field productos-create-field--status">
@@ -118,21 +118,6 @@
         </aside>
     </div>
 
-    <section class="productos-excel-callout">
-        <div class="productos-excel-icon"><i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i></div>
-        <div class="productos-excel-copy">
-            <h3>Carga masiva por Excel</h3>
-            <p>Importa 1000 o más productos con una plantilla estandarizada.</p>
-            <ul>
-                <li><i class="bi bi-check2" aria-hidden="true"></i> Registra múltiples productos de forma rápida</li>
-                <li><i class="bi bi-check2" aria-hidden="true"></i> Valida los datos antes de importar</li>
-            </ul>
-        </div>
-        <div class="productos-excel-actions">
-            <a class="productos-excel-template" href="{{ route('management.products.export', ['format' => 'excel']) }}"><i class="bi bi-download" aria-hidden="true"></i><span><b>Descargar plantilla Excel</b><small>Formato .xls compatible</small></span></a>
-            <button class="productos-excel-upload" type="button" disabled title="La importación masiva estará disponible próximamente"><i class="bi bi-upload" aria-hidden="true"></i><span><b>Subir archivo Excel</b><small>Disponible próximamente</small></span></button>
-        </div>
-    </section>
 
     <footer class="productos-create-footer">
         <button class="productos-create-cancel" type="button" data-close-product-create>Cancelar</button>

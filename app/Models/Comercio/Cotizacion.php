@@ -12,7 +12,7 @@ class Cotizacion extends Model
 {
     protected $table = 'cotizaciones';
 
-    protected $fillable = ['cliente_id', 'creado_por', 'total', 'estado', 'notas', 'activo', 'creado_en'];
+    protected $fillable = ['cliente_id', 'creado_por_usuario_id', 'total', 'estado', 'notas', 'activo', 'creado_en', 'empresa_id', 'sede_id'];
 
     public $timestamps = false;
 
@@ -28,7 +28,7 @@ class Cotizacion extends Model
 
     public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'creado_por');
+        return $this->belongsTo(User::class, 'creado_por_usuario_id');
     }
 
     public function details(): HasMany

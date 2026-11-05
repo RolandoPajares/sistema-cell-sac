@@ -173,8 +173,32 @@ if (salesPage && salesPage.dataset.salesInitialized !== 'true') {
     };
 
     salesPage.querySelectorAll('[data-sales-form]').forEach(initializeForm);
+    salesPage.querySelectorAll('[data-sales-cancel]').forEach((form) => {
+        form.addEventListener('submit', (event) => {
+            const reason = window.prompt('Indica el motivo de la anulación (mínimo 5 caracteres):');
+            if (reason === null || reason.trim().length < 5 || reason.trim().length > 500) {
+                event.preventDefault();
+                if (reason !== null) window.alert('El motivo debe tener entre 5 y 500 caracteres.');
+                return;
+            }
+            form.querySelector('[name="motivo"]').value = reason.trim();
+        });
+    });
+    salesPage.querySelectorAll('[data-sales-confirm]').forEach((form) => {
+        form.addEventListener('submit', (event) => {
+            if (!window.confirm('La confirmacion descontara existencias del almacen asociado. ¿Deseas continuar?')) {
+                event.preventDefault();
+            }
+        });
+    });
     salesPage.querySelectorAll('[data-open-sales-create]').forEach((button) => {
         button.addEventListener('click', () => openDialog(salesPage.querySelector('#nueva-venta')));
+    });
+    salesPage.querySelectorAll('[data-open-sales-confirm]').forEach((button) => {
+        button.addEventListener('click', () => openDialog(document.getElementById(button.dataset.openSalesConfirm)));
+    });
+    salesPage.querySelectorAll('[data-sales-details]').forEach((button) => {
+        button.addEventListener('click', () => openDialog(document.getElementById(`detalle-venta-${button.dataset.salesDetails}`)));
     });
     salesPage.querySelectorAll('[data-close-sales-dialog]').forEach((button) => {
         button.addEventListener('click', () => button.closest('dialog')?.close());

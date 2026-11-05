@@ -2,21 +2,31 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
+use App\Servicios\ServicioAutorizacion;
+use App\Servicios\ServicioInventario;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class GuardarProductoRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->isRole('administrador') ?? false;
+        return $this->user() !== null && app(ServicioAutorizacion::class)->allowsRoute($this);
     }
 
     public function rules(): array
     {
+        $usuarioActual = $this->user();
+        abort_unless($usuarioActual instanceof User, 403);
+        $autorizacion = app(ServicioAutorizacion::class);
+        $permiso = $autorizacion->permissionForRoute($this) ?? 'gestion.productos.consultar';
+        $alcance = app(ServicioInventario::class)->alcanceConsulta($usuarioActual, $permiso);
+
         return [
             'marca' => ['required', 'string', 'max:80'],
             'nombre' => ['required', 'string', 'max:160'],
-            'categoria_id' => ['required', 'integer', 'exists:categorias,id'],
+            'categoria_id' => ['required', 'integer', Rule::exists('categorias', 'id')->where('empresa_id', $alcance['empresa_id'])],
             'precio' => ['required', 'numeric', 'min:0'],
             'precio_original' => ['nullable', 'numeric', 'min:0'],
             'precio_oferta' => ['nullable', 'numeric', 'min:0', 'lte:precio'],
@@ -24,8 +34,7 @@ class GuardarProductoRequest extends FormRequest
             'imagen' => ['nullable', 'image', 'max:5120'],
             'etiqueta' => ['nullable', 'string', 'max:80'],
             'descripcion' => ['nullable', 'string'],
-            'existencias' => ['sometimes', 'integer', 'min:0'],
-            'proveedor_id' => ['nullable', 'integer', 'exists:proveedores,id'],
+            'proveedor_id' => ['nullable', 'integer', Rule::exists('proveedores', 'id')->where('empresa_id', $alcance['empresa_id'])],
             'activo' => ['sometimes', 'boolean'],
         ];
     }

@@ -1,12 +1,13 @@
 <form class="ventas-modal-form" method="post" action="{{ route('management.sales.store') }}" data-sales-form>
     @csrf
+    <input type="hidden" name="venta_token" value="{{ session('venta_token') }}">
 
     <div class="ventas-modal-steps" aria-label="Pasos del registro">
         <span class="is-current"><b>1</b> Información</span>
         <i aria-hidden="true"></i>
         <span><b>2</b> Productos</span>
         <i aria-hidden="true"></i>
-        <span><b>3</b> Pago y comprobante</span>
+        <span><b>3</b> Confirmación</span>
     </div>
 
     <section class="ventas-modal-section">
@@ -17,15 +18,14 @@
                 <select name="cliente_id" required data-sales-customer>
                     <option value="">Buscar cliente...</option>
                     @foreach ($customers as $customer)
-                        <option value="{{ $customer->id }}" @selected((string) old('cliente_id') === (string) $customer->id)>{{ $customer->nombre }} · {{ $customer->correo }}</option>
+                        <option value="{{ $customer->id }}" @selected((string) old('cliente_id') === (string) $customer->id)>{{ $customer->razon_social ?: $customer->nombre_contacto }} · {{ $customer->correo }}</option>
                     @endforeach
                 </select>
             </label>
             <label class="ventas-modal-field">
                 <span>Tipo de venta <b>*</b></span>
                 <select name="tipo_venta" required>
-                    <option value="tienda_online" @selected(old('tipo_venta', 'tienda_online') === 'tienda_online')>Tienda online</option>
-                    <option value="fisica" @selected(old('tipo_venta') === 'fisica')>Venta física</option>
+                    <option value="fisica" @selected(old('tipo_venta', 'fisica') === 'fisica')>Venta física</option>
                 </select>
             </label>
             <label class="ventas-modal-field">

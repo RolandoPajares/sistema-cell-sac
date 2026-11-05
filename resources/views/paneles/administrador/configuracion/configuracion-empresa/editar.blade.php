@@ -5,7 +5,7 @@
         </header>
         <div class="admin-settings-identity-grid">
             <div class="admin-settings-logo-preview"><img src="{{ asset('assets/cell-legacy/img/marca/logoadmin.png') }}" alt="Logo de TECHNOLOGY CELL"><span>Vista previa del logotipo</span></div>
-            <div class="admin-settings-upload"><input type="file" accept="image/png,image/jpeg,image/svg+xml" data-settings-file><i class="bi bi-cloud-arrow-up" aria-hidden="true"></i><strong>Subir nuevo logo</strong><span>PNG, JPG o SVG · máximo 2 MB</span><button class="admin-settings-inline-button" type="button" data-settings-file-trigger>Seleccionar archivo</button><small data-settings-file-name>Sin archivo seleccionado</small></div>
+            <div class="admin-settings-upload"><input type="file" accept="image/png,image/jpeg,image/svg+xml" aria-label="Archivo del logotipo de la empresa" data-settings-file><i class="bi bi-cloud-arrow-up" aria-hidden="true"></i><strong>Subir nuevo logo</strong><span>PNG, JPG o SVG · máximo 2 MB</span><button class="admin-settings-inline-button" type="button" data-settings-file-trigger>Seleccionar archivo</button><small data-settings-file-name>Sin archivo seleccionado</small></div>
         </div>
     </section>
 

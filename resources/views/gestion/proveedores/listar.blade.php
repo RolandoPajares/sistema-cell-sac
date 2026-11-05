@@ -85,8 +85,7 @@
             </label>
             <button class="proveedores-toolbar-button" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i><span>Filtros</span></button>
             <button class="proveedores-primary-button" type="button" data-open-supplier-create><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo proveedor</button>
-            <button class="proveedores-toolbar-button" type="button" disabled title="Importación disponible próximamente"><i class="bi bi-upload" aria-hidden="true"></i> Importar</button>
-            <a class="proveedores-toolbar-button" href="{{ route('management.suppliers') }}"><i class="bi bi-download" aria-hidden="true"></i> Exportar</a>
+            <details class="proveedores-export-menu"><summary class="proveedores-toolbar-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar</summary><div class="proveedores-export-options"><a href="{{ route('management.suppliers.export', ['format' => 'excel'] + request()->query()) }}">Excel (.xlsx)</a><a href="{{ route('management.suppliers.export', ['format' => 'pdf'] + request()->query()) }}">PDF (.pdf)</a><a href="{{ route('management.suppliers.export', ['format' => 'csv'] + request()->query()) }}">CSV (.csv)</a></div></details>
             @if (($filters['buscar'] ?? null) || ($filters['categoria'] ?? null) || ($filters['estado'] ?? null) || ($filters['ciudad'] ?? null))
                 <a class="proveedores-clear-button" href="{{ route('management.suppliers') }}">Limpiar filtros</a>
             @endif
@@ -192,7 +191,7 @@
                         <div class="proveedores-detail-section" id="proveedores-info">
                             <h3>Información general</h3>
                             <dl class="proveedores-info-list">
-                                <div><dt><i class="bi bi-person" aria-hidden="true"></i> Contacto</dt><dd>Área de compras</dd></div>
+                                <div><dt><i class="bi bi-person" aria-hidden="true"></i> Contacto</dt><dd>No registrado</dd></div>
                                 <div><dt><i class="bi bi-envelope" aria-hidden="true"></i> Correo</dt><dd>{{ $selectedSupplier->correo }}</dd></div>
                                 <div><dt><i class="bi bi-telephone" aria-hidden="true"></i> Teléfono</dt><dd>{{ $selectedSupplier->telefono ?: 'No registrado' }}</dd></div>
                                 <div><dt><i class="bi bi-geo-alt" aria-hidden="true"></i> Ciudad</dt><dd>{{ $selectedSupplier->ciudad ?: 'No registrada' }}</dd></div>
@@ -219,10 +218,10 @@
 
         <div class="proveedores-bottom-grid">
             <section class="proveedores-secondary-card">
-                <header class="proveedores-card-header"><div><h2><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i> Alertas de abastecimiento <span class="proveedores-alert-count">{{ $lowStockProducts->count() }}</span></h2><p>Productos con existencias por debajo del mínimo.</p></div><a href="{{ route('management.inventory', ['estado' => 'critico']) }}">Ver todas</a></header>
+                <header class="proveedores-card-header"><div><h2><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i> Productos sin existencias <span class="proveedores-alert-count">{{ $lowStockProducts->count() }}</span></h2><p>Productos con saldo físico igual a cero.</p></div><a href="{{ route('management.inventory', ['estado' => 'sin_existencias']) }}">Ver todas</a></header>
                 <div class="proveedores-alert-list">
                     @forelse ($lowStockProducts as $product)
-                        <div class="proveedores-alert-row"><span class="proveedores-alert-icon"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i></span><span><strong>Stock bajo en {{ $product->nombre }}</strong><small>{{ $product->existencias }} unidades · {{ $product->suppliers->first()?->nombre ?: 'Sin proveedor' }}</small></span><time>{{ $product->existencias <= 5 ? 'Crítico' : 'Bajo' }}</time><a href="{{ route('management.inventory', ['buscar' => $product->nombre]) }}">Revisar</a></div>
+                        <div class="proveedores-alert-row"><span class="proveedores-alert-icon"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i></span><span><strong>Sin existencias: {{ $product->nombre }}</strong><small>{{ number_format((float) $product->existencias_alcance) }} unidades · {{ $product->suppliers->first()?->nombre ?: 'Sin proveedor' }}</small></span><time>Reponer</time><a href="{{ route('management.inventory', ['buscar' => $product->nombre]) }}">Revisar</a></div>
                     @empty
                         <div class="proveedores-secondary-empty"><i class="bi bi-shield-check" aria-hidden="true"></i><strong>Sin alertas de abastecimiento</strong><span>El inventario de proveedores está al día.</span></div>
                     @endforelse
@@ -242,17 +241,17 @@
         </div>
     </section>
 
-    <dialog class="proveedores-dialog" id="nuevo-proveedor">
+    <dialog class="proveedores-dialog" id="nuevo-proveedor" aria-labelledby="proveedor-crear-titulo">
         <div class="proveedores-dialog-card">
-            <header class="proveedores-dialog-header"><div><span>Compras y logística</span><h2>Registrar proveedor</h2><p>Completa los datos del proveedor para vincularlo a tus compras.</p></div><button type="button" class="proveedores-dialog-close" data-close-supplier-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
+            <header class="proveedores-dialog-header"><div><span>Compras y logística</span><h2 id="proveedor-crear-titulo">Registrar proveedor</h2><p>Completa los datos del proveedor para vincularlo a tus compras.</p></div><button type="button" class="proveedores-dialog-close" data-close-supplier-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
             <div class="proveedores-dialog-body">@include('gestion.proveedores.crear')</div>
         </div>
     </dialog>
 
     @foreach ($suppliers as $supplier)
-        <dialog class="proveedores-dialog" id="editar-proveedor-{{ $supplier->id }}">
+        <dialog class="proveedores-dialog" id="editar-proveedor-{{ $supplier->id }}" aria-labelledby="proveedor-editar-titulo-{{ $supplier->id }}">
             <div class="proveedores-dialog-card">
-                <header class="proveedores-dialog-header"><div><span>Compras y logística</span><h2>Editar proveedor</h2><p>Actualiza la información de {{ $supplier->nombre }}.</p></div><button type="button" class="proveedores-dialog-close" data-close-supplier-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
+                <header class="proveedores-dialog-header"><div><span>Compras y logística</span><h2 id="proveedor-editar-titulo-{{ $supplier->id }}">Editar proveedor</h2><p>Actualiza la información de {{ $supplier->nombre }}.</p></div><button type="button" class="proveedores-dialog-close" data-close-supplier-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
                 <div class="proveedores-dialog-body">@include('gestion.proveedores.editar', ['supplier' => $supplier])</div>
             </div>
         </dialog>
@@ -263,17 +262,6 @@
     <script>
         (() => {
             const page = document.querySelector('[data-proveedores-page]');
-            if (!page) {
-                return;
-            }
-
-            const openDialog = (dialog) => {
-                if (dialog && !dialog.open) {
-                    dialog.showModal();
-                }
-            };
-
-            page.querySelector('[data-open-supplier-create]')?.addEventListener('click', () => openDialog(document.querySelector('#nuevo-proveedor')));
             page.querySelectorAll('[data-open-supplier-edit]').forEach((button) => {
                 button.addEventListener('click', () => openDialog(document.querySelector(`#editar-proveedor-${button.dataset.openSupplierEdit}`)));
             });

@@ -17,7 +17,7 @@ class RecursoProducto extends JsonResource
             'name' => $this->nombre,
             'description' => $this->descripcion,
             'price' => (float) $this->effective_price,
-            'stock' => (int) $this->existencias,
+            'stock' => (int) ($this->existencias_disponibles ?? 0),
             'image_path' => $this->url_imagen,
             'category' => $this->whenLoaded('category', fn (): array => [
                 'id' => (int) $this->category->id,

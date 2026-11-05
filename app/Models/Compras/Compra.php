@@ -11,7 +11,7 @@ class Compra extends Model
 {
     protected $table = 'compras';
 
-    protected $fillable = ['proveedor_id', 'creado_por', 'total', 'estado', 'fecha_compra', 'activo', 'creado_en'];
+    protected $fillable = ['proveedor_id', 'creado_por_usuario_id', 'total', 'estado', 'fecha_compra', 'activo', 'creado_en', 'empresa_id', 'sede_id', 'almacen_id'];
 
     public $timestamps = false;
 
@@ -27,7 +27,7 @@ class Compra extends Model
 
     public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'creado_por');
+        return $this->belongsTo(User::class, 'creado_por_usuario_id');
     }
 
     public function details(): HasMany

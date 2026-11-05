@@ -6,7 +6,7 @@
 @section('content')
 @php($module = require resource_path('views/gestion/configuracion-empresa/datos.php'))
 
-@if (auth()->user()?->rol === 'administrador')
+@if (auth()->user()?->isRole('administrador'))
     @include('paneles.administrador.configuracion.configuracion-empresa.listar', ['module' => $module])
 @else
     @include('gestion.componentes.modulo-pendiente', ['module' => $module])

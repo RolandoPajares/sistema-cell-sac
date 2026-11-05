@@ -1,6 +1,7 @@
 <form method="post" class="form-card compact-form" action="{{ route('management.purchases.store') }}">
     @csrf
-    <h2>Registrar recepción</h2>
+    <input type="hidden" name="compra_token" value="{{ session('compra_token') }}">
+    <h2>Registrar compra pendiente</h2>
 
     <label>
         Proveedor
@@ -31,6 +32,19 @@
     </label>
 
     <label>
+        Variante (si corresponde)
+        <select name="items[0][variante_id]">
+            <option value="">Producto sin variantes</option>
+            @foreach ($products as $product)
+                @foreach ($product->variants->where('estado', 'activo') as $variant)
+                    <option value="{{ $variant->id }}">{{ $product->nombre }} · {{ $variant->nombre_color }}@if ($variant->codigo_sku) · SKU {{ $variant->codigo_sku }}@endif</option>
+                @endforeach
+            @endforeach
+        </select>
+        <small>Si el producto tiene variantes, selecciona una que pertenezca al producto indicado.</small>
+    </label>
+
+    <label>
         Cantidad
         <input type="number" name="items[0][cantidad]" min="1" required>
     </label>
@@ -46,5 +60,5 @@
         >
     </label>
 
-    <button class="btn btn-primary">Registrar compra y entrada</button>
+    <button class="btn btn-primary">Registrar compra</button>
 </form>

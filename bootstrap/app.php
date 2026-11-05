@@ -1,6 +1,10 @@
 <?php
 
 use App\Http\Middleware\AsegurarRol;
+use App\Http\Middleware\EstablecerContextoAuditoria;
+use App\Http\Middleware\RegistrarSesionUsuario;
+use App\Http\Middleware\VerificarCuentaActiva;
+use App\Http\Middleware\VerificarPermiso;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,7 +18,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->alias(['role' => AsegurarRol::class]);
+        $middleware->web(append: [EstablecerContextoAuditoria::class]);
+
+        $middleware->alias([
+            'role' => AsegurarRol::class,
+            'permiso' => VerificarPermiso::class,
+            'sesion.usuario' => RegistrarSesionUsuario::class,
+            'cuenta.activa' => VerificarCuentaActiva::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

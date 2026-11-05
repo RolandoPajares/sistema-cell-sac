@@ -70,8 +70,8 @@
                 <p>{{ $financeContent['description'] }}</p>
             </div>
             <div class="admin-finance-actions">
-                <button class="admin-finance-button admin-finance-button--secondary" type="button" data-pending-notice="La exportación estará disponible cuando exista una fuente financiera integrada."><i class="bi bi-download" aria-hidden="true"></i> Exportar</button>
-                <button class="admin-finance-button admin-finance-button--secondary" type="button" data-pending-notice="{{ $financeContent['secondary'] }} quedará disponible al conectar el backend financiero."><i class="bi bi-arrow-repeat" aria-hidden="true"></i> {{ $financeContent['secondary'] }}</button>
+                <button class="admin-finance-button admin-finance-button--secondary" type="button" disabled title="Exportación no disponible en esta pantalla"><i class="bi bi-download" aria-hidden="true"></i> Exportar</button>
+                <button class="admin-finance-button admin-finance-button--secondary" type="button" disabled title="Operación no disponible en esta pantalla"><i class="bi bi-arrow-repeat" aria-hidden="true"></i> {{ $financeContent['secondary'] }}</button>
                 @if ($isCrud)
                     <button class="admin-finance-button admin-finance-button--primary" type="button" data-pending-open="crear"><i class="bi bi-plus-lg" aria-hidden="true"></i> {{ $financeContent['action'] }}</button>
                 @endif
@@ -93,17 +93,17 @@
         @endforeach
     </section>
 
-    <form class="admin-finance-filters" data-pending-form>
+    <form class="admin-finance-filters" method="GET" action="{{ url()->current() }}">
         <label class="admin-finance-search">
             <i class="bi bi-search" aria-hidden="true"></i>
             <span class="visually-hidden">Buscar {{ $recordPlural }}</span>
-            <input type="search" placeholder="Buscar {{ $recordSingular }}, cliente o referencia..." data-pending-search>
+            <input type="search" name="buscar" value="{{ $module['filters']['buscar'] ?? request('buscar') }}" placeholder="Buscar {{ $recordSingular }}, cliente o referencia...">
         </label>
-        <label><span class="visually-hidden">Método o tipo</span><select data-pending-filter><option>Método: Todos</option><option>Transferencia</option><option>Tarjeta</option><option>Efectivo</option></select></label>
-        <label><span class="visually-hidden">Estado</span><select data-pending-filter><option>Estado: Todos</option><option>Pendiente</option><option>En revisión</option><option>Confirmado</option></select></label>
-        <label><span class="visually-hidden">Periodo</span><select data-pending-filter><option>Fecha: Este mes</option><option>Últimos 30 días</option><option>Este año</option></select></label>
+        <label><span class="visually-hidden">Tipo</span><select name="tipo"><option value="">Tipo: Todos</option>@foreach (($module['filter_options']['types'] ?? []) as $codigo => $nombre)<option value="{{ $codigo }}" @selected(($module['filters']['tipo'] ?? request('tipo')) === $codigo)>{{ $nombre }}</option>@endforeach</select></label>
+        <label><span class="visually-hidden">Estado</span><select name="estado"><option value="">Estado: Todos</option>@foreach (($module['filter_options']['statuses'] ?? []) as $estado)<option value="{{ $estado }}" @selected(($module['filters']['estado'] ?? request('estado')) === $estado)>{{ $estado }}</option>@endforeach</select></label>
+        <label><span class="visually-hidden">Periodo</span><select name="periodo"><option value="">Fecha: Todo el periodo</option><option value="mes" @selected(($module['filters']['periodo'] ?? request('periodo')) === 'mes')>Este mes</option><option value="ultimos_30_dias" @selected(($module['filters']['periodo'] ?? request('periodo')) === 'ultimos_30_dias')>Últimos 30 días</option><option value="anio" @selected(($module['filters']['periodo'] ?? request('periodo')) === 'anio')>Este año</option></select></label>
         <button class="admin-finance-filter-button" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i> Filtrar</button>
-        <button class="admin-finance-clear-button" type="button" data-pending-notice="Los filtros se limpiarán cuando el módulo tenga una fuente financiera conectada.">Limpiar filtros</button>
+        <a class="admin-finance-clear-button" href="{{ url()->current() }}">Limpiar filtros</a>
     </form>
     <span class="admin-finance-filter-status" data-finance-filter-status role="status" aria-live="polite"></span>
 
@@ -113,10 +113,10 @@
                 <span class="admin-finance-card-icon"><i class="bi {{ $module['icon'] }}" aria-hidden="true"></i></span>
                 <div>
                     <h2>{{ $financeContent['tableTitle'] }}</h2>
-                    <p>La información aparecerá cuando se conecten los registros financieros.</p>
+                    <p>{{ $module['description'] }}</p>
                 </div>
             </div>
-            <span class="admin-finance-count">Sin registros</span>
+            <span class="admin-finance-count">{{ number_format($module['total_count'] ?? 0) }} registros</span>
         </header>
         <div class="admin-finance-table-wrap">
             <table class="admin-finance-table">
@@ -131,39 +131,45 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @if (! empty($module['records']))
+                        @foreach ($module['records'] as $registro)
+                            <tr>@foreach ($registro['cells'] as $celda)<td>{{ $celda }}</td>@endforeach</tr>
+                        @endforeach
+                    @else
                     <tr>
                         <td colspan="{{ max(1, count($columns) + ($isCrud ? 1 : 0)) }}">
                             <div class="admin-finance-empty">
                                 <span><i class="bi bi-inbox" aria-hidden="true"></i></span>
                                 <strong>No hay {{ $recordPlural }} para mostrar</strong>
-                                <p>Este módulo está listo visualmente; los datos aparecerán cuando exista la integración financiera.</p>
+                                <p>La consulta a MariaDB no encontró registros para mostrar.</p>
                                 @if ($isCrud)
                                     <button class="admin-finance-empty-button" type="button" data-pending-open="crear"><i class="bi bi-plus-lg" aria-hidden="true"></i> {{ $financeContent['action'] }}</button>
                                 @endif
                             </div>
                         </td>
                     </tr>
+                    @endif
                 </tbody>
             </table>
         </div>
         <footer class="admin-finance-table-footer">
-            <span>Sin resultados para mostrar</span>
-            <nav class="admin-finance-pagination" aria-label="Paginación deshabilitada">
-                <button type="button" disabled aria-label="Página anterior"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
-                <button type="button" class="is-active" disabled>1</button>
-                <button type="button" disabled aria-label="Página siguiente"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+            <span>Mostrando {{ number_format(($module['pagination'] ?? null)?->firstItem() ?? 0) }}–{{ number_format(($module['pagination'] ?? null)?->lastItem() ?? 0) }} de {{ number_format($module['total_count'] ?? 0) }}</span>
+            <nav class="admin-finance-pagination" aria-label="Paginación">
+                @if (($module['pagination'] ?? null)?->previousPageUrl())<a href="{{ $module['pagination']->previousPageUrl() }}" aria-label="Página anterior"><i class="bi bi-chevron-left" aria-hidden="true"></i></a>@else<button type="button" disabled aria-label="Página anterior"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>@endif
+                <button type="button" class="is-active" disabled>{{ ($module['pagination'] ?? null)?->currentPage() ?? 1 }}</button>
+                @if (($module['pagination'] ?? null)?->nextPageUrl())<a href="{{ $module['pagination']->nextPageUrl() }}" aria-label="Página siguiente"><i class="bi bi-chevron-right" aria-hidden="true"></i></a>@else<button type="button" disabled aria-label="Página siguiente"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>@endif
             </nav>
         </footer>
     </section>
 
     <section class="admin-finance-summary-grid" aria-label="Resumen de {{ $financeContent['title'] }}">
-        @foreach ($financeContent['summary'] as $summary)
+        @foreach (($module['summary'] ?? $financeContent['summary']) as $summary)
             <article class="admin-finance-summary-card">
                 <header>
                     <div><span class="admin-finance-summary-icon admin-finance-summary-icon--{{ $summary['tone'] }}"><i class="bi {{ $summary['icon'] }}" aria-hidden="true"></i></span><h2>{{ $summary['title'] }}</h2></div>
-                    <button type="button" data-pending-notice="Este resumen se habilitará al integrar datos financieros."><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+                    <button type="button" aria-label="Ver resumen: {{ $summary['title'] }}" disabled title="Solo consulta de resumen"><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
                 </header>
-                <div class="admin-finance-summary-empty"><i class="bi bi-bar-chart-line" aria-hidden="true"></i><strong>{{ $summary['text'] }}</strong><span>Sin datos integrados</span></div>
+                <div class="admin-finance-summary-empty"><i class="bi bi-bar-chart-line" aria-hidden="true"></i><strong>{{ $summary['text'] }}</strong><span>{{ $module['summary'] ?? false ? 'Datos consultados en MariaDB' : 'Sin datos integrados' }}</span></div>
             </article>
         @endforeach
     </section>

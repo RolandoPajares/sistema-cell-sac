@@ -3,14 +3,15 @@
 namespace App\Models\Compras;
 
 use App\Models\Catalogo\Producto;
+use App\Models\Catalogo\VarianteProducto;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DetalleCompra extends Model
 {
-    protected $table = 'compra_detalles';
+    protected $table = 'detalles_compras';
 
-    protected $fillable = ['compra_id', 'producto_id', 'cantidad', 'costo_unitario'];
+    protected $fillable = ['compra_id', 'producto_id', 'variante_id', 'cantidad', 'costo_unitario'];
 
     public $timestamps = false;
 
@@ -27,5 +28,10 @@ class DetalleCompra extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Producto::class, 'producto_id');
+    }
+
+    public function variante(): BelongsTo
+    {
+        return $this->belongsTo(VarianteProducto::class, 'variante_id');
     }
 }

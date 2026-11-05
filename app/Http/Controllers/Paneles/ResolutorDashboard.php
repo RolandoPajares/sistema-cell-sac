@@ -10,6 +10,7 @@ use App\Http\Controllers\Paneles\Marketing\DashboardController as MarketingDashb
 use App\Http\Controllers\Paneles\VentasMayoristas\DashboardController as VentasMayoristasDashboardController;
 use App\Http\Controllers\Paneles\VentasMinoristas\DashboardController as VentasMinoristasDashboardController;
 use App\Models\User;
+use App\Servicios\ServicioAutorizacion;
 
 final class ResolutorDashboard
 {
@@ -21,11 +22,12 @@ final class ResolutorDashboard
         private readonly VentasMinoristasDashboardController $ventasMinoristas,
         private readonly ClienteMayoristaDashboardController $clienteMayorista,
         private readonly ClienteMinoristaDashboardController $clienteMinorista,
+        private readonly ServicioAutorizacion $autorizacion,
     ) {}
 
     public function for(User $user): PanelDashboardController
     {
-        return match ($user->rol) {
+        foreach ([
             'administrador' => $this->administrador,
             'marketing' => $this->marketing,
             'compras_logistica' => $this->comprasLogistica,
@@ -33,7 +35,12 @@ final class ResolutorDashboard
             'ventas_minoristas' => $this->ventasMinoristas,
             'cliente_mayorista' => $this->clienteMayorista,
             'cliente_minorista' => $this->clienteMinorista,
-            default => abort(403),
-        };
+        ] as $code => $dashboard) {
+            if ($this->autorizacion->hasRole($user, $code)) {
+                return $dashboard;
+            }
+        }
+
+        abort(403);
     }
 }

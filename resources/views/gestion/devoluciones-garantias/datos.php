@@ -35,7 +35,7 @@ return [
         'search_label' => 'Buscar solicitudes',
         'search_placeholder' => 'Buscar caso, pedido, cliente o producto...',
         'actions' => [
-            ['label' => 'Exportar', 'icon' => 'bi-download', 'route' => 'management.returns.export'],
+            ['label' => 'Exportar', 'icon' => 'bi-download', 'route' => 'management.returns.export', 'formats' => ['excel', 'pdf', 'csv']],
             ['label' => 'Ver políticas', 'icon' => 'bi-file-earmark-text', 'notice' => 'Las políticas se mostrarán cuando exista una configuración comercial integrada.'],
             ['label' => 'Nueva solicitud', 'icon' => 'bi-plus-lg', 'modal' => 'crear'],
         ],

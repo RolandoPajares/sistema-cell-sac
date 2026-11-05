@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CaracteristicaProducto extends Model
 {
-    protected $table = 'producto_caracteristicas';
+    protected $table = 'caracteristicas_productos';
 
     protected $fillable = ['producto_id', 'nombre', 'valor'];
 

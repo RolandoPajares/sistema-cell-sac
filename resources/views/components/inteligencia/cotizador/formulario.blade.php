@@ -2,7 +2,7 @@
 
 <form method="post" class="form-card compact-form" action="{{ route('quotations.store') }}">
     @csrf
-    @if(in_array(auth()->user()->rol, ['administrador', 'ventas_mayoristas'], true))
+    @if(auth()->user()->isRole('administrador') || auth()->user()->isRole('ventas_mayoristas'))
         <label>
             Cliente mayorista
             <select name="cliente_id" required>

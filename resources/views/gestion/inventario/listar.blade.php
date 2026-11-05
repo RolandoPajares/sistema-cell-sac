@@ -13,11 +13,9 @@
             return str_starts_with($path, 'http') ? $path : asset(ltrim($path, '/'));
         };
         $statusForStock = static function (int $stock): array {
-            return match (true) {
-                $stock > 10 => ['label' => 'Óptimo', 'class' => 'optimal'],
-                $stock > 0 => ['label' => 'Bajo', 'class' => 'low'],
-                default => ['label' => 'Crítico', 'class' => 'critical'],
-            };
+            return $stock > 0
+                ? ['label' => 'Con existencias', 'class' => 'optimal']
+                : ['label' => 'Sin existencias', 'class' => 'critical'];
         };
         $monthNames = [1 => 'Ene', 2 => 'Feb', 3 => 'Mar', 4 => 'Abr', 5 => 'May', 6 => 'Jun', 7 => 'Jul', 8 => 'Ago', 9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dic'];
         $today = now();
@@ -41,13 +39,13 @@
         <section class="inventario-kpi-grid" aria-label="Resumen del inventario">
             <article class="inventario-kpi inventario-kpi--blue">
                 <span class="inventario-kpi-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span>
-                <div><small>Productos en stock</small><strong>{{ number_format($activeProducts) }}</strong><span>Productos disponibles para la venta</span></div>
-                <b class="inventario-kpi-trend is-positive"><i class="bi bi-arrow-up-right" aria-hidden="true"></i> Stock disponible</b>
+                <div><small>Productos con existencias</small><strong>{{ number_format($activeProducts) }}</strong><span>Productos con saldo físico en el alcance autorizado</span></div>
+                <b class="inventario-kpi-trend is-positive"><i class="bi bi-box-seam" aria-hidden="true"></i> Saldo físico</b>
             </article>
             <article class="inventario-kpi inventario-kpi--orange">
                 <span class="inventario-kpi-icon"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i></span>
-                <div><small>Stock bajo</small><strong>{{ number_format($lowStock) }}</strong><span>Productos por debajo del mínimo</span></div>
-                <b class="inventario-kpi-trend {{ $lowStock > 0 ? 'is-negative' : 'is-positive' }}"><i class="bi bi-{{ $lowStock > 0 ? 'arrow-up-right' : 'check' }}" aria-hidden="true"></i> {{ $lowStock > 0 ? 'Revisar' : 'Correcto' }}</b>
+                <div><small>Productos sin existencias</small><strong>{{ number_format($sinExistencias) }}</strong><span>Productos con saldo físico igual a cero</span></div>
+                <b class="inventario-kpi-trend {{ $sinExistencias > 0 ? 'is-negative' : 'is-positive' }}"><i class="bi bi-{{ $sinExistencias > 0 ? 'exclamation-triangle' : 'check' }}" aria-hidden="true"></i> {{ $sinExistencias > 0 ? 'Revisar' : 'Sin faltantes' }}</b>
             </article>
             <article class="inventario-kpi inventario-kpi--indigo">
                 <span class="inventario-kpi-icon"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></span>
@@ -60,7 +58,7 @@
             </article>
             <article class="inventario-kpi inventario-kpi--green">
                 <span class="inventario-kpi-icon"><i class="bi bi-cash-stack" aria-hidden="true"></i></span>
-                <div><small>Valor inventario</small><strong>S/ {{ number_format($inventoryValue, 2) }}</strong><span>Valor registrado en productos activos</span></div>
+                <div><small>Valor inventario</small><strong>S/ {{ number_format($inventoryValue, 2) }}</strong><span>Valor a precio de catálogo del stock autorizado</span></div>
                 <b class="inventario-kpi-trend is-positive"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> Valor actual</b>
             </article>
         </section>
@@ -70,13 +68,13 @@
             <button class="inventario-toolbar-button inventario-toolbar-button--green" type="button" data-open-inventory-movement data-movement-type="entrada"><i class="bi bi-arrow-down" aria-hidden="true"></i> Entrada</button>
             <button class="inventario-toolbar-button inventario-toolbar-button--red" type="button" data-open-inventory-movement data-movement-type="salida"><i class="bi bi-arrow-up" aria-hidden="true"></i> Salida</button>
             <button class="inventario-toolbar-button inventario-toolbar-button--purple" type="button" data-open-inventory-movement data-movement-type="ajuste"><i class="bi bi-pencil" aria-hidden="true"></i> Ajuste</button>
-            <button class="inventario-toolbar-button" type="button" disabled><i class="bi bi-file-earmark-excel" aria-hidden="true"></i> Importar Excel</button>
+            <button class="inventario-toolbar-button" type="button" data-open-inventory-movement data-movement-type="ajuste"><i class="bi bi-clipboard-check" aria-hidden="true"></i> Conteo físico</button>
         </div>
 
         <form class="inventario-filters" method="get" action="{{ route('management.inventory') }}">
             <label class="inventario-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar producto</span><input type="search" name="buscar" value="{{ $filters['buscar'] ?? '' }}" placeholder="Buscar producto, SKU..."></label>
             <label><span class="visually-hidden">Filtrar por categoría</span><select name="categoria"><option value="">Todas las categorías</option>@foreach ($categories as $category)<option value="{{ $category->id }}" @selected(($filters['categoria'] ?? null) === $category->id)>{{ $category->nombre }}</option>@endforeach</select></label>
-            <label><span class="visually-hidden">Filtrar por estado</span><select name="estado"><option value="">Todos los estados</option><option value="optimo" @selected(($filters['estado'] ?? null) === 'optimo')>Óptimo</option><option value="bajo" @selected(($filters['estado'] ?? null) === 'bajo')>Bajo</option><option value="critico" @selected(($filters['estado'] ?? null) === 'critico')>Crítico</option></select></label>
+            <label><span class="visually-hidden">Filtrar por estado</span><select name="estado"><option value="">Todos los estados</option><option value="con_existencias" @selected(($filters['estado'] ?? null) === 'con_existencias')>Con existencias</option><option value="sin_existencias" @selected(($filters['estado'] ?? null) === 'sin_existencias')>Sin existencias</option></select></label>
             <label><span class="visually-hidden">Filtrar por proveedor</span><select name="proveedor"><option value="">Todos los proveedores</option>@foreach ($suppliers as $supplier)<option value="{{ $supplier->id }}" @selected(($filters['proveedor'] ?? null) === $supplier->id)>{{ $supplier->nombre }}</option>@endforeach</select></label>
             <button class="inventario-filter-button" type="submit"><i class="bi bi-search" aria-hidden="true"></i> Buscar</button>
             @if (($filters['buscar'] ?? null) || ($filters['categoria'] ?? null) || ($filters['estado'] ?? null) || ($filters['proveedor'] ?? null))
@@ -91,13 +89,14 @@
             </header>
             <div class="inventario-table-wrap">
                 <table class="inventario-table">
-                    <thead><tr><th><span class="inventario-checkbox" aria-hidden="true"></span></th><th>Producto</th><th>SKU</th><th>Categoría</th><th>Stock actual</th><th>Stock mínimo</th><th>Proveedor</th><th>Último movimiento</th><th>Estado</th><th>Acción</th></tr></thead>
+                    <thead><tr><th><span class="inventario-checkbox" aria-hidden="true"></span></th><th>Producto</th><th>SKU</th><th>Categoría</th><th>Existencias físicas</th><th>Reservado</th><th>Proveedor</th><th>Último movimiento</th><th>Estado</th><th>Acción</th></tr></thead>
                     <tbody>
                         @forelse ($products as $product)
                             @php
                                 $image = $productImage($product->url_imagen);
-                                $status = $statusForStock((int) $product->existencias);
+                                $status = $statusForStock((int) $product->existencias_alcance);
                                 $movement = $latestMovements->get($product->id);
+                                $codigosSku = $product->variants->pluck('codigo_sku')->filter()->unique()->values();
                                 $movementLabel = match ($movement?->tipo_movimiento) { 'entrada' => 'Entrada', 'salida' => 'Salida', 'ajuste' => 'Ajuste', default => 'Sin movimientos' };
                                 $movementClass = match ($movement?->tipo_movimiento) { 'entrada' => 'entry', 'salida' => 'exit', 'ajuste' => 'adjustment', default => 'empty' };
                             @endphp
@@ -107,10 +106,10 @@
                                     @if ($image)<img src="{{ $image }}" alt="{{ $product->nombre }}">@else<span class="inventario-product-image"><i class="bi bi-box-seam" aria-hidden="true"></i></span>@endif
                                     <span><strong>{{ $product->marca }} {{ $product->nombre }}</strong><small>{{ $product->nombre }}</small></span>
                                 </td>
-                                <td class="inventario-sku">{{ $product->etiqueta ?: 'SKU-'.str_pad((string) $product->id, 4, '0', STR_PAD_LEFT) }}</td>
+                                <td class="inventario-sku">{{ $codigosSku->isNotEmpty() ? $codigosSku->implode(', ') : 'Sin SKU registrado' }}</td>
                                 <td>{{ $product->category?->nombre ?: ($product->categoria ?: 'Sin categoría') }}</td>
-                                <td><span class="inventario-stock inventario-stock--{{ $status['class'] }}">{{ number_format($product->existencias) }} unidades</span></td>
-                                <td class="inventario-minimum">10</td>
+                                <td><span class="inventario-stock inventario-stock--{{ $status['class'] }}">{{ number_format($product->existencias_alcance) }} unidades</span></td>
+                                <td class="inventario-minimum">{{ number_format($product->existencias_reservadas) }}</td>
                                 <td>{{ $product->suppliers->first()?->nombre ?: 'Sin proveedor' }}</td>
                                 <td class="inventario-movement inventario-movement--{{ $movementClass }}">
                                     @if ($movement)
@@ -120,10 +119,10 @@
                                     @endif
                                 </td>
                                 <td><span class="inventario-status inventario-status--{{ $status['class'] }}"><i class="bi bi-circle-fill" aria-hidden="true"></i>{{ $status['label'] }}</span></td>
-                                <td class="inventario-actions-cell"><button class="inventario-view-button" type="button" data-open-inventory-movement data-inventory-product="{{ $product->id }}" title="Registrar movimiento para {{ $product->nombre }}"><i class="bi bi-eye" aria-hidden="true"></i><span>Ver</span></button><button class="inventario-more-button" type="button" disabled aria-label="Más opciones"><i class="bi bi-three-dots-vertical" aria-hidden="true"></i></button></td>
+                                <td class="inventario-actions-cell"><button class="inventario-view-button" type="button" data-open-inventory-movement data-movement-type="ajuste" data-inventory-product="{{ $product->id }}" title="Registrar conteo físico para {{ $product->nombre }}"><i class="bi bi-clipboard-check" aria-hidden="true"></i><span>Ajustar</span></button><button class="inventario-more-button" type="button" data-open-inventory-detail aria-label="Consultar información de inventario"><i class="bi bi-three-dots-vertical" aria-hidden="true"></i></button></td>
                             </tr>
                         @empty
-                            <tr><td colspan="10" class="inventario-empty"><i class="bi bi-inbox" aria-hidden="true"></i><strong>No hay productos para mostrar.</strong><span>Prueba con otros filtros de inventario.</span></td></tr>
+                            <tr><td colspan="10" class="inventario-empty"><i class="bi bi-inbox" aria-hidden="true"></i>@if ($products->total() === 0 && !($filters['buscar'] || $filters['categoria'] || $filters['estado'] || $filters['proveedor']))<strong>No hay productos registrados.</strong><span>Los productos aparecerán aquí cuando se registren en el catálogo.</span>@else<strong>No hay productos para los filtros aplicados.</strong><span>Prueba con otros filtros de inventario.</span>@endif</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -143,50 +142,76 @@
 
         <div class="inventario-bottom-grid">
             <section class="inventario-secondary-card">
-                <header class="inventario-card-header"><div class="inventario-card-title"><i class="bi bi-exclamation-triangle-fill inventario-title-icon--orange" aria-hidden="true"></i><div><h2>Alertas de inventario</h2><p>Productos con stock igual o menor al mínimo.</p></div></div><a class="inventario-view-all" href="{{ route('management.inventory', ['estado' => 'critico']) }}">Ver todas</a></header>
+                <header class="inventario-card-header"><div class="inventario-card-title"><i class="bi bi-exclamation-triangle-fill inventario-title-icon--orange" aria-hidden="true"></i><div><h2>Productos sin existencias</h2><p>Saldo físico igual a cero en el alcance autorizado.</p></div></div><a class="inventario-view-all" href="{{ route('management.inventory', ['estado' => 'sin_existencias']) }}">Ver todas</a></header>
                 <div class="inventario-alert-list">
-                    @forelse ($lowStockProducts as $product)
+                    @forelse ($productosSinExistencias as $product)
                         @php
-                            $status = $statusForStock((int) $product->existencias);
+                            $status = $statusForStock((int) $product->existencias_alcance);
                         @endphp
-                        <div class="inventario-alert-row"><span class="inventario-alert-icon inventario-alert-icon--{{ $status['class'] }}"><i class="bi bi-{{ $status['class'] === 'critical' ? 'box' : 'exclamation-triangle' }}" aria-hidden="true"></i></span><span><strong>{{ $product->nombre }}</strong><small>{{ $product->suppliers->first()?->nombre ?: 'Sin proveedor' }}</small></span><b class="inventario-alert-stock">{{ number_format($product->existencias) }}</b><span class="inventario-status inventario-status--{{ $status['class'] }}">{{ $status['label'] }}</span><button type="button" class="inventario-register-alert" data-open-inventory-movement data-inventory-product="{{ $product->id }}">Registrar</button></div>
+                        <div class="inventario-alert-row"><span class="inventario-alert-icon inventario-alert-icon--{{ $status['class'] }}"><i class="bi bi-{{ $status['class'] === 'critical' ? 'box' : 'exclamation-triangle' }}" aria-hidden="true"></i></span><span><strong>{{ $product->nombre }}</strong><small>{{ $product->suppliers->first()?->nombre ?: 'Sin proveedor' }}</small></span><b class="inventario-alert-stock">{{ number_format($product->existencias_alcance) }}</b><span class="inventario-status inventario-status--{{ $status['class'] }}">{{ $status['label'] }}</span><button type="button" class="inventario-register-alert" data-open-inventory-movement data-inventory-product="{{ $product->id }}">Registrar</button></div>
                     @empty
-                        <div class="inventario-secondary-empty"><i class="bi bi-shield-check" aria-hidden="true"></i><strong>Sin alertas de inventario</strong><span>Los productos activos están sobre el mínimo.</span></div>
+                        <div class="inventario-secondary-empty"><i class="bi bi-shield-check" aria-hidden="true"></i><strong>No hay productos sin existencias</strong><span>Los saldos físicos consultados son mayores que cero.</span></div>
                     @endforelse
                 </div>
             </section>
 
             <section class="inventario-secondary-card">
-                <header class="inventario-card-header"><div class="inventario-card-title"><i class="bi bi-clock-history" aria-hidden="true"></i><div><h2>Movimientos recientes</h2><p>Últimos movimientos de inventario.</p></div></div><a class="inventario-view-all" href="{{ route('management.inventory') }}">Ver todos</a></header>
+                <header class="inventario-card-header"><div class="inventario-card-title"><i class="bi bi-clock-history" aria-hidden="true"></i><div><h2>{{ $verHistorialMovimientos ? 'Historial de movimientos' : 'Movimientos recientes' }}</h2><p>{{ $verHistorialMovimientos ? 'Movimientos registrados en las sedes autorizadas.' : 'Últimos movimientos de inventario.' }}</p></div></div><a class="inventario-view-all" href="{{ $verHistorialMovimientos ? route('management.inventory') : route('management.inventory.movements') }}">{{ $verHistorialMovimientos ? 'Volver al inventario' : 'Ver todos' }}</a></header>
+                @if ($verHistorialMovimientos)
+                    <form class="inventario-filters" method="get" action="{{ route('management.inventory.movements') }}">
+                        <label class="inventario-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar movimientos</span><input type="search" name="mov_buscar" value="{{ $filtrosMovimientos['buscar'] }}" maxlength="100" placeholder="Producto, motivo o documento"></label>
+                        <label><span class="visually-hidden">Tipo de movimiento</span><select name="mov_tipo"><option value="">Todos los tipos</option>@foreach ($tiposMovimiento as $tipo)<option value="{{ $tipo }}" @selected($filtrosMovimientos['tipo'] === $tipo)>{{ ucfirst($tipo) }}</option>@endforeach</select></label>
+                        <label><span class="visually-hidden">Almacén</span><select name="mov_almacen"><option value="">Todos los almacenes autorizados</option>@foreach ($almacenesMovimiento as $almacen)<option value="{{ $almacen->id }}" @selected($filtrosMovimientos['almacen'] === (int) $almacen->id)>{{ $almacen->sede_nombre }} · {{ $almacen->nombre }}</option>@endforeach</select></label>
+                        <button class="inventario-filter-button" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i> Filtrar</button>
+                        @if ($hayFiltrosMovimientos)<a class="inventario-clear-button" href="{{ route('management.inventory.movements') }}">Limpiar</a>@endif
+                    </form>
+                @endif
                 <div class="inventario-recent-table-wrap">
-                    <table class="inventario-recent-table"><thead><tr><th>Tipo</th><th>Producto</th><th>Cantidad</th><th>Motivo</th><th>Usuario</th><th>Fecha</th></tr></thead><tbody>
+                    <table class="inventario-recent-table"><thead><tr><th>Tipo</th><th>Producto</th><th>Cantidad</th><th>Motivo</th><th>Usuario</th><th>Fecha</th>@if ($verHistorialMovimientos)<th>Detalle</th>@endif</tr></thead><tbody>
                         @forelse ($recentMovements as $movement)
                             @php
                                 $movementClass = $movement->tipo_movimiento === 'entrada' ? 'entry' : ($movement->tipo_movimiento === 'salida' ? 'exit' : 'adjustment');
-                                $movementQuantity = $movement->tipo_movimiento === 'salida' ? -abs((int) $movement->cantidad) : (int) $movement->cantidad;
+                                $movementQuantity = $movement->tipo_movimiento === 'salida' ? -abs((float) $movement->cantidad) : (float) $movement->cantidad;
+                                $cantidadFormateada = rtrim(rtrim(number_format($movementQuantity, 6, '.', ''), '0'), '.');
                             @endphp
-                            <tr><td><span class="inventario-recent-type inventario-recent-type--{{ $movementClass }}"><i class="bi bi-{{ $movement->tipo_movimiento === 'ajuste' ? 'pencil' : 'arrow-'.($movement->tipo_movimiento === 'entrada' ? 'down' : 'up') }}" aria-hidden="true"></i>{{ ucfirst($movement->tipo_movimiento) }}</span></td><td>{{ $movement->product?->marca }} {{ $movement->product?->nombre ?: 'Producto eliminado' }}</td><td class="inventario-quantity {{ $movementQuantity >= 0 ? 'is-positive' : 'is-negative' }}">{{ $movementQuantity >= 0 ? '+' : '' }}{{ $movementQuantity }}</td><td>{{ \Illuminate\Support\Str::limit($movement->notas, 24) }}</td><td>{{ $movement->user?->nombre ?: 'Sistema' }}</td><td>{{ $movement->creado_en?->format('d/m/Y H:i') }}</td></tr>
+                            <tr><td><span class="inventario-recent-type inventario-recent-type--{{ $movementClass }}"><i class="bi bi-{{ $movement->tipo_movimiento === 'ajuste' ? 'pencil' : 'arrow-'.($movement->tipo_movimiento === 'entrada' ? 'down' : 'up') }}" aria-hidden="true"></i>{{ ucfirst($movement->tipo_movimiento) }}</span></td><td>{{ $movement->product?->marca }} {{ $movement->product?->nombre ?: 'Producto eliminado' }}</td><td class="inventario-quantity {{ $movementQuantity >= 0 ? 'is-positive' : 'is-negative' }}">{{ $movementQuantity >= 0 ? '+' : '' }}{{ $cantidadFormateada }}</td><td>{{ \Illuminate\Support\Str::limit($movement->notas, 24) }}</td><td>{{ $movement->user?->nombre ?: 'Sistema' }}</td><td>{{ $movement->creado_en?->format('d/m/Y H:i') }}</td>@if ($verHistorialMovimientos)<td><button class="inventario-more-button" type="button" data-open-movement-detail data-tipo="{{ $movement->tipo_movimiento }}" data-cantidad="{{ $movementQuantity }}" data-fecha="{{ $movement->creado_en?->format('d/m/Y H:i') }}" data-usuario="{{ $movement->user?->nombre ?: 'Sistema' }}" data-notas="{{ $movement->notas }}" data-producto="{{ trim(($movement->product?->marca ?? '').' '.($movement->product?->nombre ?? 'Producto eliminado')) }}" data-variante="{{ $movement->variante?->codigo_sku ?: $movement->variante?->nombre_color ?: 'Sin variante' }}" data-almacen="{{ $movement->almacen?->nombre ?: 'Sin almacén' }}" data-documento="{{ trim(($movement->documento_tipo ?? '').' '.($movement->documento_id ?? '')) ?: 'Sin documento asociado' }}" aria-label="Ver detalle del movimiento"><i class="bi bi-three-dots-vertical" aria-hidden="true"></i></button></td>@endif</tr>
                         @empty
-                            <tr><td colspan="6" class="inventario-recent-empty">Todavía no hay movimientos registrados.</td></tr>
+                            <tr><td colspan="{{ $verHistorialMovimientos ? 7 : 6 }}" class="inventario-recent-empty">@if ($hayFiltrosMovimientos)No se encontraron movimientos con los filtros seleccionados.@else Todavía no hay movimientos registrados.@endif</td></tr>
                         @endforelse
                     </tbody></table>
                 </div>
+                @if ($verHistorialMovimientos && $recentMovements->hasPages())
+                    <div class="inventario-pagination">{{ $recentMovements->links() }}</div>
+                @endif
             </section>
         </div>
     </section>
 
-    <dialog class="inventario-dialog" id="registrar-movimiento-inventario">
+    <dialog class="inventario-dialog" id="registrar-movimiento-inventario" aria-labelledby="inventario-movimiento-titulo">
         <div class="inventario-dialog-card">
-            <header class="inventario-dialog-header"><div class="inventario-card-title"><span class="inventario-dialog-icon"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></span><div><h2>Registrar movimiento</h2><p>Actualiza las existencias y conserva la trazabilidad.</p></div></div><button class="inventario-dialog-close" type="button" data-close-inventory-movement aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
-            <form method="post" action="{{ route('legacy.admin.inventory.store') }}" class="inventario-movement-form">
+            <header class="inventario-dialog-header"><div class="inventario-card-title"><span class="inventario-dialog-icon"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></span><div><h2 id="inventario-movimiento-titulo">Registrar movimiento</h2><p>Actualiza las existencias y conserva la trazabilidad.</p></div></div><button class="inventario-dialog-close" type="button" data-close-inventory-movement aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
+            <form method="post" action="{{ route('management.inventory.adjust', ['product' => 0]) }}" data-ruta-base="{{ route('management.inventory.adjust', ['product' => 0]) }}" data-hay-productos="{{ $movementProducts->isNotEmpty() ? '1' : '0' }}" data-hay-almacenes="{{ $almacenes->isNotEmpty() ? '1' : '0' }}" data-inventory-movement-form class="inventario-movement-form">
                 @csrf
-                <label><span>Producto <b>*</b></span><select name="producto_id" data-inventory-product-select required><option value="">Selecciona un producto</option>@foreach ($movementProducts as $product)<option value="{{ $product->id }}" @selected((string) old('producto_id') === (string) $product->id)>{{ $product->marca }} {{ $product->nombre }} · Stock: {{ $product->existencias }}</option>@endforeach</select></label>
+                <input type="hidden" name="producto_id" value="{{ old('producto_id') }}" data-inventory-product-input>
+                <label><span>Producto <b>*</b></span><select data-inventory-product-select required><option value="">Selecciona un producto</option>@foreach ($movementProducts as $product)<option value="{{ $product->id }}" @selected((string) old('producto_id') === (string) $product->id)>{{ $product->marca }} {{ $product->nombre }} · Existencias: {{ $product->existencias_alcance }}</option>@endforeach</select></label>
+                @if ($movementProducts->isEmpty())
+                    <p class="inventario-count-notice"><i class="bi bi-info-circle" aria-hidden="true"></i>No hay productos registrados para esta empresa. Registra primero un producto en <a href="{{ route('management.products') }}">Gestión de productos</a>.</p>
+                @endif
+                <label><span>Almacén <b>*</b></span><select name="almacen_id" data-inventory-warehouse-select required><option value="">Selecciona un almacén</option>@foreach ($almacenes as $almacen)<option value="{{ $almacen->id }}" @selected((string) old('almacen_id') === (string) $almacen->id)>{{ $almacen->sede_nombre }} · {{ $almacen->nombre }}</option>@endforeach</select></label>
+                @if ($almacenes->isEmpty())
+                    <p class="inventario-count-notice"><i class="bi bi-info-circle" aria-hidden="true"></i>No hay almacenes activos autorizados para esta empresa y sede. Configura primero un almacén para registrar existencias.</p>
+                @endif
+                <label><span>Variante</span><select name="variante_id" data-inventory-variant-select><option value="" @selected(old('variante_id') === null)>Producto sin variante</option>@foreach ($movementProducts as $product)@foreach ($product->variants as $variante)<option value="{{ $variante->id }}" data-producto-id="{{ $product->id }}" @selected((string) old('variante_id') === (string) $variante->id)>{{ $product->nombre }} · {{ $variante->codigo_sku ?: $variante->nombre_color }}</option>@endforeach @endforeach</select></label>
                 <label><span>Tipo de movimiento <b>*</b></span><select name="tipo_movimiento" data-inventory-type-select required><option value="entrada" @selected(old('tipo_movimiento') === 'entrada')>Entrada</option><option value="salida" @selected(old('tipo_movimiento') === 'salida')>Salida</option><option value="ajuste" @selected(old('tipo_movimiento') === 'ajuste')>Ajuste</option></select></label>
-                <label><span>Cantidad <b>*</b></span><input type="number" name="cantidad" min="1" value="{{ old('cantidad') }}" required></label>
+                <label><span><span data-inventory-quantity-label>Cantidad del movimiento</span> <b>*</b></span><input type="number" name="cantidad" min="1" value="{{ old('cantidad') }}" data-inventory-quantity required></label>
                 <label class="inventario-form-wide"><span>Motivo u observación <b>*</b></span><textarea name="notas" maxlength="500" rows="3" required>{{ old('notas') }}</textarea></label>
-                <footer class="inventario-dialog-footer"><button class="inventario-cancel-button" type="button" data-close-inventory-movement>Cancelar</button><button class="inventario-primary-button" type="submit"><i class="bi bi-check2" aria-hidden="true"></i> Guardar movimiento</button></footer>
+                <footer class="inventario-dialog-footer"><button class="inventario-cancel-button" type="button" data-close-inventory-movement>Cancelar</button><button class="inventario-primary-button" type="submit" @disabled($movementProducts->isEmpty() || $almacenes->isEmpty())><i class="bi bi-check2" aria-hidden="true"></i> Guardar movimiento</button></footer>
             </form>
         </div>
+    </dialog>
+
+    <dialog class="inventario-dialog inventario-detail-dialog" data-inventory-detail-dialog aria-labelledby="inventory-detail-title">
+        <div class="inventario-dialog-card"><header class="inventario-dialog-header"><div class="inventario-card-title"><span class="inventario-dialog-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span><div><h2 id="inventory-detail-title">Detalle de inventario</h2><p>Consulta de solo lectura con la información de esta pantalla.</p></div></div><button class="inventario-dialog-close" type="button" data-close-inventory-detail aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><dl class="inventario-detail-list" data-inventory-detail-fields></dl><footer class="inventario-dialog-footer"><button class="inventario-cancel-button" type="button" data-close-inventory-detail>Cerrar</button></footer></div>
     </dialog>
 @endsection
 
@@ -196,11 +221,65 @@
             const dialog = document.querySelector('#registrar-movimiento-inventario');
             const page = document.querySelector('[data-inventory-page]');
             const productSelect = dialog?.querySelector('[data-inventory-product-select]');
+            const productInput = dialog?.querySelector('[data-inventory-product-input]');
+            const warehouseSelect = dialog?.querySelector('[data-inventory-warehouse-select]');
+            const variantSelect = dialog?.querySelector('[data-inventory-variant-select]');
             const typeSelect = dialog?.querySelector('[data-inventory-type-select]');
+            const quantityInput = dialog?.querySelector('[data-inventory-quantity]');
+            const quantityLabel = dialog?.querySelector('[data-inventory-quantity-label]');
+            const formularioMovimiento = dialog?.querySelector('[data-inventory-movement-form]');
+            const botonGuardarMovimiento = formularioMovimiento?.querySelector('[type="submit"]');
+            const detailDialog = document.querySelector('[data-inventory-detail-dialog]');
 
-            if (!dialog || !page || !productSelect || !typeSelect) {
+            if (!dialog || !page || !productSelect || !productInput || !warehouseSelect || !variantSelect || !typeSelect || !quantityInput || !quantityLabel || !formularioMovimiento || !botonGuardarMovimiento) {
                 return;
             }
+
+            const rutaMovimientoBase = formularioMovimiento.dataset.rutaBase.replace(/\/0$/, '');
+            const opcionProductoBase = variantSelect.querySelector('option[value=""]');
+            const opcionesVariantes = [...variantSelect.querySelectorAll('option[data-producto-id]')];
+
+            const actualizarRutaMovimiento = () => {
+                const productoId = productSelect.value;
+                productInput.value = productoId;
+                formularioMovimiento.action = productoId ? `${rutaMovimientoBase}/${encodeURIComponent(productoId)}` : `${rutaMovimientoBase}/0`;
+                botonGuardarMovimiento.disabled = productoId === '' || warehouseSelect.value === '' || formularioMovimiento.dataset.hayProductos !== '1' || formularioMovimiento.dataset.hayAlmacenes !== '1';
+            };
+
+            const actualizarVariantesDisponibles = () => {
+                const productoId = productSelect.value;
+                let variantesDelProducto = 0;
+                opcionesVariantes.forEach((opcion) => {
+                    const perteneceAlProducto = opcion.dataset.productoId === productoId;
+                    opcion.hidden = !perteneceAlProducto;
+                    opcion.disabled = !perteneceAlProducto;
+                    variantesDelProducto += perteneceAlProducto ? 1 : 0;
+                });
+
+                const requiereVariante = productoId !== '' && variantesDelProducto > 0;
+                opcionProductoBase.hidden = requiereVariante;
+                opcionProductoBase.disabled = requiereVariante;
+                variantSelect.required = requiereVariante;
+                variantSelect.disabled = productoId === '' || !requiereVariante;
+
+                if (!requiereVariante || variantSelect.selectedOptions[0]?.dataset.productoId !== productoId) {
+                    variantSelect.value = '';
+                }
+            };
+
+            const actualizarEtiquetaCantidad = () => {
+                const esAjuste = typeSelect.value === 'ajuste';
+                quantityLabel.textContent = esAjuste ? 'Existencias contadas (saldo final)' : 'Cantidad del movimiento';
+                quantityInput.min = esAjuste ? '0' : '1';
+            };
+
+            productSelect.addEventListener('change', actualizarRutaMovimiento);
+            productSelect.addEventListener('change', actualizarVariantesDisponibles);
+            warehouseSelect.addEventListener('change', actualizarRutaMovimiento);
+            typeSelect.addEventListener('change', actualizarEtiquetaCantidad);
+            actualizarRutaMovimiento();
+            actualizarVariantesDisponibles();
+            actualizarEtiquetaCantidad();
 
             page.querySelectorAll('[data-open-inventory-movement]').forEach((button) => {
                 button.addEventListener('click', () => {
@@ -210,6 +289,9 @@
                     if (button.dataset.movementType) {
                         typeSelect.value = button.dataset.movementType;
                     }
+                    actualizarVariantesDisponibles();
+                    actualizarRutaMovimiento();
+                    actualizarEtiquetaCantidad();
                     dialog.showModal();
                 });
             });
@@ -221,6 +303,54 @@
                 }
             });
 
+            page.querySelectorAll('[data-open-inventory-detail]').forEach((button) => button.addEventListener('click', () => {
+                const row = button.closest('tr');
+                const details = detailDialog.querySelector('[data-inventory-detail-fields]');
+                const headings = [...row.closest('table').querySelectorAll('thead th')];
+                const cells = [...row.querySelectorAll('td')];
+                details.replaceChildren();
+                cells.slice(1, headings.length - 1).forEach((cell, index) => {
+                    const wrapper = document.createElement('div');
+                    const term = document.createElement('dt');
+                    const description = document.createElement('dd');
+                    term.textContent = headings[index + 1]?.textContent.trim() ?? `Dato ${index + 1}`;
+                    description.textContent = cell.textContent.trim();
+                    wrapper.append(term, description);
+                    details.append(wrapper);
+                });
+                detailDialog.showModal();
+            }));
+            page.querySelectorAll('[data-open-movement-detail]').forEach((button) => button.addEventListener('click', () => {
+                const details = detailDialog.querySelector('[data-inventory-detail-fields]');
+                const campos = [
+                    ['Tipo', button.dataset.tipo],
+                    ['Cantidad', button.dataset.cantidad],
+                    ['Fecha', button.dataset.fecha],
+                    ['Usuario', button.dataset.usuario],
+                    ['Producto', button.dataset.producto],
+                    ['Variante', button.dataset.variante],
+                    ['Almacén', button.dataset.almacen],
+                    ['Motivo', button.dataset.notas],
+                    ['Documento', button.dataset.documento],
+                ];
+                details.replaceChildren();
+                campos.forEach(([etiqueta, valor]) => {
+                    const wrapper = document.createElement('div');
+                    const term = document.createElement('dt');
+                    const description = document.createElement('dd');
+                    term.textContent = etiqueta;
+                    description.textContent = valor || '—';
+                    wrapper.append(term, description);
+                    details.append(wrapper);
+                });
+                detailDialog.showModal();
+            }));
+            detailDialog.querySelectorAll('[data-close-inventory-detail]').forEach((button) => button.addEventListener('click', () => detailDialog.close()));
+            detailDialog.addEventListener('click', (event) => {
+                if (event.target === detailDialog) {
+                    detailDialog.close();
+                }
+            });
             @if ($errors->any())
                 dialog.showModal();
             @endif

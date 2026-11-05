@@ -66,8 +66,8 @@
                     <a class="home-product-image-link" href="{{ route('catalog.show', $product) }}" aria-label="Ver {{ $product->marca }} {{ $product->nombre }}">
                         <div class="product-art home-product-art">
                             <span class="badge">{{ $product->etiqueta ?: 'Oferta' }}</span>
-                            @if($product->display_image_path)
-                                <img class="home-product-photo" src="{{ asset('assets/cell-legacy/'.$product->display_image_path) }}" alt="{{ $product->marca }} {{ $product->nombre }}" loading="lazy">
+                            @if($product->url_imagen_principal)
+                                <img class="home-product-photo" src="{{ $product->url_imagen_principal }}" alt="{{ $product->marca }} {{ $product->nombre }}" loading="lazy">
                             @else
                                 <div class="home-product-placeholder" role="img" aria-label="Imagen no disponible"><i class="bi bi-phone" aria-hidden="true"></i><span>{{ $product->marca }}</span></div>
                             @endif
@@ -79,7 +79,7 @@
                         <div class="home-product-specs">{{ $product->display_specifications }}</div>
                         @if($product->display_discount > 0)<div class="home-product-pricing"><del>S/ {{ number_format($product->display_original_price, 2) }}</del><span>-{{ $product->display_discount }}%</span></div>@endif
                         <div class="price">S/ {{ number_format((float) $product->precio_oferta, 2) }}</div>
-                        <div class="stock">{{ $product->existencias }} unidades disponibles</div>
+                        <div class="stock">{{ $product->existencias_disponibles }} unidades disponibles</div>
                         <div class="home-product-actions">
                             @auth
                                 <form

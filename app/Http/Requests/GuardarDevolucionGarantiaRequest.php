@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Servicios\ServicioAutorizacion;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -9,7 +10,8 @@ class GuardarDevolucionGarantiaRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->isRole('administrador') ?? false;
+        return $this->user() !== null
+            && app(ServicioAutorizacion::class)->allows($this->user(), 'gestion.devoluciones.crear');
     }
 
     public function rules(): array

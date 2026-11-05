@@ -18,9 +18,9 @@ class CuentaController extends Controller
 
         abort_unless($user instanceof User, 403);
 
-        if ($user->rol === 'administrador') {
+        if ($user->isRole('administrador')) {
             return view('paneles.administrador.perfil.editar', [
-                'role' => $user->rol,
+                'role' => 'administrador',
             ]);
         }
 

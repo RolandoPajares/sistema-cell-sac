@@ -29,7 +29,7 @@
                 <p>Organiza tus productos en categorías para una mejor gestión.</p>
             </div>
             <div class="categorias-actions">
-                <a class="categorias-export-button" href="{{ route('management.categories.export', $categoryQuery) }}"><i class="bi bi-download" aria-hidden="true"></i> Exportar</a>
+                <details class="categorias-export-menu"><summary class="categorias-export-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar</summary><div class="categorias-export-options"><a href="{{ route('management.categories.export', ['format' => 'excel'] + $categoryQuery) }}">Excel (.xlsx)</a><a href="{{ route('management.categories.export', ['format' => 'pdf'] + $categoryQuery) }}">PDF (.pdf)</a><a href="{{ route('management.categories.export', ['format' => 'csv'] + $categoryQuery) }}">CSV (.csv)</a></div></details>
                 <button class="categorias-primary-button" type="button" data-open-category-create><i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva categoría</button>
             </div>
         </header>
@@ -92,7 +92,11 @@
                                 </td>
                             </tr>
                         @empty
+                            @if (!($filters['buscar'] || $filters['estado']))
+                                <tr><td class="categorias-empty" colspan="8"><i class="bi bi-inbox" aria-hidden="true"></i><strong>No hay categorías registradas.</strong><span>Registra la primera categoría para organizar tus productos.</span></td></tr>
+                            @else
                             <tr><td class="categorias-empty" colspan="8"><i class="bi bi-inbox" aria-hidden="true"></i><strong>No hay categorías que coincidan con los filtros.</strong><span>Prueba con otros criterios de búsqueda.</span></td></tr>
+                            @endif
                         @endforelse
                     </tbody>
                 </table>
@@ -106,18 +110,18 @@
     </section>
 
     @foreach ($categories as $category)
-        <dialog class="categorias-dialog categorias-edit-dialog" id="editar-categoria-{{ $category->id }}">
+        <dialog class="categorias-dialog categorias-edit-dialog" id="editar-categoria-{{ $category->id }}" aria-labelledby="categoria-editar-titulo-{{ $category->id }}">
             <div class="categorias-dialog-card">
-                <header class="categorias-dialog-header"><div><span class="categorias-eyebrow">Catálogo</span><h2>Editar categoría</h2><p>Actualiza la información de {{ $category->nombre }}.</p></div><button class="categorias-dialog-close" type="button" data-close-category-edit aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
+                <header class="categorias-dialog-header"><div><span class="categorias-eyebrow">Catálogo</span><h2 id="categoria-editar-titulo-{{ $category->id }}">Editar categoría</h2><p>Actualiza la información de {{ $category->nombre }}.</p></div><button class="categorias-dialog-close" type="button" data-close-category-edit aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
                 @include('gestion.categorias.editar', ['category' => $category])
             </div>
         </dialog>
     @endforeach
 
     @foreach ($categories as $category)
-        <dialog class="categorias-dialog categorias-view-dialog" id="ver-categoria-{{ $category->id }}">
+        <dialog class="categorias-dialog categorias-view-dialog" id="ver-categoria-{{ $category->id }}" aria-labelledby="categoria-detalle-titulo-{{ $category->id }}">
             <div class="categorias-dialog-card">
-                <header class="categorias-dialog-header"><div><span class="categorias-eyebrow">Catálogo</span><h2>Información de categoría</h2><p>Resumen de {{ $category->nombre }}.</p></div><button class="categorias-dialog-close" type="button" data-close-category-view aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
+                <header class="categorias-dialog-header"><div><span class="categorias-eyebrow">Catálogo</span><h2 id="categoria-detalle-titulo-{{ $category->id }}">Información de categoría</h2><p>Resumen de {{ $category->nombre }}.</p></div><button class="categorias-dialog-close" type="button" data-close-category-view aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
                 <div class="categorias-view-body">
                     <div class="categorias-view-heading"><span class="categorias-view-icon"><i class="bi {{ $categoryIcon($category->nombre) }}" aria-hidden="true"></i></span><div><h3>{{ $category->nombre }}</h3><span class="categorias-status categorias-status--{{ $category->activo ? 'active' : 'inactive' }}"><i class="bi bi-circle-fill" aria-hidden="true"></i>{{ $category->activo ? 'Activa' : 'Inactiva' }}</span></div></div>
                     <div class="categorias-view-grid"><div><small>Productos asignados</small><strong>{{ number_format($category->products_count) }}</strong></div><div><small>Fecha de creación</small><strong>{{ $category->creado_en?->format('d/m/Y H:i') ?: 'Sin fecha' }}</strong></div></div>
@@ -128,9 +132,9 @@
         </dialog>
     @endforeach
 
-    <dialog class="categorias-dialog" id="nueva-categoria">
+    <dialog class="categorias-dialog" id="nueva-categoria" aria-labelledby="categoria-crear-titulo">
         <div class="categorias-dialog-card">
-            <header class="categorias-dialog-header"><div><span class="categorias-eyebrow">Catálogo</span><h2>Nueva categoría</h2><p>Registra una categoría para organizar tus productos.</p></div><button class="categorias-dialog-close" type="button" data-close-category-create aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
+            <header class="categorias-dialog-header"><div><span class="categorias-eyebrow">Catálogo</span><h2 id="categoria-crear-titulo">Nueva categoría</h2><p>Registra una categoría para organizar tus productos.</p></div><button class="categorias-dialog-close" type="button" data-close-category-create aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
             @include('gestion.categorias.crear')
         </div>
     </dialog>

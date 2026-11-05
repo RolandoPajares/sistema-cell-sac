@@ -518,6 +518,19 @@
 
 .cotizaciones-create-dialog .admin-dialog-body { max-height: calc(100vh - 120px); overflow-y: auto; }
 .cotizaciones-create-dialog .form-card { max-width: none; margin: 0; box-shadow: none; }
+.cotizaciones-demo-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px solid #e8eff7; }
+.cotizaciones-demo-actions button { padding: 6px 8px; border: 1px solid #cfe0f4; border-radius: 7px; color: #086de8; background: #fff; font-size: 0.59rem; font-weight: 800; cursor: pointer; }
+.cotizaciones-demo-dialog { width: min(100% - 28px, 560px); max-height: calc(100vh - 28px); overflow: auto; }
+.cotizaciones-demo-body { display: grid; gap: 15px; }
+.cotizaciones-demo-warning { display: flex; align-items: flex-start; gap: 10px; padding: 12px; border: 1px solid #cfe2f8; border-radius: 9px; color: #31547f; background: #f2f8ff; }
+.cotizaciones-demo-warning > i { margin-top: 2px; color: #0874ed; }
+.cotizaciones-demo-warning p { margin: 0; font-size: 0.69rem; line-height: 1.5; }
+.cotizaciones-demo-body dl { display: grid; gap: 8px; margin: 0; }
+.cotizaciones-demo-body dl > div { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid #edf2f8; font-size: 0.69rem; }
+.cotizaciones-demo-body dt { color: #7185a8; font-weight: 700; }
+.cotizaciones-demo-body dd { margin: 0; color: #142954; font-weight: 800; text-align: right; overflow-wrap: anywhere; }
+.cotizaciones-demo-feedback { margin: 0; padding: 11px; border: 1px solid #bde8d3; border-radius: 8px; color: #176b49; background: #effbf5; font-size: 0.67rem; line-height: 1.5; }
+.cotizaciones-demo-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 22px 18px; border-top: 1px solid #e0ebf6; }
 
 @media (max-width: 1180px) {
     .cotizaciones-filters {
@@ -553,6 +566,8 @@
     .cotizaciones-table-footer nav { margin-left: 0; }
     .cotizaciones-bottom-grid { flex-direction: column; }
     .cotizaciones-recent-row { flex-wrap: wrap; }
+    .cotizaciones-demo-footer { align-items: stretch; flex-direction: column-reverse; }
+    .cotizaciones-demo-footer button { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {

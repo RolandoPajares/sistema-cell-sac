@@ -1,5 +1,9 @@
 @php
-    $isAdmin = in_array(auth()->user()->rol, ['administrador', 'ventas_minoristas', 'ventas_mayoristas'], true);
+    $isAdminPanel = (bool) ($adminView ?? false);
+    $isAdmin = ($adminView ?? false)
+        || auth()->user()?->isRole('administrador')
+        || auth()->user()?->isRole('ventas_minoristas')
+        || auth()->user()?->isRole('ventas_mayoristas');
 @endphp
 @extends($isAdmin ? 'layouts.administracion' : 'layouts.tienda')
 
@@ -7,7 +11,7 @@
 @section('body_class', 'modulo-pedidos')
 
 @section('content')
-    @if ($isAdmin && auth()->user()->rol === 'administrador')
+    @if ($isAdminPanel || ($isAdmin && auth()->user()->isRole('administrador')))
         @php
             $productImage = static function (?string $path): ?string {
                 if (!$path) {
@@ -24,13 +28,6 @@
                     'Entregado' => ['label' => 'Entregado', 'class' => 'delivered'],
                     'Cancelado' => ['label' => 'Cancelado', 'class' => 'cancelled'],
                     default => ['label' => $status, 'class' => 'muted'],
-                };
-            };
-            $paymentFor = static function (string $status): array {
-                return match ($status) {
-                    'Pendiente' => ['label' => 'Pendiente', 'class' => 'pending'],
-                    'Cancelado' => ['label' => 'Reembolsado', 'class' => 'cancelled'],
-                    default => ['label' => 'Pagado', 'class' => 'paid'],
                 };
             };
             $shippingFor = static function (string $status): array {
@@ -79,7 +76,7 @@
             <section class="pedidos-kpi-grid" aria-label="Resumen de pedidos">
                 <article class="pedidos-kpi pedidos-kpi--blue"><span class="pedidos-kpi-icon"><i class="bi bi-cart3" aria-hidden="true"></i></span><div><small>Pedidos hoy</small><strong>{{ number_format($todayOrders) }}</strong><span>vs. ayer</span></div><b class="pedidos-kpi-trend {{ ($todayOrdersTrend ?? 0) >= 0 ? 'is-positive' : 'is-negative' }}"><i class="bi bi-arrow-{{ ($todayOrdersTrend ?? 0) >= 0 ? 'up' : 'down' }}" aria-hidden="true"></i> @if ($todayOrdersTrend !== null){{ number_format(abs($todayOrdersTrend), 1) }}%@else sin periodo anterior @endif</b></article>
                 <article class="pedidos-kpi pedidos-kpi--orange"><span class="pedidos-kpi-icon"><i class="bi bi-clock" aria-hidden="true"></i></span><div><small>Pendientes</small><strong>{{ number_format($pendingOrders) }}</strong><span>Requieren atención</span></div><b class="pedidos-kpi-trend {{ $pendingOrders > 0 ? 'is-negative' : 'is-positive' }}"><i class="bi bi-{{ $pendingOrders > 0 ? 'arrow-down' : 'check' }}" aria-hidden="true"></i> {{ $pendingOrders > 0 ? 'Revisar' : 'Al día' }}</b></article>
-                <article class="pedidos-kpi pedidos-kpi--green"><span class="pedidos-kpi-icon"><i class="bi bi-credit-card" aria-hidden="true"></i></span><div><small>Pagados</small><strong>{{ number_format($paidOrders) }}</strong><span>Pedidos confirmados</span></div><b class="pedidos-kpi-trend is-positive"><i class="bi bi-arrow-up" aria-hidden="true"></i> Estado actual</b></article>
+                <article class="pedidos-kpi pedidos-kpi--green"><span class="pedidos-kpi-icon"><i class="bi bi-credit-card" aria-hidden="true"></i></span><div><small>Estado de pago</small><strong>{{ $paidOrders === null ? 'No verificado' : number_format($paidOrders) }}</strong><span>Sin fuente financiera integrada</span></div><b class="pedidos-kpi-trend is-positive"><i class="bi bi-arrow-up" aria-hidden="true"></i> Estado actual</b></article>
                 <article class="pedidos-kpi pedidos-kpi--blue"><span class="pedidos-kpi-icon"><i class="bi bi-truck" aria-hidden="true"></i></span><div><small>En envío</small><strong>{{ number_format($shippingOrders) }}</strong><span>En tránsito</span></div><b class="pedidos-kpi-trend is-positive"><i class="bi bi-arrow-up" aria-hidden="true"></i> Seguimiento</b></article>
                 <article class="pedidos-kpi pedidos-kpi--purple"><span class="pedidos-kpi-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span><div><small>Entregados</small><strong>{{ number_format($deliveredOrders) }}</strong><span>Pedidos completados</span></div><b class="pedidos-kpi-trend is-positive"><i class="bi bi-check2" aria-hidden="true"></i> Finalizados</b></article>
                 <article class="pedidos-kpi pedidos-kpi--red"><span class="pedidos-kpi-icon"><i class="bi bi-x-circle" aria-hidden="true"></i></span><div><small>Cancelados</small><strong>{{ number_format($cancelledOrders) }}</strong><span>Pedidos cancelados</span></div><b class="pedidos-kpi-trend {{ $cancelledOrders > 0 ? 'is-negative' : 'is-positive' }}"><i class="bi bi-{{ $cancelledOrders > 0 ? 'arrow-down' : 'check' }}" aria-hidden="true"></i> {{ $cancelledOrders > 0 ? 'Revisar' : 'Sin casos' }}</b></article>
@@ -87,7 +84,7 @@
 
             <div class="pedidos-toolbar">
                 <button class="pedidos-primary-button" type="button" disabled title="Los pedidos se crean desde la tienda"><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo pedido</button>
-                <button class="pedidos-toolbar-button" type="button" disabled><i class="bi bi-download" aria-hidden="true"></i> Exportar <i class="bi bi-chevron-down" aria-hidden="true"></i></button>
+                <details class="pedidos-export-menu"><summary class="pedidos-toolbar-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar <i class="bi bi-chevron-down" aria-hidden="true"></i></summary><div class="pedidos-export-options"><a href="{{ route('management.orders.export', ['format' => 'excel'] + request()->query()) }}">Excel (.xlsx)</a><a href="{{ route('management.orders.export', ['format' => 'pdf'] + request()->query()) }}">PDF (.pdf)</a><a href="{{ route('management.orders.export', ['format' => 'csv'] + request()->query()) }}">CSV (.csv)</a></div></details>
                 <button class="pedidos-toolbar-button" type="button" data-refresh-orders><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Actualizar</button>
             </div>
 
@@ -95,7 +92,7 @@
                 <label class="pedidos-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar pedido o cliente</span><input type="search" name="buscar" value="{{ $filters['buscar'] ?? '' }}" placeholder="Buscar pedido o cliente..."></label>
                 <label><span class="visually-hidden">Filtrar por estado</span><select name="estado"><option value="">Estado: Todos</option><option value="pendiente" @selected(($filters['estado'] ?? null) === 'Pendiente')>Pendiente</option><option value="en_proceso" @selected(($filters['estado'] ?? null) === 'En proceso')>En preparación</option><option value="enviado" @selected(($filters['estado'] ?? null) === 'Enviado')>Enviado</option><option value="entregado" @selected(($filters['estado'] ?? null) === 'Entregado')>Entregado</option><option value="cancelado" @selected(($filters['estado'] ?? null) === 'Cancelado')>Cancelado</option></select></label>
                 <label><span class="visually-hidden">Filtrar por fecha</span><select name="periodo"><option value="7" @selected($filters['periodo'] === '7')>Últimos 7 días</option><option value="30" @selected($filters['periodo'] === '30')>Últimos 30 días</option><option value="90" @selected($filters['periodo'] === '90')>Últimos 90 días</option><option value="all" @selected($filters['periodo'] === 'all')>Todo el historial</option></select></label>
-                <label><span class="visually-hidden">Filtrar por canal</span><select name="canal"><option value="">Canal: Todos</option><option value="tienda_online" @selected(($filters['canal'] ?? null) === 'tienda_online')>Tienda online</option></select></label>
+                <label><span class="visually-hidden">Filtrar por canal</span><select name="canal"><option value="">Canal: Todos</option><option value="ecommerce" @selected(($filters['canal'] ?? null) === 'ecommerce')>Tienda online</option></select></label>
                 <button class="pedidos-more-filters" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i> Más filtros</button>
                 @if (($filters['buscar'] ?? null) || ($filters['estado'] ?? null) || $filters['periodo'] !== '30')<a class="pedidos-clear-filters" href="{{ route('management.orders') }}">Limpiar</a>@endif
             </form>
@@ -109,7 +106,7 @@
                             @forelse ($orders as $order)
                                 @php
                                     $status = $statusFor($order->estado);
-                                    $payment = $paymentFor($order->estado);
+                                    $payment = ['label' => 'No verificado', 'class' => 'muted'];
                                     $shipping = $shippingFor($order->estado);
                                 @endphp
                                 <tr>
@@ -189,7 +186,7 @@
     @endif
 @endsection
 
-@if ($isAdmin && auth()->user()->rol === 'administrador')
+@if ($isAdminPanel || ($isAdmin && auth()->user()->isRole('administrador')))
     @push('scripts')
         <script>
             (() => {

@@ -11,12 +11,30 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('devoluciones_garantias')) {
+            $requiredColumns = [
+                'id', 'codigo', 'pedido_id', 'cliente_id', 'producto_id', 'tipo', 'motivo',
+                'estado', 'fecha_solicitud', 'fecha_limite', 'resolucion', 'creado_por', 'activo', 'creado_en',
+            ];
+            $missingColumns = array_values(array_filter(
+                $requiredColumns,
+                static fn (string $column): bool => ! Schema::hasColumn('devoluciones_garantias', $column),
+            ));
+
+            if ($missingColumns !== []) {
+                throw new RuntimeException('The existing devoluciones_garantias table needs a reviewed, additive reconciliation before migrations continue. Missing columns: '.implode(', ', $missingColumns));
+            }
+
+            return;
+        }
+
         Schema::create('devoluciones_garantias', function (Blueprint $table): void {
             $table->increments('id');
             $table->string('codigo', 40)->unique();
-            $table->integer('pedido_id');
-            $table->integer('cliente_id');
-            $table->integer('producto_id')->nullable();
+            // Legacy commerce IDs are INT UNSIGNED; the FK columns must match exactly on MariaDB.
+            $table->unsignedInteger('pedido_id');
+            $table->unsignedInteger('cliente_id');
+            $table->unsignedInteger('producto_id')->nullable();
             $table->string('tipo', 30)->index();
             $table->text('motivo');
             $table->string('estado', 30)->default('Recibida')->index();
@@ -38,6 +56,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('devoluciones_garantias');
+        throw new LogicException('This business table may predate the migration and contains retained records. Use a reviewed recovery plan instead of dropping it.');
     }
 };
