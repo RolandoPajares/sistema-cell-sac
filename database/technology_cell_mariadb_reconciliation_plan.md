@@ -59,3 +59,5 @@ La base aislada autorizada `tc_cell_sac_validacion_20261105` ya fue creada desde
 
 El script `technology_cell_mariadb_relationship_preflight.sql` comprobó 20 relaciones críticas de organización, catálogo, compras, ventas, inventario, RBAC, pagos y facturación en la base activa y en la aislada; todas devolvieron `OK`.
 
+El nuevo `technology_cell_mariadb_preflight.sql` devolvió `OK` para versión, tablas canónicas y motores tanto en la base activa como en `tc_cell_sac_validacion_20261105`. `mysqlcheck --check --extended` devolvió `OK` para todas las tablas de la base aislada.
+
