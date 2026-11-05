@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Dominio\Catalogo\ProductoDao;
+use App\Infraestructura\Persistencia\Pdo\PdoConexion;
+use App\Infraestructura\Persistencia\Pdo\PdoProductoDao;
 use App\Models\Marketing\Campania;
 use App\Models\User;
 use App\Servicios\ServicioAutorizacion;
@@ -16,7 +19,12 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public function register(): void {}
+    public function register(): void
+    {
+        $this->app->singleton(ProductoDao::class, function (): ProductoDao {
+            return new PdoProductoDao(new PdoConexion(app('db')->connection()->getPdo()));
+        });
+    }
 
     public function boot(): void
     {
