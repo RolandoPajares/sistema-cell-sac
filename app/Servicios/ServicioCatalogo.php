@@ -2,6 +2,7 @@
 
 namespace App\Servicios;
 
+use App\Dominio\Catalogo\ProductoDao;
 use App\Models\Catalogo\Categoria;
 use App\Models\Catalogo\Producto;
 use App\Models\User;
@@ -16,6 +17,7 @@ class ServicioCatalogo
     public function __construct(
         private readonly ServicioInventario $inventario,
         private readonly ServicioAutorizacion $autorizacion,
+        private readonly ProductoDao $productoDao,
     ) {}
 
     /**
@@ -67,21 +69,7 @@ class ServicioCatalogo
             return;
         }
 
-        $imagen = $producto->images()->firstOrCreate(
-            ['ruta_imagen' => $rutaImagen],
-            ['orden' => 0, 'actualizado_en' => now()],
-        );
-        $debePriorizar = $imagen->wasRecentlyCreated
-            || (int) $imagen->orden !== 0
-            || $producto->images()
-                ->where('id', '<>', $imagen->id)
-                ->where('orden', '<=', 0)
-                ->exists();
-
-        if ($debePriorizar) {
-            $producto->images()->where('id', '<>', $imagen->id)->increment('orden');
-            $imagen->update(['orden' => 0, 'actualizado_en' => now()]);
-        }
+        $this->productoDao->sincronizarImagenPortada((int) $producto->id, $rutaImagen);
     }
 
     /**
