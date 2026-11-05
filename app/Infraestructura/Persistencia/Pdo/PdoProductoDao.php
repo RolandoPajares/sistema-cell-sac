@@ -73,6 +73,47 @@ final class PdoProductoDao implements ProductoDao
         return $actualizado;
     }
 
+    public function crearVariante(VarianteProductoEntidad $variante): VarianteProductoEntidad
+    {
+        $this->validarVariante($variante);
+        if ($this->buscarPorId($variante->productoId, false) === null) {
+            throw new DomainException('No se puede crear una variante para un producto inexistente.');
+        }
+
+        $consulta = $this->conexion->preparar('INSERT INTO variantes_productos (producto_id, codigo_sku, codigo_barras, nombre_color, codigo_color, existencias, controla_serie, estado) VALUES (:producto_id, :codigo_sku, :codigo_barras, :nombre_color, :codigo_color, :existencias, :controla_serie, :estado)');
+        $consulta->execute([
+            'producto_id' => $variante->productoId, 'codigo_sku' => $variante->codigoSku,
+            'codigo_barras' => $variante->codigoBarras, 'nombre_color' => $variante->nombreColor,
+            'codigo_color' => $variante->codigoColor, 'existencias' => $variante->existencias,
+            'controla_serie' => $variante->controlaSerie ? 1 : 0, 'estado' => $variante->estado,
+        ]);
+
+        return $this->buscarVariantePorId($this->conexion->ultimoId());
+    }
+
+    public function actualizarVariante(VarianteProductoEntidad $variante): VarianteProductoEntidad
+    {
+        if ($variante->id === null) {
+            throw new DomainException('No se puede actualizar una variante sin identificador.');
+        }
+        $this->validarVariante($variante);
+        $consulta = $this->conexion->preparar('UPDATE variantes_productos SET producto_id = :producto_id, codigo_sku = :codigo_sku, codigo_barras = :codigo_barras, nombre_color = :nombre_color, codigo_color = :codigo_color, existencias = :existencias, controla_serie = :controla_serie, estado = :estado WHERE id = :id');
+        $consulta->execute([
+            'id' => $variante->id, 'producto_id' => $variante->productoId, 'codigo_sku' => $variante->codigoSku,
+            'codigo_barras' => $variante->codigoBarras, 'nombre_color' => $variante->nombreColor,
+            'codigo_color' => $variante->codigoColor, 'existencias' => $variante->existencias,
+            'controla_serie' => $variante->controlaSerie ? 1 : 0, 'estado' => $variante->estado,
+        ]);
+
+        return $this->buscarVariantePorId($variante->id);
+    }
+
+    public function eliminarVariante(int $id): void
+    {
+        $consulta = $this->conexion->preparar('DELETE FROM variantes_productos WHERE id = :id');
+        $consulta->execute(['id' => $id]);
+    }
+
     public function eliminar(int $id): void
     {
         $consulta = $this->conexion->preparar('DELETE FROM productos WHERE id = :id');
@@ -127,10 +168,33 @@ final class PdoProductoDao implements ProductoDao
         ), $consulta->fetchAll(PDO::FETCH_ASSOC));
     }
 
+    private function buscarVariantePorId(int $id): VarianteProductoEntidad
+    {
+        $consulta = $this->conexion->preparar('SELECT id, producto_id, codigo_sku, codigo_barras, nombre_color, codigo_color, existencias, controla_serie, estado FROM variantes_productos WHERE id = :id LIMIT 1');
+        $consulta->execute(['id' => $id]);
+        $fila = $consulta->fetch(PDO::FETCH_ASSOC);
+        if ($fila === false) {
+            throw new RuntimeException('La variante no pudo ser recuperada.');
+        }
+
+        return new VarianteProductoEntidad(
+            id: (int) $fila['id'], productoId: (int) $fila['producto_id'], codigoSku: $fila['codigo_sku'],
+            codigoBarras: $fila['codigo_barras'], nombreColor: (string) $fila['nombre_color'], codigoColor: $fila['codigo_color'],
+            existencias: (int) $fila['existencias'], controlaSerie: (bool) $fila['controla_serie'], estado: (string) $fila['estado'],
+        );
+    }
+
     private function validarProducto(ProductoEntidad $producto): void
     {
         if ($producto->marca === '' || $producto->nombre === '' || $producto->categoria === '' || $producto->precio === '' || $producto->categoriaId < 1) {
             throw new DomainException('Marca, nombre, categoría, precio y categoría válida son obligatorios.');
+        }
+    }
+
+    private function validarVariante(VarianteProductoEntidad $variante): void
+    {
+        if ($variante->productoId < 1 || $variante->nombreColor === '' || $variante->existencias < 0 || $variante->estado === '') {
+            throw new DomainException('Producto, color, existencias y estado de variante son obligatorios y válidos.');
         }
     }
 }

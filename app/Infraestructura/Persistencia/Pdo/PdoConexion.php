@@ -8,7 +8,12 @@ use Throwable;
 
 final class PdoConexion
 {
-    public function __construct(private readonly PDO $pdo) {}
+    public function __construct(private readonly PDO $pdo)
+    {
+        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+        $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+    }
 
     public function ejecutarEnTransaccion(Closure $operacion): mixed
     {
