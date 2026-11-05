@@ -265,7 +265,7 @@ class CotizacionController extends Controller
     {
         $this->quotationService->create($request->validated(), $request->user());
 
-        return back()->with('status', 'CotizaciÃ³n guardada como borrador; aÃºn no se envÃ­a al cliente.');
+        return back()->with('status', 'Cotización guardada como borrador; aún no se envía al cliente.');
     }
 
     public function aprobar(Request $request, Cotizacion $quotation): RedirectResponse

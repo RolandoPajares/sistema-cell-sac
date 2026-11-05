@@ -260,6 +260,8 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::get('/pedidos', [PedidoController::class, 'index'])->name('orders');
     Route::get('/pedidos/exportar/{format}', [PedidoController::class, 'export'])
         ->whereIn('format', ['pdf', 'excel', 'csv'])->name('orders.export');
+    Route::patch('/pedidos/{order}/estado', [PedidoController::class, 'updateStatus'])
+        ->whereNumber('order')->name('orders.status');
     Route::get('/ventas', [VentaController::class, 'index'])->name('sales');
     Route::get('/ventas/diseno/minoristas', [VentaController::class, 'panelMinorista'])
         ->middleware('role:administrador')->name('sales.preview.retail');
