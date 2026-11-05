@@ -91,7 +91,7 @@
     <dialog class="clientes-dialog clientes-import-dialog" id="importar-clientes" aria-labelledby="clientes-import-title" data-client-import-dialog>
         <div class="clientes-dialog-card">
             <header class="clientes-dialog-header clientes-import-header">
-                <div class="clientes-import-heading"><span class="clientes-import-icon"><i class="bi bi-file-earmark-arrow-up" aria-hidden="true"></i></span><div><span class="clientes-eyebrow">CRM · Importación masiva</span><h2 id="clientes-import-title">Importar clientes</h2><p>Prepara una plantilla y revisa ejemplos antes de una futura integración.</p></div></div>
+                <div class="clientes-import-heading"><span class="clientes-import-icon"><i class="bi bi-file-earmark-arrow-up" aria-hidden="true"></i></span><div><span class="clientes-eyebrow">CRM · Importación masiva</span><h2 id="clientes-import-title">Importar clientes</h2><p>Valida una plantilla y revisa las filas antes de guardarlas en MariaDB.</p></div></div>
                 <button class="clientes-dialog-close" type="button" data-close-client-dialog aria-label="Cerrar importación"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
             </header>
             <form method="post" action="{{ route('management.customers.import') }}" enctype="multipart/form-data" data-client-import-form>

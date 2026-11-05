@@ -3,26 +3,26 @@
 namespace App\Http\Controllers\Gestion\Usuarios;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CambiarEstadoUsuarioRequest;
 use App\Http\Requests\ActualizarUsuarioRequest;
+use App\Http\Requests\CambiarEstadoUsuarioRequest;
 use App\Http\Requests\GuardarUsuarioRequest;
 use App\Models\Clientes\Cliente;
 use App\Models\Organizacion\Sede;
 use App\Models\Seguridad\Rol;
 use App\Models\User;
-use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ExportadorTabular;
+use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioDelegacion;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Illuminate\Http\Response;
 
 class GestionUsuariosController extends Controller
 {
@@ -44,10 +44,12 @@ class GestionUsuariosController extends Controller
             'users' => $users,
             'roles' => $roleCodes,
             'roleLabels' => $this->roleLabels($roleCodes),
+            'roleScopes' => $this->roleScopes($roleCodes),
             'roleDistribution' => $this->roleDistribution(),
             'recentUsers' => User::query()->with(['customer:id,usuario_id,ciudad', 'rolesVigentes', 'rolesPorSedeVigentes'])->latest('creado_en')->latest('id')->limit(5)->get(['id', 'nombre', 'correo', 'rol', 'creado_en']),
             'filters' => $filters,
             'cities' => Cliente::query()->whereNotNull('ciudad')->where('ciudad', '<>', '')->distinct()->orderBy('ciudad')->pluck('ciudad'),
+            'sites' => Sede::query()->where('activa', true)->orderBy('nombre')->get(['id', 'nombre', 'empresa_id']),
             'totalUsers' => $totalUsers,
             'activeUsers' => $hasAccountStatus ? User::query()->where('activo', true)->count() : null,
             'inactiveUsers' => $hasAccountStatus ? User::query()->where('activo', false)->count() : null,
@@ -119,14 +121,20 @@ class GestionUsuariosController extends Controller
 
             if ($role !== null) {
                 if ($role->alcance_permitido === 'sede') {
-                    $siteId = app(ServicioAutorizacion::class)->activeSiteIdFor($request->user());
+                    $siteId = isset($data['sede_id']) ? (int) $data['sede_id'] : null;
                     if ($siteId === null) {
-                        $sites = Sede::query()->where('activa', true)->orderBy('id')->limit(2)->pluck('id');
-                        $siteId = $sites->count() === 1 ? (int) $sites->first() : null;
+                        $siteId = app(ServicioAutorizacion::class)->activeSiteIdFor($request->user());
+                    }
+                    if ($siteId === null) {
+                        $activeSites = Sede::query()->where('activa', true)->orderBy('id')->limit(2)->pluck('id');
+                        $siteId = $activeSites->count() === 1 ? (int) $activeSites->first() : null;
                     }
                     if ($siteId === null) {
                         abort(422, 'Selecciona una sede autorizada para asignar este rol.');
                     }
+
+                    $site = Sede::query()->whereKey($siteId)->where('activa', true)->firstOrFail();
+                    abort_unless(app(ServicioAutorizacion::class)->allowsRecord($request->user(), 'gestion.seguridad.asignar', (int) $site->empresa_id, $siteId), 403);
 
                     DB::table('usuarios_sedes_roles')->insert([
                         'usuario_id' => $user->getKey(),
@@ -306,6 +314,16 @@ class GestionUsuariosController extends Controller
     {
         return Schema::hasTable('roles')
             ? DB::table('roles')->whereIn('codigo', $roleCodes)->pluck('nombre', 'codigo')->all()
+            : [];
+    }
+
+    /** @param array<int,string> $roleCodes
+     * @return array<string,string>
+     */
+    private function roleScopes(array $roleCodes): array
+    {
+        return Schema::hasTable('roles')
+            ? DB::table('roles')->whereIn('codigo', $roleCodes)->pluck('alcance_permitido', 'codigo')->all()
             : [];
     }
 }

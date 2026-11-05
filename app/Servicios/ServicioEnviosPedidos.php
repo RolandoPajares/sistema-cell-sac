@@ -3,13 +3,76 @@
 namespace App\Servicios;
 
 use App\Models\Comercio\EnvioPedido;
+use App\Models\Comercio\EventoEnvioPedido;
 use App\Models\User;
+use App\Servicios\RegistradorAuditoria;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 final class ServicioEnviosPedidos
 {
-    public function __construct(private readonly ServicioAutorizacion $autorizacion) {}
+    public function __construct(
+        private readonly ServicioAutorizacion $autorizacion,
+        private readonly RegistradorAuditoria $auditoria,
+    ) {}
+
+    /**
+     * Actualiza el estado operativo y registra un evento sin duplicar notificaciones externas.
+     *
+     * @param array{estado:string,descripcion?:string|null,identificador_externo?:string|null,ocurrido_en?:string|null} $datos
+     */
+    public function actualizarEstado(EnvioPedido $envio, array $datos, User $usuario, ?string $ip = null): EventoEnvioPedido
+    {
+        abort_unless($this->autorizacion->allowsRecord(
+            $usuario,
+            'gestion.inventario.ajustar',
+            (int) $envio->empresa_id,
+            (int) $envio->sede_id,
+        ), 403);
+
+        return DB::transaction(function () use ($envio, $datos, $usuario, $ip): EventoEnvioPedido {
+            $locked = EnvioPedido::query()->whereKey($envio->getKey())->lockForUpdate()->firstOrFail();
+            $source = 'admin';
+            $externalId = $datos['identificador_externo'] ?? null;
+            if ($externalId !== null) {
+                $existing = EventoEnvioPedido::query()
+                    ->where('envio_pedido_id', $locked->getKey())
+                    ->where('fuente', $source)
+                    ->where('identificador_externo', $externalId)
+                    ->first();
+                if ($existing !== null) {
+                    return $existing;
+                }
+            }
+
+            $status = (string) $datos['estado'];
+            abort_if(in_array($locked->estado, ['entregado', 'cancelado'], true) && $locked->estado !== $status, 409, 'El envío ya se encuentra en un estado terminal.');
+            $occurredAt = isset($datos['ocurrido_en']) ? Carbon::parse($datos['ocurrido_en']) : now();
+            $before = $locked->only(['estado', 'despachado_en', 'entregado_en']);
+            $attributes = ['estado' => $status];
+            if (in_array($status, ['despachado', 'en_transito'], true) && $locked->despachado_en === null) {
+                $attributes['despachado_en'] = $occurredAt;
+            }
+            if ($status === 'entregado' && $locked->entregado_en === null) {
+                $attributes['entregado_en'] = $occurredAt;
+            }
+            $locked->update($attributes);
+            $event = EventoEnvioPedido::query()->create([
+                'envio_pedido_id' => $locked->getKey(),
+                'estado' => $status,
+                'descripcion' => $datos['descripcion'] ?? null,
+                'fuente' => $source,
+                'identificador_externo' => $externalId,
+                'ocurrido_en' => $occurredAt,
+                'datos_seguros' => ['origen' => 'panel_administrativo'],
+            ]);
+            $this->auditoria->record($usuario->getKey(), 'shipment.status_updated', 'envios_pedidos', $locked->getKey(), $before, $locked->only(['estado', 'despachado_en', 'entregado_en']), $ip, 'exito', $datos['descripcion'] ?? null, ['empresa_id' => (int) $locked->empresa_id, 'sede_id' => (int) $locked->sede_id]);
+
+            return $event;
+        }, 3);
+    }
 
     /**
      * @param  array{buscar?:string|null,estado?:string|null,modalidad?:string|null}  $filtros

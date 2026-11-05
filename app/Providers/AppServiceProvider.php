@@ -2,8 +2,15 @@
 
 namespace App\Providers;
 
+use App\Dominio\Catalogo\ProductoDao;
+use App\Contratos\Productos\AlcanceProductos;
+use App\Contratos\Productos\AuditoriaProductos;
+use App\Infraestructura\Persistencia\Pdo\PdoConexion;
+use App\Infraestructura\Persistencia\Pdo\PdoProductoDao;
 use App\Models\Marketing\Campania;
 use App\Models\User;
+use App\Servicios\AdaptadorAlcanceProductos;
+use App\Servicios\AdaptadorAuditoriaProductos;
 use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioMenuDinamico;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -16,7 +23,14 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public function register(): void {}
+    public function register(): void
+    {
+        $this->app->singleton(ProductoDao::class, function (): ProductoDao {
+            return new PdoProductoDao(new PdoConexion(app('db')->connection()->getPdo()));
+        });
+        $this->app->bind(AlcanceProductos::class, AdaptadorAlcanceProductos::class);
+        $this->app->bind(AuditoriaProductos::class, AdaptadorAuditoriaProductos::class);
+    }
 
     public function boot(): void
     {

@@ -8,14 +8,14 @@ use App\Http\Requests\GuardarCategoriaRequest;
 use App\Models\Catalogo\Categoria;
 use App\Models\Catalogo\Producto;
 use App\Models\User;
-use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ExportadorTabular;
+use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioInventario;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Response;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -52,7 +52,7 @@ class CategoriaController extends Controller
             $categoria->activo ? 'Activa' : 'Inactiva',
             $categoria->creado_en?->format('Y-m-d H:i:s'),
         ])->all();
-        $response = $exporter->download($format, 'categorias-'.now()->format('Ymd'),
+        $response = $exporter->download($format, 'categorias',
             ['ID', 'Nombre', 'Descripción', 'Productos', 'Estado', 'Registrada'],
             $rows,
             [

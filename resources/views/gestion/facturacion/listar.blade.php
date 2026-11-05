@@ -4,10 +4,8 @@
 @section('body_class', 'modulo-facturacion')
 
 @section('content')
-@if (auth()->user()?->isRole('administrador'))
-    @include('paneles.administrador.finanzas.facturacion.listar')
-@else
-    @include('gestion.componentes.modulo-pendiente', ['module' => $module])
-@endif
+{{-- La consulta usa siempre el origen real de documentos_electronicos. No se
+     muestra la maqueta anterior a ningún rol autorizado. --}}
+@include('paneles.administrador.finanzas.facturacion.listar')
 @endsection
 

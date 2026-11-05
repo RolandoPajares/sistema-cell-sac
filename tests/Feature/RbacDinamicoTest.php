@@ -24,7 +24,7 @@ it('seeds the seven RBAC roles without inventing organization data', function ()
         ->and(DB::table('empresas')->count())->toBe(0)
         ->and(DB::table('sedes')->count())->toBe(0)
         ->and(DB::table('almacenes')->count())->toBe(0)
-        ->and(DB::table('permisos')->count())->toBe(174)
+        ->and(DB::table('permisos')->count())->toBe(183)
         ->and(DB::table('pantallas')->whereIn('codigo', ['admin.payments', 'admin.cash_registers', 'admin.refunds'])
             ->where('habilitada', true)->count())->toBe(3)
         ->and(DB::table('pantallas')->where('codigo', 'admin.cash_registers')->value('ruta'))
@@ -424,4 +424,57 @@ it('preserves the last active global administrator assignment', function (): voi
         'rol_id' => $administratorRoleId,
         'activo' => true,
     ]);
+});
+
+it('does not deactivate a role that is still assigned at a site', function (): void {
+    $administrator = SpanishAccessFixture::user('administrador');
+    $roleId = (int) DB::table('roles')->where('codigo', 'marketing')->value('id');
+    $siteId = (int) DB::table('sedes')->where('activa', true)->value('id');
+
+    DB::table('usuarios_sedes_roles')->insert([
+        'usuario_id' => $administrator->id,
+        'sede_id' => $siteId,
+        'rol_id' => $roleId,
+        'asignado_por_usuario_id' => $administrator->id,
+        'asignado_en' => now(),
+        'activo' => true,
+    ]);
+
+    $this->actingAs($administrator)
+        ->patch(route('management.roles_permissions.status', $roleId), ['activo' => 0])
+        ->assertStatus(409);
+
+    expect(DB::table('roles')->where('id', $roleId)->value('activo'))->toBe(1);
+});
+
+it('does not change role scope while active assignments exist', function (): void {
+    $administrator = SpanishAccessFixture::user('administrador');
+    $roleId = (int) DB::table('roles')->where('codigo', 'marketing')->value('id');
+
+    DB::table('usuarios_roles')->insert([
+        'usuario_id' => $administrator->id,
+        'rol_id' => $roleId,
+        'asignado_por_usuario_id' => $administrator->id,
+        'asignado_en' => now(),
+        'activo' => true,
+    ]);
+
+    $this->actingAs($administrator)
+        ->put(route('management.roles_permissions.update', $roleId), [
+            'nombre' => 'Marketing',
+            'descripcion' => 'Rol de marketing',
+            'alcance_permitido' => 'empresa',
+        ])
+        ->assertStatus(409);
+});
+
+it('keeps indispensable RBAC screens enabled', function (): void {
+    $administrator = SpanishAccessFixture::user('administrador');
+    $screenId = (int) DB::table('pantallas')->where('codigo', 'admin.roles')->value('id');
+
+    $this->actingAs($administrator)
+        ->patch(route('management.modules.screens.update', $screenId), ['habilitada' => 0])
+        ->assertStatus(422);
+
+    expect(DB::table('pantallas')->where('id', $screenId)->value('habilitada'))->toBe(1);
 });

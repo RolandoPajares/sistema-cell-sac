@@ -5,7 +5,6 @@
 
 @section('content')
 @php
-    $module = require resource_path('views/gestion/soporte-reclamos/datos.php');
     $kpis = $module['kpis'];
     $tableColumns = ['Ticket', 'Cliente', 'Asunto', 'Prioridad', 'Estado', 'Actualización', 'Acciones'];
 @endphp
@@ -60,14 +59,14 @@
                 <thead><tr>@foreach ($tableColumns as $column)<th>{{ $column }}</th>@endforeach</tr></thead>
                 <tbody>
                 @forelse ($module['rows'] ?? [] as $row)
-                    <tr><td>{{ $row['codigo'] }}</td><td>{{ $row['cliente'] }}</td><td>{{ $row['asunto'] }}</td><td>{{ $row['prioridad'] }}</td><td>{{ $row['estado'] }}</td><td>{{ $row['actualizado'] }}</td><td><button type="button" aria-label="Editar caso" data-pending-open="editar" data-pending-action="{{ $row['edit_url'] }}" data-pending-record="{{ base64_encode(json_encode($row['record'], JSON_UNESCAPED_UNICODE)) }}"><i class="bi bi-pencil" aria-hidden="true"></i></button><button type="button" aria-label="Cerrar caso" data-pending-open="eliminar" data-pending-action="{{ $row['delete_url'] }}" data-pending-method="PATCH" data-pending-record="{{ base64_encode(json_encode($row['record'], JSON_UNESCAPED_UNICODE)) }}"><i class="bi bi-check2-circle" aria-hidden="true"></i></button></td></tr>
+                    <tr><td>{{ $row['codigo'] }}</td><td>{{ $row['cliente'] }}</td><td>{{ $row['asunto'] }}</td><td>{{ $row['prioridad'] }}</td><td>{{ $row['estado'] }}</td><td>{{ $row['actualizado'] }}</td><td><button type="button" aria-label="Ver caso" data-pending-open="ver" data-pending-record="{{ base64_encode(json_encode($row['record'], JSON_UNESCAPED_UNICODE)) }}"><i class="bi bi-eye" aria-hidden="true"></i></button><button type="button" aria-label="Editar caso" data-pending-open="editar" data-pending-action="{{ $row['edit_url'] }}" data-pending-record="{{ base64_encode(json_encode($row['record'], JSON_UNESCAPED_UNICODE)) }}"><i class="bi bi-pencil" aria-hidden="true"></i></button><button type="button" aria-label="Cerrar caso" data-pending-open="eliminar" data-pending-action="{{ $row['delete_url'] }}" data-pending-method="PATCH" data-pending-record="{{ base64_encode(json_encode($row['record'], JSON_UNESCAPED_UNICODE)) }}"><i class="bi bi-check2-circle" aria-hidden="true"></i></button></td></tr>
                 @empty
                     <tr><td colspan="{{ count($tableColumns) }}"><div class="gestion-soporte-empty"><span><i class="bi bi-inbox" aria-hidden="true"></i></span><strong>No hay casos para mostrar</strong><p>No existen casos que coincidan con el alcance y filtros actuales.</p></div></td></tr>
                 @endforelse
                 </tbody>
             </table>
         </div>
-        <footer class="gestion-soporte-table-footer"><span>Sin resultados para mostrar</span><div class="gestion-soporte-pagination" aria-label="Paginación deshabilitada"><button type="button" disabled aria-label="Página anterior"><i class="bi bi-chevron-left" aria-hidden="true"></i></button><button type="button" class="is-active" disabled>1</button><button type="button" disabled aria-label="Página siguiente"><i class="bi bi-chevron-right" aria-hidden="true"></i></button></div></footer>
+        <footer class="gestion-soporte-table-footer"><span>{{ $module['pagination']->total() }} registros; mostrando {{ $module['pagination']->firstItem() ?: 0 }} a {{ $module['pagination']->lastItem() ?: 0 }}</span><div class="gestion-soporte-pagination" aria-label="Paginación">@if ($module['pagination']->onFirstPage())<button type="button" disabled aria-label="Página anterior"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>@else<a href="{{ $module['pagination']->previousPageUrl() }}" aria-label="Página anterior"><i class="bi bi-chevron-left" aria-hidden="true"></i></a>@endif @for ($page = 1; $page <= $module['pagination']->lastPage(); $page++)<a href="{{ $module['pagination']->url($page) }}" class="{{ $page === $module['pagination']->currentPage() ? 'is-active' : '' }}">{{ $page }}</a>@endfor @if ($module['pagination']->hasMorePages())<a href="{{ $module['pagination']->nextPageUrl() }}" aria-label="Página siguiente"><i class="bi bi-chevron-right" aria-hidden="true"></i></a>@else<button type="button" disabled aria-label="Página siguiente"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>@endif</div></footer>
     </section>
 
     <section class="gestion-soporte-bottom-grid" aria-label="Resumen de soporte">

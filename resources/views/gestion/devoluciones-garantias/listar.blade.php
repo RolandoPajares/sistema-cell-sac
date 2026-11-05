@@ -4,8 +4,8 @@
 @section('body_class', 'modulo-devoluciones-garantias')
 
 @section('content')
-@include('gestion.componentes.tablero-operacion', [
-    'module' => require resource_path('views/gestion/devoluciones-garantias/datos.php'),
-])
+{{-- El controlador prepara filas, KPIs, filtros, paginación y alcance RBAC
+     desde MariaDB. No recargar aquí la maqueta estática de datos.php. --}}
+@include('gestion.componentes.tablero-operacion', ['module' => $module])
 @endsection
 

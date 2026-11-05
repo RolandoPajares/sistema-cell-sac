@@ -21,7 +21,7 @@ return new class extends Migration
 
         DB::table('pantallas')->where('id', $screen->id)->update([
             'ruta' => 'management.security_sessions',
-            'habilitada' => true,
+            'habilitada' => (bool) $screen->habilitada,
             'actualizado_en' => now(),
         ]);
 

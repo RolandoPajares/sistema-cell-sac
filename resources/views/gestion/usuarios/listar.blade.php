@@ -74,7 +74,7 @@
     </section>
 
     <dialog class="usuarios-dialog" id="nuevo-usuario" aria-labelledby="usuario-crear-titulo">
-        <div class="usuarios-dialog-card"><header class="usuarios-dialog-header"><div><span class="usuarios-dialog-icon"><i class="bi bi-person-plus" aria-hidden="true"></i></span><span><small>Gestión de usuarios</small><h2 id="usuario-crear-titulo">Registrar nuevo usuario</h2><p>Crea una cuenta y asígnale un rol configurable.</p></span></div><button type="button" class="usuarios-dialog-close" data-close-user-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="usuarios-dialog-body">@include('gestion.usuarios.crear', ['roles' => $roles, 'roleLabels' => $roleLabels])</div></div>
+            <div class="usuarios-dialog-card"><header class="usuarios-dialog-header"><div><span class="usuarios-dialog-icon"><i class="bi bi-person-plus" aria-hidden="true"></i></span><span><small>Gestión de usuarios</small><h2 id="usuario-crear-titulo">Registrar nuevo usuario</h2><p>Crea una cuenta y asígnale un rol configurable.</p></span></div><button type="button" class="usuarios-dialog-close" data-close-user-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="usuarios-dialog-body">@include('gestion.usuarios.crear', ['roles' => $roles, 'roleLabels' => $roleLabels, 'roleScopes' => $roleScopes, 'sites' => $sites])</div></div>
     </dialog>
 
     @foreach ($users as $user)
@@ -111,6 +111,8 @@
             const role = form?.querySelector('[data-user-role]');
             const documentField = form?.querySelector('[data-user-document]');
             const roleNote = form?.querySelector('[data-user-role-note]');
+            const siteField = form?.querySelector('[data-user-site-field]');
+            const siteSelect = form?.querySelector('[data-user-site]');
 
             const updateCustomerFields = () => {
                 const isCustomer = role?.value.startsWith('cliente_');
@@ -119,6 +121,13 @@
                 }
                 if (roleNote) {
                     roleNote.hidden = !isCustomer;
+                }
+                const needsSite = role?.selectedOptions[0]?.dataset.scope === 'sede';
+                if (siteField) {
+                    siteField.hidden = !needsSite;
+                }
+                if (siteSelect) {
+                    siteSelect.required = needsSite;
                 }
             };
 

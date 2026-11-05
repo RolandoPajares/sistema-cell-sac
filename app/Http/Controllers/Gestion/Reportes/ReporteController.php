@@ -98,7 +98,7 @@ class ReporteController extends Controller
             $order->creado_en?->toDateTimeString(),
         ])->all();
         $response = $exporter->download($format, 'reporte-pedidos',
-            ['ID', 'Usuario', 'Subtotal', 'Descuento', 'Total', 'Estado', 'Registrado'],
+            ['id', 'usuario_id', 'subtotal', 'descuento', 'total', 'estado', 'creado_en'],
             $rows,
             [
                 'title' => 'REPORTE COMERCIAL DE PEDIDOS',

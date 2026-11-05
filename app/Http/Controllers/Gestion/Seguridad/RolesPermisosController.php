@@ -11,6 +11,7 @@ use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioDelegacion;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
@@ -106,13 +107,20 @@ class RolesPermisosController extends Controller
 
     public function update(ActualizarRolRequest $request, Rol $role, ServicioDelegacion $delegacion, RegistradorAuditoria $auditoria): RedirectResponse
     {
-        abort_if($role->es_sistema || $role->codigo === 'administrador', 422, 'El rol del sistema está reservado y no puede editarse.');
+        abort_if($role->codigo === 'administrador', 422, 'El rol del administrador está reservado y no puede editarse.');
         $data = $request->validated();
         abort_unless($data['alcance_permitido'] !== 'empresa' || $request->user()->isRole('administrador'), 403, 'Solo un administrador global puede conceder alcance empresarial.');
         abort_unless($delegacion->puedeDelegarPermisos($request->user(), $role->permisos()->pluck('permisos.id')->all(), $data['alcance_permitido']), 403, 'El nuevo alcance excede tus privilegios delegables.');
 
         DB::transaction(function () use ($role, $data, $request, $auditoria): void {
             $locked = Rol::query()->lockForUpdate()->findOrFail($role->getKey());
+            if ($locked->alcance_permitido !== $data['alcance_permitido']) {
+                $hasGlobalAssignments = DB::table('usuarios_roles')
+                    ->where('rol_id', $locked->getKey())->where('activo', true)->exists();
+                $hasSiteAssignments = Schema::hasTable('usuarios_sedes_roles') && DB::table('usuarios_sedes_roles')
+                    ->where('rol_id', $locked->getKey())->where('activo', true)->exists();
+                abort_if($hasGlobalAssignments || $hasSiteAssignments, 409, 'No puedes cambiar el alcance de un rol con asignaciones activas; revócalas primero.');
+            }
             $before = $locked->only(['nombre', 'descripcion', 'alcance_permitido']);
             $locked->update($data);
             $auditoria->record($request->user()->getKey(), 'actualizar_rol', 'roles', $locked->getKey(), $before, $locked->only(['nombre', 'descripcion', 'alcance_permitido']), $request->ip());
@@ -123,13 +131,16 @@ class RolesPermisosController extends Controller
 
     public function updateStatus(Request $request, Rol $role, ServicioDelegacion $delegacion, RegistradorAuditoria $auditoria): RedirectResponse
     {
-        abort_if($role->es_sistema || $role->codigo === 'administrador', 422, 'El rol del sistema está reservado y no puede desactivarse.');
+        abort_if($role->codigo === 'administrador', 422, 'El rol del administrador está reservado y no puede desactivarse.');
         abort_unless(app(ServicioAutorizacion::class)->allowsGlobal($request->user(), 'gestion.seguridad.actualizar'), 403);
         $activo = $request->boolean('activo');
 
         DB::transaction(function () use ($role, $activo, $request, $delegacion, $auditoria): void {
             $locked = Rol::query()->lockForUpdate()->findOrFail($role->getKey());
-            abort_if(!$activo && $locked->usuarios()->wherePivot('activo', true)->exists(), 409, 'Revoca primero las asignaciones activas de este rol.');
+            $hasGlobalAssignments = $locked->usuarios()->wherePivot('activo', true)->exists();
+            $hasSiteAssignments = Schema::hasTable('usuarios_sedes_roles') && DB::table('usuarios_sedes_roles')
+                ->where('rol_id', $locked->getKey())->where('activo', true)->exists();
+            abort_if(! $activo && ($hasGlobalAssignments || $hasSiteAssignments), 409, 'Revoca primero las asignaciones activas de este rol.');
             abort_unless($delegacion->puedeDelegarPermisos($request->user(), $locked->permisos()->pluck('permisos.id')->all(), $locked->alcance_permitido), 403);
             $before = ['activo' => (bool) $locked->activo];
             $locked->update(['activo' => $activo]);

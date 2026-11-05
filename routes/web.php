@@ -165,7 +165,7 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::get('/organizacion/personal', [PersonalSedeController::class, 'listar'])
         ->middleware(['role:administrador', 'permiso:ruta', 'permiso:pantalla.admin.staff.consultar'])->name('company_settings.staff');
     Route::get('/organizacion/responsables', [ResponsableOrganizacionalController::class, 'index'])
-        ->middleware(['role:administrador', 'permiso:ruta', 'permiso:pantalla.admin.responsibles.consultar'])->name('company_settings.responsibles');
+        ->middleware(['role:administrador', 'permiso:ruta', 'permiso:pantalla.admin.staff.consultar', 'permiso:pantalla.admin.responsibles.consultar'])->name('company_settings.responsibles');
     Route::post('/organizacion/responsables', [ResponsableOrganizacionalController::class, 'store'])
         ->middleware(['role:administrador', 'permiso:gestion.organizacion.actualizar', 'permiso:pantalla.admin.responsibles.consultar'])->name('company_settings.responsibles.store');
     Route::get('/seguridad-diseno/usuarios', static fn (): RedirectResponse => redirect()->route('management.users'))
@@ -184,7 +184,7 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
         ->middleware('role:administrador')->name('roles_permissions.preview.modules');
     Route::get('/seguridad-diseno/politicas', static fn (): View => view('paneles.administrador.seguridad.politicas.listar'))
         ->middleware('role:administrador')->name('roles_permissions.preview.policies');
-    Route::get('/seguridad-diseno/sesiones', static fn (): RedirectResponse => redirect()->route('management.security_sessions'))
+    Route::get('/seguridad-diseno/sesiones', static fn (): View => view('paneles.administrador.seguridad.sesiones.listar'))
         ->middleware('role:administrador')->name('roles_permissions.preview.sessions');
     Route::get('/seguridad/sesiones', [SesionesGlobalesController::class, 'index'])
         ->middleware(['role:administrador', 'permiso:ruta', 'permiso:pantalla.admin.sessions.consultar'])->name('security_sessions');
@@ -320,6 +320,13 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::post('/inventario/transferencias/{transfer}/close', [TransferenciaExistenciaController::class, 'close'])->whereNumber('transfer')->name('inventory.transfer_close');
     Route::get('/inventario/diseno/envios', [EnviosPedidosController::class, 'mostrar'])
         ->middleware(['role:administrador', 'permiso:ruta', 'permiso:pantalla.admin.shipments.consultar'])->name('inventory.preview.shipments');
+    Route::patch('/inventario/envios/{envioPedido}/estado', [EnviosPedidosController::class, 'actualizarEstado'])
+        ->whereNumber('envioPedido')
+        ->middleware(['role:administrador', 'permiso:ruta'])
+        ->name('inventory.shipments.status.update');
+    Route::get('/inventario/diseno/envios/{envio}', [EnviosPedidosController::class, 'detalle'])
+        ->whereNumber('envio')
+        ->middleware(['role:administrador', 'permiso:ruta', 'permiso:pantalla.admin.shipments.consultar'])->name('inventory.preview.shipments.show');
     Route::get('/inventario/diseno/envios/exportar/{format?}', [EnviosPedidosController::class, 'exportar'])
         ->whereIn('format', ['pdf', 'excel', 'csv'])
         ->middleware(['role:administrador', 'permiso:ruta'])->name('inventory.preview.shipments.export');
@@ -339,6 +346,7 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::get('/compras/exportar/{format}', [CompraController::class, 'export'])
         ->whereIn('format', ['pdf', 'excel', 'csv'])->name('purchases.export');
     Route::post('/compras', [CompraController::class, 'store'])->name('purchases.store');
+    Route::post('/compras/importar', [CompraController::class, 'import'])->name('purchases.import');
     Route::post('/compras/{compra}/aprobar', [CompraController::class, 'approve'])->whereNumber('compra')->name('purchases.approve');
     Route::post('/compras/{compra}/anular', [CompraController::class, 'cancel'])->whereNumber('compra')->name('purchases.cancel');
     Route::post('/compras/{compra}/recibir', [CompraController::class, 'receive'])->whereNumber('compra')->name('purchases.receive');
@@ -359,6 +367,8 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::put('/cupones/{coupon}', [CuponController::class, 'update'])->whereNumber('coupon')->name('coupons.update');
     Route::delete('/cupones/{coupon}', [CuponController::class, 'deactivate'])->whereNumber('coupon')->name('coupons.deactivate');
     Route::get('/segmentos', [SegmentoClienteController::class, 'index'])->name('segments');
+    Route::get('/segmentos/exportar/{format?}', [SegmentoClienteController::class, 'export'])
+        ->whereIn('format', ['pdf', 'excel', 'csv'])->name('segments.export');
     Route::post('/segmentos', [SegmentoClienteController::class, 'store'])->name('segments.store');
     Route::put('/segmentos/{segment}', [SegmentoClienteController::class, 'update'])->whereNumber('segment')->name('segments.update');
     Route::delete('/segmentos/{segment}', [SegmentoClienteController::class, 'deactivate'])->whereNumber('segment')->name('segments.deactivate');

@@ -69,7 +69,11 @@
     <section class="gestion-operacion-control-card">
         <header class="gestion-operacion-card-header">
             <div><i class="bi {{ $ui['table_icon'] }}" aria-hidden="true"></i><h2>{{ $ui['table_title'] }}</h2><span>{{ $ui['table_count'] }}</span></div>
-            <button class="gestion-operacion-sort" type="button" data-pending-notice="El ordenamiento quedará habilitado con los registros reales.">Ordenar por <strong>Más recientes</strong><i class="bi bi-chevron-down" aria-hidden="true"></i></button>
+            @if (($ui['backend'] ?? false) === true && !empty($ui['sort_options']))
+                <details class="gestion-operacion-sort-menu"><summary class="gestion-operacion-sort">Ordenar por <strong>{{ $ui['sort_options'][$filterValues['orden'] ?? 'recientes'] ?? 'Más recientes' }}</strong><i class="bi bi-chevron-down" aria-hidden="true"></i></summary><div class="gestion-operacion-sort-options">@foreach ($ui['sort_options'] as $sortKey => $sortLabel)<a href="{{ route($ui['filter_route'], array_merge(request()->query(), ['orden' => $sortKey, 'page' => 1])) }}">{{ $sortLabel }}</a>@endforeach</div></details>
+            @else
+                <button class="gestion-operacion-sort" type="button" data-pending-notice="El ordenamiento quedará habilitado cuando exista una fuente de datos integrada.">Ordenar por <strong>Más recientes</strong><i class="bi bi-chevron-down" aria-hidden="true"></i></button>
+            @endif
         </header>
         <div class="gestion-operacion-table-wrap">
             <table class="gestion-operacion-table">

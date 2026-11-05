@@ -514,6 +514,13 @@ final class ServicioAutorizacion
             $action = 'actualizar';
         }
 
+        // Segmentos no tenía permiso de exportación en el catálogo RBAC legado.
+        // Exportar no amplía el alcance de lectura: conserva el permiso de consulta
+        // hasta que el permiso específico sea administrado desde la matriz gráfica.
+        if ($routeModule === 'segments' && $routeName === 'segments.export') {
+            $action = 'consultar';
+        }
+
         return 'gestion.'.$module.'.'.$action;
     }
 
