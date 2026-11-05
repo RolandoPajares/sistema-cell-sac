@@ -18,9 +18,10 @@ it('ejecuta CRUD, mapea variantes y protege valores con parámetros enlazados', 
     $actualizado = $dao->actualizar(new ProductoEntidad($producto->id, 'Marca', 'Teléfono Pro', 1, 'Móviles', '120.00', '110.00', true, 7));
     $dao->actualizarVariante(new VarianteProductoEntidad($variante->id, (int) $producto->id, 'SKU-2', null, 'Azul', null, 3, false, 'activo'));
 
-    expect($mapeado?->variantes)->toHaveCount(1)
+    expect($mapeado?->marca)->toBe("Marca'; DROP TABLE productos;--")
+        ->and($mapeado?->variantes)->toHaveCount(1)
         ->and($actualizado->nombre)->toBe('Teléfono Pro')
-        ->and($dao->buscarPorId((int) $producto->id)?->marca)->toBe("Marca'; DROP TABLE productos;--");
+        ->and($dao->buscarPorId((int) $producto->id)?->marca)->toBe('Marca');
 
     $dao->eliminarVariante((int) $variante->id);
     $dao->eliminar((int) $producto->id);
