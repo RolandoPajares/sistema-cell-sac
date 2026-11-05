@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Gestion\SoporteReclamos;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ActualizarCasoSoporteRequest;
 use App\Http\Requests\GuardarCasoSoporteRequest;
+use App\Models\Clientes\Cliente;
 use App\Models\Comercio\CasoSoporte;
 use App\Servicios\ExportadorTabular;
 use App\Servicios\RegistradorAuditoria;
@@ -51,7 +52,7 @@ class SoporteReclamoController extends Controller
             'prioridad' => $case->prioridad,
             'estado' => $case->estado,
             'actualizado' => $case->actualizado_en?->format('d/m/Y H:i'),
-            'record' => ['id' => $case->id, 'codigo' => $case->codigo, 'asunto' => $case->asunto, 'prioridad' => $case->prioridad, 'estado' => $case->estado, 'cliente_id' => $case->cliente_id],
+            'record' => ['id' => $case->id, 'codigo' => $case->codigo, 'asunto' => $case->asunto, 'prioridad' => $case->prioridad, 'estado' => $case->estado, 'cliente_id' => $case->cliente_id, 'cliente_nombre' => $case->cliente?->nombre_contacto ?: $case->cliente?->razon_social ?: 'Sin cliente'],
             'edit_url' => route('management.support.update', $case),
             'delete_url' => route('management.support.close', $case),
         ])->all();
@@ -69,6 +70,7 @@ class SoporteReclamoController extends Controller
     {
         $location = app(ServicioAutorizacion::class)->operationSite($request->user());
         abort_unless($location['empresa_id'] !== null && $location['sede_id'] !== null, 403, 'Selecciona una sede autorizada.');
+        $this->assertCustomerInScope($request, $request->filled('cliente_id') ? $request->integer('cliente_id') : null, (int) $location['empresa_id']);
         $case = DB::transaction(function () use ($request, $location, $audit): CasoSoporte {
             $case = CasoSoporte::create($request->validated() + ['empresa_id' => $location['empresa_id'], 'sede_id' => $location['sede_id'], 'estado' => 'abierto']);
             $audit->record($request->user()->getKey(), 'support.created', 'casos_soporte', $case->getKey(), null, $case->only(['codigo', 'asunto', 'prioridad', 'estado']), $request->ip());
@@ -82,6 +84,7 @@ class SoporteReclamoController extends Controller
     public function update(ActualizarCasoSoporteRequest $request, CasoSoporte $casoSoporte, RegistradorAuditoria $audit): RedirectResponse
     {
         $this->assertCaseInScope($request, $casoSoporte, 'gestion.soporte.actualizar');
+        $this->assertCustomerInScope($request, $request->filled('cliente_id') ? $request->integer('cliente_id') : null, (int) $casoSoporte->empresa_id);
         $before = $casoSoporte->only(['asunto', 'prioridad', 'estado', 'cliente_id']);
         DB::transaction(function () use ($request, $casoSoporte, $audit, $before): void {
             $casoSoporte->update($request->validated());
@@ -96,8 +99,10 @@ class SoporteReclamoController extends Controller
         $this->assertCaseInScope($request, $casoSoporte, 'gestion.soporte.anular');
         abort_unless($casoSoporte->estado !== 'cerrado', 409, 'El caso ya está cerrado.');
         $before = ['estado' => $casoSoporte->estado];
-        $casoSoporte->update(['estado' => 'cerrado']);
-        $audit->record($request->user()->getKey(), 'support.closed', 'casos_soporte', $casoSoporte->getKey(), $before, ['estado' => 'cerrado'], $request->ip());
+        DB::transaction(function () use ($request, $casoSoporte, $audit, $before): void {
+            $casoSoporte->update(['estado' => 'cerrado']);
+            $audit->record($request->user()->getKey(), 'support.closed', 'casos_soporte', $casoSoporte->getKey(), $before, ['estado' => 'cerrado'], $request->ip());
+        }, 3);
 
         return redirect()->route('management.support')->with('status', 'Caso de soporte cerrado.');
     }
@@ -105,6 +110,19 @@ class SoporteReclamoController extends Controller
     private function assertCaseInScope(Request $request, CasoSoporte $case, string $permission): void
     {
         abort_unless(app(ServicioAutorizacion::class)->allowsRecord($request->user(), $permission, (int) $case->empresa_id, (int) $case->sede_id), 403);
+    }
+
+    private function assertCustomerInScope(Request $request, ?int $customerId, int $companyId): void
+    {
+        if ($customerId === null) {
+            return;
+        }
+
+        abort_unless(Cliente::query()
+            ->whereKey($customerId)
+            ->where('empresa_id', $companyId)
+            ->where('activo', true)
+            ->exists(), 422, 'El cliente no pertenece a la empresa o está inactivo.');
     }
 
     public function export(Request $request, ExportadorTabular $exporter, RegistradorAuditoria $audit, string $format = 'csv'): Response|StreamedResponse
