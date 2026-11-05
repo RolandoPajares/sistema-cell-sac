@@ -51,7 +51,10 @@ final class AsignacionRolesController extends Controller
             abort_unless($role->codigo !== 'administrador' || $autorizacion->hasRole($request->user(), 'administrador'), 403);
         } else {
             abort_unless(Schema::hasTable('usuarios_sedes_roles'), 503, 'La asignación por sede requiere la migración RBAC.');
-            $site = Sede::query()->findOrFail((int) $data['sede_id']);
+            $siteId = app(ServicioAutorizacion::class)->operationSite($request->user())['sede_id'];
+            abort_if($siteId === null, 422, 'No existe una sede interna autorizada para asignar este rol.');
+            $site = Sede::query()->whereKey($siteId)->where('activa', true)->firstOrFail();
+            $data['sede_id'] = (int) $site->getKey();
             abort_unless($autorizacion->allowsRecord($request->user(), 'gestion.seguridad.asignar', (int) $site->empresa_id, (int) $site->id), 403);
             if (! $autorizacion->hasRole($request->user(), 'administrador')) {
                 $canManageSite = DB::table('usuarios_sedes_roles')

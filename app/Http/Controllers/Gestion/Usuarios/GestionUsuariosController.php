@@ -121,16 +121,9 @@ class GestionUsuariosController extends Controller
 
             if ($role !== null) {
                 if ($role->alcance_permitido === 'sede') {
-                    $siteId = isset($data['sede_id']) ? (int) $data['sede_id'] : null;
+                    $siteId = app(ServicioAutorizacion::class)->operationSite($request->user())['sede_id'];
                     if ($siteId === null) {
-                        $siteId = app(ServicioAutorizacion::class)->activeSiteIdFor($request->user());
-                    }
-                    if ($siteId === null) {
-                        $activeSites = Sede::query()->where('activa', true)->orderBy('id')->limit(2)->pluck('id');
-                        $siteId = $activeSites->count() === 1 ? (int) $activeSites->first() : null;
-                    }
-                    if ($siteId === null) {
-                        abort(422, 'Selecciona una sede autorizada para asignar este rol.');
+                        abort(422, 'No existe una sede interna autorizada para asignar este rol.');
                     }
 
                     $site = Sede::query()->whereKey($siteId)->where('activa', true)->firstOrFail();

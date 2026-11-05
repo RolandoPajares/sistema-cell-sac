@@ -27,7 +27,7 @@ class AsignarRolUsuarioRequest extends FormRequest
         return [
             'rol_id' => ['required', 'integer', Rule::exists('roles', 'id')->where('activo', true)],
             'alcance' => ['required', 'in:empresa,sede'],
-            'sede_id' => ['nullable', 'required_if:alcance,sede', 'integer', Rule::exists('sedes', 'id')->where('activa', true)],
+            'sede_id' => ['nullable', 'integer', Rule::exists('sedes', 'id')->where('activa', true)],
             'vigente_hasta' => ['nullable', 'date', 'after:today'],
         ];
     }
