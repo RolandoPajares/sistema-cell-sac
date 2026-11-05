@@ -15,6 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class MenusController extends Controller
@@ -61,7 +62,7 @@ class MenusController extends Controller
         abort_unless($autorizacion->allowsGlobal($request->user(), 'gestion.seguridad.actualizar'), 403);
         $validated = $request->validate([
             'roles' => ['sometimes', 'array'],
-            'roles.*' => ['integer', 'distinct', 'exists:roles,id'],
+            'roles.*' => ['integer', 'distinct', Rule::exists('roles', 'id')->where('activo', true)],
         ]);
         $validated['roles'] ??= [];
         if ($menu->codigo === 'administrador.sidebar') {
@@ -115,6 +116,7 @@ class MenusController extends Controller
     {
         abort_unless($autorizacion->allowsGlobal($request->user(), 'gestion.seguridad.actualizar'), 403);
         $validated = $request->validate(['habilitada' => ['required', 'boolean']]);
+        abort_if(! $validated['habilitada'] && $this->isIndispensableScreen($screen), 422, 'La pantalla indispensable de seguridad no se puede desactivar.');
         if ($validated['habilitada'] && (! is_string($screen->ruta) || ! $this->isActionableRoute($screen->ruta))) {
             abort(422, 'No se puede activar una pantalla sin una ruta de controlador implementada.');
         }
@@ -148,5 +150,16 @@ class MenusController extends Controller
         $route = Route::getRoutes()->getByName($routeName);
 
         return $route !== null && ! str_contains($route->getActionName(), 'Illuminate\\Routing\\ViewController');
+    }
+
+    private function isIndispensableScreen(Pantalla $screen): bool
+    {
+        return in_array($screen->codigo, [
+            'admin.users',
+            'admin.roles',
+            'admin.user_assignments',
+            'admin.menus',
+            'admin.modules',
+        ], true);
     }
 }

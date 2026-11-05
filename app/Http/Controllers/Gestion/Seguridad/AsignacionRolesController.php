@@ -124,6 +124,7 @@ final class AsignacionRolesController extends Controller
         RegistradorAuditoria $auditoria,
     ): RedirectResponse {
         abort_unless(app(ServicioAutorizacion::class)->allowsGlobal($request->user(), 'gestion.seguridad.revocar'), 403);
+        abort_unless($delegacion->puedeAdministrarUsuario($request->user(), $user), 403, 'No puedes administrar una cuenta con privilegios superiores a los tuyos.');
         abort_unless($delegacion->puedeAsignarRol($request->user(), $role), 403, 'No puedes administrar una asignación con privilegios superiores a los tuyos.');
         if ($site !== null) {
             abort_unless(app(ServicioAutorizacion::class)->allowsRecord($request->user(), 'gestion.seguridad.revocar', (int) $site->empresa_id, (int) $site->id), 403);

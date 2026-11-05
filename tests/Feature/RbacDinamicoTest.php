@@ -467,3 +467,14 @@ it('does not change role scope while active assignments exist', function (): voi
         ])
         ->assertStatus(409);
 });
+
+it('keeps indispensable RBAC screens enabled', function (): void {
+    $administrator = SpanishAccessFixture::user('administrador');
+    $screenId = (int) DB::table('pantallas')->where('codigo', 'admin.roles')->value('id');
+
+    $this->actingAs($administrator)
+        ->patch(route('management.modules.screens.update', $screenId), ['habilitada' => 0])
+        ->assertStatus(422);
+
+    expect(DB::table('pantallas')->where('id', $screenId)->value('habilitada'))->toBe(1);
+});
