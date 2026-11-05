@@ -184,7 +184,7 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
         ->middleware('role:administrador')->name('roles_permissions.preview.modules');
     Route::get('/seguridad-diseno/politicas', static fn (): View => view('paneles.administrador.seguridad.politicas.listar'))
         ->middleware('role:administrador')->name('roles_permissions.preview.policies');
-    Route::get('/seguridad-diseno/sesiones', static fn (): RedirectResponse => redirect()->route('management.security_sessions'))
+    Route::get('/seguridad-diseno/sesiones', static fn (): View => view('paneles.administrador.seguridad.sesiones.listar'))
         ->middleware('role:administrador')->name('roles_permissions.preview.sessions');
     Route::get('/seguridad/sesiones', [SesionesGlobalesController::class, 'index'])
         ->middleware(['role:administrador', 'permiso:ruta', 'permiso:pantalla.admin.sessions.consultar'])->name('security_sessions');

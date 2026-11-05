@@ -107,7 +107,7 @@ class RolesPermisosController extends Controller
 
     public function update(ActualizarRolRequest $request, Rol $role, ServicioDelegacion $delegacion, RegistradorAuditoria $auditoria): RedirectResponse
     {
-        abort_if($role->es_sistema || $role->codigo === 'administrador', 422, 'El rol del sistema está reservado y no puede editarse.');
+        abort_if($role->codigo === 'administrador', 422, 'El rol del administrador está reservado y no puede editarse.');
         $data = $request->validated();
         abort_unless($data['alcance_permitido'] !== 'empresa' || $request->user()->isRole('administrador'), 403, 'Solo un administrador global puede conceder alcance empresarial.');
         abort_unless($delegacion->puedeDelegarPermisos($request->user(), $role->permisos()->pluck('permisos.id')->all(), $data['alcance_permitido']), 403, 'El nuevo alcance excede tus privilegios delegables.');
@@ -131,7 +131,7 @@ class RolesPermisosController extends Controller
 
     public function updateStatus(Request $request, Rol $role, ServicioDelegacion $delegacion, RegistradorAuditoria $auditoria): RedirectResponse
     {
-        abort_if($role->es_sistema || $role->codigo === 'administrador', 422, 'El rol del sistema está reservado y no puede desactivarse.');
+        abort_if($role->codigo === 'administrador', 422, 'El rol del administrador está reservado y no puede desactivarse.');
         abort_unless(app(ServicioAutorizacion::class)->allowsGlobal($request->user(), 'gestion.seguridad.actualizar'), 403);
         $activo = $request->boolean('activo');
 
