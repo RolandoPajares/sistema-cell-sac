@@ -114,6 +114,13 @@ class RolesPermisosController extends Controller
 
         DB::transaction(function () use ($role, $data, $request, $auditoria): void {
             $locked = Rol::query()->lockForUpdate()->findOrFail($role->getKey());
+            if ($locked->alcance_permitido !== $data['alcance_permitido']) {
+                $hasGlobalAssignments = DB::table('usuarios_roles')
+                    ->where('rol_id', $locked->getKey())->where('activo', true)->exists();
+                $hasSiteAssignments = Schema::hasTable('usuarios_sedes_roles') && DB::table('usuarios_sedes_roles')
+                    ->where('rol_id', $locked->getKey())->where('activo', true)->exists();
+                abort_if($hasGlobalAssignments || $hasSiteAssignments, 409, 'No puedes cambiar el alcance de un rol con asignaciones activas; revócalas primero.');
+            }
             $before = $locked->only(['nombre', 'descripcion', 'alcance_permitido']);
             $locked->update($data);
             $auditoria->record($request->user()->getKey(), 'actualizar_rol', 'roles', $locked->getKey(), $before, $locked->only(['nombre', 'descripcion', 'alcance_permitido']), $request->ip());
@@ -130,7 +137,10 @@ class RolesPermisosController extends Controller
 
         DB::transaction(function () use ($role, $activo, $request, $delegacion, $auditoria): void {
             $locked = Rol::query()->lockForUpdate()->findOrFail($role->getKey());
-            abort_if(!$activo && $locked->usuarios()->wherePivot('activo', true)->exists(), 409, 'Revoca primero las asignaciones activas de este rol.');
+            $hasGlobalAssignments = $locked->usuarios()->wherePivot('activo', true)->exists();
+            $hasSiteAssignments = Schema::hasTable('usuarios_sedes_roles') && DB::table('usuarios_sedes_roles')
+                ->where('rol_id', $locked->getKey())->where('activo', true)->exists();
+            abort_if(!$activo && ($hasGlobalAssignments || $hasSiteAssignments), 409, 'Revoca primero las asignaciones activas de este rol.');
             abort_unless($delegacion->puedeDelegarPermisos($request->user(), $locked->permisos()->pluck('permisos.id')->all(), $locked->alcance_permitido), 403);
             $before = ['activo' => (bool) $locked->activo];
             $locked->update(['activo' => $activo]);
