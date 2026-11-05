@@ -10,6 +10,12 @@ interface ProductoDao
 
     public function actualizar(ProductoEntidad $producto): ProductoEntidad;
 
+    public function crearVariante(VarianteProductoEntidad $variante): VarianteProductoEntidad;
+
+    public function actualizarVariante(VarianteProductoEntidad $variante): VarianteProductoEntidad;
+
+    public function eliminarVariante(int $id): void;
+
     public function eliminar(int $id): void;
 
     public function sincronizarImagenPortada(int $productoId, string $rutaImagen): void;

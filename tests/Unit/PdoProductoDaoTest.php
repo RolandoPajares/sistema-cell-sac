@@ -1,6 +1,7 @@
 <?php
 
 use App\Dominio\Catalogo\ProductoEntidad;
+use App\Dominio\Catalogo\VarianteProductoEntidad;
 use App\Infraestructura\Persistencia\Pdo\PdoConexion;
 use App\Infraestructura\Persistencia\Pdo\PdoProductoDao;
 
@@ -12,14 +13,16 @@ it('ejecuta CRUD, mapea variantes y protege valores con parámetros enlazados', 
     $dao = new PdoProductoDao(new PdoConexion($pdo));
 
     $producto = $dao->crear(new ProductoEntidad(null, "Marca'; DROP TABLE productos;--", 'Teléfono', 1, 'Móviles', '100.00', null, true, 7));
-    $pdo->prepare('INSERT INTO variantes_productos (producto_id, nombre_color, existencias, controla_serie, estado) VALUES (?, ?, ?, ?, ?)')->execute([$producto->id, 'Negro', 4, 0, 'activo']);
+    $variante = $dao->crearVariante(new VarianteProductoEntidad(null, (int) $producto->id, 'SKU-1', null, 'Negro', null, 4, false, 'activo'));
     $mapeado = $dao->buscarPorId((int) $producto->id);
     $actualizado = $dao->actualizar(new ProductoEntidad($producto->id, 'Marca', 'Teléfono Pro', 1, 'Móviles', '120.00', '110.00', true, 7));
+    $dao->actualizarVariante(new VarianteProductoEntidad($variante->id, (int) $producto->id, 'SKU-2', null, 'Azul', null, 3, false, 'activo'));
 
     expect($mapeado?->variantes)->toHaveCount(1)
         ->and($actualizado->nombre)->toBe('Teléfono Pro')
         ->and($dao->buscarPorId((int) $producto->id)?->marca)->toBe("Marca'; DROP TABLE productos;--");
 
+    $dao->eliminarVariante((int) $variante->id);
     $dao->eliminar((int) $producto->id);
     expect($dao->buscarPorId((int) $producto->id))->toBeNull();
 });
