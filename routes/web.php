@@ -320,10 +320,10 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::post('/inventario/transferencias/{transfer}/close', [TransferenciaExistenciaController::class, 'close'])->whereNumber('transfer')->name('inventory.transfer_close');
     Route::get('/inventario/diseno/envios', [EnviosPedidosController::class, 'mostrar'])
         ->middleware(['role:administrador', 'permiso:ruta', 'permiso:pantalla.admin.shipments.consultar'])->name('inventory.preview.shipments');
-    Route::patch('/inventario/diseno/envios/{envioPedido}/estado', [EnviosPedidosController::class, 'actualizarEstado'])
+    Route::patch('/inventario/envios/{envioPedido}/estado', [EnviosPedidosController::class, 'actualizarEstado'])
         ->whereNumber('envioPedido')
-        ->middleware(['role:administrador', 'permiso:ruta', 'permiso:gestion.inventario.ajustar'])
-        ->name('inventory.shipments.status.update');
+        ->middleware(['role:administrador', 'permiso:ruta'])
+        ->name('shipments.status.update');
     Route::get('/inventario/diseno/envios/{envio}', [EnviosPedidosController::class, 'detalle'])
         ->whereNumber('envio')
         ->middleware(['role:administrador', 'permiso:ruta', 'permiso:pantalla.admin.shipments.consultar'])->name('inventory.preview.shipments.show');

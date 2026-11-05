@@ -31,7 +31,7 @@ final class EnviosPedidosController extends Controller
     {
         $this->envios->actualizarEstado($envioPedido, $solicitud->validated(), $solicitud->user(), $solicitud->ip());
 
-        return redirect()->back()->with('status', 'Estado del envío actualizado correctamente.');
+        return back()->with('status', 'Estado de envío actualizado y evento registrado.');
     }
 
     public function detalle(Request $request, EnvioPedido $envio): View
@@ -57,4 +57,5 @@ final class EnviosPedidosController extends Controller
 
         return $response;
     }
+
 }

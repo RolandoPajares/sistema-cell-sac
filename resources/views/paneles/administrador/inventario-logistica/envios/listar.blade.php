@@ -16,7 +16,11 @@
 
     <div class="tc-il__notice" role="status">
         <i class="bi bi-info-circle" aria-hidden="true"></i>
-        <span>El catálogo RBAC mantiene deshabilitada la entrada admin.shipments. Esta vista es de consulta y no altera estados de entrega.</span>
+        @if (Route::has('management.inventory.shipments.status.update'))
+            <span>Los cambios de estado registran un evento histórico y quedan limitados a las sedes autorizadas.</span>
+        @else
+            <span>La consulta está operativa. La actualización de estados quedará disponible cuando el integrador conecte su ruta RBAC.</span>
+        @endif
     </div>
 
     <div class="tc-il__metrics">
@@ -115,6 +119,8 @@
                                                 <button type="submit" class="tc-il__button tc-il__button--primary">Registrar estado</button>
                                             </form>
                                         </details>
+                                    @else
+                                        <span aria-label="Actualización pendiente de integración">Pendiente de ruta</span>
                                     @endif
                                 </td>
                             </tr>
