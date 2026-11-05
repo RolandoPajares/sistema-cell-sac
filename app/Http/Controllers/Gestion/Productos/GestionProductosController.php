@@ -17,6 +17,7 @@ use App\Models\Compras\Proveedor;
 use App\Models\Organizacion\Empresa;
 use App\Models\User;
 use App\Servicios\ExportadorTabular;
+use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioConfiguracionTienda;
 use App\Servicios\ServicioGestionProductos;

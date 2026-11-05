@@ -165,7 +165,7 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::get('/organizacion/personal', [PersonalSedeController::class, 'listar'])
         ->middleware(['role:administrador', 'permiso:ruta', 'permiso:pantalla.admin.staff.consultar'])->name('company_settings.staff');
     Route::get('/organizacion/responsables', [ResponsableOrganizacionalController::class, 'index'])
-        ->middleware(['role:administrador', 'permiso:ruta', 'permiso:pantalla.admin.responsibles.consultar'])->name('company_settings.responsibles');
+        ->middleware(['role:administrador', 'permiso:ruta', 'permiso:pantalla.admin.staff.consultar', 'permiso:pantalla.admin.responsibles.consultar'])->name('company_settings.responsibles');
     Route::post('/organizacion/responsables', [ResponsableOrganizacionalController::class, 'store'])
         ->middleware(['role:administrador', 'permiso:gestion.organizacion.actualizar', 'permiso:pantalla.admin.responsibles.consultar'])->name('company_settings.responsibles.store');
     Route::get('/seguridad-diseno/usuarios', static fn (): RedirectResponse => redirect()->route('management.users'))

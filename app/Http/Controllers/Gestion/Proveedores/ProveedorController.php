@@ -10,16 +10,16 @@ use App\Models\Catalogo\Categoria;
 use App\Models\Compras\Compra;
 use App\Models\Compras\Proveedor;
 use App\Models\User;
-use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ExportadorTabular;
+use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioInventario;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Response;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -110,7 +110,7 @@ class ProveedorController extends Controller
             $proveedor->creado_en?->format('Y-m-d H:i:s'),
         ])->all();
         $filters = $this->filtros($request);
-        $response = $exporter->download($format, 'proveedores-'.now()->format('Ymd'),
+        $response = $exporter->download($format, 'proveedores',
             ['ID', 'Nombre', 'RUC', 'Correo', 'Teléfono', 'Ciudad', 'Productos asociados', 'Estado', 'Registrado'],
             $rows,
             [
