@@ -3,17 +3,21 @@
 namespace App\Http\Controllers\Paneles\Administrador;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ActualizarEstadoEnvioPedidoRequest;
 use App\Http\Requests\ListadoEnviosPedidosRequest;
+use App\Models\Comercio\EnvioPedido;
+use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioEnviosPedidos;
 use App\Servicios\ExportadorTabular;
 use App\Servicios\RegistradorAuditoria;
 use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 final class EnviosPedidosController extends Controller
 {
-    public function __construct(private readonly ServicioEnviosPedidos $envios) {}
+    public function __construct(private readonly ServicioEnviosPedidos $envios, private readonly ServicioAutorizacion $autorizacion) {}
 
     public function mostrar(ListadoEnviosPedidosRequest $solicitud): View
     {
@@ -21,6 +25,23 @@ final class EnviosPedidosController extends Controller
             'paneles.administrador.inventario-logistica.envios.listar',
             $this->envios->listar($solicitud->user(), $solicitud->validated()),
         );
+    }
+
+    public function actualizarEstado(ActualizarEstadoEnvioPedidoRequest $solicitud, EnvioPedido $envioPedido): \Illuminate\Http\RedirectResponse
+    {
+        $this->envios->actualizarEstado($envioPedido, $solicitud->validated(), $solicitud->user(), $solicitud->ip());
+
+        return redirect()->back()->with('status', 'Estado del envío actualizado correctamente.');
+    }
+
+    public function detalle(Request $request, EnvioPedido $envio): View
+    {
+        $sedesAutorizadas = $this->autorizacion->authorizedSiteIds($request->user(), 'gestion.inventario.consultar');
+        abort_unless(in_array((int) $envio->sede_id, $sedesAutorizadas, true), 404);
+
+        $envio->load(['pedido:id,numero_referencia,cliente_id', 'almacen.sede', 'eventos' => static fn ($query) => $query->orderByDesc('ocurrido_en')->orderByDesc('id')]);
+
+        return view('paneles.administrador.inventario-logistica.envios.detalle', compact('envio'));
     }
 
     public function exportar(ListadoEnviosPedidosRequest $solicitud, ExportadorTabular $exporter, RegistradorAuditoria $audit, string $format = 'csv'): Response|StreamedResponse

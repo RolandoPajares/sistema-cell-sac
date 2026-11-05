@@ -74,6 +74,7 @@
                             <th>Seguimiento</th>
                             <th>Estado</th>
                             <th>Último evento</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -93,10 +94,33 @@
                                         Sin eventos registrados
                                     @endif
                                 </td>
+                                <td>
+                                    <a class="tc-il__button" href="{{ route('management.inventory.preview.shipments.show', $envio) }}" aria-label="Ver detalle de {{ $envio->codigo }}"><i class="bi bi-eye" aria-hidden="true"></i> Ver detalle</a>
+                                    @if (Route::has('management.inventory.shipments.status.update'))
+                                        <details>
+                                            <summary class="tc-il__button">Actualizar</summary>
+                                            <form method="POST" action="{{ route('management.inventory.shipments.status.update', $envio) }}">
+                                                @csrf
+                                                @method('PATCH')
+                                                <label>Estado
+                                                    <select name="estado" required>
+                                                        @foreach (['pendiente' => 'Pendiente', 'preparando' => 'Preparando', 'despachado' => 'Despachado', 'en_transito' => 'En tránsito', 'entregado' => 'Entregado', 'incidencia' => 'Incidencia', 'cancelado' => 'Cancelado'] as $status => $label)
+                                                            <option value="{{ $status }}" @selected($envio->estado === $status)>{{ $label }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </label>
+                                                <label>Descripción
+                                                    <textarea name="descripcion" maxlength="500" rows="2" placeholder="Motivo o detalle del evento"></textarea>
+                                                </label>
+                                                <button type="submit" class="tc-il__button tc-il__button--primary">Registrar estado</button>
+                                            </form>
+                                        </details>
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="tc-il__empty">
+                                <td colspan="8" class="tc-il__empty">
                                     @if ($resumen['total'] === 0)
                                         No hay envíos registrados para las sedes autorizadas.
                                     @else
