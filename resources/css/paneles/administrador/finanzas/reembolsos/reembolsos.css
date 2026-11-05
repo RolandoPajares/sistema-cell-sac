@@ -1,0 +1,33 @@
+.admin-finance-module--reembolsos .admin-finance-card-icon { background: #f0e7ff; color: #7041df; }
+.admin-finance-module--reembolsos .admin-finance-summary-card:first-child { background: linear-gradient(145deg, #fff, #fffaf0); }
+.admin-finance-module--reembolsos .admin-finance-summary-card:nth-child(2) { background: linear-gradient(145deg, #fff, #f7fbff); }
+.admin-finance-module--reembolsos .admin-finance-summary-card:nth-child(3) { background: linear-gradient(145deg, #fff, #f4fff9); }
+
+.admin-finance-module--reembolsos .tc-finance-demo {
+    display: flex;
+    width: 100%;
+    max-height: min(86vh, 700px);
+    flex-direction: column;
+}
+
+.admin-finance-module--reembolsos .tc-finance-demo [hidden] { display: none !important; }
+.admin-finance-module--reembolsos .tc-finance-demo__body { max-height: 62vh; overflow-y: auto; }
+.admin-finance-module--reembolsos .tc-finance-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
+.admin-finance-module--reembolsos .tc-finance-field { display: grid; gap: 7px; color: #25466f; font-size: .82rem; font-weight: 650; }
+.admin-finance-module--reembolsos .tc-finance-field input,
+.admin-finance-module--reembolsos .tc-finance-field select,
+.admin-finance-module--reembolsos .tc-finance-field textarea { width: 100%; min-width: 0; border: 1px solid #d5e1ef; border-radius: 9px; padding: 10px 11px; color: #26364b; background: #fff; font: inherit; font-weight: 450; }
+.admin-finance-module--reembolsos .tc-finance-field :is(input, select, textarea):focus { outline: 3px solid rgb(29 120 226 / 15%); border-color: #3288e6; }
+.admin-finance-module--reembolsos .tc-finance-field [aria-invalid="true"] { border-color: #d83b49; }
+.admin-finance-module--reembolsos .tc-finance-field--wide { grid-column: 1 / -1; }
+.admin-finance-module--reembolsos .tc-finance-form-grid > small { align-self: center; color: #62738a; font-size: .72rem; }
+.admin-finance-module--reembolsos .tc-finance-warning-list { margin-top: 17px; border: 1px solid #f1d79c; border-radius: 10px; padding: 12px 14px; color: #77530d; background: #fff9e9; font-size: .78rem; }
+.admin-finance-module--reembolsos .tc-finance-warning-list ul { margin: 7px 0; padding-left: 20px; }
+.admin-finance-module--reembolsos .tc-finance-warning-list span { color: #6d7787; }
+.admin-finance-module--reembolsos .tc-finance-demo__error { margin: 12px 0 0; color: #b42332; font-size: .82rem; }
+.admin-finance-module--reembolsos .tc-finance-demo__feedback { margin: 12px 0 0; border-radius: 9px; padding: 11px 13px; color: #155b39; background: #eaf8f0; font-size: .82rem; }
+
+@media (max-width: 640px) {
+    .admin-finance-module--reembolsos .tc-finance-form-grid { grid-template-columns: minmax(0, 1fr); }
+    .admin-finance-module--reembolsos .tc-finance-field--wide { grid-column: auto; }
+}

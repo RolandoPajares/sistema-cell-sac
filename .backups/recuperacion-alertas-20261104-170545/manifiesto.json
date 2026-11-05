@@ -1,0 +1,26 @@
+﻿[
+    {
+        "archivo":  "routes\\web.php",
+        "sha256":  "3E8B887F9CC979896312DCA2CDBC6C7F1E339A97A91659A86A2C0BD1BB0CB36F"
+    },
+    {
+        "archivo":  "app\\Http\\Controllers\\Cuenta\\CuentaAdministracionController.php",
+        "sha256":  "7DB608681D4AC112E7E19ECDB096036AD885BD49E39ADF28995CA22432342AD8"
+    },
+    {
+        "archivo":  "resources\\views\\paneles\\administrador\\dashboard-global\\alertas\\listar.blade.php",
+        "sha256":  "9F10D50D441050AC17C6F836683BB3C6BCD5A2ED60338EBE89580493B6DD87EC"
+    },
+    {
+        "archivo":  "resources\\views\\paneles\\administrador\\perfil\\notificaciones.blade.php",
+        "sha256":  "D2E0F6A0B7D2890DFC8FDDD3A718063300BB7D9688A55B7A792D56792D2F94AF"
+    },
+    {
+        "archivo":  "resources\\js\\modulos\\paneles\\administrador\\dashboard-global\\dashboard-global.js",
+        "sha256":  "9374E22042BF653D44E0B53D2EAAC38295FC53EF4E1F545558A1F73D18F77313"
+    },
+    {
+        "archivo":  "resources\\js\\modulos\\paneles\\administrador\\index.js",
+        "sha256":  "71926DDC0CAF37FEDA84D4900855025CE0280AA431971754F5BA0E961C1C10FD"
+    }
+]

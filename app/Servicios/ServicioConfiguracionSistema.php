@@ -1,0 +1,123 @@
+<?php
+
+namespace App\Servicios;
+
+use App\Models\Organizacion\Empresa;
+use App\Models\User;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+
+final class ServicioConfiguracionSistema
+{
+    /** @param array{empresa_id:?int,sede_id:?int} $ubicacion
+     * @return array{empresa:?Empresa,sedes:Collection,usuariosVinculados:int,integracionesActivas:int,series:Collection,cambios:Collection}
+     */
+    public function obtenerDatosGenerales(User $usuario, array $ubicacion): array
+    {
+        $empresa = $ubicacion['empresa_id'] === null ? null : Empresa::query()->find($ubicacion['empresa_id']);
+        $sedes = $empresa?->sedes()->where('activa', true)->get() ?? collect();
+        $usuariosVinculados = $ubicacion['sede_id'] === null || ! Schema::hasTable('usuarios_sedes_roles')
+            ? 0
+            : DB::table('usuarios_sedes_roles')->join('usuarios', 'usuarios.id', '=', 'usuarios_sedes_roles.usuario_id')
+                ->join('roles', 'roles.id', '=', 'usuarios_sedes_roles.rol_id')->where('roles.activo', true)
+                ->where('usuarios_sedes_roles.sede_id', $ubicacion['sede_id'])->where('usuarios_sedes_roles.activo', true)
+                ->where('usuarios.activo', true)->where(function ($consulta): void {
+                    $consulta->whereNull('usuarios_sedes_roles.vigente_hasta')->orWhere('usuarios_sedes_roles.vigente_hasta', '>', now());
+                })->distinct('usuarios.id')->count('usuarios.id');
+        $integracionesActivas = $empresa === null || ! Schema::hasTable('integraciones')
+            ? 0
+            : DB::table('integraciones')->where('empresa_id', $empresa->getKey())->where('activa', true)->count();
+        $series = $ubicacion['empresa_id'] === null || $ubicacion['sede_id'] === null || ! Schema::hasTable('series_documentos')
+            ? collect()
+            : DB::table('series_documentos')->where('empresa_id', $ubicacion['empresa_id'])
+                ->where('sede_id', $ubicacion['sede_id'])->where('activa', true)->orderBy('tipo_documento_id')->get();
+        $cambios = $this->consultaAuditoria($usuario, $ubicacion['empresa_id'], $ubicacion['sede_id'])
+            ->latest('creado_en')->limit(5)->get(['accion', 'entidad', 'creado_en']);
+
+        return compact('empresa', 'sedes', 'usuariosVinculados', 'integracionesActivas', 'series', 'cambios');
+    }
+
+    /** @param array{empresa_id:?int,sede_id:?int} $ubicacion
+     * @return array{integraciones:LengthAwarePaginator,eventos:Collection,totales:array{total:int,activas:int,inactivas:int,eventos:int}}
+     */
+    public function consultarIntegraciones(array $ubicacion, ?string $busqueda, ?string $estado): array
+    {
+        $ultimosEventos = DB::table('eventos_integracion')->select('integracion_id')
+            ->selectRaw('MAX(iniciado_en) AS ultima_sincronizacion')->groupBy('integracion_id');
+        $consulta = DB::table('integraciones')->leftJoinSub($ultimosEventos, 'ultimos_eventos', function ($union): void {
+            $union->on('ultimos_eventos.integracion_id', '=', 'integraciones.id');
+        })->select('integraciones.*', 'ultimos_eventos.ultima_sincronizacion')->whereRaw('1 = 0');
+        $eventos = collect();
+        $total = 0;
+        $activas = 0;
+        if ($ubicacion['empresa_id'] !== null && Schema::hasTable('integraciones')) {
+            $consulta = DB::table('integraciones')->leftJoinSub($ultimosEventos, 'ultimos_eventos', function ($union): void {
+                $union->on('ultimos_eventos.integracion_id', '=', 'integraciones.id');
+            })->select('integraciones.*', 'ultimos_eventos.ultima_sincronizacion')
+                ->where('integraciones.empresa_id', $ubicacion['empresa_id'])
+                ->when($busqueda !== null && trim($busqueda) !== '', function ($consulta) use ($busqueda): void {
+                    $termino = '%'.trim((string) $busqueda).'%';
+                    $consulta->where(function ($subconsulta) use ($termino): void {
+                        $subconsulta->where('nombre', 'like', $termino)->orWhere('proveedor', 'like', $termino)->orWhere('codigo', 'like', $termino);
+                    });
+                })
+                ->when($estado !== null && $estado !== '', fn ($consulta) => $consulta->where('activa', $estado === 'Activa'));
+            $total = (clone $consulta)->count();
+            $activas = (clone $consulta)->where('activa', true)->count();
+            if (Schema::hasTable('eventos_integracion')) {
+                $eventos = DB::table('eventos_integracion')->join('integraciones', 'integraciones.id', '=', 'eventos_integracion.integracion_id')
+                    ->where('integraciones.empresa_id', $ubicacion['empresa_id'])
+                    ->orderByDesc('eventos_integracion.iniciado_en')->limit(10)
+                    ->get(['eventos_integracion.id', 'integraciones.nombre', 'eventos_integracion.estado', 'eventos_integracion.direccion', 'eventos_integracion.iniciado_en']);
+            }
+        }
+        $integraciones = (clone $consulta)->orderBy('nombre')->paginate(12)->withQueryString();
+
+        return [
+            'integraciones' => $integraciones,
+            'eventos' => $eventos,
+            'totales' => ['total' => $total, 'activas' => $activas, 'inactivas' => $total - $activas, 'eventos' => $eventos->count()],
+        ];
+    }
+
+    /** @param array{empresa_id:?int,sede_id:?int} $ubicacion
+     * @return array{sesiones:Collection,eventos:Collection,controles:array<int,array<int,mixed>>}
+     */
+    public function obtenerDatosSeguridad(User $usuario, array $ubicacion): array
+    {
+        $sesiones = Schema::hasTable('sesiones_usuarios')
+            ? DB::table('sesiones_usuarios')->where('usuario_id', $usuario->getKey())->orderByDesc('ultimo_acceso')->limit(20)->get()
+            : collect();
+        $eventos = $this->consultaAuditoria($usuario, $ubicacion['empresa_id'], $ubicacion['sede_id'])
+            ->where(function ($consulta): void {
+                $consulta->where('modulo', 'seguridad')->orWhere('entidad', 'like', '%sesion%')->orWhere('accion', 'like', '%acceso%');
+            })->latest('creado_en')->limit(10)->get(['accion', 'entidad', 'resultado', 'creado_en']);
+        $controles = [
+            ['Políticas de contraseña', 'La tabla usuarios almacena el hash y el bloqueo vigente; no existe una tabla de políticas.', 'bi-key', [['Política', 'Sin configuración persistida'], ['Usuario actual bloqueado', $usuario->bloqueado_hasta?->toDateTimeString() ?? 'No']], 'politica'],
+            ['Autenticación en dos pasos', 'No existe configuración persistente de segundo factor en el esquema.', 'bi-lock', [['Estado', 'Sin configuración persistida'], ['Adopción', 'No disponible']], 'dos-pasos'],
+            ['Sesiones y expiración', 'Sesiones registradas para el usuario autenticado.', 'bi-clock', [['Sesiones registradas', (string) $sesiones->count()], ['Activas registradas', (string) $sesiones->whereNull('revocada_en')->count()]], 'sesiones'],
+            ['Control de IP y dispositivos', 'La tabla de sesiones conserva IP y agente del usuario autenticado.', 'bi-display', [['Sesiones con IP', (string) $sesiones->whereNotNull('direccion_ip')->count()], ['Dispositivos', (string) $sesiones->whereNotNull('agente_usuario')->count()]], 'dispositivos'],
+            ['Permisos sensibles', 'Los permisos se administran desde el catálogo RBAC existente.', 'bi-people', [['Rol actual', (string) $usuario->rol], ['Permisos administrativos', 'Consultar en RBAC']], 'permisos'],
+            ['Registros de seguridad', 'Eventos de auditoría filtrados por empresa y sede autorizadas.', 'bi-database', [['Eventos recientes', (string) $eventos->count()], ['Retención', 'No configurada en el esquema']], 'registros'],
+        ];
+
+        return compact('sesiones', 'eventos', 'controles');
+    }
+
+    private function consultaAuditoria(User $usuario, ?int $empresaId, ?int $sedeId): Builder
+    {
+        return DB::table('registros_auditoria')->where(function ($consulta) use ($usuario, $empresaId): void {
+            $consulta->where('usuario_id', $usuario->getKey());
+            if ($empresaId !== null) {
+                $consulta->orWhere('empresa_id', $empresaId);
+            }
+        })->when($sedeId !== null, function ($consulta) use ($sedeId): void {
+            $consulta->where(function ($alcance) use ($sedeId): void {
+                $alcance->whereNull('sede_id')->orWhere('sede_id', $sedeId);
+            });
+        });
+    }
+}

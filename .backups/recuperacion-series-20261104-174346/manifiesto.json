@@ -1,0 +1,10 @@
+﻿[
+    {
+        "archivo":  "routes\\web.php",
+        "sha256":  "2B5FE92908AAB775DC32C262E25D29ABAC8E1255275739A00573C68C4F835850"
+    },
+    {
+        "archivo":  "resources\\views\\paneles\\administrador\\inventario-logistica\\series\\listar.blade.php",
+        "sha256":  "E11A3DC69E64ACAA8C71909131F9F0A723B962B0FA3A637D9BB7B9DC4FB520C1"
+    }
+]
