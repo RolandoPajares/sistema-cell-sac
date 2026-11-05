@@ -126,6 +126,10 @@ class GestionUsuariosController extends Controller
                         $siteId = app(ServicioAutorizacion::class)->activeSiteIdFor($request->user());
                     }
                     if ($siteId === null) {
+                        $activeSites = Sede::query()->where('activa', true)->orderBy('id')->limit(2)->pluck('id');
+                        $siteId = $activeSites->count() === 1 ? (int) $activeSites->first() : null;
+                    }
+                    if ($siteId === null) {
                         abort(422, 'Selecciona una sede autorizada para asignar este rol.');
                     }
 
