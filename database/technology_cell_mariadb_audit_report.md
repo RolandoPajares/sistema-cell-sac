@@ -10,9 +10,13 @@ La base activa confirmada fue `md_tecnologia_digital_cell` en MariaDB `10.4.32`,
 
 ## Desincronización comprobada
 
-La tabla `migrations` activa solo registra 11 migraciones: las tres migraciones Laravel base y las ocho migraciones `2026_11_05_12xxxx`. Las migraciones anteriores presentes en `database/migrations` no están registradas.
+La tabla `migrations` activa registraba inicialmente 11 migraciones: las tres migraciones Laravel base y las ocho migraciones `2026_11_05_12xxxx`. Hay 31 archivos de migración en el repositorio; 20 estaban pendientes.
 
-No es seguro marcar esas migraciones como aplicadas: varias crean nombres legacy (`producto_variantes`, `compra_detalles`, `cotizacion_detalles`, `detalle_pedidos`) y las migraciones posteriores también referencian esos nombres. El esquema real y el dump usan `variantes_productos`, `detalles_compras`, `detalles_cotizaciones` y `detalles_pedidos`. Los modelos y servicios actuales usan los nombres canónicos.
+No es seguro marcar las 18 migraciones históricas como aplicadas: varias crean nombres legacy (`producto_variantes`, `compra_detalles`, `cotizacion_detalles`, `detalle_pedidos`) y las migraciones posteriores también referencian esos nombres. El esquema real y el dump usan `variantes_productos`, `detalles_compras`, `detalles_cotizaciones` y `detalles_pedidos`. Los modelos y servicios actuales usan los nombres canónicos.
+
+Las dos migraciones del 2026-11-03 sí coinciden exactamente con las columnas existentes (tipos, nulabilidad, defaults y orden). Fueron registradas con batch nuevo mediante `technology_cell_mariadb_mark_verified_migrations.sql`, tras validar base, columnas y ausencia de duplicados. Quedan 18 migraciones históricas pendientes para reconciliación coordinada.
+
+Durante la primera ejecución se detectó y corrigió una guardia que podía insertar una fila por el comportamiento de `MAX()` sobre un conjunto vacío; la comprobación posterior confirmó las dos filas y se normalizó su batch a `10`. No se alteraron datos de negocio.
 
 La única tabla legacy existente en la base activa es `compra_detalles`; está vacía y no tiene referencias activas. No se elimina ni se renombra por esta auditoría. Las tablas `producto_variantes`, `cotizacion_detalles` y `detalle_pedidos` no existen.
 
@@ -53,4 +57,10 @@ No se ejecutó `migrate`, `migrate:fresh`, `migrate:reset`, `migrate:rollback`, 
 3. Mantener los nombres canónicos usados por Eloquent y actualizar las migraciones legacy en una rama coordinada.
 4. Decidir explícitamente el destino de `compra_detalles` antes de cualquier renombre o eliminación; contiene cero filas, pero cambiarla sigue siendo una operación estructural.
 5. Autorizar un segundo entorno aislado si se requiere probar restauración completa del respaldo sin reutilizar una base existente.
+
+## Bloqueo de pruebas Laravel
+
+Las pruebas aisladas MariaDB se descubrieron como `6 skipped` porque requieren una instancia descartable por named pipe (`TECHNOLOGY_CELL_QA_PIPE` y `TECHNOLOGY_CELL_QA_ROOT`), no disponible en este entorno.
+
+Al ejecutar `MigrationCoverageTest` con `APP_KEY` temporal del proceso, Laravel falló en SQLite al aplicar `2026_11_05_120100_create_responsables_organizacionales_table.php`: la migración consulta `information_schema.table_constraints`, que no existe en SQLite. La corrección debe hacerse en ese archivo compartido por el integrador, condicionando la consulta al driver MariaDB/MySQL o usando una verificación compatible con SQLite. No se modificó el archivo compartido en esta rama.
 
