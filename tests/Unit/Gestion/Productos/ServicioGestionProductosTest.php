@@ -1,0 +1,82 @@
+<?php
+
+use App\Models\Catalogo\Producto;
+use App\Models\User;
+use App\Servicios\RegistradorAuditoria;
+use App\Servicios\ServicioAutorizacion;
+use App\Servicios\ServicioCatalogo;
+use App\Servicios\ServicioGestionProductos;
+use App\Servicios\ServicioInventario;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Tests\TestCase;
+
+uses(TestCase::class);
+
+beforeEach(function (): void {
+    Schema::create('productos', function (Blueprint $table): void {
+        $table->increments('id');
+        $table->string('marca');
+        $table->string('nombre');
+        $table->unsignedInteger('categoria_id');
+        $table->string('categoria');
+        $table->decimal('precio', 10, 2);
+        $table->decimal('precio_oferta', 10, 2)->nullable();
+        $table->string('url_imagen')->nullable();
+        $table->unsignedInteger('existencias')->default(0);
+        $table->boolean('activo')->default(true);
+        $table->timestamp('creado_en')->nullable();
+        $table->unsignedBigInteger('empresa_id')->nullable();
+    });
+    Schema::create('productos_proveedores', function (Blueprint $table): void {
+        $table->unsignedInteger('producto_id');
+        $table->unsignedInteger('proveedor_id');
+    });
+});
+
+afterEach(function (): void {
+    Schema::dropIfExists('productos_proveedores');
+    Schema::dropIfExists('productos');
+});
+
+function usuarioGestionProductos(): User
+{
+    $usuario = new User;
+    $usuario->setRawAttributes(['id' => 17]);
+
+    return $usuario;
+}
+
+it('centraliza el alta y revierte la transacción cuando falla la auditoría', function (): void {
+    $authorization = Mockery::mock('overload:'.ServicioAutorizacion::class);
+    $authorization->shouldReceive('operationScopeAttributes')->twice()->andReturn(['empresa_id' => 4]);
+    $inventory = Mockery::mock(ServicioInventario::class);
+    $inventory->shouldReceive('registerNewProduct')->twice();
+    $catalog = Mockery::mock(ServicioCatalogo::class);
+    $catalog->shouldReceive('sincronizarImagenPortada')->twice();
+    $audit = Mockery::mock('overload:'.RegistradorAuditoria::class);
+    $auditCalls = 0;
+    $audit->shouldReceive('record')->twice()->andReturnUsing(function () use (&$auditCalls): void {
+        $auditCalls++;
+        if ($auditCalls === 2) {
+            throw new RuntimeException('auditoría no disponible');
+        }
+    });
+
+    $product = (new ServicioGestionProductos($authorization, $inventory, $catalog, $audit))->crear([
+        'marca' => 'Marca QA', 'nombre' => 'Producto QA', 'categoria_id' => 1,
+        'categoria' => 'Móviles', 'precio' => '100.00', 'url_imagen' => 'storage/producto.jpg',
+    ], null, usuarioGestionProductos(), '127.0.0.1');
+
+    expect($product)->toBeInstanceOf(Producto::class)
+        ->and(DB::table('productos')->where('id', $product->id)->value('empresa_id'))->toBe(4);
+
+    expect(fn (): Producto => (new ServicioGestionProductos($authorization, $inventory, $catalog, $audit))->crear([
+        'marca' => 'Marca QA', 'nombre' => 'Producto fallido', 'categoria_id' => 1,
+        'categoria' => 'Móviles', 'precio' => '100.00',
+    ], null, usuarioGestionProductos(), '127.0.0.1'))->toThrow(RuntimeException::class);
+
+    expect(DB::table('productos')->where('nombre', 'Producto fallido')->exists())->toBeFalse()
+        ->and(DB::table('productos')->count())->toBe(1);
+});
