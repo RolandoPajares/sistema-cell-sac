@@ -31,6 +31,27 @@
 2. Verificar allí los flujos de creación de rol, asignación, revocación, aislamiento empresa/sede, CSRF y auditoría.
 3. Integrar los commits de esta rama y repetir las pruebas conjuntas; no se ejecutaron migraciones ni escrituras sobre la base activa.
 
+### Comando de integración pendiente
+
+Con una instancia descartable activa, el integrador debe exportar exclusivamente para el proceso:
+
+```powershell
+$env:TECHNOLOGY_CELL_QA_PIPE = '<named-pipe-atc_ventas_32_hex>'
+$env:TECHNOLOGY_CELL_QA_ROOT = '<directorio-technology_cell_ventas_pipe_...>'
+$env:TECHNOLOGY_CELL_QA_DATABASE = '<base-qa-creada-y-autorizada>'
+$env:DB_CONNECTION = 'mysql'
+$env:DB_HOST = '.'
+$env:DB_PORT = '1'
+$env:DB_SOCKET = "\\.\pipe\$env:TECHNOLOGY_CELL_QA_PIPE"
+$env:DB_DATABASE = $env:TECHNOLOGY_CELL_QA_DATABASE
+$env:DB_USERNAME = 'root'
+$env:DB_PASSWORD = ''
+$env:APP_KEY = 'base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
+php artisan test tests/Feature/RbacDinamicoTest.php tests/Unit/IntegracionMariaDbTechnologyCellTest.php
+```
+
+Condiciones obligatorias antes de ejecutar: `TECHNOLOGY_CELL_QA_PIPE` debe coincidir con `@@socket`, `TECHNOLOGY_CELL_QA_ROOT\datos` con `@@datadir`, la instancia debe reportar MariaDB `10.4.32`, `@@skip_networking = 1`, y `DB_DATABASE` no puede ser `md_tecnologia_digital_cell`. La suite no debe ejecutarse concurrentemente con otro agente sobre esa base.
+
 ## Commits
 
 - `8dfe79d7a3a6697dc8e2b39b199cdb3d94f44e25` — flujos gráficos de usuarios y sedes.
