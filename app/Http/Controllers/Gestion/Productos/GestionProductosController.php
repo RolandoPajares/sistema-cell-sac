@@ -7,9 +7,9 @@ use App\Http\Requests\ActualizarProductoRequest;
 use App\Http\Requests\GuardarConfiguracionTiendaRequest;
 use App\Http\Requests\GuardarImagenVarianteRequest;
 use App\Http\Requests\GuardarPrecioMayoristaRequest;
-use App\Http\Requests\ImportarPreciosMayoristasRequest;
 use App\Http\Requests\GuardarProductoRequest;
 use App\Http\Requests\GuardarVarianteProductoRequest;
+use App\Http\Requests\ImportarPreciosMayoristasRequest;
 use App\Models\Catalogo\Categoria;
 use App\Models\Catalogo\Producto;
 use App\Models\Catalogo\VarianteProducto;
@@ -17,10 +17,9 @@ use App\Models\Compras\Proveedor;
 use App\Models\Organizacion\Empresa;
 use App\Models\User;
 use App\Servicios\ExportadorTabular;
-use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ServicioAutorizacion;
-use App\Servicios\ServicioCatalogo;
 use App\Servicios\ServicioConfiguracionTienda;
+use App\Servicios\ServicioGestionProductos;
 use App\Servicios\ServicioInventario;
 use App\Servicios\ServicioPreciosMayoristas;
 use App\Servicios\ServicioVariantesProducto;
@@ -335,10 +334,7 @@ class GestionProductosController extends Controller
 
     public function store(
         GuardarProductoRequest $request,
-        RegistradorAuditoria $audit,
-        ServicioInventario $inventory,
-        ServicioAutorizacion $authorization,
-        ServicioCatalogo $catalogo,
+        ServicioGestionProductos $productos,
     ): RedirectResponse {
         $validated = $request->validated();
         $supplierId = $validated['proveedor_id'] ?? null;
@@ -352,17 +348,7 @@ class GestionProductosController extends Controller
         }
 
         try {
-            DB::transaction(function () use ($data, $supplierId, $request, $audit, $inventory, $authorization, $catalogo): void {
-                $product = Producto::create($data + [
-                    'activo' => true,
-                    'creado_en' => now(),
-                    ...$authorization->operationScopeAttributes($request->user(), 'productos'),
-                ]);
-                $product->suppliers()->sync($supplierId ? [$supplierId] : []);
-                $inventory->registerNewProduct($product, $request->user());
-                $catalogo->sincronizarImagenPortada($product);
-                $audit->record($request->user()->id, 'product.created', 'productos', $product->id, null, $product->only(['marca', 'nombre', 'categoria_id', 'precio', 'existencias', 'url_imagen']), $request->ip());
-            }, 3);
+            $productos->crear($data, $supplierId !== null ? (int) $supplierId : null, $request->user(), (string) $request->ip());
         } catch (Throwable $excepcion) {
             if (is_string($rutaImagenGuardada)) {
                 Storage::disk('public')->delete($rutaImagenGuardada);
@@ -376,7 +362,7 @@ class GestionProductosController extends Controller
             ->with('open_product_modal', $request->boolean('continue'));
     }
 
-    public function update(ActualizarProductoRequest $request, Producto $product, RegistradorAuditoria $audit, ServicioCatalogo $catalogo): RedirectResponse
+    public function update(ActualizarProductoRequest $request, Producto $product, ServicioGestionProductos $productos): RedirectResponse
     {
         $this->authorize('update', $product);
         $validated = $request->validated();
@@ -391,16 +377,7 @@ class GestionProductosController extends Controller
         }
 
         try {
-            DB::transaction(function () use ($product, $data, $validated, $request, $audit, $before, $catalogo): void {
-                $product->update($data);
-
-                if (array_key_exists('proveedor_id', $validated)) {
-                    $product->suppliers()->sync($validated['proveedor_id'] ? [$validated['proveedor_id']] : []);
-                }
-
-                $catalogo->sincronizarImagenPortada($product);
-                $audit->record($request->user()->id, 'product.updated', 'productos', $product->id, $before, $product->only(array_keys($before)), $request->ip());
-            }, 3);
+            $productos->actualizar($product, $data, $validated, $before, $request->user(), (string) $request->ip());
         } catch (Throwable $excepcion) {
             if (is_string($rutaImagenGuardada)) {
                 Storage::disk('public')->delete($rutaImagenGuardada);
