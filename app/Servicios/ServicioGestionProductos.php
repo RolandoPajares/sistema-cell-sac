@@ -2,6 +2,8 @@
 
 namespace App\Servicios;
 
+use App\Contratos\Productos\AlcanceProductos;
+use App\Contratos\Productos\AuditoriaProductos;
 use App\Models\Catalogo\Producto;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -9,10 +11,10 @@ use Illuminate\Support\Facades\DB;
 final class ServicioGestionProductos
 {
     public function __construct(
-        private readonly ServicioAutorizacion $autorizacion,
+        private readonly AlcanceProductos $alcance,
         private readonly ServicioInventario $inventario,
         private readonly ServicioCatalogo $catalogo,
-        private readonly RegistradorAuditoria $auditoria,
+        private readonly AuditoriaProductos $auditoria,
     ) {}
 
     /** @param array<string, mixed> $datos */
@@ -22,12 +24,12 @@ final class ServicioGestionProductos
             $producto = Producto::create($datos + [
                 'activo' => true,
                 'creado_en' => now(),
-                ...$this->autorizacion->operationScopeAttributes($usuario, 'productos'),
+                ...$this->alcance->atributosDeAlcance($usuario, 'productos'),
             ]);
             $producto->suppliers()->sync($proveedorId !== null ? [$proveedorId] : []);
             $this->inventario->registerNewProduct($producto, $usuario);
             $this->catalogo->sincronizarImagenPortada($producto);
-            $this->auditoria->record($usuario->id, 'product.created', 'productos', $producto->id, null, $producto->only([
+            $this->auditoria->registrar($usuario->id, 'product.created', 'productos', $producto->id, null, $producto->only([
                 'marca', 'nombre', 'categoria_id', 'precio', 'existencias', 'url_imagen',
             ]), $ip);
 
@@ -44,7 +46,7 @@ final class ServicioGestionProductos
                 $producto->suppliers()->sync($datosValidados['proveedor_id'] ? [$datosValidados['proveedor_id']] : []);
             }
             $this->catalogo->sincronizarImagenPortada($producto);
-            $this->auditoria->record($usuario->id, 'product.updated', 'productos', $producto->id, $antes, $producto->only(array_keys($antes)), $ip);
+            $this->auditoria->registrar($usuario->id, 'product.updated', 'productos', $producto->id, $antes, $producto->only(array_keys($antes)), $ip);
         }, 3);
     }
 }
