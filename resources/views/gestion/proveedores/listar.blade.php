@@ -85,7 +85,7 @@
             </label>
             <button class="proveedores-toolbar-button" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i><span>Filtros</span></button>
             <button class="proveedores-primary-button" type="button" data-open-supplier-create><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo proveedor</button>
-            <a class="proveedores-toolbar-button" href="{{ route('management.suppliers.export', request()->query()) }}"><i class="bi bi-download" aria-hidden="true"></i> Exportar</a>
+            <details class="proveedores-export-menu"><summary class="proveedores-toolbar-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar</summary><div class="proveedores-export-options"><a href="{{ route('management.suppliers.export', ['format' => 'excel'] + request()->query()) }}">Excel (.xlsx)</a><a href="{{ route('management.suppliers.export', ['format' => 'pdf'] + request()->query()) }}">PDF (.pdf)</a><a href="{{ route('management.suppliers.export', ['format' => 'csv'] + request()->query()) }}">CSV (.csv)</a></div></details>
             @if (($filters['buscar'] ?? null) || ($filters['categoria'] ?? null) || ($filters['estado'] ?? null) || ($filters['ciudad'] ?? null))
                 <a class="proveedores-clear-button" href="{{ route('management.suppliers') }}">Limpiar filtros</a>
             @endif

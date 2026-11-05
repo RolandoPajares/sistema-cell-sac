@@ -29,7 +29,7 @@
                 <p>Organiza tus productos en categorías para una mejor gestión.</p>
             </div>
             <div class="categorias-actions">
-                <a class="categorias-export-button" href="{{ route('management.categories.export', $categoryQuery) }}"><i class="bi bi-download" aria-hidden="true"></i> Exportar</a>
+                <details class="categorias-export-menu"><summary class="categorias-export-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar</summary><div class="categorias-export-options"><a href="{{ route('management.categories.export', ['format' => 'excel'] + $categoryQuery) }}">Excel (.xlsx)</a><a href="{{ route('management.categories.export', ['format' => 'pdf'] + $categoryQuery) }}">PDF (.pdf)</a><a href="{{ route('management.categories.export', ['format' => 'csv'] + $categoryQuery) }}">CSV (.csv)</a></div></details>
                 <button class="categorias-primary-button" type="button" data-open-category-create><i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva categoría</button>
             </div>
         </header>

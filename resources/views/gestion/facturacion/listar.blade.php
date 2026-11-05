@@ -4,7 +4,7 @@
 @section('body_class', 'modulo-facturacion')
 
 @section('content')
-@if (auth()->user()?->rol === 'administrador')
+@if (auth()->user()?->isRole('administrador'))
     @include('paneles.administrador.finanzas.facturacion.listar')
 @else
     @include('gestion.componentes.modulo-pendiente', ['module' => $module])

@@ -226,10 +226,12 @@
                         <label class="productos-create-field"><span>SKU</span><input class="productos-create-input" name="codigo_sku" value="{{ old('codigo_sku') }}" maxlength="80"></label>
                         <label class="productos-create-field"><span>Código de barras</span><input class="productos-create-input" name="codigo_barras" value="{{ old('codigo_barras') }}" maxlength="80"></label>
                         <label class="productos-create-field"><span>Código de color</span><input class="productos-create-input" name="codigo_color" value="{{ old('codigo_color') }}" maxlength="20"></label>
+                        <label class="productos-create-field productos-create-field--status"><span>Control de serie / IMEI</span><span><input type="hidden" name="controla_serie" value="0"><input type="checkbox" name="controla_serie" value="1" @checked(old('controla_serie', false))> Exigir serie o IMEI</span></label>
                     </div>
                     @error('nombre_color')<small class="form-error">{{ $message }}</small>@enderror
                     @error('codigo_sku')<small class="form-error">{{ $message }}</small>@enderror
                     @error('codigo_barras')<small class="form-error">{{ $message }}</small>@enderror
+                    @error('controla_serie')<small class="form-error">{{ $message }}</small>@enderror
                     <footer class="productos-create-footer"><span></span><button class="productos-create-submit" type="submit"><i class="bi bi-plus-lg" aria-hidden="true"></i> Registrar variante</button></footer>
                 </form>
 
@@ -278,11 +280,13 @@
                             <label class="productos-create-field"><span>SKU</span><input class="productos-create-input" name="codigo_sku" value="{{ old('codigo_sku', $variante->codigo_sku) }}" maxlength="80"></label>
                             <label class="productos-create-field"><span>Código de barras</span><input class="productos-create-input" name="codigo_barras" value="{{ old('codigo_barras', $variante->codigo_barras) }}" maxlength="80"></label>
                             <label class="productos-create-field"><span>Código de color</span><input class="productos-create-input" name="codigo_color" value="{{ old('codigo_color', $variante->codigo_color) }}" maxlength="20"></label>
+                            <label class="productos-create-field productos-create-field--status"><span>Control de serie / IMEI</span><span><input type="hidden" name="controla_serie" value="0"><input type="checkbox" name="controla_serie" value="1" @checked((bool) old('controla_serie', $variante->controla_serie))> Exigir serie o IMEI</span></label>
                             <label class="productos-create-field productos-create-field--status"><span>Estado</span><select class="productos-create-input" name="estado"><option value="activo" @selected(old('estado', $variante->estado) === 'activo')>Activa</option><option value="inactivo" @selected(old('estado', $variante->estado) === 'inactivo')>Inactiva</option></select></label>
                         </div>
                         @error('nombre_color')<small class="form-error">{{ $message }}</small>@enderror
                         @error('codigo_sku')<small class="form-error">{{ $message }}</small>@enderror
                         @error('codigo_barras')<small class="form-error">{{ $message }}</small>@enderror
+                        @error('controla_serie')<small class="form-error">{{ $message }}</small>@enderror
                         <footer class="productos-create-footer"><button class="productos-create-cancel" type="button" data-close-variant-edit>Cancelar</button><button class="productos-create-submit" type="submit"><i class="bi bi-save" aria-hidden="true"></i> Guardar cambios</button></footer>
                     </form>
 
@@ -390,6 +394,9 @@
                     }
                 });
             });
+            @if (($idProductoEditar ?? 0) > 0)
+                document.getElementById(`editar-producto-${@json($idProductoEditar)}`)?.showModal();
+            @endif
             page.querySelectorAll('[data-open-product-view]').forEach((button) => {
                 const viewDialog = document.getElementById(button.dataset.productViewDialog);
                 const editDialog = document.getElementById(button.dataset.productDialog);

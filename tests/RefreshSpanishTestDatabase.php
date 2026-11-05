@@ -139,6 +139,12 @@ trait RefreshSpanishTestDatabase
             });
         }
 
+        if (! Schema::hasColumn('cupones', 'empresa_id')) {
+            Schema::table('cupones', function (Blueprint $table): void {
+                $table->unsignedBigInteger('empresa_id')->nullable()->index();
+            });
+        }
+
         if (! Schema::hasColumn('cupones', 'actualizado_en')) {
             Schema::table('cupones', function (Blueprint $table): void {
                 $table->timestamp('actualizado_en')->nullable();

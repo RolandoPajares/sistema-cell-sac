@@ -25,7 +25,7 @@
                 <h1>Clientes <i class="bi bi-people" aria-hidden="true"></i></h1>
                 <p>Gestiona perfiles minoristas y mayoristas vinculados a la operación.</p>
             </div>
-            <div class="clientes-actions"><button class="clientes-export-button" type="button" disabled><i class="bi bi-upload" aria-hidden="true"></i> Exportar</button><button class="clientes-export-button" type="button" data-open-client-import><i class="bi bi-file-earmark-arrow-up" aria-hidden="true"></i> Importar</button><button class="clientes-primary-button" type="button" data-open-client-create><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo cliente</button></div>
+            <div class="clientes-actions"><details class="clientes-export-menu"><summary class="clientes-export-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar</summary><div class="clientes-export-options"><a href="{{ route('management.customers.export', array_merge(request()->query(), ['format' => 'excel'])) }}">Excel (.xlsx)</a><a href="{{ route('management.customers.export', array_merge(request()->query(), ['format' => 'pdf'])) }}">PDF (.pdf)</a><a href="{{ route('management.customers.export', array_merge(request()->query(), ['format' => 'csv'])) }}">CSV (.csv)</a></div></details><button class="clientes-export-button" type="button" data-open-client-import><i class="bi bi-file-earmark-arrow-up" aria-hidden="true"></i> Importar CSV</button><button class="clientes-primary-button" type="button" data-open-client-create><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo cliente</button></div>
         </header>
 
         <section class="clientes-kpi-grid" aria-label="Resumen de clientes">
@@ -94,8 +94,10 @@
                 <div class="clientes-import-heading"><span class="clientes-import-icon"><i class="bi bi-file-earmark-arrow-up" aria-hidden="true"></i></span><div><span class="clientes-eyebrow">CRM · Importación masiva</span><h2 id="clientes-import-title">Importar clientes</h2><p>Prepara una plantilla y revisa ejemplos antes de una futura integración.</p></div></div>
                 <button class="clientes-dialog-close" type="button" data-close-client-dialog aria-label="Cerrar importación"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
             </header>
+            <form method="post" action="{{ route('management.customers.import') }}" enctype="multipart/form-data" data-client-import-form>
+            @csrf
             <div class="clientes-import-body">
-                <div class="clientes-import-demo-note"><i class="bi bi-info-circle" aria-hidden="true"></i><span>Asistente visual. El archivo no se lee, procesa, transmite ni guarda.</span></div>
+                <div class="clientes-import-demo-note"><i class="bi bi-database-check" aria-hidden="true"></i><span>El CSV se valida en el servidor y se guarda en MariaDB dentro de una transacción. No se crean cuentas de usuario.</span></div>
                 <nav class="clientes-import-steps" aria-label="Etapas de importación">
                     <span data-client-import-indicator="0"><b>1</b> Plantilla</span><i aria-hidden="true"></i><span data-client-import-indicator="1"><b>2</b> Archivo</span><i aria-hidden="true"></i><span data-client-import-indicator="2"><b>3</b> Vista previa</span><i aria-hidden="true"></i><span data-client-import-indicator="3"><b>4</b> Validaciones</span><i aria-hidden="true"></i><span data-client-import-indicator="4"><b>5</b> Confirmar</span>
                 </nav>
@@ -104,22 +106,23 @@
                     <button class="clientes-export-button clientes-import-download" type="button" data-client-import-download><i class="bi bi-download" aria-hidden="true"></i> Descargar plantilla CSV</button>
                 </section>
                 <section class="clientes-import-stage" data-client-import-stage="1" hidden>
-                    <h3>2. Seleccionar archivo</h3><label class="clientes-import-field" for="clientes-import-file"><span>Archivo CSV o XLSX</span><input id="clientes-import-file" type="file" accept=".csv,.xlsx" data-client-import-file></label>
-                    <small class="clientes-import-hint">La selección se usa solo para mostrar esta etapa. No se abre ni se envía el archivo.</small><p class="clientes-import-file-name" data-client-import-file-name>No se ha seleccionado un archivo.</p>
+                    <h3>2. Seleccionar archivo</h3><label class="clientes-import-field" for="clientes-import-file"><span>Archivo CSV UTF-8</span><input id="clientes-import-file" name="archivo" type="file" accept=".csv,.txt" data-client-import-file required></label>
+                    <small class="clientes-import-hint">La cabecera debe coincidir con la plantilla y el archivo se validará nuevamente en el servidor.</small><p class="clientes-import-file-name" data-client-import-file-name>No se ha seleccionado un archivo.</p>
                 </section>
                 <section class="clientes-import-stage" data-client-import-stage="2" hidden>
-                    <h3>3. Vista previa ilustrativa</h3><p>Estas filas son ejemplos estáticos; no proceden del archivo seleccionado.</p>
-                    <div class="clientes-import-table-wrap"><table><thead><tr><th>Tipo</th><th>Documento</th><th>Nombre de contacto</th><th>Razón social</th><th>Correo</th><th>Teléfono</th><th>Ciudad</th></tr></thead><tbody><tr><td>minorista</td><td>DOC-DEMO-01</td><td>Cliente Demo Uno</td><td>Comercial de ejemplo</td><td>uno@example.test</td><td>000000001</td><td>Lima</td></tr><tr class="is-warning"><td>mayorista</td><td>DOC-DEMO-01</td><td>Cliente Demo Dos</td><td>Distribución de ejemplo</td><td>dos@example.test</td><td>000000002</td><td>Arequipa</td></tr></tbody></table></div>
+                    <h3>3. Vista previa del archivo seleccionado</h3><p>Se muestran hasta 10 filas reales del CSV seleccionado; la validación definitiva ocurre en el servidor.</p>
+                    <div class="clientes-import-table-wrap"><table><thead><tr><th>Tipo</th><th>Documento</th><th>Nombre de contacto</th><th>Razón social</th><th>Correo</th><th>Teléfono</th><th>Ciudad</th></tr></thead><tbody data-client-import-preview><tr><td colspan="7">Selecciona un CSV para consultar su contenido.</td></tr></tbody></table></div>
                 </section>
                 <section class="clientes-import-stage" data-client-import-stage="3" hidden>
-                    <h3>4. Validaciones ilustrativas</h3><ul class="clientes-import-validation-list"><li class="is-valid"><i class="bi bi-check-circle" aria-hidden="true"></i> Tipo permitido: minorista o mayorista.</li><li class="is-valid"><i class="bi bi-check-circle" aria-hidden="true"></i> Documento, nombre de contacto y correo son obligatorios.</li><li><i class="bi bi-info-circle" aria-hidden="true"></i> Razón social, teléfono y ciudad son opcionales.</li><li class="is-warning"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i> El documento repetido aparece solo en estos ejemplos; no se consultan clientes reales.</li><li><i class="bi bi-info-circle" aria-hidden="true"></i> El correo debe tener formato válido; la validación real requiere backend.</li></ul>
+                    <h3>4. Validaciones del archivo</h3><ul class="clientes-import-validation-list" data-client-import-validations><li><i class="bi bi-info-circle" aria-hidden="true"></i> Selecciona un archivo para validar sus columnas.</li></ul>
                 </section>
                 <section class="clientes-import-stage" data-client-import-stage="4" hidden>
-                    <h3>5. Confirmar importación</h3><p>Archivo seleccionado: <strong data-client-import-final-file>—</strong></p><label class="clientes-import-ack"><input type="checkbox" data-client-import-ack> Confirmo que revisé la vista previa y las advertencias ilustrativas.</label><p class="clientes-import-feedback" data-client-import-feedback role="status" aria-live="polite" hidden></p>
+                    <h3>5. Confirmar importación</h3><p>Archivo seleccionado: <strong data-client-import-final-file>—</strong></p><label class="clientes-import-ack"><input type="checkbox" name="confirmado" value="1" data-client-import-ack> Confirmo que revisé la vista previa y deseo guardar los clientes válidos en MariaDB.</label><p class="clientes-import-feedback" data-client-import-feedback role="status" aria-live="polite" hidden></p>
                 </section>
                 <p class="clientes-import-error" data-client-import-error role="alert" hidden></p>
             </div>
-            <footer class="clientes-dialog-footer clientes-import-footer"><button class="clientes-cancel-button" type="button" data-close-client-dialog>Cancelar</button><button class="clientes-cancel-button" type="button" data-client-import-previous hidden>Anterior</button><button class="clientes-primary-button" type="button" data-client-import-next>Siguiente</button><button class="clientes-primary-button" type="button" data-client-import-confirm hidden>Confirmar importación (demostración)</button></footer>
+            <footer class="clientes-dialog-footer clientes-import-footer"><button class="clientes-cancel-button" type="button" data-close-client-dialog>Cancelar</button><button class="clientes-cancel-button" type="button" data-client-import-previous hidden>Anterior</button><button class="clientes-primary-button" type="button" data-client-import-next>Siguiente</button><button class="clientes-primary-button" type="submit" data-client-import-confirm hidden>Importar clientes</button></footer>
+            </form>
         </div>
     </dialog>
     @foreach ($customers as $customer)
@@ -134,7 +137,7 @@
         (() => {
             const page = document.querySelector('[data-client-page]');
             const createDialog = document.querySelector('#nuevo-cliente');
-            const importDialog = page?.querySelector('[data-client-import-dialog]');
+            const importDialog = document.querySelector('[data-client-import-dialog]');
 
             if (!page || !createDialog) {
                 return;
@@ -152,8 +155,45 @@
             const importFinalFile = importDialog?.querySelector('[data-client-import-final-file]');
             const importAcknowledgement = importDialog?.querySelector('[data-client-import-ack]');
             const importFeedback = importDialog?.querySelector('[data-client-import-feedback]');
+            const importForm = importDialog?.querySelector('[data-client-import-form]');
+            const importPreview = importDialog?.querySelector('[data-client-import-preview]');
+            const importValidations = importDialog?.querySelector('[data-client-import-validations]');
             let importStep = 0;
             let selectedImportFileName = '';
+            let importFileReady = false;
+            const parseCsv = (text) => {
+                const rows = [];
+                let row = [], cell = '', quoted = false;
+                for (let index = 0; index < text.length; index += 1) {
+                    const character = text[index];
+                    if (character === '"' && text[index + 1] === '"' && quoted) { cell += '"'; index += 1; continue; }
+                    if (character === '"') { quoted = !quoted; continue; }
+                    if (character === ',' && !quoted) { row.push(cell.trim()); cell = ''; continue; }
+                    if ((character === '\n' || character === '\r') && !quoted) {
+                        if (character === '\r' && text[index + 1] === '\n') index += 1;
+                        row.push(cell.trim()); cell = '';
+                        if (row.some((value) => value !== '')) rows.push(row);
+                        row = []; continue;
+                    }
+                    cell += character;
+                }
+                if (cell !== '' || row.length) { row.push(cell.trim()); rows.push(row); }
+                return rows;
+            };
+            const renderImportPreview = (rows) => {
+                if (!importPreview) return;
+                importPreview.innerHTML = rows.slice(1, 11).map((row) => `<tr>${Array.from({ length: 7 }, (_, index) => `<td>${String(row[index] ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')}</td>`).join('')}</tr>`).join('') || '<tr><td colspan="7">El CSV no contiene filas de datos.</td></tr>';
+            };
+            const renderImportValidations = (rows) => {
+                if (!importValidations) return;
+                const expected = ['tipo', 'documento', 'nombre_contacto', 'razon_social', 'correo', 'telefono', 'ciudad'];
+                const headers = (rows[0] ?? []).map((value) => String(value).replace(/^﻿/, '').toLowerCase());
+                const valid = JSON.stringify(headers) === JSON.stringify(expected) && rows.length > 1;
+                importFileReady = valid;
+                importValidations.innerHTML = valid
+                    ? '<li class="is-valid"><i class="bi bi-check-circle" aria-hidden="true"></i> Cabecera correcta y hay filas para enviar al servidor.</li><li><i class="bi bi-info-circle" aria-hidden="true"></i> El servidor volverá a validar tipos, correos y documentos duplicados.</li>'
+                    : '<li class="is-warning"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i> La cabecera o el contenido no coincide con la plantilla CSV.</li>';
+            };
             const renderImportStep = (step) => {
                 importStep = step;
                 importStages.forEach((stage) => { stage.hidden = Number(stage.dataset.clientImportStage) !== step; });
@@ -171,6 +211,8 @@
                 importFileName.textContent = 'No se ha seleccionado un archivo.';
                 importAcknowledgement.checked = false;
                 importConfirm.disabled = false;
+                importFileReady = false;
+                if (importPreview) importPreview.innerHTML = '<tr><td colspan="7">Selecciona un CSV para consultar su contenido.</td></tr>';
                 renderImportStep(0);
             };
             page.querySelector('[data-open-client-import]')?.addEventListener('click', () => {
@@ -188,36 +230,45 @@
             });
             importFile?.addEventListener('change', () => {
                 const file = importFile.files?.[0] ?? null;
-                if (file && !/\.(csv|xlsx)$/i.test(file.name)) {
+                if (file && !/\.(csv|txt)$/i.test(file.name)) {
                     selectedImportFileName = '';
                     importFile.value = '';
                     importFileName.textContent = 'No se ha seleccionado un archivo.';
-                    importError.textContent = 'Selecciona un archivo CSV o XLSX.';
+                    importError.textContent = 'Selecciona un archivo CSV UTF-8.';
                     importError.hidden = false;
                     return;
                 }
                 selectedImportFileName = file?.name ?? '';
                 importFileName.textContent = file ? `Seleccionado: ${file.name}` : 'No se ha seleccionado un archivo.';
                 importError.hidden = true;
+                importFileReady = false;
+                if (file) {
+                    file.text().then((text) => {
+                        const rows = parseCsv(text);
+                        renderImportPreview(rows);
+                        renderImportValidations(rows);
+                    }).catch(() => {
+                        importError.textContent = 'No se pudo leer el CSV seleccionado.';
+                        importError.hidden = false;
+                    });
+                }
             });
             importPrevious?.addEventListener('click', () => renderImportStep(Math.max(0, importStep - 1)));
             importNext?.addEventListener('click', () => {
-                if (importStep === 1 && !selectedImportFileName) {
-                    importError.textContent = 'Selecciona un archivo para continuar con la vista previa ilustrativa.';
+                if (importStep === 1 && (!selectedImportFileName || !importFileReady)) {
+                    importError.textContent = 'Selecciona un CSV válido para continuar.';
                     importError.hidden = false;
                     return;
                 }
                 renderImportStep(Math.min(4, importStep + 1));
             });
-            importConfirm?.addEventListener('click', () => {
+            importConfirm?.addEventListener('click', (event) => {
                 if (!importAcknowledgement.checked) {
                     importError.textContent = 'Confirma que revisaste la vista previa y sus advertencias.';
                     importError.hidden = false;
+                    event.preventDefault();
                     return;
                 }
-                importFeedback.textContent = 'Funcionalidad visual. Integración pendiente. No se realizaron cambios. No se cargaron, procesaron ni guardaron archivos o clientes.';
-                importFeedback.hidden = false;
-                importConfirm.disabled = true;
                 importError.hidden = true;
             });
             document.querySelectorAll('[data-open-client-edit]').forEach((button) => button.addEventListener('click', () => document.getElementById(button.dataset.openClientEdit)?.showModal()));

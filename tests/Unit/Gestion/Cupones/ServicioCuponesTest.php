@@ -16,6 +16,7 @@ beforeEach(function (): void {
     Schema::dropIfExists('cupones');
     Schema::create('cupones', function (Blueprint $table): void {
         $table->increments('id');
+        $table->unsignedBigInteger('empresa_id')->nullable();
         $table->string('codigo', 50)->unique();
         $table->string('tipo_descuento', 20);
         $table->decimal('valor', 10, 2);
@@ -131,6 +132,7 @@ function createCouponSyntheticAuthorization(): void
 function makeCouponForServiceTest(array $attributes = []): Cupon
 {
     return Cupon::query()->create($attributes + [
+        'empresa_id' => 1,
         'codigo' => 'PRUEBA-'.fake()->unique()->numerify('#####'),
         'tipo_descuento' => 'porcentaje',
         'valor' => 10,
@@ -158,7 +160,7 @@ it('filters persisted coupons using code, discount type and current validity', f
     makeCouponForServiceTest(['codigo' => 'VERANO-FIJO', 'tipo_descuento' => 'fijo']);
     makeCouponForServiceTest(['codigo' => 'VERANO-FUTURO', 'inicia_en' => now()->addDay()]);
 
-    $result = app(ServicioCupones::class)->query(['buscar' => 'VERANO', 'tipo' => 'porcentaje', 'estado' => 'Activo'])->get();
+    $result = app(ServicioCupones::class)->query(['buscar' => 'VERANO', 'tipo' => 'porcentaje', 'estado' => 'Activo'], 1)->get();
 
     expect($result)->toHaveCount(1)->and($result->sole()->is($matchingCoupon))->toBeTrue();
 });

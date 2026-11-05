@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Gestion\Productos;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ActualizarProductoRequest;
+use App\Http\Requests\GuardarConfiguracionTiendaRequest;
 use App\Http\Requests\GuardarImagenVarianteRequest;
+use App\Http\Requests\GuardarPrecioMayoristaRequest;
 use App\Http\Requests\GuardarProductoRequest;
 use App\Http\Requests\GuardarVarianteProductoRequest;
 use App\Models\Catalogo\Categoria;
@@ -17,7 +19,9 @@ use App\Servicios\ExportadorTabular;
 use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioCatalogo;
+use App\Servicios\ServicioConfiguracionTienda;
 use App\Servicios\ServicioInventario;
+use App\Servicios\ServicioPreciosMayoristas;
 use App\Servicios\ServicioVariantesProducto;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -28,6 +32,7 @@ use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -35,7 +40,7 @@ use Throwable;
 
 class GestionProductosController extends Controller
 {
-    public function preciosCanales(Request $request, ServicioInventario $inventario, ServicioAutorizacion $autorizacion): View
+    public function preciosCanales(Request $request, ServicioInventario $inventario, ServicioAutorizacion $autorizacion, ServicioPreciosMayoristas $servicioPrecios): View
     {
         $filtros = $request->validate([
             'buscar' => ['nullable', 'string', 'max:100'],
@@ -56,7 +61,12 @@ class GestionProductosController extends Controller
             'variants:id,producto_id,codigo_sku',
         ])->orderBy('productos.nombre')->orderBy('productos.id')->paginate(20)->withQueryString();
         $empresa = Empresa::query()->findOrFail($alcance['empresa_id']);
-        $productos = $paginacion->getCollection()->map(static function (Producto $producto) use ($empresa): array {
+        $preciosMayoristasDisponibles = Schema::hasTable('precios_mayoristas');
+        $preciosMayoristas = $servicioPrecios->preciosVigentes(
+            (int) $alcance['empresa_id'],
+            $paginacion->getCollection()->pluck('id')->map(static fn (mixed $id): int => (int) $id)->all(),
+        );
+        $productos = $paginacion->getCollection()->map(static function (Producto $producto) use ($empresa, $preciosMayoristas, $preciosMayoristasDisponibles): array {
             $precioBase = (float) $producto->precio;
             $precioMinorista = (float) ($producto->precio_oferta ?? $producto->precio);
             $existenciasDisponibles = max(0, (float) $producto->existencias_alcance - (float) $producto->existencias_reservadas);
@@ -69,6 +79,9 @@ class GestionProductosController extends Controller
                 'marca' => $producto->marca,
                 'base' => $empresa->moneda_base.' '.number_format($precioBase, 2, '.', ','),
                 'minorista' => $empresa->moneda_base.' '.number_format($precioMinorista, 2, '.', ','),
+                'mayorista' => ! $preciosMayoristasDisponibles ? 'No definido' : (($precioMayorista = $preciosMayoristas->get($producto->getKey()))
+                    ? $empresa->moneda_base.' '.number_format((float) $precioMayorista->precio, 2, '.', ',')
+                    : 'Sin precio registrado'),
                 'stock' => rtrim(rtrim(number_format($existenciasDisponibles, 3, '.', ''), '0'), '.'),
                 'estado' => $producto->activo ? 'Activo' : 'Inactivo',
                 'icono' => 'bi-box-seam',
@@ -87,6 +100,20 @@ class GestionProductosController extends Controller
         $promedioVigente = (float) ($consultaPromedioVigente->first()?->promedio ?? 0);
         $ofertas = (clone $consultaBase)->whereNotNull('productos.precio_oferta')
             ->whereColumn('productos.precio_oferta', '<', 'productos.precio')->count();
+        $resumenMayorista = ['cantidad' => 0, 'promedio' => 0.0];
+        if ($preciosMayoristasDisponibles) {
+            $preciosVigentes = DB::table('precios_mayoristas as precio')
+                ->selectRaw('precio.producto_id, MAX(precio.id) AS id')
+                ->where('precio.empresa_id', $alcance['empresa_id'])->whereNull('precio.variante_id')
+                ->where('precio.vigente_desde', '<=', now())
+                ->where(fn ($consulta) => $consulta->whereNull('precio.vigente_hasta')->orWhere('precio.vigente_hasta', '>=', now()))
+                ->groupBy('precio.producto_id');
+            $productosAlcance = (clone $consultaBase)->select('productos.id')->distinct();
+            $resumenMayorista = DB::query()->fromSub($productosAlcance, 'productos_alcance')
+                ->joinSub($preciosVigentes, 'precios_vigentes', 'precios_vigentes.producto_id', '=', 'productos_alcance.id')
+                ->join('precios_mayoristas as precio_actual', 'precio_actual.id', '=', 'precios_vigentes.id')
+                ->selectRaw('COUNT(*) AS cantidad, COALESCE(AVG(precio_actual.precio), 0) AS promedio')->first();
+        }
 
         return view('paneles.administrador.ecommerce-marketing.precios.listar', [
             'productos' => $productos,
@@ -100,19 +127,36 @@ class GestionProductosController extends Controller
             'promedioBase' => $empresa->moneda_base.' '.number_format($promedioBase, 2, '.', ','),
             'promedioMinorista' => $empresa->moneda_base.' '.number_format($promedioVigente, 2, '.', ','),
             'productosEnOferta' => $ofertas,
+            'preciosMayoristasDisponibles' => $preciosMayoristasDisponibles,
+            'puedeActualizarPrecioMayorista' => $preciosMayoristasDisponibles && $autorizacion->allowsGlobal($request->user(), 'gestion.productos.actualizar'),
+            'totalPreciosMayoristas' => (int) $resumenMayorista->cantidad,
+            'promedioMayorista' => $preciosMayoristasDisponibles
+                ? $empresa->moneda_base.' '.number_format((float) $resumenMayorista->promedio, 2, '.', ',')
+                : 'No definido',
             'puedeExportar' => $autorizacion->allows($request->user(), 'gestion.productos.exportar'),
         ]);
     }
 
-    public function configuracionTienda(Request $request, ServicioInventario $inventario): View
+    public function guardarPrecioMayorista(GuardarPrecioMayoristaRequest $request, ServicioPreciosMayoristas $servicioPrecios): RedirectResponse
+    {
+        $servicioPrecios->registrar($request->validated(), $request->user(), $request->ip());
+
+        return redirect()->route('management.products.preview.prices')->with('status', 'El precio mayorista quedó registrado en MariaDB.');
+    }
+
+    public function configuracionTienda(Request $request, ServicioInventario $inventario, ServicioAutorizacion $autorizacion, ServicioConfiguracionTienda $servicioConfiguracion): View
     {
         $alcance = $inventario->alcanceConsulta($request->user(), 'gestion.productos.consultar');
         $empresa = Empresa::query()->findOrFail($alcance['empresa_id']);
         $productosActivos = Producto::query()->where('empresa_id', $empresa->id)->where('activo', true);
         $categoriasActivas = Categoria::query()->where('empresa_id', $empresa->id)->where('activo', true)->count();
-        $mediosPago = DB::table('medios_pago')->where('activo', true)->orderBy('nombre')->pluck('nombre');
+        $mediosPago = DB::table('medios_pago')->where('activo', true)->orderBy('nombre')->get(['id', 'nombre']);
+        $configuracionTiendaDisponible = Schema::hasTable('configuraciones_tienda');
+        $configuracionTienda = $servicioConfiguracion->consultar((int) $empresa->id);
+        $puedeActualizarConfiguracion = $configuracionTiendaDisponible
+            && $autorizacion->allowsGlobal($request->user(), 'gestion.configuracion.actualizar');
         $productosVista = (clone $productosActivos)->with('category:id,nombre')->orderBy('nombre')->limit(2)->get();
-        $sinConfiguracion = 'No existe una entidad de configuración de tienda en el esquema actual.';
+        $sinConfiguracion = $configuracionTiendaDisponible ? 'Sin valor configurado en MariaDB.' : 'No existe una entidad de configuración de tienda en el esquema actual.';
         $secciones = [
             ['clave' => 'general', 'titulo' => 'General', 'icono' => 'bi-gear', 'resumen' => 'Información de la empresa', 'filas' => [
                 ['Nombre comercial', $empresa->nombre_comercial ?: $empresa->razon_social],
@@ -125,7 +169,7 @@ class GestionProductosController extends Controller
                 ['Logo de tienda', $sinConfiguracion], ['Banner principal', $sinConfiguracion], ['Color de tienda', 'El diseño actual se conserva; no hay preferencia persistente en MariaDB.'],
             ]],
             ['clave' => 'pagos', 'titulo' => 'Pagos', 'icono' => 'bi-credit-card', 'resumen' => 'Medios de pago registrados', 'filas' => [
-                ['Medios activos', (string) $mediosPago->count()], ['Opciones', $mediosPago->isEmpty() ? 'No hay medios de pago activos' : $mediosPago->implode(', ')],
+                ['Medios activos', (string) $mediosPago->count()], ['Opciones', $mediosPago->isEmpty() ? 'No hay medios de pago activos' : $mediosPago->pluck('nombre')->implode(', ')],
                 ['Confirmación externa', 'No habilitada en este módulo.'],
             ]],
             ['clave' => 'envios', 'titulo' => 'Envíos', 'icono' => 'bi-truck', 'resumen' => 'Configuración de entregas', 'filas' => [
@@ -142,13 +186,48 @@ class GestionProductosController extends Controller
             ]],
         ];
 
+        foreach ($secciones as &$seccion) {
+            foreach ($seccion['filas'] as $indiceFila => &$fila) {
+                $valorConfigurado = match ([$seccion['clave'], $indiceFila]) {
+                    ['general', 0] => data_get($configuracionTienda, 'general.nombre_tienda'),
+                    ['apariencia', 2] => data_get($configuracionTienda, 'apariencia.color_principal'),
+                    ['envios', 1] => data_get($configuracionTienda, 'envios.costo_estandar') === null
+                        ? null
+                        : $empresa->moneda_base.' '.number_format((float) data_get($configuracionTienda, 'envios.costo_estandar'), 2),
+                    ['notificaciones', 0] => data_get($configuracionTienda, 'notificaciones.confirmacion_pedido'),
+                    ['notificaciones', 1] => data_get($configuracionTienda, 'notificaciones.correo_remitente'),
+                    ['seo', 0] => data_get($configuracionTienda, 'seo.titulo'),
+                    ['seo', 1] => data_get($configuracionTienda, 'seo.descripcion'),
+                    ['seo', 2] => data_get($configuracionTienda, 'seo.analitica_id'),
+                    default => null,
+                };
+                if ($valorConfigurado !== null) {
+                    $fila[1] = $valorConfigurado;
+                }
+            }
+            unset($fila);
+        }
+        unset($seccion);
+
         return view('paneles.administrador.ecommerce-marketing.tienda.listar', [
             'empresa' => $empresa,
+            'mediosPago' => $mediosPago,
+            'configuracionTienda' => $configuracionTienda,
+            'nombreTienda' => data_get($configuracionTienda, 'general.nombre_tienda', $empresa->nombre_comercial ?: $empresa->razon_social),
+            'configuracionTiendaDisponible' => $configuracionTiendaDisponible,
+            'puedeActualizarConfiguracion' => $puedeActualizarConfiguracion,
             'secciones' => $secciones,
             'productosActivosCount' => (clone $productosActivos)->count(),
             'categoriasActivasCount' => $categoriasActivas,
             'productosVista' => $productosVista,
         ]);
+    }
+
+    public function guardarConfiguracionTienda(GuardarConfiguracionTiendaRequest $request, ServicioConfiguracionTienda $servicioConfiguracion): RedirectResponse
+    {
+        $servicioConfiguracion->guardar($request->validated(), $request->user(), $request->ip());
+
+        return redirect()->route('management.products.preview.store_settings')->with('status', 'La configuración de tienda quedó guardada en MariaDB.');
     }
 
     public function index(Request $request, ServicioInventario $inventario): View
@@ -171,7 +250,12 @@ class GestionProductosController extends Controller
             ->whereBetween('creado_en', [$previousMonthStart, $previousMonthEnd])
             ->count();
         $categoryCount = Categoria::query()->where('empresa_id', $alcance['empresa_id'])->where('activo', true)->count();
-        $paginaProductos = $this->productQuery($filters, $alcance, $inventario)
+        $idProductoEditar = $request->integer('editar');
+        $consultaProductos = $this->productQuery($filters, $alcance, $inventario);
+        if ($idProductoEditar > 0) {
+            $consultaProductos->where('productos.id', $idProductoEditar);
+        }
+        $paginaProductos = $consultaProductos
             ->with([
                 'category' => function (BelongsTo $relacion) use ($alcance): void {
                     $relacion->where('empresa_id', $alcance['empresa_id']);
@@ -212,6 +296,7 @@ class GestionProductosController extends Controller
                 ->pluck('marca'),
             'suppliers' => Proveedor::query()->where('empresa_id', $alcance['empresa_id'])->where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
             'filters' => $filters,
+            'idProductoEditar' => $idProductoEditar,
             'activeProducts' => $resumen['productos_activos'],
             'productsTrendPercent' => $this->trendPercent($productosAgregadosEsteMes, $productosAgregadosMesAnterior),
             'productsWithStock' => $resumen['productos_con_existencias'],

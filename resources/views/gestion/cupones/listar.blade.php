@@ -1,10 +1,13 @@
 @extends('layouts.administracion')
 
 @section('title', 'Cupones')
-@section('body_class', auth()->user()?->rol === 'administrador' ? 'modulo-cupones' : '')
+@section('body_class', auth()->user()?->isRole('administrador') ? 'modulo-cupones' : '')
 
 @section('content')
-    @if (auth()->user()?->rol !== 'administrador')
+    @php
+        $rolPanel = auth()->user()?->rol ?: auth()->user()?->rolesVigentes()->value('roles.codigo');
+    @endphp
+    @if ($rolPanel !== 'administrador')
         <section class="container content-page">
             <h1>Cupones</h1>
             <p class="notice">Gestiona los cupones disponibles para las promociones comerciales.</p>
@@ -36,15 +39,18 @@
                     <ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
                 </div>
             @endif
+            @unless ($empresaCuponDisponible)
+                <p class="gestion-pendiente-feedback" role="status">No se pueden consultar ni crear cupones hasta contar con propiedad empresarial persistida en MariaDB.</p>
+            @endunless
 
             <header class="admin-marketing-header">
                 <nav class="admin-marketing-breadcrumb" aria-label="Ruta de navegación"><span>Administración</span><i class="bi bi-chevron-right" aria-hidden="true"></i><span>Marketing</span><i class="bi bi-chevron-right" aria-hidden="true"></i><strong>Cupones y promociones</strong></nav>
                 <div class="admin-marketing-heading-row">
                     <div><span class="admin-marketing-eyebrow"><i class="bi bi-ticket-perforated" aria-hidden="true"></i> Marketing</span><h1>Gestión de cupones y promociones</h1><p>Configura descuentos, controla condiciones de uso y mide su impacto comercial.</p></div>
                     <div class="admin-marketing-actions">
-                        <a class="admin-marketing-button admin-marketing-button--secondary" href="{{ route('management.coupons.export', request()->query()) }}"><i class="bi bi-download" aria-hidden="true"></i> Exportar</a>
+                        <details class="admin-marketing-export-menu"><summary class="admin-marketing-button admin-marketing-button--secondary"><i class="bi bi-download" aria-hidden="true"></i> Exportar</summary><div class="admin-marketing-export-options"><a href="{{ route('management.coupons.export', ['format' => 'excel'] + request()->query()) }}">Excel (.xlsx)</a><a href="{{ route('management.coupons.export', ['format' => 'pdf'] + request()->query()) }}">PDF (.pdf)</a><a href="{{ route('management.coupons.export', ['format' => 'csv'] + request()->query()) }}">CSV (.csv)</a></div></details>
                         <a class="admin-marketing-button admin-marketing-button--secondary" href="#cupones-estadisticas"><i class="bi bi-bar-chart-line" aria-hidden="true"></i> Ver estadísticas</a>
-                        <button class="admin-marketing-button admin-marketing-button--primary" type="button" data-pending-open="crear"><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo cupón</button>
+                        <button class="admin-marketing-button admin-marketing-button--primary" type="button" data-pending-open="crear" @disabled(!$empresaCuponDisponible) title="{{ $empresaCuponDisponible ? 'Crear cupón' : 'Requiere estructura de propiedad por empresa' }}"><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo cupón</button>
                         <a class="admin-marketing-button admin-marketing-button--secondary" href="{{ route('management.campaigns') }}"><i class="bi bi-megaphone" aria-hidden="true"></i> Nueva promoción</a>
                     </div>
                 </div>
@@ -84,7 +90,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="7"><div class="admin-marketing-empty"><span><i class="bi bi-ticket-perforated" aria-hidden="true"></i></span><strong>No hay cupones para mostrar</strong><p>Crea el primer cupón para comenzar a controlar tus promociones.</p><button type="button" class="admin-marketing-empty-button" data-pending-open="crear"><i class="bi bi-plus-lg" aria-hidden="true"></i> Crear cupón</button></div></td></tr>
+                        <tr><td colspan="7"><div class="admin-marketing-empty"><span><i class="bi bi-ticket-perforated" aria-hidden="true"></i></span><strong>No hay cupones para mostrar</strong><p>Crea el primer cupón para comenzar a controlar tus promociones.</p><button type="button" class="admin-marketing-empty-button" data-pending-open="crear" @disabled(!$empresaCuponDisponible) title="{{ $empresaCuponDisponible ? 'Crear cupón' : 'Requiere estructura de propiedad por empresa' }}"><i class="bi bi-plus-lg" aria-hidden="true"></i> Crear cupón</button></div></td></tr>
                     @endforelse
                 </tbody></table></div>
                 <footer class="admin-marketing-table-footer"><span>Mostrando {{ $coupons->firstItem() ?? 0 }} a {{ $coupons->lastItem() ?? 0 }} de {{ number_format($coupons->total()) }} registros</span>{{ $coupons->links() }}</footer>

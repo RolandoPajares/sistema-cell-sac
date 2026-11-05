@@ -10,12 +10,16 @@ use App\Models\Compras\Compra;
 use App\Models\Compras\Proveedor;
 use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioCompras;
+use App\Servicios\ExportadorTabular;
+use App\Servicios\RegistradorAuditoria;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
+use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 class CompraController extends Controller
@@ -74,7 +78,7 @@ class CompraController extends Controller
         };
 
         $purchases = $applyFilters($activePurchases())
-            ->with(['supplier', 'details.product'])
+            ->with(['supplier', 'details.product', 'details.variante'])
             ->withCount('details')
             ->latest('fecha_compra')
             ->latest('id')
@@ -180,6 +184,7 @@ class CompraController extends Controller
         }
         $idsPendientes = array_values(array_unique([...$pendingPurchaseRecords->modelKeys(), ...$purchases->getCollection()->modelKeys()]));
         $aprobables = $this->authorization->scopeRecordsFor(Compra::query()->whereIn('compras.id', $idsPendientes), $request->user(), 'gestion.compras.aprobar')->pluck('compras.id')->all();
+        $anulables = $this->authorization->scopeRecordsFor(Compra::query()->whereIn('compras.id', $idsPendientes)->where('estado', 'Pendiente'), $request->user(), 'gestion.compras.anular')->pluck('compras.id')->all();
         $recibibles = $this->authorization->scopeRecordsFor(Compra::query()->whereIn('compras.id', $idsPendientes), $request->user(), 'gestion.compras.recibir')->pluck('compras.id')->all();
         $tokensRecepcion = [];
         foreach ($purchases as $purchase) {
@@ -202,6 +207,7 @@ class CompraController extends Controller
             'products' => $products,
             'canCreate' => $canCreate,
             'aprobables' => $aprobables,
+            'anulables' => $anulables,
             'recibibles' => $recibibles,
             'tokensRecepcion' => $tokensRecepcion,
             'filters' => $filters,
@@ -226,6 +232,64 @@ class CompraController extends Controller
         ]);
     }
 
+    public function export(Request $request, string $format, ExportadorTabular $exporter, RegistradorAuditoria $audit): Response|StreamedResponse
+    {
+        abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
+        $filters = $request->validate([
+            'buscar' => ['nullable', 'string', 'max:160'],
+            'proveedor' => ['nullable', 'integer'],
+            'estado' => ['nullable', 'string', 'max:30'],
+            'desde' => ['nullable', 'date_format:Y-m-d'],
+            'hasta' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:desde'],
+        ]);
+        $query = $this->authorization->scopeRecordsFor(Compra::query(), $request->user(), 'gestion.compras.consultar')
+            ->where('activo', true)
+            ->with('supplier')
+            ->when(($filters['buscar'] ?? '') !== '', function (Builder $builder) use ($filters): void {
+                $search = trim((string) $filters['buscar']);
+                $builder->where(function (Builder $nested) use ($search): void {
+                    if (ctype_digit($search)) {
+                        $nested->where('id', (int) $search)
+                            ->orWhereHas('supplier', fn (Builder $supplier): Builder => $supplier->where('nombre', 'like', '%'.$search.'%'));
+
+                        return;
+                    }
+
+                    $nested->whereHas('supplier', fn (Builder $supplier): Builder => $supplier->where('nombre', 'like', '%'.$search.'%'));
+                });
+            })
+            ->when(($filters['proveedor'] ?? '') !== '', fn (Builder $builder): Builder => $builder->where('proveedor_id', $filters['proveedor']))
+            ->when(($filters['estado'] ?? '') !== '', fn (Builder $builder): Builder => $builder->where('estado', $filters['estado']))
+            ->when(($filters['desde'] ?? '') !== '', fn (Builder $builder): Builder => $builder->whereDate('fecha_compra', '>=', $filters['desde']))
+            ->when(($filters['hasta'] ?? '') !== '', fn (Builder $builder): Builder => $builder->whereDate('fecha_compra', '<=', $filters['hasta']))
+            ->orderByDesc('fecha_compra')->orderByDesc('id')->limit(5000);
+        $purchases = $query->get();
+        $rows = $purchases->map(static fn (Compra $purchase): array => [
+            $purchase->id,
+            $purchase->supplier?->nombre,
+            $purchase->fecha_compra?->format('Y-m-d'),
+            $purchase->estado,
+            $purchase->total,
+        ])->all();
+        $response = $exporter->download($format, 'compras-'.now()->format('Ymd'),
+            ['ID', 'Proveedor', 'Fecha', 'Estado', 'Total'],
+            $rows,
+            [
+                'title' => 'REPORTE DE COMPRAS',
+                'subtitle' => 'Compras reales consultadas desde MariaDB.',
+                'module' => 'Operaciones Comerciales',
+                'report_name' => 'Compras',
+                'filters' => $filters,
+                'generated_by' => (string) $request->user()->nombre,
+                'role' => 'Usuario autorizado',
+                'scope' => 'Empresa, sede, almacén y permisos RBAC vigentes.',
+                'indicators' => [['label' => 'Compras incluidas', 'value' => count($rows)]],
+            ]);
+        $audit->record($request->user()->getKey(), 'exportar', 'compras', null, null, ['formato' => $format, 'filtros' => $filters, 'cantidad' => count($rows)], $request->ip());
+
+        return $response;
+    }
+
     public function store(GuardarCompraRequest $request): RedirectResponse
     {
         $datos = $request->validated();
@@ -247,6 +311,13 @@ class CompraController extends Controller
         $this->purchaseService->recibir($compra, $request->user(), $request->ip());
 
         return back()->with('status', 'La compra está recibida.');
+    }
+
+    public function cancel(Request $request, Compra $compra): RedirectResponse
+    {
+        $this->purchaseService->anular($compra, $request->user(), $request->ip());
+
+        return back()->with('status', 'La compra pendiente fue anulada y quedó conservada en auditoría.');
     }
 
     public function recibirParcial(RegistrarRecepcionParcialCompraRequest $request, Compra $compra): RedirectResponse

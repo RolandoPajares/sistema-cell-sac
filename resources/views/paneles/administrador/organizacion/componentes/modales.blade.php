@@ -5,10 +5,10 @@
             <div><small>{{ in_array($tipo, ['empresa', 'sedes', 'almacenes'], true) ? 'Organización · Datos de MariaDB' : 'Organización y Sedes · Vista de diseño' }}</small><h2 id="tc-org-modal-title" data-org-modal-title></h2><p data-org-modal-description></p></div>
             <button type="button" class="tc-org__dialog-close" data-org-close aria-label="Cerrar formulario"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
         </header>
-        <form class="tc-org__dialog-form" data-org-form @if (in_array($tipo, ['empresa', 'almacenes', 'sedes'], true)) data-org-real-form method="post" action="{{ $tipo === 'almacenes' ? route('management.company_settings.warehouses.store') : ($tipo === 'sedes' ? route('management.company_settings.sites.store') : route('management.company_settings.data.update')) }}" @else novalidate @endif>
+        <form class="tc-org__dialog-form" data-org-form @if (in_array($tipo, ['empresa', 'almacenes', 'sedes', 'responsables'], true)) data-org-real-form method="post" action="{{ $tipo === 'almacenes' ? route('management.company_settings.warehouses.store') : ($tipo === 'sedes' ? route('management.company_settings.sites.store') : ($tipo === 'responsables' ? route('management.company_settings.responsibles.store') : route('management.company_settings.data.update'))) }}" @else novalidate @endif>
             <div class="tc-org__dialog-steps" data-org-steps aria-label="Pasos del formulario"><span data-org-step-indicator="1">1 · Información</span><span data-org-step-indicator="2">2 · Detalles</span><span data-org-step-indicator="3">3 · Confirmación</span></div>
             <div class="tc-org__dialog-body">
-                @if (in_array($tipo, ['empresa', 'almacenes', 'sedes'], true))
+                @if (in_array($tipo, ['empresa', 'almacenes', 'sedes', 'responsables'], true))
                     @csrf
                     <input type="hidden" name="_method" value="POST" data-org-method>
                 @endif
@@ -49,21 +49,22 @@
                     </div></section>
                 @else
                     <section data-org-step="1"><h3><i class="bi bi-diagram-3"></i> Recurso y responsable</h3><div class="tc-org__field-grid">
-                        <label>Tipo de recurso <b>*</b><select name="tipo_recurso" required><option value="">Seleccionar…</option><option>Sede</option><option>Almacén</option><option>Área</option></select></label>
-                        <label>Recurso o unidad <b>*</b><input name="recurso" required maxlength="160" placeholder="Seleccionar recurso existente al integrar datos"></label>
-                        <label>Sede <b>*</b><select name="sede" required><option value="">Seleccionar sede…</option><option>Oficina Central</option><option>Sede Principal</option><option>Sede Norte</option><option>Sede Sur</option></select></label>
-                        <label>Nuevo responsable <b>*</b><select name="responsable" required><option value="">Seleccionar usuario existente…</option><option>Carlos Mendoza</option><option>Ana Torres</option><option>Luis Rojas</option><option>María Gómez</option><option>Javier Salazar</option><option>Elena Paredes</option><option>Ricardo Vega</option><option>Daniel Castro</option></select></label>
+                        <label>Tipo de recurso <b>*</b><select name="tipo_recurso" required><option value="">Seleccionar…</option><option value="sede">Sede</option><option value="almacen">Almacén</option><option value="" disabled>Área (sin entidad en el esquema)</option></select></label>
+                        <label data-org-resource-field="almacen_id">Almacén<select name="almacen_id"><option value="">Seleccionar almacén…</option>@foreach ($almacenes ?? [] as $almacen)<option value="{{ $almacen->id }}" data-sede-id="{{ $almacen->sede_id }}">{{ $almacen->nombre }} · {{ $almacen->codigo }}</option>@endforeach</select></label>
+                        <label data-org-resource-field="area_nombre">Área<input name="area_nombre" maxlength="160" placeholder="No disponible en el esquema" disabled></label>
+                        <label>Sede <b>*</b><select name="sede_id" required><option value="">Seleccionar sede…</option>@foreach ($sedes ?? [] as $sede)<option value="{{ $sede->id }}">{{ $sede->nombre }} · {{ $sede->codigo }}</option>@endforeach</select></label>
+                        <label>Nuevo responsable <b>*</b><select name="responsable_usuario_id" required><option value="">Seleccionar usuario existente…</option>@foreach ($usuarios ?? [] as $usuario)<option value="{{ $usuario->id }}" data-sede-id="{{ $usuario->sede_id }}">{{ $usuario->nombre }}</option>@endforeach</select></label>
                         <label>Cargo <b>*</b><input name="cargo" required maxlength="100"></label>
                     </div></section>
                     <section data-org-step="2" hidden><h3><i class="bi bi-calendar-check"></i> Vigencia y relevo</h3><div class="tc-org__field-grid">
                         <label>Fecha de inicio <b>*</b><input name="inicio" type="date" required></label><label>Fecha de fin<input name="fin" type="date"></label>
                         <label>Motivo <b>*</b><textarea name="motivo" required minlength="10" maxlength="500" rows="3" placeholder="Explica el motivo de la asignación o relevo"></textarea></label>
                         <label>Responsable anterior<input name="anterior" readonly placeholder="Se mostrará al seleccionar una asignación"></label>
-                    </div><p class="tc-org__dialog-note">El relevo de una persona responsable requerirá confirmación y trazabilidad cuando exista integración backend.</p></section>
+                    </div><p class="tc-org__dialog-note">El relevo conserva la vigencia anterior y enlaza la asignación precedente en el historial.</p></section>
                 @endif
             </div>
             <p class="tc-org__dialog-feedback" data-org-feedback role="status" aria-live="polite"></p>
-            <footer class="tc-org__dialog-footer"><button type="button" class="tc-org__button" data-org-close>Cancelar</button><button type="button" class="tc-org__button" data-org-prev hidden>Anterior</button><button type="button" class="tc-org__button tc-org__button--primary" data-org-next>Siguiente</button><button type="{{ in_array($tipo, ['empresa', 'almacenes', 'sedes'], true) ? 'submit' : 'button' }}" class="tc-org__button tc-org__button--primary" data-org-save hidden>Guardar</button></footer>
+            <footer class="tc-org__dialog-footer"><button type="button" class="tc-org__button" data-org-close>Cancelar</button><button type="button" class="tc-org__button" data-org-prev hidden>Anterior</button><button type="button" class="tc-org__button tc-org__button--primary" data-org-next>Siguiente</button><button type="{{ in_array($tipo, ['empresa', 'almacenes', 'sedes', 'responsables'], true) ? 'submit' : 'button' }}" class="tc-org__button tc-org__button--primary" data-org-save hidden>Guardar</button></footer>
         </form>
     </div>
 </dialog>

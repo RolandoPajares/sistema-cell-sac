@@ -48,7 +48,7 @@ $queryWithoutPage = request()->except(['page']);
         </div>
         <div class="ventas-hero-actions">
             <button class="ventas-secondary-button" type="button" disabled>Más opciones <i class="bi bi-chevron-down" aria-hidden="true"></i></button>
-            <a class="ventas-secondary-button" href="{{ route('management.sales.export', $queryWithoutPage) }}"><i class="bi bi-download" aria-hidden="true"></i> Exportar <i class="bi bi-chevron-down" aria-hidden="true"></i></a>
+            <details class="ventas-export-menu"><summary class="ventas-secondary-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar <i class="bi bi-chevron-down" aria-hidden="true"></i></summary><div class="ventas-export-options"><a href="{{ route('management.sales.export', ['format' => 'excel'] + $queryWithoutPage) }}">Excel (.xlsx)</a><a href="{{ route('management.sales.export', ['format' => 'pdf'] + $queryWithoutPage) }}">PDF (.pdf)</a><a href="{{ route('management.sales.export', ['format' => 'csv'] + $queryWithoutPage) }}">CSV (.csv)</a></div></details>
             <button class="ventas-primary-button" type="button" @disabled(! $canCreate) @if ($canCreate) data-open-sales-create @endif title="{{ $canCreate ? 'Registrar venta física' : 'Registro no disponible: faltan permisos, almacén o la migración requerida.' }}"><i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva venta</button>
         </div>
     </header>

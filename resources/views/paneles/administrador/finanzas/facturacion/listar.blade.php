@@ -1,1 +1,1 @@
-@include('paneles.administrador.componentes.finanzas-modulo', ['module' => $module])
+@include('paneles.administrador.componentes.finanzas-modulo-conectado', ['module' => $module])

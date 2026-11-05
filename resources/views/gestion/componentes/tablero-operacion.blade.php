@@ -22,7 +22,9 @@
             </div>
             <div class="gestion-operacion-actions">
                 @foreach ($ui['actions'] as $action)
-                    @if (isset($action['route']))
+                    @if (isset($action['route']) && isset($action['formats']))
+                        <details class="gestion-pendiente-export-menu"><summary class="gestion-pendiente-secondary"><i class="bi {{ $action['icon'] }}" aria-hidden="true"></i> {{ $action['label'] }}</summary><div class="gestion-pendiente-export-options">@foreach ($action['formats'] as $format)<a href="{{ route($action['route'], array_merge(request()->query(), ['format' => $format])) }}">{{ strtoupper($format) }} (.{{ $format === 'excel' ? 'xlsx' : $format }})</a>@endforeach</div></details>
+                    @elseif (isset($action['route']))
                         <a class="gestion-pendiente-secondary" href="{{ route($action['route'], request()->query()) }}"><i class="bi {{ $action['icon'] }}" aria-hidden="true"></i> {{ $action['label'] }}</a>
                     @elseif (($action['modal'] ?? null) === 'crear')
                         <button class="gestion-pendiente-primary" type="button" data-pending-open="crear"><i class="bi {{ $action['icon'] }}" aria-hidden="true"></i> {{ $action['label'] }}</button>

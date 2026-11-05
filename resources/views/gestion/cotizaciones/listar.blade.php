@@ -1,4 +1,4 @@
-@extends(in_array(auth()->user()->rol, ['cliente_mayorista'], true) ? 'layouts.tienda' : 'layouts.administracion')
+@extends(auth()->user()->isRole('cliente_mayorista') ? 'layouts.tienda' : 'layouts.administracion')
 
 @section('title', 'Cotizaciones mayoristas')
 

@@ -10,10 +10,12 @@ use App\Models\Clientes\Cliente;
 use App\Models\Comercio\DevolucionGarantia;
 use App\Models\Comercio\Pedido;
 use App\Servicios\RegistradorAuditoria;
+use App\Servicios\ExportadorTabular;
 use App\Servicios\ServicioAutorizacion;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -141,8 +143,9 @@ class DevolucionGarantiaController extends Controller
         return redirect()->route('management.returns')->with('status', 'Solicitud desactivada correctamente.');
     }
 
-    public function export(Request $request): StreamedResponse
+    public function export(Request $request, ExportadorTabular $exporter, RegistradorAuditoria $audit, string $format = 'csv'): Response|StreamedResponse
     {
+        abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
         $returns = $this->applyFilters($this->authorization->scopeRecordsFor(
             DevolucionGarantia::query()->where('activo', true),
             $request->user(),
@@ -151,32 +154,24 @@ class DevolucionGarantiaController extends Controller
             ->with(['customer:id,nombre_contacto,razon_social', 'product:id,nombre'])
             ->orderBy('fecha_solicitud')
             ->orderBy('id')
-            ->lazyById(200, 'id');
+            ->get();
+        $rows = $returns->map(static fn (DevolucionGarantia $returnRequest): array => [
+            $returnRequest->codigo,
+            $returnRequest->customer?->nombre_contacto ?: $returnRequest->customer?->razon_social,
+            $returnRequest->product?->nombre,
+            $returnRequest->tipo,
+            $returnRequest->estado,
+            $returnRequest->fecha_solicitud?->format('d/m/Y'),
+            $returnRequest->fecha_limite?->format('d/m/Y'),
+        ])->all();
+        $response = $exporter->download($format, 'devoluciones-garantias',
+            ['Código', 'Cliente', 'Producto', 'Tipo', 'Estado', 'Fecha de solicitud', 'Fecha límite'],
+            $rows,
+            ['title' => 'REPORTE DE DEVOLUCIONES Y GARANTÍAS', 'module' => 'Operaciones Comerciales', 'report_name' => 'Devoluciones y garantías', 'generated_by' => (string) $request->user()->nombre, 'indicators' => [['label' => 'Solicitudes incluidas', 'value' => count($rows)]], 'column_types' => ['text', 'text', 'text', 'text', 'text', 'date', 'date']]
+        );
+        $audit->record($request->user()->getKey(), 'exportar', 'devoluciones_garantias', null, null, ['formato' => $format, 'cantidad' => count($rows)], $request->ip());
 
-        return response()->streamDownload(function () use ($returns): void {
-            $output = fopen('php://output', 'w');
-
-            if ($output === false) {
-                return;
-            }
-
-            fwrite($output, "\xEF\xBB\xBF");
-            fputcsv($output, ['Código', 'Cliente', 'Producto', 'Tipo', 'Estado', 'Fecha de solicitud', 'Fecha límite']);
-
-            foreach ($returns as $returnRequest) {
-                fputcsv($output, [
-                    $returnRequest->codigo,
-                    $returnRequest->customer?->nombre_contacto ?: $returnRequest->customer?->razon_social,
-                    $returnRequest->product?->nombre,
-                    $returnRequest->tipo,
-                    $returnRequest->estado,
-                    $returnRequest->fecha_solicitud?->format('d/m/Y'),
-                    $returnRequest->fecha_limite?->format('d/m/Y'),
-                ]);
-            }
-
-            fclose($output);
-        }, 'devoluciones-garantias.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+        return $response;
     }
 
     private function assertOrderInScope(Request $request, Pedido $order, string $permission): void

@@ -60,5 +60,5 @@
         @error('finaliza_en')<small role="alert">{{ $message }}</small>@enderror
     </label>
 
-    <button class="btn btn-primary">Guardar cupón</button>
+    <button class="btn btn-primary" @disabled(!$empresaCuponDisponible)>Guardar cupón</button>
 </form>

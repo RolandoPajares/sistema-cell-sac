@@ -13,7 +13,7 @@ class Cupon extends Model
     protected $table = 'cupones';
 
     protected $fillable = [
-        'codigo', 'tipo_descuento', 'valor', 'minimo_compra', 'limite_usos',
+        'empresa_id', 'codigo', 'tipo_descuento', 'valor', 'minimo_compra', 'limite_usos',
         'usos', 'inicia_en', 'finaliza_en', 'activo',
     ];
 

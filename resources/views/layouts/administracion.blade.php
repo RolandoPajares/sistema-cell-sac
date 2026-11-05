@@ -1,4 +1,6 @@
 @php($userPreferences = (array) (auth()->user()?->preferencias ?? []))
+@php($panelUser = auth()->user())
+@php($panelRole = $panelUser?->rol ?: $panelUser?->rolesVigentes()->value('roles.codigo'))
 <!doctype html>
 <html lang="es">
     <head>
@@ -10,7 +12,7 @@
         <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.min.css') }}">
         @stack('styles')
     </head>
-    <body class="admin-body admin-theme @yield('body_class')" data-panel-role="{{ auth()->user()?->rol }}">
+    <body class="admin-body admin-theme @yield('body_class')" data-panel-role="{{ $panelRole }}">
         <div class="admin-layout admin-app" data-admin-app data-user-compact-menu="{{ array_key_exists('menu_compacto', $userPreferences) ? ($userPreferences['menu_compacto'] ? '1' : '0') : '' }}">
             @include('layouts.panel.menu-lateral', ['links' => $sidebarLinks ?? []])
             <div class="admin-shell admin-content-shell">

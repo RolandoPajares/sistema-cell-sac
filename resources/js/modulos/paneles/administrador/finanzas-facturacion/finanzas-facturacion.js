@@ -4,6 +4,19 @@ document.querySelectorAll('[data-finanzas-diseno]').forEach((page) => {
     const rows = [...page.querySelectorAll('[data-ff-row]')];
     const empty = page.querySelector('[data-ff-empty]');
     const dialogs = [...page.querySelectorAll('[data-ff-dialog]')];
+    page.querySelectorAll('[data-account-application]').forEach((form) => {
+        const cuenta = form.querySelector('[data-account-select]');
+        const pago = form.querySelector('[data-registered-payment-select]');
+        const actualizarPagosDisponibles = () => {
+            if (!cuenta || !pago) return;
+            [...pago.options].forEach((opcion) => {
+                if (opcion.value) opcion.hidden = opcion.dataset.cuenta !== cuenta.value;
+            });
+            if (pago.selectedOptions[0]?.hidden) pago.value = '';
+        };
+        cuenta?.addEventListener('change', actualizarPagosDisponibles);
+        actualizarPagosDisponibles();
+    });
 
     const applyFilters = () => {
         const query = search?.value.trim().toLocaleLowerCase('es') ?? '';

@@ -502,6 +502,14 @@ final class ServicioAutorizacion
             $action = $request->isMethod('GET') ? 'consultar' : 'revocar';
         }
 
+        if ($routeModule === 'integrations' && in_array($routeName, ['integrations.store', 'integrations.update'], true)) {
+            $action = 'configurar';
+        }
+
+        if ($routeModule === 'backups' && $routeName === 'backups.store') {
+            $action = 'crear';
+        }
+
         return 'gestion.'.$module.'.'.$action;
     }
 

@@ -6,6 +6,7 @@ use App\Models\Comercio\Cupon;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class ServicioCupones
 {
@@ -13,9 +14,14 @@ class ServicioCupones
      * @param  array{buscar?:?string,tipo?:?string,estado?:?string,vigencia?:?string}  $filters
      * @return Builder<Cupon>
      */
-    public function query(array $filters): Builder
+    public function query(array $filters, ?int $empresaId): Builder
     {
-        $query = Cupon::query()
+        $query = Cupon::query();
+        if (! Schema::hasColumn('cupones', 'empresa_id') || $empresaId === null) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        $query->where('empresa_id', $empresaId)
             ->when($filters['buscar'] ?? null, fn (Builder $query, string $search): Builder => $query->where('codigo', 'like', '%'.$search.'%'))
             ->when($filters['tipo'] ?? null, fn (Builder $query, string $type): Builder => $query->where('tipo_descuento', $type));
 
@@ -43,18 +49,23 @@ class ServicioCupones
     }
 
     /** @return array{total:int,activos:int,canjes:int,proximos:iterable,mas_usados:iterable} */
-    public function dashboard(): array
+    public function dashboard(?int $empresaId): array
     {
+        if (! Schema::hasColumn('cupones', 'empresa_id') || $empresaId === null) {
+            return ['total' => 0, 'activos' => 0, 'canjes' => 0, 'proximos' => collect(), 'mas_usados' => collect()];
+        }
+
         $now = now();
+        $cuponesEmpresa = Cupon::query()->where('empresa_id', $empresaId);
 
         return [
-            'total' => Cupon::query()->count(),
-            'activos' => Cupon::query()->where('activo', true)->where('inicia_en', '<=', $now)->where('finaliza_en', '>=', $now)
+            'total' => (clone $cuponesEmpresa)->count(),
+            'activos' => (clone $cuponesEmpresa)->where('activo', true)->where('inicia_en', '<=', $now)->where('finaliza_en', '>=', $now)
                 ->where(fn (Builder $query): Builder => $query->whereNull('limite_usos')->orWhereColumn('usos', '<', 'limite_usos'))->count(),
-            'canjes' => (int) Cupon::query()->sum('usos'),
-            'proximos' => Cupon::query()->where('activo', true)->whereBetween('finaliza_en', [$now, $now->copy()->addDays(30)])
+            'canjes' => (int) (clone $cuponesEmpresa)->sum('usos'),
+            'proximos' => (clone $cuponesEmpresa)->where('activo', true)->whereBetween('finaliza_en', [$now, $now->copy()->addDays(30)])
                 ->orderBy('finaliza_en')->orderBy('id')->limit(4)->get(),
-            'mas_usados' => Cupon::query()->where('usos', '>', 0)->orderByDesc('usos')->orderBy('id')->limit(5)->get(),
+            'mas_usados' => (clone $cuponesEmpresa)->where('usos', '>', 0)->orderByDesc('usos')->orderBy('id')->limit(5)->get(),
         ];
     }
 
@@ -62,14 +73,17 @@ class ServicioCupones
     public function register(array $attributes, User $actor, ?string $ip): Cupon
     {
         $this->authorization()->assertAllowed($actor, 'gestion.cupones.crear');
+        $empresaId = $this->empresaActual();
+        $attributes['empresa_id'] = $empresaId;
         $attributes['codigo'] = mb_strtoupper((string) $attributes['codigo']);
         $this->assertCouponRules($attributes, 0);
 
-        return DB::transaction(function () use ($attributes, $actor, $ip): Cupon {
+        return DB::transaction(function () use ($attributes, $actor, $ip, $empresaId): Cupon {
             $coupon = Cupon::query()->create($attributes + ['activo' => true, 'usos' => 0]);
             app(RegistradorAuditoria::class)->record(
                 $actor->getKey(), 'coupon.created', 'cupones', $coupon->getKey(), null,
-                $coupon->only(['codigo', 'tipo_descuento', 'valor', 'minimo_compra', 'limite_usos', 'inicia_en', 'finaliza_en']), $ip,
+                $coupon->only(['empresa_id', 'codigo', 'tipo_descuento', 'valor', 'minimo_compra', 'limite_usos', 'inicia_en', 'finaliza_en']), $ip,
+                scope: ['empresa_id' => $empresaId],
             );
 
             return $coupon;
@@ -80,15 +94,16 @@ class ServicioCupones
     public function update(Cupon $coupon, array $attributes, User $actor, ?string $ip): Cupon
     {
         $this->authorization()->assertAllowed($actor, 'gestion.cupones.actualizar');
+        $empresaId = $this->empresaActual();
 
-        return DB::transaction(function () use ($coupon, $attributes, $actor, $ip): Cupon {
-            $lockedCoupon = Cupon::query()->whereKey($coupon->getKey())->lockForUpdate()->firstOrFail();
+        return DB::transaction(function () use ($coupon, $attributes, $actor, $ip, $empresaId): Cupon {
+            $lockedCoupon = Cupon::query()->where('empresa_id', $empresaId)->whereKey($coupon->getKey())->lockForUpdate()->firstOrFail();
             $this->assertCouponRules($attributes, (int) $lockedCoupon->usos);
             $before = $lockedCoupon->only(['tipo_descuento', 'valor', 'minimo_compra', 'limite_usos', 'inicia_en', 'finaliza_en']);
             $lockedCoupon->update($attributes + ['actualizado_en' => now()]);
             app(RegistradorAuditoria::class)->record(
                 $actor->getKey(), 'coupon.updated', 'cupones', $lockedCoupon->getKey(), $before,
-                $lockedCoupon->only(array_keys($before)), $ip,
+                $lockedCoupon->only(array_keys($before)), $ip, scope: ['empresa_id' => $empresaId],
             );
 
             return $lockedCoupon->refresh();
@@ -98,9 +113,10 @@ class ServicioCupones
     public function deactivate(Cupon $coupon, User $actor, ?string $ip): Cupon
     {
         $this->authorization()->assertAllowed($actor, 'gestion.cupones.eliminar');
+        $empresaId = $this->empresaActual();
 
-        return DB::transaction(function () use ($coupon, $actor, $ip): Cupon {
-            $lockedCoupon = Cupon::query()->whereKey($coupon->getKey())->lockForUpdate()->firstOrFail();
+        return DB::transaction(function () use ($coupon, $actor, $ip, $empresaId): Cupon {
+            $lockedCoupon = Cupon::query()->where('empresa_id', $empresaId)->whereKey($coupon->getKey())->lockForUpdate()->firstOrFail();
             if (! $lockedCoupon->activo) {
                 return $lockedCoupon;
             }
@@ -108,6 +124,7 @@ class ServicioCupones
             $lockedCoupon->update(['activo' => false, 'actualizado_en' => now()]);
             app(RegistradorAuditoria::class)->record(
                 $actor->getKey(), 'coupon.deactivated', 'cupones', $lockedCoupon->getKey(), ['activo' => true], ['activo' => false], $ip,
+                scope: ['empresa_id' => $empresaId],
             );
 
             return $lockedCoupon->refresh();
@@ -136,5 +153,20 @@ class ServicioCupones
     private function authorization(): ServicioAutorizacion
     {
         return app(ServicioAutorizacion::class);
+    }
+
+    public function empresaDisponible(): bool
+    {
+        return Schema::hasColumn('cupones', 'empresa_id') && $this->authorization()->activeCompanyId() !== null;
+    }
+
+    private function empresaActual(): int
+    {
+        abort_unless(Schema::hasColumn('cupones', 'empresa_id'), 503,
+            'Los cupones están deshabilitados hasta aplicar la estructura de propiedad por empresa.');
+        $empresaId = $this->authorization()->activeCompanyId();
+        abort_unless($empresaId !== null, 409, 'Selecciona una empresa activa para gestionar cupones.');
+
+        return $empresaId;
     }
 }

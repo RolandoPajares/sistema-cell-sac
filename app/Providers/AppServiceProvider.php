@@ -43,13 +43,19 @@ class AppServiceProvider extends ServiceProvider
                 ->where('finaliza_en', '>=', now())
                 ->latest('inicia_en')
                 ->get();
-            $role = auth()->user()?->rol;
-            $eligible = $campaigns->filter(function (Campania $campaign) use ($role): bool {
+            $user = auth()->user();
+            $roles = $user?->rolesVigentes()->pluck('roles.codigo')->all() ?? [];
+            if ($user?->rol !== null) {
+                $roles[] = $user->rol;
+            }
+            $eligible = $campaigns->filter(function (Campania $campaign) use ($roles): bool {
                 if ($campaign->segments->isEmpty()) {
                     return true;
                 }
 
-                return $role !== null && $campaign->segments->contains(fn ($segment): bool => in_array($role, $segment->criterios['roles'] ?? [], true));
+                return $roles !== [] && $campaign->segments->contains(
+                    fn ($segment): bool => array_intersect($roles, $segment->criterios['roles'] ?? []) !== [],
+                );
             })->unique('ubicacion')->values();
 
             $view->with('publicCampaigns', $eligible);

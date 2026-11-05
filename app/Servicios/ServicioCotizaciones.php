@@ -41,7 +41,8 @@ class ServicioCotizaciones
             abort_unless($isOwner || $isAuthorizedEmployee, 403);
 
             $items = collect($data['items']);
-            $products = Producto::whereIn('id', $items->pluck('producto_id'))->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            $products = Producto::query()->whereIn('id', $items->pluck('producto_id'))
+                ->where('empresa_id', $customer->empresa_id)->orderBy('id')->lockForUpdate()->get()->keyBy('id');
             $total = 0.0;
             $lines = [];
 
@@ -132,6 +133,76 @@ class ServicioCotizaciones
                 scope: ['empresa_id' => (int) $cotizacionBloqueada->empresa_id, 'sede_id' => (int) $cotizacionBloqueada->sede_id]);
 
             return $cotizacionBloqueada;
+        }, 3);
+    }
+
+    public function desactivar(Cotizacion $cotizacion, User $usuario, ?string $ip): Cotizacion
+    {
+        $this->authorization->assertAllowed($usuario, 'gestion.cotizaciones.actualizar');
+
+        return DB::transaction(function () use ($cotizacion, $usuario, $ip): Cotizacion {
+            $bloqueada = Cotizacion::query()->whereKey($cotizacion->getKey())->lockForUpdate()->firstOrFail();
+            abort_unless($this->authorization->allowsRecord(
+                $usuario,
+                'gestion.cotizaciones.actualizar',
+                is_numeric($bloqueada->empresa_id) ? (int) $bloqueada->empresa_id : null,
+                is_numeric($bloqueada->sede_id) ? (int) $bloqueada->sede_id : null,
+            ), 403);
+            abort_unless($bloqueada->activo, 409, 'La cotizacion ya esta desactivada.');
+            abort_unless(in_array($bloqueada->estado, ['Borrador', 'Pendiente'], true), 409, 'Solo se pueden desactivar cotizaciones en borrador o pendientes.');
+            $bloqueada->update(['activo' => false]);
+            $this->auditoria->record($usuario->id, 'cotizacion.desactivada', 'cotizaciones', $bloqueada->id,
+                ['activo' => true, 'estado' => $bloqueada->estado], ['activo' => false, 'estado' => $bloqueada->estado], $ip,
+                scope: ['empresa_id' => (int) $bloqueada->empresa_id, 'sede_id' => (int) $bloqueada->sede_id]);
+
+            return $bloqueada;
+        }, 3);
+    }
+
+    public function actualizar(Cotizacion $cotizacion, array $data, User $usuario, ?string $ip): Cotizacion
+    {
+        $this->authorization->assertAllowed($usuario, 'gestion.cotizaciones.actualizar');
+
+        return DB::transaction(function () use ($cotizacion, $data, $usuario, $ip): Cotizacion {
+            $bloqueada = Cotizacion::query()->whereKey($cotizacion->getKey())->lockForUpdate()->firstOrFail();
+            abort_unless($bloqueada->activo, 409, 'La cotización está desactivada.');
+            abort_unless(in_array($bloqueada->estado, ['Borrador', 'Pendiente'], true), 409, 'Solo se pueden editar cotizaciones en borrador o pendientes.');
+            abort_unless($this->authorization->allowsRecord(
+                $usuario,
+                'gestion.cotizaciones.actualizar',
+                is_numeric($bloqueada->empresa_id) ? (int) $bloqueada->empresa_id : null,
+                is_numeric($bloqueada->sede_id) ? (int) $bloqueada->sede_id : null,
+            ), 403);
+
+            $cliente = Cliente::query()->whereKey((int) $data['cliente_id'])
+                ->where('empresa_id', $bloqueada->empresa_id)->where('tipo', 'mayorista')->where('activo', true)->first();
+            abort_unless($cliente !== null, 422, 'El cliente debe ser mayorista, activo y pertenecer a la empresa de la cotización.');
+
+            $items = collect($data['items']);
+            $productos = Producto::query()->whereIn('id', $items->pluck('producto_id')->unique())
+                ->where('empresa_id', $bloqueada->empresa_id)->where('activo', true)->lockForUpdate()->get()->keyBy('id');
+            $total = 0.0;
+            $lineas = [];
+            foreach ($items as $item) {
+                $producto = $productos->get((int) $item['producto_id']);
+                abort_unless($producto instanceof Producto, 422, 'Uno de los productos no pertenece a la empresa o está inactivo.');
+                $cantidad = (int) $item['cantidad'];
+                $precio = (float) $producto->effective_price;
+                $total += $precio * $cantidad;
+                $lineas[] = [$producto->id, $cantidad, $precio];
+            }
+
+            $antes = ['cliente_id' => $bloqueada->cliente_id, 'total' => $bloqueada->total, 'notas' => $bloqueada->notas, 'detalle_ids' => $bloqueada->details()->pluck('id')->all()];
+            $bloqueada->update(['cliente_id' => $cliente->id, 'total' => $total, 'notas' => $data['notas'] ?? null]);
+            $bloqueada->details()->delete();
+            foreach ($lineas as [$productoId, $cantidad, $precio]) {
+                $bloqueada->details()->create(['producto_id' => $productoId, 'cantidad' => $cantidad, 'precio_unitario' => $precio]);
+            }
+            $this->auditoria->record($usuario->id, 'cotizacion.actualizada', 'cotizaciones', $bloqueada->id, $antes,
+                ['cliente_id' => $cliente->id, 'total' => $total, 'notas' => $data['notas'] ?? null, 'lineas' => count($lineas)], $ip,
+                scope: ['empresa_id' => (int) $bloqueada->empresa_id, 'sede_id' => (int) $bloqueada->sede_id]);
+
+            return $bloqueada->fresh(['customer', 'details.product']);
         }, 3);
     }
 

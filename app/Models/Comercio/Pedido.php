@@ -12,7 +12,7 @@ class Pedido extends Model
 {
     protected $table = 'pedidos';
 
-    protected $fillable = ['usuario_id', 'cliente_id', 'cotizacion_id', 'canal', 'tipo_venta', 'observaciones', 'total', 'subtotal', 'descuento', 'cupon_codigo', 'estado', 'creado_en', 'empresa_id', 'sede_id', 'almacen_id'];
+    protected $fillable = ['usuario_id', 'cliente_id', 'cotizacion_id', 'canal', 'tipo_venta', 'observaciones', 'total', 'subtotal', 'descuento', 'cupon_id', 'cupon_codigo', 'estado', 'creado_en', 'empresa_id', 'sede_id', 'almacen_id'];
 
     public $timestamps = false;
 

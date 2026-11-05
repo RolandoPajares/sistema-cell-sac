@@ -11,12 +11,14 @@ use App\Models\Compras\Compra;
 use App\Models\Compras\Proveedor;
 use App\Models\User;
 use App\Servicios\RegistradorAuditoria;
+use App\Servicios\ExportadorTabular;
 use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioInventario;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -88,36 +90,43 @@ class ProveedorController extends Controller
         ]);
     }
 
-    public function export(Request $request, ServicioInventario $inventario): StreamedResponse
+    public function export(Request $request, ServicioInventario $inventario, ExportadorTabular $exporter, RegistradorAuditoria $audit): Response|StreamedResponse
     {
         $alcance = $this->alcanceActual($request, $inventario);
+        $format = (string) ($request->route('format') ?: 'csv');
+        abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
         $proveedores = $this->consultaProveedores($this->filtros($request), $alcance)
             ->withCount(['products' => fn (Builder $consulta): Builder => $consulta->where('productos.empresa_id', $alcance['empresa_id'])])
-            ->orderBy('proveedores.nombre')
-            ->cursor();
+            ->orderBy('proveedores.nombre')->limit(5000)->get();
+        $rows = $proveedores->map(static fn (Proveedor $proveedor): array => [
+            $proveedor->id,
+            $proveedor->nombre,
+            $proveedor->ruc,
+            $proveedor->correo,
+            $proveedor->telefono,
+            $proveedor->ciudad,
+            $proveedor->products_count,
+            $proveedor->activo ? 'Activo' : 'Inactivo',
+            $proveedor->creado_en?->format('Y-m-d H:i:s'),
+        ])->all();
+        $filters = $this->filtros($request);
+        $response = $exporter->download($format, 'proveedores-'.now()->format('Ymd'),
+            ['ID', 'Nombre', 'RUC', 'Correo', 'Teléfono', 'Ciudad', 'Productos asociados', 'Estado', 'Registrado'],
+            $rows,
+            [
+                'title' => 'REPORTE DE PROVEEDORES',
+                'subtitle' => 'Proveedores reales consultados desde MariaDB.',
+                'module' => 'Inventario y Logística',
+                'report_name' => 'Proveedores',
+                'filters' => $filters,
+                'generated_by' => (string) $request->user()->nombre,
+                'role' => 'Usuario autorizado',
+                'scope' => 'Empresa y permisos RBAC vigentes.',
+                'indicators' => [['label' => 'Proveedores incluidos', 'value' => count($rows)]],
+            ]);
+        $audit->record($request->user()->getKey(), 'exportar', 'proveedores', null, null, ['formato' => $format, 'filtros' => $filters, 'cantidad' => count($rows)], $request->ip());
 
-        return response()->streamDownload(function () use ($proveedores): void {
-            $salida = fopen('php://output', 'w');
-
-            fwrite($salida, "\xEF\xBB\xBF");
-            fputcsv($salida, ['id', 'nombre', 'ruc', 'correo', 'telefono', 'ciudad', 'productos_asociados', 'estado', 'creado_en']);
-
-            foreach ($proveedores as $proveedor) {
-                fputcsv($salida, [
-                    $proveedor->id,
-                    $proveedor->nombre,
-                    $proveedor->ruc,
-                    $proveedor->correo,
-                    $proveedor->telefono,
-                    $proveedor->ciudad,
-                    $proveedor->products_count,
-                    $proveedor->activo ? 'Activo' : 'Inactivo',
-                    $proveedor->creado_en?->format('d/m/Y H:i'),
-                ]);
-            }
-
-            fclose($salida);
-        }, 'proveedores.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+        return $response;
     }
 
     public function store(GuardarProveedorRequest $request, ServicioInventario $inventario, RegistradorAuditoria $auditoria): RedirectResponse

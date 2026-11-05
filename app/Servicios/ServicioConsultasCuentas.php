@@ -24,6 +24,9 @@ class ServicioConsultasCuentas
         if ($sedes === []) {
             throw new HttpException(403, 'No tienes sedes autorizadas para consultar estas cuentas.');
         }
+        $monedasAutorizadas = DB::table('sedes')->join('empresas', 'empresas.id', '=', 'sedes.empresa_id')
+            ->whereIn('sedes.id', $sedes)->where('sedes.activa', true)->where('empresas.activo', true)
+            ->distinct()->orderBy('empresas.moneda_base')->pluck('empresas.moneda_base')->all();
 
         $aplicacionesCobro = DB::table('aplicaciones_cobro as aplicaciones')
             ->join('pagos as pagos_aplicados', 'pagos_aplicados.id', '=', 'aplicaciones.pago_id')
@@ -35,10 +38,12 @@ class ServicioConsultasCuentas
 
         $porCobrar = DB::table('cuentas_por_cobrar as cuentas')
             ->join('documentos_electronicos as documentos', 'documentos.id', '=', 'cuentas.documento_electronico_id')
+            ->join('sedes as sedes_documento', 'sedes_documento.id', '=', 'documentos.sede_id')
             ->leftJoinSub($aplicacionesCobro, 'aplicaciones', 'aplicaciones.cuenta_cobrar_id', '=', 'cuentas.id')
             ->whereIn('documentos.sede_id', $sedes)
+            ->whereColumn('documentos.empresa_id', 'sedes_documento.empresa_id')
             ->get([
-                'cuentas.id', 'cuentas.monto_original', 'cuentas.moneda', 'cuentas.vence_en', 'cuentas.estado',
+                'cuentas.id', 'cuentas.documento_electronico_id', 'cuentas.monto_original', 'cuentas.moneda', 'cuentas.vence_en', 'cuentas.estado',
                 'documentos.serie', 'documentos.correlativo', 'documentos.fecha_emision',
                 'documentos.receptor_historico', 'documentos.empresa_id', 'documentos.sede_id',
                 DB::raw('COALESCE(aplicaciones.total_aplicado, 0) AS total_aplicado'),
@@ -60,12 +65,14 @@ class ServicioConsultasCuentas
 
         $porPagar = DB::table('cuentas_por_pagar as cuentas')
             ->join('compras', 'compras.id', '=', 'cuentas.compra_id')
+            ->join('sedes as sedes_compra', 'sedes_compra.id', '=', 'compras.sede_id')
             ->join('proveedores', 'proveedores.id', '=', 'compras.proveedor_id')
             ->leftJoinSub($aplicacionesPago, 'aplicaciones', 'aplicaciones.cuenta_pagar_id', '=', 'cuentas.id')
             ->whereIn('compras.sede_id', $sedes)
             ->where('compras.activo', true)
+            ->whereColumn('compras.empresa_id', 'sedes_compra.empresa_id')
             ->get([
-                'cuentas.id', 'cuentas.monto_original', 'cuentas.moneda', 'cuentas.vence_en', 'cuentas.estado',
+                'cuentas.id', 'cuentas.compra_id', 'cuentas.monto_original', 'cuentas.moneda', 'cuentas.vence_en', 'cuentas.estado',
                 'compras.numero_referencia', 'compras.fecha_compra', 'compras.empresa_id', 'compras.sede_id',
                 'proveedores.nombre as nombre_proveedor',
                 DB::raw('COALESCE(aplicaciones.total_aplicado, 0) AS total_aplicado'),
@@ -94,16 +101,17 @@ class ServicioConsultasCuentas
                     ['texto' => $fila['estado'], 'tono' => $fila['tono']],
                 ],
                 'filtros' => ['tipo' => $fila['tipo'], 'estado' => $fila['estado'], 'moneda' => $fila['moneda']],
+                'cuenta_id' => $fila['id'], 'tipo_cuenta' => $fila['tipo'], 'origen_id' => $fila['origen_id'],
             ])->all(),
             'metricas' => [
-                $this->metricaReal('Por cobrar vigente', $cobrosVigentes, 'bi-person-check', 'azul'),
-                $this->metricaReal('Por cobrar vencido', $cobrosVencidos, 'bi-exclamation-triangle', 'rojo'),
-                $this->metricaReal('Por pagar próximo', $pagosVigentes, 'bi-calendar3', 'verde'),
-                $this->metricaReal('Por pagar vencido', $pagosVencidos, 'bi-exclamation-circle', 'ambar'),
+                $this->metricaReal('Por cobrar vigente', $cobrosVigentes, 'bi-person-check', 'azul', $monedasAutorizadas),
+                $this->metricaReal('Por cobrar vencido', $cobrosVencidos, 'bi-exclamation-triangle', 'rojo', $monedasAutorizadas),
+                $this->metricaReal('Por pagar próximo', $pagosVigentes, 'bi-calendar3', 'verde', $monedasAutorizadas),
+                $this->metricaReal('Por pagar vencido', $pagosVencidos, 'bi-exclamation-circle', 'ambar', $monedasAutorizadas),
             ],
             'paneles' => [
                 ['titulo' => 'Cuentas por cobrar', 'icono' => 'bi-pie-chart', 'tipo' => 'anillo', 'valor' => (string) $porCobrar->count(), 'unidad' => 'Documentos', 'filas' => [['Vigentes', (string) $cobrosVigentes->count()], ['Vencidas', (string) $cobrosVencidos->count()], ['Sin saldo', (string) $porCobrar->filter(fn (array $fila): bool => $fila['saldo'] <= 0)->count()]], 'gradiente' => $this->gradienteSaldos($cobrosVigentes->count(), $cobrosVencidos->count(), $porCobrar->filter(fn (array $fila): bool => $fila['saldo'] <= 0)->count(), $totalCuentasCobrar)],
-                ['titulo' => 'Cuentas por pagar', 'icono' => 'bi-bar-chart', 'tipo' => 'columnas', 'filas' => [['Vigentes', $this->importeAgrupado($pagosVigentes), $this->porcentaje($pagosVigentes->count(), $porPagar->count())], ['Vencidas', $this->importeAgrupado($pagosVencidos), $this->porcentaje($pagosVencidos->count(), $porPagar->count())]]],
+                ['titulo' => 'Cuentas por pagar', 'icono' => 'bi-bar-chart', 'tipo' => 'columnas', 'filas' => [['Vigentes', $this->importeAgrupado($pagosVigentes, $monedasAutorizadas), $this->porcentaje($pagosVigentes->count(), $porPagar->count())], ['Vencidas', $this->importeAgrupado($pagosVencidos, $monedasAutorizadas), $this->porcentaje($pagosVencidos->count(), $porPagar->count())]]],
                 ['titulo' => 'Resumen de saldos', 'icono' => 'bi-exclamation-triangle', 'tipo' => 'lista', 'filas' => [['Por cobrar', (string) $porCobrar->count().' documentos'], ['Por pagar', (string) $porPagar->count().' documentos'], ['Registros visibles', (string) $filas->count()]]],
             ],
         ];
@@ -117,6 +125,8 @@ class ServicioConsultasCuentas
         $estado = $saldo <= 0 ? 'Pagada' : ($fechaVencimiento < Carbon::today()->toDateString() ? 'Vencida' : ((float) $cuenta->total_aplicado > 0 ? 'Parcial' : (string) $cuenta->estado));
 
         return [
+            'id' => (int) $cuenta->id,
+            'origen_id' => (int) ($cuenta->compra_id ?? $cuenta->documento_electronico_id),
             'documento' => $documento, 'tercero' => $tercero ?: 'Sin nombre en el documento', 'tipo' => $tipo,
             'emision' => Carbon::parse($cuenta->fecha_emision ?? $cuenta->fecha_compra)->format('d/m/Y'),
             'vence' => Carbon::parse($fechaVencimiento)->format('d/m/Y'), 'saldo' => $saldo,
@@ -139,15 +149,16 @@ class ServicioConsultasCuentas
     /** @param Collection<int, array<string, mixed>> $cuentas
      * @return array<string, string>
      */
-    private function metricaReal(string $titulo, Collection $cuentas, string $icono, string $tono): array
+    private function metricaReal(string $titulo, Collection $cuentas, string $icono, string $tono, array $monedasAutorizadas): array
     {
-        return ['titulo' => $titulo, 'valor' => $this->importeAgrupado($cuentas), 'icono' => $icono, 'tono' => $tono, 'detalle' => $cuentas->count().' documentos'];
+        return ['titulo' => $titulo, 'valor' => $this->importeAgrupado($cuentas, $monedasAutorizadas), 'icono' => $icono, 'tono' => $tono, 'detalle' => $cuentas->count().' documentos'];
     }
 
-    private function importeAgrupado(Collection $cuentas): string
+    /** @param array<int, string> $monedasAutorizadas */
+    private function importeAgrupado(Collection $cuentas, array $monedasAutorizadas): string
     {
         if ($cuentas->isEmpty()) {
-            return 'PEN 0,00';
+            return collect($monedasAutorizadas)->map(fn (string $moneda): string => $this->formatearImporte(0, $moneda))->implode(' · ');
         }
 
         return $cuentas->groupBy('moneda')

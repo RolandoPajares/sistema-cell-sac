@@ -5,16 +5,22 @@ namespace App\Http\Controllers\Gestion\Clientes;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ActualizarClienteRequest;
 use App\Http\Requests\GuardarClienteRequest;
+use App\Http\Requests\ImportarClientesRequest;
 use App\Models\Clientes\Cliente;
 use App\Models\Comercio\Pedido;
 use App\Models\User;
 use App\Servicios\RegistradorAuditoria;
+use App\Servicios\ExportadorTabular;
 use App\Servicios\ServicioAutorizacion;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
+use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ClienteController extends Controller
 {
@@ -68,6 +74,45 @@ class ClienteController extends Controller
         ]);
     }
 
+    public function export(Request $request, string $format, ExportadorTabular $exporter, RegistradorAuditoria $audit): Response|StreamedResponse
+    {
+        $usuario = $request->user();
+        abort_unless($usuario instanceof User, 403);
+        abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
+        $filters = $this->filters($request);
+        $customers = $this->customerQuery($filters, $usuario)
+            ->with('user:id,nombre,correo')
+            ->orderBy('nombre_contacto')->orderBy('id')->limit(5000)->get();
+        $rows = $customers->map(static fn (Cliente $customer): array => [
+            $customer->tipo,
+            $customer->documento,
+            $customer->nombre_contacto,
+            $customer->razon_social,
+            $customer->correo,
+            $customer->telefono,
+            $customer->ciudad,
+            $customer->activo ? 'Activo' : 'Inactivo',
+            $customer->user?->nombre,
+        ])->all();
+        $response = $exporter->download($format, 'clientes-'.now()->format('Ymd'),
+            ['Tipo', 'Documento', 'Nombre de contacto', 'Razón social', 'Correo', 'Teléfono', 'Ciudad', 'Estado', 'Usuario'],
+            $rows,
+            [
+                'title' => 'REPORTE DE CLIENTES',
+                'subtitle' => 'Clientes reales consultados desde MariaDB.',
+                'module' => 'Operaciones Comerciales',
+                'report_name' => 'Clientes',
+                'filters' => $filters,
+                'generated_by' => (string) $usuario->nombre,
+                'role' => 'Usuario autorizado',
+                'scope' => 'Empresa, sede y permisos RBAC vigentes.',
+                'indicators' => [['label' => 'Clientes incluidos', 'value' => count($rows)]],
+            ]);
+        $audit->record($usuario->getKey(), 'exportar', 'clientes', null, null, ['formato' => $format, 'filtros' => $filters, 'cantidad' => count($rows)], $request->ip());
+
+        return $response;
+    }
+
     public function store(GuardarClienteRequest $request, RegistradorAuditoria $audit): RedirectResponse
     {
         $usuario = $request->user();
@@ -80,6 +125,63 @@ class ClienteController extends Controller
         $audit->record($usuario->id, 'customer.created', 'clientes', $customer->id, null, $customer->only(['tipo', 'documento', 'nombre_contacto', 'correo']), $request->ip());
 
         return back()->with('status', 'Cliente registrado.');
+    }
+
+    public function import(ImportarClientesRequest $request, RegistradorAuditoria $audit): RedirectResponse
+    {
+        $usuario = $request->user();
+        abort_unless($usuario instanceof User, 403);
+        $handle = fopen($request->file('archivo')->getRealPath(), 'rb');
+        abort_if($handle === false, 422, 'No se pudo leer el archivo CSV.');
+
+        try {
+            $headers = fgetcsv($handle);
+            $headers = array_map(static fn ($header): string => mb_strtolower(trim(ltrim((string) $header, "\xEF\xBB\xBF"))), $headers ?: []);
+            $requiredHeaders = ['tipo', 'documento', 'nombre_contacto', 'razon_social', 'correo', 'telefono', 'ciudad'];
+            abort_unless($headers === $requiredHeaders, 422, 'La cabecera CSV no coincide con la plantilla de clientes.');
+
+            $rows = [];
+            $documents = [];
+            $line = 1;
+            while (($values = fgetcsv($handle)) !== false) {
+                $line++;
+                if (count(array_filter($values, static fn ($value): bool => trim((string) $value) !== '')) === 0) {
+                    continue;
+                }
+                abort_if(count($rows) >= 500, 422, 'La importación está limitada a 500 clientes por archivo.');
+                $row = array_pad(array_slice($values, 0, count($requiredHeaders)), count($requiredHeaders), null);
+                $payload = array_combine($requiredHeaders, array_map(static fn ($value): string => trim((string) $value), $row));
+                $validator = Validator::make($payload, [
+                    'tipo' => ['required', 'in:minorista,mayorista'],
+                    'documento' => ['required', 'string', 'max:20'],
+                    'razon_social' => ['nullable', 'string', 'max:160'],
+                    'nombre_contacto' => ['required', 'string', 'max:160'],
+                    'correo' => ['required', 'email', 'max:160'],
+                    'telefono' => ['nullable', 'string', 'max:30'],
+                    'ciudad' => ['nullable', 'string', 'max:80'],
+                ]);
+                abort_if($validator->fails(), 422, 'Error en la fila '.$line.': '.$validator->errors()->first());
+                abort_if(in_array($payload['documento'], $documents, true), 422, 'El documento se repite en la fila '.$line.'.');
+                $documents[] = $payload['documento'];
+                $rows[] = $payload;
+            }
+            abort_if($rows === [], 422, 'El archivo CSV no contiene clientes para importar.');
+
+            $scope = $this->autorizacion->operationScopeAttributes($usuario, 'clientes');
+            abort_unless($this->autorizacion->allows($usuario, 'gestion.clientes.crear'), 403);
+            DB::transaction(function () use ($rows, $scope, $usuario, $audit, $request): void {
+                $documents = collect($rows)->pluck('documento');
+                abort_if(Cliente::query()->whereIn('documento', $documents)->exists(), 422, 'Uno o más documentos ya existen en MariaDB.');
+                foreach ($rows as $row) {
+                    Cliente::create($row + ['activo' => true, 'creado_en' => now()] + $scope);
+                }
+                $audit->record($usuario->getKey(), 'customer.imported', 'clientes', null, null, ['cantidad' => count($rows)], $request->ip());
+            });
+        } finally {
+            fclose($handle);
+        }
+
+        return back()->with('status', 'Se importaron '.count($rows).' clientes en MariaDB.');
     }
 
     public function update(ActualizarClienteRequest $request, Cliente $customer, RegistradorAuditoria $audit): RedirectResponse

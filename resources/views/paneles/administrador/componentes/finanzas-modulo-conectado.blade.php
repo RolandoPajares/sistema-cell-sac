@@ -27,9 +27,7 @@
             </div>
             <div class="admin-finance-actions">
                 @if ($module['export_route'] ?? false)
-                    <a class="admin-finance-button admin-finance-button--secondary" href="{{ route($module['export_route'], ['format' => 'csv'] + $exportParameters) }}">
-                        <i class="bi bi-download" aria-hidden="true"></i> {{ $module['export_label'] ?? 'Exportar CSV' }}
-                    </a>
+                    <details class="admin-finance-export-menu"><summary class="admin-finance-button admin-finance-button--secondary"><i class="bi bi-download" aria-hidden="true"></i> {{ $module['export_label'] ?? 'Exportar' }}</summary><div class="admin-finance-export-options"><a href="{{ route($module['export_route'], ['format' => 'excel'] + $exportParameters) }}">Excel (.xlsx)</a><a href="{{ route($module['export_route'], ['format' => 'pdf'] + $exportParameters) }}">PDF (.pdf)</a><a href="{{ route($module['export_route'], ['format' => 'csv'] + $exportParameters) }}">CSV (.csv)</a></div></details>
                 @endif
                 @if ($module['create_route'] ?? false)
                     <button class="admin-finance-button admin-finance-button--primary" type="button" data-finance-open="crear">

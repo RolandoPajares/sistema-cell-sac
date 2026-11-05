@@ -3,6 +3,7 @@
 namespace App\Models\Inventario;
 
 use App\Models\Catalogo\Producto;
+use App\Models\Catalogo\VarianteProducto;
 use App\Models\Organizacion\Almacen;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -34,5 +35,10 @@ class MovimientoInventario extends Model
     public function almacen(): BelongsTo
     {
         return $this->belongsTo(Almacen::class, 'almacen_id');
+    }
+
+    public function variante(): BelongsTo
+    {
+        return $this->belongsTo(VarianteProducto::class, 'variante_id');
     }
 }

@@ -80,6 +80,9 @@ final class ExportadorTabular
      */
     private function excel(string $filename, array $columns, array $rows, array $report): Response
     {
+        if (!class_exists(ZipArchive::class)) {
+            return $this->excelWithoutZipArchive($filename, $columns, $rows, $report);
+        }
         $temporaryFile = tempnam(sys_get_temp_dir(), 'tc-xlsx-');
         abort_if($temporaryFile === false, 500, 'No se pudo preparar el archivo Excel.');
 
@@ -119,6 +122,79 @@ final class ExportadorTabular
                 unlink($temporaryFile);
             }
         }
+    }
+
+    /**
+     * Genera el paquete XLSX con el formato ZIP de Open XML cuando la extensión
+     * ZipArchive no está habilitada. No cambia la configuración de PHP ni crea
+     * un archivo con extensión falsa: cada entrada usa compresión DEFLATE y el
+     * paquete contiene las partes XML requeridas por Excel.
+     *
+     * @param  array<int, string>  $columns
+     * @param  array<int, array<int, string|int|float|null>>  $rows
+     * @param  array<string, mixed>  $report
+     */
+    private function excelWithoutZipArchive(string $filename, array $columns, array $rows, array $report): Response
+    {
+        $context = $this->reportContext($filename, $report, count($columns));
+        $logo = $this->logoBytes();
+        $worksheet = $this->buildWorksheet($columns, $rows, $context, $logo !== null);
+        $logoContentTypes = $logo === null
+            ? ''
+            : '<Default Extension="png" ContentType="image/png"/><Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>';
+
+        $entries = [
+            '[Content_Types].xml' => '<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>'.$logoContentTypes.'<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>',
+            '_rels/.rels' => '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>',
+            'xl/workbook.xml' => $this->workbookXml($worksheet['last_layout_column'], $worksheet['last_row'], $worksheet['header_row']),
+            'xl/_rels/workbook.xml.rels' => '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>',
+            'xl/styles.xml' => $this->stylesXml(),
+            'xl/worksheets/sheet1.xml' => $worksheet['xml'],
+        ];
+
+        if ($logo !== null) {
+            $entries['xl/media/technology-cell-logo.png'] = $logo;
+            $entries['xl/worksheets/_rels/sheet1.xml.rels'] = '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing1.xml"/></Relationships>';
+            $entries['xl/drawings/drawing1.xml'] = $this->drawingXml();
+            $entries['xl/drawings/_rels/drawing1.xml.rels'] = '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/technology-cell-logo.png"/></Relationships>';
+        }
+
+        return response($this->buildZipPackage($entries), 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="'.$this->safeFilename($filename).'.xlsx"',
+        ]);
+    }
+
+    /**
+     * @param  array<string, string>  $entries
+     */
+    private function buildZipPackage(array $entries): string
+    {
+        $body = '';
+        $centralDirectory = '';
+        $offset = 0;
+        $entryCount = 0;
+
+        foreach ($entries as $name => $content) {
+            $compressed = gzdeflate($content, 6);
+            abort_if($compressed === false, 500, 'No se pudo comprimir el archivo Excel.');
+            $nameLength = strlen($name);
+            $contentLength = strlen($content);
+            $compressedLength = strlen($compressed);
+            $crc = crc32($content);
+
+            $localHeader = pack('VvvvvvVVVvv', 0x04034b50, 20, 0, 8, 0, 0, $crc, $compressedLength, $contentLength, $nameLength, 0).$name.$compressed;
+            $body .= $localHeader;
+            $centralDirectory .= pack('VvvvvvvVVVvvvvvVV', 0x02014b50, 20, 20, 0, 8, 0, 0, $crc, $compressedLength, $contentLength, $nameLength, 0, 0, 0, 0, 0, $offset).$name;
+            $offset += strlen($localHeader);
+            $entryCount++;
+        }
+
+        $centralOffset = strlen($body);
+        $body .= $centralDirectory;
+        $body .= pack('VvvvvVVv', 0x06054b50, 0, 0, $entryCount, $entryCount, strlen($centralDirectory), $centralOffset, 0);
+
+        return $body;
     }
 
     /**

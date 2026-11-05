@@ -7,10 +7,10 @@
 @php
     $module = require resource_path('views/gestion/soporte-reclamos/datos.php');
     $kpis = $module['kpis'];
-    $tableColumns = ['Ticket', 'Cliente', 'Asunto', 'Tipo', 'Prioridad', 'Fecha', 'Estado', 'Acciones'];
+    $tableColumns = ['Ticket', 'Cliente', 'Asunto', 'Prioridad', 'Estado', 'Actualización', 'Acciones'];
 @endphp
 
-<section class="gestion-soporte-page" data-pending-module="soporte-reclamos">
+<section class="gestion-soporte-page" data-pending-module="soporte-reclamos" data-backend="true">
     <header class="gestion-soporte-header">
         <nav class="gestion-soporte-breadcrumb" aria-label="Ruta de navegación">
             <span>Administración</span><i class="bi bi-chevron-right" aria-hidden="true"></i>
@@ -21,10 +21,10 @@
             <div class="gestion-soporte-heading">
                 <span class="gestion-soporte-eyebrow"><i class="bi bi-headset" aria-hidden="true"></i>{{ $module['area'] }}</span>
                 <h1>Gestión de soporte y reclamos</h1>
-                <p>Atiende solicitudes, resuelve incidencias y supervisa la calidad del servicio.</p>
+                <p>Atiende solicitudes e incidencias utilizando casos reales de MariaDB.</p>
             </div>
             <div class="gestion-soporte-actions">
-                <button class="gestion-soporte-button gestion-soporte-button--secondary" type="button" data-pending-notice="La exportación se habilitará cuando este módulo tenga datos conectados."><i class="bi bi-download" aria-hidden="true"></i> Exportar</button>
+                <details class="gestion-soporte-export-menu"><summary class="gestion-soporte-button gestion-soporte-button--secondary"><i class="bi bi-download" aria-hidden="true"></i> Exportar</summary><div class="gestion-soporte-export-options"><a href="{{ route('management.support.export', ['format' => 'excel'] + request()->query()) }}">Excel (.xlsx)</a><a href="{{ route('management.support.export', ['format' => 'pdf'] + request()->query()) }}">PDF (.pdf)</a><a href="{{ route('management.support.export', ['format' => 'csv'] + request()->query()) }}">CSV (.csv)</a></div></details>
                 <button class="gestion-soporte-button gestion-soporte-button--secondary" type="button" data-pending-notice="Los reportes se habilitarán cuando exista una fuente de datos integrada."><i class="bi bi-bar-chart-line" aria-hidden="true"></i> Ver reportes</button>
                 <button class="gestion-soporte-button gestion-soporte-button--primary" type="button" data-pending-open="crear"><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo ticket</button>
             </div>
@@ -41,25 +41,30 @@
         @endforeach
     </section>
 
-    <form class="gestion-soporte-filters" data-pending-form>
-        <label class="gestion-soporte-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar tickets</span><input type="search" placeholder="Buscar ticket, cliente, pedido o asunto..." data-pending-search></label>
-        <label><span class="visually-hidden">Filtrar por tipo</span><select data-pending-filter><option value="">Tipo: Todos</option><option>Soporte</option><option>Reclamo</option></select></label>
-        <label><span class="visually-hidden">Filtrar por prioridad</span><select data-pending-filter><option value="">Prioridad: Todas</option><option>Alta</option><option>Media</option><option>Baja</option></select></label>
-        <label><span class="visually-hidden">Filtrar por estado</span><select data-pending-filter><option value="">Estado: Todos</option><option>Abierto</option><option>En atención</option><option>Resuelto</option><option>Cerrado</option></select></label>
+    <form class="gestion-soporte-filters" method="GET" action="{{ route('management.support') }}">
+        <label class="gestion-soporte-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar tickets</span><input name="buscar" type="search" value="{{ $module['filters']['buscar'] ?? '' }}" placeholder="Buscar ticket o asunto..."></label>
+        <label><span class="visually-hidden">Filtrar por prioridad</span><select name="prioridad"><option value="">Prioridad: Todas</option><option value="alta" @selected(($module['filters']['prioridad'] ?? '') === 'alta')>Alta</option><option value="normal" @selected(($module['filters']['prioridad'] ?? '') === 'normal')>Normal</option><option value="baja" @selected(($module['filters']['prioridad'] ?? '') === 'baja')>Baja</option><option value="urgente" @selected(($module['filters']['prioridad'] ?? '') === 'urgente')>Urgente</option></select></label>
+        <label><span class="visually-hidden">Filtrar por estado</span><select name="estado"><option value="">Estado: Todos</option><option value="abierto" @selected(($module['filters']['estado'] ?? '') === 'abierto')>Abierto</option><option value="en_proceso" @selected(($module['filters']['estado'] ?? '') === 'en_proceso')>En proceso</option><option value="resuelto" @selected(($module['filters']['estado'] ?? '') === 'resuelto')>Resuelto</option><option value="cerrado" @selected(($module['filters']['estado'] ?? '') === 'cerrado')>Cerrado</option></select></label>
         <label><span class="visually-hidden">Filtrar por fecha</span><select data-pending-filter><option value="">Fecha: Este mes</option><option>Esta semana</option><option>Últimos 30 días</option></select></label>
         <button class="gestion-soporte-filter-button" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i> Filtrar</button>
-        <button class="gestion-soporte-clear-button" type="button" data-pending-notice="Los filtros se limpiarán cuando el módulo esté conectado a datos reales.">Limpiar</button>
+        <a class="gestion-soporte-clear-button" href="{{ route('management.support') }}">Limpiar</a>
     </form>
 
     <section class="gestion-soporte-table-card">
         <header class="gestion-soporte-card-header">
             <div><span class="gestion-soporte-card-icon"><i class="bi bi-headset" aria-hidden="true"></i></span><div><h2>Centro de soporte y reclamos</h2><p>Gestiona cada solicitud desde una única bandeja de atención.</p></div></div>
-            <span class="gestion-soporte-count">Sin registros</span>
+                <span class="gestion-soporte-count">{{ count($module['rows'] ?? []) }} en esta página</span>
         </header>
         <div class="gestion-soporte-table-wrap">
             <table class="gestion-soporte-table">
                 <thead><tr>@foreach ($tableColumns as $column)<th>{{ $column }}</th>@endforeach</tr></thead>
-                <tbody><tr><td colspan="{{ count($tableColumns) }}"><div class="gestion-soporte-empty"><span><i class="bi bi-inbox" aria-hidden="true"></i></span><strong>No hay tickets para mostrar</strong><p>Los tickets aparecerán aquí cuando el módulo esté conectado con clientes, pedidos y atención.</p><button type="button" class="gestion-soporte-empty-action" data-pending-open="crear"><i class="bi bi-plus-lg" aria-hidden="true"></i> Crear primer ticket</button></div></td></tr></tbody>
+                <tbody>
+                @forelse ($module['rows'] ?? [] as $row)
+                    <tr><td>{{ $row['codigo'] }}</td><td>{{ $row['cliente'] }}</td><td>{{ $row['asunto'] }}</td><td>{{ $row['prioridad'] }}</td><td>{{ $row['estado'] }}</td><td>{{ $row['actualizado'] }}</td><td><button type="button" aria-label="Editar caso" data-pending-open="editar" data-pending-action="{{ $row['edit_url'] }}" data-pending-record="{{ base64_encode(json_encode($row['record'], JSON_UNESCAPED_UNICODE)) }}"><i class="bi bi-pencil" aria-hidden="true"></i></button><button type="button" aria-label="Cerrar caso" data-pending-open="eliminar" data-pending-action="{{ $row['delete_url'] }}" data-pending-method="PATCH" data-pending-record="{{ base64_encode(json_encode($row['record'], JSON_UNESCAPED_UNICODE)) }}"><i class="bi bi-check2-circle" aria-hidden="true"></i></button></td></tr>
+                @empty
+                    <tr><td colspan="{{ count($tableColumns) }}"><div class="gestion-soporte-empty"><span><i class="bi bi-inbox" aria-hidden="true"></i></span><strong>No hay casos para mostrar</strong><p>No existen casos que coincidan con el alcance y filtros actuales.</p></div></td></tr>
+                @endforelse
+                </tbody>
             </table>
         </div>
         <footer class="gestion-soporte-table-footer"><span>Sin resultados para mostrar</span><div class="gestion-soporte-pagination" aria-label="Paginación deshabilitada"><button type="button" disabled aria-label="Página anterior"><i class="bi bi-chevron-left" aria-hidden="true"></i></button><button type="button" class="is-active" disabled>1</button><button type="button" disabled aria-label="Página siguiente"><i class="bi bi-chevron-right" aria-hidden="true"></i></button></div></footer>

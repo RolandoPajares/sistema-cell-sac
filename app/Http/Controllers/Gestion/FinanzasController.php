@@ -63,7 +63,7 @@ class FinanzasController extends Controller
                 'create_route' => $canCreate ? 'management.payments.store' : null,
                 'form_options' => $canCreate ? $financialQueries->opcionesPago($request->user()) : [],
                 'request_token' => (string) Str::uuid(),
-                'export_label' => 'Exportar CSV',
+                'export_label' => 'Exportar',
                 'filters' => $filters + ['tipo' => null, 'estado' => null, 'desde' => null, 'hasta' => null, 'buscar' => null],
                 'filter_options' => [
                     'types' => ['cobro' => 'Cobros', 'pago' => 'Pagos', 'reembolso' => 'Reembolsos'],
@@ -120,7 +120,7 @@ class FinanzasController extends Controller
                 'export_route' => $authorization->allows($request->user(), 'gestion.reembolsos.exportar') ? 'management.refunds.export' : null,
                 'create_route' => $canCreate ? 'management.refunds.store' : null,
                 'form_options' => $canCreate ? $financialQueries->opcionesReembolso($request->user()) : [],
-                'export_label' => 'Exportar CSV',
+                'export_label' => 'Exportar',
                 'filters' => $filters + ['estado' => null, 'desde' => null, 'hasta' => null, 'buscar' => null],
                 'filter_options' => [
                     'types' => [],
@@ -236,7 +236,7 @@ class FinanzasController extends Controller
     public function exportarPagos(FiltroPagosRequest $request, string $format, ServicioConsultasFinancieras $financialQueries, ServicioAutorizacion $authorization, ExportadorTabular $exporter, RegistradorAuditoria $auditor): Response|StreamedResponse
     {
         $authorization->assertAllowed($request->user(), 'gestion.pagos.exportar');
-        abort_unless($format === 'csv', 404);
+        abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
 
         return $this->export(
             $request->user(), $request->validated(), 'pagos',
@@ -250,7 +250,7 @@ class FinanzasController extends Controller
     public function exportarReembolsos(FiltroReembolsosRequest $request, string $format, ServicioConsultasFinancieras $financialQueries, ServicioAutorizacion $authorization, ExportadorTabular $exporter, RegistradorAuditoria $auditor): Response|StreamedResponse
     {
         $authorization->assertAllowed($request->user(), 'gestion.reembolsos.exportar');
-        abort_unless($format === 'csv', 404);
+        abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
 
         return $this->export(
             $request->user(), $request->validated(), 'reembolsos',

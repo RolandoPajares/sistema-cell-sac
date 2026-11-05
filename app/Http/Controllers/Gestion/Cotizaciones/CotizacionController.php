@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Gestion\Cotizaciones;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\GuardarCotizacionRequest;
+use App\Http\Requests\ActualizarCotizacionRequest;
 use App\Http\Requests\RegistrarEnvioCotizacionRequest;
 use App\Models\Catalogo\Producto;
 use App\Models\Clientes\Cliente;
@@ -43,10 +44,22 @@ class CotizacionController extends Controller
             $query = $this->authorization->scopeRecordsFor($query, $request->user(), 'gestion.cotizaciones.consultar');
         }
 
+        if ($this->authorization->hasRole($request->user(), 'cliente_mayorista')) {
+            $customers = Cliente::query()->where('usuario_id', $request->user()->getKey())
+                ->where('tipo', 'mayorista')->where('activo', true)->orderBy('nombre_contacto')->get();
+            $empresasAutorizadas = $customers->pluck('empresa_id')->filter()->unique()->values();
+        } else {
+            $sedesAutorizadas = $this->authorization->authorizedSiteIds($request->user(), 'gestion.ventas.crear');
+            $empresasAutorizadas = DB::table('sedes')->whereIn('id', $sedesAutorizadas)->where('activa', true)
+                ->pluck('empresa_id')->unique()->values();
+            $customers = Cliente::query()->whereIn('empresa_id', $empresasAutorizadas)
+                ->where('tipo', 'mayorista')->where('activo', true)->orderBy('nombre_contacto')->get();
+        }
+
         return view('gestion.cotizaciones.listar', [
             'quotations' => $query->paginate(20),
-            'customers' => Cliente::query()->where('tipo', 'mayorista')->where('activo', true)->orderBy('nombre_contacto')->get(),
-            'products' => Producto::query()->active()->orderBy('nombre')->get(),
+            'customers' => $customers,
+            'products' => Producto::query()->active()->whereIn('empresa_id', $empresasAutorizadas)->orderBy('nombre')->get(),
         ]);
     }
 
@@ -144,7 +157,8 @@ class CotizacionController extends Controller
             ->where('sedes.activa', true)
             ->where('empresas.activo', true)
             ->orderBy('sedes.nombre')->orderBy('almacenes.nombre')
-            ->get(['almacenes.id', 'almacenes.nombre', 'almacenes.sede_id', 'sedes.nombre as sede_nombre']);
+            ->get(['almacenes.id', 'almacenes.nombre', 'almacenes.sede_id', 'sedes.empresa_id', 'sedes.nombre as sede_nombre']);
+        $empresasAutorizadas = $almacenesVenta->pluck('empresa_id')->unique()->values();
 
         return view('gestion.cotizaciones.administrador', [
             'quotations' => $quotations,
@@ -154,11 +168,12 @@ class CotizacionController extends Controller
             'puedeCrearVenta' => $this->authorization->allows($request->user(), 'gestion.ventas.crear') && $almacenesVenta->isNotEmpty(),
             'almacenesVenta' => $almacenesVenta,
             'customers' => Cliente::query()
+                ->whereIn('empresa_id', $empresasAutorizadas)
                 ->where('tipo', 'mayorista')
                 ->where('activo', true)
                 ->orderBy('nombre_contacto')
                 ->get(),
-            'products' => Producto::query()->active()->orderBy('nombre')->get(),
+            'products' => Producto::query()->active()->whereIn('empresa_id', $empresasAutorizadas)->orderBy('nombre')->get(),
             'filters' => $filters,
             'totalQuotations' => $totalQuotations,
             'pendingQuotations' => (clone $allQuotations)->whereIn('estado', ['Borrador', 'Pendiente', 'Enviada'])->count(),
@@ -173,6 +188,79 @@ class CotizacionController extends Controller
         ]);
     }
 
+    public function export(
+        Request $request,
+        string $format,
+        ExportadorTabular $exportador,
+        RegistradorAuditoria $auditoria,
+    ): Response|StreamedResponse {
+        abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
+        $usuario = $request->user();
+        abort_unless($usuario !== null, 403);
+        $this->authorization->assertAllowed($usuario, 'gestion.cotizaciones.exportar');
+        $filtros = $request->validate([
+            'buscar' => ['nullable', 'string', 'max:160'],
+            'cliente' => ['nullable', 'integer'],
+            'estado' => ['nullable', 'string', 'max:30'],
+            'desde' => ['nullable', 'date_format:Y-m-d'],
+            'hasta' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:desde'],
+        ]);
+        $consulta = $this->authorization->scopeRecordsFor(
+            Cotizacion::query()->where('activo', true),
+            $usuario,
+            'gestion.cotizaciones.exportar',
+        )->with('customer')->withCount('details');
+        if (($filtros['buscar'] ?? '') !== '') {
+            $buscar = trim($filtros['buscar']);
+            $consulta->where(function (Builder $query) use ($buscar): void {
+                $query->whereHas('customer', fn (Builder $customer): Builder => $customer
+                    ->where('nombre_contacto', 'like', '%'.$buscar.'%')
+                    ->orWhere('documento', 'like', '%'.$buscar.'%'))
+                    ->orWhereHas('details.product', fn (Builder $product): Builder => $product->where('nombre', 'like', '%'.$buscar.'%'));
+            });
+        }
+        $consulta->when(($filtros['cliente'] ?? '') !== '', fn (Builder $query): Builder => $query->where('cliente_id', $filtros['cliente']))
+            ->when(($filtros['estado'] ?? '') !== '', fn (Builder $query): Builder => $query->where('estado', $filtros['estado']))
+            ->when(($filtros['desde'] ?? '') !== '', fn (Builder $query): Builder => $query->whereDate('creado_en', '>=', $filtros['desde']))
+            ->when(($filtros['hasta'] ?? '') !== '', fn (Builder $query): Builder => $query->whereDate('creado_en', '<=', $filtros['hasta']));
+        $cotizaciones = $consulta->latest('creado_en')->latest('id')->get();
+        $filas = $cotizaciones->map(static fn (Cotizacion $cotizacion): array => [
+            'COT-'.($cotizacion->creado_en?->format('Y') ?? now()->format('Y')).'-'.str_pad((string) $cotizacion->id, 4, '0', STR_PAD_LEFT),
+            $cotizacion->customer?->nombre_contacto ?? 'Cliente no disponible',
+            'Mayorista',
+            $cotizacion->details_count,
+            $cotizacion->moneda.' '.number_format((float) $cotizacion->total, 2, '.', ''),
+            $cotizacion->estado,
+            $cotizacion->creado_en,
+        ])->all();
+        $response = $exportador->download($format, 'cotizaciones',
+            ['Cotización', 'Cliente', 'Tipo', 'Productos', 'Total', 'Estado', 'Creado en'],
+            $filas,
+            [
+                'title' => 'COTIZACIONES MAYORISTAS',
+                'subtitle' => 'Datos reales consultados desde MariaDB.',
+                'module' => 'Operaciones Comerciales',
+                'report_name' => 'Cotizaciones',
+                'filters' => $filtros,
+                'generated_by' => (string) $usuario->nombre,
+                'role' => 'Usuario autorizado',
+                'scope' => 'Empresa, sede y permisos RBAC vigentes.',
+                'indicators' => [['label' => 'Cotizaciones incluidas', 'value' => count($filas)]],
+                'column_types' => ['text', 'text', 'text', 'integer', 'currency', 'text', 'datetime'],
+            ]);
+        $auditoria->record($usuario->getKey(), 'exportar', 'cotizaciones', null, null,
+            ['formato' => $format, 'cantidad' => count($filas), 'filtros' => $filtros], $request->ip());
+
+        return $response;
+    }
+
+    public function update(ActualizarCotizacionRequest $request, Cotizacion $quotation): RedirectResponse
+    {
+        $this->quotationService->actualizar($quotation, $request->validated(), $request->user(), $request->ip());
+
+        return back()->with('status', 'La cotización se actualizó en MariaDB.');
+    }
+
     public function store(GuardarCotizacionRequest $request): RedirectResponse
     {
         $this->quotationService->create($request->validated(), $request->user());
@@ -185,6 +273,13 @@ class CotizacionController extends Controller
         $this->quotationService->aprobar($quotation, $request->user(), $request->ip());
 
         return back()->with('status', 'La cotizacion fue aprobada y registrada en MariaDB.');
+    }
+
+    public function deactivate(Request $request, Cotizacion $quotation): RedirectResponse
+    {
+        $this->quotationService->desactivar($quotation, $request->user(), $request->ip());
+
+        return back()->with('status', 'La cotizacion fue desactivada y conservada en el historial.');
     }
 
     public function registrarEnvioManual(RegistrarEnvioCotizacionRequest $request, Cotizacion $quotation): RedirectResponse

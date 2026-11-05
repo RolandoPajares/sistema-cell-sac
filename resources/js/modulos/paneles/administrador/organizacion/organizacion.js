@@ -138,7 +138,7 @@ document.querySelectorAll('[data-organizacion]').forEach((page) => {
         feedback.textContent = '';
         const pageName = page.dataset.organizacion;
         const values = row ? rowValues(row) : [];
-        const formularioReal = ['empresa', 'almacenes', 'sedes'].includes(pageName) && form.hasAttribute('data-org-real-form');
+        const formularioReal = ['empresa', 'almacenes', 'sedes', 'responsables'].includes(pageName) && form.hasAttribute('data-org-real-form');
         if (formularioReal) {
             form.action = pageName === 'empresa'
                 ? page.dataset.orgUpdateRoute
@@ -159,7 +159,9 @@ document.querySelectorAll('[data-organizacion]').forEach((page) => {
             ? 'Completa los datos del almacén. Se validarán el código, la sede y el permiso antes de guardar.'
             : formularioReal && pageName === 'sedes'
                 ? 'Completa los datos de la sede. El código será único dentro de la empresa activa.'
-                : formularioReal
+            : formularioReal && pageName === 'responsables'
+                ? 'Selecciona un recurso y un usuario existente. La vigencia anterior se cerrará de forma transaccional si corresponde.'
+            : formularioReal
                     ? 'Actualiza los campos disponibles en la ficha empresarial. El cambio quedará auditado.'
                     : 'Completa los campos y revisa la información. La integración con Laravel y MySQL está pendiente.';
         activeSteps = steps;
@@ -182,6 +184,22 @@ document.querySelectorAll('[data-organizacion]').forEach((page) => {
             });
         }
         if (action === 'logo') activeSteps = [steps[2]];
+        if (pageName === 'responsables') {
+            const tipoRecurso = form.elements.namedItem('tipo_recurso');
+            const selectorSede = form.elements.namedItem('sede_id');
+            const selectorAlmacen = form.elements.namedItem('almacen_id');
+            const selectorResponsable = form.elements.namedItem('responsable_usuario_id');
+            const actualizarRecurso = () => {
+                const tipo = tipoRecurso.value;
+                form.querySelector('[data-org-resource-field="almacen_id"]').hidden = tipo !== 'almacen';
+                selectorAlmacen.required = tipo === 'almacen';
+                [...selectorAlmacen.options].forEach((option) => { if (option.value) option.hidden = option.dataset.sedeId !== selectorSede.value; });
+                [...selectorResponsable.options].forEach((option) => { if (option.value) option.hidden = option.dataset.sedeId !== selectorSede.value; });
+            };
+            tipoRecurso.onchange = actualizarRecurso;
+            selectorSede.onchange = actualizarRecurso;
+            actualizarRecurso();
+        }
         if (row) prefill(row, values);
         showStep(0);
         dialog.showModal();
@@ -250,6 +268,17 @@ document.querySelectorAll('[data-organizacion]').forEach((page) => {
             feedback.textContent = 'Vista de diseño: la integración con Laravel y MySQL está pendiente. No se guardó ninguna información.';
         });
         form?.addEventListener('submit', (event) => event.preventDefault());
+    }
+    if (form?.hasAttribute('data-org-real-form') && page.dataset.organizacion === 'responsables') {
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            for (let index = 0; index < activeSteps.length; index++) {
+                showStep(index);
+                if (!validateStep(activeSteps[index])) return;
+            }
+            showStep(activeSteps.length - 1);
+            HTMLFormElement.prototype.submit.call(form);
+        });
     }
     confirmDialog?.querySelector('[data-org-confirm]')?.addEventListener('click', () => {
         const reason = confirmDialog.querySelector('[data-org-confirm-reason]');

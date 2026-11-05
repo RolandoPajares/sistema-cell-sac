@@ -11,8 +11,11 @@ use App\Models\Comercio\DetallePedido;
 use App\Models\Comercio\Pedido;
 use App\Models\Inventario\MovimientoInventario;
 use App\Models\Marketing\Campania;
+use App\Servicios\ExportadorTabular;
+use App\Servicios\RegistradorAuditoria;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -76,34 +79,43 @@ class ReporteController extends Controller
         ]);
     }
 
-    public function export(FiltroReporteRequest $request): StreamedResponse
+    public function export(FiltroReporteRequest $request, ExportadorTabular $exporter, RegistradorAuditoria $audit, string $format = 'csv'): Response|StreamedResponse
     {
+        abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
+        $filters = $this->reportFilters($request->validated());
         $orders = $this->salesQuery($request->validated())
             ->select(['id', 'usuario_id', 'subtotal', 'descuento', 'total', 'estado', 'creado_en'])
             ->orderBy('creado_en')
             ->orderBy('id')
-            ->cursor();
+            ->get();
+        $rows = $orders->map(static fn (Pedido $order): array => [
+            $order->id,
+            $order->usuario_id,
+            $order->subtotal,
+            $order->descuento,
+            $order->total,
+            $order->estado,
+            $order->creado_en?->toDateTimeString(),
+        ])->all();
+        $response = $exporter->download($format, 'reporte-pedidos',
+            ['ID', 'Usuario', 'Subtotal', 'Descuento', 'Total', 'Estado', 'Registrado'],
+            $rows,
+            [
+                'title' => 'REPORTE COMERCIAL DE PEDIDOS',
+                'subtitle' => 'Datos reales consultados desde MariaDB.',
+                'module' => 'Análisis y Auditoría',
+                'report_name' => 'Pedidos',
+                'filters' => $filters,
+                'generated_by' => (string) $request->user()->nombre,
+                'role' => 'Usuario autorizado',
+                'scope' => 'Empresa y permisos RBAC vigentes.',
+                'indicators' => [['label' => 'Pedidos incluidos', 'value' => count($rows)]],
+                'column_types' => ['integer', 'integer', 'currency', 'currency', 'currency', 'text', 'datetime'],
+            ]);
+        $audit->record($request->user()->getKey(), 'exportar', 'reportes', null, null,
+            ['formato' => $format, 'reporte' => 'pedidos', 'filtros' => $filters, 'cantidad' => count($rows)], $request->ip());
 
-        return response()->streamDownload(function () use ($orders): void {
-            $output = fopen('php://output', 'w');
-
-            fwrite($output, "\xEF\xBB\xBF");
-            fputcsv($output, ['id', 'usuario_id', 'subtotal', 'descuento', 'total', 'estado', 'creado_en']);
-
-            foreach ($orders as $order) {
-                fputcsv($output, [
-                    $order->id,
-                    $order->usuario_id,
-                    $order->subtotal,
-                    $order->descuento,
-                    $order->total,
-                    $order->estado,
-                    $order->creado_en?->toDateTimeString(),
-                ]);
-            }
-
-            fclose($output);
-        }, 'reporte-pedidos.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+        return $response;
     }
 
     /**

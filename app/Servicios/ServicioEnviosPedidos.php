@@ -67,6 +67,21 @@ final class ServicioEnviosPedidos
         ];
     }
 
+    /** @return Builder<EnvioPedido> */
+    public function consultaExportacion(User $usuario, array $filtros): Builder
+    {
+        $siteIds = $this->autorizacion->authorizedSiteIds($usuario, 'gestion.inventario.exportar');
+        $query = EnvioPedido::query()->with(['almacen.sede', 'ultimoEvento']);
+        if ($siteIds === []) {
+            $query->whereRaw('1 = 0');
+        } else {
+            $query->whereIn('sede_id', $siteIds);
+        }
+        $this->aplicarFiltros($query, $filtros);
+
+        return $query->orderByDesc('creado_en')->orderByDesc('id');
+    }
+
     /**
      * @param  Builder<EnvioPedido>  $consulta
      * @param  array{buscar?:string|null,estado?:string|null,modalidad?:string|null}  $filtros

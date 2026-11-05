@@ -51,6 +51,7 @@ it('muestra contadores cero y estado vacío cuando no hay dispositivos', functio
     prepararEsquemaDispositivosParaPrueba();
     SpanishAccessFixture::organization();
     $administrador = SpanishAccessFixture::user('administrador');
+    SpanishAccessFixture::grantScreenReadPermission($administrador, 'admin.imei', 'management.inventory.preview.serials');
 
     $respuesta = $this->withoutVite()->actingAs($administrador)->get(route('management.inventory.preview.serials'));
 
@@ -66,6 +67,7 @@ it('filtra por producto, estado y texto usando dispositivos reales', function ()
     prepararEsquemaDispositivosParaPrueba();
     $organizacion = SpanishAccessFixture::organization();
     $administrador = SpanishAccessFixture::user('administrador');
+    SpanishAccessFixture::grantScreenReadPermission($administrador, 'admin.imei', 'management.inventory.preview.serials');
     $producto = Producto::factory()->create([
         'empresa_id' => $organizacion['empresa_id'],
         'marca' => 'Marca de prueba',
@@ -92,6 +94,7 @@ it('restringe dispositivos al ámbito de la sede seleccionada en la sesión', fu
     prepararEsquemaDispositivosParaPrueba();
     $organizacion = SpanishAccessFixture::organization();
     $administrador = SpanishAccessFixture::user('administrador');
+    SpanishAccessFixture::grantScreenReadPermission($administrador, 'admin.imei', 'management.inventory.preview.serials');
     $producto = Producto::factory()->create(['empresa_id' => $organizacion['empresa_id']]);
     crearDispositivoParaPrueba($producto, $organizacion['almacen_id'], 'TEST-SEDE-PRINCIPAL');
 
@@ -130,6 +133,7 @@ it('pagina el listado de dispositivos consultados', function (): void {
     prepararEsquemaDispositivosParaPrueba();
     $organizacion = SpanishAccessFixture::organization();
     $administrador = SpanishAccessFixture::user('administrador');
+    SpanishAccessFixture::grantScreenReadPermission($administrador, 'admin.imei', 'management.inventory.preview.serials');
     $producto = Producto::factory()->create(['empresa_id' => $organizacion['empresa_id']]);
 
     foreach (range(1, 21) as $numero) {

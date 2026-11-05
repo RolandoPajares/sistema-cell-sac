@@ -9,10 +9,12 @@ use App\Models\Catalogo\Categoria;
 use App\Models\Catalogo\Producto;
 use App\Models\User;
 use App\Servicios\RegistradorAuditoria;
+use App\Servicios\ExportadorTabular;
 use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioInventario;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -35,30 +37,38 @@ class CategoriaController extends Controller
         ]);
     }
 
-    public function export(Request $request, ServicioInventario $inventario): StreamedResponse
+    public function export(Request $request, ServicioInventario $inventario, ExportadorTabular $exporter, RegistradorAuditoria $audit): Response|StreamedResponse
     {
         $alcance = $this->alcanceActual($request, $inventario);
-        $categorias = $this->consultaCategorias($this->filtros($request), $alcance['empresa_id'])->cursor();
+        $format = (string) ($request->route('format') ?: 'csv');
+        abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
+        $filters = $this->filtros($request);
+        $categorias = $this->consultaCategorias($filters, $alcance['empresa_id'])->limit(5000)->get();
+        $rows = $categorias->map(static fn (Categoria $categoria): array => [
+            $categoria->id,
+            $categoria->nombre,
+            $categoria->descripcion,
+            $categoria->products_count,
+            $categoria->activo ? 'Activa' : 'Inactiva',
+            $categoria->creado_en?->format('Y-m-d H:i:s'),
+        ])->all();
+        $response = $exporter->download($format, 'categorias-'.now()->format('Ymd'),
+            ['ID', 'Nombre', 'Descripción', 'Productos', 'Estado', 'Registrada'],
+            $rows,
+            [
+                'title' => 'REPORTE DE CATEGORÍAS',
+                'subtitle' => 'Categorías reales consultadas desde MariaDB.',
+                'module' => 'Inventario y Logística',
+                'report_name' => 'Categorías',
+                'filters' => $filters,
+                'generated_by' => (string) $request->user()->nombre,
+                'role' => 'Usuario autorizado',
+                'scope' => 'Empresa y permisos RBAC vigentes.',
+                'indicators' => [['label' => 'Categorías incluidas', 'value' => count($rows)]],
+            ]);
+        $audit->record($request->user()->getKey(), 'exportar', 'categorias', null, null, ['formato' => $format, 'filtros' => $filters, 'cantidad' => count($rows)], $request->ip());
 
-        return response()->streamDownload(function () use ($categorias): void {
-            $salida = fopen('php://output', 'w');
-
-            fwrite($salida, "\xEF\xBB\xBF");
-            fputcsv($salida, ['id', 'nombre', 'descripcion', 'productos', 'estado', 'fecha_creacion']);
-
-            foreach ($categorias as $categoria) {
-                fputcsv($salida, [
-                    $categoria->id,
-                    $categoria->nombre,
-                    $categoria->descripcion,
-                    $categoria->products_count,
-                    $categoria->activo ? 'Activa' : 'Inactiva',
-                    $categoria->creado_en?->format('d/m/Y H:i'),
-                ]);
-            }
-
-            fclose($salida);
-        }, 'categorias.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+        return $response;
     }
 
     public function store(GuardarCategoriaRequest $request, ServicioInventario $inventario, RegistradorAuditoria $auditoria): RedirectResponse

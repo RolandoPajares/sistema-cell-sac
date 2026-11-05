@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Gestion\Seguridad;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ActualizarPermisosRolRequest;
+use App\Http\Requests\ActualizarRolRequest;
 use App\Http\Requests\GuardarRolRequest;
 use App\Models\Seguridad\Rol;
 use App\Servicios\RegistradorAuditoria;
@@ -101,5 +102,40 @@ class RolesPermisosController extends Controller
         });
 
         return back()->with('status', 'Los privilegios del rol fueron actualizados.');
+    }
+
+    public function update(ActualizarRolRequest $request, Rol $role, ServicioDelegacion $delegacion, RegistradorAuditoria $auditoria): RedirectResponse
+    {
+        abort_if($role->es_sistema || $role->codigo === 'administrador', 422, 'El rol del sistema está reservado y no puede editarse.');
+        $data = $request->validated();
+        abort_unless($data['alcance_permitido'] !== 'empresa' || $request->user()->isRole('administrador'), 403, 'Solo un administrador global puede conceder alcance empresarial.');
+        abort_unless($delegacion->puedeDelegarPermisos($request->user(), $role->permisos()->pluck('permisos.id')->all(), $data['alcance_permitido']), 403, 'El nuevo alcance excede tus privilegios delegables.');
+
+        DB::transaction(function () use ($role, $data, $request, $auditoria): void {
+            $locked = Rol::query()->lockForUpdate()->findOrFail($role->getKey());
+            $before = $locked->only(['nombre', 'descripcion', 'alcance_permitido']);
+            $locked->update($data);
+            $auditoria->record($request->user()->getKey(), 'actualizar_rol', 'roles', $locked->getKey(), $before, $locked->only(['nombre', 'descripcion', 'alcance_permitido']), $request->ip());
+        });
+
+        return back()->with('status', 'El rol fue actualizado.');
+    }
+
+    public function updateStatus(Request $request, Rol $role, ServicioDelegacion $delegacion, RegistradorAuditoria $auditoria): RedirectResponse
+    {
+        abort_if($role->es_sistema || $role->codigo === 'administrador', 422, 'El rol del sistema está reservado y no puede desactivarse.');
+        abort_unless(app(ServicioAutorizacion::class)->allowsGlobal($request->user(), 'gestion.seguridad.actualizar'), 403);
+        $activo = $request->boolean('activo');
+
+        DB::transaction(function () use ($role, $activo, $request, $delegacion, $auditoria): void {
+            $locked = Rol::query()->lockForUpdate()->findOrFail($role->getKey());
+            abort_if(!$activo && $locked->usuarios()->wherePivot('activo', true)->exists(), 409, 'Revoca primero las asignaciones activas de este rol.');
+            abort_unless($delegacion->puedeDelegarPermisos($request->user(), $locked->permisos()->pluck('permisos.id')->all(), $locked->alcance_permitido), 403);
+            $before = ['activo' => (bool) $locked->activo];
+            $locked->update(['activo' => $activo]);
+            $auditoria->record($request->user()->getKey(), $activo ? 'reactivar_rol' : 'desactivar_rol', 'roles', $locked->getKey(), $before, ['activo' => $activo], $request->ip());
+        });
+
+        return back()->with('status', $activo ? 'El rol fue reactivado.' : 'El rol fue desactivado.');
     }
 }

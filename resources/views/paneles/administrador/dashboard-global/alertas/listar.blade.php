@@ -5,7 +5,7 @@
 
 @section('content')
 <section class="tc-dg" data-dashboard-global="alertas">
-    @include('paneles.administrador.dashboard-global.componentes.cabecera', ['titulo' => 'Alertas y notificaciones', 'icono' => 'bi-bell', 'descripcion' => 'Consulta las notificaciones persistidas para la cuenta administrativa actual.'])
+    @include('paneles.administrador.dashboard-global.componentes.cabecera', ['titulo' => 'Alertas y notificaciones', 'icono' => 'bi-bell', 'descripcion' => 'Consulta las notificaciones persistidas para la cuenta administrativa actual.', 'exportRoute' => $disponible ? 'management.reports.dashboard_alerts.export' : null, 'exportParameters' => array_filter(['estado' => $estado, 'buscar' => $busqueda], static fn ($value) => $value !== null && $value !== '')])
 
     @unless ($disponible)
         <div class="tc-dg__empty" role="status">La tabla notificaciones no está disponible en la base de datos.</div>

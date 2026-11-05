@@ -72,14 +72,15 @@ class ServicioPedidos
                 $items[] = [$product, $quantity, $priceCents];
             }
 
-            $discountCents = $this->discountFor($couponCode, $subtotalCents);
+            $descuentoCupon = $this->discountFor($couponCode, $subtotalCents, (int) $location['empresa_id']);
             $order = Pedido::create([
                 'usuario_id' => $user->id,
                 'canal' => 'ecommerce',
                 'subtotal' => $subtotalCents / 100,
-                'descuento' => $discountCents / 100,
+                'descuento' => $descuentoCupon['descuento_centimos'] / 100,
+                'cupon_id' => $descuentoCupon['cupon_id'],
                 'cupon_codigo' => $couponCode,
-                'total' => ($subtotalCents - $discountCents) / 100,
+                'total' => ($subtotalCents - $descuentoCupon['descuento_centimos']) / 100,
                 'estado' => 'Pendiente',
                 'creado_en' => now(),
                 ...$this->authorization->operationScopeAttributes($user, 'pedidos'),
@@ -152,13 +153,16 @@ class ServicioPedidos
         }, 3);
     }
 
-    private function discountFor(?string $couponCode, int $subtotalCents): int
+    /** @return array{descuento_centimos:int,cupon_id:?int} */
+    private function discountFor(?string $couponCode, int $subtotalCents, int $empresaId): array
     {
         if ($couponCode === null || $couponCode === '') {
-            return 0;
+            return ['descuento_centimos' => 0, 'cupon_id' => null];
         }
 
-        $coupon = Cupon::where('codigo', $couponCode)->lockForUpdate()->first();
+        abort_unless(Schema::hasColumn('cupones', 'empresa_id'), 503,
+            'Los cupones no están disponibles hasta configurar su empresa propietaria.');
+        $coupon = Cupon::where('empresa_id', $empresaId)->where('codigo', $couponCode)->lockForUpdate()->first();
         abort_unless($coupon && $coupon->activo && $coupon->inicia_en <= now() && $coupon->finaliza_en >= now(), 422, 'El cupón venció o fue desactivado.');
         abort_if($coupon->limite_usos !== null && $coupon->usos >= $coupon->limite_usos, 422, 'El cupón agotó sus usos.');
         abort_if($subtotalCents < (int) round((float) $coupon->minimo_compra * 100), 422, 'El pedido no alcanza el mínimo del cupón.');
@@ -169,6 +173,6 @@ class ServicioPedidos
 
         $coupon->increment('usos');
 
-        return min($discountCents, $subtotalCents);
+        return ['descuento_centimos' => min($discountCents, $subtotalCents), 'cupon_id' => (int) $coupon->getKey()];
     }
 }

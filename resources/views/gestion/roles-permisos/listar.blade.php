@@ -30,6 +30,15 @@
                     @if ($role->codigo === 'administrador')
                         <p class="admin-alert admin-alert--success">Rol global del sistema. Conserva privilegios completos y no puede editarse desde esta matriz para evitar bloquear la administración.</p>
                     @else
+                        <form method="post" action="{{ route('management.roles_permissions.update', $role) }}" class="role-edit-form">
+                            @csrf @method('PUT')
+                            <div class="two-column">
+                                <label>Nombre<input name="nombre" value="{{ $role->nombre }}" maxlength="120" required></label>
+                                <label>Alcance máximo<select name="alcance_permitido" required><option value="empresa" @selected($role->alcance_permitido === 'empresa')>Empresa</option><option value="sede" @selected($role->alcance_permitido === 'sede')>Sede</option><option value="propio" @selected($role->alcance_permitido === 'propio')>Registros propios</option></select></label>
+                                <label>Descripción<textarea name="descripcion" maxlength="255">{{ $role->descripcion }}</textarea></label>
+                            </div>
+                            <button class="btn btn-outline-primary" type="submit">Guardar datos del rol</button>
+                        </form>
                         <form method="post" action="{{ route('management.roles_permissions.permissions', $role) }}">
                             @csrf @method('PUT')
                             <label>Alcance de todas las concesiones
@@ -52,6 +61,11 @@
                                 @endforeach
                             </div>
                             <button class="btn btn-primary" type="submit">Guardar privilegios</button>
+                        </form>
+                        <form method="post" action="{{ route('management.roles_permissions.status', $role) }}" data-confirm="¿{{ $role->activo ? 'Desactivar' : 'Reactivar' }} este rol?">
+                            @csrf @method('PATCH')
+                            <input type="hidden" name="activo" value="{{ $role->activo ? 0 : 1 }}">
+                            <button class="btn btn-outline-danger" type="submit">{{ $role->activo ? 'Desactivar rol' : 'Reactivar rol' }}</button>
                         </form>
                     @endif
                 </details>

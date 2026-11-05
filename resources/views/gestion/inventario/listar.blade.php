@@ -157,17 +157,26 @@
 
             <section class="inventario-secondary-card">
                 <header class="inventario-card-header"><div class="inventario-card-title"><i class="bi bi-clock-history" aria-hidden="true"></i><div><h2>{{ $verHistorialMovimientos ? 'Historial de movimientos' : 'Movimientos recientes' }}</h2><p>{{ $verHistorialMovimientos ? 'Movimientos registrados en las sedes autorizadas.' : 'Últimos movimientos de inventario.' }}</p></div></div><a class="inventario-view-all" href="{{ $verHistorialMovimientos ? route('management.inventory') : route('management.inventory.movements') }}">{{ $verHistorialMovimientos ? 'Volver al inventario' : 'Ver todos' }}</a></header>
+                @if ($verHistorialMovimientos)
+                    <form class="inventario-filters" method="get" action="{{ route('management.inventory.movements') }}">
+                        <label class="inventario-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar movimientos</span><input type="search" name="mov_buscar" value="{{ $filtrosMovimientos['buscar'] }}" maxlength="100" placeholder="Producto, motivo o documento"></label>
+                        <label><span class="visually-hidden">Tipo de movimiento</span><select name="mov_tipo"><option value="">Todos los tipos</option>@foreach ($tiposMovimiento as $tipo)<option value="{{ $tipo }}" @selected($filtrosMovimientos['tipo'] === $tipo)>{{ ucfirst($tipo) }}</option>@endforeach</select></label>
+                        <label><span class="visually-hidden">Almacén</span><select name="mov_almacen"><option value="">Todos los almacenes autorizados</option>@foreach ($almacenesMovimiento as $almacen)<option value="{{ $almacen->id }}" @selected($filtrosMovimientos['almacen'] === (int) $almacen->id)>{{ $almacen->sede_nombre }} · {{ $almacen->nombre }}</option>@endforeach</select></label>
+                        <button class="inventario-filter-button" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i> Filtrar</button>
+                        @if ($hayFiltrosMovimientos)<a class="inventario-clear-button" href="{{ route('management.inventory.movements') }}">Limpiar</a>@endif
+                    </form>
+                @endif
                 <div class="inventario-recent-table-wrap">
-                    <table class="inventario-recent-table"><thead><tr><th>Tipo</th><th>Producto</th><th>Cantidad</th><th>Motivo</th><th>Usuario</th><th>Fecha</th></tr></thead><tbody>
+                    <table class="inventario-recent-table"><thead><tr><th>Tipo</th><th>Producto</th><th>Cantidad</th><th>Motivo</th><th>Usuario</th><th>Fecha</th>@if ($verHistorialMovimientos)<th>Detalle</th>@endif</tr></thead><tbody>
                         @forelse ($recentMovements as $movement)
                             @php
                                 $movementClass = $movement->tipo_movimiento === 'entrada' ? 'entry' : ($movement->tipo_movimiento === 'salida' ? 'exit' : 'adjustment');
                                 $movementQuantity = $movement->tipo_movimiento === 'salida' ? -abs((float) $movement->cantidad) : (float) $movement->cantidad;
                                 $cantidadFormateada = rtrim(rtrim(number_format($movementQuantity, 6, '.', ''), '0'), '.');
                             @endphp
-                            <tr><td><span class="inventario-recent-type inventario-recent-type--{{ $movementClass }}"><i class="bi bi-{{ $movement->tipo_movimiento === 'ajuste' ? 'pencil' : 'arrow-'.($movement->tipo_movimiento === 'entrada' ? 'down' : 'up') }}" aria-hidden="true"></i>{{ ucfirst($movement->tipo_movimiento) }}</span></td><td>{{ $movement->product?->marca }} {{ $movement->product?->nombre ?: 'Producto eliminado' }}</td><td class="inventario-quantity {{ $movementQuantity >= 0 ? 'is-positive' : 'is-negative' }}">{{ $movementQuantity >= 0 ? '+' : '' }}{{ $cantidadFormateada }}</td><td>{{ \Illuminate\Support\Str::limit($movement->notas, 24) }}</td><td>{{ $movement->user?->nombre ?: 'Sistema' }}</td><td>{{ $movement->creado_en?->format('d/m/Y H:i') }}</td></tr>
+                            <tr><td><span class="inventario-recent-type inventario-recent-type--{{ $movementClass }}"><i class="bi bi-{{ $movement->tipo_movimiento === 'ajuste' ? 'pencil' : 'arrow-'.($movement->tipo_movimiento === 'entrada' ? 'down' : 'up') }}" aria-hidden="true"></i>{{ ucfirst($movement->tipo_movimiento) }}</span></td><td>{{ $movement->product?->marca }} {{ $movement->product?->nombre ?: 'Producto eliminado' }}</td><td class="inventario-quantity {{ $movementQuantity >= 0 ? 'is-positive' : 'is-negative' }}">{{ $movementQuantity >= 0 ? '+' : '' }}{{ $cantidadFormateada }}</td><td>{{ \Illuminate\Support\Str::limit($movement->notas, 24) }}</td><td>{{ $movement->user?->nombre ?: 'Sistema' }}</td><td>{{ $movement->creado_en?->format('d/m/Y H:i') }}</td>@if ($verHistorialMovimientos)<td><button class="inventario-more-button" type="button" data-open-movement-detail data-tipo="{{ $movement->tipo_movimiento }}" data-cantidad="{{ $movementQuantity }}" data-fecha="{{ $movement->creado_en?->format('d/m/Y H:i') }}" data-usuario="{{ $movement->user?->nombre ?: 'Sistema' }}" data-notas="{{ $movement->notas }}" data-producto="{{ trim(($movement->product?->marca ?? '').' '.($movement->product?->nombre ?? 'Producto eliminado')) }}" data-variante="{{ $movement->variante?->codigo_sku ?: $movement->variante?->nombre_color ?: 'Sin variante' }}" data-almacen="{{ $movement->almacen?->nombre ?: 'Sin almacén' }}" data-documento="{{ trim(($movement->documento_tipo ?? '').' '.($movement->documento_id ?? '')) ?: 'Sin documento asociado' }}" aria-label="Ver detalle del movimiento"><i class="bi bi-three-dots-vertical" aria-hidden="true"></i></button></td>@endif</tr>
                         @empty
-                            <tr><td colspan="6" class="inventario-recent-empty">Todavía no hay movimientos registrados.</td></tr>
+                            <tr><td colspan="{{ $verHistorialMovimientos ? 7 : 6 }}" class="inventario-recent-empty">@if ($hayFiltrosMovimientos)No se encontraron movimientos con los filtros seleccionados.@else Todavía no hay movimientos registrados.@endif</td></tr>
                         @endforelse
                     </tbody></table>
                 </div>
@@ -306,6 +315,31 @@
                     const description = document.createElement('dd');
                     term.textContent = headings[index + 1]?.textContent.trim() ?? `Dato ${index + 1}`;
                     description.textContent = cell.textContent.trim();
+                    wrapper.append(term, description);
+                    details.append(wrapper);
+                });
+                detailDialog.showModal();
+            }));
+            page.querySelectorAll('[data-open-movement-detail]').forEach((button) => button.addEventListener('click', () => {
+                const details = detailDialog.querySelector('[data-inventory-detail-fields]');
+                const campos = [
+                    ['Tipo', button.dataset.tipo],
+                    ['Cantidad', button.dataset.cantidad],
+                    ['Fecha', button.dataset.fecha],
+                    ['Usuario', button.dataset.usuario],
+                    ['Producto', button.dataset.producto],
+                    ['Variante', button.dataset.variante],
+                    ['Almacén', button.dataset.almacen],
+                    ['Motivo', button.dataset.notas],
+                    ['Documento', button.dataset.documento],
+                ];
+                details.replaceChildren();
+                campos.forEach(([etiqueta, valor]) => {
+                    const wrapper = document.createElement('div');
+                    const term = document.createElement('dt');
+                    const description = document.createElement('dd');
+                    term.textContent = etiqueta;
+                    description.textContent = valor || '—';
                     wrapper.append(term, description);
                     details.append(wrapper);
                 });

@@ -72,9 +72,11 @@ it('creates a pending order and decrements stock atomically at checkout', functi
 
 it('applies a valid coupon once and records the discounted total', function () {
     $user = SpanishAccessFixture::user('cliente_minorista');
+    $alcance = SpanishAccessFixture::organization();
     $product = productForCellSac(['precio' => 100, 'existencias' => 3]);
     $checkoutToken = bin2hex(random_bytes(32));
     $coupon = Cupon::create([
+        'empresa_id' => $alcance['empresa_id'],
         'codigo' => 'SALE10',
         'tipo_descuento' => 'porcentaje',
         'valor' => 10,
@@ -90,7 +92,7 @@ it('applies a valid coupon once and records the discounted total', function () {
         ->post(route('checkout'), ['checkout_token' => $checkoutToken])
         ->assertRedirect();
 
-    $this->assertDatabaseHas('pedidos', ['subtotal' => 100, 'descuento' => 10, 'total' => 90]);
+    $this->assertDatabaseHas('pedidos', ['subtotal' => 100, 'descuento' => 10, 'total' => 90, 'cupon_id' => $coupon->id]);
     expect((int) $coupon->fresh()->usos)->toBe(1);
 });
 

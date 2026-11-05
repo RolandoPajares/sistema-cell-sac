@@ -53,7 +53,7 @@
             <button class="campanias-toolbar-button" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i> Filtrar</button>
             <button class="campanias-primary-button" type="button" data-open-campaign-create><i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva campaña</button>
             <button class="campanias-toolbar-button" type="button" disabled title="Importación disponible próximamente"><i class="bi bi-upload" aria-hidden="true"></i> Importar</button>
-            <a class="campanias-toolbar-button" href="{{ route('management.campaigns') }}"><i class="bi bi-download" aria-hidden="true"></i> Exportar</a>
+            <details class="campanias-export-menu"><summary class="campanias-toolbar-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar</summary><div class="campanias-export-options"><a href="{{ route('management.campaigns.export', ['format' => 'excel', 'buscar' => $filters['buscar'], 'ubicacion' => $filters['ubicacion'], 'estado' => $filters['estado']]) }}">Excel (.xlsx)</a><a href="{{ route('management.campaigns.export', ['format' => 'pdf', 'buscar' => $filters['buscar'], 'ubicacion' => $filters['ubicacion'], 'estado' => $filters['estado']]) }}">PDF (.pdf)</a><a href="{{ route('management.campaigns.export', ['format' => 'csv', 'buscar' => $filters['buscar'], 'ubicacion' => $filters['ubicacion'], 'estado' => $filters['estado']]) }}">CSV (.csv)</a></div></details>
             @if (($filters['buscar'] ?? null) || ($filters['ubicacion'] ?? null) || ($filters['estado'] ?? null))
                 <a class="campanias-clear-button" href="{{ route('management.campaigns') }}">Limpiar filtros</a>
             @endif

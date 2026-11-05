@@ -85,7 +85,7 @@ class MenusController extends Controller
                 DB::table('roles_menus')->insert([
                     'rol_id' => $role->getKey(),
                     'menu_id' => $menu->getKey(),
-                    'created_at' => now(),
+                    'creado_en' => now(),
                 ]);
             }
 

@@ -36,7 +36,7 @@
             </div>
             <div class="compras-hero-actions">
                 <button class="compras-secondary-button" type="button" disabled title="La importación de compras aún no está disponible."><i class="bi bi-upload" aria-hidden="true"></i> Importar</button>
-                <button class="compras-secondary-button" type="button" disabled title="La exportación de compras aún no está disponible."><i class="bi bi-download" aria-hidden="true"></i> Exportar</button>
+                <details class="compras-export-menu"><summary class="compras-secondary-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar</summary><div class="compras-export-options"><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'excel'])) }}">Excel (.xlsx)</a><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'pdf'])) }}">PDF (.pdf)</a><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'csv'])) }}">CSV (.csv)</a></div></details>
                 <button class="compras-primary-button" type="button" data-admin-dialog-open="nueva-compra" @disabled(! $canCreate || $suppliers->isEmpty() || $products->isEmpty())>
                     <i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva compra
                 </button>
@@ -127,7 +127,7 @@
                                 <td><span class="compras-status compras-status--{{ $statusClass($status) }}"><i class="bi bi-circle-fill" aria-hidden="true"></i>{{ $status }}</span></td>
                                 <td><span class="compras-reception compras-reception--{{ $statusClass($estadoRecepcion) }}"><i class="bi bi-box-seam" aria-hidden="true"></i>{{ $receptionLabel($estadoRecepcion) }}</span></td>
                                 <td>
-                                    <details class="compras-row-details">
+                                    <details class="compras-row-details" id="detalle-compra-{{ $purchase->id }}">
                                         <summary aria-label="Ver detalle de orden {{ $purchase->id }}" title="Ver detalle"><i class="bi bi-eye" aria-hidden="true"></i></summary>
                                         <div class="compras-detail-popover">
                                             <strong>Orden de compra</strong>
@@ -139,7 +139,7 @@
                                             </ul>
                                             <p>Total <b>S/ {{ number_format((float) $purchase->total, 2) }}</b></p>
                                             @if ($purchase->estado === 'Aprobada' && in_array($purchase->id, $recibibles, true) && isset($tokensRecepcion[$purchase->id]) && $purchase->details->contains(fn ($detail) => $detail->cantidad_pendiente > 0))
-                                                <details class="compras-partial-reception">
+                                                <details class="compras-partial-reception" id="recepcion-parcial-{{ $purchase->id }}">
                                                     <summary>Registrar recepción parcial</summary>
                                                     <form method="post" action="{{ route('management.purchases.receive_partial', $purchase) }}">
                                                         @csrf
@@ -150,6 +150,9 @@
                                                                     {{ $detail->product?->nombre ?? 'Producto no disponible' }} · pendiente {{ $detail->cantidad_pendiente }}
                                                                     <input type="hidden" name="items[{{ $indice }}][detalle_compra_id]" value="{{ $detail->id }}">
                                                                     <input type="number" name="items[{{ $indice }}][cantidad]" min="0" max="{{ $detail->cantidad_pendiente }}" value="0" required>
+                                                                    @if ($detail->variante?->controla_serie)
+                                                                        <textarea name="items[{{ $indice }}][identificadores]" maxlength="30000" rows="3" placeholder="Un equipo por línea: IMEI:15dígitos, SERIE:valor o IMEI:15dígitos|SERIE:valor"></textarea>
+                                                                    @endif
                                                                 </label>
                                                             @endif
                                                         @endforeach
@@ -162,6 +165,9 @@
                                     </details>
                                     @if ($purchase->estado === 'Pendiente' && in_array($purchase->id, $aprobables))
                                         <form method="post" action="{{ route('management.purchases.approve', $purchase) }}">@csrf <button class="compras-reception-open" type="submit">Aprobar</button></form>
+                                        @if (in_array($purchase->id, $anulables, true))<form method="post" action="{{ route('management.purchases.cancel', $purchase) }}" onsubmit="return confirm('¿Anular esta compra pendiente? Se conservará la auditoría.')">@csrf <button class="compras-reception-open" type="submit">Anular</button></form>@endif
+                                    @elseif ($purchase->estado === 'Aprobada' && in_array($purchase->id, $recibibles, true) && $purchase->details->contains(fn ($detail) => $detail->cantidad_pendiente > 0 && $detail->variante?->controla_serie))
+                                        <button class="compras-reception-open" type="button" onclick="document.getElementById('detalle-compra-{{ $purchase->id }}').open = true; document.getElementById('recepcion-parcial-{{ $purchase->id }}').open = true;">Recibir</button>
                                     @elseif ($purchase->estado === 'Aprobada' && in_array($purchase->id, $recibibles, true))
                                         <form method="post" action="{{ route('management.purchases.receive', $purchase) }}" onsubmit="return confirm('¿Confirmas la recepción completa de esta compra?')">@csrf <button class="compras-reception-open" type="submit">Recibir</button></form>
                                     @endif
@@ -199,6 +205,7 @@
                         <span class="compras-status compras-status--{{ $statusClass((string) $pending->estado) }}">{{ $pending->estado }}</span>
                         @if ($pending->estado === 'Pendiente' && in_array($pending->id, $aprobables))
                             <form method="post" action="{{ route('management.purchases.approve', $pending) }}">@csrf <button class="compras-reception-open" type="submit">Aprobar</button></form>
+                            @if (in_array($pending->id, $anulables, true))<form method="post" action="{{ route('management.purchases.cancel', $pending) }}" onsubmit="return confirm('¿Anular esta compra pendiente? Se conservará la auditoría.')">@csrf <button class="compras-reception-open" type="submit">Anular</button></form>@endif
                         @elseif ($pending->estado === 'Aprobada' && in_array($pending->id, $recibibles))
                             <form method="post" action="{{ route('management.purchases.receive', $pending) }}" onsubmit="return confirm('¿Confirmas la recepción completa de esta compra?')">@csrf <button class="compras-reception-open" type="submit">Recibir mercadería</button></form>
                         @endif

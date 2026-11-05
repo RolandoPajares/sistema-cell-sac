@@ -5,7 +5,9 @@ use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioDelegacion;
 use App\Servicios\ServicioMenuDinamico;
 use Database\Seeders\RbacInicialSeeder;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Tests\SpanishAccessFixture;
 
 it('seeds the seven RBAC roles without inventing organization data', function (): void {
@@ -152,6 +154,90 @@ it('autoriza una ruta compartida por pantallas vigentes y bloquea si todas sus p
     $this->actingAs($administrador)->get(route('management.payments'))->assertForbidden();
 });
 
+it('requires screen permissions for the shipment and IMEI panels', function (): void {
+    $administrador = SpanishAccessFixture::user('administrador');
+    Schema::create('envios_pedidos', function (Blueprint $tabla): void {
+        $tabla->bigIncrements('id');
+        $tabla->unsignedBigInteger('empresa_id');
+        $tabla->unsignedBigInteger('sede_id');
+        $tabla->unsignedInteger('pedido_id');
+        $tabla->unsignedBigInteger('almacen_id');
+        $tabla->unsignedBigInteger('guia_remision_id')->nullable();
+        $tabla->string('codigo', 60);
+        $tabla->string('modalidad', 30);
+        $tabla->string('transportista', 120)->nullable();
+        $tabla->string('servicio', 120)->nullable();
+        $tabla->string('numero_seguimiento', 160)->nullable();
+        $tabla->string('estado', 30)->default('pendiente');
+        $tabla->string('moneda', 3)->default('PEN');
+        $tabla->decimal('costo_envio', 15, 2)->default(0);
+        $tabla->json('destino_historico');
+        $tabla->dateTime('estimado_entrega_en')->nullable();
+        $tabla->dateTime('despachado_en')->nullable();
+        $tabla->dateTime('entregado_en')->nullable();
+        $tabla->unsignedBigInteger('creado_por_usuario_id')->nullable();
+        $tabla->dateTime('creado_en');
+    });
+    Schema::create('eventos_envios_pedidos', function (Blueprint $tabla): void {
+        $tabla->bigIncrements('id');
+        $tabla->unsignedBigInteger('envio_pedido_id');
+        $tabla->string('estado', 30);
+        $tabla->string('descripcion', 500)->nullable();
+        $tabla->string('fuente', 30)->nullable();
+        $tabla->string('identificador_externo', 160)->nullable();
+        $tabla->dateTime('ocurrido_en');
+        $tabla->dateTime('registrado_en')->nullable();
+        $tabla->json('datos_seguros')->nullable();
+    });
+    $pantallas = [
+        'management.inventory.preview.shipments' => [
+            'codigo' => 'admin.shipments',
+            'ruta' => 'management.inventory.preview.shipments',
+            'permiso' => 'pantalla.admin.shipments.consultar',
+        ],
+        'management.inventory.preview.serials' => [
+            'codigo' => 'admin.imei',
+            'ruta' => 'management.inventory.preview.serials',
+            'permiso' => 'pantalla.admin.imei.consultar',
+        ],
+    ];
+
+    foreach (array_keys($pantallas) as $nombreRuta) {
+        $this->actingAs($administrador)->get(route($nombreRuta))->assertForbidden();
+    }
+
+    $rolAdministradorId = DB::table('roles')->where('codigo', 'administrador')->value('id');
+
+    foreach ($pantallas as $pantalla) {
+        $registroPantalla = DB::table('pantallas')->where('codigo', $pantalla['codigo'])->firstOrFail();
+        DB::table('pantallas')->where('id', $registroPantalla->id)->update([
+            'ruta' => $pantalla['ruta'],
+            'habilitada' => true,
+        ]);
+        $permisoId = DB::table('permisos')->insertGetId([
+            'modulo_id' => $registroPantalla->modulo_id,
+            'pantalla_id' => $registroPantalla->id,
+            'codigo' => $pantalla['permiso'],
+            'accion' => 'consultar',
+            'nombre' => $pantalla['codigo'].' - consultar',
+            'es_sistema' => true,
+            'activo' => true,
+            'creado_en' => now(),
+            'actualizado_en' => now(),
+        ]);
+        DB::table('roles_permisos')->insert([
+            'rol_id' => $rolAdministradorId,
+            'permiso_id' => $permisoId,
+            'alcance' => 'empresa',
+            'creado_en' => now(),
+        ]);
+    }
+
+    foreach (array_keys($pantallas) as $nombreRuta) {
+        $this->actingAs($administrador)->get(route($nombreRuta))->assertOk();
+    }
+});
+
 it('restricts assigned employee permissions to their company site and customer permissions to owned records', function (): void {
     $marketingUser = SpanishAccessFixture::user('marketing');
     $customer = SpanishAccessFixture::user('cliente_minorista');
@@ -244,6 +330,30 @@ it('builds role-specific menus from the database and enforces route permissions'
         ->patch(route('management.modules.update', $securityModuleId), ['habilitado' => false])
         ->assertUnprocessable();
     expect(DB::table('modulos')->where('codigo', 'seguridad')->value('habilitado'))->toBe(1);
+});
+
+it('updates menu role assignments using the Spanish pivot timestamp from the SQL schema', function (): void {
+    $administrador = SpanishAccessFixture::user('administrador');
+    $this->seed(RbacInicialSeeder::class);
+    $menuId = (int) DB::table('menus')->where('codigo', 'administrador.sidebar')->value('id');
+    $rolId = (int) DB::table('roles')->where('codigo', 'administrador')->value('id');
+
+    $this->actingAs($administrador)
+        ->put(route('management.menus.roles', $menuId), ['roles' => [$rolId]])
+        ->assertRedirect();
+
+    expect(DB::table('roles_menus')->where('menu_id', $menuId)->where('rol_id', $rolId)->value('creado_en'))->not->toBeNull();
+});
+
+it('keeps global session management inaccessible while its RBAC screen is disabled', function (): void {
+    $administrador = SpanishAccessFixture::user('administrador');
+    $this->seed(RbacInicialSeeder::class);
+
+    $this->actingAs($administrador)
+        ->get(route('management.security_sessions'))
+        ->assertForbidden();
+
+    expect(DB::table('pantallas')->where('codigo', 'admin.sessions')->value('habilitada'))->toBe(0);
 });
 
 it('abre las gestiones de seguridad reales y elimina los resultados simulados de sus alias', function (): void {

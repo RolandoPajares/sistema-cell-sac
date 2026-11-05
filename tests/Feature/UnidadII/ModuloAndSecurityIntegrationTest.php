@@ -12,10 +12,13 @@ use App\Models\Marketing\Campania;
 use App\Models\User;
 use App\Servicios\ServicioCompras;
 use Illuminate\Database\QueryException;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\SpanishAccessFixture;
 
 /**
@@ -48,6 +51,43 @@ function crearImagenPngParaPruebaCatalogo(string $nombre): UploadedFile
     $contenido = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=', true);
 
     return UploadedFile::fake()->createWithContent($nombre, $contenido === false ? '' : $contenido);
+}
+
+function prepararEsquemaDispositivosRecepcionCompra(): void
+{
+    if (! Schema::hasTable('dispositivos')) {
+        Schema::create('dispositivos', function (Blueprint $tabla): void {
+            $tabla->bigIncrements('id');
+            $tabla->unsignedInteger('producto_id');
+            $tabla->unsignedInteger('variante_id')->nullable();
+            $tabla->string('imei', 20)->nullable()->unique();
+            $tabla->string('numero_serie', 100)->nullable()->unique();
+            $tabla->unsignedBigInteger('detalle_compra_id')->nullable();
+            $tabla->unsignedBigInteger('almacen_actual_id')->nullable();
+            $tabla->string('estado', 30)->default('disponible');
+            $tabla->dateTime('fecha_ingreso', 6)->nullable();
+            $tabla->dateTime('fecha_salida', 6)->nullable();
+        });
+    }
+
+    if (! Schema::hasTable('movimientos_dispositivos')) {
+        Schema::create('movimientos_dispositivos', function (Blueprint $tabla): void {
+            $tabla->bigIncrements('id');
+            $tabla->unsignedBigInteger('dispositivo_id');
+            $tabla->unsignedBigInteger('movimiento_inventario_id');
+            $tabla->string('estado_anterior', 30)->nullable();
+            $tabla->string('estado_nuevo', 30);
+            $tabla->dateTime('creado_en', 6)->useCurrent();
+        });
+    }
+
+    if (! Schema::hasTable('detalles_compras_dispositivos')) {
+        Schema::create('detalles_compras_dispositivos', function (Blueprint $tabla): void {
+            $tabla->unsignedBigInteger('detalle_compra_id');
+            $tabla->unsignedBigInteger('dispositivo_id')->unique();
+            $tabla->primary(['detalle_compra_id', 'dispositivo_id']);
+        });
+    }
 }
 
 it('completes the administrator category lifecycle and records audit events', function (): void {
@@ -633,8 +673,22 @@ it('registra, actualiza y desactiva variantes sin escribir proyecciones de stock
 
     $variante = VarianteProducto::query()->where('producto_id', $producto->id)->firstOrFail();
     expect($variante->estado)->toBe('activo')
+        ->and((bool) $variante->controla_serie)->toBeFalse()
         ->and((int) $variante->existencias)->toBe(0)
         ->and((int) $producto->fresh()->existencias)->toBe(11);
+
+    $this->actingAs($administrador)
+        ->put(route('management.products.variants.update', ['product' => $producto, 'variante' => $variante]), [
+            'nombre_color' => 'Negro',
+            'codigo_sku' => 'SKU-NEGRO',
+            'codigo_barras' => 'BARRAS-NEGRO',
+            'codigo_color' => '#000000',
+            'controla_serie' => '1',
+            'estado' => 'activo',
+        ])
+        ->assertRedirect();
+
+    expect((bool) $variante->fresh()->controla_serie)->toBeTrue();
 
     DB::table('existencias_almacen')->insert([
         'almacen_id' => $alcance['almacen_id'],
@@ -652,15 +706,30 @@ it('registra, actualiza y desactiva variantes sin escribir proyecciones de stock
             'codigo_sku' => 'SKU-NEGRO-MATE',
             'codigo_barras' => 'BARRAS-NEGRO-MATE',
             'codigo_color' => '#111111',
+            'controla_serie' => '1',
             'estado' => 'activo',
         ])
         ->assertRedirect();
+
+    $this->actingAs($administrador)
+        ->put(route('management.products.variants.update', ['product' => $producto, 'variante' => $variante]), [
+            'nombre_color' => 'Negro mate',
+            'codigo_sku' => 'SKU-NEGRO-MATE',
+            'codigo_barras' => 'BARRAS-NEGRO-MATE',
+            'codigo_color' => '#111111',
+            'controla_serie' => '0',
+            'estado' => 'activo',
+        ])
+        ->assertStatus(409);
+
+    expect((bool) $variante->fresh()->controla_serie)->toBeTrue();
 
     $this->actingAs($administrador)
         ->get(route('management.products'))
         ->assertOk()
         ->assertSee('SKU-NEGRO-MATE')
         ->assertSee('Negro mate')
+        ->assertSee('Control de serie / IMEI')
         ->assertSee('2 reservadas');
 
     $this->actingAs($administrador)
@@ -710,6 +779,59 @@ it('no permite asignar variantes a un producto con saldo base sin conciliar', fu
         ->assertStatus(409);
 
     expect(VarianteProducto::query()->where('producto_id', $producto->id)->count())->toBe(0);
+});
+
+it('impide cambiar el control de serie cuando existe historial o un dispositivo vinculado', function (): void {
+    $administrador = SpanishAccessFixture::user('administrador');
+    $alcance = SpanishAccessFixture::organization();
+    $producto = productoParaIntegracionUnidadDos(['existencias' => 0]);
+    $varianteConMovimiento = VarianteProducto::query()->create([
+        'producto_id' => $producto->id,
+        'nombre_color' => 'Con movimiento',
+        'controla_serie' => false,
+        'estado' => 'activo',
+        'fecha_creacion' => now(),
+    ]);
+    $varianteConDispositivo = VarianteProducto::query()->create([
+        'producto_id' => $producto->id,
+        'nombre_color' => 'Con dispositivo',
+        'controla_serie' => false,
+        'estado' => 'activo',
+        'fecha_creacion' => now(),
+    ]);
+
+    DB::table('movimientos_inventario')->insert([
+        'producto_id' => $producto->id,
+        'usuario_id' => $administrador->id,
+        'tipo_movimiento' => 'ajuste',
+        'cantidad' => 0,
+        'notas' => 'Historial existente de la variante',
+        'creado_en' => now(),
+        'empresa_id' => $alcance['empresa_id'],
+        'sede_id' => $alcance['sede_id'],
+        'almacen_id' => $alcance['almacen_id'],
+        'variante_id' => $varianteConMovimiento->id,
+        'documento_tipo' => 'prueba',
+        'documento_id' => 'HISTORIAL-VARIANTE',
+    ]);
+    DB::table('dispositivos')->insert([
+        'producto_id' => $producto->id,
+        'variante_id' => $varianteConDispositivo->id,
+        'imei' => '123456789012345',
+        'estado' => 'disponible',
+    ]);
+
+    foreach ([$varianteConMovimiento, $varianteConDispositivo] as $variante) {
+        $this->actingAs($administrador)
+            ->put(route('management.products.variants.update', ['product' => $producto, 'variante' => $variante]), [
+                'nombre_color' => $variante->nombre_color,
+                'controla_serie' => '1',
+                'estado' => 'activo',
+            ])
+            ->assertStatus(409);
+
+        expect((bool) $variante->fresh()->controla_serie)->toBeFalse();
+    }
 });
 
 it('rechaza la gestión de variantes de productos de otra empresa', function (): void {
@@ -1090,6 +1212,146 @@ it('recibe compras de productos con variante en el saldo exacto del almacen', fu
         ->and((int) $producto->fresh()->existencias)->toBe(3);
 });
 
+it('registra equipos serializados desde la recepcion de compra sin duplicar inventario', function (): void {
+    prepararEsquemaDispositivosRecepcionCompra();
+    $compras = SpanishAccessFixture::user('compras_logistica');
+    $administrador = SpanishAccessFixture::user('administrador');
+    $alcance = SpanishAccessFixture::organization();
+    $proveedor = Proveedor::create([
+        'nombre' => 'Proveedor de equipos serializados',
+        'ruc' => 'RUC-IMEI-001',
+        'correo' => 'imei@example.test',
+        'activo' => true,
+        'creado_en' => now(),
+        'empresa_id' => $alcance['empresa_id'],
+    ]);
+    $producto = productoParaIntegracionUnidadDos(['existencias' => 0]);
+    $variante = VarianteProducto::query()->create([
+        'producto_id' => $producto->id,
+        'nombre_color' => 'Equipo serializado',
+        'codigo_sku' => 'SKU-IMEI-001',
+        'controla_serie' => true,
+        'estado' => 'activo',
+    ]);
+    $tokenCompra = str_repeat('b', 64);
+    $compra = app(ServicioCompras::class)->registrar([
+        'proveedor_id' => $proveedor->id,
+        'fecha_compra' => now()->toDateString(),
+        'items' => [[
+            'producto_id' => $producto->id,
+            'variante_id' => $variante->id,
+            'cantidad' => 2,
+            'costo_unitario' => '10.00',
+        ]],
+    ], $compras, $tokenCompra, null);
+    $servicioCompras = app(ServicioCompras::class);
+    $servicioCompras->aprobar($compra, $compras, null);
+    $detalle = $compra->details()->firstOrFail();
+    $tokenRecepcion = str_repeat('c', 64);
+    $items = [[
+        'detalle_compra_id' => $detalle->id,
+        'cantidad' => 2,
+        'identificadores' => "IMEI:490154203237518\nSERIE:SERIE-IMEI-001",
+    ]];
+
+    $respuesta = $this->actingAs($administrador)->get(route('management.purchases'));
+    $respuesta->assertOk()->assertSee('IMEI:15dígitos');
+    $this->app['session.store']->put('compra_recepcion_tokens.'.$compra->id, $tokenRecepcion);
+    $this->actingAs($administrador)->post(route('management.purchases.receive_partial', $compra), [
+        'token_recepcion' => $tokenRecepcion,
+        'items' => $items,
+    ])->assertRedirect()->assertSessionHas('status', 'La recepción completó la compra y actualizó las existencias.');
+
+    $movimiento = DB::table('movimientos_inventario')
+        ->where('documento_tipo', 'compra')
+        ->where('documento_id', (string) $compra->id)
+        ->sole();
+    $auditoriaRecepcion = DB::table('registros_auditoria')
+        ->where('accion', 'compra.recepcion_parcial')
+        ->where('entidad_id', $compra->id)
+        ->sole();
+    expect($compra->fresh()->estado)->toBe('Recibida')
+        ->and((float) DB::table('existencias_almacen')->where('producto_id', $producto->id)->where('variante_id', $variante->id)->value('cantidad_fisica'))->toBe(2.0)
+        ->and(DB::table('dispositivos')->where('detalle_compra_id', $detalle->id)->count())->toBe(2)
+        ->and(DB::table('detalles_compras_dispositivos')->where('detalle_compra_id', $detalle->id)->count())->toBe(2)
+        ->and(DB::table('movimientos_dispositivos')->where('movimiento_inventario_id', $movimiento->id)->count())->toBe(2)
+        ->and($auditoriaRecepcion->valores_nuevos)->not->toContain('490154203237518')->not->toContain('SERIE-IMEI-001');
+
+    $servicioCompras->registrarRecepcionParcial($compra, $items, null, $tokenRecepcion, $administrador, null);
+    expect(DB::table('movimientos_inventario')->where('documento_tipo', 'compra')->where('documento_id', (string) $compra->id)->count())->toBe(1)
+        ->and(DB::table('dispositivos')->where('detalle_compra_id', $detalle->id)->count())->toBe(2)
+        ->and((float) DB::table('existencias_almacen')->where('producto_id', $producto->id)->where('variante_id', $variante->id)->value('cantidad_fisica'))->toBe(2.0);
+
+    $this->assertDatabaseHas('dispositivos', [
+        'imei' => '490154203237518',
+        'numero_serie' => null,
+        'almacen_actual_id' => $alcance['almacen_id'],
+        'estado' => 'disponible',
+    ]);
+    $this->assertDatabaseHas('dispositivos', [
+        'imei' => null,
+        'numero_serie' => 'SERIE-IMEI-001',
+        'almacen_actual_id' => $alcance['almacen_id'],
+        'estado' => 'disponible',
+    ]);
+});
+
+it('no altera existencias cuando la recepcion serializada carece de identificadores', function (): void {
+    prepararEsquemaDispositivosRecepcionCompra();
+    $compras = SpanishAccessFixture::user('compras_logistica');
+    $alcance = SpanishAccessFixture::organization();
+    $proveedor = Proveedor::create([
+        'nombre' => 'Proveedor sin identificadores',
+        'ruc' => 'RUC-IMEI-002',
+        'correo' => 'sin-imei@example.test',
+        'activo' => true,
+        'creado_en' => now(),
+        'empresa_id' => $alcance['empresa_id'],
+    ]);
+    $producto = productoParaIntegracionUnidadDos(['existencias' => 0]);
+    $variante = VarianteProducto::query()->create([
+        'producto_id' => $producto->id,
+        'nombre_color' => 'Equipo pendiente de serie',
+        'codigo_sku' => 'SKU-IMEI-002',
+        'controla_serie' => true,
+        'estado' => 'activo',
+    ]);
+    $compra = app(ServicioCompras::class)->registrar([
+        'proveedor_id' => $proveedor->id,
+        'fecha_compra' => now()->toDateString(),
+        'items' => [[
+            'producto_id' => $producto->id,
+            'variante_id' => $variante->id,
+            'cantidad' => 1,
+            'costo_unitario' => '10.00',
+        ]],
+    ], $compras, str_repeat('d', 64), null);
+    app(ServicioCompras::class)->aprobar($compra, $compras, null);
+    $detalle = $compra->details()->firstOrFail();
+    $administrador = SpanishAccessFixture::user('administrador');
+
+    expect(fn () => app(ServicioCompras::class)->registrarRecepcionParcial(
+        $compra,
+        [['detalle_compra_id' => $detalle->id, 'cantidad' => 1]],
+        null,
+        str_repeat('e', 64),
+        $administrador,
+        null,
+    ))->toThrow(HttpException::class);
+    expect(fn () => app(ServicioCompras::class)->registrarRecepcionParcial(
+        $compra,
+        [['detalle_compra_id' => $detalle->id, 'cantidad' => 1, 'identificadores' => 'IMEI:490154203237519']],
+        null,
+        str_repeat('f', 64),
+        $administrador,
+        null,
+    ))->toThrow(HttpException::class);
+
+    expect((int) DB::table('existencias_almacen')->where('producto_id', $producto->id)->where('variante_id', $variante->id)->value('cantidad_fisica'))->toBe(0)
+        ->and(DB::table('movimientos_inventario')->where('documento_tipo', 'compra')->where('documento_id', (string) $compra->id)->count())->toBe(0)
+        ->and(DB::table('dispositivos')->where('detalle_compra_id', $detalle->id)->count())->toBe(0);
+});
+
 it('rolls back a purchase when its audit record cannot be stored', function (): void {
     $purchasing = SpanishAccessFixture::user('compras_logistica');
     $scope = SpanishAccessFixture::organization();
@@ -1147,6 +1409,7 @@ it('cancels an order and restores its inventory', function (): void {
 
 it('creates a wholesale quotation with details and ownership', function (): void {
     $wholesaleCustomer = SpanishAccessFixture::user('cliente_mayorista');
+    $organization = SpanishAccessFixture::organization();
     $customer = Cliente::create([
         'usuario_id' => $wholesaleCustomer->id,
         'tipo' => 'mayorista',
@@ -1156,6 +1419,7 @@ it('creates a wholesale quotation with details and ownership', function (): void
         'correo' => $wholesaleCustomer->correo,
         'activo' => true,
         'creado_en' => now(),
+        'empresa_id' => $organization['empresa_id'],
     ]);
     $product = productoParaIntegracionUnidadDos(['precio' => 100]);
 

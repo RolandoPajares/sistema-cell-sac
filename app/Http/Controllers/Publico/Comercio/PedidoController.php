@@ -5,13 +5,17 @@ namespace App\Http\Controllers\Publico\Comercio;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ActualizarEstadoPedidoRequest;
 use App\Models\Comercio\Pedido;
+use App\Servicios\ExportadorTabular;
+use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioPedidos;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PedidoController extends Controller
 {
@@ -81,6 +85,7 @@ class PedidoController extends Controller
 
         return view('publico.comercio.pedidos', [
             'orders' => $orders,
+            'adminView' => true,
             'filters' => $filters,
             'totalOrders' => $totalOrders,
             'todayOrders' => $todayOrders,
@@ -103,6 +108,43 @@ class PedidoController extends Controller
                 ->where('creado_en', '<', now()->subHours(48))
                 ->count(),
         ]);
+    }
+
+    public function export(Request $request, string $format, ExportadorTabular $exportador, RegistradorAuditoria $auditoria): Response|StreamedResponse
+    {
+        abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
+        abort_unless($this->authorization->hasRole($request->user(), 'administrador'), 403);
+        $this->authorization->assertAllowed($request->user(), 'gestion.pedidos.exportar');
+        $filtros = $this->adminFilters($request);
+        $pedidos = $this->adminOrderQuery($request, $filtros)
+            ->with('user:id,nombre,correo')
+            ->orderBy('creado_en')->orderBy('id')->get();
+        $filas = $pedidos->map(static fn (Pedido $pedido): array => [
+            $pedido->id,
+            $pedido->user?->nombre ?? 'Cliente eliminado',
+            $pedido->user?->correo ?? '—',
+            $pedido->canal ?? '—',
+            $pedido->total,
+            $pedido->estado,
+            $pedido->creado_en,
+        ])->all();
+        $respuesta = $exportador->download($format, 'pedidos-online', ['ID', 'Cliente', 'Correo', 'Canal', 'Total', 'Estado', 'Creado en'], $filas, [
+            'title' => 'PEDIDOS ONLINE',
+            'subtitle' => 'Datos reales filtrados desde MariaDB.',
+            'module' => 'Operaciones Comerciales',
+            'report_name' => 'Pedidos online',
+            'filters' => $filtros,
+            'generated_by' => (string) $request->user()->nombre,
+            'role' => 'Usuario autorizado',
+            'scope' => 'Pedidos dentro del alcance RBAC vigente.',
+            'indicators' => [['label' => 'Pedidos incluidos', 'value' => count($filas)]],
+            'column_types' => ['integer', 'text', 'text', 'text', 'currency', 'text', 'datetime'],
+        ]);
+        $auditoria->record((int) $request->user()->getKey(), 'exportar', 'pedidos', null, null, [
+            'formato' => $format, 'filtros' => $filtros, 'cantidad' => count($filas),
+        ], $request->ip());
+
+        return $respuesta;
     }
 
     public function show(Pedido $order): View

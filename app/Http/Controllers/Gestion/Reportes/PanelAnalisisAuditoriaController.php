@@ -10,9 +10,11 @@ use App\Models\Clientes\Cliente;
 use App\Models\Comercio\Pedido;
 use App\Models\Comercio\Venta;
 use App\Models\User;
+use App\Servicios\ExportadorTabular;
 use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ServicioAutorizacion;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -82,9 +84,10 @@ final class PanelAnalisisAuditoriaController extends Controller
         ]);
     }
 
-    public function exportar(Request $request, string $tipo, ServicioAutorizacion $autorizacion, RegistradorAuditoria $auditoria): StreamedResponse
+    public function exportar(Request $request, string $tipo, ServicioAutorizacion $autorizacion, ExportadorTabular $exportador, RegistradorAuditoria $auditoria, string $format = 'csv'): Response|StreamedResponse
     {
         abort_unless(in_array($tipo, ['globales', 'sedes', 'operaciones', 'roles', 'seguridad', 'exportaciones'], true), 404);
+        abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
         $autorizacion->assertAllowed($request->user(), 'gestion.reportes.exportar');
         $filtros = $request->validate([
             'desde' => ['nullable', 'date'],
@@ -107,7 +110,12 @@ final class PanelAnalisisAuditoriaController extends Controller
                 ->when(isset($filtros['estado']), fn (Builder $q) => $q->where('estado', $filtros['estado']))
                 ->when(isset($filtros['canal']), fn (Builder $q) => $q->whereHas('pedido', fn (Builder $pedido) => $pedido->where('canal', $filtros['canal'])))
                 ->select(['id', 'codigo', 'empresa_id', 'sede_id', 'total', 'estado', 'fecha_venta']);
+            $registros = $consulta->get();
             $columnas = ['Id', 'Código', 'Empresa', 'Sede', 'Total', 'Estado', 'Fecha'];
+            $filas = $registros->map(static fn (Venta $venta): array => [
+                $venta->id, $venta->codigo, $venta->empresa_id, $venta->sede_id,
+                $venta->total, $venta->estado, $venta->fecha_venta,
+            ])->all();
         } else {
             $consulta = $autorizacion->scopeRecordsFor(RegistroAuditoria::query(), $request->user(), 'gestion.auditoria.consultar')
                 ->when(isset($filtros['desde']), fn (Builder $q) => $q->whereDate('creado_en', '>=', $filtros['desde']))
@@ -121,26 +129,37 @@ final class PanelAnalisisAuditoriaController extends Controller
                 ->when($tipo === 'seguridad', fn (Builder $q) => $q->where(fn (Builder $filtro) => $filtro->where('modulo', 'like', '%seguridad%')->orWhere('accion', 'like', '%login%')->orWhere('accion', 'like', '%acceso%')))
                 ->when($tipo === 'exportaciones', fn (Builder $q) => $q->where('accion', 'like', '%export%'))
                 ->select(['id', 'usuario_id', 'modulo', 'accion', 'entidad', 'entidad_id', 'resultado', 'direccion_ip', 'creado_en']);
+            $registros = $consulta->get();
             $columnas = ['Id', 'Usuario ID', 'Módulo', 'Acción', 'Entidad', 'Entidad ID', 'Resultado', 'Dirección IP', 'Fecha'];
+            $filas = $registros->map(static fn (RegistroAuditoria $registro): array => [
+                $registro->id, $registro->usuario_id, $registro->modulo, $registro->accion,
+                $registro->entidad, $registro->entidad_id, $registro->resultado,
+                $registro->direccion_ip, $registro->creado_en,
+            ])->all();
         }
 
+        $respuesta = $exportador->download($format, 'analisis-auditoria-'.$tipo, $columnas, $filas, [
+            'title' => mb_strtoupper((string) $tipo).' — ANÁLISIS Y AUDITORÍA',
+            'subtitle' => 'Datos reales consultados desde MariaDB.',
+            'module' => 'Análisis y Auditoría',
+            'report_name' => $tipo,
+            'filters' => $filtros,
+            'generated_by' => (string) $request->user()->nombre,
+            'role' => 'Usuario autorizado',
+            'scope' => 'Empresa, sede y permisos RBAC vigentes.',
+            'indicators' => [['label' => 'Registros incluidos', 'value' => count($filas)]],
+            'column_types' => array_fill(0, count($columnas), 'text'),
+        ]);
         $auditoria->record((int) $request->user()->getKey(), 'exportar', 'registros_auditoria', null, null, [
             'tipo' => $tipo,
-            'formato' => 'csv',
+            'formato' => $format,
             'desde' => $filtros['desde'] ?? null,
             'hasta' => $filtros['hasta'] ?? null,
             'sede_id' => $filtros['sede'] ?? null,
+            'cantidad' => count($filas),
         ], $request->ip());
 
-        return response()->streamDownload(function () use ($consulta, $columnas): void {
-            $salida = fopen('php://output', 'w');
-            fwrite($salida, "\xEF\xBB\xBF");
-            fputcsv($salida, $columnas);
-            foreach ($consulta->cursor() as $registro) {
-                fputcsv($salida, array_values($registro->getAttributes()));
-            }
-            fclose($salida);
-        }, 'analisis-auditoria-'.$tipo.'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+        return $respuesta;
     }
 
     /** @param array<string, mixed> $pagina @param array<string, mixed> $filtros */

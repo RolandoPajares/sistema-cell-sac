@@ -10,10 +10,13 @@ use App\Models\Marketing\EventoCampania;
 use App\Models\Marketing\SegmentoCliente;
 use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ServicioAutorizacion;
+use App\Servicios\ExportadorTabular;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CampaniaController extends Controller
 {
@@ -78,6 +81,44 @@ class CampaniaController extends Controller
         $audit->record(request()->user()->id, 'campaign.deactivated', 'campanas_publicitarias', $campaign->id, ['activo' => true], ['activo' => false], request()->ip());
 
         return back()->with('status', 'Campaña desactivada.');
+    }
+
+    public function export(Request $request, ServicioAutorizacion $autorizacion, ExportadorTabular $exporter, RegistradorAuditoria $audit): Response|StreamedResponse
+    {
+        $format = $request->string('format', 'csv')->toString();
+        abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
+        $empresaId = $autorizacion->activeCompanyId();
+        abort_unless($empresaId !== null, 409, 'Selecciona una empresa activa para exportar campañas.');
+        $filters = $this->filters($request);
+        $campaigns = $this->campaignQuery($filters, $empresaId)->with('segments')->orderBy('id')->limit(5000)->get();
+        $rows = $campaigns->map(fn (Campania $campaign): array => [
+            $campaign->nombre,
+            $campaign->titulo,
+            $campaign->activo ? 'Activa' : 'Inactiva',
+            $campaign->ubicacion,
+            (int) $campaign->vistas,
+            (int) $campaign->clics,
+            $campaign->vistas > 0 ? round(((int) $campaign->clics / (int) $campaign->vistas) * 100, 1).'%' : '0.0%',
+            $campaign->inicia_en?->format('Y-m-d H:i'),
+            $campaign->finaliza_en?->format('Y-m-d H:i'),
+            $campaign->segments->pluck('nombre')->implode(', '),
+        ])->all();
+        $response = $exporter->download($format, 'campanas-'.now()->format('Ymd'), [
+            'Campaña', 'Título', 'Estado', 'Ubicación', 'Vistas', 'Clics', 'CTR', 'Inicio', 'Fin', 'Segmentos',
+        ], $rows, [
+            'title' => 'REPORTE DE CAMPAÑAS',
+            'subtitle' => 'Campañas reales de la empresa activa.',
+            'module' => 'Ecommerce / Marketing',
+            'report_name' => 'Campañas',
+            'filters' => $filters,
+            'generated_by' => (string) $request->user()->nombre,
+            'role' => 'Usuario autorizado',
+            'scope' => 'Empresa activa y filtros RBAC vigentes.',
+            'indicators' => [['label' => 'Campañas incluidas', 'value' => count($rows)]],
+        ]);
+        $audit->record($request->user()->id, 'exportar', 'campanas_publicitarias', null, null, ['formato' => $format, 'filtros' => $filters, 'cantidad' => count($rows)], $request->ip());
+
+        return $response;
     }
 
     public function update(ActualizarCampaniaRequest $request, Campania $campaign, RegistradorAuditoria $audit, ServicioAutorizacion $autorizacion): RedirectResponse

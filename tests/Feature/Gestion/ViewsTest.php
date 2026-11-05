@@ -37,6 +37,19 @@ it('renders each management module with its canonical list view', function () {
     }
 });
 
+it('opens the existing product edit form for a catalog row selected from pricing', function () {
+    $admin = SpanishAccessFixture::user('administrador');
+    $alcance = SpanishAccessFixture::organization();
+    $producto = Producto::factory()->create(['empresa_id' => $alcance['empresa_id'], 'precio' => 245.5]);
+
+    $this->actingAs($admin)
+        ->get(route('management.products', ['editar' => $producto->id]))
+        ->assertOk()
+        ->assertViewHas('products', fn ($productos): bool => $productos->total() === 1 && $productos->getCollection()->sole()->is($producto))
+        ->assertSee('editar-producto-'.$producto->id, false)
+        ->assertSee('name="precio"', false);
+});
+
 it('filters the administrator quotation dashboard and calculates real status totals', function () {
     $admin = SpanishAccessFixture::user('administrador');
     $scope = SpanishAccessFixture::organization();
@@ -86,6 +99,30 @@ it('filters the administrator quotation dashboard and calculates real status tot
         ->assertSee('aria-label="Buscar cotización, cliente o producto"', false)
         ->assertSee('aria-label="Cliente mayorista"', false)
         ->assertSee('aria-label="Estado de cotización"', false);
+});
+
+it('rejects a quotation that mixes a customer company with another company product', function (): void {
+    $admin = SpanishAccessFixture::user('administrador');
+    $scope = SpanishAccessFixture::organization();
+    $customer = Cliente::create([
+        'tipo' => 'mayorista', 'documento' => 'RUC-900099', 'nombre_contacto' => 'Cliente aislado',
+        'correo' => 'cliente.aislado@example.test', 'activo' => true, 'creado_en' => now(),
+        'empresa_id' => $scope['empresa_id'],
+    ]);
+    $otraEmpresaId = DB::table('empresas')->insertGetId([
+        'codigo' => 'OTRA-EMPRESA', 'razon_social' => 'Empresa ajena', 'activo' => false,
+        'creado_en' => now(), 'actualizado_en' => now(),
+    ]);
+    $productoAjeno = Producto::factory()->create(['empresa_id' => $otraEmpresaId]);
+
+    $this->actingAs($admin)
+        ->post(route('quotations.store'), [
+            'cliente_id' => $customer->id,
+            'items' => [['producto_id' => $productoAjeno->id, 'cantidad' => 1]],
+        ])
+        ->assertUnprocessable();
+
+    expect(DB::table('cotizaciones')->where('cliente_id', $customer->id)->count())->toBe(0);
 });
 
 it('approves a pending quotation within RBAC scope and records the audit event', function () {
@@ -257,6 +294,7 @@ it('associates available serialized devices to a sale exactly once during confir
     $this->actingAs($admin)->post(route('management.sales.convert_quotation', $quotation), ['almacen_id' => $scope['almacen_id']]);
     $venta = Venta::query()->where('codigo', 'COT-'.$quotation->id)->sole();
     $detalleId = (int) $venta->detalles()->value('id');
+    $this->actingAs($admin)->get(route('management.sales'))->assertOk()->assertSee('490154203237518');
     $datosConfirmacion = ['dispositivos' => [$detalleId => [$dispositivoId]]];
     $respuestaConfirmacion = $this->post(route('management.sales.confirm', $venta), $datosConfirmacion);
     $respuestaConfirmacion->assertSessionHasNoErrors()->assertRedirect(route('management.sales'));
@@ -294,7 +332,39 @@ it('opens the independent inventory movement history within RBAC scope', functio
         ->assertViewHas('recentMovements', fn ($movimientos): bool => $movimientos->total() === 1)
         ->assertSee('Historial de movimientos')
         ->assertSee('Movimiento aislado de')
+        ->assertSee('data-open-movement-detail', false)
+        ->assertSee('name="mov_buscar"', false)
         ->assertSee('-1.5');
+});
+
+it('filtra el historial independiente de movimientos dentro del alcance autorizado y muestra el detalle completo', function () {
+    $admin = SpanishAccessFixture::user('administrador');
+    $scope = SpanishAccessFixture::organization();
+    $product = Producto::factory()->create(['empresa_id' => $scope['empresa_id'], 'nombre' => 'Equipo de inventario filtrable']);
+
+    foreach ([
+        ['tipo_movimiento' => 'entrada', 'notas' => 'Recepción documentada', 'documento_tipo' => 'compra', 'documento_id' => 'COMPRA-77'],
+        ['tipo_movimiento' => 'salida', 'notas' => 'Salida de otro documento', 'documento_tipo' => 'venta', 'documento_id' => 'VENTA-88'],
+    ] as $movimiento) {
+        DB::table('movimientos_inventario')->insert([
+            ...$movimiento,
+            'producto_id' => $product->id,
+            'usuario_id' => $admin->id,
+            'cantidad' => 1,
+            'creado_en' => now(),
+            'empresa_id' => $scope['empresa_id'],
+            'sede_id' => $scope['sede_id'],
+            'almacen_id' => $scope['almacen_id'],
+        ]);
+    }
+
+    $this->withoutVite()->actingAs($admin)
+        ->get(route('management.inventory.movements', ['mov_buscar' => 'COMPRA-77', 'mov_tipo' => 'entrada']))
+        ->assertOk()
+        ->assertViewHas('recentMovements', fn ($movimientos): bool => $movimientos->total() === 1)
+        ->assertSee('Recepción documentada')
+        ->assertSee('COMPRA-77')
+        ->assertDontSee('VENTA-88');
 });
 
 it('filters purchases and calculates their dashboard totals', function () {

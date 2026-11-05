@@ -72,6 +72,7 @@ it('muestra cero y un estado vacío cuando no hay envíos para la sede', functio
     prepararEsquemaEnviosParaPrueba();
     SpanishAccessFixture::organization();
     $administrador = SpanishAccessFixture::user('administrador');
+    SpanishAccessFixture::grantScreenReadPermission($administrador, 'admin.shipments', 'management.inventory.preview.shipments');
 
     $respuesta = $this->withoutVite()->actingAs($administrador)->get(route('management.inventory.preview.shipments'));
 
@@ -86,6 +87,7 @@ it('filtra envíos reales por texto estado y modalidad', function (): void {
     prepararEsquemaEnviosParaPrueba();
     $organizacion = SpanishAccessFixture::organization();
     $administrador = SpanishAccessFixture::user('administrador');
+    SpanishAccessFixture::grantScreenReadPermission($administrador, 'admin.shipments', 'management.inventory.preview.shipments');
     $envioId = crearEnvioParaPrueba($organizacion, 'ENV-REAL-001', 'despachado', 'SEGUIMIENTO-REAL-001');
     DB::table('eventos_envios_pedidos')->insert([
         'envio_pedido_id' => $envioId,
@@ -125,6 +127,7 @@ it('limita los envíos a las sedes autorizadas de la sesión', function (): void
     prepararEsquemaEnviosParaPrueba();
     $organizacion = SpanishAccessFixture::organization();
     $administrador = SpanishAccessFixture::user('administrador');
+    SpanishAccessFixture::grantScreenReadPermission($administrador, 'admin.shipments', 'management.inventory.preview.shipments');
     crearEnvioParaPrueba($organizacion, 'ENV-SEDE-PRINCIPAL');
 
     $sedeAlternaId = DB::table('sedes')->insertGetId([
@@ -166,6 +169,7 @@ it('pagina los envíos consultados y deniega a roles sin acceso administrativo',
     prepararEsquemaEnviosParaPrueba();
     $organizacion = SpanishAccessFixture::organization();
     $administrador = SpanishAccessFixture::user('administrador');
+    SpanishAccessFixture::grantScreenReadPermission($administrador, 'admin.shipments', 'management.inventory.preview.shipments');
 
     foreach (range(1, 21) as $numero) {
         crearEnvioParaPrueba($organizacion, 'ENV-PAGINA-'.str_pad((string) $numero, 3, '0', STR_PAD_LEFT));

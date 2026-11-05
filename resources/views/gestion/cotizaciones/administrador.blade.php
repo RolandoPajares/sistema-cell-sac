@@ -28,9 +28,19 @@
                 <h1>Gestión de cotizaciones</h1>
                 <p>Administra las propuestas comerciales y da seguimiento a cada cotización mayorista.</p>
             </div>
-            <button class="cotizaciones-primary-button" type="button" data-admin-dialog-open="nueva-cotizacion" @disabled($customers->isEmpty() || $products->isEmpty())>
-                <i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva cotización
-            </button>
+            <div class="cotizaciones-hero-actions">
+                <details class="cotizaciones-export-menu">
+                    <summary class="cotizaciones-filter-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar</summary>
+                    <div class="cotizaciones-export-options">
+                        <a href="{{ route('management.quotations.export.list', ['format' => 'excel'] + request()->query()) }}">Excel (.xlsx)</a>
+                        <a href="{{ route('management.quotations.export.list', ['format' => 'pdf'] + request()->query()) }}">PDF (.pdf)</a>
+                        <a href="{{ route('management.quotations.export.list', ['format' => 'csv'] + request()->query()) }}">CSV (.csv)</a>
+                    </div>
+                </details>
+                <button class="cotizaciones-primary-button" type="button" data-admin-dialog-open="nueva-cotizacion" @disabled($customers->isEmpty() || $products->isEmpty())>
+                    <i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva cotización
+                </button>
+            </div>
         </header>
 
         <section class="cotizaciones-kpi-grid" aria-label="Resumen de cotizaciones">
@@ -130,6 +140,36 @@
                                             @if ($quotation->notas)
                                                 <p>{{ $quotation->notas }}</p>
                                             @endif
+                                            @if (in_array($status, ['Borrador', 'Pendiente'], true) && $puedeEnviar)
+                                                <details class="cotizaciones-edit-details">
+                                                    <summary>Editar cotización</summary>
+                                                    <form method="POST" action="{{ route('management.quotations.update', $quotation) }}" class="cotizaciones-edit-form">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <label>Cliente
+                                                            <select name="cliente_id" required>
+                                                                @foreach ($customers as $customer)
+                                                                    <option value="{{ $customer->id }}" @selected((int) $customer->id === (int) $quotation->cliente_id)>{{ $customer->nombre_contacto }} · {{ $customer->documento }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </label>
+                                                        @foreach ($quotation->details as $index => $detail)
+                                                            <label>Producto {{ $index + 1 }}
+                                                                <select name="items[{{ $index }}][producto_id]" required>
+                                                                    @foreach ($products as $product)
+                                                                        <option value="{{ $product->id }}" @selected((int) $product->id === (int) $detail->producto_id)>{{ $product->nombre }}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </label>
+                                                            <label>Cantidad
+                                                                <input type="number" name="items[{{ $index }}][cantidad]" min="1" max="100000" value="{{ $detail->cantidad }}" required>
+                                                            </label>
+                                                        @endforeach
+                                                        <label>Notas<textarea name="notas" maxlength="500" rows="2">{{ $quotation->notas }}</textarea></label>
+                                                        <button type="submit">Guardar cambios</button>
+                                                    </form>
+                                                </details>
+                                            @endif
                                             <div class="cotizaciones-demo-actions" aria-label="Acciones de cotizacion">
     @if (in_array($status, ['Borrador', 'Pendiente'], true))
         @if ($puedeEnviar && $puedeDescargar && filled($quotation->customer?->correo))
@@ -142,6 +182,13 @@
         <form method="POST" action="{{ route('management.quotations.approve', $quotation) }}" style="display: contents">
             @csrf
             <button type="submit">Aprobar cotizacion</button>
+        </form>
+    @endif
+    @if ($puedeEnviar && in_array($status, ['Borrador', 'Pendiente'], true))
+        <form method="POST" action="{{ route('management.quotations.deactivate', $quotation) }}" style="display: contents" data-confirm="¿Desactivar esta cotización? Se conservará el historial.">
+            @csrf
+            @method('DELETE')
+            <button type="submit">Desactivar cotizacion</button>
         </form>
     @endif
     @if ($status === 'Aprobada')

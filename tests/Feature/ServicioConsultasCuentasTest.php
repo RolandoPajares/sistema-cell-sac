@@ -98,5 +98,6 @@ it('consulta cuentas reales por cobrar y pagar y calcula saldos con pagos aplica
         ->assertSee('Cliente de prueba aislada')
         ->assertSee('Proveedor de prueba aislada')
         ->assertSee('PEN 200,00')
-        ->assertSee('Detalle real pendiente de implementar');
+        ->assertSee('Consultar detalle real')
+        ->assertSee('Aplicar cobro registrado');
 });

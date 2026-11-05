@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Gestion\Usuarios;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CambiarEstadoUsuarioRequest;
+use App\Http\Requests\ActualizarUsuarioRequest;
 use App\Http\Requests\GuardarUsuarioRequest;
 use App\Models\Clientes\Cliente;
 use App\Models\Organizacion\Sede;
 use App\Models\Seguridad\Rol;
 use App\Models\User;
 use App\Servicios\RegistradorAuditoria;
+use App\Servicios\ExportadorTabular;
 use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioDelegacion;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,6 +21,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Http\Response;
 
 class GestionUsuariosController extends Controller
 {
@@ -51,6 +55,47 @@ class GestionUsuariosController extends Controller
             'rolesConfigured' => count($this->roleCodes()),
             'currentMonthUsers' => User::query()->whereBetween('creado_en', [now()->startOfMonth(), now()->endOfMonth()])->count(),
         ]);
+    }
+
+    public function export(Request $request, string $format, ExportadorTabular $exporter, RegistradorAuditoria $audit): Response|StreamedResponse
+    {
+        abort_unless(app(ServicioAutorizacion::class)->allowsGlobal($request->user(), 'gestion.seguridad.consultar'), 403);
+
+        abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
+        $filters = $this->filters($request);
+        $users = $this->userQuery($filters)
+            ->with(['customer:id,usuario_id,documento,razon_social,tipo,ciudad', 'rolesVigentes', 'rolesPorSedeVigentes'])
+            ->orderByDesc('creado_en')->orderByDesc('id')->limit(5000)->get();
+        $rows = $users->map(function (User $user): array {
+            $roles = $user->rolesVigentes->concat($user->rolesPorSedeVigentes)->pluck('nombre')->unique()->join(', ');
+
+            return [
+                $user->nombre,
+                $user->correo,
+                $roles !== '' ? $roles : 'Sin rol vigente',
+                $user->customer?->tipo ?? 'Administrativo',
+                $user->customer?->ciudad ?? '',
+                Schema::hasColumn('usuarios', 'activo') ? ($user->activo ? 'Activo' : 'Inactivo') : 'Sin control de estado',
+                $user->creado_en?->format('Y-m-d H:i:s'),
+            ];
+        })->all();
+        $response = $exporter->download($format, 'usuarios-'.now()->format('Ymd'),
+            ['Nombre', 'Correo', 'Roles', 'Tipo', 'Ciudad', 'Estado', 'Registrado'],
+            $rows,
+            [
+                'title' => 'REPORTE DE USUARIOS',
+                'subtitle' => 'Cuentas reales consultadas desde MariaDB.',
+                'module' => 'Seguridad y Delegación',
+                'report_name' => 'Usuarios',
+                'filters' => $filters,
+                'generated_by' => (string) $request->user()->nombre,
+                'role' => 'Usuario autorizado',
+                'scope' => 'Alcance administrativo y filtros RBAC vigentes.',
+                'indicators' => [['label' => 'Usuarios incluidos', 'value' => count($rows)]],
+            ]);
+        $audit->record($request->user()->getKey(), 'exportar', 'usuarios', null, null, ['formato' => $format, 'filtros' => $filters, 'cantidad' => count($rows)], $request->ip());
+
+        return $response;
     }
 
     public function store(GuardarUsuarioRequest $request, ServicioDelegacion $delegacion, RegistradorAuditoria $audit): RedirectResponse
@@ -153,6 +198,26 @@ class GestionUsuariosController extends Controller
         });
 
         return back()->with('status', $active ? 'La cuenta fue reactivada.' : 'La cuenta fue desactivada y sus sesiones revocadas.');
+    }
+
+    public function update(ActualizarUsuarioRequest $request, User $user, ServicioDelegacion $delegacion, RegistradorAuditoria $audit): RedirectResponse
+    {
+        abort_unless($delegacion->puedeAdministrarUsuario($request->user(), $user), 403, 'No puedes editar una cuenta con privilegios superiores a los tuyos.');
+        $data = $request->validated();
+
+        DB::transaction(function () use ($data, $request, $user, $audit): void {
+            $locked = User::query()->lockForUpdate()->findOrFail($user->getKey());
+            $before = ['nombre' => $locked->nombre, 'correo' => $locked->correo];
+            $attributes = ['nombre' => $data['nombre'], 'correo' => mb_strtolower($data['correo'])];
+            if (filled($data['password'] ?? null)) {
+                $attributes['password'] = $data['password'];
+            }
+            $locked->forceFill($attributes)->save();
+            $after = ['nombre' => $locked->nombre, 'correo' => $locked->correo, 'password_actualizada' => filled($data['password'] ?? null)];
+            $audit->record($request->user()->getKey(), 'user.updated', 'usuarios', $locked->getKey(), $before, $after, $request->ip());
+        }, 3);
+
+        return back()->with('status', 'La cuenta fue actualizada correctamente.');
     }
 
     /** @param array{buscar:?string,rol:?string,estado:?string,ciudad:?string,fecha:?string,por_pagina:int} $filters

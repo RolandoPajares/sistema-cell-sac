@@ -128,6 +128,7 @@ beforeEach(function (): void {
         $table->unsignedBigInteger('usuario_id');
         $table->unsignedBigInteger('empresa_id')->nullable();
         $table->unsignedBigInteger('sede_id')->nullable();
+        $table->unsignedBigInteger('cupon_id')->nullable();
     });
     Schema::create('modulos', function (Blueprint $table): void {
         $table->id();
@@ -1084,6 +1085,7 @@ it('adjusts the warehouse balance to zero atomically without fabricating variant
 
     Schema::create('cupones', function (Blueprint $table): void {
         $table->id();
+        $table->unsignedBigInteger('empresa_id');
         $table->string('codigo')->unique();
         $table->string('tipo_descuento');
         $table->decimal('valor', 10, 2);
@@ -1096,7 +1098,7 @@ it('adjusts the warehouse balance to zero atomically without fabricating variant
         $table->timestamp('creado_en')->nullable();
         $table->timestamp('actualizado_en')->nullable();
     });
-    DB::table('cupones')->insert(['codigo' => 'PRUEBA', 'tipo_descuento' => 'porcentaje', 'valor' => 10, 'inicia_en' => now()->subDay(), 'finaliza_en' => now()->addDay()]);
+    DB::table('cupones')->insert(['empresa_id' => 1, 'codigo' => 'PRUEBA', 'tipo_descuento' => 'porcentaje', 'valor' => 10, 'inicia_en' => now()->subDay(), 'finaliza_en' => now()->addDay()]);
     $token = str_repeat('b', 64);
     $this->actingAs($user)->withSession(['cart' => [2 => 1], 'checkout_token' => $token, 'coupon_code' => 'PRUEBA'])
         ->postJson(route('checkout'), ['checkout_token' => str_repeat('c', 64)])->assertStatus(422);
@@ -1237,6 +1239,7 @@ it('reads and exports only authorised sales, independently of orders and without
         'canal' => 'ecommerce', 'desde' => now()->toDateString(), 'hasta' => now()->toDateString(),
     ]))->assertOk()->streamedContent();
     expect($filteredExport)->toContain("'=VENTA")->not->toContain('VENTA-2');
+    DB::table('roles_permisos')->where('rol_id', 1)->where('permiso_id', 1)->delete();
     expect($service->query($user, $filters)->count())->toBe(0);
     $this->get(route('management.sales'))->assertForbidden();
 });

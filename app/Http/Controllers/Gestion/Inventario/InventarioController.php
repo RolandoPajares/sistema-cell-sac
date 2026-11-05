@@ -43,9 +43,21 @@ class InventarioController extends Controller
         $movementsYesterday = $movementQuery()->whereDate('creado_en', today()->subDay())->count();
         $latestMovements = $this->latestMovements($products->getCollection(), $request->user());
         $verHistorialMovimientos = $request->routeIs('management.inventory.movements');
+        $filtrosMovimientos = $verHistorialMovimientos ? $this->filtrosMovimientos($request) : [];
         $consultaMovimientos = $movementQuery()
-            ->with(['product:id,nombre,marca,etiqueta', 'user:id,nombre', 'almacen:id,nombre'])
-            ->latest('creado_en');
+            ->with([
+                'product:id,nombre,marca,etiqueta',
+                'user:id,nombre',
+                'almacen:id,nombre',
+                'variante:id,producto_id,codigo_sku,nombre_color',
+            ])
+            ->orderByDesc('creado_en')
+            ->orderByDesc('id');
+
+        if ($verHistorialMovimientos) {
+            $this->aplicarFiltrosMovimientos($consultaMovimientos, $filtrosMovimientos);
+        }
+
         $movimientosRecientes = $verHistorialMovimientos
             ? $consultaMovimientos->paginate(25)->withQueryString()
             : $consultaMovimientos->limit(5)->get();
@@ -68,6 +80,12 @@ class InventarioController extends Controller
                 ->get(),
             'recentMovements' => $movimientosRecientes,
             'verHistorialMovimientos' => $verHistorialMovimientos,
+            'filtrosMovimientos' => $filtrosMovimientos,
+            'tiposMovimiento' => $verHistorialMovimientos
+                ? $movementQuery()->distinct()->orderBy('tipo_movimiento')->pluck('tipo_movimiento')
+                : collect(),
+            'almacenesMovimiento' => $verHistorialMovimientos ? $this->inventoryService->almacenesParaConsulta($alcance) : collect(),
+            'hayFiltrosMovimientos' => collect($filtrosMovimientos)->contains(fn (mixed $valor): bool => $valor !== null && $valor !== ''),
             'filters' => $filters,
             'activeProducts' => $resumen['productos'],
             'sinExistencias' => $resumen['sin_existencias'],
@@ -120,6 +138,57 @@ class InventarioController extends Controller
             'proveedor' => $request->integer('proveedor') ?: null,
             'por_pagina' => in_array($perPage, [7, 8, 10, 20, 50], true) ? $perPage : 7,
         ];
+    }
+
+    /** @return array{buscar:?string,tipo:?string,almacen:?int} */
+    private function filtrosMovimientos(Request $request): array
+    {
+        $datos = $request->validate([
+            'mov_buscar' => ['nullable', 'string', 'max:100'],
+            'mov_tipo' => ['nullable', 'string', 'max:30'],
+            'mov_almacen' => ['nullable', 'integer', 'min:1'],
+        ]);
+
+        return [
+            'buscar' => filled($datos['mov_buscar'] ?? null) ? trim((string) $datos['mov_buscar']) : null,
+            'tipo' => filled($datos['mov_tipo'] ?? null) ? (string) $datos['mov_tipo'] : null,
+            'almacen' => filled($datos['mov_almacen'] ?? null) ? (int) $datos['mov_almacen'] : null,
+        ];
+    }
+
+    /**
+     * @param  Builder<MovimientoInventario>  $consulta
+     * @param  array{buscar:?string,tipo:?string,almacen:?int}  $filtros
+     */
+    private function aplicarFiltrosMovimientos(Builder $consulta, array $filtros): void
+    {
+        if ($filtros['tipo'] !== null) {
+            $consulta->where('tipo_movimiento', $filtros['tipo']);
+        }
+
+        if ($filtros['almacen'] !== null) {
+            $consulta->where('almacen_id', $filtros['almacen']);
+        }
+
+        if ($filtros['buscar'] === null) {
+            return;
+        }
+
+        $coincidencia = '%'.$filtros['buscar'].'%';
+        $consulta->where(static function (Builder $consulta) use ($coincidencia): void {
+            $consulta->where('notas', 'like', $coincidencia)
+                ->orWhere('documento_tipo', 'like', $coincidencia)
+                ->orWhere('documento_id', 'like', $coincidencia)
+                ->orWhereHas('product', static function (Builder $consultaProducto) use ($coincidencia): void {
+                    $consultaProducto->where('nombre', 'like', $coincidencia)
+                        ->orWhere('marca', 'like', $coincidencia)
+                        ->orWhere('etiqueta', 'like', $coincidencia);
+                })
+                ->orWhereHas('variante', static function (Builder $consultaVariante) use ($coincidencia): void {
+                    $consultaVariante->where('codigo_sku', 'like', $coincidencia)
+                        ->orWhere('nombre_color', 'like', $coincidencia);
+                });
+        });
     }
 
     /**

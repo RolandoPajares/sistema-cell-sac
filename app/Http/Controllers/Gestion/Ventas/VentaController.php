@@ -16,11 +16,14 @@ use App\Models\Comercio\Venta;
 use App\Models\Finanzas\MedioPago;
 use App\Models\Organizacion\Sede;
 use App\Servicios\ConsultaVentas;
+use App\Servicios\ExportadorTabular;
+use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioCotizaciones;
 use App\Servicios\ServicioVentas;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -315,33 +318,44 @@ class VentaController extends Controller
         return redirect()->route('management.sales')->with('status', 'La venta está anulada.');
     }
 
-    public function export(FiltroVentaRequest $request): StreamedResponse
+    public function export(FiltroVentaRequest $request, string $format = 'csv', ?ExportadorTabular $exporter = null, ?RegistradorAuditoria $audit = null): Response|StreamedResponse
     {
+        abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
         $ventas = $this->ventas->query($request->user(), $this->filters($request->validated()))
             ->with(['cliente:id,razon_social,nombre_contacto', 'pedido:id,canal'])
-            ->orderBy('ventas.fecha_venta')->orderBy('ventas.id')->lazy(500);
+            ->orderBy('ventas.fecha_venta')->orderBy('ventas.id')->limit(5000)->get();
+        $safe = static function (?string $value): string {
+            $value ??= '';
 
-        return response()->streamDownload(function () use ($ventas): void {
-            $output = fopen('php://output', 'w');
-            if ($output === false) {
-                return;
-            }
-            fwrite($output, "\xEF\xBB\xBF");
-            fputcsv($output, ['codigo', 'fecha_venta', 'cliente', 'total', 'moneda', 'estado', 'canal']);
-            foreach ($ventas as $venta) {
-                $safe = static function (?string $value): string {
-                    $value ??= '';
+            return preg_match('/^[\s\x00-\x1f]*[=+\-@]/u', $value) ? "'".$value : $value;
+        };
+        $rows = $ventas->map(fn (Venta $venta): array => [
+            $safe($venta->codigo),
+            $venta->fecha_venta?->toDateTimeString(),
+            $safe($venta->cliente?->razon_social ?: $venta->cliente?->nombre_contacto),
+            $venta->total,
+            $safe($venta->moneda),
+            $safe($venta->estado),
+            $safe($venta->canal ?: $venta->pedido?->canal),
+        ])->all();
+        $filters = $this->filters($request->validated());
+        $response = ($exporter ?? app(ExportadorTabular::class))->download($format, 'ventas-'.now()->format('Ymd'),
+            ['Código', 'Fecha', 'Cliente', 'Total', 'Moneda', 'Estado', 'Canal'],
+            $rows,
+            [
+                'title' => 'REPORTE DE VENTAS',
+                'subtitle' => 'Ventas reales consultadas desde MariaDB.',
+                'module' => 'Operaciones Comerciales',
+                'report_name' => 'Ventas',
+                'filters' => $filters,
+                'generated_by' => (string) $request->user()->nombre,
+                'role' => 'Usuario autorizado',
+                'scope' => 'Empresa, sede, almacén y permisos RBAC vigentes.',
+                'indicators' => [['label' => 'Ventas incluidas', 'value' => count($rows)]],
+            ]);
+        ($audit ?? app(RegistradorAuditoria::class))->record($request->user()->getKey(), 'exportar', 'ventas', null, null, ['formato' => $format, 'filtros' => $filters, 'cantidad' => count($rows)], $request->ip());
 
-                    return preg_match('/^[\s\x00-\x1f]*[=+\-@]/u', $value) ? "'".$value : $value;
-                };
-                fputcsv($output, [
-                    $safe($venta->codigo), $venta->fecha_venta?->toDateTimeString(),
-                    $safe($venta->cliente?->razon_social ?: $venta->cliente?->nombre_contacto),
-                    $venta->total, $safe($venta->moneda), $safe($venta->estado), $safe($venta->canal ?: $venta->pedido?->canal),
-                ]);
-            }
-            fclose($output);
-        }, 'ventas.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+        return $response;
     }
 
     private function filters(array $input): array

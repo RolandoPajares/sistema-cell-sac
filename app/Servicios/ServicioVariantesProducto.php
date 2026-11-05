@@ -16,7 +16,7 @@ class ServicioVariantesProducto
     public function __construct(private readonly RegistradorAuditoria $auditoria) {}
 
     /**
-     * @param  array{codigo_sku:?string,codigo_barras:?string,nombre_color:string,codigo_color:?string}  $datos
+     * @param  array{codigo_sku:?string,codigo_barras:?string,nombre_color:string,codigo_color:?string,controla_serie?:bool|int|string}  $datos
      */
     public function registrar(Producto $producto, array $datos, User $usuario, ?string $ip): VarianteProducto
     {
@@ -34,6 +34,7 @@ class ServicioVariantesProducto
             abort_if($saldoBasePendiente, 409, 'El producto tiene existencias sin variante asignada. Ajusta ese saldo desde Inventario antes de registrar variantes.');
 
             $variante = $productoBloqueado->variants()->create($datos + [
+                'controla_serie' => false,
                 'estado' => 'activo',
                 'fecha_creacion' => now(),
             ]);
@@ -44,7 +45,7 @@ class ServicioVariantesProducto
                 'variantes_productos',
                 $variante->id,
                 null,
-                $variante->only(['producto_id', 'codigo_sku', 'codigo_barras', 'nombre_color', 'codigo_color', 'estado']),
+                $variante->only(['producto_id', 'codigo_sku', 'codigo_barras', 'nombre_color', 'codigo_color', 'controla_serie', 'estado']),
                 $ip,
                 scope: ['empresa_id' => (int) $productoBloqueado->empresa_id],
             );
@@ -54,7 +55,7 @@ class ServicioVariantesProducto
     }
 
     /**
-     * @param  array{codigo_sku:?string,codigo_barras:?string,nombre_color:string,codigo_color:?string,estado?:string}  $datos
+     * @param  array{codigo_sku:?string,codigo_barras:?string,nombre_color:string,codigo_color:?string,controla_serie?:bool|int|string,estado?:string}  $datos
      */
     public function actualizar(Producto $producto, VarianteProducto $variante, array $datos, User $usuario, ?string $ip): VarianteProducto
     {
@@ -64,7 +65,39 @@ class ServicioVariantesProducto
                 ->whereKey($variante->getKey())
                 ->lockForUpdate()
                 ->firstOrFail();
-            $antes = $varianteBloqueada->only(['codigo_sku', 'codigo_barras', 'nombre_color', 'codigo_color', 'estado']);
+            $antes = $varianteBloqueada->only(['codigo_sku', 'codigo_barras', 'nombre_color', 'codigo_color', 'controla_serie', 'estado']);
+
+            if (array_key_exists('controla_serie', $datos)) {
+                $controlaSerieNuevo = filter_var($datos['controla_serie'], FILTER_VALIDATE_BOOLEAN);
+
+                if ($controlaSerieNuevo !== (bool) $varianteBloqueada->controla_serie) {
+                    $existeSaldo = DB::table('existencias_almacen')
+                        ->where('producto_id', $productoBloqueado->id)
+                        ->where('variante_id', $varianteBloqueada->id)
+                        ->where(function ($consulta): void {
+                            $consulta->where('cantidad_fisica', '<>', 0)
+                                ->orWhere('cantidad_reservada', '<>', 0);
+                        })
+                        ->exists();
+                    $existeMovimiento = DB::table('movimientos_inventario')
+                        ->where('producto_id', $productoBloqueado->id)
+                        ->where('variante_id', $varianteBloqueada->id)
+                        ->exists();
+                    $existeDispositivo = DB::table('dispositivos')
+                        ->where('producto_id', $productoBloqueado->id)
+                        ->where('variante_id', $varianteBloqueada->id)
+                        ->exists();
+
+                    abort_if(
+                        $existeSaldo || $existeMovimiento || $existeDispositivo,
+                        409,
+                        'No se puede cambiar el control de serie porque la variante tiene existencias, movimientos o dispositivos asociados.',
+                    );
+
+                    $datos['controla_serie'] = $controlaSerieNuevo;
+                }
+            }
+
             $varianteBloqueada->update($datos);
 
             $this->auditoria->record(

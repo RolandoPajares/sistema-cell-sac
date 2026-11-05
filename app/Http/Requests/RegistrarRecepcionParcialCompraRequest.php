@@ -29,6 +29,7 @@ class RegistrarRecepcionParcialCompraRequest extends FormRequest
             'items' => ['required', 'array', 'min:1', 'max:100'],
             'items.*.detalle_compra_id' => ['required', 'integer', 'distinct', 'exists:detalles_compras,id'],
             'items.*.cantidad' => ['required', 'integer', 'min:0', 'max:1000'],
+            'items.*.identificadores' => ['nullable', 'string', 'max:30000'],
             'observaciones' => ['nullable', 'string', 'max:500'],
         ];
     }

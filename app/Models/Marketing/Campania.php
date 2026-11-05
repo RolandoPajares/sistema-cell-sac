@@ -33,7 +33,7 @@ class Campania extends Model
 
     public function segments(): BelongsToMany
     {
-        return $this->belongsToMany(SegmentoCliente::class, 'campanas_segmentos', 'campana_id', 'segmento_id');
+        return $this->belongsToMany(SegmentoCliente::class, 'campana_segmento', 'campana_id', 'segmento_id');
     }
 
     public function events(): HasMany

@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Servicios\ServicioAutorizacion;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 
 class GuardarCuponRequest extends FormRequest
@@ -15,8 +16,13 @@ class GuardarCuponRequest extends FormRequest
 
     public function rules(): array
     {
+        $unicidadCodigo = Rule::unique('cupones', 'codigo');
+        if (Schema::hasColumn('cupones', 'empresa_id')) {
+            $unicidadCodigo->where('empresa_id', app(ServicioAutorizacion::class)->activeCompanyId());
+        }
+
         return [
-            'codigo' => ['required', 'alpha_dash', 'max:50', Rule::unique('cupones', 'codigo')],
+            'codigo' => ['required', 'alpha_dash', 'max:50', $unicidadCodigo],
             'tipo_descuento' => ['required', Rule::in(['porcentaje', 'fijo'])],
             'valor' => ['required', 'numeric', 'gt:0', 'max:99999999.99', Rule::when($this->input('tipo_descuento') === 'porcentaje', ['lte:100'])],
             'minimo_compra' => ['required', 'numeric', 'min:0', 'max:99999999.99'],

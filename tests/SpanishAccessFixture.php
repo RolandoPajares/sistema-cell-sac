@@ -73,4 +73,49 @@ final class SpanishAccessFixture
 
         return $user;
     }
+
+    public static function grantScreenReadPermission(User $user, string $screenCode, string $routeName): void
+    {
+        $screen = DB::table('pantallas')->where('codigo', $screenCode)->first();
+        if ($screen === null) {
+            throw new \RuntimeException('La pantalla de prueba no existe: '.$screenCode);
+        }
+
+        DB::table('pantallas')->where('id', $screen->id)->update([
+            'ruta' => $routeName,
+            'habilitada' => true,
+        ]);
+
+        $permissionCode = 'pantalla.'.$screenCode.'.consultar';
+        $permissionId = DB::table('permisos')->where('codigo', $permissionCode)->value('id');
+        if ($permissionId === null) {
+            $permissionId = DB::table('permisos')->insertGetId([
+                'modulo_id' => $screen->modulo_id,
+                'pantalla_id' => $screen->id,
+                'codigo' => $permissionCode,
+                'accion' => 'consultar',
+                'nombre' => $screen->nombre.' - consultar',
+                'es_sistema' => true,
+                'activo' => true,
+                'creado_en' => now(),
+                'actualizado_en' => now(),
+            ]);
+        } else {
+            DB::table('permisos')->where('id', $permissionId)->update(['activo' => true]);
+        }
+
+        $rolAdministradorId = DB::table('roles')->where('codigo', 'administrador')->value('id');
+        DB::table('roles_permisos')->insertOrIgnore([
+            'rol_id' => $rolAdministradorId,
+            'permiso_id' => $permissionId,
+            'alcance' => 'empresa',
+            'creado_en' => now(),
+        ]);
+
+        $menuId = DB::table('menus')->where('codigo', 'administrador.sidebar')->value('id');
+        DB::table('elementos_menu')
+            ->where('menu_id', $menuId)
+            ->where('pantalla_id', $screen->id)
+            ->update(['permiso_id' => $permissionId, 'habilitado' => true]);
+    }
 }

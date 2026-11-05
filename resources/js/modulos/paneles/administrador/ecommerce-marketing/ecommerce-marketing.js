@@ -24,7 +24,8 @@ if (pricesPage) {
     const filters = [...pricesPage.querySelectorAll('[data-em-price-filter]')];
     const dialog = pricesPage.querySelector('[data-em-dialog]');
     const notice = dialog.querySelector('[data-em-price-notice]');
-    const saveButton = dialog.querySelector('[data-em-demo-save]');
+    const saveButton = dialog.querySelector('[data-em-price-submit]');
+    const priceForm = dialog.querySelector('[data-em-wholesale-price-form]');
     const bulk = dialog.querySelector('[data-em-price-bulk]');
     const bulkSteps = [...(bulk?.querySelectorAll('[data-em-bulk-step]') ?? [])];
     const bulkIndicators = [...(bulk?.querySelectorAll('[data-em-bulk-indicator]') ?? [])];
@@ -88,7 +89,7 @@ if (pricesPage) {
         bulkConfirm.hidden = step !== bulkSteps.length - 1;
         bulkError.hidden = true;
         bulkFeedback.hidden = true;
-        bulkConfirm.disabled = false;
+        bulkConfirm.disabled = true;
     };
 
     const resetBulkFlow = () => {
@@ -150,11 +151,12 @@ if (pricesPage) {
                     : 'La configuración y los precios de esta pantalla son ejemplos; no se modifica el catálogo ni el checkout.';
         }
         if (mode === 'editar') {
-            dialog.querySelector('[data-em-edit-channel]').value = channel;
+            dialog.querySelector('[data-em-edit-channel]').value = 'mayorista';
             dialog.querySelector('[data-em-edit-price]').value = '';
             dialog.querySelector('[data-em-edit-start]').value = '';
             dialog.querySelector('[data-em-edit-end]').value = '';
             dialog.querySelector('[data-em-edit-reason]').value = '';
+            dialog.querySelector('[data-em-edit-product-id]').value = button.closest('[data-em-price-row]')?.dataset.emProductId ?? '';
             editError.hidden = true;
         }
         if (mode === 'detalle') {
@@ -166,27 +168,40 @@ if (pricesPage) {
         }
         openDialog(dialog, button);
     }));
+    pricesPage.querySelectorAll('[data-em-price-edit]').forEach((enlace) => enlace.addEventListener('click', (event) => {
+        if (channel !== 'mayorista') {
+            return;
+        }
+        event.preventDefault();
+        lastTrigger = enlace;
+        activeMode = 'editar';
+        pricesPage.querySelector('[data-em-dialog-title]').textContent = `${titles.editar} · ${enlace.dataset.emProductName}`;
+        dialog.querySelectorAll('[data-em-dialog-fields]').forEach((fields) => {
+            fields.hidden = fields.dataset.emDialogFields !== 'editar';
+        });
+        dialog.querySelectorAll('[data-em-dialog-product]').forEach((field) => { field.value = enlace.dataset.emProductName ?? ''; });
+        dialog.querySelector('[data-em-edit-product-id]').value = enlace.dataset.emProductId ?? '';
+        dialog.querySelector('[data-em-edit-channel]').value = 'mayorista';
+        dialog.querySelector('[data-em-edit-price]').value = '';
+        dialog.querySelector('[data-em-edit-start]').value = '';
+        dialog.querySelector('[data-em-edit-end]').value = '';
+        dialog.querySelector('[data-em-edit-reason]').value = '';
+        saveButton.hidden = false;
+        editError.hidden = true;
+        notice.textContent = 'El nuevo precio se guardará con su vigencia y motivo en MariaDB; no se alterará el precio minorista.';
+        openDialog(dialog, enlace);
+    }));
     wireDialogClose(dialog, '[data-em-close]', () => {
         lastTrigger?.setAttribute('aria-expanded', 'false');
         lastTrigger?.focus();
         resetBulkFlow();
-        saveButton.disabled = false;
+        saveButton.disabled = saveButton.dataset.emPermission !== 'true';
         activeMode = 'configuracion';
     });
-    saveButton.addEventListener('click', () => {
-        if (activeMode === 'editar' && !validateEditPrice()) {
-            return;
+    priceForm.addEventListener('submit', (event) => {
+        if (activeMode !== 'editar' || !validateEditPrice()) {
+            event.preventDefault();
         }
-        const fields = [...dialog.querySelectorAll(`[data-em-dialog-fields="${activeMode}"] input, [data-em-dialog-fields="${activeMode}"] select, [data-em-dialog-fields="${activeMode}"] textarea`)];
-        const invalid = fields.find((field) => !field.checkValidity());
-        if (invalid) {
-            invalid.focus();
-            return;
-        }
-        notice.textContent = activeMode === 'editar'
-            ? 'Integración pendiente: no se guardó el precio ni se cambiaron las condiciones del catálogo.'
-            : 'Integración pendiente: no se guardaron preferencias ni se alteró ningún precio.';
-        saveButton.disabled = true;
     });
 
     bulkFile.addEventListener('change', () => {
@@ -238,6 +253,9 @@ if (storePage) {
     const tabs = [...storePage.querySelectorAll('[data-em-store-tab]')];
     const panels = [...storePage.querySelectorAll('[data-em-store-panel]')];
     const dialog = storePage.querySelector('[data-em-store-dialog]');
+    const storeForm = dialog.querySelector('[data-em-store-form]');
+    const sectionInput = dialog.querySelector('[data-em-store-section-value]');
+    const storeSaveButton = dialog.querySelector('[data-em-store-submit]');
     let lastTrigger;
     let selectedSection = 'general';
 
@@ -252,19 +270,30 @@ if (storePage) {
 
     storePage.querySelectorAll('[data-em-store-open]').forEach((button) => button.addEventListener('click', () => {
         lastTrigger = button;
+        selectedSection = button.dataset.emStoreSection ?? selectedSection;
         const label = tabs.find((tab) => tab.dataset.emStoreTab === selectedSection)?.textContent.trim() ?? 'tienda';
         storePage.querySelector('#tc-em-store-dialog-title').textContent = `Editar configuración · ${label}`;
         dialog.querySelectorAll('[data-em-store-fields]').forEach((fields) => {
             fields.hidden = fields.dataset.emStoreFields !== selectedSection;
         });
+        sectionInput.value = selectedSection;
         openDialog(dialog, button);
     }));
     wireDialogClose(dialog, '[data-em-store-close]', () => {
         lastTrigger?.setAttribute('aria-expanded', 'false');
         lastTrigger?.focus();
     });
-    dialog.querySelector('[data-em-demo-save]').addEventListener('click', () => {
-        dialog.querySelector('.tc-em__modal-notice').textContent = 'No se guardaron cambios. Esta configuración requiere integración con el ecommerce.';
+    storeForm.addEventListener('submit', (event) => {
+        if (selectedSection === 'integraciones' || storeSaveButton.disabled) {
+            event.preventDefault();
+            return;
+        }
+        sectionInput.value = selectedSection;
+        dialog.querySelectorAll('[data-em-store-fields]').forEach((grupo) => {
+            grupo.querySelectorAll('input, select, textarea').forEach((campo) => {
+                campo.disabled = grupo.dataset.emStoreFields !== selectedSection;
+            });
+        });
     });
 }
 
@@ -469,6 +498,9 @@ if (segmentPage) {
     const editError = editDialog.querySelector('[data-em-segment-edit-error]');
     const editFeedback = editDialog.querySelector('[data-em-segment-edit-feedback]');
     const nameField = editDialog.querySelector('[data-em-segment-edit-name]');
+    const editForm = editDialog.querySelector('[data-em-segment-edit-form]');
+    const removeForm = dialogs.remove.querySelector('[data-em-segment-remove-form]');
+    const segmentBaseUrl = segmentPage.dataset.emSegmentBaseUrl;
     const roleLabel = (role) => role.replace(/_/g, ' ');
 
     Object.values(dialogs).forEach((dialog) => wireDialogClose(dialog, '[data-em-segment-close]', () => {
@@ -521,6 +553,7 @@ if (segmentPage) {
             }
 
             if (mode === 'edit') {
+                editForm.action = segmentBaseUrl + '/' + data.emSegmentId;
                 nameField.value = data.emSegmentName;
                 const selectedRoles = new Set(data.emSegmentRoles.split('|').filter(Boolean));
                 roleCheckboxes.forEach((checkbox) => { checkbox.checked = selectedRoles.has(checkbox.value); });
@@ -530,6 +563,7 @@ if (segmentPage) {
             }
 
             if (mode === 'remove') {
+                removeForm.action = segmentBaseUrl + '/' + data.emSegmentId;
                 dialog.querySelector('[data-em-segment-remove-name]').textContent = data.emSegmentName;
                 dialog.querySelector('[data-em-segment-remove-ack]').checked = false;
                 dialog.querySelector('[data-em-segment-remove-feedback]').hidden = true;
@@ -552,15 +586,18 @@ if (segmentPage) {
             return;
         }
         editError.hidden = true;
+        editForm.submit();
     });
 
     const removeDialog = dialogs.remove;
     removeDialog.querySelector('[data-em-segment-remove-confirm]').addEventListener('click', () => {
         const feedback = removeDialog.querySelector('[data-em-segment-remove-feedback]');
         const acknowledged = removeDialog.querySelector('[data-em-segment-remove-ack]').checked;
-        feedback.textContent = acknowledged
-            ? 'Integración pendiente: el segmento y sus posibles relaciones con campañas siguen sin cambios.'
-            : 'Confirma que entiendes que la eliminación real aún no está integrada.';
+        if (acknowledged) {
+            removeForm.submit();
+            return;
+        }
+        feedback.textContent = 'Confirma la casilla para desactivar el segmento.';
         feedback.hidden = false;
     });
 }

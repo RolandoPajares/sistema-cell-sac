@@ -1,9 +1,9 @@
-@extends(in_array(auth()->user()->rol, ['administrador', 'ventas_minoristas', 'ventas_mayoristas'], true) ? 'layouts.administracion' : 'layouts.tienda')
+@extends((auth()->user()->isRole('administrador') || auth()->user()->isRole('ventas_minoristas') || auth()->user()->isRole('ventas_mayoristas')) ? 'layouts.administracion' : 'layouts.tienda')
 @section('title', 'Pedido #'.$order->id)
 @section('content')
-<section class="{{ in_array(auth()->user()->rol, ['administrador', 'ventas_minoristas', 'ventas_mayoristas'], true) ? 'admin-page' : 'container content-page' }}">
+<section class="{{ (auth()->user()->isRole('administrador') || auth()->user()->isRole('ventas_minoristas') || auth()->user()->isRole('ventas_mayoristas')) ? 'admin-page' : 'container content-page' }}">
     <div class="admin-page-head"><div><span class="product-category">Pedido #{{ $order->id }}</span><h1>{{ $order->user->nombre }}</h1><p>Estado actual: <strong>{{ $order->estado }}</strong></p></div></div>
-    @if (in_array(auth()->user()->rol, ['administrador', 'ventas_minoristas', 'ventas_mayoristas'], true))
+    @if (auth()->user()->isRole('administrador') || auth()->user()->isRole('ventas_minoristas') || auth()->user()->isRole('ventas_mayoristas'))
         <form
             method="post"
             action="{{ route('orders.status', $order) }}"

@@ -69,10 +69,14 @@
                 <h1>Reportes comerciales <i class="bi bi-bar-chart-fill" aria-hidden="true"></i></h1>
                 <p>Consulta y analiza la información de ventas, inventario, pedidos y campañas del sistema.</p>
             </div>
-            <a class="reportes-export-button" href="{{ route('management.reports.export', $filters) }}">
-                <i class="bi bi-download" aria-hidden="true"></i>
-                Exportar CSV
-            </a>
+            <details class="reportes-export-menu">
+                <summary class="reportes-export-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar <i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
+                <div class="reportes-export-options">
+                    <a href="{{ route('management.reports.export', ['format' => 'excel'] + $filters) }}">Excel (.xlsx)</a>
+                    <a href="{{ route('management.reports.export', ['format' => 'pdf'] + $filters) }}">PDF (.pdf)</a>
+                    <a href="{{ route('management.reports.export', ['format' => 'csv'] + $filters) }}">CSV (.csv)</a>
+                </div>
+            </details>
         </header>
 
         <form class="reportes-toolbar" method="GET" action="{{ route('management.reports') }}" data-report-filter-form>

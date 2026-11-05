@@ -20,6 +20,7 @@ class GuardarVarianteProductoRequest extends FormRequest
             'codigo_barras' => ['nullable', 'string', 'max:80', Rule::unique('variantes_productos', 'codigo_barras')->ignore($this->route('variante'))],
             'nombre_color' => ['required', 'string', 'max:100'],
             'codigo_color' => ['nullable', 'string', 'max:20'],
+            'controla_serie' => ['sometimes', 'boolean'],
         ];
 
         if ($this->isMethod('PUT') || $this->isMethod('PATCH')) {

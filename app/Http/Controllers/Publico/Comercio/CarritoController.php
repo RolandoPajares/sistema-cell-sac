@@ -8,14 +8,19 @@ use App\Http\Requests\AgregarCarritoRequest;
 use App\Http\Requests\AplicarCuponRequest;
 use App\Models\Catalogo\Producto;
 use App\Models\Comercio\Cupon;
+use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioInventario;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class CarritoController extends Controller
 {
-    public function __construct(private readonly ServicioInventario $inventario) {}
+    public function __construct(
+        private readonly ServicioInventario $inventario,
+        private readonly ServicioAutorizacion $autorizacion,
+    ) {}
 
     public function index(Request $request): View
     {
@@ -111,7 +116,11 @@ class CarritoController extends Controller
     public function applyCoupon(AplicarCuponRequest $request): RedirectResponse
     {
         $code = mb_strtoupper($request->string('codigo')->trim()->toString());
-        $coupon = Cupon::query()->where('codigo', $code)->where('activo', true)
+        abort_unless(Schema::hasColumn('cupones', 'empresa_id'), 503,
+            'Los cupones no están disponibles hasta configurar su empresa propietaria.');
+        $ubicacion = $this->autorizacion->operationLocation($request->user());
+        abort_unless($ubicacion['empresa_id'] !== null, 503, 'No hay una empresa autorizada para validar el cupón.');
+        $coupon = Cupon::query()->where('empresa_id', $ubicacion['empresa_id'])->where('codigo', $code)->where('activo', true)
             ->where('inicia_en', '<=', now())->where('finaliza_en', '>=', now())->first();
 
         abort_unless($coupon && ($coupon->limite_usos === null || $coupon->usos < $coupon->limite_usos), 422, 'CupÃ³n no vÃ¡lido o agotado.');
