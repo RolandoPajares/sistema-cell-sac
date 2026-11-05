@@ -463,7 +463,7 @@ it('does not change role scope while active assignments exist', function (): voi
         ->put(route('management.roles_permissions.update', $roleId), [
             'nombre' => 'Marketing',
             'descripcion' => 'Rol de marketing',
-            'alcance_permitido' => 'sede',
+            'alcance_permitido' => 'empresa',
         ])
         ->assertStatus(409);
 });
