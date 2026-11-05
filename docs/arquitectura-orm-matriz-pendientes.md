@@ -10,4 +10,4 @@
 | Transacciones | Completa | Sincronización de portada con rollback ante excepción | Ejecutar también en MariaDB aislada cuando el entorno sea entregado |
 | Integración empresarial | Completa | `ServicioCatalogo` delega la portada al DAO durante alta/edición de producto | Ninguno |
 | MVC/n-capas | Completa para el flujo elegido | Controlador de productos → `ServicioCatalogo` → `ProductoDao` → PDO | Otros módulos son propiedad de agentes distintos |
-| Verificación MariaDB | Bloqueada externamente | El worktree no tiene `vendor/` ni variables de instancia QA aislada | Integrador debe ejecutar la prueba MariaDB aislada |
+| Verificación MariaDB | Preparada, pendiente de ejecución externa | `PdoProductoDaoMariaAisladaTest` valida identidad, escritura, relación y rollback | Integrador debe ejecutar la prueba con la instancia QA aislada y `vendor/` disponible |
