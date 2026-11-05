@@ -54,17 +54,18 @@ it('centraliza el alta y revierte la transacción cuando falla la auditoría', f
     $inventory = Mockery::mock(ServicioInventario::class);
     $inventory->shouldReceive('registerNewProduct')->twice();
     $catalog = Mockery::mock(ServicioCatalogo::class);
-    $catalog->shouldReceive('sincronizarImagenPortada')->twice();
+    $catalog->shouldReceive('sincronizarImagenPortada')->times(3);
     $audit = Mockery::mock('overload:'.RegistradorAuditoria::class);
     $auditCalls = 0;
-    $audit->shouldReceive('record')->twice()->andReturnUsing(function () use (&$auditCalls): void {
+    $audit->shouldReceive('record')->times(3)->andReturnUsing(function () use (&$auditCalls): void {
         $auditCalls++;
-        if ($auditCalls === 2) {
+        if ($auditCalls === 3) {
             throw new RuntimeException('auditoría no disponible');
         }
     });
 
-    $product = (new ServicioGestionProductos($authorization, $inventory, $catalog, $audit))->crear([
+    $service = new ServicioGestionProductos($authorization, $inventory, $catalog, $audit);
+    $product = $service->crear([
         'marca' => 'Marca QA', 'nombre' => 'Producto QA', 'categoria_id' => 1,
         'categoria' => 'Móviles', 'precio' => '100.00', 'url_imagen' => 'storage/producto.jpg',
     ], null, usuarioGestionProductos(), '127.0.0.1');
@@ -72,7 +73,11 @@ it('centraliza el alta y revierte la transacción cuando falla la auditoría', f
     expect($product)->toBeInstanceOf(Producto::class)
         ->and(DB::table('productos')->where('id', $product->id)->value('empresa_id'))->toBe(4);
 
-    expect(fn (): Producto => (new ServicioGestionProductos($authorization, $inventory, $catalog, $audit))->crear([
+    $service->actualizar($product, ['nombre' => 'Producto actualizado'], [], ['nombre' => 'Producto QA'], usuarioGestionProductos(), '127.0.0.1');
+
+    expect(DB::table('productos')->where('id', $product->id)->value('nombre'))->toBe('Producto actualizado');
+
+    expect(fn (): Producto => $service->crear([
         'marca' => 'Marca QA', 'nombre' => 'Producto fallido', 'categoria_id' => 1,
         'categoria' => 'Móviles', 'precio' => '100.00',
     ], null, usuarioGestionProductos(), '127.0.0.1'))->toThrow(RuntimeException::class);
