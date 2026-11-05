@@ -349,6 +349,7 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::get('/campanas', [CampaniaController::class, 'index'])->name('campaigns');
     Route::get('/campanas/exportar', [CampaniaController::class, 'export'])->name('campaigns.export');
     Route::post('/campanas', [CampaniaController::class, 'store'])->name('campaigns.store');
+    Route::post('/campanas/importar', [CampaniaController::class, 'import'])->name('campaigns.import');
     Route::put('/campanas/{campaign}', [CampaniaController::class, 'update'])->name('campaigns.update');
     Route::delete('/campanas/{campaign}', [CampaniaController::class, 'deactivate'])->name('campaigns.deactivate');
     Route::get('/cupones', [CuponController::class, 'index'])->name('coupons');
