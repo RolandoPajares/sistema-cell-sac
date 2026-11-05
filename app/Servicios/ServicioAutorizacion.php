@@ -42,6 +42,7 @@ final class ServicioAutorizacion
         'export' => 'exportar', 'adjust' => 'ajustar', 'approve' => 'aprobar', 'cancel' => 'anular',
         'assign' => 'asignar', 'revoke' => 'revocar', 'activate' => 'activar',
         'receive' => 'recibir', 'emit' => 'emitir', 'restore' => 'restaurar',
+        'confirm' => 'crear', 'convert_quotation' => 'crear',
     ];
 
     public function schemaAvailable(): bool

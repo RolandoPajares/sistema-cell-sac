@@ -59,11 +59,11 @@
                 <p class="tc-em__bulk-error tc-em__form-full" data-em-edit-error role="alert" hidden></p>
             </div>
             <div class="tc-em__form-grid" data-em-dialog-fields="detalle" hidden>
-                <label class="tc-em__form-full">Producto de ejemplo<input type="text" data-em-dialog-product readonly></label>
-                <label>Precio minorista (ejemplo)<input type="text" data-em-detail-minorista readonly></label>
-                <label>Precio mayorista (ejemplo)<input type="text" data-em-detail-mayorista readonly></label>
-                <label>Precio base (ejemplo)<input type="text" data-em-detail-base readonly></label>
-                <label>Stock de ejemplo<input type="text" data-em-detail-stock readonly></label>
+                <label class="tc-em__form-full">Producto<input type="text" data-em-dialog-product readonly></label>
+                <label>Precio registrado<input type="text" data-em-detail-minorista readonly></label>
+                <label>Precio mayorista<input type="text" data-em-detail-mayorista readonly></label>
+                <label>Precio base<input type="text" data-em-detail-base readonly></label>
+                <label>Stock disponible<input type="text" data-em-detail-stock readonly></label>
             </div>
         </div>
         <footer>

@@ -184,8 +184,18 @@ if (salesPage && salesPage.dataset.salesInitialized !== 'true') {
             form.querySelector('[name="motivo"]').value = reason.trim();
         });
     });
+    salesPage.querySelectorAll('[data-sales-confirm]').forEach((form) => {
+        form.addEventListener('submit', (event) => {
+            if (!window.confirm('La confirmacion descontara existencias del almacen asociado. ¿Deseas continuar?')) {
+                event.preventDefault();
+            }
+        });
+    });
     salesPage.querySelectorAll('[data-open-sales-create]').forEach((button) => {
         button.addEventListener('click', () => openDialog(salesPage.querySelector('#nueva-venta')));
+    });
+    salesPage.querySelectorAll('[data-open-sales-confirm]').forEach((button) => {
+        button.addEventListener('click', () => openDialog(document.getElementById(button.dataset.openSalesConfirm)));
     });
     salesPage.querySelectorAll('[data-sales-details]').forEach((button) => {
         button.addEventListener('click', () => openDialog(document.getElementById(`detalle-venta-${button.dataset.salesDetails}`)));

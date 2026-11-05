@@ -4,8 +4,10 @@ use App\Models\Catalogo\Categoria;
 use App\Models\Catalogo\Producto;
 use App\Models\Clientes\Cliente;
 use App\Models\Comercio\Cotizacion;
+use App\Models\Comercio\Venta;
 use App\Models\Compras\Compra;
 use App\Models\Compras\Proveedor;
+use Illuminate\Support\Facades\DB;
 use Tests\SpanishAccessFixture;
 
 it('renders each management module with its canonical list view', function () {
@@ -84,6 +86,215 @@ it('filters the administrator quotation dashboard and calculates real status tot
         ->assertSee('aria-label="Buscar cotización, cliente o producto"', false)
         ->assertSee('aria-label="Cliente mayorista"', false)
         ->assertSee('aria-label="Estado de cotización"', false);
+});
+
+it('approves a pending quotation within RBAC scope and records the audit event', function () {
+    $admin = SpanishAccessFixture::user('administrador');
+    $scope = SpanishAccessFixture::organization();
+    $customer = Cliente::create([
+        'tipo' => 'mayorista',
+        'documento' => 'RUC-900003',
+        'nombre_contacto' => 'Cliente para aprobación',
+        'correo' => 'aprobacion@example.test',
+        'activo' => true,
+        'creado_en' => now(),
+        'empresa_id' => $scope['empresa_id'],
+    ]);
+    $product = Producto::factory()->create(['empresa_id' => $scope['empresa_id']]);
+    $quotation = Cotizacion::create([
+        'cliente_id' => $customer->id,
+        'creado_por_usuario_id' => $admin->id,
+        'total' => 120,
+        'estado' => 'Pendiente',
+        'activo' => true,
+        'creado_en' => now(),
+        'empresa_id' => $scope['empresa_id'],
+        'sede_id' => $scope['sede_id'],
+    ]);
+    $quotation->details()->create(['producto_id' => $product->id, 'cantidad' => 1, 'precio_unitario' => 120]);
+
+    $this->actingAs($admin)
+        ->post(route('management.quotations.approve', $quotation))
+        ->assertRedirect();
+
+    expect($quotation->fresh()->estado)->toBe('Aprobada')
+        ->and(DB::table('registros_auditoria')->where('accion', 'cotizacion.aprobada')->where('entidad_id', $quotation->id)->exists())->toBeTrue();
+});
+
+it('downloads a real quotation PDF and records a manually confirmed email send once', function () {
+    $admin = SpanishAccessFixture::user('administrador');
+    $scope = SpanishAccessFixture::organization();
+    $customer = Cliente::create([
+        'tipo' => 'mayorista',
+        'documento' => 'RUC-900004',
+        'nombre_contacto' => 'Cliente con correo',
+        'correo' => 'destinatario@example.test',
+        'activo' => true,
+        'creado_en' => now(),
+        'empresa_id' => $scope['empresa_id'],
+    ]);
+    $product = Producto::factory()->create(['empresa_id' => $scope['empresa_id']]);
+    $quotation = Cotizacion::create([
+        'cliente_id' => $customer->id,
+        'creado_por_usuario_id' => $admin->id,
+        'total' => 120,
+        'estado' => 'Borrador',
+        'activo' => true,
+        'creado_en' => now(),
+        'empresa_id' => $scope['empresa_id'],
+        'sede_id' => $scope['sede_id'],
+    ]);
+    $quotation->details()->create(['producto_id' => $product->id, 'cantidad' => 1, 'precio_unitario' => 120]);
+
+    $this->actingAs($admin)
+        ->get(route('management.quotations'))
+        ->assertOk()
+        ->assertSee('data-quotation-action="enviar"', false)
+        ->assertSee('data-quotation-dialog', false)
+        ->assertSee('Descargar PDF');
+
+    $this->actingAs($admin)
+        ->get(route('management.quotations.export', $quotation))
+        ->assertOk()
+        ->assertHeader('content-type', 'application/pdf');
+
+    $datosEnvio = ['confirmar_envio_manual' => '1'];
+    $this->post(route('management.quotations.update.send', $quotation), $datosEnvio)->assertRedirect();
+    $this->post(route('management.quotations.update.send', $quotation), $datosEnvio)->assertRedirect();
+
+    expect($quotation->fresh()->estado)->toBe('Enviada')
+        ->and(DB::table('registros_auditoria')->where('accion', 'cotizacion.descargada')->where('entidad_id', $quotation->id)->exists())->toBeTrue()
+        ->and(DB::table('registros_auditoria')->where('accion', 'cotizacion.envio_manual_registrado')->where('entidad_id', $quotation->id)->count())->toBe(1);
+});
+
+it('converts an approved quotation to a draft and confirms its inventory movement once', function () {
+    $admin = SpanishAccessFixture::user('administrador');
+    $scope = SpanishAccessFixture::organization();
+    $customer = Cliente::create([
+        'tipo' => 'mayorista',
+        'documento' => 'RUC-900005',
+        'nombre_contacto' => 'Cliente de conversion',
+        'correo' => 'conversion@example.test',
+        'activo' => true,
+        'creado_en' => now(),
+        'empresa_id' => $scope['empresa_id'],
+    ]);
+    $product = Producto::factory()->create(['empresa_id' => $scope['empresa_id'], 'existencias' => 5]);
+    $quotation = Cotizacion::create([
+        'cliente_id' => $customer->id,
+        'creado_por_usuario_id' => $admin->id,
+        'total' => 240,
+        'estado' => 'Aprobada',
+        'activo' => true,
+        'creado_en' => now(),
+        'empresa_id' => $scope['empresa_id'],
+        'sede_id' => $scope['sede_id'],
+    ]);
+    $quotation->details()->create(['producto_id' => $product->id, 'cantidad' => 2, 'precio_unitario' => 120]);
+    DB::table('existencias_almacen')->insert([
+        'almacen_id' => $scope['almacen_id'], 'producto_id' => $product->id,
+        'empresa_id' => $scope['empresa_id'], 'sede_id' => $scope['sede_id'],
+        'cantidad_fisica' => 5, 'cantidad_reservada' => 0, 'actualizado_en' => now(),
+    ]);
+
+    $respuestaConversion = $this->actingAs($admin)
+        ->post(route('management.sales.convert_quotation', $quotation), ['almacen_id' => $scope['almacen_id']]);
+    $respuestaConversion->assertRedirect(route('management.sales'));
+    $this->post(route('management.sales.convert_quotation', $quotation), ['almacen_id' => $scope['almacen_id']])
+        ->assertRedirect(route('management.sales'));
+
+    $venta = Venta::query()->where('codigo', 'COT-'.$quotation->id)->sole();
+    $pedidoId = (int) $venta->pedido_id;
+    expect($quotation->fresh()->estado)->toBe('Convertida')
+        ->and($venta->estado)->toBe('borrador')
+        ->and(DB::table('pedidos')->where('id', $pedidoId)->value('estado'))->toBe('Pendiente')
+        ->and(DB::table('pedidos')->where('id', $pedidoId)->value('canal'))->toBe('presencial')
+        ->and(DB::table('pedidos')->where('id', $pedidoId)->value('tipo_venta'))->toBe('fisica')
+        ->and((float) DB::table('existencias_almacen')->where('almacen_id', $scope['almacen_id'])->where('producto_id', $product->id)->value('cantidad_fisica'))->toBe(5.0)
+        ->and(DB::table('movimientos_inventario')->where('documento_tipo', 'venta')->where('documento_id', (string) $venta->id)->count())->toBe(0);
+
+    $this->post(route('management.sales.confirm', $venta))->assertRedirect(route('management.sales'));
+    $this->post(route('management.sales.confirm', $venta))->assertRedirect(route('management.sales'));
+
+    expect($venta->fresh()->estado)->toBe('confirmada')
+        ->and((float) DB::table('existencias_almacen')->where('almacen_id', $scope['almacen_id'])->where('producto_id', $product->id)->value('cantidad_fisica'))->toBe(3.0)
+        ->and(DB::table('movimientos_inventario')->where('documento_tipo', 'venta')->where('documento_id', (string) $venta->id)->where('tipo_movimiento', 'salida')->count())->toBe(1)
+        ->and(DB::table('registros_auditoria')->where('accion', 'cotizacion.convertida_en_venta_borrador')->where('entidad_id', $quotation->id)->count())->toBe(1)
+        ->and(DB::table('registros_auditoria')->where('accion', 'venta.confirmada_desde_cotizacion')->where('entidad_id', $venta->id)->count())->toBe(1);
+});
+
+it('associates available serialized devices to a sale exactly once during confirmation', function () {
+    $admin = SpanishAccessFixture::user('administrador');
+    $scope = SpanishAccessFixture::organization();
+    $customer = Cliente::create([
+        'tipo' => 'mayorista', 'documento' => 'RUC-900006', 'nombre_contacto' => 'Cliente serializado',
+        'correo' => 'serializado@example.test', 'activo' => true, 'creado_en' => now(), 'empresa_id' => $scope['empresa_id'],
+    ]);
+    $product = Producto::factory()->create(['empresa_id' => $scope['empresa_id'], 'existencias' => 1]);
+    $variantId = DB::table('variantes_productos')->insertGetId([
+        'producto_id' => $product->id, 'existencias' => 1, 'controla_serie' => true, 'estado' => 'activo',
+        'fecha_creacion' => now(),
+    ]);
+    $quotation = Cotizacion::create([
+        'cliente_id' => $customer->id, 'creado_por_usuario_id' => $admin->id, 'total' => 120,
+        'estado' => 'Aprobada', 'activo' => true, 'creado_en' => now(),
+        'empresa_id' => $scope['empresa_id'], 'sede_id' => $scope['sede_id'],
+    ]);
+    $quotation->details()->create([
+        'producto_id' => $product->id, 'variante_id' => $variantId, 'cantidad' => 1,
+        'precio_unitario' => 120, 'total_linea' => 120,
+    ]);
+    DB::table('existencias_almacen')->insert([
+        'almacen_id' => $scope['almacen_id'], 'producto_id' => $product->id, 'variante_id' => $variantId,
+        'empresa_id' => $scope['empresa_id'], 'sede_id' => $scope['sede_id'],
+        'cantidad_fisica' => 1, 'cantidad_reservada' => 0, 'actualizado_en' => now(),
+    ]);
+    $dispositivoId = DB::table('dispositivos')->insertGetId([
+        'producto_id' => $product->id, 'variante_id' => $variantId, 'imei' => '490154203237518',
+        'almacen_actual_id' => $scope['almacen_id'], 'estado' => 'disponible', 'fecha_ingreso' => now(),
+    ]);
+
+    $this->actingAs($admin)->post(route('management.sales.convert_quotation', $quotation), ['almacen_id' => $scope['almacen_id']]);
+    $venta = Venta::query()->where('codigo', 'COT-'.$quotation->id)->sole();
+    $detalleId = (int) $venta->detalles()->value('id');
+    $datosConfirmacion = ['dispositivos' => [$detalleId => [$dispositivoId]]];
+    $respuestaConfirmacion = $this->post(route('management.sales.confirm', $venta), $datosConfirmacion);
+    $respuestaConfirmacion->assertSessionHasNoErrors()->assertRedirect(route('management.sales'));
+    $this->post(route('management.sales.confirm', $venta), $datosConfirmacion)->assertRedirect(route('management.sales'));
+
+    expect($venta->fresh()->estado)->toBe('confirmada')
+        ->and(DB::table('existencias_almacen')->where('almacen_id', $scope['almacen_id'])->where('producto_id', $product->id)->where('variante_id', $variantId)->value('cantidad_fisica'))->toBe(0)
+        ->and(DB::table('detalles_ventas_dispositivos')->where('detalle_venta_id', $detalleId)->where('dispositivo_id', $dispositivoId)->count())->toBe(1)
+        ->and(DB::table('dispositivos')->where('id', $dispositivoId)->value('estado'))->toBe('vendido')
+        ->and(DB::table('movimientos_dispositivos')->where('dispositivo_id', $dispositivoId)->where('estado_nuevo', 'vendido')->count())->toBe(1)
+        ->and(DB::table('movimientos_inventario')->where('documento_tipo', 'venta')->where('documento_id', (string) $venta->id)->count())->toBe(1);
+});
+
+it('opens the independent inventory movement history within RBAC scope', function () {
+    $admin = SpanishAccessFixture::user('administrador');
+    $scope = SpanishAccessFixture::organization();
+    $product = Producto::factory()->create(['empresa_id' => $scope['empresa_id']]);
+    DB::table('movimientos_inventario')->insert([
+        'producto_id' => $product->id,
+        'usuario_id' => $admin->id,
+        'tipo_movimiento' => 'salida',
+        'cantidad' => 1.5,
+        'notas' => 'Movimiento aislado de prueba',
+        'creado_en' => now(),
+        'empresa_id' => $scope['empresa_id'],
+        'sede_id' => $scope['sede_id'],
+        'almacen_id' => $scope['almacen_id'],
+    ]);
+
+    $this->withoutVite()->actingAs($admin)
+        ->get(route('management.inventory.movements'))
+        ->assertOk()
+        ->assertViewIs('gestion.inventario.listar')
+        ->assertViewHas('verHistorialMovimientos', true)
+        ->assertViewHas('recentMovements', fn ($movimientos): bool => $movimientos->total() === 1)
+        ->assertSee('Historial de movimientos')
+        ->assertSee('Movimiento aislado de')
+        ->assertSee('-1.5');
 });
 
 it('filters purchases and calculates their dashboard totals', function () {

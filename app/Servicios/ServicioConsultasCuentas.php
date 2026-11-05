@@ -1,0 +1,175 @@
+<?php
+
+namespace App\Servicios;
+
+use App\Models\User;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+
+class ServicioConsultasCuentas
+{
+    public function __construct(private ServicioAutorizacion $autorizacion) {}
+
+    /**
+     * @return array{filas: array<int, array{celdas: array<int, mixed>, filtros: array<string, string>}>, metricas: array<int, array<string, string>>, paneles: array<int, array<string, mixed>>}
+     */
+    public function obtenerVista(User $usuario): array
+    {
+        $permiso = 'gestion.pagos.consultar';
+        $this->autorizacion->assertAllowed($usuario, $permiso);
+        $sedes = $this->autorizacion->authorizedSiteIds($usuario, $permiso);
+
+        if ($sedes === []) {
+            throw new HttpException(403, 'No tienes sedes autorizadas para consultar estas cuentas.');
+        }
+
+        $aplicacionesCobro = DB::table('aplicaciones_cobro as aplicaciones')
+            ->join('pagos as pagos_aplicados', 'pagos_aplicados.id', '=', 'aplicaciones.pago_id')
+            ->select('aplicaciones.cuenta_cobrar_id')
+            ->selectRaw('SUM(aplicaciones.importe_aplicado) AS total_aplicado')
+            ->where('pagos_aplicados.tipo', 'cobro')
+            ->where('pagos_aplicados.estado', 'registrado')
+            ->groupBy('aplicaciones.cuenta_cobrar_id');
+
+        $porCobrar = DB::table('cuentas_por_cobrar as cuentas')
+            ->join('documentos_electronicos as documentos', 'documentos.id', '=', 'cuentas.documento_electronico_id')
+            ->leftJoinSub($aplicacionesCobro, 'aplicaciones', 'aplicaciones.cuenta_cobrar_id', '=', 'cuentas.id')
+            ->whereIn('documentos.sede_id', $sedes)
+            ->get([
+                'cuentas.id', 'cuentas.monto_original', 'cuentas.moneda', 'cuentas.vence_en', 'cuentas.estado',
+                'documentos.serie', 'documentos.correlativo', 'documentos.fecha_emision',
+                'documentos.receptor_historico', 'documentos.empresa_id', 'documentos.sede_id',
+                DB::raw('COALESCE(aplicaciones.total_aplicado, 0) AS total_aplicado'),
+            ])
+            ->map(fn (object $cuenta): array => $this->formatearFila(
+                $cuenta,
+                'Por cobrar',
+                $this->nombreReceptor($cuenta->receptor_historico),
+                trim($cuenta->serie.'-'.str_pad((string) $cuenta->correlativo, 8, '0', STR_PAD_LEFT)),
+            ));
+
+        $aplicacionesPago = DB::table('aplicaciones_pago as aplicaciones')
+            ->join('pagos as pagos_aplicados', 'pagos_aplicados.id', '=', 'aplicaciones.pago_id')
+            ->select('aplicaciones.cuenta_pagar_id')
+            ->selectRaw('SUM(aplicaciones.importe_aplicado) AS total_aplicado')
+            ->where('pagos_aplicados.tipo', 'pago')
+            ->where('pagos_aplicados.estado', 'registrado')
+            ->groupBy('aplicaciones.cuenta_pagar_id');
+
+        $porPagar = DB::table('cuentas_por_pagar as cuentas')
+            ->join('compras', 'compras.id', '=', 'cuentas.compra_id')
+            ->join('proveedores', 'proveedores.id', '=', 'compras.proveedor_id')
+            ->leftJoinSub($aplicacionesPago, 'aplicaciones', 'aplicaciones.cuenta_pagar_id', '=', 'cuentas.id')
+            ->whereIn('compras.sede_id', $sedes)
+            ->where('compras.activo', true)
+            ->get([
+                'cuentas.id', 'cuentas.monto_original', 'cuentas.moneda', 'cuentas.vence_en', 'cuentas.estado',
+                'compras.numero_referencia', 'compras.fecha_compra', 'compras.empresa_id', 'compras.sede_id',
+                'proveedores.nombre as nombre_proveedor',
+                DB::raw('COALESCE(aplicaciones.total_aplicado, 0) AS total_aplicado'),
+            ])
+            ->map(fn (object $cuenta): array => $this->formatearFila(
+                $cuenta,
+                'Por pagar',
+                $cuenta->nombre_proveedor,
+                $cuenta->numero_referencia ?: 'Compra #'.$cuenta->id,
+            ));
+
+        $filas = $porCobrar->concat($porPagar)->sortByDesc('fecha_orden')->values();
+        $hoy = Carbon::today();
+        $cobrosVigentes = $porCobrar->filter(fn (array $fila): bool => $fila['saldo'] > 0 && $fila['vence_orden'] >= $hoy->toDateString());
+        $cobrosVencidos = $porCobrar->filter(fn (array $fila): bool => $fila['saldo'] > 0 && $fila['vence_orden'] < $hoy->toDateString());
+        $pagosVigentes = $porPagar->filter(fn (array $fila): bool => $fila['saldo'] > 0 && $fila['vence_orden'] >= $hoy->toDateString());
+        $pagosVencidos = $porPagar->filter(fn (array $fila): bool => $fila['saldo'] > 0 && $fila['vence_orden'] < $hoy->toDateString());
+
+        $totalCuentasCobrar = max(1, $porCobrar->count());
+
+        return [
+            'filas' => $filas->map(fn (array $fila): array => [
+                'celdas' => [
+                    $fila['documento'], $fila['tercero'], ['texto' => $fila['tipo'], 'tono' => $fila['tipo'] === 'Por cobrar' ? 'azul' : 'violeta'],
+                    $fila['emision'], $fila['vence'], $this->formatearImporte($fila['saldo'], $fila['moneda']), $fila['moneda'],
+                    ['texto' => $fila['estado'], 'tono' => $fila['tono']],
+                ],
+                'filtros' => ['tipo' => $fila['tipo'], 'estado' => $fila['estado'], 'moneda' => $fila['moneda']],
+            ])->all(),
+            'metricas' => [
+                $this->metricaReal('Por cobrar vigente', $cobrosVigentes, 'bi-person-check', 'azul'),
+                $this->metricaReal('Por cobrar vencido', $cobrosVencidos, 'bi-exclamation-triangle', 'rojo'),
+                $this->metricaReal('Por pagar próximo', $pagosVigentes, 'bi-calendar3', 'verde'),
+                $this->metricaReal('Por pagar vencido', $pagosVencidos, 'bi-exclamation-circle', 'ambar'),
+            ],
+            'paneles' => [
+                ['titulo' => 'Cuentas por cobrar', 'icono' => 'bi-pie-chart', 'tipo' => 'anillo', 'valor' => (string) $porCobrar->count(), 'unidad' => 'Documentos', 'filas' => [['Vigentes', (string) $cobrosVigentes->count()], ['Vencidas', (string) $cobrosVencidos->count()], ['Sin saldo', (string) $porCobrar->filter(fn (array $fila): bool => $fila['saldo'] <= 0)->count()]], 'gradiente' => $this->gradienteSaldos($cobrosVigentes->count(), $cobrosVencidos->count(), $porCobrar->filter(fn (array $fila): bool => $fila['saldo'] <= 0)->count(), $totalCuentasCobrar)],
+                ['titulo' => 'Cuentas por pagar', 'icono' => 'bi-bar-chart', 'tipo' => 'columnas', 'filas' => [['Vigentes', $this->importeAgrupado($pagosVigentes), $this->porcentaje($pagosVigentes->count(), $porPagar->count())], ['Vencidas', $this->importeAgrupado($pagosVencidos), $this->porcentaje($pagosVencidos->count(), $porPagar->count())]]],
+                ['titulo' => 'Resumen de saldos', 'icono' => 'bi-exclamation-triangle', 'tipo' => 'lista', 'filas' => [['Por cobrar', (string) $porCobrar->count().' documentos'], ['Por pagar', (string) $porPagar->count().' documentos'], ['Registros visibles', (string) $filas->count()]]],
+            ],
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function formatearFila(object $cuenta, string $tipo, string $tercero, string $documento): array
+    {
+        $saldo = max(0, round((float) $cuenta->monto_original - (float) $cuenta->total_aplicado, 2));
+        $fechaVencimiento = (string) $cuenta->vence_en;
+        $estado = $saldo <= 0 ? 'Pagada' : ($fechaVencimiento < Carbon::today()->toDateString() ? 'Vencida' : ((float) $cuenta->total_aplicado > 0 ? 'Parcial' : (string) $cuenta->estado));
+
+        return [
+            'documento' => $documento, 'tercero' => $tercero ?: 'Sin nombre en el documento', 'tipo' => $tipo,
+            'emision' => Carbon::parse($cuenta->fecha_emision ?? $cuenta->fecha_compra)->format('d/m/Y'),
+            'vence' => Carbon::parse($fechaVencimiento)->format('d/m/Y'), 'saldo' => $saldo,
+            'moneda' => (string) $cuenta->moneda, 'estado' => $estado,
+            'tono' => $estado === 'Vencida' ? 'rojo' : ($estado === 'Pagada' ? 'verde' : ($estado === 'Parcial' ? 'violeta' : 'azul')),
+            'vence_orden' => $fechaVencimiento, 'fecha_orden' => (string) ($cuenta->fecha_emision ?? $cuenta->fecha_compra),
+        ];
+    }
+
+    private function nombreReceptor(string $datos): string
+    {
+        $receptor = json_decode($datos, true);
+        if (! is_array($receptor)) {
+            return '';
+        }
+
+        return (string) ($receptor['razon_social'] ?? $receptor['nombre_contacto'] ?? $receptor['nombre'] ?? '');
+    }
+
+    /** @param Collection<int, array<string, mixed>> $cuentas
+     * @return array<string, string>
+     */
+    private function metricaReal(string $titulo, Collection $cuentas, string $icono, string $tono): array
+    {
+        return ['titulo' => $titulo, 'valor' => $this->importeAgrupado($cuentas), 'icono' => $icono, 'tono' => $tono, 'detalle' => $cuentas->count().' documentos'];
+    }
+
+    private function importeAgrupado(Collection $cuentas): string
+    {
+        if ($cuentas->isEmpty()) {
+            return 'PEN 0,00';
+        }
+
+        return $cuentas->groupBy('moneda')
+            ->map(fn (Collection $grupo, string $moneda): string => $this->formatearImporte((float) $grupo->sum('saldo'), $moneda))
+            ->implode(' · ');
+    }
+
+    private function formatearImporte(float $importe, string $moneda): string
+    {
+        return $moneda.' '.number_format($importe, 2, ',', ' ');
+    }
+
+    private function porcentaje(int $parte, int $total): int
+    {
+        return $total === 0 ? 0 : (int) round(($parte / $total) * 100);
+    }
+
+    private function gradienteSaldos(int $vigentes, int $vencidos, int $pagados, int $total): string
+    {
+        $porcentajeVigentes = $this->porcentaje($vigentes, $total);
+        $porcentajeVencidos = $porcentajeVigentes + $this->porcentaje($vencidos, $total);
+
+        return 'conic-gradient(#0950c6 0 '.$porcentajeVigentes.'%, #f34d61 '.$porcentajeVigentes.'% '.$porcentajeVencidos.'%, #29b66a '.$porcentajeVencidos.'% 100%)';
+    }
+}

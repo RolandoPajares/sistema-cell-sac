@@ -130,17 +130,28 @@
                                             @if ($quotation->notas)
                                                 <p>{{ $quotation->notas }}</p>
                                             @endif
-                                            <div class="cotizaciones-demo-actions" aria-label="Acciones demostrativas de cotización">
-                                                @if (in_array($status, ['Borrador', 'Pendiente'], true))
-                                                    <button type="button" data-quotation-demo-action="enviar" data-reference="{{ $quotationReference }}" data-customer="{{ $customerName }}">Enviar cotización</button>
-                                                @endif
-                                                @if (in_array($status, ['Pendiente', 'Enviada'], true))
-                                                    <button type="button" data-quotation-demo-action="aprobar" data-reference="{{ $quotationReference }}" data-customer="{{ $customerName }}">Aprobar cotización</button>
-                                                @endif
-                                                @if ($status === 'Aprobada')
-                                                    <button type="button" data-quotation-demo-action="convertir" data-reference="{{ $quotationReference }}" data-customer="{{ $customerName }}">Convertir en venta</button>
-                                                @endif
-                                            </div>
+                                            <div class="cotizaciones-demo-actions" aria-label="Acciones de cotizacion">
+    @if (in_array($status, ['Borrador', 'Pendiente'], true))
+        @if ($puedeEnviar && $puedeDescargar && filled($quotation->customer?->correo))
+            <button type="button" data-quotation-action="enviar" data-reference="{{ $quotationReference }}" data-customer="{{ $customerName }}" data-recipient="{{ $quotation->customer->correo }}" data-download="{{ route('management.quotations.export', $quotation) }}" data-send="{{ route('management.quotations.update.send', $quotation) }}">Enviar cotizacion</button>
+        @else
+            <button type="button" disabled title="Se requieren permisos de actualizacion y exportacion, y un correo valido del cliente">Enviar cotizacion</button>
+        @endif
+    @endif
+    @if (in_array($quotation->id, $aprobables, true))
+        <form method="POST" action="{{ route('management.quotations.approve', $quotation) }}" style="display: contents">
+            @csrf
+            <button type="submit">Aprobar cotizacion</button>
+        </form>
+    @endif
+    @if ($status === 'Aprobada')
+        @if ($puedeCrearVenta)
+            <button type="button" data-quotation-action="convertir" data-reference="{{ $quotationReference }}" data-customer="{{ $customerName }}" data-convert="{{ route('management.sales.convert_quotation', $quotation) }}" data-site-id="{{ $quotation->sede_id }}">Convertir en venta</button>
+        @else
+            <button type="button" disabled title="Se requiere el permiso de creacion de ventas">Convertir en venta</button>
+        @endif
+    @endif
+</div>
                                         </div>
                                     </details>
                                 </td>
@@ -203,63 +214,118 @@
                 @endif
             </div>
         </dialog>
-
-        <dialog class="admin-dialog cotizaciones-demo-dialog" id="accion-demostrativa-cotizacion" aria-labelledby="accion-demostrativa-title" data-quotation-demo-dialog>
+        <dialog class="admin-dialog cotizaciones-demo-dialog" id="accion-demostrativa-cotizacion" aria-labelledby="accion-cotizacion-title" data-quotation-dialog>
             <header class="admin-dialog-header">
-                <div><h2 id="accion-demostrativa-title" data-quotation-demo-title>Acción de cotización</h2><p data-quotation-demo-description>Revisa la acción seleccionada.</p></div>
-                <button class="admin-dialog-close" type="button" data-close-quotation-demo aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+                <div><h2 id="accion-cotizacion-title" data-quotation-title>Accion de cotizacion</h2><p data-quotation-description>Revisa la accion seleccionada.</p></div>
+                <button class="admin-dialog-close" type="button" data-close-quotation-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
             </header>
             <div class="admin-dialog-body cotizaciones-demo-body">
-                <div class="cotizaciones-demo-warning"><i class="bi bi-info-circle" aria-hidden="true"></i><p>Interfaz demostrativa: no se enviará, aprobará ni convertirá la cotización y no se crearán ventas.</p></div>
-                <dl><div><dt>Cotización</dt><dd data-quotation-demo-reference>—</dd></div><div><dt>Cliente</dt><dd data-quotation-demo-customer>—</dd></div></dl>
-                <p class="cotizaciones-demo-feedback" data-quotation-demo-feedback role="status" aria-live="polite" hidden></p>
+                <div class="cotizaciones-demo-warning"><i class="bi bi-info-circle" aria-hidden="true"></i><p data-quotation-message></p></div>
+                <dl><div><dt>Cotizacion</dt><dd data-quotation-reference>—</dd></div><div><dt>Cliente</dt><dd data-quotation-customer>—</dd></div></dl>
+                <div data-manual-send hidden>
+                    <a class="cotizaciones-filter-button" data-quotation-download href="#" download>Descargar PDF</a>
+                    <a class="cotizaciones-filter-button" data-quotation-mailto href="#">Abrir correo para envio manual</a>
+                    <form id="confirmar-envio-cotizacion" method="POST" action="#" data-manual-send-form>
+                        @csrf
+                        <label><input type="checkbox" name="confirmar_envio_manual" value="1" required> Confirmo que envie manualmente el PDF al destinatario indicado.</label>
+                    </form>
+                </div>
+                <form id="convertir-cotizacion" method="POST" action="#" data-conversion-form hidden>
+                    @csrf
+                    <label for="almacen-conversion-cotizacion">Almacén autorizado para la venta</label>
+                    <select id="almacen-conversion-cotizacion" name="almacen_id" required>
+                        <option value="">Seleccionar almacén...</option>
+                        @foreach ($almacenesVenta as $almacen)
+                            <option value="{{ $almacen->id }}" data-site-id="{{ $almacen->sede_id }}">{{ $almacen->sede_nombre }} · {{ $almacen->nombre }}</option>
+                        @endforeach
+                    </select>
+                </form>
+                <p class="cotizaciones-demo-feedback" data-quotation-blocked role="status" aria-live="polite" hidden></p>
             </div>
-            <footer class="cotizaciones-demo-footer"><button class="cotizaciones-filter-button" type="button" data-close-quotation-demo>Cancelar</button><button class="cotizaciones-primary-button" type="button" data-confirm-quotation-demo>Confirmar (demostración)</button></footer>
+            <footer class="cotizaciones-demo-footer">
+                <button class="cotizaciones-filter-button" type="button" data-close-quotation-dialog>Cerrar</button>
+                <button class="cotizaciones-primary-button" type="submit" form="confirmar-envio-cotizacion" data-record-manual-send hidden>Registrar envio manual</button>
+                <button class="cotizaciones-primary-button" type="submit" form="convertir-cotizacion" data-confirm-conversion hidden>Crear venta en borrador</button>
+            </footer>
         </dialog>
     </section>
 @endsection
-
 @push('scripts')
     <script>
         (() => {
-            const dialog = document.querySelector('[data-quotation-demo-dialog]');
+            const dialog = document.querySelector('[data-quotation-dialog]');
             if (!dialog) {
                 return;
             }
 
-            const actionTitles = {
-                enviar: ['Preparar envío de cotización', 'El envío real requiere una integración de comunicación.'],
-                aprobar: ['Revisar aprobación de cotización', 'La aprobación real requiere una política y una acción autorizada.'],
-                convertir: ['Revisar conversión a venta', 'La conversión real requiere un flujo transaccional autorizado.'],
+            const contenido = {
+                enviar: {
+                    titulo: 'Enviar cotizacion manualmente',
+                    descripcion: 'Descarga el PDF y envialo desde tu correo.',
+                    mensaje: 'Technology Cell no envia correos automaticamente. Descarga el PDF, adjuntalo al mensaje y envialo al destinatario mostrado. Despues confirma aqui el envio realizado.',
+                },
+                convertir: {
+                    titulo: 'Convertir cotizacion en venta',
+                    descripcion: 'La venta se creara como borrador y no descontara existencias.',
+                    mensaje: 'Selecciona el almacen autorizado. La venta quedara pendiente de confirmacion; el inventario se descontara solo al confirmar la venta.',
+                },
             };
-            const title = dialog.querySelector('[data-quotation-demo-title]');
-            const description = dialog.querySelector('[data-quotation-demo-description]');
-            const reference = dialog.querySelector('[data-quotation-demo-reference]');
-            const customer = dialog.querySelector('[data-quotation-demo-customer]');
-            const feedback = dialog.querySelector('[data-quotation-demo-feedback]');
-            let selectedAction = '';
+            const titulo = dialog.querySelector('[data-quotation-title]');
+            const descripcion = dialog.querySelector('[data-quotation-description]');
+            const mensaje = dialog.querySelector('[data-quotation-message]');
+            const referencia = dialog.querySelector('[data-quotation-reference]');
+            const cliente = dialog.querySelector('[data-quotation-customer]');
+            const envioManual = dialog.querySelector('[data-manual-send]');
+            const formulario = dialog.querySelector('[data-manual-send-form]');
+            const descarga = dialog.querySelector('[data-quotation-download]');
+            const correo = dialog.querySelector('[data-quotation-mailto]');
+            const registro = dialog.querySelector('[data-record-manual-send]');
+            const conversion = dialog.querySelector('[data-conversion-form]');
+            const confirmarConversion = dialog.querySelector('[data-confirm-conversion]');
+            const almacenConversion = dialog.querySelector('#almacen-conversion-cotizacion');
+            const bloqueo = dialog.querySelector('[data-quotation-blocked]');
 
-            document.querySelectorAll('[data-quotation-demo-action]').forEach((button) => {
-                button.addEventListener('click', () => {
-                    selectedAction = button.dataset.quotationDemoAction ?? '';
-                    const copy = actionTitles[selectedAction] ?? ['Acción de cotización', 'La integración de esta acción está pendiente.'];
-                    title.textContent = copy[0];
-                    description.textContent = copy[1];
-                    reference.textContent = button.dataset.reference ?? '—';
-                    customer.textContent = button.dataset.customer ?? 'Cliente no disponible';
-                    feedback.hidden = true;
+            document.querySelectorAll('[data-quotation-action]').forEach((boton) => {
+                boton.addEventListener('click', () => {
+                    const accion = boton.dataset.quotationAction ?? '';
+                    const textos = contenido[accion];
+                    if (!textos) {
+                        return;
+                    }
+                    titulo.textContent = textos.titulo;
+                    descripcion.textContent = textos.descripcion;
+                    mensaje.textContent = textos.mensaje;
+                    referencia.textContent = boton.dataset.reference ?? '—';
+                    cliente.textContent = boton.dataset.customer ?? 'Cliente no disponible';
+                    const esEnvio = accion === 'enviar';
+                    envioManual.hidden = !esEnvio;
+                    registro.hidden = !esEnvio;
+                    conversion.hidden = esEnvio;
+                    confirmarConversion.hidden = esEnvio;
+                    bloqueo.hidden = true;
+                    formulario.action = boton.dataset.send ?? '#';
+                    conversion.action = boton.dataset.convert ?? '#';
+                    const sedeId = boton.dataset.siteId ?? '';
+                    Array.from(almacenConversion.options).forEach((opcion) => {
+                        const visible = opcion.value === '' || opcion.dataset.siteId === sedeId;
+                        opcion.hidden = !visible;
+                        opcion.disabled = !visible;
+                    });
+                    if (almacenConversion.selectedOptions[0]?.hidden) {
+                        almacenConversion.value = '';
+                    }
+                    descarga.href = boton.dataset.download ?? '#';
+                    const asunto = encodeURIComponent(`Cotizacion ${boton.dataset.reference ?? ''}`);
+                    const cuerpo = encodeURIComponent(`Adjunto la cotizacion ${boton.dataset.reference ?? ''}.`);
+                    correo.href = `mailto:${encodeURIComponent(boton.dataset.recipient ?? '')}?subject=${asunto}&body=${cuerpo}`;
+                    formulario.reset();
                     dialog.showModal();
                 });
             });
 
-            dialog.querySelectorAll('[data-close-quotation-demo]').forEach((button) => button.addEventListener('click', () => dialog.close()));
-            dialog.querySelector('[data-confirm-quotation-demo]')?.addEventListener('click', () => {
-                const actions = { enviar: 'no se envió', aprobar: 'no se aprobó', convertir: 'no se convirtió en venta' };
-                feedback.textContent = `Integración pendiente: ${actions[selectedAction] ?? 'no se ejecutó la acción'}; la cotización y las ventas reales no cambiaron.`;
-                feedback.hidden = false;
-            });
-            dialog.addEventListener('click', (event) => {
-                if (event.target === dialog) {
+            dialog.querySelectorAll('[data-close-quotation-dialog]').forEach((boton) => boton.addEventListener('click', () => dialog.close()));
+            dialog.addEventListener('click', (evento) => {
+                if (evento.target === dialog) {
                     dialog.close();
                 }
             });

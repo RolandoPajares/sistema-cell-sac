@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Models\User;
 use App\Servicios\ServicioAutorizacion;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -19,7 +18,7 @@ class GuardarSegmentoClienteRequest extends FormRequest
         return [
             'nombre' => ['required', 'string', 'max:120', Rule::unique('segmentos_clientes', 'nombre')],
             'roles' => ['required', 'array', 'min:1'],
-            'roles.*' => ['required', Rule::in(User::ROLES)],
+            'roles.*' => ['required', Rule::exists('roles', 'codigo')->where('activo', true)],
         ];
     }
 }

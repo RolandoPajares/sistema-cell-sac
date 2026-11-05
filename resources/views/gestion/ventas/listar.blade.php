@@ -184,7 +184,10 @@ $queryWithoutPage = request()->except(['page']);
                                 <td><span class="ventas-channel"><i class="bi bi-shop" aria-hidden="true"></i> {{ $order->canal ?: $order->pedido?->canal ?: 'Sin canal registrado' }}</span></td>
                                 <td><span class="ventas-status ventas-status--{{ $status['class'] }}"><i class="bi bi-circle-fill" aria-hidden="true"></i>{{ $status['label'] }}</span></td>
                                 <td><span class="ventas-receipt">No consultado</span></td>
-                                <td><span class="ventas-row-actions"><button class="ventas-action-button" type="button" data-sales-details="{{ $order->id }}" title="Ver detalle" aria-label="Ver detalle de venta {{ $order->codigo }}"><i class="bi bi-eye" aria-hidden="true"></i></button><button class="ventas-action-button" type="button" disabled title="Las ventas confirmadas no se editan" aria-label="Editar venta no disponible"><i class="bi bi-pencil" aria-hidden="true"></i></button>
+                                <td><span class="ventas-row-actions"><button class="ventas-action-button" type="button" data-sales-details="{{ $order->id }}" title="Ver detalle" aria-label="Ver detalle de venta {{ $order->codigo }}"><i class="bi bi-eye" aria-hidden="true"></i></button>@if (in_array($order->id, $editables, true))<a class="ventas-action-button" href="{{ route('management.sales', ['editar' => $order->id]) }}" title="Editar borrador" aria-label="Editar venta {{ $order->codigo }}"><i class="bi bi-pencil" aria-hidden="true"></i></a>@else<button class="ventas-action-button" type="button" disabled title="Solo se editan borradores autorizados sin movimientos asociados" aria-label="Editar venta no disponible"><i class="bi bi-pencil" aria-hidden="true"></i></button>@endif
+                                        @if (in_array($order->id, $confirmables, true) && $order->estado === 'borrador' && $order->pedido_id !== null)
+                                        <button class="ventas-action-button" type="button" data-open-sales-confirm="confirmar-venta-{{ $order->id }}" title="Confirmar venta y descontar existencias" aria-label="Confirmar venta {{ $order->codigo }}"><i class="bi bi-check-circle" aria-hidden="true"></i></button>
+                                        @endif
                                         @if (in_array($order->id, $cancelables) && $order->estado === 'confirmada' && $order->canal === 'presencial' && $order->pedido_id === null)
                                         <form method="post" action="{{ route('management.sales.cancel', $order) }}" data-sales-cancel>
                                             @csrf
@@ -203,6 +206,35 @@ $queryWithoutPage = request()->except(['page']);
                     </table>
                 </div>
                 @foreach ($orders as $order)
+                @if (in_array($order->id, $confirmables, true) && $order->estado === 'borrador' && $order->pedido_id !== null)
+                <dialog class="ventas-dialog" id="confirmar-venta-{{ $order->id }}" aria-labelledby="confirmar-venta-titulo-{{ $order->id }}">
+                    <div class="ventas-dialog-card">
+                        <header class="ventas-dialog-header"><div><h2 id="confirmar-venta-titulo-{{ $order->id }}">Confirmar venta {{ $order->codigo }}</h2><p>Se validarán las existencias y los identificadores antes de descontar inventario.</p></div><button class="ventas-dialog-close" type="button" data-close-sales-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
+                        <form class="ventas-modal-form" method="post" action="{{ route('management.sales.confirm', $order) }}" data-sales-confirm>
+                            @csrf
+                            <section class="ventas-modal-section">
+                                <div class="ventas-modal-section-header"><i class="bi bi-phone" aria-hidden="true"></i><h3>IMEI y números de serie</h3></div>
+                            @foreach ($order->detalles as $detalle)
+                                @php($configuracionDispositivos = $dispositivosPorDetalle->get($detalle->getKey(), ['requiere' => false, 'dispositivos' => collect()]))
+                                @if ($configuracionDispositivos['requiere'])
+                                <label class="ventas-modal-field"><span>{{ $detalle->descripcion_historica }} — {{ number_format((float) $detalle->cantidad, 0) }} unidad(es) serializadas</span>
+                                    <select name="dispositivos[{{ $detalle->getKey() }}][]" multiple required size="{{ min(5, max(2, (int) $detalle->cantidad)) }}">
+                                        @foreach ($configuracionDispositivos['dispositivos'] as $dispositivo)
+                                            <option value="{{ $dispositivo->id }}">{{ $dispositivo->imei ?: $dispositivo->numero_serie ?: 'Dispositivo '.$dispositivo->id }}</option>
+                                        @endforeach
+                                    </select>
+                                </label>
+                                @endif
+                            @endforeach
+                                @if ($order->detalles->contains(fn ($detalle) => ($dispositivosPorDetalle->get($detalle->getKey())['requiere'] ?? false) && $dispositivosPorDetalle->get($detalle->getKey())['dispositivos']->count() < (int) $detalle->cantidad))
+                                    <p role="status">No hay suficientes IMEI o series disponibles en el almacén asociado. Registra o recibe las unidades antes de confirmar.</p>
+                                @endif
+                            </section>
+                            <footer class="ventas-modal-footer"><button class="ventas-modal-cancel" type="button" data-close-sales-dialog>Cancelar</button><span></span><button class="ventas-primary-button" type="submit" @disabled($order->detalles->contains(fn ($detalle) => ($dispositivosPorDetalle->get($detalle->getKey())['requiere'] ?? false) && $dispositivosPorDetalle->get($detalle->getKey())['dispositivos']->count() < (int) $detalle->cantidad))>Confirmar y descontar existencias</button></footer>
+                        </form>
+                    </div>
+                </dialog>
+                @endif
                 <dialog class="ventas-dialog" id="detalle-venta-{{ $order->id }}" aria-labelledby="detalle-venta-titulo-{{ $order->id }}">
                     <div class="ventas-dialog-card">
                         <header class="ventas-dialog-header">

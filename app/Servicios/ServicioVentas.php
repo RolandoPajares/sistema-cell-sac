@@ -4,9 +4,11 @@ namespace App\Servicios;
 
 use App\Models\Catalogo\Producto;
 use App\Models\Clientes\Cliente;
+use App\Models\Comercio\DetalleVenta;
 use App\Models\Comercio\Venta;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -150,6 +152,256 @@ class ServicioVentas
 
             return $bloqueada;
         }, 3);
+    }
+
+    /** @param array{cliente_id:int,fecha_venta:string,observaciones:?string,items:array<int,array{producto_id:int,cantidad:int}>} $datos */
+    public function actualizarBorrador(Venta $venta, array $datos, User $actor, ?string $ip): Venta
+    {
+        $this->autorizacion->assertAllowed($actor, 'gestion.ventas.actualizar');
+        foreach (['ventas', 'detalles_ventas', 'existencias_almacen', 'movimientos_inventario', 'pagos', 'documentos_electronicos', 'devoluciones_garantias'] as $tabla) {
+            abort_unless(Schema::hasTable($tabla), 503, 'Faltan tablas necesarias para editar la venta de forma segura.');
+        }
+
+        return DB::transaction(function () use ($venta, $datos, $actor, $ip): Venta {
+            $ventaBloqueada = Venta::query()->whereKey($venta->getKey())->lockForUpdate()->firstOrFail();
+            abort_unless($this->autorizacion->allowsRecord($actor, 'gestion.ventas.actualizar', (int) $ventaBloqueada->empresa_id, (int) $ventaBloqueada->sede_id), 403);
+            abort_unless($ventaBloqueada->estado === 'borrador' && $ventaBloqueada->pedido_id === null, 409, 'Solo se pueden editar ventas en borrador sin pedido asociado.');
+            abort_unless($ventaBloqueada->canal === 'presencial', 409, 'La edicion de ventas vinculadas a otros canales requiere su flujo correspondiente.');
+            abort_if((float) $ventaBloqueada->descuento !== 0.0 || (float) $ventaBloqueada->impuestos !== 0.0, 409, 'La venta tiene descuentos o impuestos que requieren sus reglas de edicion.');
+            $ubicacion = $this->autorizacion->operationLocation($actor);
+            abort_unless((int) $ventaBloqueada->empresa_id === $ubicacion['empresa_id'] && (int) $ventaBloqueada->sede_id === $ubicacion['sede_id']
+                && (int) $ventaBloqueada->almacen_id === $ubicacion['almacen_id'], 409, 'La edicion requiere operar desde la ubicacion original de la venta.');
+            if (Schema::hasColumns('movimientos_inventario', ['documento_tipo', 'documento_id'])) {
+                abort_if(DB::table('movimientos_inventario')->where('documento_tipo', 'venta')->where('documento_id', (string) $ventaBloqueada->id)->exists(), 409, 'La venta ya tiene movimientos y no puede editarse.');
+            }
+            foreach (['pagos', 'documentos_electronicos', 'devoluciones_garantias'] as $tabla) {
+                if (Schema::hasColumn($tabla, 'venta_id')) {
+                    abort_if(DB::table($tabla)->where('venta_id', $ventaBloqueada->id)->exists(), 409, 'La venta ya tiene registros asociados y no puede editarse.');
+                }
+            }
+            $detallesAnteriores = $ventaBloqueada->detalles()->lockForUpdate()->get()->keyBy('producto_id');
+            abort_if($detallesAnteriores->contains(fn ($detalle): bool => $detalle->variante_id !== null), 409, 'Las ventas con variantes requieren el flujo de edicion por variante.');
+
+            $cliente = Cliente::query()->whereKey($datos['cliente_id'])->where('empresa_id', $ventaBloqueada->empresa_id)->where('activo', true)->first();
+            abort_unless($cliente !== null, 422, 'El cliente no esta activo en la empresa de la venta.');
+            $items = collect($datos['items'])->sortBy('producto_id')->values();
+            abort_if($items->isEmpty() || $items->pluck('producto_id')->unique()->count() !== $items->count(), 422, 'Los productos de la venta no son validos.');
+            $productos = Producto::query()->whereIn('id', $items->pluck('producto_id'))->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            $totalCentimos = 0;
+            $lineas = [];
+
+            foreach ($items as $item) {
+                $producto = $productos->get((int) $item['producto_id']);
+                abort_unless($producto instanceof Producto && $producto->activo && (int) $producto->empresa_id === (int) $ventaBloqueada->empresa_id, 422, 'Un producto no esta disponible en la empresa de la venta.');
+                $cantidad = (int) $item['cantidad'];
+                $saldo = DB::table('existencias_almacen')->where('empresa_id', $ventaBloqueada->empresa_id)->where('sede_id', $ventaBloqueada->sede_id)
+                    ->where('almacen_id', $ventaBloqueada->almacen_id)->where('producto_id', $producto->id)->lockForUpdate()->get();
+                abort_unless($saldo->count() === 1 && $saldo->first()->variante_id === null, 409, 'La existencia del producto no tiene un saldo unico compatible con la edicion.');
+                abort_if($cantidad > floor((float) $saldo->first()->cantidad_fisica - (float) $saldo->first()->cantidad_reservada), 422, 'La existencia disponible no alcanza para la cantidad solicitada.');
+                abort_if(DB::table('dispositivos')->where('producto_id', $producto->id)->exists(), 409, 'Los productos serializados requieren seleccionar sus identificadores antes de editarse.');
+                $precioHistorico = $detallesAnteriores->get($producto->id)?->precio_unitario;
+                $precioCentimos = $this->centimos((string) ($precioHistorico ?? $producto->effective_price));
+                $importeCentimos = $precioCentimos * $cantidad;
+                abort_if($importeCentimos > self::MAX_CENTIMOS - $totalCentimos, 422, 'La venta supera el importe permitido.');
+                $totalCentimos += $importeCentimos;
+                $lineas[] = [$producto, $cantidad, $precioCentimos, $importeCentimos];
+            }
+
+            $antes = ['cliente_id' => $ventaBloqueada->cliente_id, 'fecha_venta' => $ventaBloqueada->fecha_venta?->toDateString(), 'total' => $ventaBloqueada->total];
+            $ventaBloqueada->update([
+                'cliente_id' => $cliente->id,
+                'fecha_venta' => CarbonImmutable::parse($datos['fecha_venta'])->setTimeFrom($ventaBloqueada->fecha_venta ?? now()),
+                'observaciones' => $datos['observaciones'] ?? null,
+                'subtotal' => $this->importe($totalCentimos),
+                'descuento' => '0.00',
+                'impuestos' => '0.00',
+                'total' => $this->importe($totalCentimos),
+            ]);
+            $ventaBloqueada->detalles()->delete();
+            foreach ($lineas as [$producto, $cantidad, $precioCentimos, $importeCentimos]) {
+                $ventaBloqueada->detalles()->create([
+                    'producto_id' => $producto->id,
+                    'descripcion_historica' => $producto->nombre,
+                    'cantidad' => $cantidad,
+                    'precio_unitario' => $this->importe($precioCentimos),
+                    'total_linea' => $this->importe($importeCentimos),
+                ]);
+            }
+            $this->auditoria->record($actor->id, 'venta.borrador_actualizado', 'ventas', $ventaBloqueada->id, $antes,
+                ['cliente_id' => $cliente->id, 'fecha_venta' => $ventaBloqueada->fecha_venta?->toDateString(), 'total' => $ventaBloqueada->total], $ip,
+                scope: ['empresa_id' => (int) $ventaBloqueada->empresa_id, 'sede_id' => (int) $ventaBloqueada->sede_id]);
+
+            return $ventaBloqueada->load('detalles');
+        }, 3);
+    }
+
+    /** @param array<int|string, array<int, int|string>> $dispositivosPorDetalle */
+    public function confirmarBorradorCotizacion(Venta $venta, User $actor, ?string $ip, array $dispositivosPorDetalle = []): Venta
+    {
+        $this->autorizacion->assertAllowed($actor, 'gestion.ventas.crear');
+        abort_unless(Schema::hasColumns('ventas', ['pedido_id', 'canal'])
+            && Schema::hasColumns('detalles_ventas', ['detalle_pedido_id', 'variante_id'])
+            && Schema::hasColumns('movimientos_inventario', ['documento_tipo', 'documento_id', 'variante_id'])
+            && Schema::hasColumns('dispositivos', ['id', 'producto_id', 'variante_id', 'almacen_actual_id', 'estado', 'fecha_salida'])
+            && Schema::hasColumns('movimientos_dispositivos', ['dispositivo_id', 'movimiento_inventario_id', 'estado_anterior', 'estado_nuevo'])
+            && Schema::hasColumns('detalles_ventas_dispositivos', ['detalle_venta_id', 'dispositivo_id']),
+            503, 'El esquema no permite confirmar de forma segura una venta vinculada a cotizacion.');
+
+        return DB::transaction(function () use ($venta, $actor, $ip, $dispositivosPorDetalle): Venta {
+            $ventaBloqueada = Venta::query()->whereKey($venta->getKey())->lockForUpdate()->firstOrFail();
+            abort_unless($this->autorizacion->allowsRecord($actor, 'gestion.ventas.crear', (int) $ventaBloqueada->empresa_id, (int) $ventaBloqueada->sede_id), 403);
+
+            $detalles = $ventaBloqueada->detalles()->orderBy('id')->lockForUpdate()->get();
+            abort_unless($ventaBloqueada->pedido_id !== null && $ventaBloqueada->canal === 'presencial', 409, 'Solo se confirma desde esta accion una venta en borrador vinculada a pedido presencial.');
+            abort_unless($detalles->isNotEmpty() && $detalles->every(fn (DetalleVenta $detalle): bool => $detalle->detalle_pedido_id !== null)
+                && $detalles->pluck('detalle_pedido_id')->unique()->count() === $detalles->count(), 409, 'Los detalles de la venta no mantienen un vinculo unico con el pedido.');
+            abort_if(array_diff(array_map('intval', array_keys($dispositivosPorDetalle)), $detalles->modelKeys()) !== [], 422, 'Se enviaron dispositivos para detalles ajenos a esta venta.');
+            $identificadoresEnviados = collect($dispositivosPorDetalle)->flatten()->map(fn ($id): int => (int) $id);
+            abort_if($identificadoresEnviados->count() !== $identificadoresEnviados->unique()->count(), 422, 'No puedes asociar el mismo dispositivo a más de un detalle de la venta.');
+
+            $pedido = DB::table('pedidos')->where('id', $ventaBloqueada->pedido_id)->lockForUpdate()->first();
+            abort_unless($pedido !== null
+                && (int) $pedido->empresa_id === (int) $ventaBloqueada->empresa_id
+                && (int) $pedido->sede_id === (int) $ventaBloqueada->sede_id
+                && (int) $pedido->almacen_id === (int) $ventaBloqueada->almacen_id
+                && $pedido->canal === 'presencial' && $pedido->tipo_venta === 'fisica',
+                409, 'El pedido no coincide con el alcance o el tipo de venta de la cotizacion.');
+            abort_unless(DB::table('almacenes')->where('id', $ventaBloqueada->almacen_id)
+                ->where('sede_id', $ventaBloqueada->sede_id)->where('activo', true)->where('permite_venta', true)->exists(),
+                409, 'El almacen original ya no esta habilitado para ventas.');
+
+            if ($ventaBloqueada->estado === 'confirmada') {
+                abort_unless($this->movimientosDeVentaCoinciden($ventaBloqueada, $detalles), 409, 'La venta ya confirmada requiere conciliacion de movimientos; no se repetira el descuento.');
+                abort_unless($this->dispositivosDeVentaCoinciden($detalles, $dispositivosPorDetalle), 409, 'Los dispositivos asociados no coinciden con la confirmacion original.');
+
+                return $ventaBloqueada;
+            }
+            abort_unless($ventaBloqueada->estado === 'borrador' && $pedido->estado === 'Pendiente', 409, 'La venta o el pedido ya no estan en un estado confirmable.');
+
+            $detallesPedido = DB::table('detalles_pedidos')->where('pedido_id', $pedido->id)
+                ->whereIn('id', $detalles->pluck('detalle_pedido_id'))->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            abort_unless($detallesPedido->count() === $detalles->count(), 409, 'Faltan detalles del pedido original.');
+            $productos = Producto::query()->whereIn('id', $detalles->pluck('producto_id')->unique())->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+
+            foreach ($detalles as $detalle) {
+                $detallePedido = $detallesPedido->get((int) $detalle->detalle_pedido_id);
+                abort_unless($detallePedido !== null
+                    && (int) $detallePedido->producto_id === (int) $detalle->producto_id
+                    && (string) ($detallePedido->variante_id ?? '') === (string) ($detalle->variante_id ?? '')
+                    && (float) $detallePedido->cantidad === (float) $detalle->cantidad,
+                    409, 'Un detalle de venta no coincide con su detalle de pedido.');
+                $producto = $productos->get((int) $detalle->producto_id);
+                abort_unless($producto instanceof Producto && $producto->activo && (int) $producto->empresa_id === (int) $ventaBloqueada->empresa_id, 409, 'Un producto de la venta no esta activo en la empresa autorizada.');
+                abort_unless(preg_match('/\A[1-9][0-9]*(?:\.0{1,6})?\z/', (string) $detalle->cantidad) === 1 && (float) $detalle->cantidad <= 1000, 409, 'Una cantidad de venta requiere conciliacion.');
+                $varianteId = $detalle->variante_id === null ? null : (int) $detalle->variante_id;
+                $varianteSerializada = false;
+                if ($varianteId !== null) {
+                    $variante = DB::table('variantes_productos')->where('id', $varianteId)->where('producto_id', $producto->id)
+                        ->where('estado', 'activo')->lockForUpdate()->first(['controla_serie']);
+                    abort_unless($variante !== null, 409, 'Una variante ya no esta activa o no corresponde al producto.');
+                    $varianteSerializada = (bool) $variante->controla_serie;
+                }
+                $dispositivos = array_values(array_unique(array_map('intval', $dispositivosPorDetalle[$detalle->getKey()] ?? [])));
+                $requiereDispositivos = $varianteSerializada || DB::table('dispositivos')->where('producto_id', $producto->id)
+                    ->when($varianteId === null, fn ($consulta) => $consulta->whereNull('variante_id'), fn ($consulta) => $consulta->where('variante_id', $varianteId))->exists();
+                if ($requiereDispositivos) {
+                    abort_unless((float) $detalle->cantidad === floor((float) $detalle->cantidad)
+                        && count($dispositivos) === (int) $detalle->cantidad, 422, 'Selecciona un IMEI o numero de serie disponible por cada unidad.');
+                    abort_unless(count($dispositivosPorDetalle[$detalle->getKey()] ?? []) === count($dispositivos), 422, 'No repitas un dispositivo en el mismo detalle.');
+                } else {
+                    abort_if($dispositivos !== [], 422, 'El detalle no requiere IMEI ni numero de serie.');
+                }
+
+                $movimiento = $this->inventario->changeLockedProductInWarehouse(
+                    $producto,
+                    $varianteId,
+                    'salida',
+                    (int) $detalle->cantidad,
+                    'Salida por confirmacion de venta #'.$ventaBloqueada->id,
+                    $actor,
+                    (int) $ventaBloqueada->empresa_id,
+                    (int) $ventaBloqueada->sede_id,
+                    (int) $ventaBloqueada->almacen_id,
+                    'venta',
+                    (string) $ventaBloqueada->id,
+                );
+                abort_unless($movimiento !== null, 409, 'No se pudo registrar el movimiento de inventario para un detalle.');
+                if ($dispositivos !== []) {
+                    $dispositivosBloqueados = DB::table('dispositivos')->whereIn('id', $dispositivos)->orderBy('id')->lockForUpdate()->get();
+                    abort_unless($dispositivosBloqueados->count() === count($dispositivos), 409, 'Un dispositivo seleccionado ya no existe.');
+                    foreach ($dispositivosBloqueados as $dispositivo) {
+                        abort_unless((int) $dispositivo->producto_id === (int) $detalle->producto_id
+                            && (string) ($dispositivo->variante_id ?? '') === (string) ($varianteId ?? '')
+                            && (int) $dispositivo->almacen_actual_id === (int) $ventaBloqueada->almacen_id
+                            && $dispositivo->estado === 'disponible', 409, 'Un IMEI o numero de serie ya no esta disponible en el almacen de la venta.');
+                        DB::table('detalles_ventas_dispositivos')->insert([
+                            'detalle_venta_id' => $detalle->getKey(), 'dispositivo_id' => $dispositivo->id,
+                        ]);
+                        $actualizados = DB::table('dispositivos')->where('id', $dispositivo->id)->where('estado', 'disponible')
+                            ->where('almacen_actual_id', $ventaBloqueada->almacen_id)->update([
+                                'estado' => 'vendido', 'almacen_actual_id' => null, 'fecha_salida' => now(),
+                            ]);
+                        abort_unless($actualizados === 1, 409, 'El dispositivo fue tomado por otra operacion; vuelve a consultar la disponibilidad.');
+                        DB::table('movimientos_dispositivos')->insert([
+                            'dispositivo_id' => $dispositivo->id, 'movimiento_inventario_id' => $movimiento->getKey(),
+                            'estado_anterior' => 'disponible', 'estado_nuevo' => 'vendido', 'creado_en' => now(),
+                        ]);
+                    }
+                }
+            }
+
+            $estadoAnterior = $ventaBloqueada->estado;
+            $ventaBloqueada->update(['estado' => 'confirmada']);
+            $this->auditoria->record($actor->id, 'venta.confirmada_desde_cotizacion', 'ventas', $ventaBloqueada->id,
+                ['estado' => $estadoAnterior], ['estado' => 'confirmada', 'pedido_id' => $pedido->id, 'movimientos' => $detalles->count()], $ip,
+                scope: ['empresa_id' => (int) $ventaBloqueada->empresa_id, 'sede_id' => (int) $ventaBloqueada->sede_id]);
+
+            return $ventaBloqueada->load('detalles');
+        }, 3);
+    }
+
+    /** @param Collection<int, DetalleVenta> $detalles */
+    private function movimientosDeVentaCoinciden(Venta $venta, Collection $detalles): bool
+    {
+        $movimientos = DB::table('movimientos_inventario')
+            ->where('documento_tipo', 'venta')->where('documento_id', (string) $venta->id)
+            ->where('tipo_movimiento', 'salida')->lockForUpdate()->get();
+        if ($movimientos->count() !== $detalles->count()) {
+            return false;
+        }
+
+        foreach ($detalles as $detalle) {
+            $coincide = $movimientos->first(fn (object $movimiento): bool => (int) $movimiento->producto_id === (int) $detalle->producto_id
+                && (string) ($movimiento->variante_id ?? '') === (string) ($detalle->variante_id ?? '')
+                && (float) $movimiento->cantidad === (float) $detalle->cantidad
+                && (int) $movimiento->empresa_id === (int) $venta->empresa_id
+                && (int) $movimiento->sede_id === (int) $venta->sede_id
+                && (int) $movimiento->almacen_id === (int) $venta->almacen_id);
+            if ($coincide === null) {
+                return false;
+            }
+            $movimientos->forget($movimientos->search(fn (object $movimiento): bool => $movimiento->id === $coincide->id));
+        }
+
+        return $movimientos->isEmpty();
+    }
+
+    /** @param Collection<int, DetalleVenta> $detalles
+     *  @param array<int|string, array<int, int|string>> $dispositivosPorDetalle
+     */
+    private function dispositivosDeVentaCoinciden(Collection $detalles, array $dispositivosPorDetalle): bool
+    {
+        foreach ($detalles as $detalle) {
+            $asociados = DB::table('detalles_ventas_dispositivos')->where('detalle_venta_id', $detalle->getKey())
+                ->orderBy('dispositivo_id')->pluck('dispositivo_id')->map(fn ($id): int => (int) $id)->all();
+            $solicitados = array_values(array_unique(array_map('intval', $dispositivosPorDetalle[$detalle->getKey()] ?? [])));
+            sort($solicitados);
+            if ($asociados !== $solicitados) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function centimos(string $precio): int

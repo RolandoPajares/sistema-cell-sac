@@ -10,7 +10,7 @@ class DetalleVenta extends Model
 {
     protected $table = 'detalles_ventas';
 
-    protected $fillable = ['venta_id', 'producto_id', 'variante_id', 'descripcion_historica', 'sku_historico', 'cantidad', 'precio_unitario', 'descuento', 'tasa_impuesto', 'impuesto', 'total_linea'];
+    protected $fillable = ['venta_id', 'producto_id', 'variante_id', 'detalle_pedido_id', 'descripcion_historica', 'sku_historico', 'cantidad', 'precio_unitario', 'descuento', 'tasa_impuesto', 'impuesto', 'total_linea'];
 
     public $timestamps = false;
 

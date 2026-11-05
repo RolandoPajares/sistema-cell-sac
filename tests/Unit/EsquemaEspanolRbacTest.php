@@ -6,10 +6,8 @@ use App\Http\Controllers\Gestion\Ventas\VentaController;
 use App\Http\Controllers\Paneles\ClienteMinorista\DashboardController as DashboardClienteMinorista;
 use App\Http\Controllers\Paneles\ResolutorDashboard;
 use App\Http\Middleware\RegistrarSesionUsuario;
-use App\Http\Requests\ActualizarVentaRequest;
 use App\Http\Requests\AjustarInventarioRequest;
 use App\Http\Requests\FiltroVentaRequest;
-use App\Http\Requests\GuardarVentaRequest;
 use App\Models\Auditoria\RegistroAuditoria;
 use App\Models\Catalogo\Producto;
 use App\Models\Comercio\DevolucionGarantia;
@@ -1239,7 +1237,6 @@ it('reads and exports only authorised sales, independently of orders and without
         'canal' => 'ecommerce', 'desde' => now()->toDateString(), 'hasta' => now()->toDateString(),
     ]))->assertOk()->streamedContent();
     expect($filteredExport)->toContain("'=VENTA")->not->toContain('VENTA-2');
-    DB::table('usuarios_sedes_roles')->update(['activo' => false]);
     expect($service->query($user, $filters)->count())->toBe(0);
     $this->get(route('management.sales'))->assertForbidden();
 });
@@ -1723,26 +1720,50 @@ it('confirms a physical sale once, deducts stock, and does not create an order o
         ->and((int) DB::table('existencias_almacen')->value('cantidad_fisica'))->toBe(5)
         ->and(DB::table('movimientos_inventario')->where('documento_tipo', 'anulacion_venta')->count())->toBe(1)
         ->and(DB::table('registros_auditoria')->where('accion', 'venta.anulada')->count())->toBe(1);
+    Schema::table('ventas', function (Blueprint $table): void {
+        $table->decimal('descuento', 15, 2)->default(0);
+        $table->decimal('impuestos', 15, 2)->default(0);
+    });
+    DB::table('permisos')->insert(['id' => 4, 'modulo_id' => 1, 'codigo' => 'gestion.ventas.actualizar']);
+    DB::table('roles_permisos')->insert(['rol_id' => 1, 'permiso_id' => 4, 'alcance' => 'sede']);
+    $borrador = Venta::create([
+        'empresa_id' => 1, 'sede_id' => 1, 'almacen_id' => 1, 'cliente_id' => 1,
+        'usuario_id' => $user->id, 'codigo' => 'BORRADOR-VENTA', 'estado' => 'borrador',
+        'moneda' => 'PEN', 'subtotal' => 12.35, 'total' => 12.35, 'fecha_venta' => now(),
+        'canal' => 'presencial', 'descuento' => 0, 'impuestos' => 0,
+    ]);
+    $borrador->detalles()->create([
+        'producto_id' => 1, 'descripcion_historica' => 'Producto ficticio',
+        'cantidad' => 1, 'precio_unitario' => 12.35, 'total_linea' => 12.35,
+    ]);
+    app(ServicioVentas::class)->actualizarBorrador($borrador, [
+        'cliente_id' => 1, 'fecha_venta' => now()->toDateString(), 'observaciones' => 'Borrador actualizado',
+        'items' => [['producto_id' => 1, 'cantidad' => 3]],
+    ], $user, null);
+    expect($borrador->fresh()->estado)->toBe('borrador')
+        ->and((float) $borrador->fresh()->total)->toBe(37.05)
+        ->and($borrador->fresh()->observaciones)->toBe('Borrador actualizado')
+        ->and((int) DB::table('detalles_ventas')->where('venta_id', $borrador->id)->value('cantidad'))->toBe(3)
+        ->and((int) DB::table('existencias_almacen')->value('cantidad_fisica'))->toBe(5)
+        ->and(DB::table('registros_auditoria')->where('accion', 'venta.borrador_actualizado')->where('entidad_id', $borrador->id)->exists())->toBeTrue();
+    $this->actingAs($user)->put(route('management.sales.update', $borrador->id), [
+        'cliente_id' => 1, 'fecha_venta' => now()->toDateString(), 'observaciones' => 'Actualizada desde el formulario',
+        'items' => [['producto_id' => 1, 'cantidad' => 2]],
+    ])->assertRedirect(route('management.sales'));
+    expect((float) $borrador->fresh()->total)->toBe(24.70)
+        ->and($borrador->fresh()->observaciones)->toBe('Actualizada desde el formulario')
+        ->and((int) DB::table('detalles_ventas')->where('venta_id', $borrador->id)->value('cantidad'))->toBe(2)
+        ->and((int) DB::table('existencias_almacen')->value('cantidad_fisica'))->toBe(5);
     DB::table('usuarios_sedes_roles')->update(['activo' => false]);
     expect(fn () => app(ServicioVentas::class)->registrarFisica($datos, $user, str_repeat('e', 64), null))->toThrow(HttpException::class);
 });
 
-it('does not report a sale as registered while the sales ledger is not integrated', function (): void {
-    $controller = app(VentaController::class);
+it('keeps the sales update endpoint bound to the real sales model', function (): void {
+    $ruta = app('router')->getRoutes()->getByName('management.sales.update');
+    $metodo = new ReflectionMethod(VentaController::class, 'update');
 
-    foreach ([
-        fn () => $controller->store(new GuardarVentaRequest),
-        fn () => $controller->update(new ActualizarVentaRequest, new Pedido),
-    ] as $action) {
-        try {
-            $action();
-            $this->fail('La operación de ventas incompleta debe permanecer bloqueada.');
-        } catch (HttpException $exception) {
-            expect($exception->getStatusCode())->toBe(503);
-        }
-    }
-
-    expect(DB::table('pedidos')->count())->toBe(0);
+    expect($ruta?->getActionMethod())->toBe('update')
+        ->and((string) $metodo->getParameters()[1]->getType())->toBe('App\\Models\\Comercio\\Venta');
 });
 
 it('accepts zero only for an inventory adjustment', function (): void {

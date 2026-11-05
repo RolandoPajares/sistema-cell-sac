@@ -13,7 +13,7 @@ class Campania extends Model
     protected $fillable = [
         'nombre', 'ubicacion', 'titulo', 'descripcion', 'texto_boton', 'url_boton',
         'url_imagen', 'precio_anterior', 'precio_oferta', 'inicia_en', 'finaliza_en',
-        'activo', 'vistas', 'clics', 'creado_en', 'actualizado_en',
+        'activo', 'vistas', 'clics', 'creado_en', 'actualizado_en', 'empresa_id',
     ];
 
     public $timestamps = false;

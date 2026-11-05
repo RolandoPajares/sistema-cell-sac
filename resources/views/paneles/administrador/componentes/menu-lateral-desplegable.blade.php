@@ -58,7 +58,7 @@
             $enabledItem('management.products', 'Productos', 'bi-box-seam'),
             $enabledItem('management.categories', 'Categorías', 'bi-diagram-3'),
             $enabledItem('management.inventory', 'Inventario', 'bi-boxes'),
-            $enabledItem('management.inventory', 'Movimientos de inventario', 'bi-arrow-left-right'),
+            $enabledItem('management.inventory.movements', 'Movimientos de inventario', 'bi-arrow-left-right'),
             $enabledItem('management.inventory.preview.transfers', 'Transferencias entre sedes', 'bi-arrow-repeat'),
             $enabledItem('management.inventory.preview.shipments', 'Envíos y entregas', 'bi-truck'),
             $enabledItem('management.inventory.preview.serials', 'Control de IMEI y series', 'bi-phone'),

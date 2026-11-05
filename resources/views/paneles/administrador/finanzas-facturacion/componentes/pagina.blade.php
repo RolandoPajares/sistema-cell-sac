@@ -1,5 +1,5 @@
 @extends('layouts.administracion')
-@section('title', $pagina['titulo'].' — Vista de diseño')
+@section('title', $pagina['titulo'].' — '.(($pagina['datosReales'] ?? false) ? 'MariaDB' : 'Vista de diseño'))
 @section('body_class', 'modulo-finanzas-facturacion')
 @section('content')
 <section class="tc-ff" data-finanzas-diseno>
@@ -13,13 +13,13 @@
             @foreach ($pagina['acciones'] as $accion)
                 @php
                     $actionIndex = $loop->index;
-                    $routeFlow = match (($pagina['clave'] ?? '').'-'.$actionIndex) {
+                    $routeFlow = ($pagina['datosReales'] ?? false) ? null : match (($pagina['clave'] ?? '').'-'.$actionIndex) {
                         'pagos-0' => 'pago',
                         'pagos-1' => 'cobro',
                         'reembolsos-0' => 'reembolso',
                         default => null,
                     };
-                    $modalName = match (($pagina['clave'] ?? '').'-'.$actionIndex) {
+                    $modalName = ($pagina['datosReales'] ?? false) ? null : match (($pagina['clave'] ?? '').'-'.$actionIndex) {
                         'cajas-0' => 'arqueos',
                         'cajas-1' => 'nueva-caja',
                         'aperturas-0' => 'apertura',
@@ -41,7 +41,7 @@
         </div>
     </header>
 
-    <div class="tc-ff__notice" role="status"><i class="bi bi-eye" aria-hidden="true"></i><strong>Vista de diseño</strong><span>Las cifras y registros son ejemplos; ninguna acción modifica datos.</span>@if (! empty($pagina['rutaReal']))<a href="{{ route($pagina['rutaReal']) }}">Abrir pantalla actual <i class="bi bi-arrow-right" aria-hidden="true"></i></a>@endif</div>
+    <div class="tc-ff__notice" role="status"><i class="bi bi-eye" aria-hidden="true"></i><strong>{{ ($pagina['datosReales'] ?? false) ? 'Datos de MariaDB' : 'Vista de diseño' }}</strong><span>{{ $pagina['aviso'] ?? 'Las cifras y registros son ejemplos; ninguna acción modifica datos.' }}</span>@if (! empty($pagina['rutaReal']))<a href="{{ route($pagina['rutaReal']) }}">Abrir pantalla actual <i class="bi bi-arrow-right" aria-hidden="true"></i></a>@endif</div>
 
     <div class="tc-ff__metrics">
         @foreach ($pagina['metricas'] as $metrica)
@@ -61,7 +61,7 @@
 
     <div class="tc-ff__main-grid">
         <article class="tc-ff__card tc-ff__table-card">
-            <div class="tc-ff__card-heading"><h2><i class="bi {{ $pagina['tablaIcono'] ?? 'bi-list-ul' }}" aria-hidden="true"></i>{{ $pagina['tablaTitulo'] }}</h2><small>Mostrando {{ count($pagina['filas']) }} registros de ejemplo</small></div>
+            <div class="tc-ff__card-heading"><h2><i class="bi {{ $pagina['tablaIcono'] ?? 'bi-list-ul' }}" aria-hidden="true"></i>{{ $pagina['tablaTitulo'] }}</h2><small>{{ count($pagina['filas']) }} registros {{ ($pagina['datosReales'] ?? false) ? 'consultados' : 'de ejemplo' }}</small></div>
             <div class="tc-ff__table-wrap"><table><thead><tr>@foreach ($pagina['columnas'] as $columna)<th>{{ $columna }}</th>@endforeach<th>Acciones</th></tr></thead><tbody>
                 @foreach ($pagina['filas'] as $fila)
                     @php
@@ -77,9 +77,9 @@
                             default => '',
                         };
                     @endphp
-                    <tr data-ff-row data-ff-code="{{ $fila['celdas'][0] ?? '' }}" data-ff-row-action="{{ $rowAction }}" @foreach (($fila['filtros'] ?? []) as $campo => $valor) data-ff-{{ $campo }}="{{ $valor }}" @endforeach>@foreach ($fila['celdas'] as $celda)<td>@if (is_array($celda))<span class="tc-ff__pill tc-ff__pill--{{ $celda['tono'] ?? 'azul' }}">{{ $celda['texto'] }}</span>@else{{ $celda }}@endif</td>@endforeach<td><div class="tc-ff__row-actions"><button type="button" data-ff-detail title="Consultar detalle de ejemplo" aria-label="Consultar detalle de ejemplo"><i class="bi bi-eye" aria-hidden="true"></i></button><button type="button" data-ff-row-action @disabled($rowAction === '') title="{{ $rowAction === '' ? 'No hay acción demostrativa disponible' : 'Abrir advertencia de ' . $rowAction }}" aria-label="Abrir confirmación demostrativa"><i class="bi bi-three-dots-vertical" aria-hidden="true"></i></button></div></td></tr>
+                    <tr data-ff-row data-ff-code="{{ $fila['celdas'][0] ?? '' }}" data-ff-row-action="{{ ($pagina['datosReales'] ?? false) ? '' : $rowAction }}" @foreach (($fila['filtros'] ?? []) as $campo => $valor) data-ff-{{ $campo }}="{{ $valor }}" @endforeach>@foreach ($fila['celdas'] as $celda)<td>@if (is_array($celda))<span class="tc-ff__pill tc-ff__pill--{{ $celda['tono'] ?? 'azul' }}">{{ $celda['texto'] }}</span>@else{{ $celda }}@endif</td>@endforeach<td><div class="tc-ff__row-actions"><button type="button" data-ff-detail @disabled($pagina['datosReales'] ?? false) title="{{ ($pagina['datosReales'] ?? false) ? 'Detalle real pendiente de implementar' : 'Consultar detalle de ejemplo' }}" aria-label="{{ ($pagina['datosReales'] ?? false) ? 'Detalle real pendiente de implementar' : 'Consultar detalle de ejemplo' }}"><i class="bi bi-eye" aria-hidden="true"></i></button><button type="button" data-ff-row-action @disabled(($pagina['datosReales'] ?? false) || $rowAction === '') title="{{ ($pagina['datosReales'] ?? false) ? 'Operación no conectada' : ($rowAction === '' ? 'No hay acción demostrativa disponible' : 'Abrir advertencia de ' . $rowAction) }}" aria-label="Operación no conectada"><i class="bi bi-three-dots-vertical" aria-hidden="true"></i></button></div></td></tr>
                 @endforeach
-            </tbody></table></div><p class="tc-ff__empty" data-ff-empty hidden>No hay registros de ejemplo que coincidan con los filtros.</p>
+            </tbody></table></div><p class="tc-ff__empty" data-ff-empty hidden>{{ ($pagina['datosReales'] ?? false) ? 'No hay cuentas registradas que coincidan con los filtros.' : 'No hay registros de ejemplo que coincidan con los filtros.' }}</p>
         </article>
         <aside class="tc-ff__card tc-ff__aside"><h2><i class="bi {{ $pagina['aside']['icono'] }}" aria-hidden="true"></i>{{ $pagina['aside']['titulo'] }}</h2><p>{{ $pagina['aside']['descripcion'] ?? 'Panel ilustrativo.' }}</p>
             @if (($pagina['aside']['tipo'] ?? 'formulario') === 'resumen')

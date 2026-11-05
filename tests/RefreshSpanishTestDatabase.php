@@ -21,6 +21,17 @@ trait RefreshSpanishTestDatabase
             return;
         }
 
+        if (! Schema::hasColumn('pedidos', 'tipo_venta')) {
+            Schema::table('pedidos', function (Blueprint $table): void {
+                $table->string('tipo_venta', 30)->nullable();
+            });
+        }
+        if (! Schema::hasColumn('pedidos', 'observaciones')) {
+            Schema::table('pedidos', function (Blueprint $table): void {
+                $table->string('observaciones', 500)->nullable();
+            });
+        }
+
         if (! Schema::hasTable('usuarios')) {
             Schema::create('usuarios', function (Blueprint $table): void {
                 $table->bigIncrements('id');
@@ -187,6 +198,23 @@ trait RefreshSpanishTestDatabase
             $table->dateTime('fecha_salida')->nullable();
             $table->foreign('producto_id')->references('id')->on('productos');
         });
+        if (! Schema::hasTable('movimientos_dispositivos')) {
+            Schema::create('movimientos_dispositivos', function (Blueprint $table): void {
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('dispositivo_id');
+                $table->unsignedBigInteger('movimiento_inventario_id');
+                $table->string('estado_anterior', 30)->nullable();
+                $table->string('estado_nuevo', 30);
+                $table->dateTime('creado_en')->useCurrent();
+            });
+        }
+        if (! Schema::hasTable('detalles_ventas_dispositivos')) {
+            Schema::create('detalles_ventas_dispositivos', function (Blueprint $table): void {
+                $table->unsignedBigInteger('detalle_venta_id');
+                $table->unsignedBigInteger('dispositivo_id')->unique();
+                $table->primary(['detalle_venta_id', 'dispositivo_id']);
+            });
+        }
         Schema::create('existencias_almacen', function (Blueprint $table): void {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('almacen_id');

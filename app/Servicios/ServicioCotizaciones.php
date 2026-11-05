@@ -5,12 +5,20 @@ namespace App\Servicios;
 use App\Models\Catalogo\Producto;
 use App\Models\Clientes\Cliente;
 use App\Models\Comercio\Cotizacion;
+use App\Models\Comercio\DetallePedido;
+use App\Models\Comercio\DetalleVenta;
+use App\Models\Comercio\Pedido;
+use App\Models\Comercio\Venta;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class ServicioCotizaciones
 {
-    public function __construct(private readonly ServicioAutorizacion $authorization) {}
+    public function __construct(
+        private readonly ServicioAutorizacion $authorization,
+        private readonly RegistradorAuditoria $auditoria,
+    ) {}
 
     public function create(array $data, User $user): Cotizacion
     {
@@ -62,5 +70,229 @@ class ServicioCotizaciones
 
             return $quotation;
         }, 3);
+    }
+
+    public function aprobar(Cotizacion $cotizacion, User $usuario, ?string $ip): Cotizacion
+    {
+        $this->authorization->assertAllowed($usuario, 'gestion.cotizaciones.aprobar');
+
+        return DB::transaction(function () use ($cotizacion, $usuario, $ip): Cotizacion {
+            $cotizacionBloqueada = Cotizacion::query()->whereKey($cotizacion->getKey())->lockForUpdate()->firstOrFail();
+            abort_unless($cotizacionBloqueada->activo, 409, 'La cotizacion esta desactivada.');
+            abort_unless($this->authorization->allowsRecord(
+                $usuario,
+                'gestion.cotizaciones.aprobar',
+                is_numeric($cotizacionBloqueada->empresa_id) ? (int) $cotizacionBloqueada->empresa_id : null,
+                is_numeric($cotizacionBloqueada->sede_id) ? (int) $cotizacionBloqueada->sede_id : null,
+            ), 403);
+            abort_unless(in_array($cotizacionBloqueada->estado, ['Pendiente', 'Enviada'], true), 409, 'Solo se pueden aprobar cotizaciones pendientes o enviadas.');
+            abort_unless($cotizacionBloqueada->cliente_id !== null
+                && $cotizacionBloqueada->customer()->where('activo', true)->where('empresa_id', $cotizacionBloqueada->empresa_id)->exists(), 409, 'La cotizacion requiere un cliente activo de la empresa correspondiente.');
+            abort_unless($cotizacionBloqueada->details()->exists(), 409, 'La cotizacion no contiene productos para aprobar.');
+            abort_if(DB::table('pedidos')->where('cotizacion_id', $cotizacionBloqueada->id)->exists(), 409, 'La cotizacion ya fue convertida en pedido.');
+
+            $estadoAnterior = $cotizacionBloqueada->estado;
+            $cotizacionBloqueada->update(['estado' => 'Aprobada']);
+            $this->auditoria->record($usuario->id, 'cotizacion.aprobada', 'cotizaciones', $cotizacionBloqueada->id,
+                ['estado' => $estadoAnterior], ['estado' => 'Aprobada'], $ip,
+                scope: ['empresa_id' => (int) $cotizacionBloqueada->empresa_id, 'sede_id' => (int) $cotizacionBloqueada->sede_id]);
+
+            return $cotizacionBloqueada;
+        }, 3);
+    }
+
+    public function registrarEnvioManual(Cotizacion $cotizacion, User $usuario, ?string $ip): Cotizacion
+    {
+        $this->authorization->assertAllowed($usuario, 'gestion.cotizaciones.actualizar');
+
+        return DB::transaction(function () use ($cotizacion, $usuario, $ip): Cotizacion {
+            $cotizacionBloqueada = Cotizacion::query()->whereKey($cotizacion->getKey())->lockForUpdate()->firstOrFail();
+            abort_unless($cotizacionBloqueada->activo, 409, 'La cotizacion esta desactivada.');
+            abort_unless($this->authorization->allowsRecord(
+                $usuario,
+                'gestion.cotizaciones.actualizar',
+                is_numeric($cotizacionBloqueada->empresa_id) ? (int) $cotizacionBloqueada->empresa_id : null,
+                is_numeric($cotizacionBloqueada->sede_id) ? (int) $cotizacionBloqueada->sede_id : null,
+            ), 403);
+            if ($cotizacionBloqueada->estado === 'Enviada') {
+                return $cotizacionBloqueada;
+            }
+            abort_unless(in_array($cotizacionBloqueada->estado, ['Borrador', 'Pendiente'], true), 409, 'El estado actual no permite registrar el envio manual.');
+
+            $cliente = $cotizacionBloqueada->customer()->where('activo', true)
+                ->where('empresa_id', $cotizacionBloqueada->empresa_id)->first();
+            abort_unless($cliente !== null && filter_var($cliente->correo, FILTER_VALIDATE_EMAIL) !== false, 409, 'La cotizacion requiere un correo valido para el cliente de la empresa.');
+            abort_unless($cotizacionBloqueada->details()->exists(), 409, 'La cotizacion no contiene productos para enviar.');
+
+            $estadoAnterior = $cotizacionBloqueada->estado;
+            $cotizacionBloqueada->update(['estado' => 'Enviada']);
+            $this->auditoria->record($usuario->id, 'cotizacion.envio_manual_registrado', 'cotizaciones', $cotizacionBloqueada->id,
+                ['estado' => $estadoAnterior], ['estado' => 'Enviada', 'destinatario' => $cliente->correo, 'canal' => 'correo manual'], $ip,
+                observations: 'El operador confirmo que envio el PDF descargado por un canal de correo externo.',
+                scope: ['empresa_id' => (int) $cotizacionBloqueada->empresa_id, 'sede_id' => (int) $cotizacionBloqueada->sede_id]);
+
+            return $cotizacionBloqueada;
+        }, 3);
+    }
+
+    public function convertirAventa(Cotizacion $cotizacion, int $almacenId, User $usuario, ?string $ip): Venta
+    {
+        $this->authorization->assertAllowed($usuario, 'gestion.ventas.crear');
+
+        return DB::transaction(function () use ($cotizacion, $almacenId, $usuario, $ip): Venta {
+            $cotizacionBloqueada = Cotizacion::query()->whereKey($cotizacion->getKey())->lockForUpdate()->firstOrFail();
+            abort_unless($cotizacionBloqueada->activo, 409, 'La cotizacion esta desactivada.');
+            abort_unless($this->authorization->allowsRecord(
+                $usuario,
+                'gestion.ventas.crear',
+                is_numeric($cotizacionBloqueada->empresa_id) ? (int) $cotizacionBloqueada->empresa_id : null,
+                is_numeric($cotizacionBloqueada->sede_id) ? (int) $cotizacionBloqueada->sede_id : null,
+            ), 403);
+
+            $pedidoExistente = Pedido::query()->where('cotizacion_id', $cotizacionBloqueada->id)->lockForUpdate()->first();
+            if ($pedidoExistente !== null) {
+                $ventaExistente = Venta::query()->where('pedido_id', $pedidoExistente->id)->lockForUpdate()->first();
+                abort_unless($cotizacionBloqueada->estado === 'Convertida' && $ventaExistente !== null, 409, 'La cotizacion ya tiene un pedido asociado que requiere conciliacion.');
+
+                return $ventaExistente;
+            }
+
+            abort_unless($cotizacionBloqueada->estado === 'Aprobada', 409, 'Solo se pueden convertir cotizaciones aprobadas.');
+            abort_unless(Schema::hasColumns('ventas', ['canal', 'observaciones', 'pedido_id'])
+                && Schema::hasColumns('pedidos', ['cotizacion_id', 'canal', 'tipo_venta', 'empresa_id', 'sede_id', 'almacen_id'])
+                && Schema::hasColumns('detalles_pedidos', ['variante_id', 'descuento', 'impuesto'])
+                && Schema::hasColumns('detalles_cotizaciones', ['variante_id', 'descuento', 'impuesto', 'total_linea'])
+                && Schema::hasColumns('detalles_ventas', ['detalle_pedido_id', 'variante_id']),
+                503, 'El esquema de ventas vinculadas no contiene las columnas requeridas.');
+
+            $almacen = DB::table('almacenes')
+                ->join('sedes', 'sedes.id', '=', 'almacenes.sede_id')
+                ->join('empresas', 'empresas.id', '=', 'sedes.empresa_id')
+                ->where('almacenes.id', $almacenId)
+                ->where('almacenes.sede_id', $cotizacionBloqueada->sede_id)
+                ->where('sedes.empresa_id', $cotizacionBloqueada->empresa_id)
+                ->where('almacenes.activo', true)
+                ->where('almacenes.permite_venta', true)
+                ->where('sedes.activa', true)
+                ->where('empresas.activo', true)
+                ->lockForUpdate()
+                ->first(['almacenes.id', 'almacenes.sede_id', 'sedes.empresa_id']);
+            abort_unless($almacen !== null, 422, 'Selecciona un almacen activo y autorizado para ventas en la sede de la cotizacion.');
+            abort_unless($this->authorization->allowsRecord($usuario, 'gestion.ventas.crear', (int) $almacen->empresa_id, (int) $almacen->sede_id), 403);
+
+            $cliente = Cliente::query()->whereKey($cotizacionBloqueada->cliente_id)
+                ->where('empresa_id', $cotizacionBloqueada->empresa_id)->where('activo', true)->first();
+            abort_unless($cliente !== null, 409, 'La cotizacion requiere un cliente activo de la misma empresa.');
+            $detalles = $cotizacionBloqueada->details()->orderBy('id')->lockForUpdate()->get();
+            abort_unless($detalles->isNotEmpty(), 409, 'La cotizacion aprobada no contiene productos.');
+
+            $subcentimos = 0;
+            $descuentosCentimos = 0;
+            $impuestosCentimos = 0;
+            $totalCentimos = 0;
+            $lineas = [];
+            $productos = Producto::query()->whereIn('id', $detalles->pluck('producto_id')->unique())->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            foreach ($detalles as $detalle) {
+                $producto = $productos->get((int) $detalle->producto_id);
+                abort_unless($producto instanceof Producto && $producto->activo && (int) $producto->empresa_id === (int) $cotizacionBloqueada->empresa_id, 409, 'Un producto de la cotizacion no esta activo en la empresa autorizada.');
+                abort_unless((int) $detalle->cantidad > 0 && (int) $detalle->cantidad <= 1000, 409, 'La cotizacion contiene una cantidad no valida para el flujo actual de ventas.');
+                $varianteId = $detalle->variante_id === null ? null : (int) $detalle->variante_id;
+                $variante = null;
+                if ($varianteId !== null) {
+                    $variante = DB::table('variantes_productos')->where('id', $varianteId)->where('producto_id', $producto->id)->where('estado', 'activo')->lockForUpdate()->first(['id', 'codigo_sku', 'controla_serie']);
+                    abort_unless($variante !== null, 409, 'Una variante de la cotizacion ya no esta activa o no corresponde al producto.');
+                }
+                $unitario = (int) round((float) $detalle->precio_unitario * 100);
+                $descuento = (int) round((float) $detalle->descuento * 100);
+                $impuesto = (int) round((float) $detalle->impuesto * 100);
+                $baseLinea = $unitario * (int) $detalle->cantidad;
+                $totalLinea = $detalle->total_linea === null ? $baseLinea - $descuento + $impuesto : (int) round((float) $detalle->total_linea * 100);
+                abort_if($unitario < 0 || $descuento < 0 || $descuento > $baseLinea || $impuesto < 0
+                    || $totalLinea < 0 || $totalLinea !== $baseLinea - $descuento + $impuesto,
+                    409, 'Una linea de la cotizacion contiene importes no validos o requiere conciliacion.');
+                $subcentimos += $baseLinea;
+                $descuentosCentimos += $descuento;
+                $impuestosCentimos += $impuesto;
+                $totalCentimos += $totalLinea;
+                $lineas[] = [$detalle, $producto, $variante, $baseLinea, $descuento, $impuesto, $totalLinea];
+            }
+
+            abort_unless($totalCentimos === (int) round((float) $cotizacionBloqueada->total * 100), 409, 'El total aprobado no coincide con el detalle de la cotizacion; requiere conciliacion.');
+            abort_if($totalCentimos > 999999999, 422, 'El total supera la capacidad del pedido comercial.');
+
+            $pedido = Pedido::query()->create([
+                'usuario_id' => $usuario->id,
+                'cliente_id' => $cliente->id,
+                'cotizacion_id' => $cotizacionBloqueada->id,
+                'canal' => 'presencial',
+                'tipo_venta' => 'fisica',
+                'observaciones' => $cotizacionBloqueada->notas,
+                'subtotal' => $this->importeCotizacion($subcentimos),
+                'descuento' => $this->importeCotizacion($descuentosCentimos),
+                'total' => $this->importeCotizacion($totalCentimos),
+                'estado' => 'Pendiente',
+                'creado_en' => now(),
+                'empresa_id' => $almacen->empresa_id,
+                'sede_id' => $almacen->sede_id,
+                'almacen_id' => $almacen->id,
+            ]);
+
+            $venta = Venta::query()->create([
+                'empresa_id' => $almacen->empresa_id,
+                'sede_id' => $almacen->sede_id,
+                'almacen_id' => $almacen->id,
+                'pedido_id' => $pedido->id,
+                'cliente_id' => $cliente->id,
+                'usuario_id' => $usuario->id,
+                'codigo' => 'COT-'.$cotizacionBloqueada->id,
+                'estado' => 'borrador',
+                'moneda' => $cotizacionBloqueada->moneda,
+                'subtotal' => $this->importeCotizacion($subcentimos),
+                'descuento' => $this->importeCotizacion($descuentosCentimos),
+                'impuestos' => $this->importeCotizacion($impuestosCentimos),
+                'total' => $this->importeCotizacion($totalCentimos),
+                'fecha_venta' => now(),
+                'canal' => 'presencial',
+                'observaciones' => $cotizacionBloqueada->notas,
+            ]);
+
+            foreach ($lineas as [$detalle, $producto, $variante, $baseLinea, $descuento, $impuesto, $totalLinea]) {
+                $detallePedido = DetallePedido::query()->create([
+                    'pedido_id' => $pedido->id,
+                    'producto_id' => $producto->id,
+                    'variante_id' => $variante?->id,
+                    'cantidad' => $detalle->cantidad,
+                    'precio_unitario' => $detalle->precio_unitario,
+                    'descripcion_historica' => $detalle->descripcion_historica ?: $producto->nombre,
+                    'descuento' => $detalle->descuento,
+                    'impuesto' => $detalle->impuesto,
+                ]);
+                DetalleVenta::query()->create([
+                    'venta_id' => $venta->id,
+                    'producto_id' => $producto->id,
+                    'variante_id' => $variante?->id,
+                    'detalle_pedido_id' => $detallePedido->id,
+                    'descripcion_historica' => $detallePedido->descripcion_historica,
+                    'sku_historico' => $variante?->codigo_sku,
+                    'cantidad' => $detalle->cantidad,
+                    'precio_unitario' => $detalle->precio_unitario,
+                    'descuento' => $this->importeCotizacion($descuento),
+                    'impuesto' => $this->importeCotizacion($impuesto),
+                    'total_linea' => $this->importeCotizacion($totalLinea),
+                ]);
+            }
+
+            $cotizacionBloqueada->update(['estado' => 'Convertida']);
+            $this->auditoria->record($usuario->id, 'cotizacion.convertida_en_venta_borrador', 'cotizaciones', $cotizacionBloqueada->id,
+                ['estado' => 'Aprobada'], ['estado' => 'Convertida', 'pedido_id' => $pedido->id, 'venta_id' => $venta->id, 'estado_venta' => 'borrador'], $ip,
+                scope: ['empresa_id' => (int) $almacen->empresa_id, 'sede_id' => (int) $almacen->sede_id]);
+
+            return $venta->load('detalles');
+        }, 3);
+    }
+
+    private function importeCotizacion(int $centimos): string
+    {
+        return intdiv($centimos, 100).'.'.str_pad((string) ($centimos % 100), 2, '0', STR_PAD_LEFT);
     }
 }

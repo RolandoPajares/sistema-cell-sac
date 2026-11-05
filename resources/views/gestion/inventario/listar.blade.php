@@ -156,20 +156,24 @@
             </section>
 
             <section class="inventario-secondary-card">
-                <header class="inventario-card-header"><div class="inventario-card-title"><i class="bi bi-clock-history" aria-hidden="true"></i><div><h2>Movimientos recientes</h2><p>Últimos movimientos de inventario.</p></div></div><a class="inventario-view-all" href="{{ route('management.inventory') }}">Ver todos</a></header>
+                <header class="inventario-card-header"><div class="inventario-card-title"><i class="bi bi-clock-history" aria-hidden="true"></i><div><h2>{{ $verHistorialMovimientos ? 'Historial de movimientos' : 'Movimientos recientes' }}</h2><p>{{ $verHistorialMovimientos ? 'Movimientos registrados en las sedes autorizadas.' : 'Últimos movimientos de inventario.' }}</p></div></div><a class="inventario-view-all" href="{{ $verHistorialMovimientos ? route('management.inventory') : route('management.inventory.movements') }}">{{ $verHistorialMovimientos ? 'Volver al inventario' : 'Ver todos' }}</a></header>
                 <div class="inventario-recent-table-wrap">
                     <table class="inventario-recent-table"><thead><tr><th>Tipo</th><th>Producto</th><th>Cantidad</th><th>Motivo</th><th>Usuario</th><th>Fecha</th></tr></thead><tbody>
                         @forelse ($recentMovements as $movement)
                             @php
                                 $movementClass = $movement->tipo_movimiento === 'entrada' ? 'entry' : ($movement->tipo_movimiento === 'salida' ? 'exit' : 'adjustment');
-                                $movementQuantity = $movement->tipo_movimiento === 'salida' ? -abs((int) $movement->cantidad) : (int) $movement->cantidad;
+                                $movementQuantity = $movement->tipo_movimiento === 'salida' ? -abs((float) $movement->cantidad) : (float) $movement->cantidad;
+                                $cantidadFormateada = rtrim(rtrim(number_format($movementQuantity, 6, '.', ''), '0'), '.');
                             @endphp
-                            <tr><td><span class="inventario-recent-type inventario-recent-type--{{ $movementClass }}"><i class="bi bi-{{ $movement->tipo_movimiento === 'ajuste' ? 'pencil' : 'arrow-'.($movement->tipo_movimiento === 'entrada' ? 'down' : 'up') }}" aria-hidden="true"></i>{{ ucfirst($movement->tipo_movimiento) }}</span></td><td>{{ $movement->product?->marca }} {{ $movement->product?->nombre ?: 'Producto eliminado' }}</td><td class="inventario-quantity {{ $movementQuantity >= 0 ? 'is-positive' : 'is-negative' }}">{{ $movementQuantity >= 0 ? '+' : '' }}{{ $movementQuantity }}</td><td>{{ \Illuminate\Support\Str::limit($movement->notas, 24) }}</td><td>{{ $movement->user?->nombre ?: 'Sistema' }}</td><td>{{ $movement->creado_en?->format('d/m/Y H:i') }}</td></tr>
+                            <tr><td><span class="inventario-recent-type inventario-recent-type--{{ $movementClass }}"><i class="bi bi-{{ $movement->tipo_movimiento === 'ajuste' ? 'pencil' : 'arrow-'.($movement->tipo_movimiento === 'entrada' ? 'down' : 'up') }}" aria-hidden="true"></i>{{ ucfirst($movement->tipo_movimiento) }}</span></td><td>{{ $movement->product?->marca }} {{ $movement->product?->nombre ?: 'Producto eliminado' }}</td><td class="inventario-quantity {{ $movementQuantity >= 0 ? 'is-positive' : 'is-negative' }}">{{ $movementQuantity >= 0 ? '+' : '' }}{{ $cantidadFormateada }}</td><td>{{ \Illuminate\Support\Str::limit($movement->notas, 24) }}</td><td>{{ $movement->user?->nombre ?: 'Sistema' }}</td><td>{{ $movement->creado_en?->format('d/m/Y H:i') }}</td></tr>
                         @empty
                             <tr><td colspan="6" class="inventario-recent-empty">Todavía no hay movimientos registrados.</td></tr>
                         @endforelse
                     </tbody></table>
                 </div>
+                @if ($verHistorialMovimientos && $recentMovements->hasPages())
+                    <div class="inventario-pagination">{{ $recentMovements->links() }}</div>
+                @endif
             </section>
         </div>
     </section>

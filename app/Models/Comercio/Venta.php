@@ -13,7 +13,7 @@ class Venta extends Model
 {
     protected $table = 'ventas';
 
-    protected $fillable = ['empresa_id', 'sede_id', 'almacen_id', 'cliente_id', 'usuario_id', 'codigo', 'estado', 'moneda', 'subtotal', 'descuento', 'impuestos', 'total', 'fecha_venta', 'canal', 'observaciones'];
+    protected $fillable = ['empresa_id', 'sede_id', 'almacen_id', 'pedido_id', 'cliente_id', 'usuario_id', 'codigo', 'estado', 'moneda', 'subtotal', 'descuento', 'impuestos', 'total', 'fecha_venta', 'canal', 'observaciones'];
 
     public const CREATED_AT = 'creado_en';
 

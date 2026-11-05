@@ -131,7 +131,7 @@ if (pricesPage) {
         const productName = button.dataset.emProduct;
         const mode = button.dataset.emOpen;
         activeMode = mode;
-        pricesPage.querySelector('[data-em-dialog-title]').textContent = productName ? `${titles[mode]} · ${productName} (ejemplo)` : titles[mode];
+        pricesPage.querySelector('[data-em-dialog-title]').textContent = productName ? `${titles[mode]} · ${productName}` : titles[mode];
         dialog.querySelectorAll('[data-em-dialog-fields]').forEach((fields) => {
             fields.hidden = fields.dataset.emDialogFields !== mode;
         });
@@ -141,8 +141,10 @@ if (pricesPage) {
         bulkNext.hidden = mode !== 'masiva';
         bulkConfirm.hidden = mode !== 'masiva';
         if (notice) {
-            notice.textContent = mode === 'detalle' || mode === 'editar'
-                ? 'Producto y precios de ejemplo; no se consultó ni modificó el catálogo real.'
+            notice.textContent = mode === 'detalle'
+                ? 'Detalle consultado desde los datos del catálogo. El precio mayorista no está definido en MariaDB.'
+                : mode === 'editar'
+                    ? 'La edición de precios por canal no está disponible en el esquema actual.'
                 : mode === 'masiva'
                     ? 'Asistente demostrativo. La plantilla se descarga localmente; el archivo no se procesa.'
                     : 'La configuración y los precios de esta pantalla son ejemplos; no se modifica el catálogo ni el checkout.';

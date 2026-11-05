@@ -17,29 +17,28 @@
                 <span>Cliente <b>*</b></span>
                 <select name="cliente_id" required data-sales-customer>
                     @foreach ($customers as $customer)
-                        <option value="{{ $customer->id }}" @selected($customer->id === $order->usuario_id)>{{ $customer->nombre }} · {{ $customer->correo }}</option>
+                        <option value="{{ $customer->id }}" @selected($customer->id === $order->cliente_id)>{{ ($customer->razon_social ?: $customer->nombre_contacto) }} · {{ $customer->correo }}</option>
                     @endforeach
                 </select>
             </label>
             <label class="ventas-modal-field">
                 <span>Tipo de venta <b>*</b></span>
                 <select name="tipo_venta" required>
-                    <option value="tienda_online">Tienda online</option>
-                    <option value="fisica">Venta física</option>
+                    <option value="fisica" selected>Venta física</option>
                 </select>
             </label>
             <label class="ventas-modal-field">
                 <span>Fecha de venta <b>*</b></span>
-                <input type="date" name="fecha_venta" value="{{ $order->creado_en?->toDateString() ?: now()->toDateString() }}" required>
+                <input type="date" name="fecha_venta" value="{{ $order->fecha_venta?->toDateString() ?: now()->toDateString() }}" required>
             </label>
             <label class="ventas-modal-field">
                 <span>Vendedor</span>
-                <input type="text" value="{{ auth()->user()->nombre }}" readonly>
+                <input type="text" value="{{ $order->usuario?->nombre ?: 'Sin asesor registrado' }}" readonly>
             </label>
         </div>
         <label class="ventas-modal-field">
             <span>Observaciones</span>
-            <textarea name="observaciones" maxlength="500" placeholder="Observaciones adicionales..."></textarea>
+            <textarea name="observaciones" maxlength="500" placeholder="Observaciones adicionales...">{{ old('observaciones', $order->observaciones) }}</textarea>
         </label>
     </section>
 
@@ -59,8 +58,8 @@
             <table class="ventas-modal-table">
                 <thead><tr><th>#</th><th>Producto</th><th>Precio (S/)</th><th>Cantidad</th><th>Subtotal (S/)</th><th>Acciones</th></tr></thead>
                 <tbody data-sales-lines>
-                    @foreach ($order->details as $index => $detail)
-                        @php($product = $detail->product)
+                    @foreach ($order->detalles as $index => $detail)
+                        @php($product = $detail->producto)
                         <tr class="ventas-modal-line" data-sales-line data-product-id="{{ $product?->id }}" data-price="{{ number_format((float) ($detail->precio_unitario ?? $product?->effective_price ?? 0), 2, '.', '') }}">
                             <td class="ventas-modal-line-number">{{ $index + 1 }}</td>
                             <td><span class="ventas-modal-product"><span class="ventas-modal-product-image">@if ($product?->url_imagen)<img src="{{ str_starts_with($product->url_imagen, 'http') ? $product->url_imagen : asset(ltrim($product->url_imagen, '/')) }}" alt="">@else<i class="bi bi-box-seam" aria-hidden="true"></i>@endif</span><span><strong>{{ $product?->nombre ?: 'Producto no disponible' }}</strong><small>Stock actual: {{ $product?->existencias ?? 0 }}</small></span></span><input type="hidden" name="items[{{ $index }}][producto_id]" value="{{ $product?->id }}"></td>

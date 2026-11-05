@@ -42,6 +42,13 @@ class InventarioController extends Controller
         $movementsToday = $movementQuery()->whereDate('creado_en', today())->count();
         $movementsYesterday = $movementQuery()->whereDate('creado_en', today()->subDay())->count();
         $latestMovements = $this->latestMovements($products->getCollection(), $request->user());
+        $verHistorialMovimientos = $request->routeIs('management.inventory.movements');
+        $consultaMovimientos = $movementQuery()
+            ->with(['product:id,nombre,marca,etiqueta', 'user:id,nombre', 'almacen:id,nombre'])
+            ->latest('creado_en');
+        $movimientosRecientes = $verHistorialMovimientos
+            ? $consultaMovimientos->paginate(25)->withQueryString()
+            : $consultaMovimientos->limit(5)->get();
 
         return view('gestion.inventario.listar', [
             'products' => $products,
@@ -59,11 +66,8 @@ class InventarioController extends Controller
                 ->orderBy('nombre')
                 ->limit(4)
                 ->get(),
-            'recentMovements' => $movementQuery()
-                ->with(['product:id,nombre,marca,etiqueta', 'user:id,nombre'])
-                ->latest('creado_en')
-                ->limit(5)
-                ->get(),
+            'recentMovements' => $movimientosRecientes,
+            'verHistorialMovimientos' => $verHistorialMovimientos,
             'filters' => $filters,
             'activeProducts' => $resumen['productos'],
             'sinExistencias' => $resumen['sin_existencias'],

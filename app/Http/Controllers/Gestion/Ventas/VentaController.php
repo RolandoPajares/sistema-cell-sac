@@ -5,16 +5,19 @@ namespace App\Http\Controllers\Gestion\Ventas;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ActualizarVentaRequest;
 use App\Http\Requests\AnularVentaRequest;
+use App\Http\Requests\ConfirmarVentaCotizacionRequest;
+use App\Http\Requests\ConvertirCotizacionRequest;
 use App\Http\Requests\FiltroVentaRequest;
 use App\Http\Requests\GuardarVentaRequest;
 use App\Models\Catalogo\Producto;
 use App\Models\Clientes\Cliente;
-use App\Models\Comercio\Pedido;
+use App\Models\Comercio\Cotizacion;
 use App\Models\Comercio\Venta;
 use App\Models\Finanzas\MedioPago;
 use App\Models\Organizacion\Sede;
 use App\Servicios\ConsultaVentas;
 use App\Servicios\ServicioAutorizacion;
+use App\Servicios\ServicioCotizaciones;
 use App\Servicios\ServicioVentas;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
@@ -31,6 +34,7 @@ class VentaController extends Controller
         private readonly ConsultaVentas $ventas,
         private readonly ServicioVentas $registro,
         private readonly ServicioAutorizacion $autorizacion,
+        private readonly ServicioCotizaciones $cotizaciones,
     ) {}
 
     public function index(FiltroVentaRequest $request): View
@@ -42,15 +46,22 @@ class VentaController extends Controller
         $customers = collect();
         $products = collect();
         $canCreate = false;
-        if (Schema::hasColumns('ventas', ['canal', 'observaciones']) && $this->autorizacion->allows($request->user(), 'gestion.ventas.crear')) {
+        $canUpdate = $this->autorizacion->allows($request->user(), 'gestion.ventas.actualizar');
+        $editOrder = null;
+        if (Schema::hasColumns('ventas', ['canal', 'observaciones'])
+            && ($this->autorizacion->allows($request->user(), 'gestion.ventas.crear') || $canUpdate)) {
             try {
                 $ubicacion = $this->autorizacion->operationLocation($request->user());
-                $canCreate = $ubicacion['empresa_id'] !== null && $ubicacion['sede_id'] !== null && $ubicacion['almacen_id'] !== null
+                $ubicacionValida = $ubicacion['empresa_id'] !== null && $ubicacion['sede_id'] !== null && $ubicacion['almacen_id'] !== null;
+                $canCreate = $ubicacionValida && $this->autorizacion->allows($request->user(), 'gestion.ventas.crear')
                     && $this->autorizacion->allowsRecord($request->user(), 'gestion.ventas.crear', $ubicacion['empresa_id'], $ubicacion['sede_id']);
+                $canUpdate = $ubicacionValida && $canUpdate
+                    && $this->autorizacion->allowsRecord($request->user(), 'gestion.ventas.actualizar', $ubicacion['empresa_id'], $ubicacion['sede_id']);
             } catch (HttpExceptionInterface) {
                 $canCreate = false;
+                $canUpdate = false;
             }
-            if ($canCreate) {
+            if ($canCreate || $canUpdate) {
                 $customers = Cliente::query()->where('empresa_id', $ubicacion['empresa_id'])->where('activo', true)->orderBy('razon_social')->orderBy('id')->get();
                 $saldos = DB::table('existencias_almacen')->where('empresa_id', $ubicacion['empresa_id'])
                     ->where('sede_id', $ubicacion['sede_id'])->where('almacen_id', $ubicacion['almacen_id'])
@@ -61,8 +72,20 @@ class VentaController extends Controller
                 $products->each(static function (Producto $producto) use ($saldos): void {
                     $producto->existencias = max(0, (int) floor((float) $saldos->get($producto->id)->disponible));
                 });
-                if (! is_string($request->session()->get('venta_token'))) {
+                if ($canCreate && ! is_string($request->session()->get('venta_token'))) {
                     $request->session()->put('venta_token', bin2hex(random_bytes(32)));
+                }
+                if ($request->filled('editar')) {
+                    abort_unless(Schema::hasColumns('ventas', ['pedido_id', 'descuento', 'impuestos']), 404);
+                    abort_unless($canUpdate && ctype_digit((string) $request->query('editar')), 404);
+                    $editOrder = $this->autorizacion->scopeRecordsFor(
+                        Venta::query()->whereKey((int) $request->query('editar'))->where('ventas.estado', 'borrador')
+                            ->where('ventas.canal', 'presencial')->whereNull('ventas.pedido_id')
+                            ->where('ventas.descuento', 0)->where('ventas.impuestos', 0),
+                        $request->user(), 'gestion.ventas.actualizar',
+                    )->where('ventas.empresa_id', $ubicacion['empresa_id'])->where('ventas.sede_id', $ubicacion['sede_id'])
+                        ->where('ventas.almacen_id', $ubicacion['almacen_id'])->with(['detalles.producto', 'cliente', 'usuario'])->first();
+                    abort_unless($editOrder !== null, 404);
                 }
             }
         }
@@ -72,6 +95,43 @@ class VentaController extends Controller
         $cancelables = $this->autorizacion->scopeRecordsFor(
             Venta::query()->whereIn('ventas.id', $orders->getCollection()->modelKeys()), $request->user(), 'gestion.ventas.anular',
         )->pluck('ventas.id')->all();
+        $editables = [];
+        if (Schema::hasColumns('ventas', ['canal', 'pedido_id', 'descuento', 'impuestos'])) {
+            $editables = $this->autorizacion->scopeRecordsFor(
+                Venta::query()->whereIn('ventas.id', $orders->getCollection()->modelKeys())->where('ventas.estado', 'borrador')
+                    ->where('ventas.canal', 'presencial')->whereNull('ventas.pedido_id')
+                    ->where('ventas.descuento', 0)->where('ventas.impuestos', 0),
+                $request->user(), 'gestion.ventas.actualizar',
+            )->pluck('ventas.id')->all();
+        }
+        $confirmables = [];
+        if ($this->autorizacion->allows($request->user(), 'gestion.ventas.crear')
+            && Schema::hasColumns('ventas', ['pedido_id', 'canal'])) {
+            $confirmables = $this->autorizacion->scopeRecordsFor(
+                Venta::query()->whereIn('ventas.id', $orders->getCollection()->modelKeys())
+                    ->where('ventas.estado', 'borrador')->whereNotNull('ventas.pedido_id')->where('ventas.canal', 'presencial'),
+                $request->user(), 'gestion.ventas.crear',
+            )->pluck('ventas.id')->all();
+        }
+        $dispositivosPorDetalle = collect();
+        if ($confirmables !== [] && Schema::hasColumns('dispositivos', ['id', 'producto_id', 'variante_id', 'almacen_actual_id', 'estado'])) {
+            foreach ($orders->getCollection()->whereIn('id', $confirmables) as $ventaPendiente) {
+                foreach ($ventaPendiente->detalles as $detalle) {
+                    $varianteId = $detalle->variante_id === null ? null : (int) $detalle->variante_id;
+                    $dispositivosDisponibles = DB::table('dispositivos')->where('producto_id', $detalle->producto_id)
+                        ->when($varianteId === null, fn ($consulta) => $consulta->whereNull('variante_id'), fn ($consulta) => $consulta->where('variante_id', $varianteId))
+                        ->where('almacen_actual_id', $ventaPendiente->almacen_id)->where('estado', 'disponible')
+                        ->orderBy('id')->get(['id', 'imei', 'numero_serie']);
+                    $requiereDispositivos = DB::table('dispositivos')->where('producto_id', $detalle->producto_id)
+                        ->when($varianteId === null, fn ($consulta) => $consulta->whereNull('variante_id'), fn ($consulta) => $consulta->where('variante_id', $varianteId))->exists()
+                        || ($varianteId !== null
+                        && (bool) DB::table('variantes_productos')->where('id', $varianteId)->value('controla_serie'));
+                    $dispositivosPorDetalle->put($detalle->getKey(), [
+                        'requiere' => $requiereDispositivos, 'dispositivos' => $dispositivosDisponibles,
+                    ]);
+                }
+            }
+        }
         $filtrosDisponibles = array_replace($filtros, ['cliente_id' => null, 'sede_id' => null]);
         $clientesDisponibles = Cliente::query()->whereIn('id', $this->ventas->query($request->user(), $filtrosDisponibles)->select('ventas.cliente_id'))
             ->orderBy('razon_social')->orderBy('id')->get(['id', 'razon_social', 'nombre_contacto']);
@@ -84,13 +144,16 @@ class VentaController extends Controller
             'estados' => $estados,
             'orders' => $orders,
             'cancelables' => $cancelables,
+            'editables' => $editables,
+            'confirmables' => $confirmables,
+            'dispositivosPorDetalle' => $dispositivosPorDetalle,
             'clientesDisponibles' => $clientesDisponibles,
             'sedesDisponibles' => $sedesDisponibles,
             'latestSales' => (clone $query)->with('cliente')->orderByDesc('ventas.fecha_venta')->orderByDesc('ventas.id')->limit(5)->get(),
             'customers' => $customers,
             'products' => $products,
             'canCreate' => $canCreate,
-            'editOrder' => null,
+            'editOrder' => $editOrder,
         ]);
     }
 
@@ -219,9 +282,30 @@ class VentaController extends Controller
         return redirect()->route('management.sales')->with('status', 'Venta '.$venta->codigo.' confirmada. No se registró ningún pago.');
     }
 
-    public function update(ActualizarVentaRequest $request, Pedido $order): RedirectResponse
+    public function convertirCotizacion(ConvertirCotizacionRequest $request, Cotizacion $quotation): RedirectResponse
     {
-        abort(503, 'La edición de ventas está pendiente de integración con ventas y sus detalles.');
+        $venta = $this->cotizaciones->convertirAventa($quotation, (int) $request->validated('almacen_id'), $request->user(), $request->ip());
+
+        return redirect()->route('management.sales')->with('status', 'La cotizacion se convirtio en la venta '.$venta->codigo.' como borrador. No se descontaron existencias.');
+    }
+
+    public function confirmarBorrador(ConfirmarVentaCotizacionRequest $request, Venta $venta): RedirectResponse
+    {
+        $ventaConfirmada = $this->registro->confirmarBorradorCotizacion(
+            $venta,
+            $request->user(),
+            $request->ip(),
+            $request->validated('dispositivos') ?? [],
+        );
+
+        return redirect()->route('management.sales')->with('status', 'La venta '.$ventaConfirmada->codigo.' fue confirmada y sus existencias se descontaron una sola vez. No se registro pago.');
+    }
+
+    public function update(ActualizarVentaRequest $request, Venta $order): RedirectResponse
+    {
+        $venta = $this->registro->actualizarBorrador($order, $request->validated(), $request->user(), $request->ip());
+
+        return redirect()->route('management.sales')->with('status', 'Se actualizaron los datos de la venta '.$venta->codigo.'.');
     }
 
     public function cancel(AnularVentaRequest $request, Venta $venta): RedirectResponse

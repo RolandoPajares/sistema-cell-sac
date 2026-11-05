@@ -35,7 +35,7 @@ use Throwable;
 
 class GestionProductosController extends Controller
 {
-    public function preciosCanales(Request $request, ServicioInventario $inventario): View
+    public function preciosCanales(Request $request, ServicioInventario $inventario, ServicioAutorizacion $autorizacion): View
     {
         $filtros = $request->validate([
             'buscar' => ['nullable', 'string', 'max:100'],
@@ -69,17 +69,22 @@ class GestionProductosController extends Controller
                 'marca' => $producto->marca,
                 'base' => $empresa->moneda_base.' '.number_format($precioBase, 2, '.', ','),
                 'minorista' => $empresa->moneda_base.' '.number_format($precioMinorista, 2, '.', ','),
-                'mayorista' => 'No registrado en MariaDB',
                 'stock' => rtrim(rtrim(number_format($existenciasDisponibles, 3, '.', ''), '0'), '.'),
                 'estado' => $producto->activo ? 'Activo' : 'Inactivo',
                 'icono' => 'bi-box-seam',
                 'activo' => (bool) $producto->activo,
+                'estado_codigo' => $producto->activo ? 'activo' : 'inactivo',
+                'categoria_id' => (int) $producto->categoria_id,
                 'en_oferta' => $producto->precio_oferta !== null && (float) $producto->precio_oferta < $precioBase,
             ];
         })->all();
         $productosFiltrados = (clone $consultaBase)->count();
         $promedioBase = (float) (clone $consultaBase)->avg('productos.precio');
-        $promedioVigente = (float) (clone $consultaBase)->selectRaw('AVG(COALESCE(productos.precio_oferta, productos.precio)) AS promedio')->value('promedio');
+        $consultaPromedioVigente = DB::query()->fromSub(
+            (clone $consultaBase)->select(['productos.precio', 'productos.precio_oferta']),
+            'precios_filtrados',
+        )->selectRaw('AVG(COALESCE(precios_filtrados.precio_oferta, precios_filtrados.precio)) AS promedio');
+        $promedioVigente = (float) ($consultaPromedioVigente->first()?->promedio ?? 0);
         $ofertas = (clone $consultaBase)->whereNotNull('productos.precio_oferta')
             ->whereColumn('productos.precio_oferta', '<', 'productos.precio')->count();
 
@@ -95,6 +100,54 @@ class GestionProductosController extends Controller
             'promedioBase' => $empresa->moneda_base.' '.number_format($promedioBase, 2, '.', ','),
             'promedioMinorista' => $empresa->moneda_base.' '.number_format($promedioVigente, 2, '.', ','),
             'productosEnOferta' => $ofertas,
+            'puedeExportar' => $autorizacion->allows($request->user(), 'gestion.productos.exportar'),
+        ]);
+    }
+
+    public function configuracionTienda(Request $request, ServicioInventario $inventario): View
+    {
+        $alcance = $inventario->alcanceConsulta($request->user(), 'gestion.productos.consultar');
+        $empresa = Empresa::query()->findOrFail($alcance['empresa_id']);
+        $productosActivos = Producto::query()->where('empresa_id', $empresa->id)->where('activo', true);
+        $categoriasActivas = Categoria::query()->where('empresa_id', $empresa->id)->where('activo', true)->count();
+        $mediosPago = DB::table('medios_pago')->where('activo', true)->orderBy('nombre')->pluck('nombre');
+        $productosVista = (clone $productosActivos)->with('category:id,nombre')->orderBy('nombre')->limit(2)->get();
+        $sinConfiguracion = 'No existe una entidad de configuración de tienda en el esquema actual.';
+        $secciones = [
+            ['clave' => 'general', 'titulo' => 'General', 'icono' => 'bi-gear', 'resumen' => 'Información de la empresa', 'filas' => [
+                ['Nombre comercial', $empresa->nombre_comercial ?: $empresa->razon_social],
+                ['Razón social', $empresa->razon_social],
+                ['RUC', $empresa->ruc ?: 'Sin RUC registrado'],
+                ['Moneda base', $empresa->moneda_base],
+                ['Estado', $empresa->activo ? 'Activa' : 'Inactiva'],
+            ]],
+            ['clave' => 'apariencia', 'titulo' => 'Apariencia', 'icono' => 'bi-image', 'resumen' => 'Identidad visual', 'filas' => [
+                ['Logo de tienda', $sinConfiguracion], ['Banner principal', $sinConfiguracion], ['Color de tienda', 'El diseño actual se conserva; no hay preferencia persistente en MariaDB.'],
+            ]],
+            ['clave' => 'pagos', 'titulo' => 'Pagos', 'icono' => 'bi-credit-card', 'resumen' => 'Medios de pago registrados', 'filas' => [
+                ['Medios activos', (string) $mediosPago->count()], ['Opciones', $mediosPago->isEmpty() ? 'No hay medios de pago activos' : $mediosPago->implode(', ')],
+                ['Confirmación externa', 'No habilitada en este módulo.'],
+            ]],
+            ['clave' => 'envios', 'titulo' => 'Envíos', 'icono' => 'bi-truck', 'resumen' => 'Configuración de entregas', 'filas' => [
+                ['Cobertura', $sinConfiguracion], ['Tarifas', $sinConfiguracion], ['Seguimiento', 'Consultar en el módulo de envíos existente.'],
+            ]],
+            ['clave' => 'notificaciones', 'titulo' => 'Notificaciones', 'icono' => 'bi-envelope', 'resumen' => 'Avisos a clientes', 'filas' => [
+                ['Plantillas', $sinConfiguracion], ['Correo transaccional', $sinConfiguracion],
+            ]],
+            ['clave' => 'seo', 'titulo' => 'SEO y Analítica', 'icono' => 'bi-bar-chart', 'resumen' => 'Visibilidad y medición', 'filas' => [
+                ['Título SEO', $sinConfiguracion], ['Descripción SEO', $sinConfiguracion], ['Analítica', $sinConfiguracion],
+            ]],
+            ['clave' => 'integraciones', 'titulo' => 'Integraciones', 'icono' => 'bi-link-45deg', 'resumen' => 'Servicios conectados', 'filas' => [
+                ['Configuración de integraciones', $sinConfiguracion], ['Pasarelas externas', 'No implementadas en esta etapa.'],
+            ]],
+        ];
+
+        return view('paneles.administrador.ecommerce-marketing.tienda.listar', [
+            'empresa' => $empresa,
+            'secciones' => $secciones,
+            'productosActivosCount' => (clone $productosActivos)->count(),
+            'categoriasActivasCount' => $categoriasActivas,
+            'productosVista' => $productosVista,
         ]);
     }
 
@@ -172,8 +225,12 @@ class GestionProductosController extends Controller
     public function export(Request $request, string $format, ServicioInventario $inventario, ?ExportadorTabular $exporter = null): Response|StreamedResponse
     {
         $filters = $this->filters($request);
+        $filtrosExportacion = $request->validate(['marca' => ['nullable', 'string', 'max:80']]);
         $alcance = $inventario->alcanceConsulta($request->user(), 'gestion.productos.exportar');
         $products = $this->productQuery($filters, $alcance, $inventario)->orderBy('productos.id');
+        if (($filtrosExportacion['marca'] ?? null) !== null) {
+            $products->where('productos.marca', $filtrosExportacion['marca']);
+        }
 
         return match ($format) {
             'csv' => $this->downloadCsv($products),
