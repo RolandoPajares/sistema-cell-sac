@@ -19,7 +19,7 @@ Esta matriz registra únicamente resultados observados en esta rama. No declara 
 | JavaScript seguro | Ausencia de `eval()` y `document.write` | 1 caso frontend | APROBADA | Ninguna |
 | API catálogo | Lectura versionada, rate limiting, recursos JSON y producto activo | `ApiContractTest.php` — 3 casos, 166 aserciones junto con frontend | APROBADA | Ninguna |
 | RBAC / vistas administrativas | `RbacDinamicoTest.php`, `ViewsTest.php`, `DispositivosControllerTest.php` | 29 casos intentados | BLOQUEADA | El setup SQLite falla al ejecutar `information_schema.table_constraints` de la migración de responsables |
-| Unit / regresión | Suite `tests/Unit` | 117 casos | APROBADA | 109 aprobados, 3.522 aserciones; 8 omitidos por ausencia de MariaDB aislada |
+| Unit / regresión | Suite `tests/Unit` | 126 casos | APROBADA | 118 aprobados, 3.688 aserciones; 8 omitidos por ausencia de MariaDB aislada |
 | MariaDB aislada | Suites MariaDB aisladas seleccionadas | 6 casos | NO EJECUTADA | 6 omitidos: no existen variables `TECHNOLOGY_CELL_QA_*` para una instancia aislada |
 | Playwright | Login, CRUD, consola y respuestas HTTP | — | NO EJECUTADA | No hay suite ni dependencia Playwright en este worktree; tampoco se levantó servidor aislado |
 
