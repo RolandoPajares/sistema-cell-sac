@@ -1,6 +1,17 @@
 <form method="POST" action="{{ route('management.users.store') }}" class="form-card usuarios-form" data-user-form>
     @csrf
 
+    @if ($errors->any())
+        <div class="admin-alert admin-alert--error usuarios-form-errors" role="alert">
+            <strong>No se pudo registrar la cuenta.</strong>
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <section class="usuarios-form-section">
         <header class="usuarios-form-section-header"><i class="bi bi-person-lock" aria-hidden="true"></i><h3>Datos de acceso</h3><small>Los campos con <b>*</b> son obligatorios</small></header>
         <div class="usuarios-form-grid">
