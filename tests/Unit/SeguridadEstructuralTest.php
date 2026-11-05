@@ -20,18 +20,30 @@ function formulariosBlade(string $directorio): array
     return $formularios;
 }
 
-test('los formularios Blade incluyen protección CSRF', function (): void {
-    $formularios = formulariosBlade(resource_path('views'));
+function raizProyectoQaSeguridad(): string
+{
+    return dirname(__DIR__, 2);
+}
+
+test('los formularios Blade mutantes incluyen protección CSRF', function (): void {
+    $formularios = formulariosBlade(raizProyectoQaSeguridad().'/resources/views');
 
     expect($formularios)->not->toBeEmpty();
 
     foreach ($formularios as [$vista, $formulario]) {
-        expect($formulario)->toContain('@csrf', "Formulario sin @csrf en {$vista}");
+        $esMutante = preg_match("~method\\s*=\\s*[\"']?(?:post|put|patch|delete)\\b~i", $formulario) === 1
+            || preg_match("~@method\\s*\\(\\s*[\"']?(?:PUT|PATCH|DELETE)~i", $formulario) === 1;
+
+        if (! $esMutante) {
+            continue;
+        }
+
+        expect(str_contains($formulario, '@csrf'))->toBeTrue("Formulario sin @csrf en {$vista}");
     }
 });
 
 test('el grupo de gestión exige autenticación, cuenta activa, sesión y permiso de ruta', function (): void {
-    $rutas = file_get_contents(base_path('routes/web.php'));
+    $rutas = file_get_contents(raizProyectoQaSeguridad().'/routes/web.php');
     $inicio = strpos($rutas, "Route::prefix('gestion')");
 
     expect($inicio)->not->toBeFalse();
@@ -44,7 +56,7 @@ test('el grupo de gestión exige autenticación, cuenta activa, sesión y permis
 });
 
 test('las rutas mutantes principales no usan GET', function (): void {
-    $rutas = file_get_contents(base_path('routes/web.php'));
+    $rutas = file_get_contents(raizProyectoQaSeguridad().'/routes/web.php');
 
     preg_match_all('/Route::get\\([^;]+->name\\(\'([^\']+)\'\\)/s', $rutas, $coincidencias);
     $operacionesMutantes = [
