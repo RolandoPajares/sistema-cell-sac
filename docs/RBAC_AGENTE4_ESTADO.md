@@ -20,6 +20,8 @@
 - `php artisan test tests/Unit/RbacAuthorizationTest.php`: 12/12, 30 aserciones.
 - Batería combinada de autorización, 403, sesiones y asignaciones: 22/22, 151 aserciones.
 - `php artisan test tests/Unit/EsquemaEspanolRbacTest.php`: 34/34, 539 aserciones.
+- Suite unitaria combinada `RbacAuthorizationTest` + `EsquemaEspanolRbacTest`: 46/46, 569 aserciones.
+- `vendor/bin/pint --test` sobre controladores, requests y seguridad RBAC: correcto.
 - `npm run build`: correcto; generó `public/build/manifest.json` para renderizado de vistas.
 - `php artisan test --filter=RbacDinamicoTest`: ejecutado; los casos Feature no llegan a RBAC porque la migración compartida consulta `information_schema.table_constraints` usando conexión SQLite.
 
