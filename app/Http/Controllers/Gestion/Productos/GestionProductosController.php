@@ -7,6 +7,7 @@ use App\Http\Requests\ActualizarProductoRequest;
 use App\Http\Requests\GuardarConfiguracionTiendaRequest;
 use App\Http\Requests\GuardarImagenVarianteRequest;
 use App\Http\Requests\GuardarPrecioMayoristaRequest;
+use App\Http\Requests\ImportarPreciosMayoristasRequest;
 use App\Http\Requests\GuardarProductoRequest;
 use App\Http\Requests\GuardarVarianteProductoRequest;
 use App\Models\Catalogo\Categoria;
@@ -142,6 +143,13 @@ class GestionProductosController extends Controller
         $servicioPrecios->registrar($request->validated(), $request->user(), $request->ip());
 
         return redirect()->route('management.products.preview.prices')->with('status', 'El precio mayorista quedó registrado en MariaDB.');
+    }
+
+    public function importarPreciosMayoristas(ImportarPreciosMayoristasRequest $request, ServicioPreciosMayoristas $servicioPrecios): RedirectResponse
+    {
+        $cantidad = $servicioPrecios->importarCsv($request->file('archivo'), $request->user(), $request->ip());
+
+        return redirect()->route('management.products.preview.prices')->with('status', $cantidad.' precios mayoristas quedaron registrados en MariaDB.');
     }
 
     public function configuracionTienda(Request $request, ServicioInventario $inventario, ServicioAutorizacion $autorizacion, ServicioConfiguracionTienda $servicioConfiguracion): View

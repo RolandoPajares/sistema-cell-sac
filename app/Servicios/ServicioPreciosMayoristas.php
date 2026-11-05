@@ -9,6 +9,8 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Validation\ValidationException;
 
 class ServicioPreciosMayoristas
 {
@@ -70,6 +72,90 @@ class ServicioPreciosMayoristas
             );
 
             return $precio;
+        }, 3);
+    }
+
+    public function importarCsv(UploadedFile $archivo, User $usuario, ?string $ip): int
+    {
+        abort_unless(Schema::hasTable('precios_mayoristas'), 503, 'Los precios mayoristas requieren aplicar primero la estructura SQL aprobada.');
+        $autorizacion = app(ServicioAutorizacion::class);
+        abort_unless($autorizacion->allowsGlobal($usuario, 'gestion.productos.actualizar'), 403);
+        $empresaId = $autorizacion->activeCompanyId();
+        abort_unless($empresaId !== null, 409, 'Selecciona una empresa activa para importar precios mayoristas.');
+        $empresa = DB::table('empresas')->where('id', $empresaId)->first(['moneda_base']);
+        $handle = fopen($archivo->getRealPath(), 'rb');
+        if ($handle === false) {
+            throw ValidationException::withMessages(['archivo' => 'No se pudo leer el archivo CSV.']);
+        }
+
+        try {
+            $headers = fgetcsv($handle);
+            $headers = array_map(static fn ($header): string => mb_strtolower(trim((string) $header), 'UTF-8'), $headers ?: []);
+            if (isset($headers[0])) {
+                $headers[0] = preg_replace('/^\xEF\xBB\xBF/', '', $headers[0]) ?? $headers[0];
+            }
+            $esperados = ['sku', 'canal', 'precio', 'moneda', 'vigencia_desde', 'vigencia_hasta', 'motivo'];
+            if ($headers !== $esperados) {
+                throw ValidationException::withMessages(['archivo' => 'La cabecera debe ser: '.implode(',', $esperados).'.']);
+            }
+            $filas = [];
+            $skus = [];
+            while (($fila = fgetcsv($handle)) !== false) {
+                if (count($fila) === 1 && trim((string) $fila[0]) === '') {
+                    continue;
+                }
+                if (count($fila) !== count($esperados)) {
+                    throw ValidationException::withMessages(['archivo' => 'La fila '.(count($filas) + 2).' no tiene siete columnas.']);
+                }
+                $datos = array_combine($esperados, array_map(static fn ($valor): string => trim((string) $valor), $fila));
+                $filaNumero = count($filas) + 2;
+                $sku = (string) $datos['sku'];
+                $precio = filter_var($datos['precio'], FILTER_VALIDATE_FLOAT);
+                if ($sku === '' || in_array($sku, $skus, true) || $datos['canal'] !== 'mayorista' || $precio === false || $precio <= 0
+                    || ($empresa?->moneda_base !== null && strtoupper($datos['moneda']) !== strtoupper((string) $empresa->moneda_base))
+                    || $datos['motivo'] === '') {
+                    throw ValidationException::withMessages(['archivo' => 'La fila '.$filaNumero.' contiene un SKU, canal, precio, moneda o motivo inválido.']);
+                }
+                try {
+                    CarbonImmutable::parse($datos['vigencia_desde']);
+                    if ($datos['vigencia_hasta'] !== '') {
+                        CarbonImmutable::parse($datos['vigencia_hasta']);
+                    }
+                } catch (\Throwable) {
+                    throw ValidationException::withMessages(['archivo' => 'Las fechas de la fila '.$filaNumero.' no son válidas.']);
+                }
+                $filas[] = $datos;
+                $skus[] = $sku;
+                if (count($filas) > 500) {
+                    throw ValidationException::withMessages(['archivo' => 'El archivo no puede superar 500 filas.']);
+                }
+            }
+        } finally {
+            fclose($handle);
+        }
+        if ($filas === []) {
+            throw ValidationException::withMessages(['archivo' => 'El archivo no contiene filas para importar.']);
+        }
+
+        return DB::transaction(function () use ($filas, $empresaId, $usuario, $ip): int {
+            foreach ($filas as $indice => $fila) {
+                $productoId = DB::table('variantes_productos as variante')
+                    ->join('productos', 'productos.id', '=', 'variante.producto_id')
+                    ->where('productos.empresa_id', $empresaId)
+                    ->where('variante.codigo_sku', $fila['sku'])
+                    ->value('productos.id');
+                if ($productoId === null) {
+                    throw ValidationException::withMessages(['archivo' => 'No existe un producto de la empresa autorizada para el SKU '.$fila['sku'].' (fila '.($indice + 2).').']);
+                }
+                $this->registrar([
+                    'producto_id' => (int) $productoId,
+                    'precio' => $fila['precio'],
+                    'vigente_desde' => $fila['vigencia_desde'],
+                    'vigente_hasta' => $fila['vigencia_hasta'] !== '' ? $fila['vigencia_hasta'] : null,
+                    'motivo' => $fila['motivo'],
+                ], $usuario, $ip);
+            }
+            return count($filas);
         }, 3);
     }
 

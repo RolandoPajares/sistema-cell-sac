@@ -5,7 +5,7 @@
             <div><h2 id="tc-em-price-dialog-title" data-em-dialog-title>Configuración de precios</h2><p>Registra precios mayoristas vigentes para el producto seleccionado.</p></div>
             <button type="button" class="tc-em__close" data-em-close aria-label="Cerrar"><i class="bi bi-x-lg"></i></button>
         </header>
-        <form method="POST" action="{{ route('management.products.wholesale_prices.update') }}" data-em-wholesale-price-form>
+        <form method="POST" action="{{ route('management.products.wholesale_prices.update') }}" enctype="multipart/form-data" data-em-wholesale-price-form data-em-edit-action="{{ route('management.products.wholesale_prices.update') }}" data-em-import-action="{{ route('management.products.wholesale_prices.import') }}">
         @csrf
         @method('PUT')
         <input type="hidden" name="producto_id" value="" data-em-edit-product-id>
@@ -27,13 +27,13 @@
                 </nav>
                 <section class="tc-em__bulk-panel" data-em-bulk-step="0">
                     <h3>Plantilla CSV</h3>
-                    <p>Descarga una plantilla CSV UTF-8 compatible con Excel. Sus columnas son ilustrativas; el modelo actual no define precios separados por canal ni una importación de vigencias.</p>
+                    <p>Descarga una plantilla CSV UTF-8 compatible con Excel. Todas las filas se validan antes de guardarse en una única transacción.</p>
                     <button type="button" class="tc-em__button" data-em-template-download><i class="bi bi-download" aria-hidden="true"></i> Descargar plantilla CSV</button>
                 </section>
                 <section class="tc-em__bulk-panel" data-em-bulk-step="1" hidden>
                     <h3>Seleccionar archivo</h3>
-                    <label>Archivo CSV o XLSX<input type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-em-bulk-file></label>
-                    <small data-em-bulk-file-status>No se leerá, transmitirá ni almacenará el archivo.</small>
+                    <label>Archivo CSV<input type="file" name="archivo" accept=".csv,text/csv" required data-em-bulk-file></label>
+                    <small data-em-bulk-file-status>Se procesará en el servidor dentro de una transacción.</small>
                 </section>
                 <section class="tc-em__bulk-panel" data-em-bulk-step="2" hidden>
                     <h3>Vista previa ilustrativa</h3>
@@ -48,7 +48,7 @@
                 <section class="tc-em__bulk-panel" data-em-bulk-step="4" hidden>
                     <h3>Confirmar actualización</h3>
                     <p>No se importarán filas ni se actualizarán precios del catálogo o checkout.</p>
-                    <label class="tc-em__bulk-check"><input type="checkbox" data-em-bulk-ack> Entiendo que la integración de importación está pendiente.</label>
+                    <label class="tc-em__bulk-check"><input type="checkbox" name="confirmar" value="1" data-em-bulk-ack required> Confirmo que el CSV contiene precios mayoristas de la empresa autorizada.</label>
                 </section>
                 <p class="tc-em__bulk-error" data-em-bulk-error role="alert" hidden></p>
                 <p class="tc-em__bulk-feedback" data-em-bulk-feedback role="status" aria-live="polite" hidden></p>
@@ -74,7 +74,7 @@
             <button type="button" class="tc-em__button" data-em-close>Cancelar</button>
             <button type="button" class="tc-em__button" data-em-bulk-previous hidden>Anterior</button>
             <button type="button" class="tc-em__button" data-em-bulk-next hidden>Siguiente</button>
-            <button type="button" class="tc-em__button tc-em__button--primary" data-em-bulk-confirm hidden disabled>Importación no disponible</button>
+            <button type="submit" class="tc-em__button tc-em__button--primary" data-em-bulk-confirm hidden disabled>Importar precios</button>
             <button type="submit" class="tc-em__button tc-em__button--primary" data-em-price-submit data-em-permission="{{ $puedeActualizarPrecioMayorista ? 'true' : 'false' }}" @disabled(!($preciosMayoristasDisponibles && $puedeActualizarPrecioMayorista))>Guardar precio mayorista</button>
         </footer>
         </form>

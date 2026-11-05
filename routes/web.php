@@ -206,6 +206,8 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
         ->middleware('role:administrador')->name('products.preview.prices');
     Route::put('/ecommerce/precios-mayoristas', [GestionProductosController::class, 'guardarPrecioMayorista'])
         ->middleware(['role:administrador', 'permiso:gestion.productos.actualizar'])->name('products.wholesale_prices.update');
+    Route::post('/ecommerce/precios-mayoristas/importar', [GestionProductosController::class, 'importarPreciosMayoristas'])
+        ->middleware(['role:administrador', 'permiso:gestion.productos.actualizar'])->name('products.wholesale_prices.import');
     Route::get('/ecommerce/diseno/tienda', [GestionProductosController::class, 'configuracionTienda'])
         ->middleware('role:administrador')->name('products.preview.store_settings');
     Route::put('/ecommerce/tienda/configuracion', [GestionProductosController::class, 'guardarConfiguracionTienda'])

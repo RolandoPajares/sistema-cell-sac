@@ -89,13 +89,13 @@ if (pricesPage) {
         bulkConfirm.hidden = step !== bulkSteps.length - 1;
         bulkError.hidden = true;
         bulkFeedback.hidden = true;
-        bulkConfirm.disabled = true;
+        bulkConfirm.disabled = step !== bulkSteps.length - 1;
     };
 
     const resetBulkFlow = () => {
         renderBulkStep(0);
         bulkFile.value = '';
-        bulkFileStatus.textContent = 'No se leerá, transmitirá ni almacenará el archivo.';
+        bulkFileStatus.textContent = 'Se procesará en el servidor dentro de una transacción.';
         bulk.querySelector('[data-em-bulk-ack]').checked = false;
         bulkError.hidden = true;
         bulkFeedback.hidden = true;
@@ -145,12 +145,13 @@ if (pricesPage) {
             notice.textContent = mode === 'detalle'
                 ? 'Detalle consultado desde los datos del catálogo. El precio mayorista no está definido en MariaDB.'
                 : mode === 'editar'
-                    ? 'La edición de precios por canal no está disponible en el esquema actual.'
+                    ? 'El nuevo precio se validará y guardará en MariaDB.'
                 : mode === 'masiva'
-                    ? 'Asistente demostrativo. La plantilla se descarga localmente; el archivo no se procesa.'
+                    ? 'Importación real: se validarán todas las filas antes de confirmar la transacción.'
                     : 'La configuración y los precios de esta pantalla son ejemplos; no se modifica el catálogo ni el checkout.';
         }
         if (mode === 'editar') {
+            priceForm.action = priceForm.dataset.emEditAction;
             dialog.querySelector('[data-em-edit-channel]').value = 'mayorista';
             dialog.querySelector('[data-em-edit-price]').value = '';
             dialog.querySelector('[data-em-edit-start]').value = '';
@@ -158,6 +159,9 @@ if (pricesPage) {
             dialog.querySelector('[data-em-edit-reason]').value = '';
             dialog.querySelector('[data-em-edit-product-id]').value = button.closest('[data-em-price-row]')?.dataset.emProductId ?? '';
             editError.hidden = true;
+        }
+        if (mode === 'masiva') {
+            priceForm.action = priceForm.dataset.emImportAction;
         }
         if (mode === 'detalle') {
             const row = button.closest('[data-em-price-row]');
@@ -189,6 +193,7 @@ if (pricesPage) {
         saveButton.hidden = false;
         editError.hidden = true;
         notice.textContent = 'El nuevo precio se guardará con su vigencia y motivo en MariaDB; no se alterará el precio minorista.';
+        priceForm.action = priceForm.dataset.emEditAction;
         openDialog(dialog, enlace);
     }));
     wireDialogClose(dialog, '[data-em-close]', () => {
@@ -199,6 +204,17 @@ if (pricesPage) {
         activeMode = 'configuracion';
     });
     priceForm.addEventListener('submit', (event) => {
+        if (activeMode === 'masiva') {
+            const file = bulkFile.files?.[0] ?? null;
+            if (!file || bulkFile.dataset.emInvalid === 'true' || !bulk.querySelector('[data-em-bulk-ack]').checked) {
+                event.preventDefault();
+                bulkError.textContent = !file || bulkFile.dataset.emInvalid === 'true'
+                    ? 'Selecciona un archivo CSV válido.'
+                    : 'Confirma que el CSV pertenece a la empresa autorizada.';
+                bulkError.hidden = false;
+            }
+            return;
+        }
         if (activeMode !== 'editar' || !validateEditPrice()) {
             event.preventDefault();
         }
@@ -206,12 +222,12 @@ if (pricesPage) {
 
     bulkFile.addEventListener('change', () => {
         const file = bulkFile.files?.[0] ?? null;
-        const supported = file && /\.(csv|xlsx)$/i.test(file.name);
+        const supported = file && /\.csv$/i.test(file.name);
         bulkFileStatus.textContent = !file
-            ? 'No se leerá, transmitirá ni almacenará el archivo.'
+            ? 'Se procesará en el servidor dentro de una transacción.'
             : supported
-                ? `Seleccionado: ${file.name}. Solo se conserva el nombre en esta vista; no se leerá ni transmitirá.`
-                : `Archivo no compatible: ${file.name}. Selecciona CSV o XLSX; no se leerá ni transmitirá.`;
+                ? `Seleccionado: ${file.name}. Se validará y procesará en el servidor.`
+                : `Archivo no compatible: ${file.name}. Selecciona un CSV.`;
         bulkFile.dataset.emInvalid = file && !supported ? 'true' : 'false';
     });
     dialog.querySelector('[data-em-template-download]').addEventListener('click', () => {
@@ -227,7 +243,7 @@ if (pricesPage) {
     bulkNext.addEventListener('click', () => {
         const file = bulkFile.files?.[0] ?? null;
         if (activeBulkStep === 1 && (!file || bulkFile.dataset.emInvalid === 'true')) {
-            bulkError.textContent = file ? 'El nombre del archivo no corresponde a CSV o XLSX.' : 'Selecciona un archivo CSV o XLSX para continuar. No se leerá su contenido.';
+            bulkError.textContent = file ? 'El nombre del archivo no corresponde a CSV.' : 'Selecciona un archivo CSV para continuar.';
             bulkError.hidden = false;
             bulkFile.focus();
             return;
@@ -236,13 +252,11 @@ if (pricesPage) {
     });
     bulkConfirm.addEventListener('click', () => {
         if (!bulk.querySelector('[data-em-bulk-ack]').checked) {
-            bulkError.textContent = 'Confirma que entiendes que la importación real está pendiente.';
+            bulkError.textContent = 'Confirma que el CSV pertenece a la empresa autorizada.';
             bulkError.hidden = false;
             return;
         }
-        bulkFeedback.textContent = 'Funcionalidad visual. Integración pendiente. No se realizaron cambios. No se procesó el archivo ni se importaron precios; el catálogo y el checkout no cambiaron.';
-        bulkFeedback.hidden = false;
-        bulkConfirm.disabled = true;
+        bulkConfirm.disabled = false;
     });
     resetBulkFlow();
 }

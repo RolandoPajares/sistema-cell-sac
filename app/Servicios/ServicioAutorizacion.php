@@ -510,6 +510,10 @@ final class ServicioAutorizacion
             $action = 'crear';
         }
 
+        if ($routeModule === 'products' && $routeName === 'products.wholesale_prices.import') {
+            $action = 'actualizar';
+        }
+
         return 'gestion.'.$module.'.'.$action;
     }
 
