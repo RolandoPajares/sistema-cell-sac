@@ -1,9 +1,9 @@
 <?php
 
+use App\Contratos\Productos\AlcanceProductos;
+use App\Contratos\Productos\AuditoriaProductos;
 use App\Models\Catalogo\Producto;
 use App\Models\User;
-use App\Servicios\RegistradorAuditoria;
-use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioCatalogo;
 use App\Servicios\ServicioGestionProductos;
 use App\Servicios\ServicioInventario;
@@ -49,15 +49,15 @@ function usuarioGestionProductos(): User
 }
 
 it('centraliza el alta y revierte la transacción cuando falla la auditoría', function (): void {
-    $authorization = Mockery::mock('overload:'.ServicioAutorizacion::class);
-    $authorization->shouldReceive('operationScopeAttributes')->twice()->andReturn(['empresa_id' => 4]);
+    $authorization = Mockery::mock(AlcanceProductos::class);
+    $authorization->shouldReceive('atributosDeAlcance')->twice()->andReturn(['empresa_id' => 4]);
     $inventory = Mockery::mock(ServicioInventario::class);
     $inventory->shouldReceive('registerNewProduct')->twice();
     $catalog = Mockery::mock(ServicioCatalogo::class);
     $catalog->shouldReceive('sincronizarImagenPortada')->times(3);
-    $audit = Mockery::mock('overload:'.RegistradorAuditoria::class);
+    $audit = Mockery::mock(AuditoriaProductos::class);
     $auditCalls = 0;
-    $audit->shouldReceive('record')->times(3)->andReturnUsing(function () use (&$auditCalls): void {
+    $audit->shouldReceive('registrar')->times(3)->andReturnUsing(function () use (&$auditCalls): void {
         $auditCalls++;
         if ($auditCalls === 3) {
             throw new RuntimeException('auditoría no disponible');
