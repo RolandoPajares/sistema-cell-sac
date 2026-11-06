@@ -1,18 +1,12 @@
 @extends('layouts.administracion')
 
-@section('title', 'Reportes comerciales')
+@section('title', 'Reportes globales')
 @section('body_class', 'modulo-reportes')
 
 @section('content')
     @php
         $reportTabs = [
-            'resumen' => ['label' => 'Resumen', 'icon' => 'bi-grid-1x2-fill'],
-            'ventas' => ['label' => 'Ventas', 'icon' => 'bi-cart3'],
-            'pedidos' => ['label' => 'Pedidos', 'icon' => 'bi-receipt'],
-            'productos' => ['label' => 'Productos', 'icon' => 'bi-box-seam'],
-            'inventario' => ['label' => 'Inventario', 'icon' => 'bi-boxes'],
-            'clientes' => ['label' => 'Clientes', 'icon' => 'bi-people'],
-            'campanas' => ['label' => 'Campañas', 'icon' => 'bi-megaphone'],
+            'resumen' => ['label' => 'Reportes globales', 'icon' => 'bi-bar-chart-line'],
         ];
         $salesMax = max(1, ...array_column($salesTrend, 'sales'));
         $ordersMax = max(1, ...array_column($salesTrend, 'orders'));
@@ -59,15 +53,15 @@
         $campaignViews = $campaignReport['items']->sum('vistas');
         $campaignClicks = $campaignReport['items']->sum('clics');
         $campaignConversion = $campaignViews > 0 ? ($campaignClicks / $campaignViews) * 100 : 0;
-        $activeReportView = $activeView ?? 'resumen';
+        $activeReportView = 'resumen';
     @endphp
 
     <section class="reportes-page" data-reportes-page>
         <header class="reportes-hero">
             <div>
                 <span class="reportes-eyebrow">Analítica y reportes</span>
-                <h1>Reportes comerciales <i class="bi bi-bar-chart-fill" aria-hidden="true"></i></h1>
-                <p>Consulta y analiza la información de ventas, inventario, pedidos y campañas del sistema.</p>
+                <h1>Reportes globales <i class="bi bi-bar-chart-fill" aria-hidden="true"></i></h1>
+                <p>Consulta ventas, pedidos, inventario, clientes y campañas desde una sola vista.</p>
             </div>
             <details class="reportes-export-menu">
                 <summary class="reportes-export-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar <i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
