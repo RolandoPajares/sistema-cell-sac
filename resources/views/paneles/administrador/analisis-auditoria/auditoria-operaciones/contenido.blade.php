@@ -16,7 +16,7 @@
     <dialog class="tc-audit__modal" data-audit-modal aria-labelledby="tc-audit-modal-title">
         <div class="tc-audit__modal-card">
             <header class="tc-audit__modal-heading"><div><i class="bi bi-file-earmark-text"></i><h2 id="tc-audit-modal-title">Detalle de la operación</h2></div><button type="button" class="tc-audit__modal-close" data-audit-close aria-label="Cerrar detalle"><i class="bi bi-x-lg"></i></button></header>
-            <dl class="tc-audit__detail-list" data-audit-detail-content></dl>
+            <table class="tc-audit__detail-table"><tbody data-audit-detail-content></tbody></table>
         </div>
     </dialog>
     <script type="application/json" data-audit-config>@json($pagina['detalles'])</script>

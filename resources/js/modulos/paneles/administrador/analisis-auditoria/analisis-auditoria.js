@@ -59,9 +59,10 @@ document.querySelectorAll('[data-auditoria-operaciones]').forEach((panel) => {
             'Fecha y hora': evento.fecha,
         };
         Object.entries(campos).forEach(([etiqueta, valor]) => {
-            const item = document.createElement('div');
-            const titulo = document.createElement('dt');
-            const contenido = document.createElement('dd');
+            const item = document.createElement('tr');
+            const titulo = document.createElement('th');
+            const contenido = document.createElement('td');
+            titulo.scope = 'row';
             titulo.textContent = etiqueta;
             contenido.textContent = String(valor ?? '—');
             item.append(titulo, contenido);
