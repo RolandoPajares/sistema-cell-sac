@@ -2,6 +2,34 @@
 
 Esta guía se genera a partir del código ejecutable propio del proyecto. Describe las funciones nombradas y los métodos encontrados en app/, routes/, database/, tests/ y resources/js/; no incluye dependencias externas ni bloques Blade que solo renderizan la interfaz.
 
+> Nota de auditoría: las fichas de los recorridos prioritarios que aparecen al
+> final de este documento fueron revisadas contra el cuerpo actual de cada
+> método. En caso de discrepancia, prevalecen el PHPDoc/JSDoc del archivo fuente
+> y su firma real. No se modificó código ejecutable para generar esta guía.
+
+## Fichas verificadas contra el cuerpo actual
+
+Estas fichas complementan el inventario y describen los recorridos de mayor riesgo
+con información comprobada en el código fuente vigente.
+
+### Carrito, checkout y DAO
+
+- **`ServicioCarrito::normalizar`** (`app/Servicios/ServicioCarrito.php`): recibe las líneas de sesión, acepta cantidad simple o arreglo con variante, descarta identificadores/cantidades no enteros positivos y devuelve `array<int, array{cantidad:int, variante_id:?int}>`; no escribe en sesión ni base de datos.
+- **`CarritoController::index/add/update`** (`app/Http/Controllers/Publico/Comercio/CarritoController.php`): normaliza la sesión, carga productos y variantes activas, valida pertenencia de variante y stock, acumula o elimina líneas y prepara la vista/redirección correspondiente.
+- **`FinalizarCompraController::index/store`** (`app/Http/Controllers/Publico/Comercio/FinalizarCompraController.php`): prepara token, disponibilidad y subtotales del checkout; al confirmar rechaza carrito vacío, delega el registro transaccional al servicio de pedidos y limpia la sesión después de crear el pedido.
+- **`PdoConexion::ejecutarEnTransaccion`** (`app/Infraestructura/Persistencia/Pdo/PdoConexion.php`): inicia transacción solo si no existe una externa, ejecuta el callback, confirma con `commit` y revierte con `rollback` ante `Throwable`.
+- **`PdoProductoDao::buscarPorId/crear/actualizar/crearVariante/actualizarVariante`** (`app/Infraestructura/Persistencia/Pdo/PdoProductoDao.php`): ejecuta consultas preparadas, mapea filas a entidades, valida datos de producto/variante y usa el wrapper transaccional para las escrituras; devuelve entidades o `null` según la operación.
+
+### Negocio, inventario y RBAC
+
+- **`ServicioVentas::registrarFisica/anular`** (`app/Servicios/ServicioVentas.php`): valida e idempotiza ventas, bloquea existencias, crea detalles, actualiza inventario y audita; la anulación verifica estado, repone existencias y registra el cambio dentro de la transacción existente.
+- **`ServicioInventario::disponibilidadParaOperacion/registerNewProduct/adjust`** (`app/Servicios/ServicioInventario.php`): restringe almacenes y productos activos, calcula disponibilidad, registra stock inicial cero y ajusta cantidades bajo autorización, bloqueo, transacción y auditoría.
+- **`ServicioAutorizacion::allows/assertAllowed`** y los middleware **`AsegurarRol::handle` / `VerificarPermiso::handle`**: resuelven roles, asignaciones, módulos y pantallas activas; autorizan o interrumpen con HTTP 403 y dejan el contexto RBAC autorizado en la solicitud.
+
+Estas fichas se mantienen deliberadamente separadas del inventario automático: la
+fuente PHPDoc/JSDoc es la referencia de tipos y excepciones, y no se inventan
+relaciones que no estén presentes en el cuerpo del método.
+
 ## Recorridos arquitectónicos
 
 - **MVC:** Ruta → Middleware → Controlador → Servicio → DAO/Modelo → MariaDB → Vista o recurso.

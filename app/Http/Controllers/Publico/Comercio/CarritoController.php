@@ -35,10 +35,13 @@ class CarritoController extends Controller
     ) {}
 
     /**
-     * Obtiene y prepara la información solicitada para la operación.
+     * Construye la vista del carrito con productos activos, variantes, stock y subtotales.
      *
-     * @param  mixed  $request  Parámetro recibido por la operación.
-     * @return View Resultado de la operación.
+     * Normaliza primero el contenido de la sesión y consulta solo los productos presentes
+     * en ella. Las líneas cuyo producto ya no está disponible se excluyen de la vista.
+     *
+     * @param Request $request Solicitud cuyo usuario y sesión contienen el carrito.
+     * @return View Vista pública del carrito con líneas y total calculado.
      */
     public function index(Request $request): View
     {
@@ -63,11 +66,16 @@ class CarritoController extends Controller
     }
 
     /**
-     * Ejecuta la operación add definida por la clase CarritoController.
+     * Valida disponibilidad y agrega un producto o variante a la sesión del carrito.
      *
-     * @param  mixed  $request  Parámetro recibido por la operación.
-     * @param  mixed  $product  Parámetro recibido por la operación.
-     * @return RedirectResponse Resultado de la operación.
+     * Exige variante cuando el producto la ofrece, valida que pertenezca al producto,
+     * compara la cantidad acumulada contra el inventario disponible y redirige al checkout
+     * cuando se solicita la opción de compra inmediata.
+     *
+     * @param AgregarCarritoRequest $request Datos validados de cantidad, variante y compra inmediata.
+     * @param Producto $product Producto activo que se agregará.
+     * @return RedirectResponse Redirección al checkout o a la página anterior con el estado de la operación.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si el producto, variante o stock no es válido.
      */
     public function add(AgregarCarritoRequest $request, Producto $product): RedirectResponse
     {
@@ -101,11 +109,15 @@ class CarritoController extends Controller
     }
 
     /**
-     * Actualiza la información existente con los datos recibidos.
+     * Cambia o elimina la cantidad de un producto que ya está en el carrito.
      *
-     * @param  mixed  $request  Parámetro recibido por la operación.
-     * @param  mixed  $product  Parámetro recibido por la operación.
-     * @return RedirectResponse Resultado de la operación.
+     * La cantidad cero elimina la línea; una cantidad positiva exige que la línea exista
+     * y no supere la disponibilidad calculada para su variante.
+     *
+     * @param ActualizarCarritoRequest $request Cantidad validada por el formulario.
+     * @param Producto $product Producto cuya línea se actualiza.
+     * @return RedirectResponse Redirección a la página anterior con la sesión actualizada.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si la línea no existe o supera el stock.
      */
     public function update(ActualizarCarritoRequest $request, Producto $product): RedirectResponse
     {

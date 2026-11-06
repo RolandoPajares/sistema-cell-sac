@@ -256,8 +256,15 @@ class ServicioInventario
     }
 
     /**
-     * @param  array<int, int|string>  $identificadores
-     * @return array<int, int>
+     * Calcula unidades disponibles para vender en la ubicación autorizada del usuario.
+     *
+     * Filtra identificadores positivos, verifica almacén activo y excluye productos o
+     * variantes serializadas; el saldo final es físico menos reservado. No modifica datos.
+     *
+     * @param User $usuario Usuario cuya empresa, sede y almacén delimitan la consulta.
+     * @param array<int, int|string> $identificadores Identificadores de productos.
+     * @return array<int, int> Existencias disponibles indexadas por producto.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si no existe ubicación autorizada.
      */
     public function disponibilidadParaOperacion(User $usuario, array $identificadores): array
     {
@@ -308,11 +315,15 @@ class ServicioInventario
     }
 
     /**
-     * Registra la información recibida y coordina su persistencia.
+     * Crea el saldo inicial en almacén para un producto recién registrado.
      *
-     * @param  mixed  $product  Parámetro recibido por la operación.
-     * @param  mixed  $user  Parámetro recibido por la operación.
-     * @return void Resultado de la operación.
+     * Exige una transacción abierta, verifica la ubicación autorizada, fija existencias
+     * del producto en cero e inserta su saldo físico y reservado inicial.
+     *
+     * @param Producto $product Producto cuyo saldo se inicializa.
+     * @param User $user Usuario que determina la ubicación autorizada.
+     * @return void Persiste el saldo inicial sin devolver datos.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si falta la transacción, el esquema o el alcance.
      */
     public function registerNewProduct(Producto $product, User $user): void
     {
@@ -335,14 +346,18 @@ class ServicioInventario
     }
 
     /**
-     * Ejecuta la operación adjust definida por la clase ServicioInventario.
+     * Ajusta inventario bajo bloqueo y registra el movimiento de auditoría.
      *
-     * @param  mixed  $product  Parámetro recibido por la operación.
-     * @param  mixed  $movementType  Parámetro recibido por la operación.
-     * @param  mixed  $quantity  Parámetro recibido por la operación.
-     * @param  mixed  $notes  Parámetro recibido por la operación.
-     * @param  mixed  $user  Parámetro recibido por la operación.
-     * @return mixed Resultado de la operación.
+     * Autoriza la acción, abre una transacción, bloquea el producto, delega el cambio
+     * al método de existencias bloqueadas y registra el movimiento resultante.
+     *
+     * @param Producto $product Producto cuyo saldo se ajusta.
+     * @param string $movementType Tipo de movimiento.
+     * @param int $quantity Cantidad del ajuste.
+     * @param string $notes Motivo guardado con el movimiento.
+     * @param User $user Usuario que ejecuta el ajuste.
+     * @return ?MovimientoInventario Movimiento creado o null cuando no se produce movimiento.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si falla autorización o validación.
      */
     public function adjust(Producto $product, string $movementType, int $quantity, string $notes, User $user): ?MovimientoInventario
     {

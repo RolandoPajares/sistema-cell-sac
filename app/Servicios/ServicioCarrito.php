@@ -5,8 +5,15 @@ namespace App\Servicios;
 final class ServicioCarrito
 {
     /**
+     * Normaliza las líneas del carrito a la estructura que consumen checkout y ventas.
+     *
+     * Acepta claves de producto convertibles a entero y líneas representadas como
+     * cantidad simple o como arreglo con cantidad y variante. Descarta identificadores
+     * y cantidades no enteros positivos, y conserva una variante válida cuando existe.
+     * No persiste información ni modifica la sesión.
+     *
      * @param  array<int|string, mixed>  $carrito
-     * @return array<int, array{cantidad:int,variante_id:?int}>
+     * @return array<int, array{cantidad:int, variante_id:?int}> Líneas normalizadas por producto.
      */
     public function normalizar(array $carrito): array
     {

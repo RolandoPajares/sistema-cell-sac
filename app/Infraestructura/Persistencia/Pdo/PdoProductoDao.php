@@ -11,25 +11,28 @@ use PDO;
 use RuntimeException;
 
 /**
- * Define la responsabilidad de la clase PdoProductoDao dentro de su módulo.
+ * Persiste productos y variantes mediante consultas PDO preparadas.
  *
- * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ * Centraliza el mapeo entre filas de MariaDB y las entidades del dominio, y
+ * agrupa las operaciones de escritura dentro de transacciones.
  */
 final class PdoProductoDao implements ProductoDao
 {
     /**
-     * Inicializa la instancia con las dependencias y el estado requeridos.
+     * Recibe la conexión PDO encapsulada que ejecutará las consultas del DAO.
      *
-     * @param  mixed  $conexion  Parámetro recibido por la operación.
-     * @return mixed Resultado de la operación.
+     * @param PdoConexion $conexion Conexión configurada para preparar consultas y controlar transacciones.
      */
     public function __construct(private readonly PdoConexion $conexion) {}
 
     /**
-     * Ejecuta la operación indicada dentro del contexto transaccional establecido.
+     * Ejecuta una operación del DAO usando la transacción administrada por la conexión.
      *
-     * @param  mixed  $operacion  Parámetro recibido por la operación.
-     * @return mixed Resultado de la operación.
+     * La devolución de la operación se propaga sin modificarla; las excepciones
+     * provocan rollback cuando esta llamada inició la transacción.
+     *
+     * @param Closure(self): mixed $operacion Callback que recibe este DAO.
+     * @return mixed Resultado producido por el callback.
      */
     public function enTransaccion(Closure $operacion): mixed
     {
@@ -37,11 +40,14 @@ final class PdoProductoDao implements ProductoDao
     }
 
     /**
-     * Obtiene y prepara la información solicitada para la operación.
+     * Busca un producto por identificador y lo mapea junto con sus variantes.
      *
-     * @param  mixed  $id  Parámetro recibido por la operación.
-     * @param  mixed  $incluirVariantes  Parámetro recibido por la operación.
-     * @return mixed Resultado de la operación.
+     * Utiliza un SELECT preparado y devuelve null si no existe la fila. Las
+     * variantes solo se consultan cuando se solicita su inclusión.
+     *
+     * @param int $id Identificador del producto.
+     * @param bool $incluirVariantes Indica si debe cargar las variantes asociadas.
+     * @return ProductoEntidad|null Entidad reconstruida o null cuando no existe.
      */
     public function buscarPorId(int $id, bool $incluirVariantes = true): ?ProductoEntidad
     {
@@ -64,10 +70,16 @@ final class PdoProductoDao implements ProductoDao
     }
 
     /**
-     * Registra la información recibida y coordina su persistencia.
+     * Valida e inserta un producto y devuelve la entidad recién persistida.
      *
-     * @param  mixed  $producto  Parámetro recibido por la operación.
-     * @return ProductoEntidad Resultado de la operación.
+     * El INSERT y la posterior recuperación por el último identificador se
+     * ejecutan en una misma transacción; una entidad no recuperable produce
+     * RuntimeException y provoca rollback.
+     *
+     * @param ProductoEntidad $producto Datos del producto que se insertará.
+     * @return ProductoEntidad Producto creado, incluyendo su identificador.
+     * @throws DomainException Si faltan datos obligatorios del producto.
+     * @throws RuntimeException Si el registro insertado no puede recuperarse.
      */
     public function crear(ProductoEntidad $producto): ProductoEntidad
     {
@@ -90,10 +102,15 @@ final class PdoProductoDao implements ProductoDao
     }
 
     /**
-     * Actualiza la información existente con los datos recibidos.
+     * Valida y actualiza un producto existente, devolviendo su estado persistido.
      *
-     * @param  mixed  $producto  Parámetro recibido por la operación.
-     * @return ProductoEntidad Resultado de la operación.
+     * La operación exige identificador, ejecuta el UPDATE y vuelve a leer la
+     * entidad dentro de la misma transacción para confirmar el resultado.
+     *
+     * @param ProductoEntidad $producto Producto con identificador y nuevos datos.
+     * @return ProductoEntidad Producto actualizado.
+     * @throws DomainException Si no hay identificador o faltan datos obligatorios.
+     * @throws RuntimeException Si el producto no existe después del UPDATE.
      */
     public function actualizar(ProductoEntidad $producto): ProductoEntidad
     {
@@ -119,10 +136,15 @@ final class PdoProductoDao implements ProductoDao
     }
 
     /**
-     * Registra la información recibida y coordina su persistencia.
+     * Valida e inserta una variante asociada a un producto existente.
      *
-     * @param  mixed  $variante  Parámetro recibido por la operación.
-     * @return VarianteProductoEntidad Resultado de la operación.
+     * Comprueba la entidad padre dentro de la transacción, ejecuta el INSERT y
+     * recupera la variante por el identificador generado.
+     *
+     * @param VarianteProductoEntidad $variante Datos de la variante a insertar.
+     * @return VarianteProductoEntidad Variante persistida.
+     * @throws DomainException Si la variante es inválida o el producto no existe.
+     * @throws RuntimeException Si la variante creada no puede recuperarse.
      */
     public function crearVariante(VarianteProductoEntidad $variante): VarianteProductoEntidad
     {
@@ -146,10 +168,15 @@ final class PdoProductoDao implements ProductoDao
     }
 
     /**
-     * Actualiza la información existente con los datos recibidos.
+     * Valida y actualiza todos los datos persistibles de una variante.
      *
-     * @param  mixed  $variante  Parámetro recibido por la operación.
-     * @return VarianteProductoEntidad Resultado de la operación.
+     * La operación requiere identificador y se ejecuta dentro de una
+     * transacción; después vuelve a consultar la variante actualizada.
+     *
+     * @param VarianteProductoEntidad $variante Variante con identificador y nuevos datos.
+     * @return VarianteProductoEntidad Variante actualizada.
+     * @throws DomainException Si no hay identificador o la variante es inválida.
+     * @throws RuntimeException Si la variante no puede recuperarse.
      */
     public function actualizarVariante(VarianteProductoEntidad $variante): VarianteProductoEntidad
     {
@@ -172,10 +199,9 @@ final class PdoProductoDao implements ProductoDao
     }
 
     /**
-     * Modifica el estado o elimina el registro según la operación solicitada.
+     * Elimina una variante mediante una sentencia DELETE preparada transaccional.
      *
-     * @param  mixed  $id  Parámetro recibido por la operación.
-     * @return void Resultado de la operación.
+     * @param int $id Identificador de la variante que se eliminará.
      */
     public function eliminarVariante(int $id): void
     {
@@ -186,10 +212,9 @@ final class PdoProductoDao implements ProductoDao
     }
 
     /**
-     * Modifica el estado o elimina el registro según la operación solicitada.
+     * Elimina un producto mediante una sentencia DELETE preparada transaccional.
      *
-     * @param  mixed  $id  Parámetro recibido por la operación.
-     * @return void Resultado de la operación.
+     * @param int $id Identificador del producto que se eliminará.
      */
     public function eliminar(int $id): void
     {
@@ -200,11 +225,15 @@ final class PdoProductoDao implements ProductoDao
     }
 
     /**
-     * Realiza la operación específica definida por este método y devuelve su resultado.
+     * Registra una imagen como portada del producto sin duplicar su referencia.
      *
-     * @param  mixed  $productoId  Parámetro recibido por la operación.
-     * @param  mixed  $rutaImagen  Parámetro recibido por la operación.
-     * @return void Resultado de la operación.
+     * Si la ruta ya existe la reutiliza; cuando debe priorizarla, incrementa
+     * el orden de las demás imágenes y asigna orden cero a la portada. Toda la
+     * sincronización se realiza en una transacción y una ruta vacía no escribe.
+     *
+     * @param int $productoId Identificador del producto propietario.
+     * @param string $rutaImagen Ruta almacenada de la imagen.
+     * @throws DomainException Si el producto no existe.
      */
     public function sincronizarImagenPortada(int $productoId, string $rutaImagen): void
     {
@@ -255,10 +284,11 @@ final class PdoProductoDao implements ProductoDao
     }
 
     /**
-     * Obtiene y prepara la información solicitada para la operación.
+     * Recupera una variante por identificador y la convierte en entidad de dominio.
      *
-     * @param  mixed  $id  Parámetro recibido por la operación.
-     * @return VarianteProductoEntidad Resultado de la operación.
+     * @param int $id Identificador de la variante.
+     * @return VarianteProductoEntidad Variante mapeada desde MariaDB.
+     * @throws RuntimeException Si no existe una fila con el identificador solicitado.
      */
     private function buscarVariantePorId(int $id): VarianteProductoEntidad
     {
@@ -277,10 +307,10 @@ final class PdoProductoDao implements ProductoDao
     }
 
     /**
-     * Determina si la operación cumple las condiciones de autorización o validación.
+     * Comprueba los campos obligatorios y la categoría positiva de un producto.
      *
-     * @param  mixed  $producto  Parámetro recibido por la operación.
-     * @return void Resultado de la operación.
+     * @param ProductoEntidad $producto Producto que se validará antes de escribir.
+     * @throws DomainException Si falta marca, nombre, categoría, precio o categoría válida.
      */
     private function validarProducto(ProductoEntidad $producto): void
     {
@@ -290,10 +320,10 @@ final class PdoProductoDao implements ProductoDao
     }
 
     /**
-     * Determina si la operación cumple las condiciones de autorización o validación.
+     * Comprueba producto, color, existencias y estado requeridos por una variante.
      *
-     * @param  mixed  $variante  Parámetro recibido por la operación.
-     * @return void Resultado de la operación.
+     * @param VarianteProductoEntidad $variante Variante que se validará antes de escribir.
+     * @throws DomainException Si falta un dato obligatorio o las existencias son negativas.
      */
     private function validarVariante(VarianteProductoEntidad $variante): void
     {

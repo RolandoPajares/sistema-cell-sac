@@ -32,7 +32,20 @@ class ServicioVentas
         private readonly ServicioAutorizacion $autorizacion,
     ) {}
 
-    /** @param array{cliente_id:int,tipo_venta:string,fecha_venta:string,observaciones:?string,items:array<int,array{producto_id:int,cantidad:int}>} $datos */
+    /**
+     * Registra una venta presencial idempotente y descuenta existencias dentro de una transacción.
+     *
+     * Verifica autorización, esquema, token, ubicación, cliente, productos activos, cantidades
+     * y restricciones de serialización. Bloquea los registros críticos, crea la venta y detalles,
+     * registra movimientos de inventario y escribe la auditoría antes de confirmar.
+     *
+     * @param array{cliente_id:int,tipo_venta:string,fecha_venta:string,observaciones:?string,items:array<int,array{producto_id:int,cantidad:int}>} $datos Datos validados de la venta.
+     * @param User $actor Usuario que registra la operación.
+     * @param string $token Token idempotente de la solicitud.
+     * @param ?string $ip Dirección IP para auditoría.
+     * @return Venta Venta confirmada o registro idempotente existente.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si falla autorización, validación, disponibilidad o consistencia.
+     */
     public function registrarFisica(array $datos, User $actor, string $token, ?string $ip): Venta
     {
         $this->autorizacion->assertAllowed($actor, 'gestion.ventas.crear');
@@ -109,13 +122,18 @@ class ServicioVentas
     }
 
     /**
-     * Ejecuta la operación anular definida por la clase ServicioVentas.
+     * Anula una venta presencial confirmada y repone sus salidas de inventario.
      *
-     * @param  mixed  $venta  Parámetro recibido por la operación.
-     * @param  mixed  $actor  Parámetro recibido por la operación.
-     * @param  mixed  $motivo  Parámetro recibido por la operación.
-     * @param  mixed  $ip  Parámetro recibido por la operación.
-     * @return Venta Resultado de la operación.
+     * Comprueba motivo, autorización, pagos, documentos y devoluciones; bloquea la venta,
+     * sus detalles, movimientos, productos y saldos, actualiza existencias, cambia el estado
+     * a anulada y registra el evento de auditoría dentro de la misma transacción.
+     *
+     * @param Venta $venta Venta que se desea anular.
+     * @param User $actor Usuario que solicita la anulación.
+     * @param string $motivo Motivo de entre 5 y 500 caracteres.
+     * @param ?string $ip Dirección IP para auditoría.
+     * @return Venta Venta anulada o ya anulada.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si no se cumplen las reglas de anulación.
      */
     public function anular(Venta $venta, User $actor, string $motivo, ?string $ip): Venta
     {

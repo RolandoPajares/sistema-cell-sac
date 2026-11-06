@@ -24,7 +24,12 @@ class ServicioCatalogo
     ) {}
 
     /**
-     * @param  array<string, mixed>  $filters
+     * Construye la consulta paginable del catálogo con búsqueda, categoría, marca,
+     * rango de precios y orden permitido. Solo considera productos activos y precarga
+     * categoría e imágenes para que la vista no ejecute consultas adicionales.
+     *
+     * @param array<string, mixed> $filters Filtros validados del catálogo.
+     * @return Builder<Producto> Consulta Eloquent aún no ejecutada.
      */
     public function query(array $filters): Builder
     {
@@ -76,8 +81,11 @@ class ServicioCatalogo
     }
 
     /**
-     * @param  Collection<int, Producto>  $productos
-     * @return Collection<int, Producto>
+     * Recupera hasta cuatro productos activos relacionados por categoría o marca.
+     * Excluye el producto actual, prioriza coincidencias de marca y ordena por oferta.
+     *
+     * @param Producto $producto Producto cuyo contexto se usa para buscar relacionados.
+     * @return Collection<int, Producto> Productos relacionados con sus relaciones cargadas.
      */
     public function relacionados(Producto $producto): Collection
     {

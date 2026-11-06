@@ -5,78 +5,78 @@ namespace App\Dominio\Catalogo;
 use Closure;
 
 /**
- * Define la responsabilidad de la clase ProductoDao dentro de su módulo.
- *
- * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ * Contrato de persistencia para productos y variantes de catálogo.
  */
 interface ProductoDao
 {
-    /** @param Closure(self): mixed $operacion */
+    /**
+     * Ejecuta una operación del DAO dentro de una transacción controlada.
+     *
+     * @param Closure(self): mixed $operacion Callback que recibe la implementación del DAO.
+     * @return mixed Resultado producido por el callback.
+     */
     public function enTransaccion(Closure $operacion): mixed;
 
     /**
-     * Obtiene y prepara la información solicitada para la operación.
+     * Busca un producto y opcionalmente carga sus variantes asociadas.
      *
-     * @param  mixed  $id  Parámetro recibido por la operación.
-     * @param  mixed  $incluirVariantes  Parámetro recibido por la operación.
-     * @return mixed Resultado de la operación.
+     * @param int $id Identificador del producto.
+     * @param bool $incluirVariantes Indica si deben incluirse las variantes.
+     * @return ProductoEntidad|null Entidad encontrada o null si no existe.
      */
     public function buscarPorId(int $id, bool $incluirVariantes = true): ?ProductoEntidad;
 
     /**
-     * Registra la información recibida y coordina su persistencia.
+     * Inserta un producto validado en el almacenamiento.
      *
-     * @param  mixed  $producto  Parámetro recibido por la operación.
-     * @return ProductoEntidad Resultado de la operación.
+     * @param ProductoEntidad $producto Datos del producto.
+     * @return ProductoEntidad Producto persistido.
      */
     public function crear(ProductoEntidad $producto): ProductoEntidad;
 
     /**
-     * Actualiza la información existente con los datos recibidos.
+     * Actualiza un producto identificado y devuelve su representación persistida.
      *
-     * @param  mixed  $producto  Parámetro recibido por la operación.
-     * @return ProductoEntidad Resultado de la operación.
+     * @param ProductoEntidad $producto Producto con nuevos datos.
+     * @return ProductoEntidad Producto actualizado.
      */
     public function actualizar(ProductoEntidad $producto): ProductoEntidad;
 
     /**
-     * Registra la información recibida y coordina su persistencia.
+     * Inserta una variante vinculada a un producto existente.
      *
-     * @param  mixed  $variante  Parámetro recibido por la operación.
-     * @return VarianteProductoEntidad Resultado de la operación.
+     * @param VarianteProductoEntidad $variante Datos de la variante.
+     * @return VarianteProductoEntidad Variante persistida.
      */
     public function crearVariante(VarianteProductoEntidad $variante): VarianteProductoEntidad;
 
     /**
-     * Actualiza la información existente con los datos recibidos.
+     * Actualiza los datos persistibles de una variante existente.
      *
-     * @param  mixed  $variante  Parámetro recibido por la operación.
-     * @return VarianteProductoEntidad Resultado de la operación.
+     * @param VarianteProductoEntidad $variante Variante con identificador.
+     * @return VarianteProductoEntidad Variante actualizada.
      */
     public function actualizarVariante(VarianteProductoEntidad $variante): VarianteProductoEntidad;
 
     /**
-     * Modifica el estado o elimina el registro según la operación solicitada.
+     * Elimina una variante por identificador dentro de una transacción.
      *
-     * @param  mixed  $id  Parámetro recibido por la operación.
-     * @return void Resultado de la operación.
+     * @param int $id Identificador de la variante.
      */
     public function eliminarVariante(int $id): void;
 
     /**
-     * Modifica el estado o elimina el registro según la operación solicitada.
+     * Elimina un producto por identificador dentro de una transacción.
      *
-     * @param  mixed  $id  Parámetro recibido por la operación.
-     * @return void Resultado de la operación.
+     * @param int $id Identificador del producto.
      */
     public function eliminar(int $id): void;
 
     /**
-     * Realiza la operación específica definida por este método y devuelve su resultado.
+     * Sincroniza una ruta de imagen y la posiciona como portada cuando corresponde.
      *
-     * @param  mixed  $productoId  Parámetro recibido por la operación.
-     * @param  mixed  $rutaImagen  Parámetro recibido por la operación.
-     * @return void Resultado de la operación.
+     * @param int $productoId Identificador del producto.
+     * @param string $rutaImagen Ruta de la imagen.
      */
     public function sincronizarImagenPortada(int $productoId, string $rutaImagen): void;
 }

@@ -7,17 +7,14 @@ use PDO;
 use Throwable;
 
 /**
- * Define la responsabilidad de la clase PdoConexion dentro de su módulo.
- *
- * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ * Configura PDO y encapsula la ejecución de transacciones con commit y rollback.
  */
 final class PdoConexion
 {
     /**
-     * Inicializa la instancia con las dependencias y el estado requeridos.
+     * Configura el PDO recibido con excepciones, fetch asociativo y prepares nativos.
      *
-     * @param  mixed  $pdo  Parámetro recibido por la operación.
-     * @return mixed Resultado de la operación.
+     * @param PDO $pdo Conexión PDO que utilizarán los DAOs.
      */
     public function __construct(private readonly PDO $pdo)
     {
@@ -27,10 +24,14 @@ final class PdoConexion
     }
 
     /**
-     * Ejecuta la operación principal asignada al componente.
+     * Ejecuta un callback y confirma o revierte la transacción que esta llamada inició.
      *
-     * @param  mixed  $operacion  Parámetro recibido por la operación.
-     * @return mixed Resultado de la operación.
+     * Si ya existe una transacción externa, conserva su control y solo propaga el
+     * resultado o la excepción del callback.
+     *
+     * @param Closure $operacion Callback que recibe el PDO configurado.
+     * @return mixed Resultado producido por el callback.
+     * @throws Throwable La excepción original del callback cuando falla la operación.
      */
     public function ejecutarEnTransaccion(Closure $operacion): mixed
     {
@@ -56,10 +57,10 @@ final class PdoConexion
     }
 
     /**
-     * Ejecuta la operación preparar definida por la clase PdoConexion.
+     * Prepara una sentencia SQL usando la conexión PDO configurada.
      *
-     * @param  mixed  $sql  Parámetro recibido por la operación.
-     * @return \PDOStatement Resultado de la operación.
+     * @param string $sql SQL con marcadores para parámetros enlazados.
+     * @return \PDOStatement Sentencia preparada.
      */
     public function preparar(string $sql): \PDOStatement
     {
@@ -67,9 +68,9 @@ final class PdoConexion
     }
 
     /**
-     * Ejecuta la operación ultimoId definida por la clase PdoConexion.
+     * Devuelve el último identificador autoincremental generado por PDO.
      *
-     * @return int Resultado de la operación.
+     * @return int Identificador convertido a entero.
      */
     public function ultimoId(): int
     {

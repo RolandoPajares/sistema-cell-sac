@@ -23,12 +23,16 @@ class AsegurarRol
     public function __construct(private readonly ServicioAutorizacion $autorizacion) {}
 
     /**
-     * Ejecuta la operación principal asignada al componente.
+     * Permite continuar solo si el usuario posee uno de los roles requeridos por la ruta.
      *
-     * @param  mixed  $request  Parámetro recibido por la operación.
-     * @param  mixed  $next  Parámetro recibido por la operación.
-     * @param  mixed  $roles  Parámetro recibido por la operación.
-     * @return Response Resultado de la operación.
+     * Evalúa los roles recibidos en el orden declarado, guarda el primer rol coincidente
+     * como contexto de la solicitud y devuelve HTTP 403 cuando no existe coincidencia.
+     *
+     * @param Request $request Solicitud HTTP que se va a autorizar.
+     * @param Closure $next Continuación del pipeline HTTP.
+     * @param string ...$roles Roles aceptados por la ruta.
+     * @return Response Respuesta producida por el siguiente middleware o controlador.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si el usuario no tiene un rol requerido.
      */
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {

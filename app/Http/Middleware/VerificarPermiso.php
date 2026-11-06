@@ -24,12 +24,17 @@ class VerificarPermiso
     public function __construct(private readonly ServicioAutorizacion $autorizacion) {}
 
     /**
-     * Ejecuta la operación principal asignada al componente.
+     * Autoriza la solicitud mediante permisos explícitos o mediante el permiso de su ruta.
      *
-     * @param  mixed  $request  Parámetro recibido por la operación.
-     * @param  mixed  $next  Parámetro recibido por la operación.
-     * @param  mixed  $permissions  Parámetro recibido por la operación.
-     * @return Response Resultado de la operación.
+     * Rechaza con HTTP 403 las solicitudes sin usuario autenticado, sin permisos declarados
+     * o que no superan alguna comprobación RBAC. Cuando autoriza, deja el permiso efectivo
+     * en los atributos de la solicitud para que las capas posteriores lo reutilicen.
+     *
+     * @param Request $request Solicitud HTTP que se va a autorizar.
+     * @param Closure $next Continuación del pipeline HTTP.
+     * @param string ...$permissions Códigos de permiso o el marcador especial `ruta`.
+     * @return Response Respuesta producida por el siguiente middleware o controlador.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si la autorización falla.
      */
     public function handle(Request $request, Closure $next, string ...$permissions): Response
     {

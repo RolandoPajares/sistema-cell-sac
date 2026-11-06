@@ -110,6 +110,16 @@ class Producto extends Model
         return $this->hasMany(VarianteProducto::class, 'producto_id');
     }
 
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(ResenaProducto::class, 'producto_id');
+    }
+
+    public function favorites(): HasMany
+    {
+        return $this->hasMany(FavoritoProducto::class, 'producto_id');
+    }
+
     /**
      * Ejecuta la operación intelligenceProfile definida por la clase Producto.
      *

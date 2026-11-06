@@ -31,11 +31,16 @@ class ServicioCotizaciones
     ) {}
 
     /**
-     * Registra la información recibida y coordina su persistencia.
+     * Crea una cotización para el usuario autorizado y registra su auditoría.
      *
-     * @param  mixed  $data  Parámetro recibido por la operación.
-     * @param  mixed  $user  Parámetro recibido por la operación.
-     * @return Cotizacion Resultado de la operación.
+     * Determina el cliente mayorista, valida propiedad o alcance del empleado, bloquea
+     * los productos de la empresa, calcula el total y persiste cabecera y detalles en
+     * una transacción.
+     *
+     * @param array<string, mixed> $data Datos validados de la cotización y sus detalles.
+     * @param User $user Usuario que crea la cotización.
+     * @return Cotizacion Cotización persistida.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si falla autorización, validación o alcance empresarial.
      */
     public function create(array $data, User $user): Cotizacion
     {

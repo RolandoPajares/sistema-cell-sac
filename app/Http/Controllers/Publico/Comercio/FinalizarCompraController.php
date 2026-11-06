@@ -31,10 +31,13 @@ class FinalizarCompraController extends Controller
     ) {}
 
     /**
-     * Obtiene y prepara la información solicitada para la operación.
+     * Prepara la pantalla de checkout a partir del carrito normalizado de la sesión.
      *
-     * @param  mixed  $request  Parámetro recibido por la operación.
-     * @return View Resultado de la operación.
+     * Genera un token de checkout si falta, carga productos activos, calcula disponibilidad
+     * y subtotales, y marca si todas las líneas pueden confirmarse sin modificar la base de datos.
+     *
+     * @param Request $request Solicitud que contiene la sesión y el usuario comprador.
+     * @return View Vista de checkout con líneas, total, token y condición de confirmación.
      */
     public function index(Request $request): View
     {
@@ -71,10 +74,15 @@ class FinalizarCompraController extends Controller
     }
 
     /**
-     * Registra la información recibida y coordina su persistencia.
+     * Convierte el carrito validado en un pedido mediante el servicio de pedidos.
      *
-     * @param  mixed  $request  Parámetro recibido por la operación.
-     * @return RedirectResponse Resultado de la operación.
+     * Rechaza un carrito vacío, delega la operación transaccional al servicio de checkout
+     * con usuario, cupón, IP y token, y limpia las claves de sesión solo después de recibir
+     * el pedido creado.
+     *
+     * @param FinalizarCompraRequest $request Datos validados del checkout.
+     * @return RedirectResponse Redirección al detalle del pedido registrado.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si la sesión no contiene líneas de carrito.
      */
     public function store(FinalizarCompraRequest $request): RedirectResponse
     {

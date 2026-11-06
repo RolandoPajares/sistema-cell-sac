@@ -133,11 +133,14 @@ final class ServicioAutorizacion
     }
 
     /**
-     * Obtiene y prepara la información solicitada para la operación.
+     * Comprueba si el usuario posee un permiso vigente en su alcance global o de sede.
      *
-     * @param  mixed  $user  Parámetro recibido por la operación.
-     * @param  mixed  $permissionCode  Parámetro recibido por la operación.
-     * @return bool Resultado de la operación.
+     * Devuelve falso si el catálogo RBAC no está sembrado y, en caso contrario, considera
+     * roles activos, asignaciones vigentes, módulos habilitados y pantallas autorizadas.
+     *
+     * @param User $user Usuario cuya asignación RBAC se consulta.
+     * @param string $permissionCode Código del permiso requerido.
+     * @return bool Verdadero cuando el permiso está vigente en el alcance aplicable.
      */
     public function allows(User $user, string $permissionCode): bool
     {
@@ -149,11 +152,15 @@ final class ServicioAutorizacion
     }
 
     /**
-     * Ejecuta la operación assertAllowed definida por la clase ServicioAutorizacion.
+     * Hace cumplir un permiso RBAC y detiene la solicitud cuando no está autorizado.
      *
-     * @param  mixed  $user  Parámetro recibido por la operación.
-     * @param  mixed  $permissionCode  Parámetro recibido por la operación.
-     * @return void Resultado de la operación.
+     * Delega la comprobación a {@see allows()} y produce HTTP 403 cuando el usuario
+     * no tiene el código activo en su alcance.
+     *
+     * @param User $user Usuario que solicita la operación.
+     * @param string $permissionCode Código del permiso requerido.
+     * @return void No devuelve datos cuando la autorización es válida.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si el permiso no está autorizado.
      */
     public function assertAllowed(User $user, string $permissionCode): void
     {
