@@ -111,6 +111,21 @@
   cursor: pointer;
 }
 
+.modulo-usuarios .usuarios-field-error {
+  display: block;
+  margin-top: 5px;
+  color: #c0263d;
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.modulo-usuarios .usuarios-form input[aria-invalid="true"],
+.modulo-usuarios .usuarios-form select[aria-invalid="true"] {
+  border-color: #e05268;
+  box-shadow: 0 0 0 3px rgba(224, 82, 104, 0.12);
+}
+
 .modulo-usuarios .usuarios-primary-button {
   border-color: #0a70ee;
   color: #fff;

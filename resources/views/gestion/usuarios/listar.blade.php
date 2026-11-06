@@ -109,7 +109,13 @@
             const form = document.querySelector('[data-user-form]');
             const role = form?.querySelector('[data-user-role]');
             const documentField = form?.querySelector('[data-user-document]');
+            const documentType = form?.querySelector('[data-user-document-type]');
+            const documentLabel = form?.querySelector('[data-user-document-label]');
+            const rucFields = form?.querySelectorAll('[data-user-ruc-field]');
             const roleNote = form?.querySelector('[data-user-role-note]');
+            const customerSection = form?.querySelector('[data-user-customer-section]');
+            const customerFields = form?.querySelectorAll('[data-user-customer-field]');
+            const customerRequired = form?.querySelector('[data-user-customer-required]');
             const siteField = form?.querySelector('[data-user-site-field]');
             const siteSelect = form?.querySelector('[data-user-site]');
 
@@ -121,6 +127,27 @@
                 if (roleNote) {
                     roleNote.hidden = !isCustomer;
                 }
+                if (customerSection) {
+                    customerSection.hidden = !isCustomer;
+                }
+                customerFields?.forEach((field) => { field.hidden = !isCustomer; });
+                if (customerRequired) {
+                    customerRequired.hidden = !isCustomer;
+                }
+                const isRuc = documentType?.value === 'ruc';
+                rucFields?.forEach((field) => { field.hidden = !isRuc; const input = field.querySelector('input'); if (input) input.required = isRuc; });
+                if (documentType) {
+                    documentType.required = isCustomer;
+                }
+                if (documentField) {
+                    documentField.maxLength = isRuc ? 11 : 8;
+                    documentField.placeholder = isRuc ? '11 dígitos del RUC' : '8 dígitos del DNI';
+                    documentField.pattern = isRuc ? '(10|15|17|20)[0-9]{9}' : '[0-9]{8}';
+                    documentField.inputMode = 'numeric';
+                }
+                if (documentLabel) {
+                    documentLabel.firstChild.textContent = isRuc ? 'RUC ' : 'DNI ';
+                }
                 const needsSite = role?.selectedOptions[0]?.dataset.scope === 'sede';
                 if (siteField) {
                     siteField.hidden = !needsSite;
@@ -131,6 +158,7 @@
             };
 
             role?.addEventListener('change', updateCustomerFields);
+            documentType?.addEventListener('change', updateCustomerFields);
             updateCustomerFields();
 
             @if ($errors->any())

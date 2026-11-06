@@ -100,7 +100,7 @@
 .tc-ff__ranking > div { display: flex; align-items: center; gap: 9px; padding: 7px 0; border-bottom: 1px solid #e3ebf6; font-size: .68rem; }
 .tc-ff__ranking b { display: grid; width: 20px; height: 20px; place-items: center; border-radius: 50%; color: #0658cb; background: #dcecff; }
 .tc-ff__ranking span { flex: 1; }
-@media (max-width: 1300px) { .tc-ff__metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tc-ff__main-grid { grid-template-columns: minmax(0, 1fr); } .tc-ff__bottom-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 1080px) { .tc-ff__metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tc-ff__main-grid { grid-template-columns: minmax(0, 1fr); } .tc-ff__bottom-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 760px) { .modulo-finanzas-facturacion .admin-main { padding: 15px 11px 26px; } .tc-ff__header { align-items: start; flex-direction: column; } .tc-ff__header-actions { width: 100%; } .tc-ff__metrics, .tc-ff__bottom-grid { grid-template-columns: minmax(0, 1fr); } .tc-ff__filter-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tc-ff__filter-fields .tc-ff__button { grid-column: 1 / -1; } .tc-ff__card-heading { flex-wrap: wrap; } }
 
 .tc-ff__dialog {
