@@ -160,6 +160,7 @@ class MenusController extends Controller
             'admin.dashboard',
             'admin.users',
             'admin.roles',
+            'admin.permissions_matrix',
             'admin.user_assignments',
             'admin.menus',
             'admin.modules',

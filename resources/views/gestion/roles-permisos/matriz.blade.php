@@ -9,7 +9,7 @@
     @unless ($ready)
         <div class="tc-rbac-alert" role="alert">El esquema RBAC no está disponible.</div>
     @else
-        <nav class="tc-rbac-tabs" aria-label="Administración de seguridad"><a href="{{ route('management.users') }}">Gestión de usuarios</a><a href="{{ route('management.roles_permissions') }}">Roles y permisos</a><a class="is-active" href="{{ route('management.permissions_matrix') }}">Matriz de privilegios</a><a href="{{ route('management.user_assignments') }}">Asignación de roles a usuarios</a><a href="{{ route('management.menus') }}">Menús y submenús</a><a href="{{ route('management.modules') }}">Módulos y pantallas</a></nav>
+        <nav class="tc-rbac-tabs" aria-label="Administración de seguridad"><a href="{{ route('management.users') }}">Gestión de usuarios</a><a href="{{ route('management.roles_permissions') }}">Roles y permisos</a><a class="is-active" href="{{ route('management.permissions_matrix') }}">Matriz de privilegios</a><a href="{{ route('management.user_assignments') }}">Asignaciones globales y por sede</a><a href="{{ route('management.menus') }}">Menús y submenús dinámicos</a><a href="{{ route('management.modules') }}">Módulos y pantallas</a></nav>
         <form class="tc-rbac-matrix-toolbar" method="get" action="{{ route('management.permissions_matrix') }}"><label>Rol<select name="rol" onchange="this.form.submit()">
             @foreach ($roles as $role)
                 <option value="{{ $role->id }}" @selected($selectedRole?->id === $role->id)>{{ $role->nombre }}</option>

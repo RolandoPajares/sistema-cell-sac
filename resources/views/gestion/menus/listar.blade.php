@@ -1,11 +1,11 @@
 @extends('layouts.administracion')
-@section('title', 'Menús y submenús')
+@section('title', 'Menús y submenús dinámicos')
 @section('body_class', 'modulo-seguridad-rbac')
 @section('content')
 <section class="tc-rbac-page" data-menu-page>
-<header class="tc-rbac-hero"><div><span class="tc-rbac-eyebrow">Seguridad y delegación</span><h1>Menús y submenús</h1><p>Configura la navegación lateral desde el catálogo real.</p></div><a class="tc-rbac-primary" href="{{ route('management.modules') }}">Ver pantallas</a></header>
+<header class="tc-rbac-hero"><div><span class="tc-rbac-eyebrow">Seguridad y delegación</span><h1>Menús y submenús dinámicos</h1><p>Configura la navegación lateral desde el catálogo real.</p></div><a class="tc-rbac-primary" href="{{ route('management.modules') }}">Ver pantallas</a></header>
 @unless($ready)<div class="tc-rbac-alert" role="alert">Las tablas RBAC no están disponibles.</div>@else
-<nav class="tc-rbac-tabs" aria-label="Administración de seguridad"><a href="{{ route('management.users') }}">Gestión de usuarios</a><a href="{{ route('management.roles_permissions') }}">Roles y permisos</a><a href="{{ route('management.permissions_matrix') }}">Matriz de privilegios</a><a href="{{ route('management.user_assignments') }}">Asignación de roles a usuarios</a><a class="is-active" href="{{ route('management.menus') }}">Menús y submenús</a><a href="{{ route('management.modules') }}">Módulos y pantallas</a></nav>
+<nav class="tc-rbac-tabs" aria-label="Administración de seguridad"><a href="{{ route('management.users') }}">Gestión de usuarios</a><a href="{{ route('management.roles_permissions') }}">Roles y permisos</a><a href="{{ route('management.permissions_matrix') }}">Matriz de privilegios</a><a href="{{ route('management.user_assignments') }}">Asignaciones globales y por sede</a><a class="is-active" href="{{ route('management.menus') }}">Menús y submenús dinámicos</a><a href="{{ route('management.modules') }}">Módulos y pantallas</a></nav>
 <section class="tc-rbac-toolbar"><label class="tc-rbac-search"><i class="bi bi-search"></i><input type="search" data-menu-filter placeholder="Buscar opción de menú"></label><span class="tc-rbac-summary"><strong>{{ $menus->count() }}</strong> navegaciones configuradas</span></section>
 @foreach($menus as $menu)
 @php($children = $menu->elementos->flatMap(fn($element) => $element->elementosHijos))
