@@ -1,12 +1,13 @@
 body > main .product-page-light {
   min-height: 72vh;
-  padding: 26px 0 72px;
+  padding: 16px 0 72px;
   background: #fff;
   color: #273142;
 }
 
 body > main .product-detail-container {
-  max-width: 1440px;
+  width: calc(100% - 68px);
+  max-width: 1760px;
 }
 
 body > main .product-breadcrumbs {
@@ -348,6 +349,9 @@ body > main .product-detail-specs li strong {
 @media (max-width: 720px) {
   body > main .product-page-light {
     padding: 18px 0 44px;
+  }
+  body > main .product-detail-container {
+    width: calc(100% - 32px);
   }
   body > main .product-detail-modern {
     grid-template-columns: 1fr;
