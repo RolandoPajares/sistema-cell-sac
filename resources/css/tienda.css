@@ -15,6 +15,7 @@
 @import './layouts/publico/encabezado.css';
 @import './layouts/publico/pie-pagina.css';
 @import './layouts/responsive.css';
+@import './componentes/asistente-flotante.css';
 @import './componentes/publico/publicidad.css';
 
 /* Page modules are bundled here so Blade only selects a layout. */

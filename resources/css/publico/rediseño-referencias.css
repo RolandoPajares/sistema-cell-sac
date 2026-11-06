@@ -141,6 +141,98 @@ body.modulo-about > main .feature { border: 1px solid #dce8fb; border-radius: 18
   body.modulo-autenticacion .assistant-float { display: none !important; }
 }
 
+/* Login público: campos legibles y control de contraseña integrado. */
+body.modulo-autenticacion .auth-wrap form,
+body.modulo-autenticacion .auth-wrap .form-group {
+  text-align: left;
+}
+
+body.modulo-autenticacion .auth-wrap .form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: #075ed1;
+  text-align: left;
+  font-weight: 800;
+}
+
+body.modulo-autenticacion .auth-wrap .input,
+body.modulo-autenticacion .auth-password-field .input {
+  width: 100%;
+  border: 1px solid #c9d9f0;
+  background: #fff;
+  color: #071d49;
+  text-align: left;
+}
+
+body.modulo-autenticacion .auth-password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+body.modulo-autenticacion .auth-password-field .input {
+  padding-right: 46px;
+}
+
+body.modulo-autenticacion .auth-password-field button {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #075ed1;
+  font-size: 1.15rem;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+body.modulo-autenticacion .auth-password-field button:hover,
+body.modulo-autenticacion .auth-password-field button:focus-visible {
+  color: #0047ad;
+}
+
+body.modulo-autenticacion .auth-register-page {
+  display: flex;
+  justify-content: center;
+  padding: 42px 16px 54px;
+  background: linear-gradient(135deg, #f4f8ff, #fff);
+}
+
+body.modulo-autenticacion .auth-register-page .auth-wrap {
+  width: min(100%, 620px);
+  margin: 0 auto;
+  text-align: left;
+}
+
+body.modulo-autenticacion .auth-register-page .auth-wrap h1,
+body.modulo-autenticacion .auth-register-page .auth-wrap > p {
+  text-align: center;
+}
+
+body.modulo-autenticacion .auth-register-page .auth-wrap .form-group {
+  margin-bottom: 16px;
+}
+
+body.modulo-autenticacion .auth-register-page .auth-wrap .input {
+  min-height: 52px;
+  background: #fff;
+}
+
+body.modulo-autenticacion .auth-register-page .auth-wrap select.input {
+  color: #071d49;
+  cursor: pointer;
+}
+
+body.modulo-autenticacion .auth-register-page [hidden] {
+  display: none !important;
+}
+
 @media (min-width: 761px) {
   .auth-reference__inner { gap: 24px; }
   body.modulo-autenticacion .auth-wrap { max-width: 500px; padding: 20px 28px; }

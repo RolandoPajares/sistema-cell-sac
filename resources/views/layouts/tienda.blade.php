@@ -25,6 +25,7 @@
 
         @include('layouts.publico.pie-pagina')
         <button id="toTop" class="to-top" aria-label="Subir"><i class="bi bi-arrow-up" aria-hidden="true"></i></button>
+        @include('components.inteligencia.asistente.flotante')
         @stack('scripts')
     </body>
 </html>

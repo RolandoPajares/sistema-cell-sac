@@ -25,6 +25,7 @@
             </div>
         </div>
         <div class="sidebar-overlay admin-sidebar-backdrop" data-sidebar-close data-admin-sidebar-close></div>
+        @include('components.inteligencia.asistente.flotante')
         @stack('scripts')
     </body>
 </html>

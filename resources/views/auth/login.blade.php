@@ -30,14 +30,19 @@
         </div>
         <div class="form-group">
             <label>Contraseña</label>
-            <input
-                class="input"
-                type="password"
-                name="password"
-                maxlength="4096"
-                required
-                autocomplete="current-password"
-            >
+            <div class="admin-password-input auth-password-field">
+                <input
+                    class="input"
+                    type="password"
+                    name="password"
+                    maxlength="4096"
+                    required
+                    autocomplete="current-password"
+                >
+                <button type="button" data-password-toggle aria-label="Mostrar contraseña">
+                    <i class="bi bi-eye" aria-hidden="true"></i>
+                </button>
+            </div>
         </div>
         <div class="auth-reference__options">
             <label><input type="checkbox" name="remember" value="1"> <span>Recordarme</span></label>
