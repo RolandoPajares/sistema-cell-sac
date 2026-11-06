@@ -10,8 +10,19 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Define la responsabilidad de la clase ServicioResponsablesOrganizacionales dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class ServicioResponsablesOrganizacionales
 {
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $idsSede  Parámetro recibido por la operación.
+     * @return Collection Resultado de la operación.
+     */
     public function listar(array $idsSede): Collection
     {
         if (! Schema::hasTable('responsables_organizacionales')) {

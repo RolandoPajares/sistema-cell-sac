@@ -7,6 +7,11 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Define la responsabilidad de la clase ServicioConfiguracionTienda dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ServicioConfiguracionTienda
 {
     private const CAMPOS_POR_SECCION = [

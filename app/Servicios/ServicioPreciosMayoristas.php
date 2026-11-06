@@ -6,12 +6,17 @@ use App\Models\Catalogo\Producto;
 use App\Models\Comercio\PrecioMayorista;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Define la responsabilidad de la clase ServicioPreciosMayoristas dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ServicioPreciosMayoristas
 {
     /** @param array{producto_id:int,precio:string,vigente_desde:string,vigente_hasta:?string,motivo:string} $datos */
@@ -75,6 +80,14 @@ class ServicioPreciosMayoristas
         }, 3);
     }
 
+    /**
+     * Procesa e incorpora la información importada.
+     *
+     * @param  mixed  $archivo  Parámetro recibido por la operación.
+     * @param  mixed  $usuario  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return int Resultado de la operación.
+     */
     public function importarCsv(UploadedFile $archivo, User $usuario, ?string $ip): int
     {
         abort_unless(Schema::hasTable('precios_mayoristas'), 503, 'Los precios mayoristas requieren aplicar primero la estructura SQL aprobada.');
@@ -155,10 +168,18 @@ class ServicioPreciosMayoristas
                     'motivo' => $fila['motivo'],
                 ], $usuario, $ip);
             }
+
             return count($filas);
         }, 3);
     }
 
+    /**
+     * Ejecuta la operación precioVigente definida por la clase ServicioPreciosMayoristas.
+     *
+     * @param  mixed  $empresaId  Parámetro recibido por la operación.
+     * @param  mixed  $productoId  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     public function precioVigente(int $empresaId, int $productoId): ?PrecioMayorista
     {
         if (! Schema::hasTable('precios_mayoristas')) {

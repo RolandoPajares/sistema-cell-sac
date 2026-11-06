@@ -7,12 +7,26 @@ if (menuAdministrador && menuAdministrador.dataset.adminMenuInicializado !== 'tr
     const botonesGrupo = grupos.map((grupo) => grupo.querySelector('[data-admin-menu-toggle]')).filter(Boolean);
     const recordarEstado = document.body.dataset.panelRole === 'administrador';
 
+/**
+ * Ejecuta la operación claveGrupo utilizada por el módulo JavaScript.
+ *
+ * @param {*} grupo - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const claveGrupo = (grupo) => {
         const submenu = grupo.querySelector('[data-admin-menu-submenu]');
 
         return submenu?.id ? `technology-cell-admin-menu:${submenu.id}` : null;
     };
 
+/**
+ * Ejecuta la operación estadoGuardado utilizada por el módulo JavaScript.
+ *
+ * @param {*} grupo - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const estadoGuardado = (grupo) => {
         const clave = claveGrupo(grupo);
 
@@ -27,6 +41,15 @@ if (menuAdministrador && menuAdministrador.dataset.adminMenuInicializado !== 'tr
         }
     };
 
+/**
+ * Registra la información recibida y coordina la actualización de la interfaz.
+ *
+ * @param {*} grupo - Parámetro recibido por la función.
+ *
+ * @param {*} abierto - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const guardarEstado = (grupo, abierto) => {
         const clave = claveGrupo(grupo);
 
@@ -41,6 +64,15 @@ if (menuAdministrador && menuAdministrador.dataset.adminMenuInicializado !== 'tr
         }
     };
 
+/**
+ * Actualiza la información visible o el estado del componente.
+ *
+ * @param {*} grupo - Parámetro recibido por la función.
+ *
+ * @param {*} abierto - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const actualizarGrupo = (grupo, abierto) => {
         const boton = grupo.querySelector('[data-admin-menu-toggle]');
         const submenu = grupo.querySelector('[data-admin-menu-submenu]');

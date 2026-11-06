@@ -5,14 +5,23 @@ namespace App\Servicios;
 use App\Models\Comercio\EnvioPedido;
 use App\Models\Comercio\EventoEnvioPedido;
 use App\Models\User;
-use App\Servicios\RegistradorAuditoria;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Define la responsabilidad de la clase ServicioEnviosPedidos dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class ServicioEnviosPedidos
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly ServicioAutorizacion $autorizacion,
         private readonly RegistradorAuditoria $auditoria,
@@ -21,7 +30,7 @@ final class ServicioEnviosPedidos
     /**
      * Actualiza el estado operativo y registra un evento sin duplicar notificaciones externas.
      *
-     * @param array{estado:string,descripcion?:string|null,identificador_externo?:string|null,ocurrido_en?:string|null} $datos
+     * @param  array{estado:string,descripcion?:string|null,identificador_externo?:string|null,ocurrido_en?:string|null}  $datos
      */
     public function actualizarEstado(EnvioPedido $envio, array $datos, User $usuario, ?string $ip = null): EventoEnvioPedido
     {

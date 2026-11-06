@@ -33,6 +33,11 @@ class UserFactory extends Factory
         ];
     }
 
+    /**
+     * Ejecuta la operación administrator definida por la clase UserFactory.
+     *
+     * @return static Resultado de la operación.
+     */
     public function administrator(): static
     {
         return $this->state(fn (array $attributes): array => ['rol' => 'administrador']);

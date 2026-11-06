@@ -11,15 +11,27 @@ use App\Servicios\ExportadorTabular;
 use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ServicioAutorizacion;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Define la responsabilidad de la clase SoporteReclamoController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class SoporteReclamoController extends Controller
 {
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $authorization  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(Request $request, ServicioAutorizacion $authorization): View
     {
         $module = require resource_path('views/gestion/soporte-reclamos/datos.php');
@@ -66,6 +78,13 @@ class SoporteReclamoController extends Controller
         return view('gestion.soporte-reclamos.listar', compact('module'));
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function store(GuardarCasoSoporteRequest $request, RegistradorAuditoria $audit): RedirectResponse
     {
         $location = app(ServicioAutorizacion::class)->operationSite($request->user());
@@ -81,6 +100,14 @@ class SoporteReclamoController extends Controller
         return redirect()->route('management.support')->with('status', 'Caso de soporte registrado: '.$case->codigo.'.');
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $casoSoporte  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function update(ActualizarCasoSoporteRequest $request, CasoSoporte $casoSoporte, RegistradorAuditoria $audit): RedirectResponse
     {
         $this->assertCaseInScope($request, $casoSoporte, 'gestion.soporte.actualizar');
@@ -94,6 +121,14 @@ class SoporteReclamoController extends Controller
         return redirect()->route('management.support')->with('status', 'Caso de soporte actualizado.');
     }
 
+    /**
+     * Modifica el estado o elimina el registro según la operación solicitada.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $casoSoporte  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function deactivate(Request $request, CasoSoporte $casoSoporte, RegistradorAuditoria $audit): RedirectResponse
     {
         $this->assertCaseInScope($request, $casoSoporte, 'gestion.soporte.anular');
@@ -107,11 +142,27 @@ class SoporteReclamoController extends Controller
         return redirect()->route('management.support')->with('status', 'Caso de soporte cerrado.');
     }
 
+    /**
+     * Ejecuta la operación assertCaseInScope definida por la clase SoporteReclamoController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $case  Parámetro recibido por la operación.
+     * @param  mixed  $permission  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     private function assertCaseInScope(Request $request, CasoSoporte $case, string $permission): void
     {
         abort_unless(app(ServicioAutorizacion::class)->allowsRecord($request->user(), $permission, (int) $case->empresa_id, (int) $case->sede_id), 403);
     }
 
+    /**
+     * Ejecuta la operación assertCustomerInScope definida por la clase SoporteReclamoController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $customerId  Parámetro recibido por la operación.
+     * @param  mixed  $companyId  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     private function assertCustomerInScope(Request $request, ?int $customerId, int $companyId): void
     {
         if ($customerId === null) {
@@ -125,6 +176,15 @@ class SoporteReclamoController extends Controller
             ->exists(), 422, 'El cliente no pertenece a la empresa o está inactivo.');
     }
 
+    /**
+     * Genera la salida exportable de la información disponible.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $exporter  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @param  mixed  $format  Parámetro recibido por la operación.
+     * @return Response|StreamedResponse Resultado de la operación.
+     */
     public function export(Request $request, ExportadorTabular $exporter, RegistradorAuditoria $audit, string $format = 'csv'): Response|StreamedResponse
     {
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');

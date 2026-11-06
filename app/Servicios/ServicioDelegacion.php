@@ -7,8 +7,19 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Define la responsabilidad de la clase ServicioDelegacion dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class ServicioDelegacion
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(private readonly ServicioAutorizacion $autorizacion) {}
 
     /** @param array<int,int> $permissionIds */
@@ -29,6 +40,13 @@ final class ServicioDelegacion
         return true;
     }
 
+    /**
+     * Determina si la operación cumple las condiciones de autorización o validación.
+     *
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $role  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     public function puedeAsignarRol(User $actor, Rol $role): bool
     {
         if (($role->codigo === 'administrador' || $role->alcance_permitido === 'empresa')
@@ -47,6 +65,13 @@ final class ServicioDelegacion
         return true;
     }
 
+    /**
+     * Determina si la operación cumple las condiciones de autorización o validación.
+     *
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $target  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     public function puedeAdministrarUsuario(User $actor, User $target): bool
     {
         $globalRoleIds = DB::table('usuarios_roles')
@@ -127,6 +152,12 @@ final class ServicioDelegacion
         };
     }
 
+    /**
+     * Ejecuta la operación esUltimoAdministradorGlobal definida por la clase ServicioDelegacion.
+     *
+     * @param  mixed  $user  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     public function esUltimoAdministradorGlobal(User $user): bool
     {
         $adminRoleId = DB::table('roles')->where('codigo', 'administrador')->value('id');
@@ -155,6 +186,11 @@ final class ServicioDelegacion
         return $query->doesntExist();
     }
 
+    /**
+     * Ejecuta la operación bloquearAdministradoresGlobales definida por la clase ServicioDelegacion.
+     *
+     * @return void Resultado de la operación.
+     */
     public function bloquearAdministradoresGlobales(): void
     {
         $adminRole = Schema::hasTable('roles')

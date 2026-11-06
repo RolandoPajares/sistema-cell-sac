@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
+/**
+ * Define la responsabilidad de la clase ServicioAutorizacion dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class ServicioAutorizacion
 {
     private const REQUIRED_TABLES = [
@@ -45,6 +50,11 @@ final class ServicioAutorizacion
         'confirm' => 'crear', 'convert_quotation' => 'crear', 'import' => 'crear',
     ];
 
+    /**
+     * Ejecuta la operación schemaAvailable definida por la clase ServicioAutorizacion.
+     *
+     * @return bool Resultado de la operación.
+     */
     public function schemaAvailable(): bool
     {
         if (Schema::getFacadeRoot() === null) {
@@ -60,6 +70,11 @@ final class ServicioAutorizacion
         return true;
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @return bool Resultado de la operación.
+     */
     public function isSeeded(): bool
     {
         return $this->schemaAvailable()
@@ -67,6 +82,13 @@ final class ServicioAutorizacion
             && DB::table('permisos')->where('activo', true)->exists();
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @param  mixed  $user  Parámetro recibido por la operación.
+     * @param  mixed  $roleCode  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     public function hasRole(User $user, string $roleCode): bool
     {
         if (! $this->isSeeded()) {
@@ -110,6 +132,16 @@ final class ServicioAutorizacion
         return false;
     }
 
+    /**
+     * Comprueba si el usuario posee un permiso vigente en su alcance global o de sede.
+     *
+     * Devuelve falso si el catálogo RBAC no está sembrado y, en caso contrario, considera
+     * roles activos, asignaciones vigentes, módulos habilitados y pantallas autorizadas.
+     *
+     * @param User $user Usuario cuya asignación RBAC se consulta.
+     * @param string $permissionCode Código del permiso requerido.
+     * @return bool Verdadero cuando el permiso está vigente en el alcance aplicable.
+     */
     public function allows(User $user, string $permissionCode): bool
     {
         if (! $this->isSeeded()) {
@@ -119,6 +151,17 @@ final class ServicioAutorizacion
         return in_array($permissionCode, $this->permissionCodes($user), true);
     }
 
+    /**
+     * Hace cumplir un permiso RBAC y detiene la solicitud cuando no está autorizado.
+     *
+     * Delega la comprobación a {@see allows()} y produce HTTP 403 cuando el usuario
+     * no tiene el código activo en su alcance.
+     *
+     * @param User $user Usuario que solicita la operación.
+     * @param string $permissionCode Código del permiso requerido.
+     * @return void No devuelve datos cuando la autorización es válida.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si el permiso no está autorizado.
+     */
     public function assertAllowed(User $user, string $permissionCode): void
     {
         abort_unless($this->allows($user, $permissionCode), 403);
@@ -179,11 +222,22 @@ final class ServicioAutorizacion
         return ['empresa_id' => (int) $site->empresa_id, 'sede_id' => (int) $site->id];
     }
 
+    /**
+     * Ejecuta la operación activeSiteIdFor definida por la clase ServicioAutorizacion.
+     *
+     * @param  mixed  $user  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     public function activeSiteIdFor(User $user): ?int
     {
         return $this->activeSiteId($user);
     }
 
+    /**
+     * Ejecuta la operación activeCompanyId definida por la clase ServicioAutorizacion.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function activeCompanyId(): ?int
     {
         return $this->singleActiveCompanyId();
@@ -205,6 +259,11 @@ final class ServicioAutorizacion
         );
     }
 
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function allowsRecord(
         User $user,
         string $permissionCode,
@@ -356,6 +415,13 @@ final class ServicioAutorizacion
         });
     }
 
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $user  Parámetro recibido por la operación.
+     * @param  mixed  $permissionCode  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     public function allowsGlobal(User $user, string $permissionCode): bool
     {
         if (! $this->isSeeded() || ! $this->allows($user, $permissionCode) || $this->singleActiveCompanyId() === null) {
@@ -378,6 +444,12 @@ final class ServicioAutorizacion
             ->exists();
     }
 
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     public function allowsRoute(Request $request): bool
     {
         $routeName = $request->route()?->getName();
@@ -434,6 +506,12 @@ final class ServicioAutorizacion
         return $this->allows($request->user(), $permissionCode);
     }
 
+    /**
+     * Ejecuta la operación permissionForRoute definida por la clase ServicioAutorizacion.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     public function permissionForRoute(Request $request): ?string
     {
         $routeName = $request->route()?->getName();
@@ -545,11 +623,23 @@ final class ServicioAutorizacion
             ->all();
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @param  mixed  $user  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     public function hasControlledAssignments(User $user): bool
     {
         return $this->isSeeded() && (bool) $user->getAttribute('acceso_controlado');
     }
 
+    /**
+     * Ejecuta la operación activeSiteId definida por la clase ServicioAutorizacion.
+     *
+     * @param  mixed  $user  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     private function activeSiteId(User $user): ?int
     {
         $sessionSiteId = request()->hasSession() ? request()->session()->get('sede_actual_id') : null;
@@ -613,6 +703,12 @@ final class ServicioAutorizacion
         return $siteIds->count() === 1 ? (int) $siteIds->first() : null;
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @param  mixed  $siteId  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     private function isActiveSite(int $siteId): bool
     {
         return Schema::hasTable('sedes')
@@ -625,6 +721,14 @@ final class ServicioAutorizacion
                 ->exists();
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @param  mixed  $user  Parámetro recibido por la operación.
+     * @param  mixed  $permissionCode  Parámetro recibido por la operación.
+     * @param  mixed  $scope  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     private function hasPermissionAtScope(User $user, string $permissionCode, string $scope): bool
     {
         $permissionId = DB::table('permisos')
@@ -704,6 +808,11 @@ final class ServicioAutorizacion
             ->all();
     }
 
+    /**
+     * Ejecuta la operación singleActiveSiteId definida por la clase ServicioAutorizacion.
+     *
+     * @return mixed Resultado de la operación.
+     */
     private function singleActiveSiteId(): ?int
     {
         if (! Schema::hasTable('sedes')) {
@@ -721,6 +830,11 @@ final class ServicioAutorizacion
         return $activeSiteIds->count() === 1 ? (int) $activeSiteIds->first() : null;
     }
 
+    /**
+     * Ejecuta la operación singleActiveCompanyId definida por la clase ServicioAutorizacion.
+     *
+     * @return mixed Resultado de la operación.
+     */
     private function singleActiveCompanyId(): ?int
     {
         if (! Schema::hasTable('empresas')) {

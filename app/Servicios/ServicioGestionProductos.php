@@ -8,8 +8,18 @@ use App\Models\Catalogo\Producto;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Define la responsabilidad de la clase ServicioGestionProductos dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class ServicioGestionProductos
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly AlcanceProductos $alcance,
         private readonly ServicioInventario $inventario,

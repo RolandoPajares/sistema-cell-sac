@@ -7,6 +7,11 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Define la responsabilidad de la clase RbacInicialSeeder dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class RbacInicialSeeder extends Seeder
 {
     private const TABLAS_REQUERIDAS = [
@@ -85,6 +90,11 @@ class RbacInicialSeeder extends Seeder
         ];
     }
 
+    /**
+     * Ejecuta la operación principal asignada al componente.
+     *
+     * @return void Resultado de la operación.
+     */
     public function run(): void
     {
         $diagnostico = $this->diagnosticarPreparacion();

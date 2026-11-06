@@ -6,6 +6,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Ejecuta la operación up definida por la clase 2026_11_05_121100_enable_support_export_permission.
+     *
+     * @return void Resultado de la operación.
+     */
     public function up(): void
     {
         if (! Schema::hasTable('modulos') || ! Schema::hasTable('permisos') || ! Schema::hasTable('roles_permisos')) {
@@ -31,6 +36,11 @@ return new class extends Migration
         DB::table('roles_permisos')->insertOrIgnore(['rol_id' => $adminRoleId, 'permiso_id' => $permissionId, 'alcance' => 'empresa', 'creado_en' => now()]);
     }
 
+    /**
+     * Ejecuta la operación down definida por la clase 2026_11_05_121100_enable_support_export_permission.
+     *
+     * @return void Resultado de la operación.
+     */
     public function down(): void
     {
         throw new LogicException('This RBAC repair is forward-only to avoid revoking administrator permissions.');

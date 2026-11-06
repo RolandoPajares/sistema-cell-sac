@@ -6,6 +6,11 @@ use App\Models\Catalogo\Producto;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Define la responsabilidad de la clase DetalleVenta dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class DetalleVenta extends Model
 {
     protected $table = 'detalles_ventas';
@@ -14,11 +19,21 @@ class DetalleVenta extends Model
 
     public $timestamps = false;
 
+    /**
+     * Ejecuta la operación venta definida por la clase DetalleVenta.
+     *
+     * @return BelongsTo Resultado de la operación.
+     */
     public function venta(): BelongsTo
     {
         return $this->belongsTo(Venta::class, 'venta_id');
     }
 
+    /**
+     * Ejecuta la operación producto definida por la clase DetalleVenta.
+     *
+     * @return BelongsTo Resultado de la operación.
+     */
     public function producto(): BelongsTo
     {
         return $this->belongsTo(Producto::class, 'producto_id');

@@ -7,6 +7,11 @@ document.querySelectorAll('[data-finanzas-diseno]').forEach((page) => {
     page.querySelectorAll('[data-account-application]').forEach((form) => {
         const cuenta = form.querySelector('[data-account-select]');
         const pago = form.querySelector('[data-registered-payment-select]');
+/**
+ * Actualiza la información visible o el estado del componente.
+ *
+ * @returns {*} Resultado de la operación.
+ */
         const actualizarPagosDisponibles = () => {
             if (!cuenta || !pago) return;
             [...pago.options].forEach((opcion) => {
@@ -18,6 +23,11 @@ document.querySelectorAll('[data-finanzas-diseno]').forEach((page) => {
         actualizarPagosDisponibles();
     });
 
+/**
+ * Gestiona la interacción y actualiza el estado visual correspondiente.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const applyFilters = () => {
         const query = search?.value.trim().toLocaleLowerCase('es') ?? '';
         let visible = 0;
@@ -39,7 +49,21 @@ document.querySelectorAll('[data-finanzas-diseno]').forEach((page) => {
         if (empty) empty.hidden = visible > 0;
     };
 
+/**
+ * Ejecuta la operación getDialog utilizada por el módulo JavaScript.
+ *
+ * @param {*} name - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const getDialog = (name) => dialogs.find((dialog) => dialog.dataset.ffDialog === name);
+/**
+ * Gestiona la interacción y actualiza el estado visual correspondiente.
+ *
+ * @param {*} dialog - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const closeDialog = (dialog) => {
         if (dialog?.open) dialog.close();
     };
@@ -86,6 +110,11 @@ document.querySelectorAll('[data-finance-module]').forEach((page) => {
     const cashField = dialog.querySelector('[data-finance-cash-field]');
     const bankField = dialog.querySelector('[data-finance-bank-field]');
     const reference = dialog.querySelector('[data-finance-reference]');
+/**
+ * Ejecuta la operación syncMethodFields utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const syncMethodFields = () => {
         if (!method) return;
         const selected = method.selectedOptions[0];
@@ -154,6 +183,19 @@ document.querySelectorAll('[data-cajas-operativas]').forEach((page) => {
     if (page.dataset.cajasReopen === 'crear') createDialog?.showModal();
 });
 
+/**
+ * Gestiona la interacción y actualiza el estado visual correspondiente.
+ *
+ * @param {*} page - Parámetro recibido por la función.
+ *
+ * @param {*} name - Parámetro recibido por la función.
+ *
+ * @param {*} row - Parámetro recibido por la función.
+ *
+ * @param {*} getDialog - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 function openDialog(page, name, row, getDialog) {
     if (!name) return;
     if (['validacion-documento', 'cambio-serie', 'revisar-reembolso', 'ejecutar-reembolso', 'sunat-reenviar-row'].includes(name)) {
@@ -176,6 +218,15 @@ function openDialog(page, name, row, getDialog) {
     dialog.showModal();
 }
 
+/**
+ * Ejecuta la operación renderDetails utilizada por el módulo JavaScript.
+ *
+ * @param {*} dialog - Parámetro recibido por la función.
+ *
+ * @param {*} row - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 function renderDetails(dialog, row) {
     const details = dialog?.querySelector('[data-ff-detail-fields]');
     if (!dialog || !row || !details) return;
@@ -195,6 +246,15 @@ function renderDetails(dialog, row) {
     dialog.showModal();
 }
 
+/**
+ * Ejecuta la operación prepareBoxDialog utilizada por el módulo JavaScript.
+ *
+ * @param {*} dialog - Parámetro recibido por la función.
+ *
+ * @param {*} row - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 function prepareBoxDialog(dialog, row) {
     const title = dialog.querySelector('[data-ff-box-title]');
     const fields = [...dialog.querySelectorAll('.tc-ff__dialog-body input, .tc-ff__dialog-body select')];
@@ -219,6 +279,15 @@ function prepareBoxDialog(dialog, row) {
     if (notice) notice.textContent = 'La fila seleccionada es ilustrativa y sus valores no se cargaron. La edición real requiere consultar un registro autorizado.';
 }
 
+/**
+ * Ejecuta la operación prepareAccountPayment utilizada por el módulo JavaScript.
+ *
+ * @param {*} dialog - Parámetro recibido por la función.
+ *
+ * @param {*} row - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 function prepareAccountPayment(dialog, row) {
     const documentField = dialog.querySelector('[data-ff-account-document]');
     const balance = dialog.querySelector('[data-ff-account-balance]');
@@ -234,6 +303,13 @@ function prepareAccountPayment(dialog, row) {
     if (amount) amount.value = '';
 }
 
+/**
+ * Ejecuta la operación initializeAccountAmount utilizada por el módulo JavaScript.
+ *
+ * @param {*} dialog - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 function initializeAccountAmount(dialog) {
     const amount = dialog?.querySelector('[data-ff-account-amount]');
     const balance = dialog?.querySelector('[data-ff-account-balance]');
@@ -251,12 +327,26 @@ function initializeAccountAmount(dialog) {
     });
 }
 
+/**
+ * Ejecuta la operación parseMoney utilizada por el módulo JavaScript.
+ *
+ * @param {*} value - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 function parseMoney(value) {
     const normalized = value.replace(/[^0-9,.-]/g, '').replace(/\.(?=.*\.)/g, '').replace(',', '.');
     const amount = Number(normalized);
     return Number.isFinite(amount) ? amount : 0;
 }
 
+/**
+ * Ejecuta la operación initializeStepper utilizada por el módulo JavaScript.
+ *
+ * @param {*} dialog - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 function initializeStepper(dialog) {
     const body = dialog.querySelector('[data-ff-stepper]');
     const stages = [...body.querySelectorAll('[data-ff-step]')];
@@ -268,6 +358,13 @@ function initializeStepper(dialog) {
     const feedback = body.querySelector('[data-ff-step-feedback]');
     let current = 0;
 
+/**
+ * Ejecuta la operación render utilizada por el módulo JavaScript.
+ *
+ * @param {*} step - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const render = (step) => {
         current = step;
         stages.forEach((stage) => { stage.hidden = Number(stage.dataset.ffStep) !== step; });
@@ -315,6 +412,13 @@ function initializeStepper(dialog) {
     render(0);
 }
 
+/**
+ * Ejecuta la operación confirmSimpleDialog utilizada por el módulo JavaScript.
+ *
+ * @param {*} dialog - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 function confirmSimpleDialog(dialog) {
     const fields = [...dialog.querySelectorAll('.tc-ff__dialog-body input[required], .tc-ff__dialog-body select[required], .tc-ff__dialog-body textarea[required]')];
     const invalid = fields.find((field) => !field.checkValidity());
@@ -342,6 +446,17 @@ function confirmSimpleDialog(dialog) {
     dialog.querySelector('[data-ff-simple-confirm]').disabled = true;
 }
 
+/**
+ * Recupera y presenta el detalle de la información solicitada.
+ *
+ * @param {*} page - Parámetro recibido por la función.
+ *
+ * @param {*} name - Parámetro recibido por la función.
+ *
+ * @param {*} row - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 function showOperation(page, name, row) {
     const dialog = page.querySelector('[data-ff-dialog="operation"]');
     if (!dialog) return;
@@ -378,6 +493,15 @@ function showOperation(page, name, row) {
     dialog.showModal();
 }
 
+/**
+ * Ejecuta la operación initializeOperationDialog utilizada por el módulo JavaScript.
+ *
+ * @param {*} page - Parámetro recibido por la función.
+ *
+ * @param {*} dialog - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 function initializeOperationDialog(page, dialog) {
     if (!dialog) return;
     const choice = dialog.querySelector('[data-ff-operation-choice]');
@@ -415,6 +539,15 @@ function initializeOperationDialog(page, dialog) {
     });
 }
 
+/**
+ * Ejecuta la operación initializeSunatDialogs utilizada por el módulo JavaScript.
+ *
+ * @param {*} retryDialog - Parámetro recibido por la función.
+ *
+ * @param {*} cdrDialog - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 function initializeSunatDialogs(retryDialog, cdrDialog) {
     retryDialog?.querySelector('[data-ff-sunat-confirm]')?.addEventListener('click', (event) => {
         const feedback = retryDialog.querySelector('[data-ff-sunat-feedback]');
@@ -440,6 +573,13 @@ function initializeSunatDialogs(retryDialog, cdrDialog) {
     });
 }
 
+/**
+ * Ejecuta la operación initializeNoteEvidence utilizada por el módulo JavaScript.
+ *
+ * @param {*} dialog - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 function initializeNoteEvidence(dialog) {
     const input = dialog?.querySelector('[data-ff-note-evidence]');
     const name = dialog?.querySelector('[data-ff-note-evidence-name]');

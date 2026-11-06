@@ -13,13 +13,35 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Define la responsabilidad de la clase ServicioCotizaciones dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ServicioCotizaciones
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly ServicioAutorizacion $authorization,
         private readonly RegistradorAuditoria $auditoria,
     ) {}
 
+    /**
+     * Crea una cotización para el usuario autorizado y registra su auditoría.
+     *
+     * Determina el cliente mayorista, valida propiedad o alcance del empleado, bloquea
+     * los productos de la empresa, calcula el total y persiste cabecera y detalles en
+     * una transacción.
+     *
+     * @param array<string, mixed> $data Datos validados de la cotización y sus detalles.
+     * @param User $user Usuario que crea la cotización.
+     * @return Cotizacion Cotización persistida.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si falla autorización, validación o alcance empresarial.
+     */
     public function create(array $data, User $user): Cotizacion
     {
         $this->authorization->assertAllowed($user, 'gestion.cotizaciones.crear');
@@ -73,6 +95,14 @@ class ServicioCotizaciones
         }, 3);
     }
 
+    /**
+     * Ejecuta la operación aprobar definida por la clase ServicioCotizaciones.
+     *
+     * @param  mixed  $cotizacion  Parámetro recibido por la operación.
+     * @param  mixed  $usuario  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return Cotizacion Resultado de la operación.
+     */
     public function aprobar(Cotizacion $cotizacion, User $usuario, ?string $ip): Cotizacion
     {
         $this->authorization->assertAllowed($usuario, 'gestion.cotizaciones.aprobar');
@@ -102,6 +132,14 @@ class ServicioCotizaciones
         }, 3);
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $cotizacion  Parámetro recibido por la operación.
+     * @param  mixed  $usuario  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return Cotizacion Resultado de la operación.
+     */
     public function registrarEnvioManual(Cotizacion $cotizacion, User $usuario, ?string $ip): Cotizacion
     {
         $this->authorization->assertAllowed($usuario, 'gestion.cotizaciones.actualizar');
@@ -136,6 +174,14 @@ class ServicioCotizaciones
         }, 3);
     }
 
+    /**
+     * Modifica el estado o elimina el registro según la operación solicitada.
+     *
+     * @param  mixed  $cotizacion  Parámetro recibido por la operación.
+     * @param  mixed  $usuario  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return Cotizacion Resultado de la operación.
+     */
     public function desactivar(Cotizacion $cotizacion, User $usuario, ?string $ip): Cotizacion
     {
         $this->authorization->assertAllowed($usuario, 'gestion.cotizaciones.actualizar');
@@ -159,6 +205,15 @@ class ServicioCotizaciones
         }, 3);
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $cotizacion  Parámetro recibido por la operación.
+     * @param  mixed  $data  Parámetro recibido por la operación.
+     * @param  mixed  $usuario  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return Cotizacion Resultado de la operación.
+     */
     public function actualizar(Cotizacion $cotizacion, array $data, User $usuario, ?string $ip): Cotizacion
     {
         $this->authorization->assertAllowed($usuario, 'gestion.cotizaciones.actualizar');
@@ -206,6 +261,15 @@ class ServicioCotizaciones
         }, 3);
     }
 
+    /**
+     * Ejecuta la operación convertirAventa definida por la clase ServicioCotizaciones.
+     *
+     * @param  mixed  $cotizacion  Parámetro recibido por la operación.
+     * @param  mixed  $almacenId  Parámetro recibido por la operación.
+     * @param  mixed  $usuario  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return Venta Resultado de la operación.
+     */
     public function convertirAventa(Cotizacion $cotizacion, int $almacenId, User $usuario, ?string $ip): Venta
     {
         $this->authorization->assertAllowed($usuario, 'gestion.ventas.crear');
@@ -362,6 +426,12 @@ class ServicioCotizaciones
         }, 3);
     }
 
+    /**
+     * Procesa e incorpora la información importada.
+     *
+     * @param  mixed  $centimos  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function importeCotizacion(int $centimos): string
     {
         return intdiv($centimos, 100).'.'.str_pad((string) ($centimos % 100), 2, '0', STR_PAD_LEFT);

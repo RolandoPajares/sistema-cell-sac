@@ -3,11 +3,25 @@ const salesPage = document.querySelector('[data-sales-page]');
 if (salesPage && salesPage.dataset.salesInitialized !== 'true') {
     salesPage.dataset.salesInitialized = 'true';
 
+/**
+ * Ejecuta la operación currency utilizada por el módulo JavaScript.
+ *
+ * @param {*} value - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const currency = (value) => `S/ ${Number(value || 0).toLocaleString('es-PE', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     })}`;
 
+/**
+ * Ejecuta la operación escapeHtml utilizada por el módulo JavaScript.
+ *
+ * @param {*} value - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const escapeHtml = (value) => String(value)
         .replaceAll('&', '&amp;')
         .replaceAll('<', '&lt;')
@@ -15,8 +29,22 @@ if (salesPage && salesPage.dataset.salesInitialized !== 'true') {
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#039;');
 
+/**
+ * Ejecuta la operación linesFor utilizada por el módulo JavaScript.
+ *
+ * @param {*} form - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const linesFor = (form) => [...form.querySelectorAll('[data-sales-line]')];
 
+/**
+ * Ejecuta la operación renderTotals utilizada por el módulo JavaScript.
+ *
+ * @param {*} form - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const renderTotals = (form) => {
         let total = 0;
 
@@ -47,6 +75,13 @@ if (salesPage && salesPage.dataset.salesInitialized !== 'true') {
         form.querySelector('[data-sales-total]')?.replaceChildren(document.createTextNode(currency(total)));
     };
 
+/**
+ * Recupera y presenta el detalle de la información solicitada.
+ *
+ * @param {*} form - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const showEmptyLine = (form) => {
         const lines = form.querySelector('[data-sales-lines]');
         if (!lines || linesFor(form).length > 0 || lines.querySelector('[data-sales-empty]')) {
@@ -59,6 +94,13 @@ if (salesPage && salesPage.dataset.salesInitialized !== 'true') {
         lines.appendChild(empty);
     };
 
+/**
+ * Ejecuta la operación addProductLine utilizada por el módulo JavaScript.
+ *
+ * @param {*} form - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const addProductLine = (form) => {
         const picker = form.querySelector('[data-sales-product-picker]');
         const option = picker?.selectedOptions?.[0];
@@ -108,6 +150,13 @@ if (salesPage && salesPage.dataset.salesInitialized !== 'true') {
         renderTotals(form);
     };
 
+/**
+ * Ejecuta la operación initializeForm utilizada por el módulo JavaScript.
+ *
+ * @param {*} form - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const initializeForm = (form) => {
         if (form.dataset.salesFormInitialized === 'true') {
             return;
@@ -166,6 +215,13 @@ if (salesPage && salesPage.dataset.salesInitialized !== 'true') {
         });
     };
 
+/**
+ * Gestiona la interacción y actualiza el estado visual correspondiente.
+ *
+ * @param {*} dialog - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const openDialog = (dialog) => {
         if (dialog && !dialog.open) {
             dialog.showModal();

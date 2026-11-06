@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+/**
+ * Define la responsabilidad de la clase Permiso dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class Permiso extends Model
 {
     /** @use HasFactory<PermisoFactory> */
@@ -20,11 +25,21 @@ class Permiso extends Model
 
     protected $fillable = ['modulo_id', 'pantalla_id', 'codigo', 'accion', 'nombre', 'activo'];
 
+    /**
+     * Ejecuta la operación casts definida por la clase Permiso.
+     *
+     * @return array Resultado de la operación.
+     */
     protected function casts(): array
     {
         return ['activo' => 'boolean'];
     }
 
+    /**
+     * Ejecuta la operación roles definida por la clase Permiso.
+     *
+     * @return BelongsToMany Resultado de la operación.
+     */
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Rol::class, 'roles_permisos', 'permiso_id', 'rol_id')

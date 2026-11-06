@@ -35,9 +35,13 @@
                 <p>Controla las compras a proveedores y las recepciones que actualizan tu inventario.</p>
             </div>
             <div class="compras-hero-actions">
-                <button class="compras-secondary-button" type="button" data-admin-dialog-open="importar-compras"><i class="bi bi-upload" aria-hidden="true"></i> Importar</button>
-                <details class="compras-export-menu"><summary class="compras-secondary-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar <i class="bi bi-chevron-down" aria-hidden="true"></i></summary><div class="compras-export-options"><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'excel'])) }}"><i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i> Excel (.xlsx)</a><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'pdf'])) }}"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i> PDF (.pdf)</a><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'csv'])) }}"><i class="bi bi-filetype-csv" aria-hidden="true"></i> CSV (.csv)</a></div></details>
-                <button class="compras-primary-button" type="button" data-admin-dialog-open="nueva-compra" @disabled(! $canCreate || $suppliers->isEmpty() || $products->isEmpty())>
+                <button class="compras-secondary-button" type="button" data-admin-dialog-open="importar-compras" @disabled(! $canImport) title="{{ $canImport ? 'Importar compras con permiso de creación' : 'Requiere permiso de creación y una ubicación autorizada' }}"><i class="bi bi-upload" aria-hidden="true"></i> Importar</button>
+                @if ($canExport)
+                    <details class="compras-export-menu"><summary class="compras-secondary-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar <i class="bi bi-chevron-down" aria-hidden="true"></i></summary><div class="compras-export-options"><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'excel'])) }}"><i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i> Excel (.xlsx)</a><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'pdf'])) }}"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i> PDF (.pdf)</a><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'csv'])) }}"><i class="bi bi-filetype-csv" aria-hidden="true"></i> CSV (.csv)</a></div></details>
+                @else
+                    <button class="compras-secondary-button" type="button" disabled title="Requiere el permiso de exportación de compras"><i class="bi bi-download" aria-hidden="true"></i> Exportar</button>
+                @endif
+                <button class="compras-primary-button" type="button" data-admin-dialog-open="nueva-compra" @disabled(! $canCreate) title="{{ $canCreate ? 'Registrar una compra' : ($canCreatePermission && $canCreateLocation ? 'Registra al menos un proveedor y un producto activo' : 'Requiere permiso de creación y una ubicación autorizada') }}">
                     <i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva compra
                 </button>
             </div>

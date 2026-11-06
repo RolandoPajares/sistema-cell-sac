@@ -10,6 +10,11 @@ if (asistente) {
     const campoEntrada = formulario?.querySelector("input");
     const launcher = asistente.querySelector(".assistant-float-launcher");
     const panelHeader = asistente.querySelector(".assistant-float-header");
+/**
+ * Ejecuta la operación posicionGuardada utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const posicionGuardada = (() => {
         try {
             return JSON.parse(localStorage.getItem("assistant-float-position") || "null");
@@ -24,6 +29,11 @@ if (asistente) {
         asistente.style.top = `${Math.min(Math.max(8, posicionGuardada.top), Math.max(8, window.innerHeight - 70))}px`;
     }
 
+/**
+ * Ejecuta la operación posicionPanelGuardada utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const posicionPanelGuardada = (() => {
         try {
             return JSON.parse(localStorage.getItem("assistant-panel-position") || "null");
@@ -37,6 +47,13 @@ if (asistente) {
         panel.style.top = `${posicionPanelGuardada.top}px`;
     }
 
+/**
+ * Ejecuta la operación cambiarEstadoPanel utilizada por el módulo JavaScript.
+ *
+ * @param {*} abierto - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const cambiarEstadoPanel = (abierto) => {
         panel.hidden = !abierto;
         asistente.querySelectorAll('[data-admin-assistant-toggle]').forEach((boton) => boton.setAttribute('aria-expanded', String(abierto)));
@@ -71,6 +88,13 @@ if (asistente) {
         asistente.style.left = `${left}px`;
         asistente.style.top = `${top}px`;
     });
+/**
+ * Ejecuta la operación terminarArrastre utilizada por el módulo JavaScript.
+ *
+ * @param {*} evento - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const terminarArrastre = (evento) => {
         if (!arrastre || arrastre.pointerId !== evento.pointerId) return;
         launcher.releasePointerCapture?.(evento.pointerId);
@@ -99,6 +123,13 @@ if (asistente) {
         panel.style.left = `${evento.clientX - movimientoPanel.offsetX}px`;
         panel.style.top = `${evento.clientY - movimientoPanel.offsetY}px`;
     });
+/**
+ * Ejecuta la operación terminarMovimientoPanel utilizada por el módulo JavaScript.
+ *
+ * @param {*} evento - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const terminarMovimientoPanel = (evento) => {
         if (!movimientoPanel || movimientoPanel.pointerId !== evento.pointerId) return;
         panelHeader.releasePointerCapture?.(evento.pointerId);
@@ -135,6 +166,13 @@ if (asistente) {
             if (edge.includes("w")) panel.style.left = `${redimension.left + redimension.width - width}px`;
             if (edge.includes("n")) panel.style.top = `${redimension.top + redimension.height - height}px`;
         });
+/**
+ * Ejecuta la operación terminarRedimension utilizada por el módulo JavaScript.
+ *
+ * @param {*} evento - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
         const terminarRedimension = (evento) => {
             if (!redimension || redimension.pointerId !== evento.pointerId) return;
             control.releasePointerCapture?.(evento.pointerId);
@@ -159,6 +197,17 @@ if (asistente) {
     });
     asistente.querySelector("[data-admin-assistant-minimize]")?.addEventListener("click", () => cambiarEstadoPanel(false));
 
+/**
+ * Ejecuta la operación agregarMensaje utilizada por el módulo JavaScript.
+ *
+ * @param {*} textoMensaje - Parámetro recibido por la función.
+ *
+ * @param {*} esPropio - Parámetro recibido por la función.
+ *
+ * @param {*} false - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const agregarMensaje = (textoMensaje, esPropio = false) => {
         const articulo = document.createElement("article");
         articulo.className = esPropio ? "is-user" : "";
@@ -174,6 +223,13 @@ if (asistente) {
         mensajes.scrollTop = mensajes.scrollHeight;
     };
 
+/**
+ * Ejecuta la operación consultarAsistente utilizada por el módulo JavaScript.
+ *
+ * @param {*} pregunta - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const consultarAsistente = async (pregunta) => {
         const consultaLimpia = pregunta.trim();
 

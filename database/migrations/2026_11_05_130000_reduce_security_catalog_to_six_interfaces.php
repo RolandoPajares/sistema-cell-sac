@@ -7,6 +7,11 @@ use Illuminate\Support\Str;
 
 return new class extends Migration
 {
+    /**
+     * Ejecuta la operación up definida por la clase 2026_11_05_130000_reduce_security_catalog_to_six_interfaces.
+     *
+     * @return void Resultado de la operación.
+     */
     public function up(): void
     {
         if (! Schema::hasTable('pantallas') || ! Schema::hasTable('permisos') || ! Schema::hasTable('elementos_menu')) {
@@ -140,9 +145,13 @@ return new class extends Migration
         });
     }
 
+    /**
+     * Ejecuta la operación down definida por la clase 2026_11_05_130000_reduce_security_catalog_to_six_interfaces.
+     *
+     * @return void Resultado de la operación.
+     */
     public function down(): void
     {
         throw new LogicException('This RBAC catalog cleanup is forward-only.');
     }
 };
-

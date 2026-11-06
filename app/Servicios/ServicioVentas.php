@@ -12,17 +12,40 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Define la responsabilidad de la clase ServicioVentas dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ServicioVentas
 {
     private const MAX_CENTIMOS = 999999999999999;
 
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly ServicioInventario $inventario,
         private readonly RegistradorAuditoria $auditoria,
         private readonly ServicioAutorizacion $autorizacion,
     ) {}
 
-    /** @param array{cliente_id:int,tipo_venta:string,fecha_venta:string,observaciones:?string,items:array<int,array{producto_id:int,cantidad:int}>} $datos */
+    /**
+     * Registra una venta presencial idempotente y descuenta existencias dentro de una transacción.
+     *
+     * Verifica autorización, esquema, token, ubicación, cliente, productos activos, cantidades
+     * y restricciones de serialización. Bloquea los registros críticos, crea la venta y detalles,
+     * registra movimientos de inventario y escribe la auditoría antes de confirmar.
+     *
+     * @param array{cliente_id:int,tipo_venta:string,fecha_venta:string,observaciones:?string,items:array<int,array{producto_id:int,cantidad:int}>} $datos Datos validados de la venta.
+     * @param User $actor Usuario que registra la operación.
+     * @param string $token Token idempotente de la solicitud.
+     * @param ?string $ip Dirección IP para auditoría.
+     * @return Venta Venta confirmada o registro idempotente existente.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si falla autorización, validación, disponibilidad o consistencia.
+     */
     public function registrarFisica(array $datos, User $actor, string $token, ?string $ip): Venta
     {
         $this->autorizacion->assertAllowed($actor, 'gestion.ventas.crear');
@@ -98,6 +121,20 @@ class ServicioVentas
         }, 3);
     }
 
+    /**
+     * Anula una venta presencial confirmada y repone sus salidas de inventario.
+     *
+     * Comprueba motivo, autorización, pagos, documentos y devoluciones; bloquea la venta,
+     * sus detalles, movimientos, productos y saldos, actualiza existencias, cambia el estado
+     * a anulada y registra el evento de auditoría dentro de la misma transacción.
+     *
+     * @param Venta $venta Venta que se desea anular.
+     * @param User $actor Usuario que solicita la anulación.
+     * @param string $motivo Motivo de entre 5 y 500 caracteres.
+     * @param ?string $ip Dirección IP para auditoría.
+     * @return Venta Venta anulada o ya anulada.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si no se cumplen las reglas de anulación.
+     */
     public function anular(Venta $venta, User $actor, string $motivo, ?string $ip): Venta
     {
         $motivo = trim($motivo);
@@ -387,7 +424,7 @@ class ServicioVentas
     }
 
     /** @param Collection<int, DetalleVenta> $detalles
-     *  @param array<int|string, array<int, int|string>> $dispositivosPorDetalle
+     * @param  array<int|string, array<int, int|string>>  $dispositivosPorDetalle
      */
     private function dispositivosDeVentaCoinciden(Collection $detalles, array $dispositivosPorDetalle): bool
     {
@@ -404,6 +441,12 @@ class ServicioVentas
         return true;
     }
 
+    /**
+     * Ejecuta la operación centimos definida por la clase ServicioVentas.
+     *
+     * @param  mixed  $precio  Parámetro recibido por la operación.
+     * @return int Resultado de la operación.
+     */
     private function centimos(string $precio): int
     {
         abort_unless(preg_match('/\A\d{1,8}(?:\.\d{1,2})?\z/', $precio) === 1, 422, 'El precio del producto no es válido.');
@@ -412,6 +455,12 @@ class ServicioVentas
         return (int) $entero * 100 + (int) str_pad($decimal, 2, '0');
     }
 
+    /**
+     * Procesa e incorpora la información importada.
+     *
+     * @param  mixed  $centimos  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function importe(int $centimos): string
     {
         return intdiv($centimos, 100).'.'.str_pad((string) ($centimos % 100), 2, '0', STR_PAD_LEFT);

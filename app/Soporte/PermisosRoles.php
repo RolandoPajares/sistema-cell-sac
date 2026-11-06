@@ -4,6 +4,11 @@ namespace App\Soporte;
 
 use App\Models\User;
 
+/**
+ * Define la responsabilidad de la clase PermisosRoles dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class PermisosRoles
 {
     /** @var array<string, array<int, string>> */
@@ -17,6 +22,13 @@ final class PermisosRoles
         'marketing' => ['dashboard', 'campanias', 'promociones', 'analitica', 'segmentacion', 'recomendador', 'comparador', 'asistente'],
     ];
 
+    /**
+     * Determina si la operación cumple las condiciones de autorización o validación.
+     *
+     * @param  mixed  $user  Parámetro recibido por la operación.
+     * @param  mixed  $module  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     public static function canView(User $user, string $module): bool
     {
         $modules = self::MODULES[$user->rol] ?? [];

@@ -1,3 +1,10 @@
+/**
+ * Ejecuta la operación decodeRecord utilizada por el módulo JavaScript.
+ *
+ * @param {*} encodedRecord - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const decodeRecord = (encodedRecord) => {
     if (!encodedRecord) {
         return {};
@@ -12,6 +19,15 @@ const decodeRecord = (encodedRecord) => {
     }
 };
 
+/**
+ * Ejecuta la operación populateModal utilizada por el módulo JavaScript.
+ *
+ * @param {*} modal - Parámetro recibido por la función.
+ *
+ * @param {*} trigger - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const populateModal = (modal, trigger) => {
     const record = decodeRecord(trigger?.dataset.pendingRecord);
     const form = modal.querySelector('[data-pending-backend-form]');
@@ -43,6 +59,13 @@ const populateModal = (modal, trigger) => {
     }
 };
 
+/**
+ * Ejecuta la operación initializePendingModule utilizada por el módulo JavaScript.
+ *
+ * @param {*} root - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const initializePendingModule = (root) => {
     if (!root || root.dataset.pendingModuleReady === 'true') {
         return;
@@ -55,6 +78,13 @@ const initializePendingModule = (root) => {
         form.dataset.pendingDefaultMethod = form.querySelector('input[name="_method"]')?.value || 'POST';
     });
 
+/**
+ * Recupera y presenta el detalle de la información solicitada.
+ *
+ * @param {*} message - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const showFeedback = (message) => {
         const feedback = root.querySelector('[data-pending-feedback]');
 
@@ -70,12 +100,28 @@ const initializePendingModule = (root) => {
         }, 4200);
     };
 
+/**
+ * Gestiona la interacción y actualiza el estado visual correspondiente.
+ *
+ * @param {*} modal - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const closeModal = (modal) => {
         if (modal?.open) {
             modal.close();
         }
     };
 
+/**
+ * Gestiona la interacción y actualiza el estado visual correspondiente.
+ *
+ * @param {*} mode - Parámetro recibido por la función.
+ *
+ * @param {*} trigger - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const openModal = (mode, trigger) => {
         const modal = root.querySelector(`[data-pending-modal="${mode}"]`);
 

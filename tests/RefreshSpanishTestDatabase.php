@@ -7,12 +7,22 @@ use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Define la responsabilidad de la clase RefreshSpanishTestDatabase dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 trait RefreshSpanishTestDatabase
 {
     use LazilyRefreshDatabase {
         migrateDatabases as migrateLaravelDatabases;
     }
 
+    /**
+     * Ejecuta la operación migrateDatabases definida por la clase RefreshSpanishTestDatabase.
+     *
+     * @return mixed Resultado de la operación.
+     */
     protected function migrateDatabases()
     {
         $this->migrateLaravelDatabases();

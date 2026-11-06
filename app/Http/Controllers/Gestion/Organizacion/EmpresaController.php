@@ -14,8 +14,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
+/**
+ * Define la responsabilidad de la clase EmpresaController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class EmpresaController extends Controller
 {
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(Request $request, ServicioAutorizacion $autorizacion): View
     {
         $empresaId = $autorizacion->activeCompanyId();
@@ -40,6 +52,11 @@ class EmpresaController extends Controller
         ]);
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function update(
         ActualizarEmpresaRequest $request,
         ServicioAutorizacion $autorizacion,

@@ -10,8 +10,18 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Define la responsabilidad de la clase ServicioInventario dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ServicioInventario
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly ServicioAutorizacion $authorization,
         private readonly RegistradorAuditoria $audit,
@@ -56,6 +66,32 @@ class ServicioInventario
             ->orderBy('sedes.nombre')
             ->orderBy('almacenes.nombre')
             ->get(['almacenes.id', 'almacenes.nombre', 'sedes.nombre AS sede_nombre']);
+    }
+
+    public function disponibilidadDeLinea(User $usuario, Producto $producto, ?int $varianteId = null): int
+    {
+        $ubicacion = $this->authorization->operationLocation($usuario);
+        abort_unless($ubicacion['empresa_id'] !== null && $ubicacion['sede_id'] !== null && $ubicacion['almacen_id'] !== null, 403);
+        abort_unless((int) $producto->empresa_id === (int) $ubicacion['empresa_id'], 403);
+
+        $consulta = DB::table('existencias_almacen')
+            ->where('empresa_id', $ubicacion['empresa_id'])
+            ->where('sede_id', $ubicacion['sede_id'])
+            ->where('almacen_id', $ubicacion['almacen_id'])
+            ->where('producto_id', $producto->id);
+
+        if ($varianteId === null) {
+            $consulta->whereNull('variante_id');
+        } else {
+            $consulta->where('variante_id', $varianteId);
+        }
+
+        $saldo = $consulta->first(['cantidad_fisica', 'cantidad_reservada']);
+        if ($saldo === null) {
+            return 0;
+        }
+
+        return max(0, (int) floor((float) $saldo->cantidad_fisica - (float) $saldo->cantidad_reservada));
     }
 
     /**
@@ -220,8 +256,15 @@ class ServicioInventario
     }
 
     /**
-     * @param  array<int, int|string>  $identificadores
-     * @return array<int, int>
+     * Calcula unidades disponibles para vender en la ubicación autorizada del usuario.
+     *
+     * Filtra identificadores positivos, verifica almacén activo y excluye productos o
+     * variantes serializadas; el saldo final es físico menos reservado. No modifica datos.
+     *
+     * @param User $usuario Usuario cuya empresa, sede y almacén delimitan la consulta.
+     * @param array<int, int|string> $identificadores Identificadores de productos.
+     * @return array<int, int> Existencias disponibles indexadas por producto.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si no existe ubicación autorizada.
      */
     public function disponibilidadParaOperacion(User $usuario, array $identificadores): array
     {
@@ -271,6 +314,17 @@ class ServicioInventario
         return $disponibilidad;
     }
 
+    /**
+     * Crea el saldo inicial en almacén para un producto recién registrado.
+     *
+     * Exige una transacción abierta, verifica la ubicación autorizada, fija existencias
+     * del producto en cero e inserta su saldo físico y reservado inicial.
+     *
+     * @param Producto $product Producto cuyo saldo se inicializa.
+     * @param User $user Usuario que determina la ubicación autorizada.
+     * @return void Persiste el saldo inicial sin devolver datos.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si falta la transacción, el esquema o el alcance.
+     */
     public function registerNewProduct(Producto $product, User $user): void
     {
         abort_unless(DB::transactionLevel() > 0 && Schema::hasTable('existencias_almacen'), 503, 'El inventario requiere una transacción y un almacén configurado.');
@@ -291,6 +345,20 @@ class ServicioInventario
         ]);
     }
 
+    /**
+     * Ajusta inventario bajo bloqueo y registra el movimiento de auditoría.
+     *
+     * Autoriza la acción, abre una transacción, bloquea el producto, delega el cambio
+     * al método de existencias bloqueadas y registra el movimiento resultante.
+     *
+     * @param Producto $product Producto cuyo saldo se ajusta.
+     * @param string $movementType Tipo de movimiento.
+     * @param int $quantity Cantidad del ajuste.
+     * @param string $notes Motivo guardado con el movimiento.
+     * @param User $user Usuario que ejecuta el ajuste.
+     * @return ?MovimientoInventario Movimiento creado o null cuando no se produce movimiento.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si falla autorización o validación.
+     */
     public function adjust(Producto $product, string $movementType, int $quantity, string $notes, User $user): ?MovimientoInventario
     {
         $this->authorization->assertAllowed($user, 'gestion.inventario.ajustar');
@@ -312,6 +380,11 @@ class ServicioInventario
         }, 3);
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function registrarMovimientoEnAlmacen(
         Producto $producto,
         ?int $varianteId,
@@ -386,6 +459,16 @@ class ServicioInventario
         }, 3);
     }
 
+    /**
+     * Ejecuta la operación changeLockedProduct definida por la clase ServicioInventario.
+     *
+     * @param  mixed  $product  Parámetro recibido por la operación.
+     * @param  mixed  $movementType  Parámetro recibido por la operación.
+     * @param  mixed  $quantity  Parámetro recibido por la operación.
+     * @param  mixed  $notes  Parámetro recibido por la operación.
+     * @param  mixed  $user  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     public function changeLockedProduct(Producto $product, string $movementType, int $quantity, string $notes, User $user): ?MovimientoInventario
     {
         abort_unless(DB::transactionLevel() > 0, 503, 'El movimiento de inventario requiere una transacción.');
@@ -445,6 +528,11 @@ class ServicioInventario
         ]);
     }
 
+    /**
+     * Ejecuta la operación changeLockedProductInWarehouse definida por la clase ServicioInventario.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function changeLockedProductInWarehouse(
         Producto $product,
         ?int $variantId,

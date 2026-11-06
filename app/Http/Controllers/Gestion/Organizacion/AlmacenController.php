@@ -17,8 +17,20 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
+/**
+ * Define la responsabilidad de la clase AlmacenController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class AlmacenController extends Controller
 {
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(FiltroAlmacenesRequest $request, ServicioAutorizacion $autorizacion): View
     {
         $usuario = $request->user();
@@ -136,6 +148,11 @@ class AlmacenController extends Controller
         ]);
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function store(
         GuardarAlmacenRequest $request,
         ServicioAutorizacion $autorizacion,
@@ -171,6 +188,11 @@ class AlmacenController extends Controller
         return back()->with('status', 'El almacén quedó registrado.');
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function update(
         GuardarAlmacenRequest $request,
         Almacen $almacen,
@@ -210,6 +232,11 @@ class AlmacenController extends Controller
         return back()->with('status', 'Los datos del almacén quedaron actualizados.');
     }
 
+    /**
+     * Ejecuta la operación cambiarEstado definida por la clase AlmacenController.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function cambiarEstado(
         CambiarEstadoAlmacenRequest $request,
         Almacen $almacen,

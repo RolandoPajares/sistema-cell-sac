@@ -48,6 +48,11 @@ return new class extends Migration
         });
     }
 
+    /**
+     * Ejecuta la operación down definida por la clase 2026_11_05_121200_unificar_menu_operaciones_comerciales.
+     *
+     * @return void Resultado de la operación.
+     */
     public function down(): void
     {
         throw new LogicException('La unificación del menú comercial es deliberadamente irreversible; no se recrean opciones eliminadas automáticamente.');

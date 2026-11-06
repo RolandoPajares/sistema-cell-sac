@@ -11,8 +11,19 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Define la responsabilidad de la clase ConsultaVentas dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ConsultaVentas
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(private readonly ServicioAutorizacion $autorizacion) {}
 
     /** @return Builder<Venta> */
@@ -85,6 +96,13 @@ class ConsultaVentas
             ->get();
     }
 
+    /**
+     * Ejecuta la operación resumen definida por la clase ConsultaVentas.
+     *
+     * @param  mixed  $usuario  Parámetro recibido por la operación.
+     * @param  mixed  $filtros  Parámetro recibido por la operación.
+     * @return array Resultado de la operación.
+     */
     public function resumen(User $usuario, array $filtros): array
     {
         $query = $this->query($usuario, $filtros);

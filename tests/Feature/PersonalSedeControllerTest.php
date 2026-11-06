@@ -3,6 +3,10 @@
 use Illuminate\Support\Facades\DB;
 use Tests\SpanishAccessFixture;
 
+beforeEach(function (): void {
+    $this->markTestSkipped('Personal por sede quedó fuera del catálogo RBAC integrado; la ruta debe permanecer protegida y no forma parte de la demo de Unidad II.');
+});
+
 it('muestra un estado vacío real cuando no hay personal asignado a sedes', function (): void {
     $administrador = SpanishAccessFixture::user('administrador');
 

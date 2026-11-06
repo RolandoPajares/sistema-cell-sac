@@ -14,18 +14,39 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
+/**
+ * Define la responsabilidad de la clase AsistenteController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class AsistenteController extends Controller
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly ServicioAutorizacion $autorizacion,
         private readonly ServicioInventario $inventario,
     ) {}
 
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @return View Resultado de la operación.
+     */
     public function index(): View
     {
         return view('publico.asistente.index');
     }
 
+    /**
+     * Ejecuta la operación ask definida por la clase AsistenteController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return JsonResponse|RedirectResponse Resultado de la operación.
+     */
     public function ask(AsistenteRequest $request): JsonResponse|RedirectResponse
     {
         $query = Str::lower(Str::ascii($request->validated('consulta')));

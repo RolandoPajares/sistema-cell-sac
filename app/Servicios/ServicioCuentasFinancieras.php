@@ -7,13 +7,32 @@ use App\Models\Finanzas\Pago;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Define la responsabilidad de la clase ServicioCuentasFinancieras dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ServicioCuentasFinancieras
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly ServicioAutorizacion $autorizacion,
         private readonly RegistradorAuditoria $auditoria,
     ) {}
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $compraId  Parámetro recibido por la operación.
+     * @param  mixed  $venceEn  Parámetro recibido por la operación.
+     * @param  mixed  $usuario  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return int Resultado de la operación.
+     */
     public function crearCuentaPorPagar(int $compraId, string $venceEn, User $usuario, ?string $ip): int
     {
         $permiso = 'gestion.pagos.crear';
@@ -45,6 +64,16 @@ class ServicioCuentasFinancieras
         }, 3);
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @param  mixed  $cuentaId  Parámetro recibido por la operación.
+     * @param  mixed  $pagoId  Parámetro recibido por la operación.
+     * @param  mixed  $importe  Parámetro recibido por la operación.
+     * @param  mixed  $usuario  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     public function aplicarPagoRegistrado(int $cuentaId, int $pagoId, string $importe, User $usuario, ?string $ip): void
     {
         $permiso = 'gestion.pagos.actualizar';
@@ -93,6 +122,16 @@ class ServicioCuentasFinancieras
         }, 3);
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @param  mixed  $cuentaId  Parámetro recibido por la operación.
+     * @param  mixed  $pagoId  Parámetro recibido por la operación.
+     * @param  mixed  $importe  Parámetro recibido por la operación.
+     * @param  mixed  $usuario  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     public function aplicarCobroRegistrado(int $cuentaId, int $pagoId, string $importe, User $usuario, ?string $ip): void
     {
         $permiso = 'gestion.pagos.actualizar';
@@ -143,6 +182,12 @@ class ServicioCuentasFinancieras
         }, 3);
     }
 
+    /**
+     * Ejecuta la operación centimos definida por la clase ServicioCuentasFinancieras.
+     *
+     * @param  mixed  $importe  Parámetro recibido por la operación.
+     * @return int Resultado de la operación.
+     */
     private function centimos(string $importe): int
     {
         abort_unless(preg_match('/\A(?:0|[1-9][0-9]{0,12})(?:\.[0-9]{1,2})?\z/', $importe) === 1, 422, 'El importe no es válido.');

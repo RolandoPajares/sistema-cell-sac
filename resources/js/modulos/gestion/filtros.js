@@ -1,5 +1,12 @@
 import { exportarTablaVisible } from '../../componentes/gestion/tabla-datos.js';
 
+/**
+ * Ejecuta la operación abrirSelectorFecha utilizada por el módulo JavaScript.
+ *
+ * @param {*} input - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const abrirSelectorFecha = (input) => {
     if (typeof input?.showPicker === 'function') {
         input.showPicker();
@@ -9,6 +16,13 @@ const abrirSelectorFecha = (input) => {
     input?.click();
 };
 
+/**
+ * Ejecuta la operación formatearFecha utilizada por el módulo JavaScript.
+ *
+ * @param {*} valor - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const formatearFecha = (valor) => new Date(`${valor}T12:00:00`).toLocaleDateString('es-PE', {
     day: '2-digit',
     month: 'short',
@@ -60,6 +74,11 @@ if (tablaFiltro) {
         }
     });
 
+/**
+ * Gestiona la interacción y actualiza el estado visual correspondiente.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const aplicarFiltros = () => {
         const textoBusqueda = (campoBusqueda?.value || '').trim().toLowerCase();
         const estadoSeleccionado = (selectorEstado?.value || '').toLowerCase();

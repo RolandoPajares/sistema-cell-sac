@@ -9,23 +9,40 @@ use App\Models\Catalogo\Producto;
 use App\Models\Clientes\Cliente;
 use App\Models\Comercio\DevolucionGarantia;
 use App\Models\Comercio\Pedido;
-use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ExportadorTabular;
+use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ServicioAutorizacion;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Response;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Define la responsabilidad de la clase DevolucionGarantiaController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class DevolucionGarantiaController extends Controller
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @param  mixed  $authorization  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(private readonly ServicioAutorizacion $authorization) {}
 
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(Request $request): View
     {
         $filters = $this->filters($request);
@@ -103,6 +120,13 @@ class DevolucionGarantiaController extends Controller
         return view('gestion.devoluciones-garantias.listar', compact('module'));
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function store(GuardarDevolucionGarantiaRequest $request, RegistradorAuditoria $audit): RedirectResponse
     {
         $order = Pedido::query()->findOrFail($request->integer('pedido_id'));
@@ -121,6 +145,14 @@ class DevolucionGarantiaController extends Controller
         return redirect()->route('management.returns')->with('status', 'Solicitud registrada correctamente.');
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $devolucionGarantia  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function update(ActualizarDevolucionGarantiaRequest $request, DevolucionGarantia $devolucionGarantia, RegistradorAuditoria $audit): RedirectResponse
     {
         abort_unless($this->authorization->allowsRecord(
@@ -142,6 +174,14 @@ class DevolucionGarantiaController extends Controller
         return redirect()->route('management.returns')->with('status', 'Solicitud actualizada correctamente.');
     }
 
+    /**
+     * Modifica el estado o elimina el registro según la operación solicitada.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $devolucionGarantia  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function destroy(Request $request, DevolucionGarantia $devolucionGarantia, RegistradorAuditoria $audit): RedirectResponse
     {
         abort_unless($this->authorization->allowsRecord(
@@ -161,6 +201,15 @@ class DevolucionGarantiaController extends Controller
         return redirect()->route('management.returns')->with('status', 'Solicitud desactivada correctamente.');
     }
 
+    /**
+     * Genera la salida exportable de la información disponible.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $exporter  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @param  mixed  $format  Parámetro recibido por la operación.
+     * @return Response|StreamedResponse Resultado de la operación.
+     */
     public function export(Request $request, ExportadorTabular $exporter, RegistradorAuditoria $audit, string $format = 'csv'): Response|StreamedResponse
     {
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
@@ -193,6 +242,14 @@ class DevolucionGarantiaController extends Controller
         return $response;
     }
 
+    /**
+     * Ejecuta la operación assertOrderInScope definida por la clase DevolucionGarantiaController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $order  Parámetro recibido por la operación.
+     * @param  mixed  $permission  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     private function assertOrderInScope(Request $request, Pedido $order, string $permission): void
     {
         abort_unless($this->authorization->allowsRecord(
@@ -306,6 +363,12 @@ class DevolucionGarantiaController extends Controller
         ];
     }
 
+    /**
+     * Ejecuta la operación statusTone definida por la clase DevolucionGarantiaController.
+     *
+     * @param  mixed  $status  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function statusTone(string $status): string
     {
         return match ($status) {

@@ -1,6 +1,7 @@
 <?php
 
 use App\Dominio\Catalogo\ProductoEntidad;
+use App\Dominio\Catalogo\ProductoDao;
 use App\Dominio\Catalogo\VarianteProductoEntidad;
 use App\Infraestructura\Persistencia\Pdo\PdoConexion;
 use App\Infraestructura\Persistencia\Pdo\PdoProductoDao;
@@ -37,4 +38,21 @@ it('rechaza datos inválidos antes de abrir una transacción de escritura', func
     expect(fn (): ProductoEntidad => $dao->crear(new ProductoEntidad(null, '', 'Inválido', 1, 'Móviles', '1.00', null, true, null)))
         ->toThrow(DomainException::class);
     expect((int) $pdo->query('SELECT COUNT(*) FROM productos')->fetchColumn())->toBe(0);
+});
+
+it('revierte el producto y la variante cuando falla el caso de negocio coordinado', function (): void {
+    $pdo = new PDO('sqlite::memory:');
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo->exec('CREATE TABLE productos (id INTEGER PRIMARY KEY AUTOINCREMENT, marca TEXT NOT NULL, nombre TEXT NOT NULL, categoria_id INTEGER NOT NULL, categoria TEXT NOT NULL, precio NUMERIC NOT NULL, precio_oferta NUMERIC NULL, activo INTEGER NOT NULL, empresa_id INTEGER NULL)');
+    $pdo->exec('CREATE TABLE variantes_productos (id INTEGER PRIMARY KEY AUTOINCREMENT, producto_id INTEGER NOT NULL, codigo_sku TEXT UNIQUE NOT NULL, codigo_barras TEXT NULL, nombre_color TEXT NOT NULL, codigo_color TEXT NULL, existencias INTEGER NOT NULL, controla_serie INTEGER NOT NULL, estado TEXT NOT NULL)');
+    $dao = new PdoProductoDao(new PdoConexion($pdo));
+
+    expect(fn (): mixed => $dao->enTransaccion(function (ProductoDao $transactionalDao): void {
+        $producto = $transactionalDao->crear(new ProductoEntidad(null, 'Marca', 'Producto rollback', 1, 'Móviles', '10.00', null, true, 7));
+        $transactionalDao->crearVariante(new VarianteProductoEntidad(null, (int) $producto->id, 'SKU-ROLLBACK', null, 'Negro', null, 1, false, 'activo'));
+        throw new RuntimeException('Fallo simulado del caso de negocio.');
+    }))->toThrow(RuntimeException::class, 'Fallo simulado del caso de negocio.');
+
+    expect((int) $pdo->query('SELECT COUNT(*) FROM productos')->fetchColumn())->toBe(0)
+        ->and((int) $pdo->query('SELECT COUNT(*) FROM variantes_productos')->fetchColumn())->toBe(0);
 });

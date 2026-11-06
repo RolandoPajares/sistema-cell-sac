@@ -9,6 +9,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Define la responsabilidad de la clase DetalleTransferenciaExistencia dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class DetalleTransferenciaExistencia extends Model
 {
     /** @use HasFactory<DetalleTransferenciaExistenciaFactory> */
@@ -23,6 +28,11 @@ class DetalleTransferenciaExistencia extends Model
 
     public $timestamps = false;
 
+    /**
+     * Ejecuta la operación casts definida por la clase DetalleTransferenciaExistencia.
+     *
+     * @return array Resultado de la operación.
+     */
     protected function casts(): array
     {
         return [
@@ -34,16 +44,31 @@ class DetalleTransferenciaExistencia extends Model
         ];
     }
 
+    /**
+     * Ejecuta la operación transferencia definida por la clase DetalleTransferenciaExistencia.
+     *
+     * @return BelongsTo Resultado de la operación.
+     */
     public function transferencia(): BelongsTo
     {
         return $this->belongsTo(TransferenciaExistencia::class, 'transferencia_id');
     }
 
+    /**
+     * Ejecuta la operación producto definida por la clase DetalleTransferenciaExistencia.
+     *
+     * @return BelongsTo Resultado de la operación.
+     */
     public function producto(): BelongsTo
     {
         return $this->belongsTo(Producto::class, 'producto_id');
     }
 
+    /**
+     * Ejecuta la operación variante definida por la clase DetalleTransferenciaExistencia.
+     *
+     * @return BelongsTo Resultado de la operación.
+     */
     public function variante(): BelongsTo
     {
         return $this->belongsTo(VarianteProducto::class, 'variante_id');

@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Ejecuta la operación up definida por la clase 2026_11_01_013915_create_rbac_seed_versions_table.
+     *
+     * @return void Resultado de la operación.
+     */
     public function up(): void
     {
         Schema::create('rbac_seed_versions', function (Blueprint $table): void {
@@ -31,6 +36,11 @@ return new class extends Migration
         }
     }
 
+    /**
+     * Ejecuta la operación down definida por la clase 2026_11_01_013915_create_rbac_seed_versions_table.
+     *
+     * @return void Resultado de la operación.
+     */
     public function down(): void
     {
         throw new LogicException('RBAC seed history is forward-only because removing it could regrant revoked privileges.');

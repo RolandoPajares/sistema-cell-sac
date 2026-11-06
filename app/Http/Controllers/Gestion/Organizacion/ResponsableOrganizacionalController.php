@@ -13,8 +13,20 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
+/**
+ * Define la responsabilidad de la clase ResponsableOrganizacionalController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class ResponsableOrganizacionalController extends Controller
 {
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @param  mixed  $servicio  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(ServicioAutorizacion $autorizacion, ServicioResponsablesOrganizacionales $servicio): View
     {
         $usuario = request()->user();
@@ -41,6 +53,14 @@ final class ResponsableOrganizacionalController extends Controller
         ]);
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $servicio  Parámetro recibido por la operación.
+     * @param  mixed  $auditoria  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function store(GuardarResponsableOrganizacionalRequest $request, ServicioResponsablesOrganizacionales $servicio, RegistradorAuditoria $auditoria): RedirectResponse
     {
         $usuario = $request->user();

@@ -8,6 +8,12 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Tests\SpanishAccessFixture;
 
+/**
+ * Ejecuta la operación productForCellSac definida por la clase CellSacCommerceTest.
+ *
+ * @param  mixed  $attributes  Parámetro recibido por la operación.
+ * @return Producto Resultado de la operación.
+ */
 function productForCellSac(array $attributes = []): Producto
 {
     $scope = SpanishAccessFixture::organization();
@@ -36,6 +42,7 @@ it('registers public accounts only as retail customers', function () {
     $response = $this->post(route('register.store'), [
         'nombre' => 'Cliente Prueba',
         'correo' => 'cliente@example.test',
+        'tipo_cliente' => 'minorista',
         'password' => 'PruebaSegura123',
         'password_confirmation' => 'PruebaSegura123',
     ]);

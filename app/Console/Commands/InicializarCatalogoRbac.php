@@ -14,8 +14,20 @@ use Throwable;
 
 #[Signature('technology-cell:inicializar-rbac {--aplicar : Autoriza la inicialización del catálogo RBAC existente}')]
 #[Description('Inicializa el catálogo RBAC sin crear ni modificar usuarios u organización')]
+/**
+ * Define la responsabilidad de la clase InicializarCatalogoRbac dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class InicializarCatalogoRbac extends Command
 {
+    /**
+     * Ejecuta la operación principal asignada al componente.
+     *
+     * @param  mixed  $inicializador  Parámetro recibido por la operación.
+     * @param  mixed  $registradorAuditoria  Parámetro recibido por la operación.
+     * @return int Resultado de la operación.
+     */
     public function handle(RbacInicialSeeder $inicializador, RegistradorAuditoria $registradorAuditoria): int
     {
         foreach (['usuarios', 'roles', 'usuarios_roles', 'empresas', 'sedes', 'almacenes', 'registros_auditoria'] as $tabla) {
@@ -137,6 +149,11 @@ final class InicializarCatalogoRbac extends Command
         return self::SUCCESS;
     }
 
+    /**
+     * Ejecuta la operación contarAdministradoresVigentes definida por la clase InicializarCatalogoRbac.
+     *
+     * @return int Resultado de la operación.
+     */
     private function contarAdministradoresVigentes(): int
     {
         return DB::table('usuarios_roles')
@@ -153,6 +170,12 @@ final class InicializarCatalogoRbac extends Command
             ->count();
     }
 
+    /**
+     * Ejecuta la operación contarAlmacenesActivos definida por la clase InicializarCatalogoRbac.
+     *
+     * @param  mixed  $empresaId  Parámetro recibido por la operación.
+     * @return int Resultado de la operación.
+     */
     private function contarAlmacenesActivos(int $empresaId): int
     {
         return DB::table('almacenes')

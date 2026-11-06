@@ -7,6 +7,11 @@ use Illuminate\Support\Str;
 
 return new class extends Migration
 {
+    /**
+     * Ejecuta la operación up definida por la clase 2026_11_05_235900_reduce_analysis_audit_menu_to_two_interfaces.
+     *
+     * @return void Resultado de la operación.
+     */
     public function up(): void
     {
         if (! Schema::hasTable('elementos_menu')) {
@@ -55,6 +60,11 @@ return new class extends Migration
         });
     }
 
+    /**
+     * Ejecuta la operación down definida por la clase 2026_11_05_235900_reduce_analysis_audit_menu_to_two_interfaces.
+     *
+     * @return void Resultado de la operación.
+     */
     public function down(): void
     {
         throw new LogicException('This menu reduction is forward-only to preserve the approved module simplification.');

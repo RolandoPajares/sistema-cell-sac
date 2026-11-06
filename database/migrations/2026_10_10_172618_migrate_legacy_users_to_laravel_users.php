@@ -55,6 +55,13 @@ return new class extends Migration
         $this->syncForeignKeys('usuarios', 'INT');
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @param  mixed  $referencedTable  Parámetro recibido por la operación.
+     * @param  mixed  $columnType  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     private function syncForeignKeys(string $referencedTable, string $columnType): void
     {
         $foreignKeys = [
@@ -103,6 +110,13 @@ return new class extends Migration
         }
     }
 
+    /**
+     * Ejecuta la operación foreignKeyExists definida por la clase 2026_10_10_172618_migrate_legacy_users_to_laravel_users.
+     *
+     * @param  mixed  $table  Parámetro recibido por la operación.
+     * @param  mixed  $constraint  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     private function foreignKeyExists(string $table, string $constraint): bool
     {
         return DB::table('information_schema.TABLE_CONSTRAINTS')

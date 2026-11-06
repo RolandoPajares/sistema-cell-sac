@@ -9,21 +9,33 @@ use App\Http\Requests\ImportarCampaniasRequest;
 use App\Models\Marketing\Campania;
 use App\Models\Marketing\EventoCampania;
 use App\Models\Marketing\SegmentoCliente;
+use App\Servicios\ExportadorTabular;
 use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ServicioAutorizacion;
-use App\Servicios\ExportadorTabular;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
-use Carbon\Carbon;
+use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Define la responsabilidad de la clase CampaniaController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class CampaniaController extends Controller
 {
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(Request $request, ServicioAutorizacion $autorizacion): View
     {
         $empresaId = $autorizacion->activeCompanyId();
@@ -63,6 +75,14 @@ class CampaniaController extends Controller
         ]);
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function store(GuardarCampaniaRequest $request, RegistradorAuditoria $audit, ServicioAutorizacion $autorizacion): RedirectResponse
     {
         $empresaId = $autorizacion->activeCompanyId();
@@ -78,6 +98,14 @@ class CampaniaController extends Controller
         return back()->with('status', 'Campaña creada.');
     }
 
+    /**
+     * Modifica el estado o elimina el registro según la operación solicitada.
+     *
+     * @param  mixed  $campaign  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function deactivate(Campania $campaign, RegistradorAuditoria $audit, ServicioAutorizacion $autorizacion): RedirectResponse
     {
         abort_unless($campaign->empresa_id !== null && (int) $campaign->empresa_id === $autorizacion->activeCompanyId(), 404);
@@ -87,6 +115,15 @@ class CampaniaController extends Controller
         return back()->with('status', 'Campaña desactivada.');
     }
 
+    /**
+     * Genera la salida exportable de la información disponible.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @param  mixed  $exporter  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return Response|StreamedResponse Resultado de la operación.
+     */
     public function export(Request $request, ServicioAutorizacion $autorizacion, ExportadorTabular $exporter, RegistradorAuditoria $audit): Response|StreamedResponse
     {
         $format = $request->string('format', 'csv')->toString();
@@ -125,6 +162,15 @@ class CampaniaController extends Controller
         return $response;
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $campaign  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function update(ActualizarCampaniaRequest $request, Campania $campaign, RegistradorAuditoria $audit, ServicioAutorizacion $autorizacion): RedirectResponse
     {
         abort_unless($campaign->empresa_id !== null && (int) $campaign->empresa_id === $autorizacion->activeCompanyId(), 404);
@@ -139,6 +185,14 @@ class CampaniaController extends Controller
         return back()->with('status', 'Campaña actualizada.');
     }
 
+    /**
+     * Procesa e incorpora la información importada.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function import(ImportarCampaniasRequest $request, RegistradorAuditoria $audit, ServicioAutorizacion $autorizacion): RedirectResponse
     {
         $empresaId = $autorizacion->activeCompanyId();
@@ -273,6 +327,13 @@ class CampaniaController extends Controller
         return $data;
     }
 
+    /**
+     * Ejecuta la operación trendPercent definida por la clase CampaniaController.
+     *
+     * @param  mixed  $current  Parámetro recibido por la operación.
+     * @param  mixed  $previous  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     private function trendPercent(int $current, int $previous): ?float
     {
         if ($previous === 0) {

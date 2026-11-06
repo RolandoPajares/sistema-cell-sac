@@ -46,6 +46,12 @@ function productoParaIntegracionUnidadDos(array $attributes = []): Producto
     return $product;
 }
 
+/**
+ * Registra la información recibida y coordina su persistencia.
+ *
+ * @param  mixed  $nombre  Parámetro recibido por la operación.
+ * @return UploadedFile Resultado de la operación.
+ */
 function crearImagenPngParaPruebaCatalogo(string $nombre): UploadedFile
 {
     $contenido = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=', true);
@@ -53,6 +59,11 @@ function crearImagenPngParaPruebaCatalogo(string $nombre): UploadedFile
     return UploadedFile::fake()->createWithContent($nombre, $contenido === false ? '' : $contenido);
 }
 
+/**
+ * Ejecuta la operación prepararEsquemaDispositivosRecepcionCompra definida por la clase ModuloAndSecurityIntegrationTest.
+ *
+ * @return void Resultado de la operación.
+ */
 function prepararEsquemaDispositivosRecepcionCompra(): void
 {
     if (! Schema::hasTable('dispositivos')) {
@@ -898,7 +909,8 @@ it('creates an administrator-managed wholesale user and customer profile atomica
             'rol' => 'cliente_mayorista',
             'password' => 'IntegracionSegura123',
             'password_confirmation' => 'IntegracionSegura123',
-            'documento' => 'RUC-20001',
+            'tipo_documento' => 'ruc',
+            'documento' => '20123456789',
             'razon_social' => 'Empresa Mayorista',
             'telefono' => '999555666',
             'ciudad' => 'Lima',
@@ -911,7 +923,7 @@ it('creates an administrator-managed wholesale user and customer profile atomica
     $this->assertDatabaseHas('clientes', [
         'usuario_id' => $user->id,
         'tipo' => 'mayorista',
-        'documento' => 'RUC-20001',
+        'documento' => '20123456789',
     ]);
 });
 

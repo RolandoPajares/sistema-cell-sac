@@ -5,6 +5,11 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
     const empty = page.querySelector('[data-il-empty]');
     const mode = page.dataset.ilMode;
 
+/**
+ * Gestiona la interacción y actualiza el estado visual correspondiente.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const applyFilters = () => {
         const query = search?.value.trim().toLocaleLowerCase('es') ?? '';
         let visible = 0;
@@ -36,13 +41,34 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
     });
 
     const dialogs = [...page.querySelectorAll('[data-il-dialog]')];
+/**
+ * Ejecuta la operación getDialog utilizada por el módulo JavaScript.
+ *
+ * @param {*} name - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const getDialog = (name) => dialogs.find((dialog) => dialog.dataset.ilDialog === name);
+/**
+ * Gestiona la interacción y actualiza el estado visual correspondiente.
+ *
+ * @param {*} dialog - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const closeDialog = (dialog) => {
         if (dialog?.open) {
             dialog.close();
         }
     };
 
+/**
+ * Ejecuta la operación renderDetails utilizada por el módulo JavaScript.
+ *
+ * @param {*} row - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const renderDetails = (row) => {
         const dialog = getDialog('detalle');
         const details = dialog?.querySelector('[data-il-detail-fields]');
@@ -68,6 +94,15 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
         dialog.showModal();
     };
 
+/**
+ * Recupera y presenta el detalle de la información solicitada.
+ *
+ * @param {*} row - Parámetro recibido por la función.
+ *
+ * @param {*} operation - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const showOperation = (row, operation) => {
         const dialog = getDialog('operacion');
         const warning = dialog?.querySelector('[data-il-operation-warning]');
@@ -299,6 +334,11 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
         const next = importDialog.querySelector('[data-il-import-next]');
         const confirm = importDialog.querySelector('[data-il-import-confirm]');
         const acknowledgement = importDialog.querySelector('[data-il-series-import-ack]');
+/**
+ * Ejecuta la operación currentImportStep utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
         const currentImportStep = () => Number(wizard.dataset.ilImportStep ?? 0);
 
         importDialog.querySelector('[data-il-series-template]')?.addEventListener('click', () => downloadCsv('plantilla-imei-series.csv', 'imei_o_serie,producto,almacen,condicion'));
@@ -340,10 +380,26 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
     }
 });
 
+/**
+ * Ejecuta la operación currentStep utilizada por el módulo JavaScript.
+ *
+ * @param {*} dialog - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 function currentStep(dialog) {
     return Number(dialog.querySelector('[data-il-step]:not([hidden])')?.dataset.ilStep ?? 0);
 }
 
+/**
+ * Ejecuta la operación resetStepper utilizada por el módulo JavaScript.
+ *
+ * @param {*} dialog - Parámetro recibido por la función.
+ *
+ * @param {*} initialStep - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 function resetStepper(dialog, initialStep = 0) {
     dialog.querySelectorAll('[data-il-step]').forEach((step) => {
         step.hidden = Number(step.dataset.ilStep) !== initialStep;
@@ -367,10 +423,26 @@ function resetStepper(dialog, initialStep = 0) {
     if (acknowledgement) acknowledgement.checked = false;
 }
 
+/**
+ * Ejecuta la operación renderStepper utilizada por el módulo JavaScript.
+ *
+ * @param {*} dialog - Parámetro recibido por la función.
+ *
+ * @param {*} step - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 function renderStepper(dialog, step) {
     resetStepper(dialog, step);
 }
 
+/**
+ * Ejecuta la operación validateVisibleStep utilizada por el módulo JavaScript.
+ *
+ * @param {*} dialog - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 function validateVisibleStep(dialog) {
     const active = dialog.querySelector('[data-il-step]:not([hidden])');
     const invalid = [...(active?.querySelectorAll('input[required], select[required], textarea[required]') ?? [])].find((field) => !field.checkValidity());
@@ -385,6 +457,15 @@ function validateVisibleStep(dialog) {
     return true;
 }
 
+/**
+ * Recupera y presenta el detalle de la información solicitada.
+ *
+ * @param {*} dialog - Parámetro recibido por la función.
+ *
+ * @param {*} message - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 function showStepError(dialog, message) {
     const error = dialog.querySelector('[data-il-step-error]');
     if (error) {
@@ -393,6 +474,13 @@ function showStepError(dialog, message) {
     }
 }
 
+/**
+ * Actualiza la información visible o el estado del componente.
+ *
+ * @param {*} container - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 function updateTransferRemoveButtons(container) {
     const rows = [...container.querySelectorAll('[data-il-transfer-product-row]')];
     rows.forEach((row) => {
@@ -401,6 +489,13 @@ function updateTransferRemoveButtons(container) {
     });
 }
 
+/**
+ * Ejecuta la operación renderTransferReview utilizada por el módulo JavaScript.
+ *
+ * @param {*} dialog - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 function renderTransferReview(dialog) {
     const list = dialog.querySelector('[data-il-transfer-review]');
     const rows = [...dialog.querySelectorAll('[data-il-transfer-product-row]')];
@@ -425,6 +520,13 @@ function renderTransferReview(dialog) {
     });
 }
 
+/**
+ * Ejecuta la operación resetImportWizard utilizada por el módulo JavaScript.
+ *
+ * @param {*} dialog - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 function resetImportWizard(dialog) {
     const wizard = dialog.querySelector('[data-il-import-wizard]');
     const fileInput = dialog.querySelector('[data-il-series-file]');
@@ -439,6 +541,15 @@ function resetImportWizard(dialog) {
     renderImportStep(dialog, 0);
 }
 
+/**
+ * Ejecuta la operación renderImportStep utilizada por el módulo JavaScript.
+ *
+ * @param {*} dialog - Parámetro recibido por la función.
+ *
+ * @param {*} step - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 function renderImportStep(dialog, step) {
     dialog.querySelector('[data-il-import-wizard]').dataset.ilImportStep = String(step);
     dialog.querySelectorAll('[data-il-import-stage]').forEach((stage) => {
@@ -459,6 +570,15 @@ function renderImportStep(dialog, step) {
     if (feedback) feedback.hidden = true;
 }
 
+/**
+ * Ejecuta la operación downloadCsv utilizada por el módulo JavaScript.
+ *
+ * @param {*} filename - Parámetro recibido por la función.
+ *
+ * @param {*} header - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 function downloadCsv(filename, header) {
     const csv = `\uFEFF${header}\r\n`;
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));

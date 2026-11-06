@@ -21,8 +21,20 @@ use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Define la responsabilidad de la clase PanelAnalisisAuditoriaController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class PanelAnalisisAuditoriaController extends Controller
 {
+    /**
+     * Ejecuta la operación globales definida por la clase PanelAnalisisAuditoriaController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function globales(Request $request, ServicioAutorizacion $autorizacion): View
     {
         $autorizacion->assertAllowed($request->user(), 'gestion.reportes.consultar');
@@ -30,6 +42,13 @@ final class PanelAnalisisAuditoriaController extends Controller
         return $this->mostrar($request, 'globales', $autorizacion);
     }
 
+    /**
+     * Ejecuta la operación operaciones definida por la clase PanelAnalisisAuditoriaController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function operaciones(Request $request, ServicioAutorizacion $autorizacion): View
     {
         $autorizacion->assertAllowed($request->user(), 'gestion.auditoria.consultar');
@@ -37,6 +56,14 @@ final class PanelAnalisisAuditoriaController extends Controller
         return $this->mostrar($request, 'operaciones', $autorizacion);
     }
 
+    /**
+     * Ejecuta la operación mostrar definida por la clase PanelAnalisisAuditoriaController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $tipo  Parámetro recibido por la operación.
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function mostrar(Request $request, string $tipo, ServicioAutorizacion $autorizacion): View
     {
         abort_unless(in_array($tipo, ['globales', 'operaciones'], true), 404);
@@ -75,6 +102,17 @@ final class PanelAnalisisAuditoriaController extends Controller
         ]);
     }
 
+    /**
+     * Genera la salida exportable de la información disponible.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $tipo  Parámetro recibido por la operación.
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @param  mixed  $exportador  Parámetro recibido por la operación.
+     * @param  mixed  $auditoria  Parámetro recibido por la operación.
+     * @param  mixed  $format  Parámetro recibido por la operación.
+     * @return Response|StreamedResponse Resultado de la operación.
+     */
     public function exportar(Request $request, string $tipo, ServicioAutorizacion $autorizacion, ExportadorTabular $exportador, RegistradorAuditoria $auditoria, string $format = 'csv'): Response|StreamedResponse
     {
         abort_unless(in_array($tipo, ['globales', 'operaciones'], true), 404);
@@ -329,6 +367,12 @@ final class PanelAnalisisAuditoriaController extends Controller
         ];
     }
 
+    /**
+     * Ejecuta la operación etiquetaAuditoria definida por la clase PanelAnalisisAuditoriaController.
+     *
+     * @param  mixed  $valor  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function etiquetaAuditoria(?string $valor): string
     {
         $valor = trim((string) $valor);
@@ -350,11 +394,23 @@ final class PanelAnalisisAuditoriaController extends Controller
         return $etiquetas[$valor] ?? mb_convert_case(str_replace(['_', '.'], ' ', $valor), MB_CASE_TITLE, 'UTF-8');
     }
 
+    /**
+     * Ejecuta la operación vista definida por la clase PanelAnalisisAuditoriaController.
+     *
+     * @param  mixed  $tipo  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function vista(string $tipo): string
     {
         return 'paneles.administrador.analisis-auditoria.'.$this->directorio($tipo).'.listar';
     }
 
+    /**
+     * Ejecuta la operación directorio definida por la clase PanelAnalisisAuditoriaController.
+     *
+     * @param  mixed  $tipo  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function directorio(string $tipo): string
     {
         return ['globales' => 'reportes-globales', 'operaciones' => 'auditoria-operaciones'][$tipo];

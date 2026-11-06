@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+/**
+ * Define la responsabilidad de la clase Rol dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class Rol extends Model
 {
     /** @use HasFactory<RolFactory> */
@@ -21,6 +26,11 @@ class Rol extends Model
 
     protected $fillable = ['codigo', 'nombre', 'descripcion', 'alcance_permitido', 'es_sistema', 'activo'];
 
+    /**
+     * Ejecuta la operación casts definida por la clase Rol.
+     *
+     * @return array Resultado de la operación.
+     */
     protected function casts(): array
     {
         return [
@@ -29,17 +39,32 @@ class Rol extends Model
         ];
     }
 
+    /**
+     * Ejecuta la operación permisos definida por la clase Rol.
+     *
+     * @return BelongsToMany Resultado de la operación.
+     */
     public function permisos(): BelongsToMany
     {
         return $this->belongsToMany(Permiso::class, 'roles_permisos', 'rol_id', 'permiso_id')
             ->withPivot('alcance');
     }
 
+    /**
+     * Ejecuta la operación menus definida por la clase Rol.
+     *
+     * @return BelongsToMany Resultado de la operación.
+     */
     public function menus(): BelongsToMany
     {
         return $this->belongsToMany(Menu::class, 'roles_menus', 'rol_id', 'menu_id');
     }
 
+    /**
+     * Ejecuta la operación usuarios definida por la clase Rol.
+     *
+     * @return BelongsToMany Resultado de la operación.
+     */
     public function usuarios(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'usuarios_roles', 'rol_id', 'usuario_id')

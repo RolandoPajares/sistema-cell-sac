@@ -5,6 +5,11 @@ document.querySelectorAll('[data-organizacion]').forEach((page) => {
     const selects = [...(filterRoot?.querySelectorAll('[data-org-select]') ?? [])];
     const empty = page.querySelector('[data-org-empty]');
 
+/**
+ * Gestiona la interacción y actualiza el estado visual correspondiente.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const applyFilters = () => {
         const query = search?.value.trim().toLocaleLowerCase('es') ?? '';
         let visible = 0;
@@ -53,6 +58,15 @@ document.querySelectorAll('[data-organizacion]').forEach((page) => {
     let activeSteps = steps;
     let lastTrigger = null;
 
+/**
+ * Gestiona la interacción y actualiza el estado visual correspondiente.
+ *
+ * @param {*} name - Parámetro recibido por la función.
+ *
+ * @param {*} value - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const setField = (name, value) => {
         const field = form?.elements.namedItem(name);
         if (!field || !value || value === '—') return;
@@ -62,6 +76,13 @@ document.querySelectorAll('[data-organizacion]').forEach((page) => {
         field.value = value;
     };
 
+/**
+ * Recupera y presenta el detalle de la información solicitada.
+ *
+ * @param {*} index - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const showStep = (index) => {
         currentStep = index;
         steps.forEach((step) => { step.hidden = !activeSteps.includes(step) || step !== activeSteps[index]; });
@@ -78,6 +99,13 @@ document.querySelectorAll('[data-organizacion]').forEach((page) => {
         feedback.textContent = '';
     };
 
+/**
+ * Ejecuta la operación validateStep utilizada por el módulo JavaScript.
+ *
+ * @param {*} step - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const validateStep = (step) => {
         for (const field of step.querySelectorAll('input, select, textarea')) {
             if (field.disabled || field.closest('[hidden]')) continue;
@@ -105,8 +133,24 @@ document.querySelectorAll('[data-organizacion]').forEach((page) => {
         return true;
     };
 
+/**
+ * Ejecuta la operación rowValues utilizada por el módulo JavaScript.
+ *
+ * @param {*} row - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const rowValues = (row) => [...row.querySelectorAll('td')].slice(1, -1).map((cell) => cell.textContent.trim());
 
+/**
+ * Ejecuta la operación prefill utilizada por el módulo JavaScript.
+ *
+ * @param {*} row - Parámetro recibido por la función.
+ *
+ * @param {*} values - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const prefill = (row, values) => {
         switch (page.dataset.organizacion) {
             case 'sedes':
@@ -132,6 +176,15 @@ document.querySelectorAll('[data-organizacion]').forEach((page) => {
         }
     };
 
+/**
+ * Gestiona la interacción y actualiza el estado visual correspondiente.
+ *
+ * @param {*} action - Parámetro recibido por la función.
+ *
+ * @param {*} row - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const openForm = (action, row) => {
         if (!dialog || !form) return;
         form.reset();
@@ -189,6 +242,11 @@ document.querySelectorAll('[data-organizacion]').forEach((page) => {
             const selectorSede = form.elements.namedItem('sede_id');
             const selectorAlmacen = form.elements.namedItem('almacen_id');
             const selectorResponsable = form.elements.namedItem('responsable_usuario_id');
+/**
+ * Actualiza la información visible o el estado del componente.
+ *
+ * @returns {*} Resultado de la operación.
+ */
             const actualizarRecurso = () => {
                 const tipo = tipoRecurso.value;
                 form.querySelector('[data-org-resource-field="almacen_id"]').hidden = tipo !== 'almacen';

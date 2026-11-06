@@ -39,6 +39,13 @@ document.querySelectorAll('[data-auditoria-operaciones]').forEach((panel) => {
     const detalleContenido = panel.querySelector('[data-audit-detail-content]');
     const filas = new Map(configuracion.map((evento) => [String(evento.id), evento]));
 
+/**
+ * Ejecuta la operación renderizar utilizada por el módulo JavaScript.
+ *
+ * @param {*} evento - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const renderizar = (evento) => {
         if (!evento) {
             return;

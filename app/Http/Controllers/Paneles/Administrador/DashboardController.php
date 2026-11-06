@@ -20,8 +20,18 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Define la responsabilidad de la clase DashboardController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class DashboardController extends PanelDashboardController
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         ServicioPaneles $panelService,
         private readonly ServicioAutorizacion $autorizacion,
@@ -31,11 +41,21 @@ final class DashboardController extends PanelDashboardController
         parent::__construct($panelService);
     }
 
+    /**
+     * Ejecuta la operación role definida por la clase DashboardController.
+     *
+     * @return string Resultado de la operación.
+     */
     protected function role(): string
     {
         return 'administrador';
     }
 
+    /**
+     * Recupera y presenta el detalle de la información solicitada.
+     *
+     * @return string Resultado de la operación.
+     */
     protected function viewName(): string
     {
         return 'paneles.administrador.dashboard';
@@ -226,6 +246,13 @@ final class DashboardController extends PanelDashboardController
         return $months;
     }
 
+    /**
+     * Ejecuta la operación trendPercent definida por la clase DashboardController.
+     *
+     * @param  mixed  $current  Parámetro recibido por la operación.
+     * @param  mixed  $previous  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     private function trendPercent(float|int $current, float|int $previous): ?float
     {
         if ((float) $previous === 0.0) {

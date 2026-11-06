@@ -19,8 +19,20 @@ use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Define la responsabilidad de la clase CategoriaController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class CategoriaController extends Controller
 {
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $inventario  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(Request $request, ServicioInventario $inventario): View
     {
         $alcance = $this->alcanceActual($request, $inventario);
@@ -37,6 +49,15 @@ class CategoriaController extends Controller
         ]);
     }
 
+    /**
+     * Genera la salida exportable de la información disponible.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $inventario  Parámetro recibido por la operación.
+     * @param  mixed  $exporter  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return Response|StreamedResponse Resultado de la operación.
+     */
     public function export(Request $request, ServicioInventario $inventario, ExportadorTabular $exporter, RegistradorAuditoria $audit): Response|StreamedResponse
     {
         $alcance = $this->alcanceActual($request, $inventario);
@@ -71,6 +92,14 @@ class CategoriaController extends Controller
         return $response;
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $inventario  Parámetro recibido por la operación.
+     * @param  mixed  $auditoria  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function store(GuardarCategoriaRequest $request, ServicioInventario $inventario, RegistradorAuditoria $auditoria): RedirectResponse
     {
         $alcance = $this->alcanceActual($request, $inventario);
@@ -84,6 +113,15 @@ class CategoriaController extends Controller
         return back()->with('status', 'Categoría registrada.');
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $category  Parámetro recibido por la operación.
+     * @param  mixed  $inventario  Parámetro recibido por la operación.
+     * @param  mixed  $auditoria  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function update(ActualizarCategoriaRequest $request, Categoria $category, ServicioInventario $inventario, RegistradorAuditoria $auditoria): RedirectResponse
     {
         $alcance = $this->alcanceActual($request, $inventario);
@@ -96,6 +134,15 @@ class CategoriaController extends Controller
         return back()->with('status', 'Categoría actualizada.');
     }
 
+    /**
+     * Modifica el estado o elimina el registro según la operación solicitada.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $category  Parámetro recibido por la operación.
+     * @param  mixed  $inventario  Parámetro recibido por la operación.
+     * @param  mixed  $auditoria  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function deactivate(Request $request, Categoria $category, ServicioInventario $inventario, RegistradorAuditoria $auditoria): RedirectResponse
     {
         $alcance = $this->alcanceActual($request, $inventario);
@@ -181,6 +228,13 @@ class CategoriaController extends Controller
         return $inventario->alcanceConsulta($usuario, $permiso);
     }
 
+    /**
+     * Recupera y presenta el detalle de la información solicitada.
+     *
+     * @param  mixed  $categoria  Parámetro recibido por la operación.
+     * @param  mixed  $empresaId  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     private function verificarEmpresa(Categoria $categoria, int $empresaId): void
     {
         abort_unless((int) $categoria->empresa_id === $empresaId, 404);

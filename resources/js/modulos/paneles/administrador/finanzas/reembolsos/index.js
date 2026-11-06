@@ -1,3 +1,10 @@
+/**
+ * Ejecuta la operación initializeReembolsos utilizada por el módulo JavaScript.
+ *
+ * @param {*} root - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 export const initializeReembolsos = (root) => {
     if (!root || root.dataset.financeReembolsosReady === 'true') {
         return;
@@ -8,6 +15,13 @@ export const initializeReembolsos = (root) => {
     initializeRefundDemo(root);
 };
 
+/**
+ * Ejecuta la operación initializeRefundDemo utilizada por el módulo JavaScript.
+ *
+ * @param {*} root - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const initializeRefundDemo = (root) => {
     const form = root.querySelector('[data-finance-refund-form]');
     const dialog = root.querySelector('[data-pending-modal="crear"]');
@@ -76,6 +90,15 @@ const initializeRefundDemo = (root) => {
     });
 };
 
+/**
+ * Ejecuta la operación bindFinanceFilterStatus utilizada por el módulo JavaScript.
+ *
+ * @param {*} root - Parámetro recibido por la función.
+ *
+ * @param {*} moduleName - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const bindFinanceFilterStatus = (root, moduleName) => {
     const status = root.querySelector('[data-finance-filter-status]');
 

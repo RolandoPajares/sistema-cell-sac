@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Ejecuta la operación up definida por la clase 2026_11_01_015112_link_commerce_enterprise_foreign_keys.
+     *
+     * @return void Resultado de la operación.
+     */
     public function up(): void
     {
         if (DB::getDriverName() === 'sqlite') {
@@ -51,6 +56,11 @@ return new class extends Migration
         });
     }
 
+    /**
+     * Ejecuta la operación down definida por la clase 2026_11_01_015112_link_commerce_enterprise_foreign_keys.
+     *
+     * @return void Resultado de la operación.
+     */
     public function down(): void
     {
         throw new LogicException('Enterprise relationships are forward-only to protect business records.');

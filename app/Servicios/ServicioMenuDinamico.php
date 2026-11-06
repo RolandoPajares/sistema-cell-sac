@@ -8,8 +8,19 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Define la responsabilidad de la clase ServicioMenuDinamico dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class ServicioMenuDinamico
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(private readonly ServicioAutorizacion $autorizacion) {}
 
     /** @return array{dinamico:bool,grupos:array<int,array<string,mixed>>} */
@@ -30,8 +41,19 @@ final class ServicioMenuDinamico
         }
 
         $menus = DB::table('menus')
-            ->join('roles_menus', 'roles_menus.menu_id', '=', 'menus.id')
-            ->whereIn('roles_menus.rol_id', $roleIds)
+            ->leftJoin('roles_menus', function ($join) use ($roleIds): void {
+                $join->on('roles_menus.menu_id', '=', 'menus.id')->whereIn('roles_menus.rol_id', $roleIds);
+            })
+            ->where(function ($query) use ($roleIds): void {
+                $query->whereNotNull('roles_menus.rol_id')
+                    ->orWhereExists(function ($subquery) use ($roleIds): void {
+                        $subquery->selectRaw('1')
+                            ->from('elementos_menu as menu_permissions')
+                            ->join('roles_permisos as effective_grants', 'effective_grants.permiso_id', '=', 'menu_permissions.permiso_id')
+                            ->whereColumn('menu_permissions.menu_id', 'menus.id')
+                            ->whereIn('effective_grants.rol_id', $roleIds);
+                    });
+            })
             ->where('menus.habilitado', true)
             ->where('menus.contexto', 'sidebar')
             ->select('menus.id', 'menus.codigo', 'menus.nombre')
@@ -89,6 +111,11 @@ final class ServicioMenuDinamico
         return ['dinamico' => true, 'grupos' => $groups];
     }
 
+    /**
+     * Ejecuta la operación schemaAvailable definida por la clase ServicioMenuDinamico.
+     *
+     * @return bool Resultado de la operación.
+     */
     private function schemaAvailable(): bool
     {
         foreach (['roles', 'usuarios_roles', 'usuarios_sedes_roles', 'roles_menus', 'menus', 'elementos_menu', 'pantallas', 'permisos'] as $table) {
@@ -185,6 +212,14 @@ final class ServicioMenuDinamico
     /** @return array<string,mixed>|null */
     private function makeItem(object $row, User $user): ?array
     {
+        if (is_string($row->ruta)
+            && $row->ruta !== 'dashboard'
+            && ! str_starts_with($row->ruta, 'management.account')
+            && is_string($row->modulo_codigo)
+            && ! $this->autorizacion->allows($user, 'gestion.'.$row->modulo_codigo.'.consultar')) {
+            return null;
+        }
+
         if (is_string($row->permiso_codigo) && ! $this->autorizacion->allows($user, $row->permiso_codigo)) {
             return null;
         }
@@ -192,9 +227,15 @@ final class ServicioMenuDinamico
         if (is_string($row->ruta)
             && $row->ruta !== 'dashboard'
             && ! str_starts_with($row->ruta, 'management.account')
-            && (! is_string($row->modulo_codigo)
-                || ! (bool) $row->modulo_habilitado
-                || ! $this->autorizacion->allows($user, 'gestion.'.$row->modulo_codigo.'.consultar'))) {
+            && (! is_string($row->modulo_codigo) || ! (bool) $row->modulo_habilitado)) {
+            return null;
+        }
+
+        if (is_string($row->ruta)
+            && $row->ruta !== 'dashboard'
+            && ! str_starts_with($row->ruta, 'management.account')
+            && ! is_string($row->permiso_codigo)
+            && (! is_string($row->modulo_codigo) || ! $this->autorizacion->allows($user, 'gestion.'.$row->modulo_codigo.'.consultar'))) {
             return null;
         }
 
@@ -211,6 +252,12 @@ final class ServicioMenuDinamico
         ];
     }
 
+    /**
+     * Ejecuta la operación activeRoute definida por la clase ServicioMenuDinamico.
+     *
+     * @param  mixed  $route  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     private function activeRoute(string $route): bool
     {
         if ($route === 'management.inventory') {

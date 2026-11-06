@@ -1,3 +1,10 @@
+/**
+ * Ejecuta la operación initializeRespaldos utilizada por el módulo JavaScript.
+ *
+ * @param {*} root - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 export const initializeRespaldos = (root) => {
     if (!root || root.dataset.adminSystemBackupsReady === 'true') {
         return;

@@ -8,6 +8,11 @@ use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use ZipArchive;
 
+/**
+ * Define la responsabilidad de la clase ExportadorTabular dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class ExportadorTabular
 {
     private const LOGO_PATH = 'public/assets/cell-legacy/img/marca/logoadmin.png';
@@ -80,7 +85,7 @@ final class ExportadorTabular
      */
     private function excel(string $filename, array $columns, array $rows, array $report): Response
     {
-        if (!class_exists(ZipArchive::class)) {
+        if (! class_exists(ZipArchive::class)) {
             return $this->excelWithoutZipArchive($filename, $columns, $rows, $report);
         }
         $temporaryFile = tempnam(sys_get_temp_dir(), 'tc-xlsx-');
@@ -183,16 +188,16 @@ final class ExportadorTabular
             $compressedLength = strlen($compressed);
             $crc = crc32($content);
 
-            $localHeader = pack('VvvvvvVVVvv', 0x04034b50, 20, 0, 8, 0, 0, $crc, $compressedLength, $contentLength, $nameLength, 0).$name.$compressed;
+            $localHeader = pack('VvvvvvVVVvv', 0x04034B50, 20, 0, 8, 0, 0, $crc, $compressedLength, $contentLength, $nameLength, 0).$name.$compressed;
             $body .= $localHeader;
-            $centralDirectory .= pack('VvvvvvvVVVvvvvvVV', 0x02014b50, 20, 20, 0, 8, 0, 0, $crc, $compressedLength, $contentLength, $nameLength, 0, 0, 0, 0, 0, $offset).$name;
+            $centralDirectory .= pack('VvvvvvvVVVvvvvvVV', 0x02014B50, 20, 20, 0, 8, 0, 0, $crc, $compressedLength, $contentLength, $nameLength, 0, 0, 0, 0, 0, $offset).$name;
             $offset += strlen($localHeader);
             $entryCount++;
         }
 
         $centralOffset = strlen($body);
         $body .= $centralDirectory;
-        $body .= pack('VvvvvVVv', 0x06054b50, 0, 0, $entryCount, $entryCount, strlen($centralDirectory), $centralOffset, 0);
+        $body .= pack('VvvvvVVv', 0x06054B50, 0, 0, $entryCount, $entryCount, strlen($centralDirectory), $centralOffset, 0);
 
         return $body;
     }
@@ -471,6 +476,15 @@ final class ExportadorTabular
         return $widths;
     }
 
+    /**
+     * Ejecuta la operación worksheetBodyStyle definida por la clase ExportadorTabular.
+     *
+     * @param  mixed  $type  Parámetro recibido por la operación.
+     * @param  mixed  $value  Parámetro recibido por la operación.
+     * @param  mixed  $alternate  Parámetro recibido por la operación.
+     * @param  mixed  $heading  Parámetro recibido por la operación.
+     * @return int Resultado de la operación.
+     */
     private function worksheetBodyStyle(string $type, mixed $value, bool $alternate, string $heading): int
     {
         if (mb_stripos($heading, 'estado') !== false) {
@@ -491,6 +505,11 @@ final class ExportadorTabular
         };
     }
 
+    /**
+     * Ejecuta la operación stylesXml definida por la clase ExportadorTabular.
+     *
+     * @return string Resultado de la operación.
+     */
     private function stylesXml(): string
     {
         $formats = '<numFmts count="6"><numFmt numFmtId="'.self::XLSX_NUMFMT_CURRENCY.'" formatCode="#,##0.00 &quot;PEN&quot;"/><numFmt numFmtId="'.self::XLSX_NUMFMT_DATE.'" formatCode="dd/mm/yyyy"/><numFmt numFmtId="'.self::XLSX_NUMFMT_DATETIME.'" formatCode="dd/mm/yyyy hh:mm"/><numFmt numFmtId="'.self::XLSX_NUMFMT_NUMBER.'" formatCode="#,##0.00"/><numFmt numFmtId="'.self::XLSX_NUMFMT_INTEGER.'" formatCode="#,##0"/><numFmt numFmtId="'.self::XLSX_NUMFMT_PERCENT.'" formatCode="0.0%"/></numFmts>';
@@ -556,6 +575,11 @@ final class ExportadorTabular
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView/></bookViews><sheets><sheet name="Reporte" sheetId="1" r:id="rId1"/></sheets><definedNames><definedName name="_xlnm.Print_Titles" localSheetId="0">\'Reporte\'!$'.$headerRow.':$'.$headerRow.'</definedName><definedName name="_xlnm.Print_Area" localSheetId="0">\'Reporte\'!'.$printArea.'</definedName></definedNames><calcPr calcId="191029"/></workbook>';
     }
 
+    /**
+     * Ejecuta la operación drawingXml definida por la clase ExportadorTabular.
+     *
+     * @return string Resultado de la operación.
+     */
     private function drawingXml(): string
     {
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><xdr:twoCellAnchor editAs="oneCell"><xdr:from><xdr:col>0</xdr:col><xdr:colOff>50000</xdr:colOff><xdr:row>0</xdr:row><xdr:rowOff>30000</xdr:rowOff></xdr:from><xdr:to><xdr:col>2</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>4</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to><xdr:pic><xdr:nvPicPr><xdr:cNvPr id="2" name="Technology CELL"/><xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId1"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor></xdr:wsDr>';
@@ -1059,6 +1083,16 @@ final class ExportadorTabular
         return sprintf("%.3F %.3F %.3F rg\nBT /%s %.2F Tf %.2F %.2F Td (%s) Tj ET\n", $color[0], $color[1], $color[2], $bold ? 'F2' : 'F1', $size, $x, $y, $escaped);
     }
 
+    /**
+     * Ejecuta la operación pdfSectionBar definida por la clase ExportadorTabular.
+     *
+     * @param  mixed  $label  Parámetro recibido por la operación.
+     * @param  mixed  $x  Parámetro recibido por la operación.
+     * @param  mixed  $top  Parámetro recibido por la operación.
+     * @param  mixed  $width  Parámetro recibido por la operación.
+     * @param  mixed  $height  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function pdfSectionBar(string $label, float $x, float $top, float $width, float $height): string
     {
         $bottom = $top - $height;
@@ -1085,6 +1119,16 @@ final class ExportadorTabular
         return $palette[$index % count($palette)];
     }
 
+    /**
+     * Ejecuta la operación pdfProgressBar definida por la clase ExportadorTabular.
+     *
+     * @param  mixed  $x  Parámetro recibido por la operación.
+     * @param  mixed  $y  Parámetro recibido por la operación.
+     * @param  mixed  $width  Parámetro recibido por la operación.
+     * @param  mixed  $height  Parámetro recibido por la operación.
+     * @param  mixed  $percentage  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function pdfProgressBar(float $x, float $y, float $width, float $height, float $percentage): string
     {
         $percentage = max(0, min(100, $percentage));
@@ -1195,6 +1239,14 @@ final class ExportadorTabular
         return ['width' => $header['width'], 'height' => $header['height'], 'rgb' => $rgb, 'alpha' => $alpha];
     }
 
+    /**
+     * Ejecuta la operación paethPredictor definida por la clase ExportadorTabular.
+     *
+     * @param  mixed  $left  Parámetro recibido por la operación.
+     * @param  mixed  $up  Parámetro recibido por la operación.
+     * @param  mixed  $upperLeft  Parámetro recibido por la operación.
+     * @return int Resultado de la operación.
+     */
     private function paethPredictor(int $left, int $up, int $upperLeft): int
     {
         $estimate = $left + $up - $upperLeft;
@@ -1341,11 +1393,24 @@ final class ExportadorTabular
         return in_array($type, ['text', 'integer', 'number', 'currency', 'percent', 'date', 'datetime'], true) ? $type : 'text';
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @param  mixed  $type  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     private function isNumericType(string $type): bool
     {
         return in_array($type, ['integer', 'number', 'currency', 'percent'], true);
     }
 
+    /**
+     * Ejecuta la operación excelDateSerial definida por la clase ExportadorTabular.
+     *
+     * @param  mixed  $value  Parámetro recibido por la operación.
+     * @param  mixed  $dateOnly  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     private function excelDateSerial(mixed $value, bool $dateOnly): ?float
     {
         $date = $this->toDateTime($value);
@@ -1372,6 +1437,12 @@ final class ExportadorTabular
         return ['date' => $date->format('d/m/Y'), 'time' => $date->format('H:i')];
     }
 
+    /**
+     * Ejecuta la operación toDateTime definida por la clase ExportadorTabular.
+     *
+     * @param  mixed  $value  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     private function toDateTime(mixed $value): ?DateTimeImmutable
     {
         if ($value instanceof DateTimeInterface) {
@@ -1388,6 +1459,13 @@ final class ExportadorTabular
         }
     }
 
+    /**
+     * Ejecuta la operación displayValue definida por la clase ExportadorTabular.
+     *
+     * @param  mixed  $value  Parámetro recibido por la operación.
+     * @param  mixed  $type  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function displayValue(mixed $value, string $type): string
     {
         if ($value === null) {
@@ -1435,6 +1513,12 @@ final class ExportadorTabular
         return $items === [] ? 'Sin filtros adicionales' : implode(' · ', $items);
     }
 
+    /**
+     * Ejecuta la operación statusTone definida por la clase ExportadorTabular.
+     *
+     * @param  mixed  $status  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function statusTone(string $status): string
     {
         $normalized = mb_strtolower(trim($status));
@@ -1451,6 +1535,12 @@ final class ExportadorTabular
         return 'neutral';
     }
 
+    /**
+     * Ejecuta la operación columnLetter definida por la clase ExportadorTabular.
+     *
+     * @param  mixed  $index  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function columnLetter(int $index): string
     {
         $letter = '';
@@ -1462,6 +1552,11 @@ final class ExportadorTabular
         return $letter;
     }
 
+    /**
+     * Ejecuta la operación logoBytes definida por la clase ExportadorTabular.
+     *
+     * @return mixed Resultado de la operación.
+     */
     private function logoBytes(): ?string
     {
         $path = base_path(self::LOGO_PATH);
@@ -1469,11 +1564,23 @@ final class ExportadorTabular
         return is_file($path) ? file_get_contents($path) ?: null : null;
     }
 
+    /**
+     * Ejecuta la operación safeFilename definida por la clase ExportadorTabular.
+     *
+     * @param  mixed  $filename  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function safeFilename(string $filename): string
     {
         return trim(preg_replace('/[^A-Za-z0-9._-]+/', '-', $filename) ?? 'reporte', '-.');
     }
 
+    /**
+     * Ejecuta la operación safeSpreadsheetText definida por la clase ExportadorTabular.
+     *
+     * @param  mixed  $value  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private static function safeSpreadsheetText(string $value): string
     {
         $isValidUtf8 = preg_match('//u', $value) === 1;

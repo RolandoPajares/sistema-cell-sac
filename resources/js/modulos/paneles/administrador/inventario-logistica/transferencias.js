@@ -7,6 +7,11 @@ document.querySelectorAll('[data-il-transfer-manager]').forEach((page) => {
     page.querySelector('[data-transfer-open]')?.addEventListener('click', () => dialog?.showModal());
     page.querySelectorAll('[data-transfer-close]').forEach((button) => button.addEventListener('click', () => dialog?.close()));
 
+/**
+ * Actualiza la información visible o el estado del componente.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const updateLineNames = () => {
         lines?.querySelectorAll('[data-transfer-line]').forEach((line, index) => {
             const select = line.querySelector('[data-transfer-product]');
@@ -25,6 +30,13 @@ document.querySelectorAll('[data-il-transfer-manager]').forEach((page) => {
         });
     };
 
+/**
+ * Ejecuta la operación syncSelection utilizada por el módulo JavaScript.
+ *
+ * @param {*} event - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const syncSelection = (event) => {
         if (event.target.matches('[data-transfer-product]')) {
             updateLineNames();

@@ -20,8 +20,19 @@ use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Define la responsabilidad de la clase ReporteController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ReporteController extends Controller
 {
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(FiltroReporteRequest $request): View
     {
         $filters = $this->reportFilters($request->validated());
@@ -79,6 +90,15 @@ class ReporteController extends Controller
         ]);
     }
 
+    /**
+     * Genera la salida exportable de la información disponible.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $exporter  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @param  mixed  $format  Parámetro recibido por la operación.
+     * @return Response|StreamedResponse Resultado de la operación.
+     */
     public function export(FiltroReporteRequest $request, ExportadorTabular $exporter, RegistradorAuditoria $audit, string $format = 'csv'): Response|StreamedResponse
     {
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
@@ -416,6 +436,12 @@ class ReporteController extends Controller
         ];
     }
 
+    /**
+     * Ejecuta la operación activeView definida por la clase ReporteController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function activeView(FiltroReporteRequest $request): string
     {
         $view = $request->string('vista')->toString();

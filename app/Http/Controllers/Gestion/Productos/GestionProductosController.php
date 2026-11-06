@@ -39,8 +39,22 @@ use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
+/**
+ * Define la responsabilidad de la clase GestionProductosController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class GestionProductosController extends Controller
 {
+    /**
+     * Ejecuta la operación preciosCanales definida por la clase GestionProductosController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $inventario  Parámetro recibido por la operación.
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @param  mixed  $servicioPrecios  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function preciosCanales(Request $request, ServicioInventario $inventario, ServicioAutorizacion $autorizacion, ServicioPreciosMayoristas $servicioPrecios): View
     {
         $filtros = $request->validate([
@@ -138,6 +152,13 @@ class GestionProductosController extends Controller
         ]);
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $servicioPrecios  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function guardarPrecioMayorista(GuardarPrecioMayoristaRequest $request, ServicioPreciosMayoristas $servicioPrecios): RedirectResponse
     {
         $servicioPrecios->registrar($request->validated(), $request->user(), $request->ip());
@@ -145,6 +166,13 @@ class GestionProductosController extends Controller
         return redirect()->route('management.products.preview.prices')->with('status', 'El precio mayorista quedó registrado en MariaDB.');
     }
 
+    /**
+     * Procesa e incorpora la información importada.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $servicioPrecios  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function importarPreciosMayoristas(ImportarPreciosMayoristasRequest $request, ServicioPreciosMayoristas $servicioPrecios): RedirectResponse
     {
         $cantidad = $servicioPrecios->importarCsv($request->file('archivo'), $request->user(), $request->ip());
@@ -152,6 +180,15 @@ class GestionProductosController extends Controller
         return redirect()->route('management.products.preview.prices')->with('status', $cantidad.' precios mayoristas quedaron registrados en MariaDB.');
     }
 
+    /**
+     * Ejecuta la operación configuracionTienda definida por la clase GestionProductosController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $inventario  Parámetro recibido por la operación.
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @param  mixed  $servicioConfiguracion  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function configuracionTienda(Request $request, ServicioInventario $inventario, ServicioAutorizacion $autorizacion, ServicioConfiguracionTienda $servicioConfiguracion): View
     {
         $alcance = $inventario->alcanceConsulta($request->user(), 'gestion.productos.consultar');
@@ -231,6 +268,13 @@ class GestionProductosController extends Controller
         ]);
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $servicioConfiguracion  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function guardarConfiguracionTienda(GuardarConfiguracionTiendaRequest $request, ServicioConfiguracionTienda $servicioConfiguracion): RedirectResponse
     {
         $servicioConfiguracion->guardar($request->validated(), $request->user(), $request->ip());
@@ -238,6 +282,13 @@ class GestionProductosController extends Controller
         return redirect()->route('management.products.preview.store_settings')->with('status', 'La configuración de tienda quedó guardada en MariaDB.');
     }
 
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $inventario  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(Request $request, ServicioInventario $inventario): View
     {
         $filters = $this->filters($request);
@@ -315,6 +366,15 @@ class GestionProductosController extends Controller
         ]);
     }
 
+    /**
+     * Genera la salida exportable de la información disponible.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $format  Parámetro recibido por la operación.
+     * @param  mixed  $inventario  Parámetro recibido por la operación.
+     * @param  mixed  $exporter  Parámetro recibido por la operación.
+     * @return Response|StreamedResponse Resultado de la operación.
+     */
     public function export(Request $request, string $format, ServicioInventario $inventario, ?ExportadorTabular $exporter = null): Response|StreamedResponse
     {
         $filters = $this->filters($request);
@@ -333,6 +393,11 @@ class GestionProductosController extends Controller
         };
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function store(
         GuardarProductoRequest $request,
         ServicioGestionProductos $productos,
@@ -363,6 +428,14 @@ class GestionProductosController extends Controller
             ->with('open_product_modal', $request->boolean('continue'));
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $product  Parámetro recibido por la operación.
+     * @param  mixed  $productos  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function update(ActualizarProductoRequest $request, Producto $product, ServicioGestionProductos $productos): RedirectResponse
     {
         $this->authorize('update', $product);
@@ -390,6 +463,13 @@ class GestionProductosController extends Controller
         return back()->with('status', 'Producto actualizado.');
     }
 
+    /**
+     * Modifica el estado o elimina el registro según la operación solicitada.
+     *
+     * @param  mixed  $product  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function deactivate(Producto $product, RegistradorAuditoria $audit): RedirectResponse
     {
         $this->authorize('delete', $product);
@@ -399,6 +479,11 @@ class GestionProductosController extends Controller
         return back()->with('status', 'Producto desactivado; su historial comercial se conserva.');
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function registrarVariante(
         GuardarVarianteProductoRequest $request,
         Producto $product,
@@ -412,6 +497,11 @@ class GestionProductosController extends Controller
         return back()->with('status', 'Variante registrada.')->with('open_variant_manager', $product->id);
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function actualizarVariante(
         GuardarVarianteProductoRequest $request,
         Producto $product,
@@ -426,6 +516,11 @@ class GestionProductosController extends Controller
         return back()->with('status', 'Variante actualizada.')->with('open_variant_manager', $product->id);
     }
 
+    /**
+     * Modifica el estado o elimina el registro según la operación solicitada.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function desactivarVariante(
         Request $request,
         Producto $product,
@@ -440,6 +535,11 @@ class GestionProductosController extends Controller
         return back()->with('status', 'Variante desactivada.')->with('open_variant_manager', $product->id);
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function registrarImagenVariante(
         GuardarImagenVarianteRequest $request,
         Producto $product,
@@ -467,6 +567,11 @@ class GestionProductosController extends Controller
             ->with('abrir_editor_variante', $variante->id);
     }
 
+    /**
+     * Modifica el estado o elimina el registro según la operación solicitada.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function eliminarImagenVariante(
         Request $request,
         Producto $product,
@@ -495,6 +600,11 @@ class GestionProductosController extends Controller
         return $data;
     }
 
+    /**
+     * Ejecuta la operación usuarioConAccesoProducto definida por la clase GestionProductosController.
+     *
+     * @return mixed Resultado de la operación.
+     */
     private function usuarioConAccesoProducto(
         Request $request,
         Producto $product,
@@ -542,6 +652,13 @@ class GestionProductosController extends Controller
         ];
     }
 
+    /**
+     * Ejecuta la operación trendPercent definida por la clase GestionProductosController.
+     *
+     * @param  mixed  $current  Parámetro recibido por la operación.
+     * @param  mixed  $previous  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     private function trendPercent(int $current, int $previous): ?float
     {
         if ($previous === 0) {
@@ -757,6 +874,12 @@ class GestionProductosController extends Controller
         return $pdf."trailer\n<< /Size ".(count($objects) + 1)." /Root 1 0 R >>\nstartxref\n{$xrefOffset}\n%%EOF";
     }
 
+    /**
+     * Ejecuta la operación escapePdfText definida por la clase GestionProductosController.
+     *
+     * @param  mixed  $value  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function escapePdfText(string $value): string
     {
         $encoded = iconv('UTF-8', 'Windows-1252//TRANSLIT', $value);

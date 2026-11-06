@@ -6,6 +6,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Ejecuta la operación up definida por la clase 2026_11_05_121000_enable_refunds_export_permission.
+     *
+     * @return void Resultado de la operación.
+     */
     public function up(): void
     {
         if (! Schema::hasTable('modulos') || ! Schema::hasTable('permisos') || ! Schema::hasTable('roles_permisos')) {
@@ -51,6 +56,11 @@ return new class extends Migration
         ]);
     }
 
+    /**
+     * Ejecuta la operación down definida por la clase 2026_11_05_121000_enable_refunds_export_permission.
+     *
+     * @return void Resultado de la operación.
+     */
     public function down(): void
     {
         throw new LogicException('This RBAC repair is forward-only to avoid revoking administrator permissions.');

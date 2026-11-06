@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Ejecuta la operación formulariosBlade definida por la clase SeguridadEstructuralTest.
+ *
+ * @param  mixed  $directorio  Parámetro recibido por la operación.
+ * @return array Resultado de la operación.
+ */
 function formulariosBlade(string $directorio): array
 {
     $formularios = [];
@@ -20,6 +26,11 @@ function formulariosBlade(string $directorio): array
     return $formularios;
 }
 
+/**
+ * Ejecuta la operación raizProyectoQaSeguridad definida por la clase SeguridadEstructuralTest.
+ *
+ * @return string Resultado de la operación.
+ */
 function raizProyectoQaSeguridad(): string
 {
     return dirname(__DIR__, 2);

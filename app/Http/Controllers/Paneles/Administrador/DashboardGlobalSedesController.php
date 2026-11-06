@@ -15,8 +15,20 @@ use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Define la responsabilidad de la clase DashboardGlobalSedesController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class DashboardGlobalSedesController extends Controller
 {
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $authorization  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(Request $request, ServicioAutorizacion $authorization): View
     {
         $filters = $this->filters($request);
@@ -33,6 +45,16 @@ final class DashboardGlobalSedesController extends Controller
         ]);
     }
 
+    /**
+     * Genera la salida exportable de la información disponible.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $format  Parámetro recibido por la operación.
+     * @param  mixed  $exporter  Parámetro recibido por la operación.
+     * @param  mixed  $authorization  Parámetro recibido por la operación.
+     * @param  mixed  $auditor  Parámetro recibido por la operación.
+     * @return Response|StreamedResponse Resultado de la operación.
+     */
     public function export(Request $request, string $format, ExportadorTabular $exporter, ServicioAutorizacion $authorization, RegistradorAuditoria $auditor): Response|StreamedResponse
     {
         $authorization->assertAllowed($request->user(), 'gestion.reportes.exportar');
@@ -147,11 +169,21 @@ final class DashboardGlobalSedesController extends Controller
             ->values();
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @return bool Resultado de la operación.
+     */
     private function hasSite(): bool
     {
         return Schema::hasTable('sedes') && Schema::hasColumn('pedidos', 'sede_id');
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @return bool Resultado de la operación.
+     */
     private function hasChannel(): bool
     {
         return Schema::hasColumn('pedidos', 'canal');

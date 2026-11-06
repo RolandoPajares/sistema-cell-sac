@@ -36,13 +36,25 @@ return new class extends Migration
             }
 
             if (Schema::hasTable('permisos')) {
+                $permissionUpdate = ['activo' => false];
+                if (Schema::hasColumn('permisos', 'actualizado_en')) {
+                    $permissionUpdate['actualizado_en'] = now();
+                } elseif (Schema::hasColumn('permisos', 'updated_at')) {
+                    $permissionUpdate['updated_at'] = now();
+                }
+
                 DB::table('permisos')
                     ->whereIn('pantalla_id', $screenIds)
-                    ->update(['activo' => false, 'actualizado_en' => now()]);
+                    ->update($permissionUpdate);
             }
         });
     }
 
+    /**
+     * Ejecuta la operación down definida por la clase 2026_11_05_140000_remove_organization_submenus.
+     *
+     * @return void Resultado de la operación.
+     */
     public function down(): void
     {
         throw new LogicException('This RBAC menu cleanup is forward-only.');

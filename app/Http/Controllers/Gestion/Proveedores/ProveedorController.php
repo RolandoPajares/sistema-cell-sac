@@ -24,8 +24,20 @@ use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Define la responsabilidad de la clase ProveedorController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ProveedorController extends Controller
 {
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $inventario  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(Request $request, ServicioInventario $inventario): View
     {
         $alcance = $this->alcanceActual($request, $inventario);
@@ -90,6 +102,15 @@ class ProveedorController extends Controller
         ]);
     }
 
+    /**
+     * Genera la salida exportable de la información disponible.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $inventario  Parámetro recibido por la operación.
+     * @param  mixed  $exporter  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return Response|StreamedResponse Resultado de la operación.
+     */
     public function export(Request $request, ServicioInventario $inventario, ExportadorTabular $exporter, RegistradorAuditoria $audit): Response|StreamedResponse
     {
         $alcance = $this->alcanceActual($request, $inventario);
@@ -129,6 +150,14 @@ class ProveedorController extends Controller
         return $response;
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $inventario  Parámetro recibido por la operación.
+     * @param  mixed  $auditoria  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function store(GuardarProveedorRequest $request, ServicioInventario $inventario, RegistradorAuditoria $auditoria): RedirectResponse
     {
         $alcance = $this->alcanceActual($request, $inventario);
@@ -142,6 +171,15 @@ class ProveedorController extends Controller
         return back()->with('status', 'Proveedor registrado.');
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $supplier  Parámetro recibido por la operación.
+     * @param  mixed  $inventario  Parámetro recibido por la operación.
+     * @param  mixed  $auditoria  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function update(ActualizarProveedorRequest $request, Proveedor $supplier, ServicioInventario $inventario, RegistradorAuditoria $auditoria): RedirectResponse
     {
         $alcance = $this->alcanceActual($request, $inventario);
@@ -154,6 +192,15 @@ class ProveedorController extends Controller
         return back()->with('status', 'Proveedor actualizado.');
     }
 
+    /**
+     * Modifica el estado o elimina el registro según la operación solicitada.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $supplier  Parámetro recibido por la operación.
+     * @param  mixed  $inventario  Parámetro recibido por la operación.
+     * @param  mixed  $auditoria  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function deactivate(Request $request, Proveedor $supplier, ServicioInventario $inventario, RegistradorAuditoria $auditoria): RedirectResponse
     {
         $alcance = $this->alcanceActual($request, $inventario);
@@ -331,6 +378,13 @@ class ProveedorController extends Controller
         return $inventario->alcanceConsulta($usuario, $permiso);
     }
 
+    /**
+     * Recupera y presenta el detalle de la información solicitada.
+     *
+     * @param  mixed  $proveedor  Parámetro recibido por la operación.
+     * @param  mixed  $empresaId  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     private function verificarEmpresa(Proveedor $proveedor, int $empresaId): void
     {
         abort_unless((int) $proveedor->empresa_id === $empresaId, 404);

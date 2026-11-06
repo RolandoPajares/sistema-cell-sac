@@ -7,6 +7,11 @@
     const etiquetaFecha = document.querySelector('[data-dashboard-date-label]');
 
     if (selectorFecha) {
+/**
+ * Ejecuta la operación abrirSelector utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
         const abrirSelector = () => {
             if (typeof selectorFecha.showPicker === 'function') {
                 selectorFecha.showPicker();

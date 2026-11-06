@@ -11,16 +11,35 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Define la responsabilidad de la clase ServicioCompras dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ServicioCompras
 {
     private const MAX_CENTIMOS = 999999999999;
 
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly ServicioInventario $inventario,
         private readonly RegistradorAuditoria $auditoria,
         private readonly ServicioAutorizacion $autorizacion,
     ) {}
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $datos  Parámetro recibido por la operación.
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $token  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return Compra Resultado de la operación.
+     */
     public function registrar(array $datos, User $actor, string $token, ?string $ip): Compra
     {
         $this->autorizacion->assertAllowed($actor, 'gestion.compras.crear');
@@ -91,16 +110,40 @@ class ServicioCompras
         }, 3);
     }
 
+    /**
+     * Ejecuta la operación aprobar definida por la clase ServicioCompras.
+     *
+     * @param  mixed  $compra  Parámetro recibido por la operación.
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return Compra Resultado de la operación.
+     */
     public function aprobar(Compra $compra, User $actor, ?string $ip): Compra
     {
         return $this->cambiarEstado($compra, $actor, $ip, false);
     }
 
+    /**
+     * Ejecuta la operación recibir definida por la clase ServicioCompras.
+     *
+     * @param  mixed  $compra  Parámetro recibido por la operación.
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return Compra Resultado de la operación.
+     */
     public function recibir(Compra $compra, User $actor, ?string $ip): Compra
     {
         return $this->cambiarEstado($compra, $actor, $ip, true);
     }
 
+    /**
+     * Ejecuta la operación anular definida por la clase ServicioCompras.
+     *
+     * @param  mixed  $compra  Parámetro recibido por la operación.
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return Compra Resultado de la operación.
+     */
     public function anular(Compra $compra, User $actor, ?string $ip): Compra
     {
         $this->autorizacion->assertAllowed($actor, 'gestion.compras.anular');
@@ -234,6 +277,15 @@ class ServicioCompras
         }
     }
 
+    /**
+     * Ejecuta la operación cambiarEstado definida por la clase ServicioCompras.
+     *
+     * @param  mixed  $compra  Parámetro recibido por la operación.
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @param  mixed  $recibir  Parámetro recibido por la operación.
+     * @return Compra Resultado de la operación.
+     */
     private function cambiarEstado(Compra $compra, User $actor, ?string $ip, bool $recibir): Compra
     {
         $permiso = $recibir ? 'gestion.compras.recibir' : 'gestion.compras.aprobar';
@@ -280,6 +332,13 @@ class ServicioCompras
         }, 3);
     }
 
+    /**
+     * Ejecuta la operación comprobarRecepcion definida por la clase ServicioCompras.
+     *
+     * @param  mixed  $compra  Parámetro recibido por la operación.
+     * @param  mixed  $completa  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     private function comprobarRecepcion(Compra $compra, bool $completa): void
     {
         $lineas = $compra->details()->get(['id', 'producto_id', 'variante_id', 'cantidad']);
@@ -454,6 +513,12 @@ class ServicioCompras
         return $identificadores;
     }
 
+    /**
+     * Ejecuta la operación esImeiValido definida por la clase ServicioCompras.
+     *
+     * @param  mixed  $imei  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     private function esImeiValido(string $imei): bool
     {
         if (preg_match('/\A[0-9]{15}\z/', $imei) !== 1) {
@@ -475,6 +540,12 @@ class ServicioCompras
         return (10 - ($suma % 10)) % 10 === (int) substr($imei, 14, 1);
     }
 
+    /**
+     * Ejecuta la operación centimos definida por la clase ServicioCompras.
+     *
+     * @param  mixed  $valor  Parámetro recibido por la operación.
+     * @return int Resultado de la operación.
+     */
     private function centimos(string $valor): int
     {
         abort_unless(preg_match('/\A\d{1,8}(?:\.\d{1,2})?\z/', $valor) === 1, 422, 'El costo unitario no es válido.');
@@ -483,6 +554,12 @@ class ServicioCompras
         return (int) $entero * 100 + (int) str_pad($decimal, 2, '0');
     }
 
+    /**
+     * Procesa e incorpora la información importada.
+     *
+     * @param  mixed  $centimos  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function importe(int $centimos): string
     {
         return intdiv($centimos, 100).'.'.str_pad((string) ($centimos % 100), 2, '0', STR_PAD_LEFT);

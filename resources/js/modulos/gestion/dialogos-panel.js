@@ -1,6 +1,13 @@
 /**
  * Apertura, cierre y carga de datos de los diálogos administrativos.
  */
+/**
+ * Ejecuta la operación abrirDialogo utilizada por el módulo JavaScript.
+ *
+ * @param {*} id - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const abrirDialogo = (id) => {
     const dialogo = typeof id === "string" ? document.getElementById(id) : null;
 

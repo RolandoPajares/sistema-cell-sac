@@ -6,6 +6,11 @@ use App\Servicios\ServicioAutorizacion;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+/**
+ * Define la responsabilidad de la clase ActualizarPermisosRolRequest dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ActualizarPermisosRolRequest extends FormRequest
 {
     /**

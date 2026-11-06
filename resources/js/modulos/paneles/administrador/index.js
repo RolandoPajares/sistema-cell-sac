@@ -23,6 +23,11 @@ if (dashboard) {
     const salesLine = dashboard.querySelector('[data-dashboard-sales-line]');
     const salesColumns = [...dashboard.querySelectorAll('[data-sales-month]')];
 
+/**
+ * Ejecuta la operación renderSalesLine utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const renderSalesLine = () => {
         if (!salesChart || !salesLine || salesColumns.length === 0) {
             return;
@@ -57,6 +62,11 @@ if (dashboard) {
         });
     };
 
+/**
+ * Gestiona la interacción y actualiza el estado visual correspondiente.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const applySalesRange = () => {
         const range = Number(rangeSelect?.value ?? salesColumns.length);
         const firstVisibleIndex = Math.max(0, salesColumns.length - range);

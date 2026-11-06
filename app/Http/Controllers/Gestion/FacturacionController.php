@@ -13,8 +13,20 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Define la responsabilidad de la clase FacturacionController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class FacturacionController extends Controller
 {
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(Request $request, ServicioAutorizacion $autorizacion): View
     {
         $filtros = $request->validate([
@@ -110,6 +122,11 @@ class FacturacionController extends Controller
         return view('gestion.facturacion.listar', ['module' => $modulo]);
     }
 
+    /**
+     * Genera la salida exportable de la información disponible.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function export(
         Request $request,
         string $format,

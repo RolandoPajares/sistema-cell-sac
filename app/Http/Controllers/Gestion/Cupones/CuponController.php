@@ -7,18 +7,31 @@ use App\Http\Requests\ActualizarCuponRequest;
 use App\Http\Requests\DesactivarCuponRequest;
 use App\Http\Requests\GuardarCuponRequest;
 use App\Models\Comercio\Cupon;
-use App\Servicios\ServicioAutorizacion;
-use App\Servicios\ServicioCupones;
 use App\Servicios\ExportadorTabular;
 use App\Servicios\RegistradorAuditoria;
+use App\Servicios\ServicioAutorizacion;
+use App\Servicios\ServicioCupones;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Response;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Define la responsabilidad de la clase CuponController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class CuponController extends Controller
 {
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $coupons  Parámetro recibido por la operación.
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(Request $request, ServicioCupones $coupons, ServicioAutorizacion $autorizacion): View
     {
         $filters = $this->filters($request);
@@ -38,6 +51,13 @@ class CuponController extends Controller
         ]);
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $coupons  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function store(GuardarCuponRequest $request, ServicioCupones $coupons): RedirectResponse
     {
         $coupons->register($request->validated(), $request->user(), $request->ip());
@@ -45,6 +65,14 @@ class CuponController extends Controller
         return back()->with('status', 'Cupón registrado.');
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $coupon  Parámetro recibido por la operación.
+     * @param  mixed  $coupons  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function update(ActualizarCuponRequest $request, Cupon $coupon, ServicioCupones $coupons): RedirectResponse
     {
         $coupons->update($coupon, $request->validated(), $request->user(), $request->ip());
@@ -52,6 +80,14 @@ class CuponController extends Controller
         return back()->with('status', 'Cupón actualizado.');
     }
 
+    /**
+     * Modifica el estado o elimina el registro según la operación solicitada.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $coupon  Parámetro recibido por la operación.
+     * @param  mixed  $coupons  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function deactivate(DesactivarCuponRequest $request, Cupon $coupon, ServicioCupones $coupons): RedirectResponse
     {
         $coupons->deactivate($coupon, $request->user(), $request->ip());
@@ -59,6 +95,16 @@ class CuponController extends Controller
         return back()->with('status', 'Cupón cancelado. Ya no estará disponible para nuevos canjes.');
     }
 
+    /**
+     * Genera la salida exportable de la información disponible.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $coupons  Parámetro recibido por la operación.
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @param  mixed  $exporter  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return Response|StreamedResponse Resultado de la operación.
+     */
     public function export(Request $request, ServicioCupones $coupons, ServicioAutorizacion $autorizacion, ExportadorTabular $exporter, RegistradorAuditoria $audit): Response|StreamedResponse
     {
         $format = (string) ($request->route('format') ?: 'csv');
@@ -114,6 +160,12 @@ class CuponController extends Controller
         ];
     }
 
+    /**
+     * Ejecuta la operación safeCsvValue definida por la clase CuponController.
+     *
+     * @param  mixed  $value  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function safeCsvValue(string $value): string
     {
         return preg_match('/^[\s\x00-\x1f]*[=+\-@]/u', $value) === 1 ? "'".$value : $value;

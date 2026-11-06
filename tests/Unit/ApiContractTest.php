@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Ejecuta la operación contenidoApiQa definida por la clase ApiContractTest.
+ *
+ * @param  mixed  $ruta  Parámetro recibido por la operación.
+ * @return string Resultado de la operación.
+ */
 function contenidoApiQa(string $ruta): string
 {
     $contenido = file_get_contents(dirname(__DIR__, 2).DIRECTORY_SEPARATOR.$ruta);

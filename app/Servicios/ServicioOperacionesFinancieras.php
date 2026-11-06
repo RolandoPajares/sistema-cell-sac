@@ -18,8 +18,18 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
+/**
+ * Define la responsabilidad de la clase ServicioOperacionesFinancieras dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ServicioOperacionesFinancieras
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly ServicioAutorizacion $authorization,
         private readonly RegistradorAuditoria $audit,
@@ -146,6 +156,16 @@ class ServicioOperacionesFinancieras
         }, 3);
     }
 
+    /**
+     * Ejecuta la operación confirmarPagoEfectivo definida por la clase ServicioOperacionesFinancieras.
+     *
+     * @param  mixed  $payment  Parámetro recibido por la operación.
+     * @param  mixed  $countedAmount  Parámetro recibido por la operación.
+     * @param  mixed  $observation  Parámetro recibido por la operación.
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return Pago Resultado de la operación.
+     */
     public function confirmarPagoEfectivo(Pago $payment, string $countedAmount, string $observation, User $actor, ?string $ip): Pago
     {
         $permission = 'gestion.pagos.actualizar';
@@ -206,6 +226,15 @@ class ServicioOperacionesFinancieras
         }, 3);
     }
 
+    /**
+     * Ejecuta la operación anularPago definida por la clase ServicioOperacionesFinancieras.
+     *
+     * @param  mixed  $payment  Parámetro recibido por la operación.
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $reason  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return Pago Resultado de la operación.
+     */
     public function anularPago(Pago $payment, User $actor, string $reason, ?string $ip): Pago
     {
         $permission = 'gestion.pagos.anular';
@@ -267,6 +296,14 @@ class ServicioOperacionesFinancieras
         }, 3);
     }
 
+    /**
+     * Ejecuta la operación aprobarReembolso definida por la clase ServicioOperacionesFinancieras.
+     *
+     * @param  mixed  $refund  Parámetro recibido por la operación.
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return Reembolso Resultado de la operación.
+     */
     public function aprobarReembolso(Reembolso $refund, User $actor, ?string $ip): Reembolso
     {
         $permission = 'gestion.reembolsos.aprobar';
@@ -293,6 +330,15 @@ class ServicioOperacionesFinancieras
         }, 3);
     }
 
+    /**
+     * Ejecuta la operación anularReembolso definida por la clase ServicioOperacionesFinancieras.
+     *
+     * @param  mixed  $refund  Parámetro recibido por la operación.
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $reason  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return Reembolso Resultado de la operación.
+     */
     public function anularReembolso(Reembolso $refund, User $actor, string $reason, ?string $ip): Reembolso
     {
         $permission = 'gestion.reembolsos.anular';
@@ -315,6 +361,13 @@ class ServicioOperacionesFinancieras
         }, 3);
     }
 
+    /**
+     * Ejecuta la operación document definida por la clase ServicioOperacionesFinancieras.
+     *
+     * @param  mixed  $kind  Parámetro recibido por la operación.
+     * @param  mixed  $id  Parámetro recibido por la operación.
+     * @return Pedido|Venta|Compra Resultado de la operación.
+     */
     private function document(string $kind, int $id): Pedido|Venta|Compra
     {
         return match ($kind) {
@@ -324,6 +377,13 @@ class ServicioOperacionesFinancieras
         };
     }
 
+    /**
+     * Ejecuta la operación assertRefundOrigin definida por la clase ServicioOperacionesFinancieras.
+     *
+     * @param  mixed  $payment  Parámetro recibido por la operación.
+     * @param  mixed  $return  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     private function assertRefundOrigin(Pago $payment, DevolucionGarantia $return): void
     {
         abort_unless($payment->tipo === 'cobro' && ! in_array($payment->estado, ['pendiente', 'anulado'], true),
@@ -341,6 +401,12 @@ class ServicioOperacionesFinancieras
             'El cobro original no corresponde al pedido o venta de la devolución.');
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @param  mixed  $payment  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     private function hasPaymentEvidence(Pago $payment): bool
     {
         if ($payment->sesion_caja_id === null) {
@@ -358,6 +424,12 @@ class ServicioOperacionesFinancieras
         return $this->cents((string) $cashIncome) >= $this->cents((string) $payment->importe);
     }
 
+    /**
+     * Ejecuta la operación cents definida por la clase ServicioOperacionesFinancieras.
+     *
+     * @param  mixed  $amount  Parámetro recibido por la operación.
+     * @return int Resultado de la operación.
+     */
     private function cents(string $amount): int
     {
         abort_unless(preg_match('/\A(?:0|[1-9][0-9]{0,12})(?:\.[0-9]{1,2})?\z/', $amount) === 1,
@@ -367,6 +439,12 @@ class ServicioOperacionesFinancieras
         return (int) $units * 100 + (int) str_pad($fraction, 2, '0');
     }
 
+    /**
+     * Ejecuta la operación money definida por la clase ServicioOperacionesFinancieras.
+     *
+     * @param  mixed  $cents  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function money(int $cents): string
     {
         return intdiv($cents, 100).'.'.str_pad((string) ($cents % 100), 2, '0', STR_PAD_LEFT);

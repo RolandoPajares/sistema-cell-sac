@@ -11,8 +11,19 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
+/**
+ * Define la responsabilidad de la clase ServicioVariantesProducto dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ServicioVariantesProducto
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @param  mixed  $auditoria  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(private readonly RegistradorAuditoria $auditoria) {}
 
     /**
@@ -115,6 +126,15 @@ class ServicioVariantesProducto
         }, 3);
     }
 
+    /**
+     * Modifica el estado o elimina el registro según la operación solicitada.
+     *
+     * @param  mixed  $producto  Parámetro recibido por la operación.
+     * @param  mixed  $variante  Parámetro recibido por la operación.
+     * @param  mixed  $usuario  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return VarianteProducto Resultado de la operación.
+     */
     public function desactivar(Producto $producto, VarianteProducto $variante, User $usuario, ?string $ip): VarianteProducto
     {
         return DB::transaction(function () use ($producto, $variante, $usuario, $ip): VarianteProducto {
@@ -142,6 +162,11 @@ class ServicioVariantesProducto
         }, 3);
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function registrarImagen(
         Producto $producto,
         VarianteProducto $variante,
@@ -203,6 +228,11 @@ class ServicioVariantesProducto
         }
     }
 
+    /**
+     * Modifica el estado o elimina el registro según la operación solicitada.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function eliminarImagen(
         Producto $producto,
         VarianteProducto $variante,
@@ -258,6 +288,12 @@ class ServicioVariantesProducto
         $this->eliminarArchivoSiNoEstaReferenciado($rutaImagenEliminada);
     }
 
+    /**
+     * Modifica el estado o elimina el registro según la operación solicitada.
+     *
+     * @param  mixed  $rutaImagen  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     private function eliminarArchivoSiNoEstaReferenciado(string $rutaImagen): void
     {
         $referenciadaEnVariantes = DB::table('imagenes_variantes')->where('ruta_imagen', $rutaImagen)->exists();

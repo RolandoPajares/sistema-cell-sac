@@ -3,20 +3,30 @@
 namespace App\Http\Controllers\Gestion\Segmentos;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\GuardarSegmentoClienteRequest;
 use App\Http\Requests\ActualizarSegmentoClienteRequest;
+use App\Http\Requests\GuardarSegmentoClienteRequest;
 use App\Models\Marketing\SegmentoCliente;
-use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ExportadorTabular;
+use App\Servicios\RegistradorAuditoria;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Illuminate\Http\Response;
 
+/**
+ * Define la responsabilidad de la clase SegmentoClienteController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class SegmentoClienteController extends Controller
 {
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @return View Resultado de la operación.
+     */
     public function index(): View
     {
         $search = trim((string) request('buscar', ''));
@@ -38,6 +48,7 @@ class SegmentoClienteController extends Controller
         }
 
         $allSegments = SegmentoCliente::query();
+
         return view('gestion.segmentos.listar', [
             'segments' => $query->paginate(30)->withQueryString(),
             'activeSegments' => (clone $allSegments)->where('activo', true)->count(),
@@ -46,6 +57,13 @@ class SegmentoClienteController extends Controller
         ]);
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function store(GuardarSegmentoClienteRequest $request, RegistradorAuditoria $audit): RedirectResponse
     {
         $data = $request->validated();
@@ -60,6 +78,14 @@ class SegmentoClienteController extends Controller
         return back()->with('status', 'Segmento creado. Sus campaÃ±as se mostrarÃ¡n a los roles seleccionados.');
     }
 
+    /**
+     * Genera la salida exportable de la información disponible.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $exporter  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return Response|StreamedResponse Resultado de la operación.
+     */
     public function export(Request $request, ExportadorTabular $exporter, RegistradorAuditoria $audit): Response|StreamedResponse
     {
         $format = (string) ($request->route('format') ?: $request->string('format', 'csv')->toString());
@@ -87,9 +113,18 @@ class SegmentoClienteController extends Controller
                 'indicators' => [['label' => 'Segmentos incluidos', 'value' => count($rows)]],
             ]);
         $audit->record($request->user()->id, 'exportar', 'segmentos_clientes', null, null, ['formato' => $format, 'cantidad' => count($rows)], $request->ip());
+
         return $response;
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $segment  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function update(ActualizarSegmentoClienteRequest $request, SegmentoCliente $segment, RegistradorAuditoria $audit): RedirectResponse
     {
         $before = $segment->getAttributes();
@@ -104,6 +139,14 @@ class SegmentoClienteController extends Controller
         return back()->with('status', 'Segmento actualizado correctamente.');
     }
 
+    /**
+     * Modifica el estado o elimina el registro según la operación solicitada.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $segment  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function deactivate(Request $request, SegmentoCliente $segment, RegistradorAuditoria $audit): RedirectResponse
     {
         $before = $segment->getAttributes();

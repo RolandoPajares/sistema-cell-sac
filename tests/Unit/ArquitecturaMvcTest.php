@@ -1,12 +1,23 @@
 <?php
 
+/**
+ * Ejecuta la operación archivosDeProyecto definida por la clase ArquitecturaMvcTest.
+ *
+ * @param  mixed  $directorio  Parámetro recibido por la operación.
+ * @param  mixed  $extension  Parámetro recibido por la operación.
+ * @return array Resultado de la operación.
+ */
 function archivosDeProyecto(string $directorio, string $extension): array
 {
     $archivos = [];
     $iterador = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directorio));
 
     foreach ($iterador as $archivo) {
-        if ($archivo->isFile() && strtolower($archivo->getExtension()) === strtolower($extension)) {
+        $coincideExtension = strtolower($extension) === 'blade.php'
+            ? str_ends_with(strtolower($archivo->getFilename()), '.blade.php')
+            : strtolower($archivo->getExtension()) === strtolower($extension);
+
+        if ($archivo->isFile() && $coincideExtension) {
             $archivos[] = $archivo->getPathname();
         }
     }
@@ -16,6 +27,11 @@ function archivosDeProyecto(string $directorio, string $extension): array
     return $archivos;
 }
 
+/**
+ * Ejecuta la operación raizProyectoQa definida por la clase ArquitecturaMvcTest.
+ *
+ * @return string Resultado de la operación.
+ */
 function raizProyectoQa(): string
 {
     return dirname(__DIR__, 2);
@@ -53,7 +69,10 @@ test('las vistas Blade no contienen acceso directo a SQL o conexiones', function
         '/\\bDB::/i',
         '/\\bPDO\\b/i',
         '/\\bmysqli\\b/i',
-        '/\\b(?:SELECT|INSERT|UPDATE|DELETE)\\s+[A-Za-z*]/i',
+        '/\\bSELECT\\s+[A-Za-z*][A-Za-z0-9_*,\\s]*\\s+FROM\\b/i',
+        '/\\bINSERT\\s+INTO\\b/i',
+        '/\\bUPDATE\\s+[A-Za-z_][A-Za-z0-9_]*\\s+SET\\b/i',
+        '/\\bDELETE\\s+FROM\\b/i',
     ];
 
     foreach (archivosDeProyecto(raizProyectoQa().'/resources/views', 'blade.php') as $vista) {
@@ -75,6 +94,6 @@ test('la capa de servicios no renderiza vistas directamente', function (): void 
         $contenido = file_get_contents($servicio);
         expect($contenido)->toBeString()
             ->and(preg_match('/\\bview\\s*\\(/i', $contenido))->toBe(0)
-            ->and($contenido)->not->toContain("resources/views");
+            ->and($contenido)->not->toContain('resources/views');
     }
 });

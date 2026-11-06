@@ -19,6 +19,11 @@ use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Define la responsabilidad de la clase DashboardGlobalVentasController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class DashboardGlobalVentasController extends Controller
 {
     private const BUSINESS_TIMEZONE = 'America/Lima';
@@ -28,6 +33,13 @@ final class DashboardGlobalVentasController extends Controller
     /** Bound the in-memory PDF/XLSX payload until streaming export infrastructure exists. */
     private const MAX_EXPORT_ROWS = 5000;
 
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $authorization  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(Request $request, ServicioAutorizacion $authorization): View
     {
         $this->authorizeDashboard($request->user(), $authorization);
@@ -53,6 +65,16 @@ final class DashboardGlobalVentasController extends Controller
         ]);
     }
 
+    /**
+     * Genera la salida exportable de la información disponible.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $format  Parámetro recibido por la operación.
+     * @param  mixed  $exporter  Parámetro recibido por la operación.
+     * @param  mixed  $authorization  Parámetro recibido por la operación.
+     * @param  mixed  $auditor  Parámetro recibido por la operación.
+     * @return Response|StreamedResponse Resultado de la operación.
+     */
     public function export(Request $request, string $format, ExportadorTabular $exporter, ServicioAutorizacion $authorization, RegistradorAuditoria $auditor): Response|StreamedResponse
     {
         $this->authorizeDashboard($request->user(), $authorization);
@@ -199,6 +221,13 @@ final class DashboardGlobalVentasController extends Controller
         return $query;
     }
 
+    /**
+     * Determina si la operación cumple las condiciones de autorización o validación.
+     *
+     * @param  mixed  $user  Parámetro recibido por la operación.
+     * @param  mixed  $authorization  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     private function authorizeDashboard(User $user, ServicioAutorizacion $authorization): void
     {
         abort_unless($authorization->hasRole($user, 'administrador'), 403);
@@ -225,6 +254,12 @@ final class DashboardGlobalVentasController extends Controller
         return $sites->get(['sedes.id', 'sedes.nombre']);
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @param  mixed  $user  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     private function hasGlobalAdministratorAssignment(User $user): bool
     {
         return DB::table('usuarios_roles')->join('roles', 'roles.id', '=', 'usuarios_roles.rol_id')
@@ -261,16 +296,33 @@ final class DashboardGlobalVentasController extends Controller
         return $activeSiteId === null ? $siteIds : array_values(array_intersect($siteIds, [$activeSiteId]));
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @return bool Resultado de la operación.
+     */
     private function hasSite(): bool
     {
         return Schema::hasTable('sedes') && Schema::hasColumn('pedidos', 'sede_id');
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @return bool Resultado de la operación.
+     */
     private function hasChannel(): bool
     {
         return Schema::hasColumn('pedidos', 'canal');
     }
 
+    /**
+     * Ejecuta la operación safeExportText definida por la clase DashboardGlobalVentasController.
+     *
+     * @param  mixed  $value  Parámetro recibido por la operación.
+     * @param  mixed  $format  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private static function safeExportText(string $value, string $format): string
     {
         $clean = trim(preg_replace('/[\p{C}\p{Z}]+/u', ' ', $value) ?? '');

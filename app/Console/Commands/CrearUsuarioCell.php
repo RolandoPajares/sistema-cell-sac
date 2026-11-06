@@ -9,8 +9,18 @@ use Illuminate\Console\Command;
 
 #[Signature('cell:user-create')]
 #[Description('Crea una cuenta CELL SAC con uno de los siete roles permitidos.')]
+/**
+ * Define la responsabilidad de la clase CrearUsuarioCell dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class CrearUsuarioCell extends Command
 {
+    /**
+     * Ejecuta la operación principal asignada al componente.
+     *
+     * @return int Resultado de la operación.
+     */
     public function handle(): int
     {
         $name = trim((string) $this->ask('Nombre'));

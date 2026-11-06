@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Tests\SpanishAccessFixture;
 
+/**
+ * Ejecuta la operación prepararEsquemaDispositivosParaPrueba definida por la clase DispositivosControllerTest.
+ *
+ * @return void Resultado de la operación.
+ */
 function prepararEsquemaDispositivosParaPrueba(): void
 {
     if (! Schema::hasTable('dispositivos')) {
@@ -36,6 +41,15 @@ function prepararEsquemaDispositivosParaPrueba(): void
     }
 }
 
+/**
+ * Registra la información recibida y coordina su persistencia.
+ *
+ * @param  mixed  $producto  Parámetro recibido por la operación.
+ * @param  mixed  $almacenId  Parámetro recibido por la operación.
+ * @param  mixed  $identificador  Parámetro recibido por la operación.
+ * @param  mixed  $estado  Parámetro recibido por la operación.
+ * @return Dispositivo Resultado de la operación.
+ */
 function crearDispositivoParaPrueba(Producto $producto, int $almacenId, string $identificador, string $estado = 'disponible'): Dispositivo
 {
     return Dispositivo::factory()->create([

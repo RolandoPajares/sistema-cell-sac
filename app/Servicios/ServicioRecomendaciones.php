@@ -5,6 +5,11 @@ namespace App\Servicios;
 use App\Models\Catalogo\Producto;
 use Illuminate\Support\Collection;
 
+/**
+ * Define la responsabilidad de la clase ServicioRecomendaciones dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ServicioRecomendaciones
 {
     /**

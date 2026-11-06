@@ -7,6 +7,11 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 
+/**
+ * Define la responsabilidad de la clase GuardarConfiguracionTiendaRequest dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class GuardarConfiguracionTiendaRequest extends FormRequest
 {
     /**

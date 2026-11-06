@@ -9,8 +9,20 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Define la responsabilidad de la clase CampaniaPublicaController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class CampaniaPublicaController extends Controller
 {
+    /**
+     * Ejecuta la operación track definida por la clase CampaniaPublicaController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $campaign  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function track(Request $request, Campania $campaign): RedirectResponse
     {
         $type = $request->validate(['tipo' => ['required', 'in:vista,clic']])['tipo'];

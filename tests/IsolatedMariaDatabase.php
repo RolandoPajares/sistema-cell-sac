@@ -6,6 +6,11 @@ use PDO;
 use RuntimeException;
 use Symfony\Component\Process\Process;
 
+/**
+ * Define la responsabilidad de la clase IsolatedMariaDatabase dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class IsolatedMariaDatabase
 {
     /** @return array{0:PDO,1:string} */

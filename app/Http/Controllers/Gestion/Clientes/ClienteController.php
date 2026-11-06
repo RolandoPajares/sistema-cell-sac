@@ -9,23 +9,40 @@ use App\Http\Requests\ImportarClientesRequest;
 use App\Models\Clientes\Cliente;
 use App\Models\Comercio\Pedido;
 use App\Models\User;
-use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ExportadorTabular;
+use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ServicioAutorizacion;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
-use Illuminate\View\View;
 use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Define la responsabilidad de la clase ClienteController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ClienteController extends Controller
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(private readonly ServicioAutorizacion $autorizacion) {}
 
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(Request $request): View
     {
         $usuario = $request->user();
@@ -74,6 +91,15 @@ class ClienteController extends Controller
         ]);
     }
 
+    /**
+     * Genera la salida exportable de la información disponible.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $format  Parámetro recibido por la operación.
+     * @param  mixed  $exporter  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return Response|StreamedResponse Resultado de la operación.
+     */
     public function export(Request $request, string $format, ExportadorTabular $exporter, RegistradorAuditoria $audit): Response|StreamedResponse
     {
         $usuario = $request->user();
@@ -113,6 +139,13 @@ class ClienteController extends Controller
         return $response;
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function store(GuardarClienteRequest $request, RegistradorAuditoria $audit): RedirectResponse
     {
         $usuario = $request->user();
@@ -127,6 +160,13 @@ class ClienteController extends Controller
         return back()->with('status', 'Cliente registrado.');
     }
 
+    /**
+     * Procesa e incorpora la información importada.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function import(ImportarClientesRequest $request, RegistradorAuditoria $audit): RedirectResponse
     {
         $usuario = $request->user();
@@ -184,6 +224,14 @@ class ClienteController extends Controller
         return back()->with('status', 'Se importaron '.count($rows).' clientes en MariaDB.');
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $customer  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function update(ActualizarClienteRequest $request, Cliente $customer, RegistradorAuditoria $audit): RedirectResponse
     {
         $usuario = $request->user();
@@ -197,6 +245,14 @@ class ClienteController extends Controller
         return back()->with('status', 'Cliente actualizado.');
     }
 
+    /**
+     * Modifica el estado o elimina el registro según la operación solicitada.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $customer  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function deactivate(Request $request, Cliente $customer, RegistradorAuditoria $audit): RedirectResponse
     {
         $usuario = $request->user();
@@ -232,6 +288,14 @@ class ClienteController extends Controller
             ->when($filters['ciudad'], fn (Builder $query, string $city): Builder => $query->where('ciudad', $city));
     }
 
+    /**
+     * Recupera y presenta el detalle de la información solicitada.
+     *
+     * @param  mixed  $cliente  Parámetro recibido por la operación.
+     * @param  mixed  $usuario  Parámetro recibido por la operación.
+     * @param  mixed  $permiso  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     private function verificarAccesoCliente(Cliente $cliente, User $usuario, string $permiso): void
     {
         $visible = $this->consultaClientesEnAlcance($usuario, $permiso)
@@ -241,6 +305,13 @@ class ClienteController extends Controller
         abort_unless($visible, 404);
     }
 
+    /**
+     * Ejecuta la operación consultaClientesEnAlcance definida por la clase ClienteController.
+     *
+     * @param  mixed  $usuario  Parámetro recibido por la operación.
+     * @param  mixed  $permiso  Parámetro recibido por la operación.
+     * @return Builder Resultado de la operación.
+     */
     private function consultaClientesEnAlcance(User $usuario, string $permiso): Builder
     {
         if ($this->autorizacion->allowsGlobal($usuario, $permiso)) {

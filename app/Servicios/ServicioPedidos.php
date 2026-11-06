@@ -6,27 +6,40 @@ use App\Models\Catalogo\Producto;
 use App\Models\Comercio\Cupon;
 use App\Models\Comercio\Pedido;
 use App\Models\User;
+use App\Servicios\ServicioCarrito;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Define la responsabilidad de la clase ServicioPedidos dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ServicioPedidos
 {
     private const MAX_ITEM_QUANTITY = 1000;
 
     private const MAX_ORDER_TOTAL_CENTS = 9999999999;
 
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly ServicioInventario $inventoryService,
         private readonly RegistradorAuditoria $auditLogger,
         private readonly ServicioAutorizacion $authorization,
+        private readonly ServicioCarrito $cartService,
     ) {}
 
     /**
-     * @param  array<int|string, int|string>  $cart
+     * @param  array<int|string, mixed>  $cart
      */
     public function checkout(User $user, array $cart, ?string $couponCode, ?string $ip, string $checkoutToken): Pedido
     {
         $this->authorization->assertAllowed($user, 'gestion.pedidos.crear');
+        $cart = $this->cartService->normalizar($cart);
         abort_if($cart === [] || preg_match('/^[a-f0-9]{64}$/', $checkoutToken) !== 1, 422, 'La solicitud de compra no es válida.');
 
         return DB::transaction(function () use ($user, $cart, $couponCode, $ip, $checkoutToken): Pedido {
@@ -52,24 +65,30 @@ class ServicioPedidos
                 ->lockForUpdate()
                 ->get()
                 ->keyBy('id');
-            $disponibilidad = $this->inventoryService->disponibilidadParaOperacion($user, array_keys($cart));
             $items = [];
             $subtotalCents = 0;
 
-            foreach ($cart as $id => $rawQuantity) {
-                $quantity = filter_var($rawQuantity, FILTER_VALIDATE_INT);
+            foreach ($cart as $id => $linea) {
+                $quantity = $linea['cantidad'];
+                $varianteId = $linea['variante_id'];
                 abort_if($quantity === false || $quantity < 1 || $quantity > self::MAX_ITEM_QUANTITY, 422, 'Cantidad de carrito inválida.');
 
                 $product = $products->get((int) $id);
-                abort_unless($product instanceof Producto && $product->activo && array_key_exists((int) $id, $disponibilidad), 422, 'Un producto dejó de estar disponible.');
-                abort_if($quantity > $disponibilidad[(int) $id], 422, 'Stock insuficiente en el almacén autorizado o faltan identificadores para '.$product->nombre.'.');
+                abort_unless($product instanceof Producto && $product->activo, 422, 'Un producto dejó de estar disponible.');
+                if ($varianteId !== null) {
+                    abort_unless($product->variants()->whereKey($varianteId)->where('estado', 'activo')->exists(), 422, 'Esta combinación no está disponible.');
+                } else {
+                    abort_unless(! $product->variants()->exists(), 422, 'Selecciona una variante.');
+                }
+                $disponible = $this->inventoryService->disponibilidadDeLinea($user, $product, $varianteId);
+                abort_if($quantity > $disponible, 422, 'Stock insuficiente en el almacén autorizado para '.$product->nombre.'.');
 
                 $priceCents = (int) round((float) $product->effective_price * 100, 0, PHP_ROUND_HALF_UP);
                 $lineCents = $priceCents * $quantity;
                 abort_if($lineCents < 0 || $subtotalCents > self::MAX_ORDER_TOTAL_CENTS - $lineCents, 422, 'El pedido supera el total permitido.');
 
                 $subtotalCents += $lineCents;
-                $items[] = [$product, $quantity, $priceCents];
+                $items[] = [$product, $varianteId, $quantity, $priceCents];
             }
 
             $descuentoCupon = $this->discountFor($couponCode, $subtotalCents, (int) $location['empresa_id']);
@@ -86,9 +105,20 @@ class ServicioPedidos
                 ...$this->authorization->operationScopeAttributes($user, 'pedidos'),
             ]);
 
-            foreach ($items as [$product, $quantity, $priceCents]) {
-                $movimiento = $this->inventoryService->changeLockedProduct($product, 'salida', $quantity, 'Salida por pedido #'.$order->id, $user);
-                $movimiento->update(['documento_tipo' => 'pedido', 'documento_id' => (string) $order->id]);
+            foreach ($items as [$product, $varianteId, $quantity, $priceCents]) {
+                $movimiento = $this->inventoryService->changeLockedProductInWarehouse(
+                    $product,
+                    $varianteId,
+                    'salida',
+                    $quantity,
+                    'Salida por pedido #'.$order->id,
+                    $user,
+                    (int) $location['empresa_id'],
+                    (int) $location['sede_id'],
+                    (int) $location['almacen_id'],
+                    'pedido',
+                    (string) $order->id,
+                );
                 $order->details()->create([
                     'producto_id' => $product->id,
                     'variante_id' => $movimiento->variante_id,
@@ -109,6 +139,15 @@ class ServicioPedidos
         }, 3);
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $order  Parámetro recibido por la operación.
+     * @param  mixed  $user  Parámetro recibido por la operación.
+     * @param  mixed  $status  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     public function updateStatus(Pedido $order, User $user, string $status, ?string $ip): void
     {
         abort_unless($this->authorization->allowsRecord(

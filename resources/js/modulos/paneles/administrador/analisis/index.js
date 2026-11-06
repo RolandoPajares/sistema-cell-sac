@@ -23,6 +23,13 @@ document.querySelectorAll('[data-admin-analysis]').forEach((root) => {
 
     root.dataset.adminAnalysisBehaviorReady = 'true';
 
+/**
+ * Recupera y presenta el detalle de la información solicitada.
+ *
+ * @param {*} message - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const showFeedback = (message) => {
         if (!feedback) {
             return;
@@ -35,6 +42,13 @@ document.querySelectorAll('[data-admin-analysis]').forEach((root) => {
         }, 3800);
     };
 
+/**
+ * Gestiona la interacción y actualiza el estado visual correspondiente.
+ *
+ * @param {*} modal - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const closeModal = (modal) => {
         if (modal?.open) {
             modal.close();

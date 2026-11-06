@@ -9,15 +9,27 @@ use App\Servicios\ExportadorTabular;
 use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ServicioNotificaciones;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Response;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Define la responsabilidad de la clase AlertasGlobalesController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class AlertasGlobalesController extends Controller
 {
+    /**
+     * Ejecuta la operación mostrar definida por la clase AlertasGlobalesController.
+     *
+     * @param  mixed  $solicitud  Parámetro recibido por la operación.
+     * @param  mixed  $servicio  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function mostrar(Request $solicitud, ServicioNotificaciones $servicio): View
     {
         $filtros = $solicitud->validate([
@@ -54,6 +66,15 @@ final class AlertasGlobalesController extends Controller
         ]);
     }
 
+    /**
+     * Genera la salida exportable de la información disponible.
+     *
+     * @param  mixed  $solicitud  Parámetro recibido por la operación.
+     * @param  mixed  $format  Parámetro recibido por la operación.
+     * @param  mixed  $exportador  Parámetro recibido por la operación.
+     * @param  mixed  $auditoria  Parámetro recibido por la operación.
+     * @return Response|StreamedResponse Resultado de la operación.
+     */
     public function exportar(Request $solicitud, string $format, ExportadorTabular $exportador, RegistradorAuditoria $auditoria): Response|StreamedResponse
     {
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');

@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Ejecuta la operación up definida por la clase 2026_11_01_015108_create_logistics_returns_tables.
+     *
+     * @return void Resultado de la operación.
+     */
     public function up(): void
     {
         if (DB::getDriverName() === 'sqlite') {
@@ -188,6 +193,11 @@ SQL);
 
     }
 
+    /**
+     * Ejecuta la operación down definida por la clase 2026_11_01_015108_create_logistics_returns_tables.
+     *
+     * @return void Resultado de la operación.
+     */
     public function down(): void
     {
         throw new LogicException('Enterprise tables are forward-only to protect business data.');

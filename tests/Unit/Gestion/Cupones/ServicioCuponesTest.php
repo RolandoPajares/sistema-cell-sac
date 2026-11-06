@@ -58,6 +58,11 @@ beforeEach(function (): void {
     createCouponSyntheticAuthorization();
 });
 
+/**
+ * Registra la información recibida y coordina su persistencia.
+ *
+ * @return void Resultado de la operación.
+ */
 function createCouponSyntheticAuthorization(): void
 {
     Schema::create('empresas', function (Blueprint $table): void {
@@ -129,6 +134,12 @@ function createCouponSyntheticAuthorization(): void
     DB::table('usuarios_roles')->insert(['usuario_id' => 21, 'rol_id' => 1, 'activo' => true]);
 }
 
+/**
+ * Ejecuta la operación makeCouponForServiceTest definida por la clase ServicioCuponesTest.
+ *
+ * @param  mixed  $attributes  Parámetro recibido por la operación.
+ * @return Cupon Resultado de la operación.
+ */
 function makeCouponForServiceTest(array $attributes = []): Cupon
 {
     return Cupon::query()->create($attributes + [
@@ -146,6 +157,11 @@ function makeCouponForServiceTest(array $attributes = []): Cupon
     ]);
 }
 
+/**
+ * Ejecuta la operación couponTestActor definida por la clase ServicioCuponesTest.
+ *
+ * @return User Resultado de la operación.
+ */
 function couponTestActor(): User
 {
     $actor = new User;

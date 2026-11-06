@@ -9,13 +9,29 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Define la responsabilidad de la clase ServicioNotificaciones dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class ServicioNotificaciones
 {
     /** @var array<int, string> */
     private const COLORES_GRAFICO = ['#0767f5', '#0bc4ee', '#9b82f6', '#77bbfb', '#8ce5db'];
 
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @param  mixed  $registradorAuditoria  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(private readonly RegistradorAuditoria $registradorAuditoria) {}
 
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function listarDelUsuario(
         User $usuario,
         string $estado = 'todas',
@@ -93,11 +109,26 @@ final class ServicioNotificaciones
         ];
     }
 
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $usuario  Parámetro recibido por la operación.
+     * @param  mixed  $identificador  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     public function buscarDelUsuario(User $usuario, string $identificador): ?Notificacion
     {
         return $this->consultaDelUsuario($usuario)->whereKey($identificador)->first();
     }
 
+    /**
+     * Ejecuta la operación marcarComoLeida definida por la clase ServicioNotificaciones.
+     *
+     * @param  mixed  $usuario  Parámetro recibido por la operación.
+     * @param  mixed  $identificador  Parámetro recibido por la operación.
+     * @param  mixed  $direccionIp  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     public function marcarComoLeida(User $usuario, string $identificador, ?string $direccionIp): bool
     {
         abort_unless(Schema::hasTable('registros_auditoria'), 503, 'La lectura requiere la tabla de auditoría disponible.');

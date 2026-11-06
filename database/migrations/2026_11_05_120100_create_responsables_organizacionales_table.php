@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Ejecuta la operación up definida por la clase 2026_11_05_120100_create_responsables_organizacionales_table.
+     *
+     * @return void Resultado de la operación.
+     */
     public function up(): void
     {
         $addChecks = static function (): void {
@@ -34,6 +39,7 @@ return new class extends Migration
 
         if (Schema::hasTable('responsables_organizacionales')) {
             $addChecks();
+
             return;
         }
 
@@ -74,6 +80,11 @@ return new class extends Migration
         $addChecks();
     }
 
+    /**
+     * Ejecuta la operación down definida por la clase 2026_11_05_120100_create_responsables_organizacionales_table.
+     *
+     * @return void Resultado de la operación.
+     */
     public function down(): void
     {
         throw new LogicException('This table is forward-only because it stores organizational history.');

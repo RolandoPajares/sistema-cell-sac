@@ -1,3 +1,10 @@
+/**
+ * Ejecuta la operación initializePagos utilizada por el módulo JavaScript.
+ *
+ * @param {*} root - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 export const initializePagos = (root) => {
     if (!root || root.dataset.financePagosReady === 'true') {
         return;
@@ -8,6 +15,13 @@ export const initializePagos = (root) => {
     initializePaymentDemo(root);
 };
 
+/**
+ * Ejecuta la operación initializePaymentDemo utilizada por el módulo JavaScript.
+ *
+ * @param {*} root - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const initializePaymentDemo = (root) => {
     const form = root.querySelector('[data-finance-payment-form]');
     const operation = form?.querySelector('[data-finance-payment-operation]');
@@ -22,6 +36,11 @@ const initializePaymentDemo = (root) => {
         return;
     }
 
+/**
+ * Ejecuta la operación syncOperation utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const syncOperation = () => {
         const isPayment = operation.value === 'pago';
         partyType.value = isPayment ? 'proveedor' : 'cliente';
@@ -80,6 +99,15 @@ const initializePaymentDemo = (root) => {
     syncOperation();
 };
 
+/**
+ * Ejecuta la operación bindFinanceFilterStatus utilizada por el módulo JavaScript.
+ *
+ * @param {*} root - Parámetro recibido por la función.
+ *
+ * @param {*} moduleName - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const bindFinanceFilterStatus = (root, moduleName) => {
     const status = root.querySelector('[data-finance-filter-status]');
 

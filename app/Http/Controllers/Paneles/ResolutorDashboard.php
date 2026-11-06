@@ -12,8 +12,18 @@ use App\Http\Controllers\Paneles\VentasMinoristas\DashboardController as VentasM
 use App\Models\User;
 use App\Servicios\ServicioAutorizacion;
 
+/**
+ * Define la responsabilidad de la clase ResolutorDashboard dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class ResolutorDashboard
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly AdministradorDashboardController $administrador,
         private readonly MarketingDashboardController $marketing,
@@ -25,6 +35,12 @@ final class ResolutorDashboard
         private readonly ServicioAutorizacion $autorizacion,
     ) {}
 
+    /**
+     * Ejecuta la operación for definida por la clase ResolutorDashboard.
+     *
+     * @param  mixed  $user  Parámetro recibido por la operación.
+     * @return PanelDashboardController Resultado de la operación.
+     */
     public function for(User $user): PanelDashboardController
     {
         foreach ([

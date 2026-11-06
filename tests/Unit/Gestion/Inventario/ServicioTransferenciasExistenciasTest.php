@@ -163,6 +163,11 @@ beforeEach(function (): void {
     ]);
 });
 
+/**
+ * Registra la información recibida y coordina su persistencia.
+ *
+ * @return void Resultado de la operación.
+ */
 function createTransferSyntheticAuthorization(): void
 {
     Schema::create('modulos', function (Blueprint $table): void {
@@ -223,6 +228,11 @@ function createTransferSyntheticAuthorization(): void
     DB::table('usuarios_roles')->insert(['usuario_id' => 51, 'rol_id' => 1, 'activo' => true]);
 }
 
+/**
+ * Ejecuta la operación transferTestActor definida por la clase ServicioTransferenciasExistenciasTest.
+ *
+ * @return User Resultado de la operación.
+ */
 function transferTestActor(): User
 {
     $actor = new User;
@@ -232,6 +242,13 @@ function transferTestActor(): User
     return $actor;
 }
 
+/**
+ * Registra la información recibida y coordina su persistencia.
+ *
+ * @param  mixed  $service  Parámetro recibido por la operación.
+ * @param  mixed  $quantity  Parámetro recibido por la operación.
+ * @return TransferenciaExistencia Resultado de la operación.
+ */
 function createTransferForTest(ServicioTransferenciasExistencias $service, int $quantity = 4): TransferenciaExistencia
 {
     return $service->request([

@@ -1,6 +1,11 @@
 /**
  * Filtros, ordenamiento y paginación de las tablas administrativas.
  */
+/**
+ * Gestiona la interacción y actualiza el estado visual correspondiente.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const filtrarFilas = () => {
     const terminoGlobal = (
         document.querySelector("[data-admin-global-search]")?.value || ""
@@ -123,6 +128,11 @@ document.querySelectorAll("[data-admin-table]").forEach((tabla) => {
     let paginaActual = 1;
     const porPagina = 10;
 
+/**
+ * Ejecuta la operación filasOrdenadas utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const filasOrdenadas = () => {
         const orden = contenedor?.querySelector("[data-category-order-filter]")?.value;
 
@@ -137,6 +147,11 @@ document.querySelectorAll("[data-admin-table]").forEach((tabla) => {
         );
     };
 
+/**
+ * Ejecuta la operación renderizarPaginacion utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const renderizarPaginacion = () => {
         const filasVisibles = filasOrdenadas().filter((fila) => !fila.hidden);
         const totalPaginas = Math.max(1, Math.ceil(filasVisibles.length / porPagina));

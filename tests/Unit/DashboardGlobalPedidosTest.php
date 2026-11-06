@@ -13,6 +13,11 @@ use Tests\TestCase;
 
 uses(TestCase::class);
 
+/**
+ * Ejecuta la operación preparePedidosDashboardAuthorization definida por la clase DashboardGlobalPedidosTest.
+ *
+ * @return void Resultado de la operación.
+ */
 function preparePedidosDashboardAuthorization(): void
 {
     Schema::create('empresas', function (Blueprint $table): void {
