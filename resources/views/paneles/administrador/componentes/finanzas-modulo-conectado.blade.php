@@ -27,7 +27,14 @@
             </div>
             <div class="admin-finance-actions">
                 @if ($module['export_route'] ?? false)
-                    <details class="admin-finance-export-menu"><summary class="admin-finance-button admin-finance-button--secondary"><i class="bi bi-download" aria-hidden="true"></i> {{ $module['export_label'] ?? 'Exportar' }}</summary><div class="admin-finance-export-options"><a href="{{ route($module['export_route'], ['format' => 'excel'] + $exportParameters) }}">Excel (.xlsx)</a><a href="{{ route($module['export_route'], ['format' => 'pdf'] + $exportParameters) }}">PDF (.pdf)</a><a href="{{ route($module['export_route'], ['format' => 'csv'] + $exportParameters) }}">CSV (.csv)</a></div></details>
+                    <details class="admin-finance-export-menu">
+                        <summary class="admin-finance-button admin-finance-button--secondary"><i class="bi bi-download" aria-hidden="true"></i><span>{{ $module['export_label'] ?? 'Exportar' }}</span><i class="bi bi-chevron-down admin-finance-export-chevron" aria-hidden="true"></i></summary>
+                        <div class="admin-finance-export-options" role="menu">
+                            <a role="menuitem" href="{{ route($module['export_route'], ['format' => 'excel'] + $exportParameters) }}"><i class="bi bi-file-earmark-excel" aria-hidden="true"></i><span><strong>Exportar Excel</strong><small>Archivo compatible .xlsx</small></span></a>
+                            <a role="menuitem" href="{{ route($module['export_route'], ['format' => 'pdf'] + $exportParameters) }}"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i><span><strong>Exportar PDF</strong><small>Documento imprimible</small></span></a>
+                            <a role="menuitem" href="{{ route($module['export_route'], ['format' => 'csv'] + $exportParameters) }}"><i class="bi bi-filetype-csv" aria-hidden="true"></i><span><strong>Exportar CSV</strong><small>Datos delimitados</small></span></a>
+                        </div>
+                    </details>
                 @endif
                 @if ($module['create_route'] ?? false)
                     <button class="admin-finance-button admin-finance-button--primary" type="button" data-finance-open="crear">

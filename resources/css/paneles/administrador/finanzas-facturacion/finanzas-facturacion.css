@@ -31,13 +31,16 @@
 .tc-ff__metric div > span { color: #5d7197; font-size: .67rem; }
 .tc-ff__metric > b { align-self: flex-end; margin-left: auto; color: #0a9b40; font-size: .68rem; white-space: nowrap; }
 .tc-ff__filters, .tc-ff__card { min-width: 0; border: 1px solid var(--ff-line); border-radius: 13px; background: linear-gradient(135deg, #fff, #f8fbff); box-shadow: 0 5px 15px #1f58a314; }
-.tc-ff__filters { margin-bottom: 13px; padding: 10px 12px; }
+.tc-ff__filters { margin-bottom: 13px; padding: 12px; }
 .tc-ff__search { display: flex; align-items: center; gap: 9px; min-height: 35px; padding: 0 11px; border: 1px solid #c7d7ed; border-radius: 7px; color: #546d96; background: #fff; }
 .tc-ff__search input { width: 100%; min-width: 0; border: 0; outline: 0; color: var(--ff-ink); background: transparent; font: inherit; }
 .tc-ff__search input::placeholder { color: #6c80a3; }
-.tc-ff__filter-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); align-items: end; gap: 10px; margin-top: 8px; }
+.tc-ff__filter-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); align-items: end; gap: 10px; margin-top: 9px; }
 .tc-ff__filter-fields label { display: grid; min-width: 0; gap: 4px; font-size: .69rem; font-weight: 800; }
 .tc-ff__filter-fields select, .tc-ff__form-grid select, .tc-ff__form-grid input, .tc-ff__form-grid textarea { width: 100%; min-height: 34px; padding: 0 9px; border: 1px solid #cad9ed; border-radius: 7px; color: #173c77; background: #fbfdff; font: inherit; }
+.tc-ff__filter-fields select:focus, .tc-ff__filter-fields input:focus { border-color: #4a98f5; box-shadow: 0 0 0 3px rgb(7 103 233 / 12%); outline: 0; }
+.tc-ff__filter-fields .tc-ff__button { min-height: 34px; }
+.tc-ff__filter-fields a.tc-ff__button { text-decoration: none; }
 .tc-ff__main-grid { display: grid; grid-template-columns: minmax(0, 2.15fr) minmax(280px, .8fr); align-items: start; gap: 13px; margin-bottom: 13px; }
 .tc-ff__card-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 11px 13px; }
 .tc-ff__card-heading h2, .tc-ff__aside h2 { display: flex; align-items: center; gap: 9px; margin: 0; color: #082c82; font-size: 1rem; font-weight: 850; }

@@ -217,6 +217,6 @@ final class ServicioMenuDinamico
             return request()->routeIs('management.inventory', 'management.inventory.movements');
         }
 
-        return request()->routeIs($route, $route.'.*');
+        return request()->routeIs($route);
     }
 }

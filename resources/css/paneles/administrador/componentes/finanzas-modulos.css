@@ -70,6 +70,34 @@
     justify-content: flex-end;
 }
 
+.admin-finance-export-menu { position: relative; }
+.admin-finance-export-menu > summary { list-style: none; }
+.admin-finance-export-menu > summary::-webkit-details-marker { display: none; }
+.admin-finance-export-menu[open] .admin-finance-export-chevron { transform: rotate(180deg); }
+.admin-finance-export-chevron { margin-left: .2rem; font-size: .65rem; transition: transform .18s ease; }
+.admin-finance-export-options {
+    background: #fff;
+    border: 1px solid var(--finance-border);
+    border-radius: .78rem;
+    box-shadow: 0 .8rem 2rem rgba(19, 65, 119, .16);
+    display: grid;
+    gap: .2rem;
+    min-width: 14rem;
+    padding: .45rem;
+    position: absolute;
+    right: 0;
+    top: calc(100% + .45rem);
+    z-index: 20;
+}
+.admin-finance-export-options a { align-items: center; border-radius: .55rem; color: #234a82; display: flex; gap: .65rem; padding: .62rem .7rem; text-decoration: none; }
+.admin-finance-export-options a:hover { background: #edf5ff; color: #075fcf; }
+.admin-finance-export-options a > i { align-items: center; background: #e6f2ff; border-radius: .5rem; color: #0875ed; display: inline-flex; flex: 0 0 auto; height: 2rem; justify-content: center; width: 2rem; }
+.admin-finance-export-options a:nth-child(1) > i { background: #dff8eb; color: #0b9c68; }
+.admin-finance-export-options a:nth-child(2) > i { background: #ffe6ea; color: #e3344f; }
+.admin-finance-export-options span { display: grid; gap: .12rem; }
+.admin-finance-export-options strong { font-size: .73rem; }
+.admin-finance-export-options small { color: #7891b4; font-size: .64rem; font-weight: 600; }
+
 .admin-finance-button,
 .admin-finance-filter-button,
 .admin-finance-clear-button,
@@ -159,6 +187,8 @@
     padding: .65rem;
 }
 
+.admin-finance-filters::before { color: #6682a8; content: 'Filtros'; font-size: .68rem; font-weight: 800; grid-column: 1 / -1; letter-spacing: .04em; text-transform: uppercase; }
+
 .admin-finance-filters label { min-width: 0; position: relative; }
 .admin-finance-filters input,
 .admin-finance-filters select {
@@ -246,4 +276,5 @@
     .admin-finance-clear-button { grid-column: auto; grid-row: auto; }
     .admin-finance-table-footer { align-items: flex-start; flex-direction: column; gap: .6rem; }
     .admin-finance-card-header { align-items: flex-start; flex-direction: column; }
+    .admin-finance-export-options { left: 0; right: auto; }
 }

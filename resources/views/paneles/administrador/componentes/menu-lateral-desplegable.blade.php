@@ -13,8 +13,7 @@
     ];
     $itemMatchesCurrentRoute = static fn (array $item): bool => $item['enabled']
         && $item['route']
-        && (request()->routeIs($item['route'])
-            || (! in_array($item['route'], ['management.dashboard', 'management.sales', 'management.inventory', 'management.billing', 'management.products'], true) && request()->routeIs($item['route'].'.*')));
+        && request()->routeIs($item['route']);
 
     $groups = [
         ['key' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'bi-speedometer2', 'items' => [
@@ -58,14 +57,10 @@
         ]],
         ['key' => 'finanzas', 'label' => 'Finanzas y Facturación', 'icon' => 'bi-wallet2', 'items' => [
             $enabledItem('management.payments', 'Pagos y cobros', 'bi-credit-card'),
-            $enabledItem('management.payments.preview.cash_registers', 'Gestión de cajas', 'bi-cash-stack'),
-            $enabledItem('management.payments.preview.cash_sessions', 'Apertura y cierre de caja', 'bi-safe'),
+            $enabledItem('management.payments.preview.cash_registers', 'Cajas, aperturas y cierres', 'bi-cash-stack'),
             $enabledItem('management.payments.preview.accounts', 'Cuentas por cobrar y pagar', 'bi-journal-text'),
             $enabledItem('management.refunds', 'Reembolsos', 'bi-arrow-return-left'),
-            $enabledItem('management.billing', 'Facturas y boletas electrónicas', 'bi-receipt-cutoff'),
-            $enabledItem('management.billing.preview.notes', 'Notas de crédito y débito', 'bi-file-earmark-minus'),
-            $enabledItem('management.billing.preview.series', 'Series y correlativos', 'bi-list-ol'),
-            $enabledItem('management.billing.preview.sunat', 'Seguimiento SUNAT', 'bi-cloud-check'),
+            $enabledItem('management.billing', 'Comprobantes de pago', 'bi-receipt-cutoff'),
         ]],
         ['key' => 'ecommerce', 'label' => 'Ecommerce y Marketing', 'icon' => 'bi-megaphone', 'items' => [
             $enabledItem('catalog.index', 'Catálogo público', 'bi-shop-window'),

@@ -399,9 +399,6 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::post('/finanzas/cuentas-por-cobrar/aplicar-cobro', [CuentasFinancierasController::class, 'aplicarCobro'])
         ->name('payments.accounts.receivables.update');
     Route::get('/finanzas/diseno/reembolsos', static fn () => redirect()->route('management.refunds'))->middleware('role:administrador')->name('refunds.preview');
-    Route::get('/finanzas/diseno/notas', static fn () => redirect()->route('management.billing'))->middleware('role:administrador')->name('billing.preview.notes');
-    Route::get('/finanzas/diseno/series', static fn () => redirect()->route('management.billing'))->middleware('role:administrador')->name('billing.preview.series');
-    Route::get('/finanzas/diseno/sunat', static fn () => redirect()->route('management.billing'))->middleware('role:administrador')->name('billing.preview.sunat');
     Route::get('/roles-permisos', [RolesPermisosController::class, 'index'])->name('roles_permissions');
     Route::get('/matriz-privilegios', [RolesPermisosController::class, 'matrix'])->name('permissions_matrix');
     Route::post('/roles-permisos', [RolesPermisosController::class, 'store'])->name('roles_permissions.store');
