@@ -28,8 +28,30 @@ class MenusController extends Controller
             ? Menu::query()->with(['roles', 'elementos' => fn ($query) => $query->with(['elementosHijos.pantalla', 'elementosHijos.permiso', 'pantalla', 'permiso'])])->orderBy('nombre')->get()
             : collect();
         $roles = $ready ? Rol::query()->where('activo', true)->orderBy('nombre')->get() : collect();
+        $activeMenus = $ready ? Menu::query()->where('habilitado', true)->count() : 0;
+        $activeSubmenus = $ready ? ElementoMenu::query()->where('habilitado', true)->whereNotNull('padre_id')->count() : 0;
+        $hiddenElements = $ready ? ElementoMenu::query()->where('habilitado', false)->count() : 0;
+        $recentChanges = $ready ? ElementoMenu::query()->where('actualizado_en', '>=', now()->subDays(7))->count() : 0;
 
-        return view('gestion.menus.listar', compact('ready', 'menus', 'roles'));
+        return view('gestion.menus.listar', compact('ready', 'menus', 'roles', 'activeMenus', 'activeSubmenus', 'hiddenElements', 'recentChanges'));
+    }
+
+    public function updateMenu(Request $request, Menu $menu, ServicioAutorizacion $autorizacion, RegistradorAuditoria $auditoria): RedirectResponse
+    {
+        abort_unless($autorizacion->allowsGlobal($request->user(), 'gestion.seguridad.actualizar'), 403);
+        $validated = $request->validate([
+            'nombre' => ['required', 'string', 'max:140'],
+            'habilitado' => ['required', 'boolean'],
+        ]);
+        abort_if($menu->codigo === 'administrador.sidebar' && ! $validated['habilitado'], 422, 'El menú administrativo esencial no se puede desactivar.');
+
+        $before = $menu->only(['nombre', 'habilitado']);
+        DB::transaction(function () use ($menu, $validated, $auditoria, $request, $before): void {
+            $menu->update($validated);
+            $auditoria->record($request->user()->getKey(), 'actualizar_menu', 'menus', $menu->getKey(), $before, $menu->only(['nombre', 'habilitado']), $request->ip());
+        });
+
+        return back()->with('status', 'El menú fue actualizado correctamente.');
     }
 
     public function updateElement(Request $request, ElementoMenu $element, ServicioAutorizacion $autorizacion, RegistradorAuditoria $auditoria): RedirectResponse

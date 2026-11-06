@@ -402,6 +402,7 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::delete('/usuarios/{user}/roles/{role}', [AsignacionRolesController::class, 'revokeGlobal'])->whereNumber('user')->whereNumber('role')->name('user_assignments.revoke');
     Route::delete('/usuarios/{user}/roles/{role}/sedes/{site}', [AsignacionRolesController::class, 'revokeAtSite'])->whereNumber('user')->whereNumber('role')->whereNumber('site')->name('user_assignments.revoke_site');
     Route::get('/menus', [MenusController::class, 'index'])->name('menus');
+    Route::patch('/menus/{menu}', [MenusController::class, 'updateMenu'])->whereNumber('menu')->name('menus.update');
     Route::put('/menus/{menu}/roles', [MenusController::class, 'updateRoles'])->whereNumber('menu')->name('menus.roles');
     Route::patch('/menus/elementos/{element}', [MenusController::class, 'updateElement'])->whereNumber('element')->name('menus.elements.update');
     Route::get('/modulos', [MenusController::class, 'modules'])->name('modules');
