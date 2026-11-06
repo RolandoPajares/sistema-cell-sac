@@ -12,6 +12,7 @@
 @import './componentes/estados.css';
 @import './componentes/tablas.css';
 @import './base/utilidades.css';
+@import './componentes/asistente-flotante.css';
 
 @import './layouts/administracion.css';
 @import './layouts/responsive.css';

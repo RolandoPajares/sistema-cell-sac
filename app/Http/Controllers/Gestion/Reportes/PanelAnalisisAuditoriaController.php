@@ -211,8 +211,16 @@ final class PanelAnalisisAuditoriaController extends Controller
         $pagina['metricas'][1][1] = in_array($reporte, ['ventas', 'pedidos', 'compras'], true) ? number_format((float) (clone $consulta)->sum('total'), 2) : (string) $registros->count();
         $pagina['metricas'][2][1] = $reporte === 'ventas' ? (string) (clone $consulta)->whereNotNull('cliente_id')->distinct()->count('cliente_id') : '—';
         $pagina['metricas'][3][1] = $reporte === 'productos' ? (string) (clone $consulta)->where('activo', true)->count() : '—';
-        $pagina['barras'] = [];
-        $pagina['resumen_filas'] = [['Registros visibles', (string) $registros->count()]];
+        $agrupados = $registros->getCollection()->groupBy(function (object $registro): string {
+            $estado = method_exists($registro, 'getAttribute') ? $registro->getAttribute('estado') : null;
+
+            return filled($estado) ? (string) $estado : 'Registros visibles';
+        })->map->count()->sortDesc()->take(5);
+        $maximo = max(1, (int) $agrupados->max());
+        $pagina['barras'] = $agrupados->map(fn (int $cantidad, string $etiqueta): array => [$etiqueta, (int) round(($cantidad / $maximo) * 100), (string) $cantidad])->values()->all();
+        $pagina['grafico'] = 'Distribución del reporte';
+        $pagina['resumen'] = 'Resumen de registros';
+        $pagina['resumen_filas'] = $agrupados->map(fn (int $cantidad, string $etiqueta): array => [$etiqueta, (string) $cantidad])->all();
     }
 
     /** @param array<string, mixed> $pagina @param array<string, mixed> $filtros */

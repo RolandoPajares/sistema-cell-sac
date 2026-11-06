@@ -4,6 +4,7 @@
 @section('body_class', 'modulo-about')
 
 @section('content')
+    <section class="about-reference-hero"><div class="container about-reference-hero__inner"><div><span class="eyebrow">NOSOTROS</span><h1>Conoce a <span>Technology CELL</span></h1><p>Tu tienda de confianza en celulares, audífonos y accesorios originales.</p><div class="about-hero-points"><span><i class="bi bi-shield-check"></i> Productos originales</span><span><i class="bi bi-truck"></i> Envíos seguros</span><span><i class="bi bi-headset"></i> Asesoría personalizada</span></div></div></div></section>
     <section>
         <div class="container detail-grid">
             <div>

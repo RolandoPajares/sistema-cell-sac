@@ -9,13 +9,15 @@
 
 @section('content')
     <section class="smart-page">
-        <div class="container">
-            <div class="smart-hero">
+        <div class="comparator-reference-hero comparator-reference-hero--full">
+            <div class="container comparator-reference-hero__inner">
                 <span class="eyebrow">MD SmartCommerce</span>
-                <h1><i class="bi bi-columns-gap" aria-hidden="true"></i> Comparador inteligente</h1>
+                <h1><i class="bi bi-columns-gap" aria-hidden="true"></i> Comparador <span>inteligente</span></h1>
                 <p>Selecciona hasta tres celulares y compara precio, disponibilidad y SmartScore por perfil.</p>
             </div>
-
+        </div>
+        <div class="container">
+            <div class="comparator-steps" aria-label="Pasos del comparador"><span><b>1</b> Selecciona hasta 3 equipos</span><span><b>2</b> Compara características</span><span><b>3</b> Elige el ideal para ti</span></div>
             <form class="panel smart-form compare-picker" method="get" id="compareForm">
                 @for ($slot = 1; $slot <= 3; $slot++)
                     <label>

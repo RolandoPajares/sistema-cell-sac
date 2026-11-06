@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\InicioSesionRequest;
 use App\Http\Requests\RegistroRequest;
+use App\Models\Clientes\Cliente;
 use App\Models\User;
 use App\Servicios\RegistradorAuditoria;
 use Illuminate\Http\RedirectResponse;
@@ -65,8 +66,9 @@ class AutenticacionController extends Controller
         abort_unless(Schema::hasTable('roles') && Schema::hasTable('usuarios_roles'), 503, 'El registro no está disponible hasta inicializar el control de acceso.');
 
         $user = DB::transaction(function () use ($data, $audit, $request): User {
+            $role = $data['tipo_cliente'] === 'mayorista' ? 'cliente_mayorista' : 'cliente_minorista';
             $roleId = DB::table('roles')
-                ->where('codigo', 'cliente_minorista')
+                ->where('codigo', $role)
                 ->where('alcance_permitido', 'propio')
                 ->where('activo', true)
                 ->value('id');
@@ -76,7 +78,7 @@ class AutenticacionController extends Controller
                 'nombre' => $data['nombre'],
                 'correo' => mb_strtolower($data['correo']),
                 'password' => $data['password'],
-                'rol' => 'cliente_minorista',
+                'rol' => $role,
             ]);
 
             DB::table('usuarios_roles')->insert([
@@ -85,7 +87,22 @@ class AutenticacionController extends Controller
                 'asignado_en' => now(),
                 'activo' => true,
             ]);
-            $audit->record($user->getKey(), 'registro_publico', 'autenticacion', $user->getKey(), null, ['rol' => 'cliente_minorista'], $request->ip());
+
+            if ($role === 'cliente_mayorista') {
+                Cliente::create([
+                    'usuario_id' => $user->getKey(),
+                    'tipo' => 'mayorista',
+                    'tipo_documento' => 'RUC',
+                    'documento' => $data['ruc'],
+                    'razon_social' => $data['nombre'],
+                    'nombre_contacto' => $data['nombre'],
+                    'correo' => mb_strtolower($data['correo']),
+                    'activo' => true,
+                    'creado_en' => now(),
+                ]);
+            }
+
+            $audit->record($user->getKey(), 'registro_publico', 'autenticacion', $user->getKey(), null, ['rol' => $role], $request->ip());
 
             return $user;
         });

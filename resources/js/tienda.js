@@ -1,5 +1,7 @@
 import './layouts/publico/encabezado.js';
 import './componentes/publico/publicidad.js';
+import './componentes/comunes/visibilidad-contrasenas.js';
+import './componentes/inteligencia/asistente/asistente-panel.js';
 import { cargarModulo } from './nucleo/cargador-modulos.js';
 
 const modulosPorPagina = [

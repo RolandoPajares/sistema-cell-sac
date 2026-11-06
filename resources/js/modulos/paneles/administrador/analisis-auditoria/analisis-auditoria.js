@@ -35,7 +35,7 @@ document.querySelectorAll('[data-analisis-auditoria]').forEach((panel) => {
 
 document.querySelectorAll('[data-auditoria-operaciones]').forEach((panel) => {
     const configuracion = JSON.parse(panel.querySelector('[data-audit-config]')?.textContent ?? '[]');
-    const detalleVacio = panel.querySelector('[data-audit-detail-empty]');
+    const modal = panel.querySelector('[data-audit-modal]');
     const detalleContenido = panel.querySelector('[data-audit-detail-content]');
     const filas = new Map(configuracion.map((evento) => [String(evento.id), evento]));
 
@@ -59,22 +59,30 @@ document.querySelectorAll('[data-auditoria-operaciones]').forEach((panel) => {
             'Fecha y hora': evento.fecha,
         };
         Object.entries(campos).forEach(([etiqueta, valor]) => {
-            const item = document.createElement('div');
-            const titulo = document.createElement('dt');
-            const contenido = document.createElement('dd');
+            const item = document.createElement('tr');
+            const titulo = document.createElement('th');
+            const contenido = document.createElement('td');
+            titulo.scope = 'row';
             titulo.textContent = etiqueta;
             contenido.textContent = String(valor ?? '—');
             item.append(titulo, contenido);
             detalleContenido.append(item);
         });
-        detalleVacio.hidden = true;
-        detalleContenido.hidden = false;
         panel.querySelectorAll('[data-audit-row]').forEach((fila) => fila.classList.toggle('is-selected', fila.dataset.auditId === String(evento.id)));
+        modal.showModal();
     };
 
     panel.querySelectorAll('[data-audit-detail]').forEach((boton) => {
         boton.addEventListener('click', () => renderizar(filas.get(String(boton.dataset.auditDetail))));
     });
 
-    renderizar(configuracion[0]);
+    panel.querySelectorAll('[data-audit-close]').forEach((boton) => {
+        boton.addEventListener('click', () => modal.close());
+    });
+
+    modal.addEventListener('click', (evento) => {
+        if (evento.target === modal) {
+            modal.close();
+        }
+    });
 });

@@ -4,9 +4,9 @@
 @section('title', 'SmartMatch')
 
 @section('content')
-    <section class="smartmatch-hero">
+    <section class="smartmatch-hero smartmatch-reference-hero">
         <div class="container smartmatch-hero-grid">
-            <div>
+            <div class="smartmatch-hero-copy">
                 <span class="smartmatch-etiqueta"><i class="bi bi-stars"></i> MD SmartCommerce</span>
                 <h1>Encuentra tu <span>celular ideal</span> con SmartMatch</h1>
                 <p>Indica tu presupuesto, para qué usarás el equipo y qué es lo más importante para ti. SmartMatch revisa el catálogo y te muestra los celulares que mejor encajan contigo.</p>
