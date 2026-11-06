@@ -41,8 +41,11 @@ class RolesPermisosController extends Controller
         $selectedRole = $roles->firstWhere('id', $selectedRoleId) ?: $roles->first();
         $permissions = $ready ? $this->permissionCatalog() : collect();
         $permissionCount = $ready ? DB::table('permisos')->where('activo', true)->count() : 0;
+        $moduleCount = $ready ? DB::table('modulos')->where('habilitado', true)->count() : 0;
+        $screenCount = $ready ? DB::table('pantallas')->where('habilitada', true)->count() : 0;
+        $assignedPermissionCount = $ready ? DB::table('roles_permisos')->join('roles', 'roles.id', '=', 'roles_permisos.rol_id')->where('roles.activo', true)->distinct()->count(DB::raw('CONCAT(roles_permisos.rol_id, ":", roles_permisos.permiso_id, ":", roles_permisos.alcance)')) : 0;
 
-        return view('gestion.roles-permisos.matriz', compact('ready', 'roles', 'selectedRole', 'permissions', 'permissionCount'));
+        return view('gestion.roles-permisos.matriz', compact('ready', 'roles', 'selectedRole', 'permissions', 'permissionCount', 'moduleCount', 'screenCount', 'assignedPermissionCount'));
     }
 
     private function permissionCatalog()
