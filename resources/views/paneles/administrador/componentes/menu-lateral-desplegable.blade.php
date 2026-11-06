@@ -73,9 +73,6 @@
         ['key' => 'analisis', 'label' => 'Análisis y Auditoría', 'icon' => 'bi-bar-chart-line', 'items' => [
             $enabledItem('management.reports.preview.global', 'Reportes globales', 'bi-bar-chart'),
             $enabledItem('management.audit.preview.operations', 'Auditoría de operaciones', 'bi-shield-check'),
-            $enabledItem('management.audit.preview.roles', 'Historial de roles y permisos', 'bi-clock-history'),
-            $enabledItem('management.audit.preview.security', 'Eventos de seguridad', 'bi-shield-exclamation'),
-            $enabledItem('management.reports.preview.exports', 'Exportaciones autorizadas', 'bi-download'),
         ]],
         ['key' => 'configuracion', 'label' => 'Configuración del Sistema', 'icon' => 'bi-gear', 'items' => [
             $enabledItem('management.general_settings.preview', 'Configuración general', 'bi-gear'),

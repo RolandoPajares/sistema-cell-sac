@@ -211,10 +211,6 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::get('/auditoria', [AuditoriaController::class, 'index'])->name('audit');
     Route::get('/analisis/diseno/auditoria-operaciones', [PanelAnalisisAuditoriaController::class, 'operaciones'])
         ->middleware('role:administrador')->name('audit.preview.operations');
-    Route::get('/analisis/diseno/historial-roles', [PanelAnalisisAuditoriaController::class, 'roles'])
-        ->middleware('role:administrador')->name('audit.preview.roles');
-    Route::get('/analisis/diseno/eventos-seguridad', [PanelAnalisisAuditoriaController::class, 'seguridad'])
-        ->middleware('role:administrador')->name('audit.preview.security');
 
     Route::get('/categorias', [CategoriaController::class, 'index'])->name('categories');
     Route::get('/categorias/exportar/{format?}', [CategoriaController::class, 'export'])
@@ -352,12 +348,8 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::get('/reportes', [ReporteController::class, 'index'])->name('reports');
     Route::get('/analisis/diseno/reportes-globales', [PanelAnalisisAuditoriaController::class, 'globales'])
         ->middleware('role:administrador')->name('reports.preview.global');
-    Route::get('/analisis/diseno/reportes-sede', [PanelAnalisisAuditoriaController::class, 'sedes'])
-        ->middleware('role:administrador')->name('reports.preview.sites');
-    Route::get('/analisis/diseno/exportaciones', [PanelAnalisisAuditoriaController::class, 'exportaciones'])
-        ->middleware('role:administrador')->name('reports.preview.exports');
     Route::get('/analisis/diseno/{tipo}/exportar/{format?}', [PanelAnalisisAuditoriaController::class, 'exportar'])
-        ->whereIn('tipo', ['globales', 'sedes', 'operaciones', 'roles', 'seguridad', 'exportaciones'])
+        ->where('tipo', 'globales')
         ->whereIn('format', ['pdf', 'excel', 'csv'])
         ->middleware('role:administrador')->name('reports.preview.export');
     Route::get('/reportes/exportar/{format?}', [ReporteController::class, 'export'])

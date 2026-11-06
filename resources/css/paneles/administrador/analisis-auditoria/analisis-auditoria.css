@@ -34,7 +34,7 @@
 .tc-aa__filters h2 { font-size: .98rem; }
 .tc-aa__filter-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) auto; align-items: end; gap: 14px; }
 .tc-aa__filter-grid label { display: grid; gap: 5px; color: #2a4572; font-size: .76rem; font-weight: 700; }
-.tc-aa__filter-grid select { width: 100%; min-height: 43px; padding: 0 11px; border: 1px solid #c5d8f2; border-radius: 9px; color: #304e7a; background: #fff; font: inherit; font-size: .82rem; }
+.tc-aa__filter-grid input, .tc-aa__filter-grid select { width: 100%; min-height: 43px; padding: 0 11px; border: 1px solid #c5d8f2; border-radius: 9px; color: #304e7a; background: #fff; font: inherit; font-size: .82rem; }
 .tc-aa__records { margin-bottom: 14px; }
 .tc-aa__card-heading { display: flex; justify-content: space-between; align-items: end; gap: 10px; margin-bottom: 10px; }
 .tc-aa__card-heading h2 { margin: 0 0 3px; }
