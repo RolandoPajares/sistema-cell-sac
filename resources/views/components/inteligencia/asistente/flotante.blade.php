@@ -1,4 +1,4 @@
-<aside class="assistant-float" data-admin-assistant aria-label="Asistente IA">
+<aside class="assistant-float" data-admin-assistant aria-label="Asistente IA" hidden>
     <button class="assistant-float-launcher" type="button" data-admin-assistant-toggle aria-controls="adminAssistantPanel" aria-expanded="false">
         <span class="assistant-float-launcher-icon"><i class="bi bi-stars" aria-hidden="true"></i></span>
         <span><strong>Asistente IA</strong><small>Ayuda contextual de Technology Cell</small></span>

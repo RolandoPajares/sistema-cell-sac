@@ -17,11 +17,11 @@
         <div class="tc-menu-workspace">
             <section class="tc-rbac-card tc-menu-tree-card"><header class="tc-menu-card-head"><div><h2><i class="bi bi-diagram-3" aria-hidden="true"></i> Estructura de menús</h2><p>Orden y estado del catálogo existente.</p></div><span class="tc-rbac-summary">{{ $menus->count() }} menús</span></header><div class="tc-menu-tree-scroll"><table class="tc-menu-tree"><thead><tr><th>Menú / submenú</th><th>Orden</th><th>Estado</th><th>Visible</th><th></th></tr></thead><tbody>
                 @forelse($menus as $menu)
-                    <tr class="tc-menu-tree-row tc-menu-tree-row--root" data-menu-row data-status="{{ $menu->habilitado ? 'active' : 'inactive' }}" data-search="{{ strtolower($menu->nombre.' '.$menu->codigo.' '.$menu->contexto) }}"><td><i class="bi bi-chevron-down" aria-hidden="true"></i><i class="bi bi-folder2-open" aria-hidden="true"></i><strong>{{ $menu->nombre }}</strong></td><td>{{ $loop->iteration }}</td><td><span class="tc-rbac-status tc-rbac-status--{{ $menu->habilitado ? 'active' : 'inactive' }}">{{ $menu->habilitado ? 'Activo' : 'Inactivo' }}</span></td><td><span class="tc-menu-switch {{ $menu->habilitado ? 'is-on' : '' }}" aria-label="{{ $menu->habilitado ? 'Visible' : 'Oculto' }}"></span></td><td><button type="button" class="tc-rbac-action tc-rbac-action--primary" data-open-dialog="editar-menu-{{ $menu->id }}"><i class="bi bi-pencil" aria-hidden="true"></i> Editar</button></td></tr>
+                    <tr class="tc-menu-tree-row tc-menu-tree-row--root" data-menu-row data-tree-key="menu-{{ $menu->id }}" data-status="{{ $menu->habilitado ? 'active' : 'inactive' }}" data-search="{{ strtolower($menu->nombre.' '.$menu->codigo.' '.$menu->contexto) }}"><td><button type="button" class="tc-tree-toggle" data-tree-toggle="menu-{{ $menu->id }}" aria-expanded="true" aria-label="Contraer {{ $menu->nombre }}"><i class="bi bi-chevron-down" aria-hidden="true"></i></button><i class="bi bi-folder2-open" aria-hidden="true"></i><strong>{{ $menu->nombre }}</strong></td><td>{{ $loop->iteration }}</td><td><span class="tc-rbac-status tc-rbac-status--{{ $menu->habilitado ? 'active' : 'inactive' }}">{{ $menu->habilitado ? 'Activo' : 'Inactivo' }}</span></td><td><span class="tc-menu-switch {{ $menu->habilitado ? 'is-on' : '' }}" aria-label="{{ $menu->habilitado ? 'Visible' : 'Oculto' }}"></span></td><td><button type="button" class="tc-rbac-action tc-rbac-action--primary" data-open-dialog="editar-menu-{{ $menu->id }}"><i class="bi bi-pencil" aria-hidden="true"></i> Editar</button></td></tr>
                     @foreach($menu->elementos as $element)
-                        <tr class="tc-menu-tree-row tc-menu-tree-row--group" data-menu-row data-status="{{ $element->habilitado ? 'active' : 'inactive' }}" data-search="{{ strtolower($element->etiqueta) }}"><td><span class="tc-menu-indent">↳</span><i class="bi bi-folder" aria-hidden="true"></i><strong>{{ $element->etiqueta }}</strong></td><td>{{ $element->orden }}</td><td><span class="tc-rbac-status tc-rbac-status--{{ $element->habilitado ? 'active' : 'inactive' }}">{{ $element->habilitado ? 'Activo' : 'Inactivo' }}</span></td><td><span class="tc-menu-switch {{ $element->habilitado ? 'is-on' : '' }}"></span></td><td>—</td></tr>
+                        <tr class="tc-menu-tree-row tc-menu-tree-row--group" data-menu-row data-tree-key="element-{{ $element->id }}" data-tree-parent="menu-{{ $menu->id }}" data-status="{{ $element->habilitado ? 'active' : 'inactive' }}" data-search="{{ strtolower($element->etiqueta) }}"><td><button type="button" class="tc-tree-toggle tc-tree-toggle--nested" data-tree-toggle="element-{{ $element->id }}" aria-expanded="true" aria-label="Contraer {{ $element->etiqueta }}"><i class="bi bi-chevron-down" aria-hidden="true"></i></button><span class="tc-menu-indent">↳</span><i class="bi bi-folder" aria-hidden="true"></i><strong>{{ $element->etiqueta }}</strong></td><td>{{ $element->orden }}</td><td><span class="tc-rbac-status tc-rbac-status--{{ $element->habilitado ? 'active' : 'inactive' }}">{{ $element->habilitado ? 'Activo' : 'Inactivo' }}</span></td><td><span class="tc-menu-switch {{ $element->habilitado ? 'is-on' : '' }}"></span></td><td>—</td></tr>
                         @foreach($element->elementosHijos as $child)
-                            <tr class="tc-menu-tree-row tc-menu-tree-row--child" data-menu-row data-status="{{ $child->habilitado && $child->pantalla?->habilitada ? 'active' : 'inactive' }}" data-search="{{ strtolower($child->etiqueta.' '.($child->pantalla?->ruta ?: '')) }}"><td><span class="tc-menu-indent tc-menu-indent--child">↳</span><i class="bi bi-window" aria-hidden="true"></i><span>{{ $child->etiqueta }}</span><small>{{ $child->pantalla?->ruta ?: 'Sin ruta registrada' }}</small></td><td>{{ $child->orden }}</td><td><span class="tc-rbac-status tc-rbac-status--{{ $child->habilitado && $child->pantalla?->habilitada ? 'active' : 'inactive' }}">{{ $child->habilitado && $child->pantalla?->habilitada ? 'Activo' : 'Inactivo' }}</span></td><td><span class="tc-menu-switch {{ $child->habilitado && $child->pantalla?->habilitada ? 'is-on' : '' }}"></span></td><td><button type="button" class="tc-rbac-action" data-open-dialog="menu-element-{{ $child->id }}">Editar</button></td></tr>
+                            <tr class="tc-menu-tree-row tc-menu-tree-row--child" data-menu-row data-tree-parent="element-{{ $element->id }}" data-status="{{ $child->habilitado && $child->pantalla?->habilitada ? 'active' : 'inactive' }}" data-search="{{ strtolower($child->etiqueta.' '.($child->pantalla?->ruta ?: '')) }}"><td><span class="tc-menu-indent tc-menu-indent--child">↳</span><i class="bi bi-window" aria-hidden="true"></i><span>{{ $child->etiqueta }}</span><small>{{ $child->pantalla?->ruta ?: 'Sin ruta registrada' }}</small></td><td>{{ $child->orden }}</td><td><span class="tc-rbac-status tc-rbac-status--{{ $child->habilitado && $child->pantalla?->habilitada ? 'active' : 'inactive' }}">{{ $child->habilitado && $child->pantalla?->habilitada ? 'Activo' : 'Inactivo' }}</span></td><td><span class="tc-menu-switch {{ $child->habilitado && $child->pantalla?->habilitada ? 'is-on' : '' }}"></span></td><td><button type="button" class="tc-rbac-action" data-open-dialog="menu-element-{{ $child->id }}">Editar</button></td></tr>
                         @endforeach
                     @endforeach
                 @empty
@@ -49,6 +49,61 @@
 
 @push('scripts')
 <script>
-(() => { const page=document.querySelector('[data-menu-page]'); if(!page)return; const open=(id)=>{const dialog=document.getElementById(id);if(dialog&&!dialog.open)dialog.showModal();}; page.querySelectorAll('[data-open-dialog]').forEach((button)=>button.addEventListener('click',()=>open(button.dataset.openDialog))); document.querySelectorAll('[data-close-dialog]').forEach((button)=>button.addEventListener('click',()=>button.closest('dialog')?.close())); document.querySelectorAll('.tc-rbac-dialog').forEach((dialog)=>dialog.addEventListener('click',(event)=>{if(event.target===dialog)dialog.close();})); const filter=page.querySelector('[data-menu-filter]'); const status=page.querySelector('[data-menu-status]'); const apply=()=>{const value=(filter?.value||'').toLowerCase().trim();const state=status?.value||'';page.querySelectorAll('[data-menu-row]').forEach((row)=>{row.hidden=(value!==''&&!row.dataset.search.includes(value))||(state!==''&&row.dataset.status!==state);});}; filter?.addEventListener('input',apply); status?.addEventListener('change',apply); })();
+(() => {
+    const page = document.querySelector('[data-menu-page]');
+    if (!page) return;
+
+    const open = (id) => {
+        const dialog = document.getElementById(id);
+        if (dialog && !dialog.open) dialog.showModal();
+    };
+
+    page.querySelectorAll('[data-open-dialog]').forEach((button) => {
+        button.addEventListener('click', () => open(button.dataset.openDialog));
+    });
+
+    document.querySelectorAll('[data-close-dialog]').forEach((button) => {
+        button.addEventListener('click', () => button.closest('dialog')?.close());
+    });
+
+    document.querySelectorAll('.tc-rbac-dialog').forEach((dialog) => {
+        dialog.addEventListener('click', (event) => {
+            if (event.target === dialog) dialog.close();
+        });
+    });
+
+    const treeRows = [...page.querySelectorAll('[data-tree-key]')];
+    const descendants = (key) => [...page.querySelectorAll(`[data-tree-parent="${key}"]`)];
+    const setExpanded = (key, expanded) => {
+        descendants(key).forEach((row) => {
+            row.hidden = !expanded;
+            if (!expanded && row.dataset.treeKey) setExpanded(row.dataset.treeKey, false);
+        });
+    };
+
+    page.querySelectorAll('[data-tree-toggle]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const expanded = button.getAttribute('aria-expanded') !== 'true';
+            button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            const icon = button.querySelector('i');
+            icon?.classList.toggle('bi-chevron-down', expanded);
+            icon?.classList.toggle('bi-chevron-right', !expanded);
+            setExpanded(button.dataset.treeToggle, expanded);
+        });
+    });
+
+    const filter = page.querySelector('[data-menu-filter]');
+    const status = page.querySelector('[data-menu-status]');
+    const apply = () => {
+        const value = (filter?.value || '').toLowerCase().trim();
+        const state = status?.value || '';
+        page.querySelectorAll('[data-menu-row]').forEach((row) => {
+            row.hidden = (value !== '' && !row.dataset.search.includes(value))
+                || (state !== '' && row.dataset.status !== state);
+        });
+    };
+    filter?.addEventListener('input', apply);
+    status?.addEventListener('change', apply);
+})();
 </script>
 @endpush
