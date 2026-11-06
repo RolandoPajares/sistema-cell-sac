@@ -34,8 +34,15 @@
 }
 
 .modulo-campanias .campanias-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
   margin-bottom: 12px;
 }
+
+.modulo-campanias .campanias-hero-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.modulo-campanias .campanias-hero-actions > * { flex: 0 0 auto; }
 
 .modulo-campanias .campanias-eyebrow {
   display: inline-flex;
@@ -98,7 +105,7 @@
 
 .modulo-campanias .campanias-toolbar {
   display: grid;
-  grid-template-columns: minmax(170px, 1.7fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(72px, 0.6fr) minmax(132px, 1.1fr) minmax(78px, 0.6fr) minmax(82px, 0.6fr);
+  grid-template-columns: minmax(170px, 1.7fr) minmax(120px, 1fr) minmax(120px, 1fr) auto auto;
   gap: 8px;
   align-items: center;
   margin-bottom: 13px;
@@ -1275,7 +1282,7 @@
 
 @media (max-width: 1250px) {
   .modulo-campanias .campanias-toolbar {
-    grid-template-columns: minmax(170px, 1.5fr) repeat(2, minmax(112px, 1fr)) repeat(4, minmax(72px, 0.75fr));
+    grid-template-columns: minmax(170px, 1.5fr) repeat(2, minmax(112px, 1fr)) auto;
   }
 
   .modulo-campanias .campanias-kpi-grid {
@@ -1294,6 +1301,9 @@
 }
 
 @media (max-width: 820px) {
+  .modulo-campanias .campanias-hero { align-items: flex-start; flex-direction: column; }
+  .modulo-campanias .campanias-hero-actions { justify-content: flex-start; }
+
   .modulo-campanias .admin-main {
     padding: 18px 16px 32px;
   }
@@ -1302,8 +1312,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .modulo-campanias .campanias-search,
-  .modulo-campanias .campanias-primary-button {
+  .modulo-campanias .campanias-search {
     grid-column: 1 / -1;
   }
 
