@@ -71,6 +71,6 @@
 /* En Cupones las acciones ocupan una fila propia para que ningún botón quede oculto. */
 .admin-cupones-page .admin-marketing-heading-row { align-items: flex-start; flex-direction: column; }
 .admin-cupones-page .admin-marketing-heading-row > div:first-child { width: 100%; }
-.admin-cupones-page .admin-marketing-actions { justify-content: flex-end; width: 100%; }
+.admin-cupones-page .admin-marketing-actions { flex: 0 1 auto; justify-content: flex-end; width: 100%; }
 .admin-cupones-page .admin-marketing-kpis { min-width: 0; }
 .admin-cupones-page .admin-marketing-filters { min-width: 0; }
