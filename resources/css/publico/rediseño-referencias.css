@@ -53,6 +53,7 @@ body.modulo-autenticacion .auth-brand img { width: 160px; height: 62px; object-f
 body.modulo-autenticacion .auth-wrap h2 { margin: 10px 0 8px; color: var(--ref-ink); font-size: 2.2rem; }
 body.modulo-autenticacion .auth-wrap > p { color: var(--ref-ink); line-height: 1.4; }
 body.modulo-autenticacion .auth-wrap .input { min-height: 54px; border-radius: 14px; background: #e5eefc; }
+body.modulo-autenticacion .auth-wrap .form-group label { color: var(--ref-blue); }
 body.modulo-autenticacion .auth-reference__options { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 8px 0 20px; color: var(--ref-ink); font-size: .85rem; }
 body.modulo-autenticacion .auth-reference__options label { display: inline-flex; align-items: center; gap: 8px; }
 body.modulo-autenticacion .auth-reference__options input { width: 20px; height: 20px; accent-color: var(--ref-blue); }

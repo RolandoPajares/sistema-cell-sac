@@ -13,7 +13,6 @@
  <div class="auth-wrap panel">
     <div class="auth-brand"><img src="{{ asset('assets/cell-legacy/img/marca/logo.jpeg') }}" alt="Technology Cell"></div>
     <h2>Iniciar sesión</h2>
-    <p>Accede a tu cuenta y gestiona tus compras, comparaciones y recomendaciones.</p>
     @if($errors->any())<div class="alert alert-error">{{ $errors->first() }}</div>@endif
     <form method="post" action="{{ route('login.store') }}">
         @csrf
