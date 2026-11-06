@@ -7,6 +7,7 @@
 .tc-aa__header { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 12px; }
 .tc-aa__heading { display: flex; align-items: center; gap: 14px; }
 .tc-aa__heading-icon { display: grid; flex: 0 0 55px; width: 55px; height: 55px; place-items: center; border-radius: 12px; color: #0875ed; background: #dbeaff; font-size: 1.65rem; }
+.tc-aa__eyebrow { display: inline-flex; margin-bottom: 5px; padding: 4px 9px; border-radius: 999px; color: #0866ce; background: #dceeff; font-size: .68rem; font-weight: 800; }
 .tc-aa__heading h1 { margin: 0 0 3px; color: #0d285b; font-size: clamp(1.45rem, 2vw, 2rem); line-height: 1.1; }
 .tc-aa__heading p { margin: 0; color: #58729a; font-size: .92rem; }
 .tc-aa__actions { display: flex; flex-wrap: wrap; gap: 9px; }
@@ -54,6 +55,9 @@
 .tc-aa__row-actions button:hover { background: #eaf5ff; }
 .tc-aa__empty { margin: 15px 0 0; color: #58729a; }
 .tc-aa__bottom { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; }
+.tc-aa--globales .tc-aa__notice { margin-top: 2px; }
+.tc-aa--globales .tc-aa__records { box-shadow: 0 9px 24px #1050a30d; }
+.tc-aa--globales .tc-aa__metric strong { letter-spacing: -.02em; }
 .tc-aa__chart { display: flex; align-items: end; justify-content: space-around; gap: 14px; min-height: 205px; padding: 18px 15px 0; border-bottom: 1px solid #e3ecf8; }
 .tc-aa__bar { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: end; height: 185px; max-width: 95px; gap: 3px; }
 .tc-aa__bar strong { color: #1b548b; font-size: .7rem; }
