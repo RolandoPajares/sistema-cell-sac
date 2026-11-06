@@ -3,7 +3,6 @@
 use App\Http\Controllers\Auth\AutenticacionController;
 use App\Http\Controllers\Cuenta\CuentaAdministracionController;
 use App\Http\Controllers\Cuenta\CuentaController;
-use App\Http\Controllers\Gestion\Auditoria\AuditoriaController;
 use App\Http\Controllers\Gestion\CajaController;
 use App\Http\Controllers\Gestion\Campanias\CampaniaController;
 use App\Http\Controllers\Gestion\Campanias\PublicidadInteligenteController;
@@ -208,7 +207,7 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::post('/usuarios', [GestionUsuariosController::class, 'store'])->name('users.store');
     Route::put('/usuarios/{user}', [GestionUsuariosController::class, 'update'])->whereNumber('user')->name('users.update');
     Route::patch('/usuarios/{user}/estado', [GestionUsuariosController::class, 'updateStatus'])->whereNumber('user')->name('users.activate');
-    Route::get('/auditoria', [AuditoriaController::class, 'index'])->name('audit');
+    Route::get('/auditoria', [PanelAnalisisAuditoriaController::class, 'operaciones'])->name('audit');
     Route::get('/analisis/diseno/auditoria-operaciones', [PanelAnalisisAuditoriaController::class, 'operaciones'])
         ->middleware('role:administrador')->name('audit.preview.operations');
 
@@ -501,7 +500,7 @@ Route::prefix('admin')->middleware(['auth', 'cuenta.activa', 'sesion.usuario', '
     Route::get('/inventory', [InventarioController::class, 'index'])->name('inventory');
     Route::post('/inventory', [InventarioController::class, 'adjustLegacy'])->name('inventory.store');
     Route::get('/reports', [ReporteController::class, 'index'])->name('reports');
-    Route::get('/audit', [AuditoriaController::class, 'index'])->name('audit');
+    Route::get('/audit', [PanelAnalisisAuditoriaController::class, 'operaciones'])->name('audit');
 });
 
 Route::middleware(['auth', 'cuenta.activa', 'sesion.usuario'])->group(function (): void {
