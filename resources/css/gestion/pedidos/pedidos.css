@@ -1339,3 +1339,7 @@
 .pedidos-create-step strong { color: #19396d; font-size: .75rem; }
 .pedidos-create-step small { color: #7990b2; font-size: .66rem; }
 .pedidos-create-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 20px 20px; border-top: 1px solid #e5edf5; }
+.pedidos-export-menu { position: relative; }
+.pedidos-export-options { position: absolute; z-index: 20; top: calc(100% + 6px); left: 0; min-width: 170px; padding: 6px; border: 1px solid #d6e6f3; border-radius: 10px; background: #fff; box-shadow: 0 14px 30px rgba(23, 61, 110, .16); }
+.pedidos-export-options a { display: block; padding: 9px 10px; border-radius: 7px; color: #254574; font-size: .7rem; text-decoration: none; white-space: nowrap; }
+.pedidos-export-options a:hover { color: #0874ed; background: #edf6ff; }

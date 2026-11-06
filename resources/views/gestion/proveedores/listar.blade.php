@@ -262,6 +262,12 @@
     <script>
         (() => {
             const page = document.querySelector('[data-proveedores-page]');
+            const openDialog = (dialog) => {
+                if (dialog && !dialog.open && typeof dialog.showModal === 'function') dialog.showModal();
+            };
+            page.querySelectorAll('[data-open-supplier-create]').forEach((button) => {
+                button.addEventListener('click', () => openDialog(document.querySelector('#nuevo-proveedor')));
+            });
             page.querySelectorAll('[data-open-supplier-edit]').forEach((button) => {
                 button.addEventListener('click', () => openDialog(document.querySelector(`#editar-proveedor-${button.dataset.openSupplierEdit}`)));
             });

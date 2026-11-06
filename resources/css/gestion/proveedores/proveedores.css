@@ -11,6 +11,10 @@
 .proveedores-hero { position: relative; }
 .proveedores-hero-create { position: absolute; top: 0; right: 0; }
 @media (max-width: 700px) { .proveedores-hero-create { position: static; margin-top: 12px; } }
+.proveedores-export-menu { position: relative; }
+.proveedores-export-options { position: absolute; z-index: 20; top: calc(100% + 6px); right: 0; min-width: 165px; padding: 6px; border: 1px solid #d6e6f3; border-radius: 10px; background: #fff; box-shadow: 0 14px 30px rgba(23, 61, 110, .16); }
+.proveedores-export-options a { display: block; padding: 9px 10px; border-radius: 7px; color: #254574; font-size: .7rem; text-decoration: none; white-space: nowrap; }
+.proveedores-export-options a:hover { color: #0874ed; background: #edf6ff; }
 
 .proveedores-page,
 .proveedores-page *,
