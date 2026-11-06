@@ -24,7 +24,7 @@ it('seeds the seven RBAC roles without inventing organization data', function ()
         ->and(DB::table('empresas')->count())->toBe(0)
         ->and(DB::table('sedes')->count())->toBe(0)
         ->and(DB::table('almacenes')->count())->toBe(0)
-        ->and(DB::table('permisos')->count())->toBe(183)
+        ->and(DB::table('permisos')->count())->toBe(184)
         ->and(DB::table('pantallas')->whereIn('codigo', ['admin.payments', 'admin.cash_registers', 'admin.refunds'])
             ->where('habilitada', true)->count())->toBe(3)
         ->and(DB::table('pantallas')->where('codigo', 'admin.cash_registers')->value('ruta'))
@@ -345,15 +345,12 @@ it('updates menu role assignments using the Spanish pivot timestamp from the SQL
     expect(DB::table('roles_menus')->where('menu_id', $menuId)->where('rol_id', $rolId)->value('creado_en'))->not->toBeNull();
 });
 
-it('keeps global session management inaccessible while its RBAC screen is disabled', function (): void {
+it('keeps the security catalog limited to the six configured interfaces', function (): void {
     $administrador = SpanishAccessFixture::user('administrador');
     $this->seed(RbacInicialSeeder::class);
 
-    $this->actingAs($administrador)
-        ->get(route('management.security_sessions'))
-        ->assertForbidden();
-
-    expect(DB::table('pantallas')->where('codigo', 'admin.sessions')->value('habilitada'))->toBe(0);
+    expect(DB::table('pantallas')->whereIn('codigo', ['admin.delegation', 'admin.sessions', 'admin.account_status'])->count())->toBe(0)
+        ->and(DB::table('pantallas')->where('codigo', 'admin.permissions_matrix')->value('habilitada'))->toBe(1);
 });
 
 it('abre las gestiones de seguridad reales y elimina los resultados simulados de sus alias', function (): void {
@@ -363,6 +360,7 @@ it('abre las gestiones de seguridad reales y elimina los resultados simulados de
     foreach ([
         'management.users',
         'management.roles_permissions',
+        'management.permissions_matrix',
         'management.user_assignments',
         'management.menus',
         'management.modules',
@@ -370,38 +368,9 @@ it('abre las gestiones de seguridad reales y elimina los resultados simulados de
         $this->actingAs($administrador)->get(route($rutaOperativa))->assertOk();
     }
 
-    $redireccionesOperativas = [
-        'management.roles_permissions.preview.users' => ['management.users', []],
-        'management.roles_permissions.preview.roles' => ['management.roles_permissions', []],
-        'management.roles_permissions.preview.matrix' => ['management.roles_permissions', []],
-        'management.roles_permissions.preview.assignments' => ['management.user_assignments', []],
-        'management.roles_permissions.preview.site_assignments' => ['management.user_assignments', []],
-        'management.roles_permissions.preview.menus' => ['management.menus', []],
-        'management.roles_permissions.preview.modules' => ['management.modules', []],
-        'management.roles_permissions.preview.blocks' => ['management.users', ['estado' => 'inactivo']],
-    ];
-
-    foreach ($redireccionesOperativas as $rutaAnterior => [$rutaOperativa, $parametros]) {
-        $this->actingAs($administrador)
-            ->get(route($rutaAnterior))
-            ->assertRedirect(route($rutaOperativa, $parametros));
-    }
-
-    $this->actingAs($administrador)
-        ->get(route('management.roles_permissions.preview.policies'))
-        ->assertOk()
-        ->assertSee('El esquema actual no contiene una entidad')
-        ->assertDontSee('Compras Demo');
-
-    $this->actingAs($administrador)
-        ->get(route('management.roles_permissions.preview.sessions'))
-        ->assertOk()
-        ->assertSee('El catálogo RBAC mantiene deshabilitado el submenú global')
-        ->assertDontSee('Administrador Demo');
-
     $usuarioMarketing = SpanishAccessFixture::user('marketing');
     $this->actingAs($usuarioMarketing)
-        ->get(route('management.roles_permissions.preview.users'))
+        ->get(route('management.users'))
         ->assertForbidden();
 });
 

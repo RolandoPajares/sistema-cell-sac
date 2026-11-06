@@ -22,21 +22,37 @@ class RolesPermisosController extends Controller
     {
         abort_unless($autorizacion->allowsGlobal(request()->user(), 'gestion.seguridad.consultar'), 403);
         $ready = $autorizacion->schemaAvailable();
+        $search = trim(request()->string('buscar')->toString());
+        $status = request()->string('estado')->toString();
         $roles = $ready
-            ? Rol::query()->with(['permisos' => fn ($query) => $query->orderBy('modulo_id')->orderBy('accion')])->withCount('usuarios')->orderBy('es_sistema', 'desc')->orderBy('nombre')->get()
-            : collect();
-        $modules = $ready ? DB::table('modulos')->where('habilitado', true)->orderBy('orden')->get() : collect();
-        $permissions = $ready
-            ? DB::table('permisos')->join('modulos', 'modulos.id', '=', 'permisos.modulo_id')
-                ->where('permisos.activo', true)
-                ->orderBy('modulos.orden')->orderBy('permisos.accion')->orderBy('permisos.nombre')
-                ->leftJoin('pantallas', 'pantallas.id', '=', 'permisos.pantalla_id')
-                ->get(['permisos.id', 'permisos.codigo', 'permisos.nombre', 'permisos.accion', 'permisos.pantalla_id', 'pantallas.nombre as pantalla_nombre', 'modulos.nombre as modulo_nombre', 'modulos.codigo as modulo_codigo'])
-                ->groupBy('modulo_codigo')
+            ? Rol::query()->withCount(['usuarios', 'permisos'])->when($search !== '', fn ($query) => $query->where(fn ($nested) => $nested->where('nombre', 'like', '%'.$search.'%')->orWhere('descripcion', 'like', '%'.$search.'%')->orWhere('codigo', 'like', '%'.$search.'%')))->when(in_array($status, ['activo', 'inactivo'], true), fn ($query) => $query->where('activo', $status === 'activo'))->orderBy('es_sistema', 'desc')->orderBy('nombre')->get()
             : collect();
         $permissionCount = $ready ? DB::table('permisos')->where('activo', true)->count() : 0;
 
-        return view('gestion.roles-permisos.listar', compact('ready', 'roles', 'modules', 'permissions', 'permissionCount'));
+        return view('gestion.roles-permisos.listar', compact('ready', 'roles', 'permissionCount', 'search', 'status'));
+    }
+
+    public function matrix(ServicioAutorizacion $autorizacion): View
+    {
+        abort_unless($autorizacion->allowsGlobal(request()->user(), 'gestion.seguridad.consultar'), 403);
+        $ready = $autorizacion->schemaAvailable();
+        $roles = $ready ? Rol::query()->where('activo', true)->with(['permisos' => fn ($query) => $query->orderBy('modulo_id')->orderBy('accion')])->orderBy('nombre')->get() : collect();
+        $selectedRoleId = (int) request()->integer('rol', (int) $roles->first()?->getKey());
+        $selectedRole = $roles->firstWhere('id', $selectedRoleId) ?: $roles->first();
+        $permissions = $ready ? $this->permissionCatalog() : collect();
+        $permissionCount = $ready ? DB::table('permisos')->where('activo', true)->count() : 0;
+
+        return view('gestion.roles-permisos.matriz', compact('ready', 'roles', 'selectedRole', 'permissions', 'permissionCount'));
+    }
+
+    private function permissionCatalog()
+    {
+        return DB::table('permisos')->join('modulos', 'modulos.id', '=', 'permisos.modulo_id')
+            ->leftJoin('pantallas', 'pantallas.id', '=', 'permisos.pantalla_id')
+            ->where('permisos.activo', true)
+            ->orderBy('modulos.orden')->orderBy('permisos.accion')->orderBy('permisos.nombre')
+            ->get(['permisos.id', 'permisos.codigo', 'permisos.nombre', 'permisos.accion', 'permisos.pantalla_id', 'pantallas.nombre as pantalla_nombre', 'modulos.nombre as modulo_nombre', 'modulos.codigo as modulo_codigo'])
+            ->groupBy('modulo_codigo');
     }
 
     public function store(GuardarRolRequest $request, RegistradorAuditoria $auditoria): RedirectResponse

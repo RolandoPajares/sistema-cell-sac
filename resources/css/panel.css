@@ -27,6 +27,7 @@
 @import './gestion/usuarios/usuarios.css';
 @import './modulos/seguridad-delegacion.css';
 @import './modulos/seguridad-delegacion-extra.css';
+@import './modulos/seguridad-rbac-overrides.css';
 @import './gestion/campanias/campanias.css';
 @import './gestion/campanias/publicidad-inteligente.css';
 @import './cuenta/perfil.css';
