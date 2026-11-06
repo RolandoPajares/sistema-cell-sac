@@ -2,7 +2,7 @@
     <nav class="tc-aa__breadcrumb" aria-label="Ruta de navegación"><i class="bi bi-house"></i><span>Análisis y Auditoría</span><i class="bi bi-chevron-right"></i><strong>Auditoría de operaciones</strong></nav>
     <header class="tc-audit__header">
         <div class="tc-aa__heading"><span class="tc-aa__heading-icon"><i class="bi bi-shield-check"></i></span><div><h1>Auditoría de operaciones</h1><p>Consulta y supervisa todas las acciones realizadas en el sistema.</p></div></div>
-        <div class="tc-aa__actions"><a class="tc-aa__button" href="{{ request()->fullUrl() }}"><i class="bi bi-arrow-clockwise"></i> Actualizar</a></div>
+        <div class="tc-aa__actions"><a class="tc-aa__button" href="{{ request()->fullUrl() }}"><i class="bi bi-arrow-clockwise"></i> Actualizar</a>@if ($puedeExportarAuditoria)<details class="tc-aa__export-menu"><summary class="tc-aa__button tc-aa__button--primary"><i class="bi bi-download"></i> Exportar auditoría <i class="bi bi-chevron-down"></i></summary><div class="tc-aa__export-options"><a href="{{ route('management.reports.preview.export', ['tipo' => 'operaciones', 'format' => 'csv'] + request()->query()) }}">CSV (.csv)</a><a href="{{ route('management.reports.preview.export', ['tipo' => 'operaciones', 'format' => 'excel'] + request()->query()) }}">Excel (.xlsx)</a><a href="{{ route('management.reports.preview.export', ['tipo' => 'operaciones', 'format' => 'pdf'] + request()->query()) }}">PDF (.pdf)</a></div></details>@endif</div>
     </header>
 
     <div class="tc-aa__notice"><i class="bi bi-database-check"></i><strong>Registro append-only</strong><span>Los eventos se consultan desde MariaDB y no se pueden editar ni eliminar desde esta pantalla.</span></div>

@@ -71,14 +71,15 @@ final class PanelAnalisisAuditoriaController extends Controller
             'tipo' => $tipo,
             'filtros' => $filtros,
             'puedeExportar' => $tipo === 'globales' && $autorizacion->allows($usuario, 'gestion.reportes.exportar'),
+            'puedeExportarAuditoria' => $tipo === 'operaciones' && $autorizacion->allows($usuario, 'gestion.auditoria.exportar'),
         ]);
     }
 
     public function exportar(Request $request, string $tipo, ServicioAutorizacion $autorizacion, ExportadorTabular $exportador, RegistradorAuditoria $auditoria, string $format = 'csv'): Response|StreamedResponse
     {
-        abort_unless($tipo === 'globales', 404);
+        abort_unless(in_array($tipo, ['globales', 'operaciones'], true), 404);
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
-        $autorizacion->assertAllowed($request->user(), 'gestion.reportes.exportar');
+        $autorizacion->assertAllowed($request->user(), $tipo === 'globales' ? 'gestion.reportes.exportar' : 'gestion.auditoria.exportar');
         $filtros = $request->validate([
             'desde' => ['nullable', 'date'],
             'hasta' => ['nullable', 'date', 'after_or_equal:desde'],
@@ -91,6 +92,7 @@ final class PanelAnalisisAuditoriaController extends Controller
             'rol_codigo' => ['nullable', 'string', 'max:40'],
             'estado' => ['nullable', 'string', 'max:30'],
             'reporte' => ['nullable', 'in:ventas,pedidos,clientes,productos,inventario,compras,campanas'],
+            'buscar' => ['nullable', 'string', 'max:120'],
         ]);
 
         if ($tipo === 'globales' && ($filtros['reporte'] ?? 'ventas') !== 'ventas') {

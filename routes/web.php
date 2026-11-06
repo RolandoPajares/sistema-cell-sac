@@ -348,7 +348,7 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::get('/analisis/diseno/reportes-globales', [PanelAnalisisAuditoriaController::class, 'globales'])
         ->middleware('role:administrador')->name('reports.preview.global');
     Route::get('/analisis/diseno/{tipo}/exportar/{format?}', [PanelAnalisisAuditoriaController::class, 'exportar'])
-        ->where('tipo', 'globales')
+        ->whereIn('tipo', ['globales', 'operaciones'])
         ->whereIn('format', ['pdf', 'excel', 'csv'])
         ->middleware('role:administrador')->name('reports.preview.export');
     Route::get('/reportes/exportar/{format?}', [ReporteController::class, 'export'])

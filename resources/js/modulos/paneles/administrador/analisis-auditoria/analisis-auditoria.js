@@ -75,4 +75,6 @@ document.querySelectorAll('[data-auditoria-operaciones]').forEach((panel) => {
     panel.querySelectorAll('[data-audit-detail]').forEach((boton) => {
         boton.addEventListener('click', () => renderizar(filas.get(String(boton.dataset.auditDetail))));
     });
+
+    renderizar(configuracion[0]);
 });
