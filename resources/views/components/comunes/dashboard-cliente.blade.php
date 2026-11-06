@@ -56,63 +56,6 @@
                 </section>
             </div>
 
-            <div class="cuenta-dos-columnas">
-                <form method="post" action="{{ route('account.profile') }}" class="cuenta-panel">
-                    @csrf
-                    @method('PUT')
-                    <div class="cuenta-panel-titulo"><h2>Mis datos</h2></div>
-                    <label>
-                        Nombre
-                        <input
-                            name="nombre"
-                            value="{{ old('nombre', auth()->user()->nombre) }}"
-                            required
-                            maxlength="120"
-                        >
-                    </label>
-
-                    <label>
-                        Correo
-                        <input
-                            type="email"
-                            name="correo"
-                            value="{{ old('correo', auth()->user()->correo) }}"
-                            required
-                            maxlength="160"
-                        >
-                    </label>
-                    <button class="btn btn-primary" type="submit">Guardar datos</button>
-                </form>
-                <form method="post" action="{{ route('account.password') }}" class="cuenta-panel">
-                    @csrf
-                    @method('PUT')
-                    <div class="cuenta-panel-titulo"><h2>Seguridad</h2></div>
-                    <label>
-                        Contraseña actual
-                        <input type="password" name="password_actual" required>
-                    </label>
-
-                    <label>
-                        Nueva contraseña
-                        <input
-                            type="password"
-                            name="password"
-                            required
-                            minlength="10"
-                        >
-                    </label>
-
-                    <label>
-                        Confirmar contraseña
-                        <input
-                            type="password"
-                            name="password_confirmation"
-                            required
-                        >
-                    </label>
-                    <button class="btn btn-primary" type="submit">Cambiar contraseña</button>
-                </form>
-            </div>
         </main>
     </div>
 </section>

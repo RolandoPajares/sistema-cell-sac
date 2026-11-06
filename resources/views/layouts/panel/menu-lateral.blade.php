@@ -3,7 +3,7 @@
     $isAdministrator = $currentUser?->rol === 'administrador'
         || ($currentUser?->isRole('administrador') ?? false);
     $brandRoute = $isAdministrator ? 'management.dashboard' : 'dashboard';
-    $accountRoute = $isAdministrator ? 'management.account' : 'dashboard';
+    $accountRoute = $isAdministrator ? 'management.account' : 'account.profile.show';
     $menuViews = [
         'administrador' => 'paneles.administrador.menu',
         'compras_logistica' => 'paneles.compras-logistica.menu',
@@ -43,7 +43,7 @@
     <div class="admin-sidebar-footer">
         <a class="{{ request()->routeIs($accountRoute) ? 'is-active' : '' }}" href="{{ route($accountRoute) }}" title="{{ $isAdministrator ? 'Configuración' : 'Mi cuenta' }}">
             <i class="bi bi-gear" aria-hidden="true"></i>
-            <span>{{ $isAdministrator ? 'Configuración' : 'Mi cuenta' }}</span>
+            <span>{{ $isAdministrator ? 'Configuración' : 'Mi perfil' }}</span>
         </a>
         <form method="post" action="{{ route('logout') }}">
             @csrf
