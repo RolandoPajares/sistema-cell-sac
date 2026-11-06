@@ -83,10 +83,18 @@
             </section>
 
             <div class="pedidos-toolbar">
-                <button class="pedidos-primary-button" type="button" disabled title="Los pedidos se crean desde la tienda"><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo pedido</button>
-                <details class="pedidos-export-menu"><summary class="pedidos-toolbar-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar <i class="bi bi-chevron-down" aria-hidden="true"></i></summary><div class="pedidos-export-options"><a href="{{ route('management.orders.export', ['format' => 'excel'] + request()->query()) }}">Excel (.xlsx)</a><a href="{{ route('management.orders.export', ['format' => 'pdf'] + request()->query()) }}">PDF (.pdf)</a><a href="{{ route('management.orders.export', ['format' => 'csv'] + request()->query()) }}">CSV (.csv)</a></div></details>
+                <button class="pedidos-primary-button" type="button" data-admin-dialog-open="nuevo-pedido" title="Crear un pedido desde la tienda"><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo pedido</button>
+                <details class="pedidos-export-menu"><summary class="pedidos-toolbar-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar <i class="bi bi-chevron-down" aria-hidden="true"></i></summary><div class="pedidos-export-options"><a href="{{ route('management.orders.export', ['format' => 'pdf'] + request()->query()) }}"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i><span><strong>Exportar PDF</strong><small>Documento imprimible</small></span></a><a href="{{ route('management.orders.export', ['format' => 'excel'] + request()->query()) }}"><i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i><span><strong>Exportar Excel</strong><small>Archivo compatible .xlsx</small></span></a><a href="{{ route('management.orders.export', ['format' => 'csv'] + request()->query()) }}"><i class="bi bi-filetype-csv" aria-hidden="true"></i><span><strong>Exportar CSV</strong><small>Datos delimitados</small></span></a></div></details>
                 <button class="pedidos-toolbar-button" type="button" data-refresh-orders><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Actualizar</button>
             </div>
+
+            <dialog class="admin-dialog pedidos-create-dialog" id="nuevo-pedido" aria-labelledby="nuevo-pedido-title">
+                <div class="pedidos-create-card">
+                    <header class="pedidos-create-header"><span class="pedidos-create-icon"><i class="bi bi-cart-plus" aria-hidden="true"></i></span><div><small>Operaciones comerciales</small><h2 id="nuevo-pedido-title">Nuevo pedido</h2><p>Selecciona productos y completa el pedido en la tienda.</p></div><button type="button" class="admin-dialog-close" data-admin-dialog-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
+                    <div class="pedidos-create-body"><div class="pedidos-create-step"><b>1</b><span><strong>Selecciona los productos</strong><small>Consulta el catálogo y agrega los artículos disponibles.</small></span></div><div class="pedidos-create-step"><b>2</b><span><strong>Completa los datos del pedido</strong><small>El cliente, cantidades y total se validan antes de guardar.</small></span></div><div class="pedidos-create-step"><b>3</b><span><strong>Confirma la compra</strong><small>El pedido se registra mediante el flujo real de la tienda.</small></span></div></div>
+                    <footer class="pedidos-create-footer"><button type="button" class="pedidos-toolbar-button" data-admin-dialog-close>Cancelar</button><a class="pedidos-primary-button" href="{{ route('catalog.index') }}"><i class="bi bi-shop" aria-hidden="true"></i> Abrir tienda</a></footer>
+                </div>
+            </dialog>
 
             <form class="pedidos-filters" method="get" action="{{ route('management.orders') }}">
                 <label class="pedidos-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar pedido o cliente</span><input type="search" name="buscar" value="{{ $filters['buscar'] ?? '' }}" placeholder="Buscar pedido o cliente..."></label>

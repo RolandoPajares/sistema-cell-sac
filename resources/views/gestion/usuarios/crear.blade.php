@@ -1,13 +1,24 @@
 <form method="POST" action="{{ route('management.users.store') }}" class="form-card usuarios-form" data-user-form>
     @csrf
 
+    @if ($errors->any())
+        <div class="admin-alert admin-alert--error usuarios-form-errors" role="alert">
+            <strong>No se pudo registrar la cuenta.</strong>
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <section class="usuarios-form-section">
         <header class="usuarios-form-section-header"><i class="bi bi-person-lock" aria-hidden="true"></i><h3>Datos de acceso</h3><small>Los campos con <b>*</b> son obligatorios</small></header>
         <div class="usuarios-form-grid">
             <label><span>Nombre completo <b>*</b></span><input type="text" name="nombre" required maxlength="120" value="{{ old('nombre') }}" placeholder="Ej. Juan Pérez García" autocomplete="name"></label>
             <label><span>Correo electrónico <b>*</b></span><input type="email" name="correo" required maxlength="160" value="{{ old('correo') }}" placeholder="usuario@empresa.com" autocomplete="email"></label>
             <label><span>Rol del usuario <b>*</b></span><select name="rol" required data-user-role><option value="">Seleccionar rol configurable</option>@foreach ($roles as $role)<option value="{{ $role }}" data-scope="{{ $roleScopes[$role] ?? '' }}" @selected(old('rol') === $role)>{{ $roleLabels[$role] ?? str_replace('_', ' ', $role) }}</option>@endforeach</select></label>
-            <label data-user-site-field hidden><span>Sede autorizada <b>*</b></span><select name="sede_id" data-user-site><option value="">Seleccionar sede</option>@foreach ($sites as $site)<option value="{{ $site->id }}" @selected((string) old('sede_id') === (string) $site->id)>{{ $site->nombre }}</option>@endforeach</select><small>Obligatoria para roles con alcance por sede.</small></label>
+            <div class="usuarios-form-note" data-user-site-field hidden><i class="bi bi-geo-alt" aria-hidden="true"></i> La sede interna autorizada se asigna automáticamente según el contexto de la empresa.</div>
             <label><span>Estado de la cuenta <b>*</b></span><select disabled><option>● Activo</option></select></label>
             <label><span>Contraseña temporal <b>*</b></span><input type="password" name="password" minlength="12" required autocomplete="new-password" placeholder="Mínimo 12 caracteres"><small>Debe contener letras y números.</small></label>
             <label><span>Confirmar contraseña <b>*</b></span><input type="password" name="password_confirmation" minlength="12" required autocomplete="new-password" placeholder="Repite la contraseña"><small>Las contraseñas deben coincidir.</small></label>

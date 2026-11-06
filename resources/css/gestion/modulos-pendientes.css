@@ -780,6 +780,16 @@
 .gestion-operacion-pagination button { background: #fff; border: 1px solid #d8e6f5; border-radius: .45rem; color: #4c76aa; cursor: pointer; font: inherit; height: 1.8rem; width: 1.8rem; }
 .gestion-operacion-pagination button.is-active { background: var(--gestion-operacion-blue); border-color: var(--gestion-operacion-blue); color: #fff; }
 
+.gestion-operacion-actions { align-items: center; display: flex; flex-wrap: wrap; gap: .6rem; justify-content: flex-end; }
+.gestion-operacion-actions .gestion-pendiente-primary,
+.gestion-operacion-actions .gestion-pendiente-secondary { min-height: 2.7rem; }
+.gestion-operacion-filter-button { box-shadow: 0 7px 16px rgba(8, 117, 237, .18); transition: transform .15s ease, box-shadow .15s ease; }
+.gestion-operacion-filter-button:hover { box-shadow: 0 10px 20px rgba(8, 117, 237, .25); transform: translateY(-1px); }
+@media (max-width: 760px) {
+    .gestion-operacion-heading-row { align-items: stretch; flex-direction: column; }
+    .gestion-operacion-actions { justify-content: flex-start; }
+}
+
 .gestion-operacion-bottom-grid { display: grid; gap: .75rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .gestion-operacion-summary-card { background: #fff; border: 1px solid var(--gestion-operacion-border); border-radius: .75rem; box-shadow: 0 .35rem 1rem rgba(29, 84, 145, .05); min-height: 8.5rem; padding: .95rem 1rem; }
 .gestion-operacion-summary-card header { align-items: flex-start; display: flex; gap: .5rem; justify-content: space-between; }

@@ -35,7 +35,7 @@ class DevolucionGarantiaController extends Controller
             'gestion.devoluciones.consultar',
         ), $filters);
         $returns = (clone $returnsQuery)
-            ->with(['customer:id,nombre_contacto,razon_social', 'product:id,nombre', 'order:id'])
+            ->with(['customer:id,nombre_contacto,razon_social', 'product:id,nombre', 'order:id', 'sale:id,codigo'])
             ->when($filters['orden'] === 'antiguos', fn (Builder $query): Builder => $query->orderBy('fecha_solicitud')->orderBy('id'))
             ->when($filters['orden'] !== 'antiguos', fn (Builder $query): Builder => $query->latest('fecha_solicitud')->latest('id'))
             ->paginate(8)
@@ -169,13 +169,14 @@ class DevolucionGarantiaController extends Controller
             $request->user(),
             'gestion.devoluciones.exportar',
         ), $this->filters($request))
-            ->with(['customer:id,nombre_contacto,razon_social', 'product:id,nombre'])
+            ->with(['customer:id,nombre_contacto,razon_social', 'product:id,nombre', 'sale:id,codigo'])
             ->when($this->filters($request)['orden'] === 'antiguos', fn (Builder $query): Builder => $query->orderBy('fecha_solicitud')->orderBy('id'))
             ->when($this->filters($request)['orden'] !== 'antiguos', fn (Builder $query): Builder => $query->latest('fecha_solicitud')->latest('id'))
             ->get();
         $rows = $returns->map(static fn (DevolucionGarantia $returnRequest): array => [
             $returnRequest->codigo,
             $returnRequest->customer?->nombre_contacto ?: $returnRequest->customer?->razon_social,
+            $returnRequest->sale?->codigo,
             $returnRequest->product?->nombre,
             $returnRequest->tipo,
             $returnRequest->estado,
@@ -183,9 +184,9 @@ class DevolucionGarantiaController extends Controller
             $returnRequest->fecha_limite?->format('d/m/Y'),
         ])->all();
         $response = $exporter->download($format, 'devoluciones-garantias',
-            ['Código', 'Cliente', 'Producto', 'Tipo', 'Estado', 'Fecha de solicitud', 'Fecha límite'],
+            ['Código', 'Cliente', 'Venta', 'Producto', 'Tipo', 'Estado', 'Fecha de solicitud', 'Fecha límite'],
             $rows,
-            ['title' => 'REPORTE DE DEVOLUCIONES Y GARANTÍAS', 'module' => 'Operaciones Comerciales', 'report_name' => 'Devoluciones y garantías', 'generated_by' => (string) $request->user()->nombre, 'indicators' => [['label' => 'Solicitudes incluidas', 'value' => count($rows)]], 'column_types' => ['text', 'text', 'text', 'text', 'text', 'date', 'date']]
+            ['title' => 'REPORTE DE DEVOLUCIONES Y GARANTÍAS', 'module' => 'Operaciones Comerciales', 'report_name' => 'Devoluciones y garantías', 'generated_by' => (string) $request->user()->nombre, 'indicators' => [['label' => 'Solicitudes incluidas', 'value' => count($rows)]], 'column_types' => ['text', 'text', 'text', 'text', 'text', 'text', 'date', 'date']]
         );
         $audit->record($request->user()->getKey(), 'exportar', 'devoluciones_garantias', null, null, ['formato' => $format, 'cantidad' => count($rows)], $request->ip());
 
@@ -275,6 +276,8 @@ class DevolucionGarantiaController extends Controller
             'cliente_nombre' => $returnRequest->customer?->nombre_contacto ?: $returnRequest->customer?->razon_social ?: '—',
             'producto_id' => $returnRequest->producto_id,
             'producto_nombre' => $returnRequest->product?->nombre ?: '—',
+            'venta_id' => $returnRequest->venta_id,
+            'venta_codigo' => $returnRequest->sale?->codigo ?: '—',
             'tipo' => $returnRequest->tipo,
             'motivo' => $returnRequest->motivo,
             'estado' => $returnRequest->estado,
@@ -290,6 +293,7 @@ class DevolucionGarantiaController extends Controller
             'cells' => [
                 $returnRequest->codigo,
                 $returnRequest->customer?->nombre_contacto ?: $returnRequest->customer?->razon_social ?: '—',
+                $returnRequest->sale?->codigo ?: '—',
                 $returnRequest->product?->nombre ?: '—',
                 ['value' => $returnRequest->tipo, 'tone' => 'blue'],
                 Str::limit($returnRequest->motivo, 36),

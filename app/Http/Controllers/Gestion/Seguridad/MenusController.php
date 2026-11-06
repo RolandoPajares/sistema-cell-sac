@@ -39,8 +39,8 @@ class MenusController extends Controller
             'orden' => ['required', 'integer', 'min:0', 'max:10000'],
             'habilitado' => ['required', 'boolean'],
         ]);
-        if ($validated['habilitado'] && $element->pantalla?->ruta && ! $this->isActionableRoute($element->pantalla->ruta)) {
-            abort(422, 'La opción solo puede habilitarse cuando su pantalla tiene una ruta funcional.');
+        if ($validated['habilitado']) {
+            abort_unless($element->pantalla !== null && $element->pantalla->habilitada && is_string($element->pantalla->ruta) && $this->isActionableRoute($element->pantalla->ruta), 422, 'La opción solo puede habilitarse cuando su pantalla existe, está activa y tiene una ruta funcional.');
         }
 
         $before = $element->only(['orden', 'habilitado']);
@@ -103,7 +103,9 @@ class MenusController extends Controller
         $modules = $ready
             ? DB::table('modulos')->orderBy('orden')->orderBy('nombre')->get()
                 ->map(function ($module): object {
-                    $module->screens = DB::table('pantallas')->where('modulo_id', $module->id)->orderBy('nombre')->get();
+                    $module->screens = DB::table('pantallas')->where('modulo_id', $module->id)->orderBy('nombre')->get()->each(function (object $screen): void {
+                        $screen->ruta_funcional = is_string($screen->ruta) && $this->isActionableRoute($screen->ruta);
+                    });
 
                     return $module;
                 })
@@ -155,6 +157,7 @@ class MenusController extends Controller
     private function isIndispensableScreen(Pantalla $screen): bool
     {
         return in_array($screen->codigo, [
+            'admin.dashboard',
             'admin.users',
             'admin.roles',
             'admin.user_assignments',

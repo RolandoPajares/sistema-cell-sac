@@ -1,44 +1,30 @@
 @extends('layouts.administracion')
 
-@section('title', 'Asignación de roles')
-@section('content')
-    <section class="admin-page">
-        <header class="admin-page-head"><div><span class="eyebrow">Seguridad y delegación</span><h1>Asignaciones de roles</h1><p>Asigna acceso global o por sede sin sustituir las asignaciones existentes.</p></div></header>
+@section('title', 'Asignación de roles a usuarios')
+@section('body_class', 'modulo-seguridad-rbac')
 
-        @unless ($ready)
-            <div class="admin-alert admin-alert--error" role="status">Las tablas RBAC aún no existen en esta base. Aplica y revisa la migración aditiva antes de administrar asignaciones.</div>
-        @else
-            <div class="form-card">
-                <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Usuario</th><th>Asignaciones actuales</th><th>Nueva asignación</th></tr></thead><tbody>
-                    @forelse ($users as $user)
-                        <tr>
-                            <td><strong>{{ $user->nombre }}</strong><br><small>{{ $user->correo }}</small></td>
-                            <td>
-                                @foreach ($user->roles as $role)
-                                    <div class="role-assignment-row"><span>{{ $role->nombre }} · Empresa</span>@if ($role->pivot->activo)<form method="post" action="{{ route('management.user_assignments.revoke', [$user->id, $role->id]) }}" data-confirm="¿Revocar este rol global?">@csrf @method('DELETE')<button class="btn btn-outline-danger btn-sm" type="submit">Revocar</button></form>@else<span>Revocado</span>@endif</div>
-                                @endforeach
-                                @foreach ($user->rolesPorSede as $role)
-                                    <div class="role-assignment-row"><span>{{ $role->nombre }} · Sede #{{ $role->pivot->sede_id }}</span>@if ($role->pivot->activo)<form method="post" action="{{ route('management.user_assignments.revoke_site', [$user->id, $role->id, $role->pivot->sede_id]) }}" data-confirm="¿Revocar este rol en la sede?">@csrf @method('DELETE')<button class="btn btn-outline-danger btn-sm" type="submit">Revocar</button></form>@else<span>Revocado</span>@endif</div>
-                                @endforeach
-                                @if ($user->roles->isEmpty() && $user->rolesPorSede->isEmpty())<span>Sin asignaciones RBAC</span>@endif
-                            </td>
-                            <td>
-                                <form method="post" action="{{ route('management.user_assignments.store', $user) }}" class="assignment-form">
-                                    @csrf
-                                    <label>Rol<select name="rol_id" required><option value="">Selecciona</option>@foreach ($roles as $role)<option value="{{ $role->id }}">{{ $role->nombre }} · {{ $role->alcance_permitido }}</option>@endforeach</select></label>
-                                    <label>Asignación<select name="alcance" required><option value="empresa">Cuenta / empresa</option><option value="sede">Sede</option></select></label>
-                                    <label>Sede<select name="sede_id"><option value="">Selecciona si corresponde</option>@foreach ($sites as $site)<option value="{{ $site->id }}">{{ $site->nombre }}</option>@endforeach</select></label>
-                                    <label>Vigente hasta<input type="date" name="vigente_hasta" min="{{ now()->addDay()->toDateString() }}"></label>
-                                    <button class="btn btn-primary btn-sm" type="submit">Asignar rol</button>
-                                </form>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="3">No hay usuarios en el sistema.</td></tr>
-                    @endforelse
-                </tbody></table></div>
-                {{ $users->links() }}
-            </div>
-        @endunless
-    </section>
+@section('content')
+<section class="tc-rbac-page" data-assignment-page>
+    <header class="tc-rbac-hero"><div><span class="tc-rbac-eyebrow">Seguridad y delegación</span><h1>Asignación de roles a usuarios</h1><p>Asigna, revoca y consulta privilegios efectivos por cuenta desde una sola operación auditada.</p></div><a class="tc-rbac-primary" href="{{ route('management.roles_permissions') }}"><i class="bi bi-shield-lock" aria-hidden="true"></i> Roles y matriz</a></header>
+    @unless($ready)<div class="tc-rbac-alert" role="alert">El esquema RBAC no está disponible. No se muestran formularios simulados.</div>@else
+    <nav class="tc-rbac-tabs" aria-label="Administración de seguridad"><a href="{{ route('management.users') }}">Gestión de usuarios</a><a href="{{ route('management.roles_permissions') }}">Roles y permisos</a><a href="{{ route('management.permissions_matrix') }}">Matriz de privilegios</a><a class="is-active" href="{{ route('management.user_assignments') }}">Asignación de roles a usuarios</a><a href="{{ route('management.menus') }}">Menús y submenús</a><a href="{{ route('management.modules') }}">Módulos y pantallas</a></nav>
+    <section class="tc-rbac-toolbar"><label class="tc-rbac-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar usuarios</span><input type="search" data-assignment-filter placeholder="Buscar usuario o correo"></label><span class="tc-rbac-summary"><strong>{{ $users->total() }}</strong> usuarios consultados</span></section>
+    <section class="tc-rbac-card tc-rbac-role-table"><div class="tc-rbac-table-wrap"><table><thead><tr><th>Usuario</th><th>Roles asignados</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
+    @forelse($users as $user)
+        @php($activeGlobal = $user->roles->filter(fn($role) => (bool) $role->pivot->activo)) @php($activeSite = $user->rolesPorSede->filter(fn($role) => (bool) $role->pivot->activo))
+        <tr data-assignment-row data-search="{{ strtolower($user->nombre.' '.$user->correo) }}"><td><strong>{{ $user->nombre }}</strong><small>{{ $user->correo }}</small></td><td><div class="tc-rbac-assignment-chips">@forelse($activeGlobal as $role)<span class="tc-rbac-pill tc-rbac-pill--scope">{{ $role->nombre }} · Empresa</span>@empty @endforelse @forelse($activeSite as $role)<span class="tc-rbac-pill tc-rbac-pill--scope">{{ $role->nombre }} · Sede</span>@empty @endforelse @if($activeGlobal->isEmpty() && $activeSite->isEmpty())<span class="tc-rbac-muted">Sin roles vigentes</span>@endif</div></td><td><span class="tc-rbac-status tc-rbac-status--{{ $user->activo ? 'active' : 'inactive' }}"><i class="bi bi-circle-fill" aria-hidden="true"></i>{{ $user->activo ? 'Activo' : 'Inactivo' }}</span></td><td><button class="tc-rbac-action tc-rbac-action--primary" type="button" data-open-dialog="asignar-roles-{{ $user->id }}"><i class="bi bi-person-gear" aria-hidden="true"></i> Asignar roles</button></td></tr>
+    @empty<tr><td colspan="4">No hay usuarios registrados.</td></tr>@endforelse
+    </tbody></table></div></section>
+    <div class="mt-3">{{ $users->links() }}</div>
+    @endunless
+</section>
+
+@foreach($users as $user)
+    @php($currentGlobal = $user->roles->filter(fn($role) => (bool) $role->pivot->activo)->pluck('id')->all()) @php($currentSite = $user->rolesPorSede->filter(fn($role) => (bool) $role->pivot->activo)->pluck('id')->all())
+    <dialog class="tc-rbac-dialog" id="asignar-roles-{{ $user->id }}" aria-labelledby="asignar-roles-title-{{ $user->id }}"><div class="tc-rbac-dialog-card"><header><div><span class="tc-rbac-dialog-icon"><i class="bi bi-person-check" aria-hidden="true"></i></span><div><small>Asignación de privilegios</small><h2 id="asignar-roles-title-{{ $user->id }}">{{ $user->nombre }}</h2></div></div><button type="button" class="tc-rbac-dialog-close" data-close-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><form method="post" action="{{ route('management.user_assignments.sync', $user) }}" class="tc-rbac-dialog-body">@csrf @method('PUT')<p class="tc-rbac-info">Las casillas marcadas se conservarán. Las desmarcadas se revocarán y quedarán registradas en auditoría.</p><div class="tc-rbac-choice-grid">@foreach($roles as $role)<label class="tc-rbac-choice"><input type="checkbox" name="roles[]" value="{{ $role->id }}" @checked(in_array($role->id, $role->alcance_permitido === 'sede' ? $currentSite : $currentGlobal, true))><span><strong>{{ $role->nombre }}</strong><small>{{ ucfirst($role->alcance_permitido) }} · {{ $role->codigo }}</small></span></label>@endforeach</div><footer><button type="button" class="tc-rbac-secondary" data-close-dialog>Cancelar</button><button class="tc-rbac-primary" type="submit"><i class="bi bi-save" aria-hidden="true"></i> Guardar asignación</button></footer></form></div></dialog>
+@endforeach
 @endsection
+
+@push('scripts')<script>
+(() => { const page=document.querySelector('[data-assignment-page]'); if(!page)return; const open=(id)=>{const d=document.getElementById(id);if(d&&!d.open)d.showModal()}; page.querySelectorAll('[data-open-dialog]').forEach(b=>b.addEventListener('click',()=>open(b.dataset.openDialog))); document.querySelectorAll('[data-close-dialog]').forEach(b=>b.addEventListener('click',()=>b.closest('dialog')?.close())); document.querySelectorAll('.tc-rbac-dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d)d.close()})); page.querySelector('[data-assignment-filter]')?.addEventListener('input',(e)=>{const v=e.target.value.toLowerCase().trim();page.querySelectorAll('[data-assignment-row]').forEach(r=>{r.hidden=v!==''&&!r.dataset.search.includes(v)})}); })();
+</script>@endpush

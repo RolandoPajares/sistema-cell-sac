@@ -1,7 +1,7 @@
 @php
-    $editing = isset($campaign) && $campaign !== null;
-    $selectedSegments = $editing ? $campaign->segments->modelKeys() : old('segmentos', []);
-    $currentImage = $editing ? $campaign->url_imagen : old('url_imagen');
+$editing = isset($campaign) && $campaign !== null;
+$selectedSegments = $editing ? $campaign->segments->modelKeys() : old('segmentos', []);
+$currentImage = $editing ? $campaign->url_imagen : old('url_imagen');
 @endphp
 
 <div class="campanias-form-grid" data-campaign-form>
@@ -22,7 +22,7 @@
         <span>Ubicación <b>*</b></span>
         <select name="ubicacion" required>
             @foreach (['emergente' => 'Emergente', 'lateral' => 'Lateral', 'barra_superior' => 'Barra superior'] as $value => $label)
-                <option value="{{ $value }}" @selected(($editing ? $campaign->ubicacion : old('ubicacion', 'emergente')) === $value)>{{ $label }}</option>
+            <option value="{{ $value }}" @selected(($editing ? $campaign->ubicacion : old('ubicacion', 'emergente')) === $value)>{{ $label }}</option>
             @endforeach
         </select>
     </label>
@@ -31,7 +31,7 @@
         <span>Destino <b>*</b></span>
         <select name="destino" required data-campaign-destination>
             @foreach (['catalog' => 'Catálogo', 'catalog.index' => 'Catálogo público', 'products' => 'Productos', 'offers' => 'Ofertas'] as $value => $label)
-                <option value="{{ $value }}" @selected(($editing ? $campaign->url_boton : old('url_boton', 'catalog')) === $value)>{{ $label }}</option>
+            <option value="{{ $value }}" @selected(($editing ? $campaign->url_boton : old('url_boton', 'catalog')) === $value)>{{ $label }}</option>
             @endforeach
         </select>
     </label>
@@ -88,9 +88,9 @@
         <label class="campanias-image-url"><span>O usa una URL existente</span><input name="url_imagen" maxlength="255" value="{{ $currentImage }}" placeholder="https://..." data-campaign-image-url></label>
         <div class="campanias-preview" data-campaign-preview @if (!$currentImage) hidden @endif>
             @if ($currentImage)
-                <img src="{{ str_starts_with($currentImage, 'http') ? $currentImage : asset(ltrim($currentImage, '/')) }}" alt="Vista previa de la campaña" data-campaign-preview-image>
+            <img src="{{ str_starts_with($currentImage, 'http') ? $currentImage : asset(ltrim($currentImage, '/')) }}" alt="Vista previa de la campaña" data-campaign-preview-image>
             @else
-                <img alt="Vista previa de la campaña" data-campaign-preview-image>
+            <img alt="Vista previa de la campaña" data-campaign-preview-image>
             @endif
             <button type="button" data-clear-campaign-image aria-label="Quitar imagen"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
         </div>
@@ -101,7 +101,7 @@
         <div>
             <label><input type="checkbox" data-campaign-all @checked(empty($selectedSegments))><span>Todos</span></label>
             @foreach ($segments as $segment)
-                <label><input type="checkbox" name="segmentos[]" value="{{ $segment->id }}" @checked(in_array($segment->id, $selectedSegments, true))><span>{{ $segment->nombre }}</span></label>
+            <label><input type="checkbox" name="segmentos[]" value="{{ $segment->id }}" @checked(in_array($segment->id, $selectedSegments, true))><span>{{ $segment->nombre }}</span></label>
             @endforeach
         </div>
     </fieldset>

@@ -32,7 +32,6 @@ use App\Http\Controllers\Gestion\Segmentos\SegmentoClienteController;
 use App\Http\Controllers\Gestion\Seguridad\AsignacionRolesController;
 use App\Http\Controllers\Gestion\Seguridad\MenusController;
 use App\Http\Controllers\Gestion\Seguridad\RolesPermisosController;
-use App\Http\Controllers\Gestion\Seguridad\SesionesGlobalesController;
 use App\Http\Controllers\Gestion\SesionCajaController;
 use App\Http\Controllers\Gestion\SoporteReclamos\SoporteReclamoController;
 use App\Http\Controllers\Gestion\Usuarios\GestionUsuariosController;
@@ -57,7 +56,6 @@ use App\Http\Controllers\Publico\Inteligente\InteligenciaComercialController;
 use App\Http\Controllers\Publico\Paginas\PaginaController;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
-use Illuminate\View\View;
 
 Route::get('/', InicioController::class)->name('home');
 Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalog.index');
@@ -168,30 +166,6 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
         ->middleware(['role:administrador', 'permiso:ruta', 'permiso:pantalla.admin.staff.consultar', 'permiso:pantalla.admin.responsibles.consultar'])->name('company_settings.responsibles');
     Route::post('/organizacion/responsables', [ResponsableOrganizacionalController::class, 'store'])
         ->middleware(['role:administrador', 'permiso:gestion.organizacion.actualizar', 'permiso:pantalla.admin.responsibles.consultar'])->name('company_settings.responsibles.store');
-    Route::get('/seguridad-diseno/usuarios', static fn (): RedirectResponse => redirect()->route('management.users'))
-        ->middleware('role:administrador')->name('roles_permissions.preview.users');
-    Route::get('/seguridad-diseno/roles', static fn (): RedirectResponse => redirect()->route('management.roles_permissions'))
-        ->middleware('role:administrador')->name('roles_permissions.preview.roles');
-    Route::get('/seguridad-diseno/matriz', static fn (): RedirectResponse => redirect()->route('management.roles_permissions'))
-        ->middleware('role:administrador')->name('roles_permissions.preview.matrix');
-    Route::get('/seguridad-diseno/asignaciones', static fn (): RedirectResponse => redirect()->route('management.user_assignments'))
-        ->middleware('role:administrador')->name('roles_permissions.preview.assignments');
-    Route::get('/seguridad-diseno/asignaciones-sede', static fn (): RedirectResponse => redirect()->route('management.user_assignments'))
-        ->middleware('role:administrador')->name('roles_permissions.preview.site_assignments');
-    Route::get('/seguridad-diseno/menus', static fn (): RedirectResponse => redirect()->route('management.menus'))
-        ->middleware('role:administrador')->name('roles_permissions.preview.menus');
-    Route::get('/seguridad-diseno/modulos', static fn (): RedirectResponse => redirect()->route('management.modules'))
-        ->middleware('role:administrador')->name('roles_permissions.preview.modules');
-    Route::get('/seguridad-diseno/politicas', static fn (): View => view('paneles.administrador.seguridad.politicas.listar'))
-        ->middleware('role:administrador')->name('roles_permissions.preview.policies');
-    Route::get('/seguridad-diseno/sesiones', static fn (): View => view('paneles.administrador.seguridad.sesiones.listar'))
-        ->middleware('role:administrador')->name('roles_permissions.preview.sessions');
-    Route::get('/seguridad/sesiones', [SesionesGlobalesController::class, 'index'])
-        ->middleware(['role:administrador', 'permiso:ruta', 'permiso:pantalla.admin.sessions.consultar'])->name('security_sessions');
-    Route::delete('/seguridad/sesiones/{sessionId}', [SesionesGlobalesController::class, 'revoke'])->whereNumber('sessionId')
-        ->middleware(['role:administrador', 'permiso:gestion.seguridad.revocar', 'permiso:pantalla.admin.sessions.consultar'])->name('security_sessions.revoke');
-    Route::get('/seguridad-diseno/bloqueos', static fn (): RedirectResponse => redirect()->route('management.users', ['estado' => 'inactivo']))
-        ->middleware('role:administrador')->name('roles_permissions.preview.blocks');
     Route::get('/cotizaciones', [CotizacionController::class, 'index'])->name('quotations');
     Route::get('/cotizaciones/exportar/{format}', [CotizacionController::class, 'export'])
         ->whereIn('format', ['pdf', 'excel', 'csv'])->name('quotations.export.list');
@@ -260,6 +234,8 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::get('/pedidos', [PedidoController::class, 'index'])->name('orders');
     Route::get('/pedidos/exportar/{format}', [PedidoController::class, 'export'])
         ->whereIn('format', ['pdf', 'excel', 'csv'])->name('orders.export');
+    Route::patch('/pedidos/{order}/estado', [PedidoController::class, 'updateStatus'])
+        ->whereNumber('order')->name('orders.status');
     Route::get('/ventas', [VentaController::class, 'index'])->name('sales');
     Route::get('/ventas/diseno/minoristas', [VentaController::class, 'panelMinorista'])
         ->middleware('role:administrador')->name('sales.preview.retail');
@@ -426,12 +402,14 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::get('/finanzas/diseno/series', static fn () => redirect()->route('management.billing'))->middleware('role:administrador')->name('billing.preview.series');
     Route::get('/finanzas/diseno/sunat', static fn () => redirect()->route('management.billing'))->middleware('role:administrador')->name('billing.preview.sunat');
     Route::get('/roles-permisos', [RolesPermisosController::class, 'index'])->name('roles_permissions');
+    Route::get('/matriz-privilegios', [RolesPermisosController::class, 'matrix'])->name('permissions_matrix');
     Route::post('/roles-permisos', [RolesPermisosController::class, 'store'])->name('roles_permissions.store');
     Route::put('/roles-permisos/{role}', [RolesPermisosController::class, 'update'])->whereNumber('role')->name('roles_permissions.update');
     Route::patch('/roles-permisos/{role}/estado', [RolesPermisosController::class, 'updateStatus'])->whereNumber('role')->name('roles_permissions.status');
     Route::put('/roles-permisos/{role}/permisos', [RolesPermisosController::class, 'updatePermissions'])->whereNumber('role')->name('roles_permissions.permissions');
     Route::get('/asignaciones-roles', [AsignacionRolesController::class, 'index'])->name('user_assignments');
     Route::post('/usuarios/{user}/roles', [AsignacionRolesController::class, 'store'])->whereNumber('user')->name('user_assignments.store');
+    Route::put('/usuarios/{user}/roles', [AsignacionRolesController::class, 'sync'])->whereNumber('user')->name('user_assignments.sync');
     Route::delete('/usuarios/{user}/roles/{role}', [AsignacionRolesController::class, 'revokeGlobal'])->whereNumber('user')->whereNumber('role')->name('user_assignments.revoke');
     Route::delete('/usuarios/{user}/roles/{role}/sedes/{site}', [AsignacionRolesController::class, 'revokeAtSite'])->whereNumber('user')->whereNumber('role')->whereNumber('site')->name('user_assignments.revoke_site');
     Route::get('/menus', [MenusController::class, 'index'])->name('menus');

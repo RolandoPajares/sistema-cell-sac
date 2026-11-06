@@ -57,6 +57,11 @@ class DevolucionGarantia extends Model
         return $this->belongsTo(Producto::class, 'producto_id');
     }
 
+    public function sale(): BelongsTo
+    {
+        return $this->belongsTo(Venta::class, 'venta_id');
+    }
+
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creado_por_usuario_id');

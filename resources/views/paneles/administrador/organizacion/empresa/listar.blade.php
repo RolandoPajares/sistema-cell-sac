@@ -28,7 +28,7 @@
     @else
         <div class="tc-org__metrics">
             @include('paneles.administrador.organizacion.componentes.metrica', ['titulo' => 'Estado de la empresa', 'valor' => $empresa->activo ? 'Activa' : 'Inactiva', 'icono' => 'bi-buildings', 'detalle' => 'Estado almacenado en MariaDB'])
-            @include('paneles.administrador.organizacion.componentes.metrica', ['titulo' => 'Sedes registradas', 'valor' => $empresa->sedes_count, 'icono' => 'bi-geo-alt', 'tono' => 'verde', 'detalle' => $empresa->sedes_activas_count.' activas'])
+            @include('paneles.administrador.organizacion.componentes.metrica', ['titulo' => 'Sede interna', 'valor' => $empresa->sedes_activas_count > 0 ? 'Activa' : 'Revisar', 'icono' => 'bi-geo-alt', 'tono' => 'verde', 'detalle' => 'Contexto operativo autorizado'])
             @include('paneles.administrador.organizacion.componentes.metrica', ['titulo' => 'Almacenes asociados', 'valor' => $almacenes, 'icono' => 'bi-box-seam', 'tono' => 'violeta', 'detalle' => 'Relacionados mediante las sedes'])
             @include('paneles.administrador.organizacion.componentes.metrica', ['titulo' => 'Moneda base', 'valor' => $empresa->moneda_base, 'icono' => 'bi-currency-exchange', 'detalle' => 'Código registrado para la empresa'])
         </div>
@@ -49,7 +49,7 @@
         </div>
 
         <div class="tc-org__grid tc-org__grid--halves">
-            <article class="tc-org__card"><h2 class="tc-org__section-heading"><i class="bi bi-buildings" aria-hidden="true"></i> Resumen de sedes</h2><div class="tc-org__summary-number"><i class="bi bi-buildings" aria-hidden="true"></i><strong>{{ $empresa->sedes_count }}</strong><span>Sedes registradas<br><small>{{ $empresa->sedes_activas_count }} activas · {{ $empresa->sedes_inactivas_count }} inactivas</small></span></div><a class="tc-org__text-link" href="{{ route('management.company_settings.sites') }}">Administrar sedes <i class="bi bi-arrow-right" aria-hidden="true"></i></a></article>
+            <article class="tc-org__card"><h2 class="tc-org__section-heading"><i class="bi bi-geo-alt" aria-hidden="true"></i> Contexto operativo</h2><div class="tc-org__summary-number"><i class="bi bi-geo-alt" aria-hidden="true"></i><strong>{{ $empresa->sedes_activas_count > 0 ? '1' : '0' }}</strong><span>Sede interna autorizada<br><small>Se resuelve automáticamente en cada operación</small></span></div></article>
             <article class="tc-org__card"><h2 class="tc-org__section-heading"><i class="bi bi-box-seam" aria-hidden="true"></i> Resumen de almacenes</h2><div class="tc-org__summary-number"><i class="bi bi-box-seam" aria-hidden="true"></i><strong>{{ $almacenes }}</strong><span>Almacenes asociados<br><small>Conteo desde las sedes de esta empresa</small></span></div><a class="tc-org__text-link" href="{{ route('management.company_settings.warehouses') }}">Administrar almacenes <i class="bi bi-arrow-right" aria-hidden="true"></i></a></article>
         </div>
     @endif

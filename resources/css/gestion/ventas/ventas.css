@@ -1140,6 +1140,47 @@
 
 .ventas-row-actions { display: inline-flex; align-items: center; gap: 5px; }
 
+.ventas-export-menu { position: relative; }
+.ventas-export-options { position: absolute; z-index: 30; top: calc(100% + 8px); left: 50%; width: 218px; display: grid; gap: 4px; padding: 7px; border: 1px solid #d8e6f4; border-radius: 11px; background: #fff; box-shadow: 0 15px 35px rgba(12, 57, 120, .18); transform: translateX(-50%); }
+.ventas-export-options a { display: flex; align-items: center; gap: 9px; padding: 9px; border-radius: 8px; color: #17376b; font-size: .74rem; font-weight: 800; text-decoration: none; }
+.ventas-export-options a:hover { color: #086de8; background: #edf5ff; }
+.ventas-export-options a > i { display: grid; flex: 0 0 28px; width: 28px; height: 28px; place-items: center; border-radius: 7px; color: #0873ed; background: #e5f2ff; font-size: 1rem; }
+.ventas-export-options a:nth-child(1) > i { color: #e33449; background: #ffe8e9; }
+.ventas-export-options a:nth-child(2) > i { color: #0b9b65; background: #dff8ec; }
+.ventas-export-options a span { display: grid; gap: 2px; }
+.ventas-export-options small { color: #7588aa; font-size: .61rem; font-weight: 500; }
+@media (max-width: 700px) { .ventas-export-options { left: auto; right: 0; width: min(218px, calc(100vw - 32px)); transform: none; } }
+
+/* El ancho útil incluye la barra lateral administrativa. En portátiles y
+   ventanas reducidas el panel lateral debe bajar, nunca cubrir la tabla. */
+@media (max-width: 1450px) {
+    .ventas-layout-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ventas-side-column {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: start;
+    }
+
+    .ventas-quick-card {
+        grid-row: auto;
+    }
+
+    .ventas-filters {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .ventas-search {
+        grid-column: span 2;
+    }
+
+    .ventas-clear-link {
+        grid-column: 1 / -1;
+        justify-self: end;
+    }
+}
+
 @media (max-width: 700px) {
     .modulo-ventas .ventas-dialog { width: calc(100vw - 16px); max-height: 95vh; }
     .ventas-dialog-card { max-height: 95vh; }

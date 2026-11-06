@@ -18,7 +18,7 @@
                 <h1>Usuarios y roles <i class="bi bi-people-fill" aria-hidden="true"></i></h1>
                 <p>Administra las cuentas de acceso al sistema y sus permisos.</p>
             </div>
-            <button class="usuarios-primary-button" type="button" data-open-user-create><i class="bi bi-person-plus" aria-hidden="true"></i> Nuevo usuario</button>
+            <div class="usuarios-hero-actions"><button class="usuarios-primary-button" type="button" data-open-user-create><i class="bi bi-person-plus" aria-hidden="true"></i> Nuevo usuario</button><details class="usuarios-export usuarios-export--hero"><summary><i class="bi bi-download" aria-hidden="true"></i> Exportar</summary><div class="usuarios-export-menu"><a href="{{ route('management.users.export', array_merge(request()->query(), ['format' => 'pdf'])) }}">PDF (.pdf)</a><a href="{{ route('management.users.export', array_merge(request()->query(), ['format' => 'csv'])) }}">CSV (.csv)</a><a href="{{ route('management.users.export', array_merge(request()->query(), ['format' => 'excel'])) }}">Excel (.xlsx)</a></div></details></div>
         </header>
 
         <section class="usuarios-kpi-grid" aria-label="Resumen de usuarios">
@@ -31,7 +31,6 @@
         <form class="usuarios-filters" method="get" action="{{ route('management.users') }}">
             <label class="usuarios-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar usuarios</span><input type="search" name="buscar" value="{{ $filters['buscar'] ?? '' }}" placeholder="Buscar por nombre, correo, rol o razón social..."></label>
             <button class="usuarios-filter-button" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i> Filtros</button>
-            <button class="usuarios-primary-button usuarios-primary-button--compact" type="button" data-open-user-create><i class="bi bi-person-plus" aria-hidden="true"></i> Nuevo usuario</button>
             <div class="usuarios-filter-row">
                 <label><span>Rol</span><select name="rol"><option value="">Todos</option>@foreach ($roles as $role)<option value="{{ $role }}" @selected(($filters['rol'] ?? null) === $role)>{{ $roleLabels[$role] ?? $role }}</option>@endforeach</select></label>
                 <label><span>Estado</span><select name="estado"><option value="">Todos</option><option value="activo" @selected(($filters['estado'] ?? null) === 'activo')>Activos</option><option value="inactivo" @selected(($filters['estado'] ?? null) === 'inactivo')>Inactivos</option></select></label>
@@ -42,7 +41,7 @@
         </form>
 
         <section class="usuarios-list-card">
-            <header class="usuarios-card-header"><div><h2>Usuarios registrados ({{ number_format($users->total()) }})</h2><p>Mostrando {{ $users->firstItem() ?? 0 }} a {{ $users->lastItem() ?? 0 }} usuarios</p></div><div class="usuarios-card-tools"><span>Ordenar por: <b>Fecha de registro</b></span><details class="usuarios-export"><summary><i class="bi bi-download" aria-hidden="true"></i> Exportar</summary><div class="usuarios-export-menu"><a href="{{ route('management.users.export', array_merge(request()->query(), ['format' => 'excel'])) }}">Excel (.xlsx)</a><a href="{{ route('management.users.export', array_merge(request()->query(), ['format' => 'pdf'])) }}">PDF (.pdf)</a><a href="{{ route('management.users.export', array_merge(request()->query(), ['format' => 'csv'])) }}">CSV (.csv)</a></div></details></div></header>
+            <header class="usuarios-card-header"><div><h2>Usuarios registrados ({{ number_format($users->total()) }})</h2><p>Mostrando {{ $users->firstItem() ?? 0 }} a {{ $users->lastItem() ?? 0 }} usuarios</p></div><div class="usuarios-card-tools"><span>Ordenar por: <b>Fecha de registro</b></span></div></header>
             <div class="usuarios-table-wrap">
                 <table class="usuarios-table">
                     <thead><tr><th>#</th><th>Usuario</th><th>Correo</th><th>Rol</th><th>Ciudad</th><th>Estado</th><th>Registro</th><th>Acciones</th></tr></thead>

@@ -7,6 +7,7 @@
 @import './componentes/precios.css';
 @import './componentes/tarjetas.css';
 @import './componentes/alertas.css';
+@import './componentes/confirmacion.css';
 @import './componentes/badges.css';
 @import './componentes/estados.css';
 @import './componentes/tablas.css';
@@ -24,6 +25,9 @@
 @import './gestion/clientes/clientes.css';
 @import './gestion/proveedores/proveedores.css';
 @import './gestion/usuarios/usuarios.css';
+@import './modulos/seguridad-delegacion.css';
+@import './modulos/seguridad-delegacion-extra.css';
+@import './modulos/seguridad-rbac-overrides.css';
 @import './gestion/campanias/campanias.css';
 @import './gestion/campanias/publicidad-inteligente.css';
 @import './cuenta/perfil.css';

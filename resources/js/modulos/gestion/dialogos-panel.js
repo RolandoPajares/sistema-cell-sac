@@ -1,10 +1,28 @@
 /**
  * Apertura, cierre y carga de datos de los diálogos administrativos.
  */
-document.querySelectorAll("[data-admin-dialog-open]").forEach((boton) => {
-    boton.addEventListener("click", () =>
-        document.getElementById(boton.dataset.adminDialogOpen)?.showModal()
-    );
+const abrirDialogo = (id) => {
+    const dialogo = typeof id === "string" ? document.getElementById(id) : null;
+
+    if (dialogo && !dialogo.open && typeof dialogo.showModal === "function") {
+        dialogo.showModal();
+    }
+};
+
+// Delegación para soportar vistas cargadas dinámicamente y evitar que un
+// botón quede sin evento cuando el módulo se incorpora después del HTML.
+document.addEventListener("click", (evento) => {
+    const abrir = evento.target.closest("[data-admin-dialog-open]");
+    const cerrar = evento.target.closest("[data-admin-dialog-close]");
+
+    if (abrir && !abrir.disabled) {
+        evento.preventDefault();
+        abrirDialogo(abrir.dataset.adminDialogOpen);
+    }
+
+    if (cerrar) {
+        cerrar.closest("dialog")?.close();
+    }
 });
 
 document.querySelectorAll("[data-audit-id]").forEach((boton) =>
@@ -47,13 +65,9 @@ document.querySelectorAll("[data-audit-id]").forEach((boton) =>
     })
 );
 
-document.querySelectorAll("[data-admin-dialog-close]").forEach((boton) => {
-    boton.addEventListener("click", () => boton.closest("dialog")?.close());
+document.querySelectorAll("dialog[data-auto-open='1']").forEach((dialogo) => {
+    abrirDialogo(dialogo.id);
 });
-
-document.querySelectorAll("dialog[data-auto-open='1']").forEach((dialogo) =>
-    dialogo.showModal()
-);
 
 document.querySelectorAll("dialog").forEach((dialogo) =>
     dialogo.addEventListener("click", (evento) => {

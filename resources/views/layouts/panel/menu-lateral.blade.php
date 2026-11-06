@@ -27,9 +27,7 @@
     </div>
 
     <nav class="admin-sidebar-nav">
-        @if ($isAdministrator)
-            @include($menuView, ['links' => $links ?? []])
-        @elseif ($usesDynamicMenu)
+        @if ($usesDynamicMenu)
             @vite(['resources/css/paneles/administrador/index.css'])
             <x-panel.menu-dinamico :menu="$links" />
         @else

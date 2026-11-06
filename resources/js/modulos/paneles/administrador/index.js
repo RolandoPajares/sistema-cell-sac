@@ -1,7 +1,6 @@
 import '../../../../css/paneles/administrador/index.css';
 import './componentes/menu-lateral-desplegable.js';
 import './organizacion/organizacion.js';
-import './seguridad/seguridad.js';
 import './operaciones-comerciales/operaciones-comerciales.js';
 import './inventario-logistica/inventario-logistica.js';
 import './inventario-logistica/transferencias.js';

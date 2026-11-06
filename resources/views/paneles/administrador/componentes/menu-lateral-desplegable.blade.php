@@ -17,26 +17,20 @@
             || (! in_array($item['route'], ['management.dashboard', 'management.sales', 'management.inventory', 'management.billing', 'management.products'], true) && request()->routeIs($item['route'].'.*')));
 
     $groups = [
-        ['key' => 'dashboard', 'label' => 'Dashboard Global', 'icon' => 'bi-speedometer2', 'items' => [
+        ['key' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'bi-speedometer2', 'items' => [
             $enabledItem('management.dashboard', 'Resumen general del negocio', 'bi-grid-1x2'),
             $enabledItem('management.dashboard.sales', 'Indicadores de ventas e ingresos', 'bi-graph-up'),
             $enabledItem('management.dashboard.orders', 'Pedidos y operaciones recientes', 'bi-clock-history'),
-            $enabledItem('management.dashboard.sites', 'Indicadores por sede', 'bi-geo-alt'),
             $enabledItem('management.dashboard.alerts', 'Alertas y notificaciones', 'bi-bell'),
         ]],
-        ['key' => 'organizacion', 'label' => 'Organización y Sedes', 'icon' => 'bi-buildings', 'items' => [
+        ['key' => 'organizacion', 'label' => 'Empresa y operación interna', 'icon' => 'bi-buildings', 'items' => [
             $enabledItem('management.company_settings.data', 'Datos de la empresa', 'bi-building'),
-            $enabledItem('management.company_settings.sites', 'Administración de sedes', 'bi-geo-alt'),
-            $enabledItem('management.company_settings.warehouses', 'Almacenes', 'bi-box-seam'),
-            $enabledItem('management.company_settings.staff', 'Personal por sede', 'bi-people'),
-            $enabledItem('management.company_settings.responsibles', 'Asignación de responsables', 'bi-person-check'),
         ]],
         ['key' => 'seguridad', 'label' => 'Seguridad y Delegación', 'icon' => 'bi-shield-lock', 'items' => [
             $enabledItem('management.users', 'Gestión de usuarios', 'bi-person-gear'),
             $enabledItem('management.roles_permissions', 'Roles y permisos', 'bi-key'),
             $enabledItem('management.roles_permissions', 'Matriz de privilegios', 'bi-grid-3x3-gap'),
             $enabledItem('management.user_assignments', 'Asignación de roles a usuarios', 'bi-person-check'),
-            $enabledItem('management.user_assignments', 'Asignación de roles por sede', 'bi-geo-alt'),
             $enabledItem('management.menus', 'Menús y submenús', 'bi-list-nested'),
             $enabledItem('management.modules', 'Módulos y pantallas', 'bi-window-stack'),
             $disabledItem('Políticas de aprobación y delegación', 'bi-person-lock'),
@@ -59,7 +53,6 @@
             $enabledItem('management.categories', 'Categorías', 'bi-diagram-3'),
             $enabledItem('management.inventory', 'Inventario', 'bi-boxes'),
             $enabledItem('management.inventory.movements', 'Movimientos de inventario', 'bi-arrow-left-right'),
-            $enabledItem('management.inventory.preview.transfers', 'Transferencias entre sedes', 'bi-arrow-repeat'),
             $enabledItem('management.inventory.preview.shipments', 'Envíos y entregas', 'bi-truck'),
             $enabledItem('management.inventory.preview.serials', 'Control de IMEI y series', 'bi-phone'),
         ]],
@@ -84,7 +77,6 @@
         ]],
         ['key' => 'analisis', 'label' => 'Análisis y Auditoría', 'icon' => 'bi-bar-chart-line', 'items' => [
             $enabledItem('management.reports.preview.global', 'Reportes globales', 'bi-bar-chart'),
-            $enabledItem('management.reports.preview.sites', 'Reportes por sede', 'bi-geo-alt'),
             $enabledItem('management.audit.preview.operations', 'Auditoría de operaciones', 'bi-shield-check'),
             $enabledItem('management.audit.preview.roles', 'Historial de roles y permisos', 'bi-clock-history'),
             $enabledItem('management.audit.preview.security', 'Eventos de seguridad', 'bi-shield-exclamation'),

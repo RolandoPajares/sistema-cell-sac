@@ -13,8 +13,8 @@ return new class extends Migration
     {
         $tables = [
             'empresas', 'sedes', 'almacenes', 'modulos', 'pantallas', 'roles', 'menus',
-            'permisos', 'rol_permiso', 'roles_menus', 'elementos_menu', 'usuario_roles',
-            'usuario_sede_roles',
+            'permisos', 'roles_permisos', 'roles_menus', 'elementos_menu', 'usuarios_roles',
+            'usuarios_sedes_roles',
         ];
 
         $existingTables = array_values(array_filter($tables, static fn (string $table): bool => Schema::hasTable($table)));
@@ -34,7 +34,8 @@ return new class extends Migration
             $table->char('ruc', 11)->nullable()->unique();
             $table->char('moneda_base', 3)->default('PEN');
             $table->boolean('activo')->default(true)->index();
-            $table->timestamps();
+            $table->dateTime('creado_en')->useCurrent();
+            $table->dateTime('actualizado_en')->useCurrent();
         });
 
         Schema::create('sedes', function (Blueprint $table): void {
@@ -46,7 +47,8 @@ return new class extends Migration
             $table->string('telefono', 30)->nullable();
             $table->string('zona_horaria', 64)->default('America/Lima');
             $table->boolean('activa')->default(true);
-            $table->timestamps();
+            $table->dateTime('creado_en')->useCurrent();
+            $table->dateTime('actualizado_en')->useCurrent();
             $table->unique(['empresa_id', 'codigo']);
             $table->index(['empresa_id', 'activa']);
         });
@@ -59,7 +61,8 @@ return new class extends Migration
             $table->string('tipo', 30)->default('general');
             $table->boolean('permite_venta')->default(true);
             $table->boolean('activo')->default(true);
-            $table->timestamps();
+            $table->dateTime('creado_en')->useCurrent();
+            $table->dateTime('actualizado_en')->useCurrent();
             $table->unique(['sede_id', 'codigo']);
             $table->index(['sede_id', 'activo']);
         });
@@ -72,7 +75,8 @@ return new class extends Migration
             $table->string('icono', 100)->nullable();
             $table->unsignedInteger('orden')->default(0);
             $table->boolean('habilitado')->default(true);
-            $table->timestamps();
+            $table->dateTime('creado_en')->useCurrent();
+            $table->dateTime('actualizado_en')->useCurrent();
             $table->index(['habilitado', 'orden']);
         });
 
@@ -84,7 +88,8 @@ return new class extends Migration
             $table->string('ruta', 160)->nullable();
             $table->string('icono', 100)->nullable();
             $table->boolean('habilitada')->default(true);
-            $table->timestamps();
+            $table->dateTime('creado_en')->useCurrent();
+            $table->dateTime('actualizado_en')->useCurrent();
             $table->index(['modulo_id', 'habilitada']);
         });
 
@@ -96,7 +101,8 @@ return new class extends Migration
             $table->string('alcance_permitido', 20)->default('sede');
             $table->boolean('es_sistema')->default(false);
             $table->boolean('activo')->default(true);
-            $table->timestamps();
+            $table->dateTime('creado_en')->useCurrent();
+            $table->dateTime('actualizado_en')->useCurrent();
             $table->index(['activo', 'es_sistema']);
         });
 
@@ -106,7 +112,8 @@ return new class extends Migration
             $table->string('nombre', 140);
             $table->string('contexto', 40)->default('sidebar');
             $table->boolean('habilitado')->default(true);
-            $table->timestamps();
+            $table->dateTime('creado_en')->useCurrent();
+            $table->dateTime('actualizado_en')->useCurrent();
             $table->index(['contexto', 'habilitado']);
         });
 
@@ -123,11 +130,11 @@ return new class extends Migration
             $table->index('pantalla_id');
         });
 
-        Schema::create('rol_permiso', function (Blueprint $table): void {
+        Schema::create('roles_permisos', function (Blueprint $table): void {
             $table->foreignId('rol_id')->constrained('roles')->restrictOnDelete();
             $table->foreignId('permiso_id')->constrained('permisos')->restrictOnDelete();
             $table->string('alcance', 20)->default('sede');
-            $table->timestamp('created_at')->useCurrent();
+            $table->dateTime('creado_en')->useCurrent();
             $table->primary(['rol_id', 'permiso_id', 'alcance']);
             $table->index(['permiso_id', 'rol_id']);
         });
@@ -135,7 +142,7 @@ return new class extends Migration
         Schema::create('roles_menus', function (Blueprint $table): void {
             $table->foreignId('rol_id')->constrained('roles')->restrictOnDelete();
             $table->foreignId('menu_id')->constrained('menus')->restrictOnDelete();
-            $table->timestamp('created_at')->useCurrent();
+            $table->dateTime('creado_en')->useCurrent();
             $table->primary(['rol_id', 'menu_id']);
             $table->index(['menu_id', 'rol_id']);
         });
@@ -159,24 +166,24 @@ return new class extends Migration
             $table->index('permiso_id');
         });
 
-        Schema::create('usuario_roles', function (Blueprint $table): void {
-            $table->foreignId('usuario_id')->constrained('users')->restrictOnDelete();
+        Schema::create('usuarios_roles', function (Blueprint $table): void {
+            $table->foreignId('usuario_id')->constrained('usuarios')->restrictOnDelete();
             $table->foreignId('rol_id')->constrained('roles')->restrictOnDelete();
-            $table->foreignId('asignado_por')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamp('asignado_en')->useCurrent();
-            $table->timestamp('vigente_hasta')->nullable();
+            $table->foreignId('asignado_por_usuario_id')->nullable()->constrained('usuarios')->nullOnDelete();
+            $table->dateTime('asignado_en')->useCurrent();
+            $table->dateTime('vigente_hasta')->nullable();
             $table->boolean('activo')->default(true);
             $table->primary(['usuario_id', 'rol_id']);
             $table->index(['rol_id', 'activo', 'usuario_id']);
         });
 
-        Schema::create('usuario_sede_roles', function (Blueprint $table): void {
-            $table->foreignId('usuario_id')->constrained('users')->restrictOnDelete();
+        Schema::create('usuarios_sedes_roles', function (Blueprint $table): void {
+            $table->foreignId('usuario_id')->constrained('usuarios')->restrictOnDelete();
             $table->foreignId('sede_id')->constrained('sedes')->restrictOnDelete();
             $table->foreignId('rol_id')->constrained('roles')->restrictOnDelete();
-            $table->foreignId('asignado_por')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamp('asignado_en')->useCurrent();
-            $table->timestamp('vigente_hasta')->nullable();
+            $table->foreignId('asignado_por_usuario_id')->nullable()->constrained('usuarios')->nullOnDelete();
+            $table->dateTime('asignado_en')->useCurrent();
+            $table->dateTime('vigente_hasta')->nullable();
             $table->boolean('activo')->default(true);
             $table->primary(['usuario_id', 'sede_id', 'rol_id']);
             $table->index(['sede_id', 'rol_id', 'activo']);

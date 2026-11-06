@@ -191,17 +191,32 @@ if (salesPage && salesPage.dataset.salesInitialized !== 'true') {
             }
         });
     });
-    salesPage.querySelectorAll('[data-open-sales-create]').forEach((button) => {
-        button.addEventListener('click', () => openDialog(salesPage.querySelector('#nueva-venta')));
-    });
-    salesPage.querySelectorAll('[data-open-sales-confirm]').forEach((button) => {
-        button.addEventListener('click', () => openDialog(document.getElementById(button.dataset.openSalesConfirm)));
-    });
-    salesPage.querySelectorAll('[data-sales-details]').forEach((button) => {
-        button.addEventListener('click', () => openDialog(document.getElementById(`detalle-venta-${button.dataset.salesDetails}`)));
-    });
-    salesPage.querySelectorAll('[data-close-sales-dialog]').forEach((button) => {
-        button.addEventListener('click', () => button.closest('dialog')?.close());
+    // Delegación de eventos: funciona también si los controles se renderizan
+    // después de cargar el módulo y centraliza la apertura de todos los diálogos.
+    salesPage.addEventListener('click', (event) => {
+        const createButton = event.target.closest('[data-open-sales-create]');
+        const confirmButton = event.target.closest('[data-open-sales-confirm]');
+        const detailsButton = event.target.closest('[data-sales-details]');
+        const closeButton = event.target.closest('[data-close-sales-dialog]');
+
+        if (createButton && !createButton.disabled) {
+            event.preventDefault();
+            openDialog(salesPage.querySelector('#nueva-venta'));
+        }
+
+        if (confirmButton && !confirmButton.disabled) {
+            event.preventDefault();
+            openDialog(document.getElementById(confirmButton.dataset.openSalesConfirm));
+        }
+
+        if (detailsButton && !detailsButton.disabled) {
+            event.preventDefault();
+            openDialog(document.getElementById(`detalle-venta-${detailsButton.dataset.salesDetails}`));
+        }
+
+        if (closeButton) {
+            closeButton.closest('dialog')?.close();
+        }
     });
     salesPage.querySelectorAll('dialog').forEach((dialog) => {
         dialog.addEventListener('click', (event) => {
