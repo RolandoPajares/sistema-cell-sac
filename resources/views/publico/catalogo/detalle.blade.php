@@ -54,7 +54,7 @@
             <div class="detail-info">
                 <div class="product-detail-meta"><strong>{{ $product->marca }}</strong><span>{{ $categoryName }}</span>@if($product->etiqueta)<span class="product-detail-badge">{{ $product->etiqueta }}</span>@endif</div>
                 <h1>{{ $product->nombre }}</h1>
-                <div class="product-detail-rating"><span class="rating-muted">Sin reseñas registradas</span><span class="product-detail-sku">SKU: <strong data-current-sku>{{ $product->variants->first()?->codigo_sku ?: 'No registrado' }}</strong></span></div>
+                <div class="product-detail-rating"><span class="rating-stars" aria-label="Sin valoración registrada"><i class="bi bi-star" aria-hidden="true"></i><i class="bi bi-star" aria-hidden="true"></i><i class="bi bi-star" aria-hidden="true"></i><i class="bi bi-star" aria-hidden="true"></i><i class="bi bi-star" aria-hidden="true"></i></span><span class="rating-muted">Sin reseñas registradas</span><span class="product-detail-sku">SKU: <strong data-current-sku>{{ $product->variants->first()?->codigo_sku ?: 'No registrado' }}</strong></span></div>
                 <div class="product-detail-price"><strong data-current-price>S/ {{ number_format($salePrice, 2) }}</strong>@if($discount > 0)<div class="product-detail-old-price"><del>S/ {{ number_format($originalPrice, 2) }}</del><span class="product-detail-discount">-{{ $discount }}%</span></div>@endif</div>
                 <p class="product-detail-stock {{ $product->existencias_disponibles > 0 ? 'is-available' : 'is-unavailable' }}" data-current-stock data-stock="{{ $product->existencias_disponibles }}"><i class="bi {{ $product->existencias_disponibles > 0 ? 'bi-check-circle' : 'bi-x-circle' }}" aria-hidden="true"></i>{{ $product->existencias_disponibles > 0 ? $product->existencias_disponibles.' unidades disponibles' : 'Sin stock' }}</p>
 
@@ -73,7 +73,7 @@
                     @auth
                         <div class="product-detail-actions"><button class="product-detail-buy product-detail-buy--primary" type="submit" @disabled($product->existencias_disponibles <= 0) data-add-to-cart><i class="bi bi-cart3" aria-hidden="true"></i> Agregar al carrito</button><button class="product-detail-buy product-detail-buy--success" type="submit" name="comprar_ahora" value="1" @disabled($product->existencias_disponibles <= 0)><i class="bi bi-lightning-charge" aria-hidden="true"></i> Comprar ahora</button></div>
                     @else
-                        <a class="product-detail-buy product-detail-buy--primary" href="{{ route('login') }}"><i class="bi bi-person-check" aria-hidden="true"></i> Debes iniciar sesión para continuar</a>
+                        <a class="product-detail-buy product-detail-buy--success" href="{{ route('login') }}"><i class="bi bi-cart3" aria-hidden="true"></i> Inicia sesión para comprar</a>
                     @endauth
                     <p class="product-detail-form-message" data-form-message role="status" hidden></p>
                 </form>
