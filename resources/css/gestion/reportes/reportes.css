@@ -162,7 +162,9 @@
 .modulo-reportes .reportes-kpi {
   display: flex;
   align-items: center;
-  gap: 14px;
+  justify-content: center;
+  gap: 8px;
+  flex-direction: column;
   min-height: 124px;
   padding: 16px 18px;
   overflow: hidden;
@@ -174,7 +176,6 @@
 
 .modulo-reportes .reportes-kpi-icon {
   display: grid;
-  flex: 0 0 50px;
   width: 50px;
   height: 50px;
   place-items: center;
@@ -184,6 +185,7 @@
 
 .modulo-reportes .reportes-kpi > div {
   min-width: 0;
+  text-align: center;
 }
 
 .modulo-reportes .reportes-kpi small,
@@ -199,19 +201,33 @@
 }
 
 .modulo-reportes .reportes-kpi strong {
-  margin-top: 4px;
+  margin-top: 2px;
   color: #0a1d4e;
-  font-size: clamp(1.35rem, 2.1vw, 1.85rem);
+  font-size: clamp(1.15rem, 1.65vw, 1.55rem);
   line-height: 1.1;
   letter-spacing: -0.04em;
 }
 
 .modulo-reportes .reportes-kpi span {
-  margin-top: 8px;
+  margin-top: 5px;
   color: #6d84a7;
   font-size: 0.68rem;
   white-space: nowrap;
 }
+
+.modulo-reportes .reportes-export-menu { position: relative; }
+.modulo-reportes .reportes-export-menu > summary { cursor: pointer; list-style: none; }
+.modulo-reportes .reportes-export-menu > summary::-webkit-details-marker { display: none; }
+.modulo-reportes .reportes-export-options { position: absolute; z-index: 30; top: calc(100% + 8px); right: 0; display: grid; width: 255px; gap: 4px; padding: 8px; border: 1px solid #d8e6f4; border-radius: 12px; background: #fff; box-shadow: 0 15px 35px rgba(12, 57, 120, .18); }
+.modulo-reportes .reportes-export-options a { display: flex; align-items: center; gap: 10px; padding: 9px; border-radius: 8px; color: #17376b; text-decoration: none; }
+.modulo-reportes .reportes-export-options a:hover { background: #edf5ff; }
+.modulo-reportes .reportes-export-options a > i { display: grid; flex: 0 0 32px; width: 32px; height: 32px; place-items: center; border-radius: 8px; color: #0873ed; background: #e5f2ff; font-size: 1.05rem; }
+.modulo-reportes .reportes-export-options a:nth-child(1) > i { color: #e33449; background: #ffe8e9; }
+.modulo-reportes .reportes-export-options a:nth-child(2) > i { color: #0b9b65; background: #dff8ec; }
+.modulo-reportes .reportes-export-options a:nth-child(3) > i { color: #0873ed; background: #e5f2ff; }
+.modulo-reportes .reportes-export-options a span { display: grid; gap: 2px; }
+.modulo-reportes .reportes-export-options strong { font-size: .75rem; }
+.modulo-reportes .reportes-export-options small { color: #7588aa; font-size: .63rem; font-weight: 500; }
 
 .modulo-reportes .reportes-kpi span i {
   color: #14a86f;

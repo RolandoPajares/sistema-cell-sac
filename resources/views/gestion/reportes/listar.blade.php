@@ -66,9 +66,9 @@
             <details class="reportes-export-menu">
                 <summary class="reportes-export-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar <i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
                 <div class="reportes-export-options">
-                    <a href="{{ route('management.reports.export', ['format' => 'excel'] + $filters) }}">Excel (.xlsx)</a>
-                    <a href="{{ route('management.reports.export', ['format' => 'pdf'] + $filters) }}">PDF (.pdf)</a>
-                    <a href="{{ route('management.reports.export', ['format' => 'csv'] + $filters) }}">CSV (.csv)</a>
+                    <a href="{{ route('management.reports.export', ['format' => 'pdf'] + $filters) }}"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i><span><strong>Exportar PDF</strong><small>Documento imprimible</small></span></a>
+                    <a href="{{ route('management.reports.export', ['format' => 'excel'] + $filters) }}"><i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i><span><strong>Exportar Excel</strong><small>Archivo compatible .xlsx</small></span></a>
+                    <a href="{{ route('management.reports.export', ['format' => 'csv'] + $filters) }}"><i class="bi bi-filetype-csv" aria-hidden="true"></i><span><strong>Exportar CSV</strong><small>Datos delimitados</small></span></a>
                 </div>
             </details>
         </header>
