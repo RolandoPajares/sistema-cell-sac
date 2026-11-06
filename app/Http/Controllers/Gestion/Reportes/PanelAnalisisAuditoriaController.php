@@ -247,7 +247,29 @@ final class PanelAnalisisAuditoriaController extends Controller
             $registro->direccion_ip ?? '—',
             $registro->resultado ?? 'registrado',
         ])->all();
-        $pagina['metricas'][0][1] = (string) $registros->total();
+        $pagina['detalles'] = $registros->getCollection()->map(static fn (RegistroAuditoria $registro): array => [
+            'id' => (string) $registro->id,
+            'fecha' => $registro->ocurrido_en?->format('Y-m-d H:i:s') ?? $registro->creado_en?->format('Y-m-d H:i:s') ?? '—',
+            'usuario' => $registro->user?->nombre ?? 'Sistema',
+            'modulo' => $registro->modulo ?? $registro->modulo_codigo ?? $registro->entidad,
+            'accion' => $registro->accion,
+            'entidad' => $registro->entidad,
+            'entidad_id' => $registro->entidad_id ?? $registro->identificador_entidad,
+            'resultado' => $registro->resultado ?? 'registrado',
+            'direccion_ip' => $registro->direccion_ip ?? '—',
+            'sede_id' => $registro->sede_id ?? '—',
+            'tabla' => $registro->tabla_afectada ?? $registro->entidad,
+            'observaciones' => $registro->observaciones ?? $registro->observacion ?? 'Sin observaciones registradas.',
+            'origen' => $registro->origen ?? 'laravel',
+        ])->values()->all();
+        $pagina['metricas'][0][0] = 'Eventos hoy';
+        $pagina['metricas'][0][1] = (string) (clone $consultaBase)->whereDate('creado_en', now()->toDateString())->count();
+        $pagina['metricas'][1][0] = 'Operaciones exitosas';
+        $pagina['metricas'][1][1] = (string) (clone $consulta)->whereIn('resultado', ['exito', 'exitoso'])->count();
+        $pagina['metricas'][2][0] = 'Accesos denegados';
+        $pagina['metricas'][2][1] = (string) (clone $consulta)->whereIn('resultado', ['denegado', 'fallo', 'fallido'])->count();
+        $pagina['metricas'][3][0] = 'Usuarios activos';
+        $pagina['metricas'][3][1] = (string) User::query()->where('activo', true)->count();
         $conteosResultado = (clone $consulta)->reorder()->selectRaw("COALESCE(resultado, 'registrado') AS resultado, COUNT(*) AS cantidad")
             ->groupBy('resultado')->pluck('cantidad', 'resultado');
         $pagina['metricas'][1][1] = (string) $conteosResultado->filter(fn ($cantidad, $resultado): bool => in_array(mb_strtolower((string) $resultado), ['exito', 'exitoso'], true))->sum();
@@ -284,7 +306,7 @@ final class PanelAnalisisAuditoriaController extends Controller
         };
         $filtros = match ($tipo) {
             'globales' => [['Tipo de reporte', 'reporte', 'Seleccionar reporte'], ['Estado', 'estado', 'Todos los estados'], ['Desde', 'desde', 'fecha'], ['Hasta', 'hasta', 'fecha']],
-            default => [['Buscar', 'buscar', 'text'], ['Usuario', 'usuario_id', 'Todos los usuarios'], ['Módulo', 'modulo', 'Todos los módulos'], ['Acción', 'accion', 'Todas las acciones'], ['Resultado', 'resultado', 'Todos los resultados'], ['Desde', 'desde', 'fecha'], ['Hasta', 'hasta', 'fecha']],
+            default => [['Desde', 'desde', 'fecha'], ['Hasta', 'hasta', 'fecha'], ['Usuario', 'usuario_id', 'Todos los usuarios'], ['Módulo', 'modulo', 'Todos los módulos'], ['Tipo de operación', 'accion', 'Todas las acciones'], ['Resultado', 'resultado', 'Todos los resultados'], ['Buscar', 'buscar', 'text']],
         };
 
         return [
