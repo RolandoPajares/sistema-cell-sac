@@ -26,6 +26,7 @@
     ])->values();
 @endphp
 
+@section('content')
 <section class="product-page-light" data-product-detail data-product-id="{{ $product->id }}" data-variant-data='@json($variantData)'>
     <div class="container product-detail-container">
         <nav class="product-breadcrumbs" aria-label="Ruta de navegación">
