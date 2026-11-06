@@ -73,7 +73,7 @@
                     @auth
                         <div class="product-detail-actions"><button class="product-detail-buy product-detail-buy--primary" type="submit" @disabled($product->existencias_disponibles <= 0) data-add-to-cart><i class="bi bi-cart3" aria-hidden="true"></i> Agregar al carrito</button><button class="product-detail-buy product-detail-buy--success" type="submit" name="comprar_ahora" value="1" @disabled($product->existencias_disponibles <= 0)><i class="bi bi-lightning-charge" aria-hidden="true"></i> Comprar ahora</button></div>
                     @else
-                        <a class="product-detail-buy product-detail-buy--success" href="{{ route('login') }}"><i class="bi bi-cart3" aria-hidden="true"></i> Inicia sesión para comprar</a>
+                        <a class="product-detail-buy product-detail-buy--success" href="{{ route('login') }}"><i class="bi bi-cart3" aria-hidden="true"></i> Comprar</a>
                     @endauth
                     <p class="product-detail-form-message" data-form-message role="status" hidden></p>
                 </form>
