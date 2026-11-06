@@ -7,9 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
 /**
- * Define la responsabilidad de la clase GuardarTransferenciaExistenciaRequest dentro de su módulo.
- *
- * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ * Valida una transferencia de existencias y evita repetir producto/variante en sus líneas.
  */
 class GuardarTransferenciaExistenciaRequest extends FormRequest
 {
@@ -43,10 +41,10 @@ class GuardarTransferenciaExistenciaRequest extends FormRequest
     }
 
     /**
-     * Ejecuta la operación withValidator definida por la clase GuardarTransferenciaExistenciaRequest.
+     * Añade validaciones posteriores para impedir transferencias inconsistentes.
      *
-     * @param  mixed  $validator  Parámetro recibido por la operación.
-     * @return void Resultado de la operación.
+     * @param  Validator  $validator  Validador al que se agregan comprobaciones de origen, destino y cantidades.
+     * @return void Registra errores adicionales sobre el validador cuando corresponde.
      */
     public function withValidator(Validator $validator): void
     {

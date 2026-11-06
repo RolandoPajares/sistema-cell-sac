@@ -11,9 +11,7 @@ use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Define la responsabilidad de la clase EstablecerContextoAuditoria dentro de su módulo.
- *
- * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ * Establece y limpia las variables de sesión MariaDB usadas por la auditoría de la solicitud.
  */
 final class EstablecerContextoAuditoria
 {
@@ -26,18 +24,20 @@ final class EstablecerContextoAuditoria
     public function __construct(private readonly ServicioAutorizacion $autorizacion) {}
 
     /**
-     * Ejecuta la operación principal asignada al componente.
+     * Establece en la solicitud el contexto de auditoría usado por las operaciones posteriores.
      *
-     * @param  mixed  $request  Parámetro recibido por la operación.
-     * @param  mixed  $next  Parámetro recibido por la operación.
-     * @return Response Resultado de la operación.
+     * @param  Request  $request  Solicitud cuyo usuario, ruta y entidad se usarán como contexto.
+     * @param  Closure  $next  Siguiente etapa del pipeline HTTP.
+     * @return Response Respuesta producida por el siguiente middleware o controlador.
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (DB::getDriverName() !== 'mysql'
+        if (
+            DB::getDriverName() !== 'mysql'
             || ! Schema::hasTable('registros_auditoria')
             || ! Schema::hasTable('empresas')
-            || ! Schema::hasTable('sedes')) {
+            || ! Schema::hasTable('sedes')
+        ) {
             return $next($request);
         }
 

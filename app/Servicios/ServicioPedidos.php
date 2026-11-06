@@ -6,7 +6,6 @@ use App\Models\Catalogo\Producto;
 use App\Models\Comercio\Cupon;
 use App\Models\Comercio\Pedido;
 use App\Models\User;
-use App\Servicios\ServicioCarrito;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -38,7 +37,9 @@ class ServicioPedidos
      */
     public function checkout(User $user, array $cart, ?string $couponCode, ?string $ip, string $checkoutToken): Pedido
     {
-        $this->authorization->assertAllowed($user, 'gestion.pedidos.crear');
+        if (! $user->isRole('cliente_mayorista') && ! $user->isRole('cliente_minorista')) {
+            $this->authorization->assertAllowed($user, 'gestion.pedidos.crear');
+        }
         $cart = $this->cartService->normalizar($cart);
         abort_if($cart === [] || preg_match('/^[a-f0-9]{64}$/', $checkoutToken) !== 1, 422, 'La solicitud de compra no es válida.');
 

@@ -44,16 +44,7 @@ final class ServicioMenuDinamico
             ->leftJoin('roles_menus', function ($join) use ($roleIds): void {
                 $join->on('roles_menus.menu_id', '=', 'menus.id')->whereIn('roles_menus.rol_id', $roleIds);
             })
-            ->where(function ($query) use ($roleIds): void {
-                $query->whereNotNull('roles_menus.rol_id')
-                    ->orWhereExists(function ($subquery) use ($roleIds): void {
-                        $subquery->selectRaw('1')
-                            ->from('elementos_menu as menu_permissions')
-                            ->join('roles_permisos as effective_grants', 'effective_grants.permiso_id', '=', 'menu_permissions.permiso_id')
-                            ->whereColumn('menu_permissions.menu_id', 'menus.id')
-                            ->whereIn('effective_grants.rol_id', $roleIds);
-                    });
-            })
+            ->whereNotNull('roles_menus.rol_id')
             ->where('menus.habilitado', true)
             ->where('menus.contexto', 'sidebar')
             ->select('menus.id', 'menus.codigo', 'menus.nombre')

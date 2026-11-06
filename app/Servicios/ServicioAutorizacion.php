@@ -9,11 +9,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
- * Define la responsabilidad de la clase ServicioAutorizacion dentro de su módulo.
- *
- * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ * Resuelve permisos RBAC, roles, alcances organizacionales y permisos derivados de rutas.
  */
 final class ServicioAutorizacion
 {
@@ -51,9 +50,9 @@ final class ServicioAutorizacion
     ];
 
     /**
-     * Ejecuta la operación schemaAvailable definida por la clase ServicioAutorizacion.
+     * Comprueba que existan las tablas mínimas necesarias para consultar RBAC.
      *
-     * @return bool Resultado de la operación.
+     * @return bool Verdadero cuando la fachada de esquema está disponible y todas las tablas requeridas existen.
      */
     public function schemaAvailable(): bool
     {
@@ -71,9 +70,9 @@ final class ServicioAutorizacion
     }
 
     /**
-     * Realiza la operación específica definida por este método y devuelve su resultado.
+     * Verifica que el esquema RBAC contenga roles y permisos activos sembrados.
      *
-     * @return bool Resultado de la operación.
+     * @return bool Verdadero cuando el catálogo está disponible y tiene datos activos.
      */
     public function isSeeded(): bool
     {
@@ -83,11 +82,11 @@ final class ServicioAutorizacion
     }
 
     /**
-     * Realiza la operación específica definida por este método y devuelve su resultado.
+     * Comprueba una asignación vigente de rol global o restringida a la sede activa.
      *
-     * @param  mixed  $user  Parámetro recibido por la operación.
-     * @param  mixed  $roleCode  Parámetro recibido por la operación.
-     * @return bool Resultado de la operación.
+     * @param  User  $user  Usuario cuya asignación se consulta.
+     * @param  string  $roleCode  Código del rol.
+     * @return bool Verdadero si el rol existe, está activo y está vigente para el usuario.
      */
     public function hasRole(User $user, string $roleCode): bool
     {
@@ -138,8 +137,8 @@ final class ServicioAutorizacion
      * Devuelve falso si el catálogo RBAC no está sembrado y, en caso contrario, considera
      * roles activos, asignaciones vigentes, módulos habilitados y pantallas autorizadas.
      *
-     * @param User $user Usuario cuya asignación RBAC se consulta.
-     * @param string $permissionCode Código del permiso requerido.
+     * @param  User  $user  Usuario cuya asignación RBAC se consulta.
+     * @param  string  $permissionCode  Código del permiso requerido.
      * @return bool Verdadero cuando el permiso está vigente en el alcance aplicable.
      */
     public function allows(User $user, string $permissionCode): bool
@@ -157,10 +156,11 @@ final class ServicioAutorizacion
      * Delega la comprobación a {@see allows()} y produce HTTP 403 cuando el usuario
      * no tiene el código activo en su alcance.
      *
-     * @param User $user Usuario que solicita la operación.
-     * @param string $permissionCode Código del permiso requerido.
+     * @param  User  $user  Usuario que solicita la operación.
+     * @param  string  $permissionCode  Código del permiso requerido.
      * @return void No devuelve datos cuando la autorización es válida.
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si el permiso no está autorizado.
+     *
+     * @throws HttpException Si el permiso no está autorizado.
      */
     public function assertAllowed(User $user, string $permissionCode): void
     {
@@ -223,10 +223,10 @@ final class ServicioAutorizacion
     }
 
     /**
-     * Ejecuta la operación activeSiteIdFor definida por la clase ServicioAutorizacion.
+     * Expone el identificador de la sede activa que corresponde al usuario.
      *
-     * @param  mixed  $user  Parámetro recibido por la operación.
-     * @return mixed Resultado de la operación.
+     * @param  User  $user  Usuario cuya sede se resuelve.
+     * @return int|null Identificador de sede autorizado o null si no hay una única sede válida.
      */
     public function activeSiteIdFor(User $user): ?int
     {
@@ -234,9 +234,9 @@ final class ServicioAutorizacion
     }
 
     /**
-     * Ejecuta la operación activeCompanyId definida por la clase ServicioAutorizacion.
+     * Devuelve la empresa activa cuando el sistema tiene una única empresa habilitada.
      *
-     * @return mixed Resultado de la operación.
+     * @return int|null Identificador de empresa o null si no puede determinarse uno único.
      */
     public function activeCompanyId(): ?int
     {
@@ -260,9 +260,14 @@ final class ServicioAutorizacion
     }
 
     /**
-     * Obtiene y prepara la información solicitada para la operación.
+     * Comprueba permiso y alcance de una operación sobre empresa, sede o propietario.
      *
-     * @return mixed Resultado de la operación.
+     * @param  User  $user  Usuario que solicita el acceso.
+     * @param  string  $permissionCode  Código del permiso.
+     * @param  int|null  $companyId  Empresa del registro consultado.
+     * @param  int|null  $siteId  Sede del registro consultado.
+     * @param  int|null  $ownerId  Propietario del registro cuando aplica.
+     * @return bool Verdadero si el usuario puede operar sobre el registro indicado.
      */
     public function allowsRecord(
         User $user,
@@ -416,11 +421,11 @@ final class ServicioAutorizacion
     }
 
     /**
-     * Obtiene y prepara la información solicitada para la operación.
+     * Comprueba que un permiso esté asignado al usuario con alcance de empresa.
      *
-     * @param  mixed  $user  Parámetro recibido por la operación.
-     * @param  mixed  $permissionCode  Parámetro recibido por la operación.
-     * @return bool Resultado de la operación.
+     * @param  User  $user  Usuario que solicita el permiso.
+     * @param  string  $permissionCode  Código del permiso.
+     * @return bool Verdadero si existe una asignación global activa y vigente.
      */
     public function allowsGlobal(User $user, string $permissionCode): bool
     {
@@ -445,10 +450,12 @@ final class ServicioAutorizacion
     }
 
     /**
-     * Obtiene y prepara la información solicitada para la operación.
+     * Resuelve el permiso de la ruta y valida módulo, pantalla y usuario actual.
      *
-     * @param  mixed  $request  Parámetro recibido por la operación.
-     * @return bool Resultado de la operación.
+     * También admite rutas de cuenta explícitamente públicas para este middleware.
+     *
+     * @param  Request  $request  Solicitud cuya ruta y usuario se autorizarán.
+     * @return bool Verdadero si la ruta queda autorizada por RBAC.
      */
     public function allowsRoute(Request $request): bool
     {
@@ -507,10 +514,12 @@ final class ServicioAutorizacion
     }
 
     /**
-     * Ejecuta la operación permissionForRoute definida por la clase ServicioAutorizacion.
+     * Traduce el nombre de una ruta de gestión a su código de permiso canónico.
      *
-     * @param  mixed  $request  Parámetro recibido por la operación.
-     * @return mixed Resultado de la operación.
+     * Normaliza prefijos legacy y acciones HTTP mediante el mapa de acciones del servicio.
+     *
+     * @param  Request  $request  Solicitud cuya ruta se inspeccionará.
+     * @return string|null Código de permiso o null para rutas no gestionadas.
      */
     public function permissionForRoute(Request $request): ?string
     {
@@ -624,10 +633,10 @@ final class ServicioAutorizacion
     }
 
     /**
-     * Realiza la operación específica definida por este método y devuelve su resultado.
+     * Indica si el usuario está sujeto a asignaciones RBAC controladas.
      *
-     * @param  mixed  $user  Parámetro recibido por la operación.
-     * @return bool Resultado de la operación.
+     * @param  User  $user  Usuario consultado.
+     * @return bool Verdadero cuando el esquema está sembrado y el indicador está activo.
      */
     public function hasControlledAssignments(User $user): bool
     {
@@ -635,10 +644,10 @@ final class ServicioAutorizacion
     }
 
     /**
-     * Ejecuta la operación activeSiteId definida por la clase ServicioAutorizacion.
+     * Resuelve la sede de sesión si sigue autorizada o una única sede asignada.
      *
-     * @param  mixed  $user  Parámetro recibido por la operación.
-     * @return mixed Resultado de la operación.
+     * @param  User  $user  Usuario cuya sede se valida.
+     * @return int|null Sede activa autorizada o null cuando hay cero o varias opciones.
      */
     private function activeSiteId(User $user): ?int
     {
@@ -704,10 +713,10 @@ final class ServicioAutorizacion
     }
 
     /**
-     * Realiza la operación específica definida por este método y devuelve su resultado.
+     * Comprueba que una sede y su empresa estén activas.
      *
-     * @param  mixed  $siteId  Parámetro recibido por la operación.
-     * @return bool Resultado de la operación.
+     * @param  int  $siteId  Identificador de la sede.
+     * @return bool Verdadero cuando ambas entidades existen y están habilitadas.
      */
     private function isActiveSite(int $siteId): bool
     {
@@ -722,12 +731,12 @@ final class ServicioAutorizacion
     }
 
     /**
-     * Realiza la operación específica definida por este método y devuelve su resultado.
+     * Busca un permiso activo en asignaciones globales o de sede para un alcance dado.
      *
-     * @param  mixed  $user  Parámetro recibido por la operación.
-     * @param  mixed  $permissionCode  Parámetro recibido por la operación.
-     * @param  mixed  $scope  Parámetro recibido por la operación.
-     * @return bool Resultado de la operación.
+     * @param  User  $user  Usuario cuya asignación se consulta.
+     * @param  string  $permissionCode  Código del permiso.
+     * @param  string  $scope  Alcance RBAC que debe coincidir.
+     * @return bool Verdadero si existe una asignación activa y vigente.
      */
     private function hasPermissionAtScope(User $user, string $permissionCode, string $scope): bool
     {
@@ -809,9 +818,9 @@ final class ServicioAutorizacion
     }
 
     /**
-     * Ejecuta la operación singleActiveSiteId definida por la clase ServicioAutorizacion.
+     * Obtiene la única sede activa cuando el catálogo no ofrece más de una.
      *
-     * @return mixed Resultado de la operación.
+     * @return int|null Identificador único o null si hay cero o varias sedes.
      */
     private function singleActiveSiteId(): ?int
     {
@@ -831,9 +840,9 @@ final class ServicioAutorizacion
     }
 
     /**
-     * Ejecuta la operación singleActiveCompanyId definida por la clase ServicioAutorizacion.
+     * Obtiene la única empresa activa cuando el catálogo no ofrece más de una.
      *
-     * @return mixed Resultado de la operación.
+     * @return int|null Identificador único o null si hay cero o varias empresas.
      */
     private function singleActiveCompanyId(): ?int
     {

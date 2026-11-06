@@ -9,11 +9,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
- * Define la responsabilidad de la clase ServicioInventario dentro de su módulo.
- *
- * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ * Coordina disponibilidad, movimientos, ajustes y sincronización de existencias.
  */
 class ServicioInventario
 {
@@ -261,14 +260,17 @@ class ServicioInventario
      * Filtra identificadores positivos, verifica almacén activo y excluye productos o
      * variantes serializadas; el saldo final es físico menos reservado. No modifica datos.
      *
-     * @param User $usuario Usuario cuya empresa, sede y almacén delimitan la consulta.
-     * @param array<int, int|string> $identificadores Identificadores de productos.
+     * @param  User  $usuario  Usuario cuya empresa, sede y almacén delimitan la consulta.
+     * @param  array<int, int|string>  $identificadores  Identificadores de productos.
      * @return array<int, int> Existencias disponibles indexadas por producto.
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si no existe ubicación autorizada.
+     *
+     * @throws HttpException Si no existe ubicación autorizada.
      */
     public function disponibilidadParaOperacion(User $usuario, array $identificadores): array
     {
-        $this->authorization->assertAllowed($usuario, 'gestion.pedidos.crear');
+        if (! $usuario->isRole('cliente_mayorista') && ! $usuario->isRole('cliente_minorista')) {
+            $this->authorization->assertAllowed($usuario, 'gestion.pedidos.crear');
+        }
         $ubicacion = $this->authorization->operationLocation($usuario);
         abort_unless($ubicacion['empresa_id'] !== null && $ubicacion['sede_id'] !== null && $ubicacion['almacen_id'] !== null, 503, 'No hay un almacén autorizado disponible.');
         $ids = collect($identificadores)->map(fn (int|string $id): int => (int) $id)
@@ -320,10 +322,11 @@ class ServicioInventario
      * Exige una transacción abierta, verifica la ubicación autorizada, fija existencias
      * del producto en cero e inserta su saldo físico y reservado inicial.
      *
-     * @param Producto $product Producto cuyo saldo se inicializa.
-     * @param User $user Usuario que determina la ubicación autorizada.
+     * @param  Producto  $product  Producto cuyo saldo se inicializa.
+     * @param  User  $user  Usuario que determina la ubicación autorizada.
      * @return void Persiste el saldo inicial sin devolver datos.
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si falta la transacción, el esquema o el alcance.
+     *
+     * @throws HttpException Si falta la transacción, el esquema o el alcance.
      */
     public function registerNewProduct(Producto $product, User $user): void
     {
@@ -351,13 +354,14 @@ class ServicioInventario
      * Autoriza la acción, abre una transacción, bloquea el producto, delega el cambio
      * al método de existencias bloqueadas y registra el movimiento resultante.
      *
-     * @param Producto $product Producto cuyo saldo se ajusta.
-     * @param string $movementType Tipo de movimiento.
-     * @param int $quantity Cantidad del ajuste.
-     * @param string $notes Motivo guardado con el movimiento.
-     * @param User $user Usuario que ejecuta el ajuste.
+     * @param  Producto  $product  Producto cuyo saldo se ajusta.
+     * @param  string  $movementType  Tipo de movimiento.
+     * @param  int  $quantity  Cantidad del ajuste.
+     * @param  string  $notes  Motivo guardado con el movimiento.
+     * @param  User  $user  Usuario que ejecuta el ajuste.
      * @return ?MovimientoInventario Movimiento creado o null cuando no se produce movimiento.
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si falla autorización o validación.
+     *
+     * @throws HttpException Si falla autorización o validación.
      */
     public function adjust(Producto $product, string $movementType, int $quantity, string $notes, User $user): ?MovimientoInventario
     {
@@ -381,9 +385,19 @@ class ServicioInventario
     }
 
     /**
-     * Registra la información recibida y coordina su persistencia.
+     * Registra un movimiento manual de inventario en un almacén autorizado.
      *
-     * @return mixed Resultado de la operación.
+     * Valida empresa, sede, almacén, variante y tipo de movimiento; bloquea el
+     * producto y delega el cambio a la rutina transaccional de existencias.
+     *
+     * @param  Producto  $producto  Producto cuyo stock se modifica.
+     * @param  int|null  $varianteId  Variante opcional del producto.
+     * @param  int  $almacenId  Almacén destino.
+     * @param  string  $tipoMovimiento  Entrada, salida o ajuste.
+     * @param  int  $cantidad  Cantidad solicitada.
+     * @param  string  $notas  Observación del movimiento.
+     * @param  User  $usuario  Usuario autorizado.
+     * @return MovimientoInventario|null Movimiento creado o null si el ajuste no cambia stock.
      */
     public function registrarMovimientoEnAlmacen(
         Producto $producto,
@@ -460,14 +474,17 @@ class ServicioInventario
     }
 
     /**
-     * Ejecuta la operación changeLockedProduct definida por la clase ServicioInventario.
+     * Cambia existencias de un producto ya bloqueado dentro de una transacción.
      *
-     * @param  mixed  $product  Parámetro recibido por la operación.
-     * @param  mixed  $movementType  Parámetro recibido por la operación.
-     * @param  mixed  $quantity  Parámetro recibido por la operación.
-     * @param  mixed  $notes  Parámetro recibido por la operación.
-     * @param  mixed  $user  Parámetro recibido por la operación.
-     * @return mixed Resultado de la operación.
+     * Valida cantidades, ubicación RBAC, reservas y consistencia de balances;
+     * actualiza existencias heredadas y crea el movimiento cuando hay diferencia.
+     *
+     * @param  Producto  $product  Producto bloqueado.
+     * @param  string  $movementType  Entrada, salida o ajuste.
+     * @param  int  $quantity  Cantidad nueva o desplazamiento solicitado.
+     * @param  string  $notes  Observación del movimiento.
+     * @param  User  $user  Usuario autorizado.
+     * @return MovimientoInventario|null Movimiento creado o null si no hubo cambio.
      */
     public function changeLockedProduct(Producto $product, string $movementType, int $quantity, string $notes, User $user): ?MovimientoInventario
     {
@@ -529,9 +546,25 @@ class ServicioInventario
     }
 
     /**
-     * Ejecuta la operación changeLockedProductInWarehouse definida por la clase ServicioInventario.
+     * Ajusta el balance de una ubicación concreta y sincroniza las existencias heredadas.
      *
-     * @return mixed Resultado de la operación.
+     * Requiere una transacción activa, valida pertenencia del almacén, bloquea el
+     * balance por producto/variante y puede crear el balance faltante solo cuando
+     * la llamada lo solicita para un ajuste.
+     *
+     * @param  Producto  $product  Producto bloqueado.
+     * @param  int|null  $variantId  Variante opcional.
+     * @param  string  $movementType  Tipo de movimiento.
+     * @param  int  $quantity  Cantidad solicitada.
+     * @param  string  $notes  Observación.
+     * @param  User  $user  Usuario que origina el movimiento.
+     * @param  int  $companyId  Empresa autorizada.
+     * @param  int  $siteId  Sede autorizada.
+     * @param  int  $warehouseId  Almacén autorizado.
+     * @param  string|null  $documentType  Tipo de documento origen.
+     * @param  string|null  $documentId  Identificador del documento origen.
+     * @param  bool  $createMissingBalance  Indica si puede crear balance inexistente.
+     * @return MovimientoInventario|null Movimiento creado o null cuando no hay cambio.
      */
     public function changeLockedProductInWarehouse(
         Producto $product,

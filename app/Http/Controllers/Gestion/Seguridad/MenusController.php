@@ -39,12 +39,13 @@ class MenusController extends Controller
             ? Menu::query()->with(['roles', 'elementos' => fn ($query) => $query->with(['elementosHijos.pantalla', 'elementosHijos.permiso', 'pantalla', 'permiso'])])->orderBy('nombre')->get()
             : collect();
         $roles = $ready ? Rol::query()->where('activo', true)->orderBy('nombre')->get() : collect();
+        $screens = $ready ? Pantalla::query()->where('habilitada', true)->orderBy('nombre')->get(['id', 'nombre', 'codigo', 'ruta']) : collect();
         $activeMenus = $ready ? Menu::query()->where('habilitado', true)->count() : 0;
         $activeSubmenus = $ready ? ElementoMenu::query()->where('habilitado', true)->whereNotNull('padre_id')->count() : 0;
         $hiddenElements = $ready ? ElementoMenu::query()->where('habilitado', false)->count() : 0;
         $recentChanges = $ready ? ElementoMenu::query()->where('actualizado_en', '>=', now()->subDays(7))->count() : 0;
 
-        return view('gestion.menus.listar', compact('ready', 'menus', 'roles', 'activeMenus', 'activeSubmenus', 'hiddenElements', 'recentChanges'));
+        return view('gestion.menus.listar', compact('ready', 'menus', 'roles', 'screens', 'activeMenus', 'activeSubmenus', 'hiddenElements', 'recentChanges'));
     }
 
     /**
@@ -87,17 +88,26 @@ class MenusController extends Controller
     {
         abort_unless($autorizacion->allowsGlobal($request->user(), 'gestion.seguridad.actualizar'), 403);
         $validated = $request->validate([
-            'orden' => ['required', 'integer', 'min:0', 'max:10000'],
+            'etiqueta' => ['sometimes', 'required', 'string', 'max:160'],
+            'icono' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'pantalla_id' => ['sometimes', 'nullable', 'integer', Rule::exists('pantallas', 'id')->where('habilitada', true)],
+            'orden' => ['sometimes', 'required', 'integer', 'min:0', 'max:10000'],
             'habilitado' => ['required', 'boolean'],
         ]);
+        if (array_key_exists('pantalla_id', $validated)) {
+            $screenId = $validated['pantalla_id'] !== null ? (int) $validated['pantalla_id'] : null;
+            $validated['permiso_id'] = $screenId === null
+                ? null
+                : DB::table('permisos')->where('pantalla_id', $screenId)->where('accion', 'consultar')->where('activo', true)->value('id');
+        }
         if ($validated['habilitado']) {
-            abort_unless($element->pantalla !== null && $element->pantalla->habilitada && is_string($element->pantalla->ruta) && $this->isActionableRoute($element->pantalla->ruta), 422, 'La opción solo puede habilitarse cuando su pantalla existe, está activa y tiene una ruta funcional.');
+            abort_unless($element->tipo === 'grupo' || ($element->pantalla !== null && $element->pantalla->habilitada && is_string($element->pantalla->ruta) && $this->isActionableRoute($element->pantalla->ruta)), 422, 'La opción solo puede habilitarse cuando su pantalla existe, está activa y tiene una ruta funcional.');
         }
 
-        $before = $element->only(['orden', 'habilitado']);
+        $before = $element->only(['etiqueta', 'icono', 'pantalla_id', 'permiso_id', 'orden', 'habilitado']);
         DB::transaction(function () use ($element, $validated, $auditoria, $request, $before): void {
             $element->update($validated);
-            $auditoria->record($request->user()->getKey(), 'actualizar_elemento_menu', 'elementos_menu', $element->getKey(), $before, $element->only(['orden', 'habilitado']), $request->ip());
+            $auditoria->record($request->user()->getKey(), 'actualizar_elemento_menu', 'elementos_menu', $element->getKey(), $before, $element->only(['etiqueta', 'icono', 'pantalla_id', 'permiso_id', 'orden', 'habilitado']), $request->ip());
         });
 
         return back()->with('status', 'La opción del menú fue actualizada.');
@@ -188,16 +198,20 @@ class MenusController extends Controller
     public function updateScreen(Request $request, Pantalla $screen, ServicioAutorizacion $autorizacion, RegistradorAuditoria $auditoria): RedirectResponse
     {
         abort_unless($autorizacion->allowsGlobal($request->user(), 'gestion.seguridad.actualizar'), 403);
-        $validated = $request->validate(['habilitada' => ['required', 'boolean']]);
+        $validated = $request->validate([
+            'nombre' => ['sometimes', 'required', 'string', 'max:160'],
+            'icono' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'habilitada' => ['required', 'boolean'],
+        ]);
         abort_if(! $validated['habilitada'] && $this->isIndispensableScreen($screen), 422, 'La pantalla indispensable de seguridad no se puede desactivar.');
         if ($validated['habilitada'] && (! is_string($screen->ruta) || ! $this->isActionableRoute($screen->ruta))) {
             abort(422, 'No se puede activar una pantalla sin una ruta de controlador implementada.');
         }
 
-        $before = $screen->only(['habilitada']);
+        $before = $screen->only(['nombre', 'icono', 'habilitada']);
         DB::transaction(function () use ($screen, $validated, $auditoria, $request, $before): void {
-            $screen->update(['habilitada' => $validated['habilitada']]);
-            $auditoria->record($request->user()->getKey(), 'actualizar_estado_pantalla', 'pantallas', $screen->getKey(), $before, $screen->only(['habilitada']), $request->ip());
+            $screen->update($validated);
+            $auditoria->record($request->user()->getKey(), 'actualizar_pantalla', 'pantallas', $screen->getKey(), $before, $screen->only(['nombre', 'icono', 'habilitada']), $request->ip());
         });
 
         return back()->with('status', 'El estado de la pantalla fue actualizado.');
@@ -215,13 +229,19 @@ class MenusController extends Controller
     public function updateModule(Request $request, Modulo $module, ServicioAutorizacion $autorizacion, RegistradorAuditoria $auditoria): RedirectResponse
     {
         abort_unless($autorizacion->allowsGlobal($request->user(), 'gestion.seguridad.actualizar'), 403);
-        $validated = $request->validate(['habilitado' => ['required', 'boolean']]);
+        $validated = $request->validate([
+            'nombre' => ['sometimes', 'required', 'string', 'max:140'],
+            'descripcion' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'icono' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'orden' => ['sometimes', 'required', 'integer', 'min:0', 'max:10000'],
+            'habilitado' => ['required', 'boolean'],
+        ]);
         abort_if(! $validated['habilitado'] && $module->codigo === 'seguridad', 422, 'El módulo de seguridad no se puede desactivar.');
 
-        $before = $module->only(['habilitado']);
+        $before = $module->only(['nombre', 'descripcion', 'icono', 'orden', 'habilitado']);
         DB::transaction(function () use ($module, $validated, $auditoria, $request, $before): void {
-            $module->update(['habilitado' => $validated['habilitado']]);
-            $auditoria->record($request->user()->getKey(), 'actualizar_estado_modulo', 'modulos', $module->getKey(), $before, $module->only(['habilitado']), $request->ip());
+            $module->update($validated);
+            $auditoria->record($request->user()->getKey(), 'actualizar_modulo', 'modulos', $module->getKey(), $before, $module->only(['nombre', 'descripcion', 'icono', 'orden', 'habilitado']), $request->ip());
         });
 
         return back()->with('status', 'El estado del módulo fue actualizado.');

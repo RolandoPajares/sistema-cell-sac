@@ -93,7 +93,8 @@ Route::middleware(['auth', 'cuenta.activa', 'sesion.usuario'])->group(function (
     Route::put('/mi-cuenta/password', [CuentaAdministracionController::class, 'updatePassword'])->name('account.password');
 
     Route::get('/carrito', [CarritoController::class, 'index'])->name('cart.index');
-    Route::post('/carrito/{product}/agregar', [CarritoController::class, 'add'])->whereNumber('product')->name('cart.add');
+    Route::post('/carrito/{product}/agregar', [CarritoController::class, 'add'])
+        ->whereNumber('product')->middleware('carrito.ecommerce')->name('cart.add');
     Route::patch('/carrito/{product}', [CarritoController::class, 'update'])->whereNumber('product')->name('cart.update');
     Route::post('/carrito/{product}/quitar', [CarritoController::class, 'remove'])->whereNumber('product')->name('cart.remove');
     Route::post('/carrito/vaciar', [CarritoController::class, 'clear'])->name('cart.clear');

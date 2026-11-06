@@ -28,7 +28,7 @@ class ServicioCatalogo
      * rango de precios y orden permitido. Solo considera productos activos y precarga
      * categoría e imágenes para que la vista no ejecute consultas adicionales.
      *
-     * @param array<string, mixed> $filters Filtros validados del catálogo.
+     * @param  array<string, mixed>  $filters  Filtros validados del catálogo.
      * @return Builder<Producto> Consulta Eloquent aún no ejecutada.
      */
     public function query(array $filters): Builder
@@ -84,7 +84,7 @@ class ServicioCatalogo
      * Recupera hasta cuatro productos activos relacionados por categoría o marca.
      * Excluye el producto actual, prioriza coincidencias de marca y ordena por oferta.
      *
-     * @param Producto $producto Producto cuyo contexto se usa para buscar relacionados.
+     * @param  Producto  $producto  Producto cuyo contexto se usa para buscar relacionados.
      * @return Collection<int, Producto> Productos relacionados con sus relaciones cargadas.
      */
     public function relacionados(Producto $producto): Collection
@@ -207,7 +207,7 @@ class ServicioCatalogo
         }
 
         $disponibles = array_fill_keys($ids, 0);
-        if ($usuario !== null && $this->autorizacion->allows($usuario, 'gestion.pedidos.crear')) {
+        if ($usuario !== null && (($usuario->isRole('cliente_mayorista') || $usuario->isRole('cliente_minorista')) || $this->autorizacion->allows($usuario, 'gestion.pedidos.crear'))) {
             try {
                 $disponibles = array_replace($disponibles, $this->inventario->disponibilidadParaOperacion($usuario, $ids));
             } catch (HttpExceptionInterface) {

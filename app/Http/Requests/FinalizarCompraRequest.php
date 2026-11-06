@@ -20,7 +20,8 @@ class FinalizarCompraRequest extends FormRequest
     public function authorize(): bool
     {
         return $this->user() !== null
-            && app(ServicioAutorizacion::class)->allows($this->user(), 'gestion.pedidos.crear');
+            && (($this->user()->isRole('cliente_mayorista') || $this->user()->isRole('cliente_minorista'))
+                || app(ServicioAutorizacion::class)->allows($this->user(), 'gestion.pedidos.crear'));
     }
 
     /**

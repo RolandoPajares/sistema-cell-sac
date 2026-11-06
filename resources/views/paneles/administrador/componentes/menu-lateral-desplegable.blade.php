@@ -5,55 +5,37 @@
         'icon' => $icon,
         'enabled' => \Illuminate\Support\Facades\Route::has($route),
     ];
-    $disabledItem = static fn (string $label, string $icon): array => [
-        'route' => null,
-        'label' => $label,
-        'icon' => $icon,
-        'enabled' => false,
-    ];
     $itemMatchesCurrentRoute = static fn (array $item): bool => $item['enabled']
         && $item['route']
         && request()->routeIs($item['route']);
 
     $groups = [
         ['key' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'bi-speedometer2', 'items' => [
-            $enabledItem('management.dashboard', 'Resumen general del negocio', 'bi-grid-1x2'),
-            $enabledItem('management.dashboard.sales', 'Indicadores de ventas e ingresos', 'bi-graph-up'),
-            $enabledItem('management.dashboard.orders', 'Pedidos y operaciones recientes', 'bi-clock-history'),
-            $enabledItem('management.dashboard.alerts', 'Alertas y notificaciones', 'bi-bell'),
-        ]],
-        ['key' => 'organizacion', 'label' => 'Empresa y operación interna', 'icon' => 'bi-buildings', 'items' => [
-            $enabledItem('management.company_settings.data', 'Datos de la empresa', 'bi-building'),
+            $enabledItem('management.dashboard', 'Dashboard', 'bi-speedometer2'),
         ]],
         ['key' => 'seguridad', 'label' => 'Seguridad y Delegación', 'icon' => 'bi-shield-lock', 'items' => [
             $enabledItem('management.users', 'Gestión de usuarios', 'bi-person-gear'),
             $enabledItem('management.roles_permissions', 'Roles y permisos', 'bi-key'),
-            $enabledItem('management.roles_permissions', 'Matriz de privilegios', 'bi-grid-3x3-gap'),
-            $enabledItem('management.user_assignments', 'Asignación de roles a usuarios', 'bi-person-check'),
-            $enabledItem('management.menus', 'Menús y submenús', 'bi-list-nested'),
+            $enabledItem('management.permissions_matrix', 'Matriz de privilegios', 'bi-grid-3x3-gap'),
+            $enabledItem('management.user_assignments', 'Asignaciones globales y por sede', 'bi-person-check'),
+            $enabledItem('management.menus', 'Menús y submenús dinámicos', 'bi-list-nested'),
             $enabledItem('management.modules', 'Módulos y pantallas', 'bi-window-stack'),
-            $disabledItem('Políticas de aprobación y delegación', 'bi-person-lock'),
-            $disabledItem('Sesiones y accesos globales', 'bi-pc-display'),
-            $enabledItem('management.users', 'Bloqueo y reactivación de cuentas', 'bi-person-exclamation'),
         ]],
         ['key' => 'operaciones', 'label' => 'Operaciones Comerciales', 'icon' => 'bi-briefcase', 'items' => [
             $enabledItem('management.sales', 'Ventas', 'bi-cart-check'),
-            $enabledItem('management.sales.preview.retail', 'Ventas minoristas', 'bi-shop'),
-            $enabledItem('management.sales.preview.wholesale', 'Ventas mayoristas', 'bi-people'),
-            $enabledItem('management.orders', 'Pedidos online', 'bi-receipt'),
-            $enabledItem('management.purchases', 'Compras', 'bi-cart-plus'),
+            $enabledItem('management.orders', 'Pedidos', 'bi-receipt'),
             $enabledItem('management.quotations', 'Cotizaciones', 'bi-file-earmark-text'),
             $enabledItem('management.customers', 'Clientes', 'bi-people'),
             $enabledItem('management.suppliers', 'Proveedores', 'bi-truck'),
+            $enabledItem('management.purchases', 'Compras', 'bi-cart-plus'),
             $enabledItem('management.returns', 'Devoluciones y garantías', 'bi-arrow-counterclockwise'),
         ]],
         ['key' => 'inventario', 'label' => 'Inventario y Logística', 'icon' => 'bi-boxes', 'items' => [
             $enabledItem('management.products', 'Productos', 'bi-box-seam'),
             $enabledItem('management.categories', 'Categorías', 'bi-diagram-3'),
-            $enabledItem('management.inventory', 'Inventario', 'bi-boxes'),
-            $enabledItem('management.inventory.movements', 'Movimientos de inventario', 'bi-arrow-left-right'),
+            $enabledItem('management.inventory', 'Existencias y movimientos', 'bi-boxes'),
+            $enabledItem('management.inventory.preview.transfers', 'Transferencias', 'bi-arrow-left-right'),
             $enabledItem('management.inventory.preview.shipments', 'Envíos y entregas', 'bi-truck'),
-            $enabledItem('management.inventory.preview.serials', 'Control de IMEI y series', 'bi-phone'),
         ]],
         ['key' => 'finanzas', 'label' => 'Finanzas y Facturación', 'icon' => 'bi-wallet2', 'items' => [
             $enabledItem('management.payments', 'Pagos y cobros', 'bi-credit-card'),
@@ -64,11 +46,6 @@
         ]],
         ['key' => 'ecommerce', 'label' => 'Ecommerce y Marketing', 'icon' => 'bi-megaphone', 'items' => [
             $enabledItem('catalog.index', 'Catálogo público', 'bi-shop-window'),
-            $enabledItem('management.products.preview.prices', 'Precios minoristas y mayoristas', 'bi-tags'),
-            $enabledItem('management.campaigns', 'Campañas publicitarias', 'bi-megaphone'),
-            $enabledItem('management.coupons', 'Promociones y cupones', 'bi-ticket-perforated'),
-            $enabledItem('management.segments', 'Segmentación de clientes', 'bi-diagram-3'),
-            $enabledItem('management.products.preview.store_settings', 'Configuración de la tienda virtual', 'bi-sliders'),
         ]],
         ['key' => 'analisis', 'label' => 'Análisis y Auditoría', 'icon' => 'bi-bar-chart-line', 'items' => [
             $enabledItem('management.reports.preview.global', 'Reportes globales', 'bi-bar-chart'),
@@ -77,7 +54,7 @@
         ['key' => 'configuracion', 'label' => 'Configuración del Sistema', 'icon' => 'bi-gear', 'items' => [
             $enabledItem('management.general_settings.preview', 'Configuración general', 'bi-gear'),
             $enabledItem('management.integrations.preview', 'Integraciones', 'bi-plug'),
-            $enabledItem('management.notifications.preview', 'Notificaciones', 'bi-bell'),
+            $enabledItem('management.notifications.preview', 'Notificaciones del sistema', 'bi-bell'),
             $enabledItem('management.security_settings.preview', 'Configuración de seguridad', 'bi-shield-check'),
             $enabledItem('management.backups.preview', 'Respaldos y recuperación', 'bi-database-gear'),
         ]],
