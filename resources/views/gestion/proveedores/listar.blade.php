@@ -25,7 +25,10 @@
                 <h1>Proveedores <i class="bi bi-truck" aria-hidden="true"></i></h1>
                 <p>Administra los proveedores vinculados al catálogo y a las compras.</p>
             </div>
-            <button class="proveedores-primary-button proveedores-hero-create" type="button" data-open-supplier-create><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo proveedor</button>
+            <div class="proveedores-hero-actions" aria-label="Acciones de proveedores">
+                <details class="proveedores-export-menu"><summary class="proveedores-toolbar-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar <i class="bi bi-chevron-down" aria-hidden="true"></i></summary><div class="proveedores-export-options"><a href="{{ route('management.suppliers.export', ['format' => 'pdf'] + request()->query()) }}"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i><span><strong>Exportar PDF</strong><small>Documento imprimible</small></span></a><a href="{{ route('management.suppliers.export', ['format' => 'excel'] + request()->query()) }}"><i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i><span><strong>Exportar Excel</strong><small>Archivo compatible .xlsx</small></span></a><a href="{{ route('management.suppliers.export', ['format' => 'csv'] + request()->query()) }}"><i class="bi bi-filetype-csv" aria-hidden="true"></i><span><strong>Exportar CSV</strong><small>Datos delimitados</small></span></a></div></details>
+                <button class="proveedores-primary-button" type="button" data-open-supplier-create><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo proveedor</button>
+            </div>
         </header>
 
         <section class="proveedores-kpi-grid" aria-label="Resumen de proveedores">
@@ -85,7 +88,6 @@
                 </select>
             </label>
             <button class="proveedores-toolbar-button" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i><span>Filtros</span></button>
-            <details class="proveedores-export-menu"><summary class="proveedores-toolbar-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar</summary><div class="proveedores-export-options"><a href="{{ route('management.suppliers.export', ['format' => 'pdf'] + request()->query()) }}"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i><span><strong>Exportar PDF</strong><small>Documento imprimible</small></span></a><a href="{{ route('management.suppliers.export', ['format' => 'excel'] + request()->query()) }}"><i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i><span><strong>Exportar Excel</strong><small>Archivo compatible .xlsx</small></span></a><a href="{{ route('management.suppliers.export', ['format' => 'csv'] + request()->query()) }}"><i class="bi bi-filetype-csv" aria-hidden="true"></i><span><strong>Exportar CSV</strong><small>Datos delimitados</small></span></a></div></details>
             @if (($filters['buscar'] ?? null) || ($filters['categoria'] ?? null) || ($filters['estado'] ?? null) || ($filters['ciudad'] ?? null))
                 <a class="proveedores-clear-button" href="{{ route('management.suppliers') }}">Limpiar filtros</a>
             @endif
