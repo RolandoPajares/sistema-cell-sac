@@ -30,6 +30,22 @@ Estas fichas se mantienen deliberadamente separadas del inventario automático: 
 fuente PHPDoc/JSDoc es la referencia de tipos y excepciones, y no se inventan
 relaciones que no estén presentes en el cuerpo del método.
 
+## Resultado de la auditoría de limpieza
+
+- No se eliminó ningún archivo: no se encontró un candidato cuya ausencia pudiera
+  demostrarse sin riesgo para rutas, autoload, migraciones, recursos empresariales o pruebas.
+- `changeLockedProduct` y `changeLockedProductInWarehouse` no son duplicados seguros
+  para eliminar: el primero resuelve el almacén de la operación y el segundo recibe
+  explícitamente empresa, sede y almacén para transferencias y movimientos dirigidos.
+- `PdoProductoDao` y los modelos Eloquent cumplen capas distintas; el DAO se conserva
+  porque las pruebas PDO aisladas lo ejercitan directamente.
+- Las pruebas MariaDB aisladas se conservan aunque estén omitidas sin la instancia
+  descartable autorizada; contienen comprobaciones de identidad para no tocar
+  `md_tecnologia_digital_cell`.
+- Los candidatos de CSS, JavaScript y vistas no se marcaron como obsoletos solo por
+  no tener referencias textuales directas: Blade, Vite, rutas dinámicas y atributos
+  `data-*` pueden resolver esas dependencias indirectamente.
+
 ## Recorridos arquitectónicos
 
 - **MVC:** Ruta → Middleware → Controlador → Servicio → DAO/Modelo → MariaDB → Vista o recurso.

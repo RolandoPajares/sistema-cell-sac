@@ -10,8 +10,10 @@ use App\Models\Seguridad\Rol;
 use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioDelegacion;
+use App\Servicios\ServicioPlantillasRbac;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
@@ -49,7 +51,7 @@ class RolesPermisosController extends Controller
      * @param  mixed  $autorizacion  Parámetro recibido por la operación.
      * @return View Resultado de la operación.
      */
-    public function matrix(ServicioAutorizacion $autorizacion): View
+    public function matrix(ServicioAutorizacion $autorizacion, ServicioPlantillasRbac $plantillas): View
     {
         abort_unless($autorizacion->allowsGlobal(request()->user(), 'gestion.seguridad.consultar'), 403);
         $ready = $autorizacion->schemaAvailable();
@@ -57,12 +59,40 @@ class RolesPermisosController extends Controller
         $selectedRoleId = (int) request()->integer('rol', (int) $roles->first()?->getKey());
         $selectedRole = $roles->firstWhere('id', $selectedRoleId) ?: $roles->first();
         $permissions = $ready ? $this->permissionCatalog() : collect();
+        $recommendedPermissionIds = $ready ? $plantillas->permissionIdsFor($selectedRole?->codigo) : [];
+        $previewItems = $ready && $selectedRole ? $this->previewCatalog((int) $selectedRole->getKey()) : collect();
         $permissionCount = $ready ? DB::table('permisos')->where('activo', true)->count() : 0;
         $moduleCount = $ready ? DB::table('modulos')->where('habilitado', true)->count() : 0;
         $screenCount = $ready ? DB::table('pantallas')->where('habilitada', true)->count() : 0;
         $assignedPermissionCount = $ready ? DB::table('roles_permisos')->join('roles', 'roles.id', '=', 'roles_permisos.rol_id')->where('roles.activo', true)->distinct()->count(DB::raw('CONCAT(roles_permisos.rol_id, ":", roles_permisos.permiso_id, ":", roles_permisos.alcance)')) : 0;
 
-        return view('gestion.roles-permisos.matriz', compact('ready', 'roles', 'selectedRole', 'permissions', 'permissionCount', 'moduleCount', 'screenCount', 'assignedPermissionCount'));
+        return view('gestion.roles-permisos.matriz', compact('ready', 'roles', 'selectedRole', 'permissions', 'permissionCount', 'moduleCount', 'screenCount', 'assignedPermissionCount', 'recommendedPermissionIds', 'previewItems'));
+    }
+
+    /**
+     * Obtiene los elementos de menú existentes para construir una vista previa real.
+     *
+     * La consulta no inventa rutas: solo devuelve pantallas y permisos registrados
+     * en los menús asociados al rol seleccionado.
+     *
+     * @param  int  $roleId  Identificador del rol cuya navegación se previsualiza.
+     * @return Collection<int, object> Elementos de menú catalogados.
+     */
+    private function previewCatalog(int $roleId): Collection
+    {
+        return DB::table('roles_menus')
+            ->join('menus', 'menus.id', '=', 'roles_menus.menu_id')
+            ->join('elementos_menu', 'elementos_menu.menu_id', '=', 'menus.id')
+            ->leftJoin('pantallas', 'pantallas.id', '=', 'elementos_menu.pantalla_id')
+            ->where('roles_menus.rol_id', $roleId)
+            ->where('menus.contexto', 'sidebar')
+            ->where('menus.habilitado', true)
+            ->where('elementos_menu.habilitado', true)
+            ->orderBy('elementos_menu.orden')
+            ->get([
+                'elementos_menu.id', 'elementos_menu.padre_id', 'elementos_menu.etiqueta',
+                'elementos_menu.tipo', 'elementos_menu.permiso_id', 'pantallas.ruta',
+            ]);
     }
 
     /**
@@ -129,9 +159,35 @@ class RolesPermisosController extends Controller
         }
         abort_unless($scope === $role->alcance_permitido, 422, 'El alcance del permiso debe coincidir con el alcance permitido del rol.');
 
-        if ($role->codigo === 'administrador') {
-            abort(422, 'El rol global del administrador es reservado y no puede perder privilegios.');
+        $protectedPermissionIds = DB::table('permisos')
+            ->join('modulos', 'modulos.id', '=', 'permisos.modulo_id')
+            ->where('modulos.codigo', 'seguridad')
+            ->where('permisos.activo', true)
+            ->pluck('permisos.id')
+            ->map(static fn (mixed $id): int => (int) $id);
+        $currentProtectedPermissionIds = DB::table('roles_permisos')
+            ->where('rol_id', $role->getKey())
+            ->whereIn('permiso_id', $protectedPermissionIds)
+            ->pluck('permiso_id')
+            ->map(static fn (mixed $id): int => (int) $id);
+        $submittedProtectedPermissionIds = collect($permissionIds)->intersect($protectedPermissionIds);
+        abort_unless($submittedProtectedPermissionIds->diff($currentProtectedPermissionIds)->isEmpty(), 422, 'El módulo Seguridad y Delegación está protegido y no se puede modificar desde esta matriz.');
+        $permissionIds = collect($permissionIds)
+            ->diff($protectedPermissionIds)
+            ->merge($currentProtectedPermissionIds)
+            ->unique()
+            ->values()
+            ->all();
+
+        if (in_array($role->codigo, ['cliente_mayorista', 'cliente_minorista'], true)) {
+            $concedeOperacionAdministrativa = DB::table('permisos')
+                ->whereIn('id', $permissionIds)
+                ->where('codigo', 'gestion.pedidos.crear')
+                ->exists();
+            abort_unless(! $concedeOperacionAdministrativa, 422, 'Los roles de cliente no pueden recibir el permiso administrativo de crear pedidos.');
         }
+
+        abort_if($role->codigo === 'administrador', 422, 'El rol global del administrador es reservado y no puede perder privilegios.');
 
         DB::transaction(function () use ($role, $permissionIds, $scope, $request, $auditoria): void {
             $role = Rol::query()->whereKey($role->getKey())->lockForUpdate()->firstOrFail();

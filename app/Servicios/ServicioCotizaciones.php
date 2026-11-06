@@ -12,11 +12,10 @@ use App\Models\Comercio\Venta;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
- * Define la responsabilidad de la clase ServicioCotizaciones dentro de su módulo.
- *
- * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ * Orquesta creación, aprobación, envío, edición y conversión de cotizaciones.
  */
 class ServicioCotizaciones
 {
@@ -37,10 +36,11 @@ class ServicioCotizaciones
      * los productos de la empresa, calcula el total y persiste cabecera y detalles en
      * una transacción.
      *
-     * @param array<string, mixed> $data Datos validados de la cotización y sus detalles.
-     * @param User $user Usuario que crea la cotización.
+     * @param  array<string, mixed>  $data  Datos validados de la cotización y sus detalles.
+     * @param  User  $user  Usuario que crea la cotización.
      * @return Cotizacion Cotización persistida.
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si falla autorización, validación o alcance empresarial.
+     *
+     * @throws HttpException Si falla autorización, validación o alcance empresarial.
      */
     public function create(array $data, User $user): Cotizacion
     {
@@ -96,12 +96,16 @@ class ServicioCotizaciones
     }
 
     /**
-     * Ejecuta la operación aprobar definida por la clase ServicioCotizaciones.
+     * Aprueba una cotización vigente y registra el cambio de estado en auditoría.
      *
-     * @param  mixed  $cotizacion  Parámetro recibido por la operación.
-     * @param  mixed  $usuario  Parámetro recibido por la operación.
-     * @param  mixed  $ip  Parámetro recibido por la operación.
-     * @return Cotizacion Resultado de la operación.
+     * Bloquea la cotización, verifica alcance RBAC, cliente activo, detalles y que
+     * todavía no exista un pedido asociado; todas las validaciones y la actualización
+     * se ejecutan dentro de una transacción.
+     *
+     * @param  Cotizacion  $cotizacion  Cotización que se aprobará.
+     * @param  User  $usuario  Usuario que ejecuta la operación.
+     * @param  string|null  $ip  Dirección IP de la solicitud.
+     * @return Cotizacion Cotización con estado `Aprobada`.
      */
     public function aprobar(Cotizacion $cotizacion, User $usuario, ?string $ip): Cotizacion
     {
@@ -133,12 +137,15 @@ class ServicioCotizaciones
     }
 
     /**
-     * Registra la información recibida y coordina su persistencia.
+     * Registra que el operador envió manualmente el PDF de una cotización.
      *
-     * @param  mixed  $cotizacion  Parámetro recibido por la operación.
-     * @param  mixed  $usuario  Parámetro recibido por la operación.
-     * @param  mixed  $ip  Parámetro recibido por la operación.
-     * @return Cotizacion Resultado de la operación.
+     * Exige cliente activo con correo válido y detalles, permite repetir la
+     * operación cuando ya está enviada y audita el cambio dentro de la transacción.
+     *
+     * @param  Cotizacion  $cotizacion  Cotización que se marcará como enviada.
+     * @param  User  $usuario  Usuario autorizado que confirma el envío.
+     * @param  string|null  $ip  Dirección IP de la solicitud.
+     * @return Cotizacion Cotización con estado `Enviada`.
      */
     public function registrarEnvioManual(Cotizacion $cotizacion, User $usuario, ?string $ip): Cotizacion
     {
@@ -175,12 +182,15 @@ class ServicioCotizaciones
     }
 
     /**
-     * Modifica el estado o elimina el registro según la operación solicitada.
+     * Desactiva una cotización en borrador o pendiente y registra la auditoría.
      *
-     * @param  mixed  $cotizacion  Parámetro recibido por la operación.
-     * @param  mixed  $usuario  Parámetro recibido por la operación.
-     * @param  mixed  $ip  Parámetro recibido por la operación.
-     * @return Cotizacion Resultado de la operación.
+     * Bloquea la fila, valida autorización y estado permitido, y cambia `activo`
+     * a falso dentro de una transacción.
+     *
+     * @param  Cotizacion  $cotizacion  Cotización que se desactivará.
+     * @param  User  $usuario  Usuario autorizado.
+     * @param  string|null  $ip  Dirección IP de la solicitud.
+     * @return Cotizacion Cotización desactivada.
      */
     public function desactivar(Cotizacion $cotizacion, User $usuario, ?string $ip): Cotizacion
     {
@@ -206,13 +216,17 @@ class ServicioCotizaciones
     }
 
     /**
-     * Actualiza la información existente con los datos recibidos.
+     * Reemplaza cliente, notas y líneas de una cotización editable.
      *
-     * @param  mixed  $cotizacion  Parámetro recibido por la operación.
-     * @param  mixed  $data  Parámetro recibido por la operación.
-     * @param  mixed  $usuario  Parámetro recibido por la operación.
-     * @param  mixed  $ip  Parámetro recibido por la operación.
-     * @return Cotizacion Resultado de la operación.
+     * Verifica cliente mayorista activo de la empresa, bloquea los productos,
+     * recalcula el total, recrea los detalles y registra la modificación en una
+     * transacción.
+     *
+     * @param  Cotizacion  $cotizacion  Cotización en borrador o pendiente.
+     * @param  array<string, mixed>  $data  Cliente, notas e ítems validados.
+     * @param  User  $usuario  Usuario autorizado.
+     * @param  string|null  $ip  Dirección IP de la solicitud.
+     * @return Cotizacion Cotización actualizada con relaciones principales.
      */
     public function actualizar(Cotizacion $cotizacion, array $data, User $usuario, ?string $ip): Cotizacion
     {
@@ -262,13 +276,17 @@ class ServicioCotizaciones
     }
 
     /**
-     * Ejecuta la operación convertirAventa definida por la clase ServicioCotizaciones.
+     * Convierte una cotización aprobada en pedido y venta de forma idempotente.
      *
-     * @param  mixed  $cotizacion  Parámetro recibido por la operación.
-     * @param  mixed  $almacenId  Parámetro recibido por la operación.
-     * @param  mixed  $usuario  Parámetro recibido por la operación.
-     * @param  mixed  $ip  Parámetro recibido por la operación.
-     * @return Venta Resultado de la operación.
+     * Bloquea cotización y pedido existente, valida columnas requeridas, almacén
+     * autorizado y detalles, y delega la creación de la venta manteniendo toda
+     * la operación en una transacción.
+     *
+     * @param  Cotizacion  $cotizacion  Cotización aprobada.
+     * @param  int  $almacenId  Almacén donde se realizará la venta.
+     * @param  User  $usuario  Usuario que convierte la cotización.
+     * @param  string|null  $ip  Dirección IP de la solicitud.
+     * @return Venta Venta creada o existente cuando la conversión ya fue completada.
      */
     public function convertirAventa(Cotizacion $cotizacion, int $almacenId, User $usuario, ?string $ip): Venta
     {

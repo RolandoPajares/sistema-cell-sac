@@ -62,8 +62,10 @@ class AutenticacionController extends Controller
         }
 
         $user = $request->user();
-        if (! $user->activo
-            || ($user->bloqueado_hasta !== null && now()->lessThan($user->bloqueado_hasta))) {
+        if (
+            ! $user->activo
+            || ($user->bloqueado_hasta !== null && now()->lessThan($user->bloqueado_hasta))
+        ) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();

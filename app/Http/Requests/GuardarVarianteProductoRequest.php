@@ -7,9 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 /**
- * Define la responsabilidad de la clase GuardarVarianteProductoRequest dentro de su módulo.
- *
- * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ * Valida los datos de una variante de producto y normaliza sus campos opcionales.
  */
 class GuardarVarianteProductoRequest extends FormRequest
 {
@@ -46,9 +44,9 @@ class GuardarVarianteProductoRequest extends FormRequest
     }
 
     /**
-     * Ejecuta la operación prepareForValidation definida por la clase GuardarVarianteProductoRequest.
+     * Convierte los campos opcionales de la variante al formato que esperan las reglas.
      *
-     * @return void Resultado de la operación.
+     * @return void Fusiona los valores normalizados en los datos de la solicitud.
      */
     protected function prepareForValidation(): void
     {

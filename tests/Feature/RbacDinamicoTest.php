@@ -305,6 +305,7 @@ it('builds role-specific menus from the database and enforces route permissions'
     $menusByRole = $usersByRole->map(fn (User $user): array => $menuService->paraUsuario($user));
     $administratorRoutes = collect($administratorMenu['grupos'])->flatMap(fn (array $group): array => $group['items'])->pluck('route')->all();
     $marketingRoutes = collect($marketingMenu['grupos'])->flatMap(fn (array $group): array => $group['items'])->pluck('route')->all();
+    $retailCustomerRoutes = collect($menusByRole['cliente_minorista']['grupos'])->flatMap(fn (array $group): array => $group['items'])->pluck('route')->filter()->values()->all();
 
     expect($menusByRole->every(fn (array $menu): bool => $menu['dinamico'] && $menu['grupos'] !== []))->toBeTrue()
         ->and(DB::table('roles_menus')->count())->toBe(7)
@@ -312,7 +313,8 @@ it('builds role-specific menus from the database and enforces route permissions'
         ->and($administratorRoutes)->toContain('management.roles_permissions')
         ->and($marketingMenu['dinamico'])->toBeTrue()
         ->and($marketingRoutes)->toContain('management.campaigns')
-        ->and($marketingRoutes)->not->toContain('management.roles_permissions');
+        ->and($marketingRoutes)->not->toContain('management.roles_permissions')
+        ->and($retailCustomerRoutes)->toEqualCanonicalizing(['dashboard', 'catalog.index', 'orders.index']);
 
     $this->actingAs($marketingUser)->get(route('management.campaigns'))->assertOk();
     $this->actingAs($marketingUser)->get(route('management.users'))->assertForbidden();

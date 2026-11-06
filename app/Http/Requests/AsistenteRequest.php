@@ -5,16 +5,14 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
- * Define la responsabilidad de la clase AsistenteRequest dentro de su módulo.
- *
- * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ * Valida la consulta enviada al asistente y admite el alias de entrada `message`.
  */
 class AsistenteRequest extends FormRequest
 {
     /**
-     * Ejecuta la operación prepareForValidation definida por la clase AsistenteRequest.
+     * Normaliza el mensaje del asistente antes de aplicar las reglas de validación.
      *
-     * @return void Resultado de la operación.
+     * @return void Actualiza los datos internos de la solicitud antes de validar.
      */
     protected function prepareForValidation(): void
     {
@@ -24,9 +22,9 @@ class AsistenteRequest extends FormRequest
     }
 
     /**
-     * Determina si la operación cumple las condiciones de autorización o validación.
+     * Permite que cualquier usuario llegue a la validación de la consulta del asistente.
      *
-     * @return bool Resultado de la operación.
+     * @return bool Siempre devuelve true; la restricción se aplica mediante las reglas.
      */
     public function authorize(): bool
     {
@@ -34,9 +32,9 @@ class AsistenteRequest extends FormRequest
     }
 
     /**
-     * Define la configuración de validación utilizada por el componente.
+     * Exige una consulta textual de hasta 300 caracteres.
      *
-     * @return array Resultado de la operación.
+     * @return array<string, list<string>> Reglas aplicadas al campo `consulta`.
      */
     public function rules(): array
     {

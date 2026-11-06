@@ -33,7 +33,7 @@
         <div class="nav-actions">
             <a class="icon-btn" href="{{ route('cart.index') }}" title="Carrito" aria-label="Ver carrito">
                 <i class="bi bi-cart3" aria-hidden="true"></i>
-                <sup>{{ collect((array) session('cart', []))->sum() }}</sup>
+                <sup>{{ collect((array) session('cart', []))->sum(fn (mixed $linea): int => is_array($linea) ? (int) ($linea['cantidad'] ?? 0) : (int) $linea) }}</sup>
             </a>
             @auth
                 <a class="header-account" href="{{ route('dashboard') }}">

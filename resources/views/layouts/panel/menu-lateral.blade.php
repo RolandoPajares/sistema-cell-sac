@@ -1,5 +1,7 @@
 @php
-    $isAdministrator = auth()->user()?->isRole('administrador') ?? false;
+    $currentUser = auth()->user();
+    $isAdministrator = $currentUser?->rol === 'administrador'
+        || ($currentUser?->isRole('administrador') ?? false);
     $brandRoute = $isAdministrator ? 'management.dashboard' : 'dashboard';
     $accountRoute = $isAdministrator ? 'management.account' : 'dashboard';
     $menuViews = [
@@ -11,7 +13,7 @@
         'cliente_mayorista' => 'paneles.cliente-mayorista.menu',
         'cliente_minorista' => 'paneles.cliente-minorista.menu',
     ];
-    $menuView = $isAdministrator ? 'paneles.administrador.menu' : ($menuViews[auth()->user()?->rol] ?? 'components.panel.menu-enlaces');
+    $menuView = $isAdministrator ? 'paneles.administrador.menu' : ($menuViews[$currentUser?->rol] ?? 'components.panel.menu-enlaces');
     $usesDynamicMenu = ($links['dinamico'] ?? false) === true;
 @endphp
 
@@ -27,7 +29,10 @@
     </div>
 
     <nav class="admin-sidebar-nav">
-        @if ($usesDynamicMenu)
+        @if ($isAdministrator)
+            {{-- El administrador usa un único menú administrativo, sin el menú legado duplicado. --}}
+            @include($menuView, ['links' => $links ?? []])
+        @elseif ($usesDynamicMenu)
             @vite(['resources/css/paneles/administrador/index.css'])
             <x-panel.menu-dinamico :menu="$links" />
         @else

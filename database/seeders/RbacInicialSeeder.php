@@ -516,7 +516,7 @@ class RbacInicialSeeder extends Seeder
                 'catalogo' => ['consultar'], 'cotizaciones' => ['consultar', 'crear'], 'pedidos' => ['consultar'],
             ],
             'cliente_minorista' => [
-                'catalogo' => ['consultar'], 'pedidos' => ['consultar', 'crear'],
+                'catalogo' => ['consultar'], 'pedidos' => ['consultar'],
             ],
         ];
 
