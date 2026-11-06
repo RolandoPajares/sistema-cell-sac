@@ -94,3 +94,22 @@ body.modulo-about > main .feature { border: 1px solid #dce8fb; border-radius: 18
   .auth-reference__secure { margin-top: 20px; padding-top: 13px; }
   .auth-reference__secure > div { margin-top: 12px; }
 }
+
+@media (min-width: 761px) {
+  .auth-reference__inner { gap: 24px; }
+  body.modulo-autenticacion .auth-wrap { max-width: 500px; padding: 20px 28px; }
+  body.modulo-autenticacion .auth-brand img { width: 125px; height: 48px; }
+  body.modulo-autenticacion .auth-wrap h2 { margin: 5px 0; font-size: 1.65rem; }
+  body.modulo-autenticacion .auth-wrap > p { margin: 3px auto 10px; max-width: 360px; font-size: .78rem; }
+  body.modulo-autenticacion .auth-wrap .form-group { margin-bottom: 10px; }
+  body.modulo-autenticacion .auth-wrap .form-group label { font-size: .78rem; }
+  body.modulo-autenticacion .auth-wrap .input { min-height: 42px; padding: 0 12px; font-size: .82rem; }
+  body.modulo-autenticacion .auth-reference__options { margin: 5px 0 12px; font-size: .75rem; }
+  body.modulo-autenticacion .auth-reference__options input { width: 16px; height: 16px; }
+  body.modulo-autenticacion .auth-wrap .btn,
+  body.modulo-autenticacion .auth-reference__register { min-height: 42px; font-size: .88rem; }
+  .auth-reference__secure { margin-top: 14px; padding-top: 10px; }
+  .auth-reference__secure > div { margin-top: 8px; }
+  .auth-reference__secure small { font-size: .68rem; }
+  .auth-reference__secure small i { font-size: 1.1rem; }
+}
