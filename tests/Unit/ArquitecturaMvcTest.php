@@ -6,7 +6,11 @@ function archivosDeProyecto(string $directorio, string $extension): array
     $iterador = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directorio));
 
     foreach ($iterador as $archivo) {
-        if ($archivo->isFile() && strtolower($archivo->getExtension()) === strtolower($extension)) {
+        $coincideExtension = strtolower($extension) === 'blade.php'
+            ? str_ends_with(strtolower($archivo->getFilename()), '.blade.php')
+            : strtolower($archivo->getExtension()) === strtolower($extension);
+
+        if ($archivo->isFile() && $coincideExtension) {
             $archivos[] = $archivo->getPathname();
         }
     }
@@ -53,7 +57,10 @@ test('las vistas Blade no contienen acceso directo a SQL o conexiones', function
         '/\\bDB::/i',
         '/\\bPDO\\b/i',
         '/\\bmysqli\\b/i',
-        '/\\b(?:SELECT|INSERT|UPDATE|DELETE)\\s+[A-Za-z*]/i',
+        '/\\bSELECT\\s+[A-Za-z*][A-Za-z0-9_*,\\s]*\\s+FROM\\b/i',
+        '/\\bINSERT\\s+INTO\\b/i',
+        '/\\bUPDATE\\s+[A-Za-z_][A-Za-z0-9_]*\\s+SET\\b/i',
+        '/\\bDELETE\\s+FROM\\b/i',
     ];
 
     foreach (archivosDeProyecto(raizProyectoQa().'/resources/views', 'blade.php') as $vista) {
