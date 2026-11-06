@@ -29,6 +29,28 @@
 .tc-aa__metric > div > span { color: #294875; font-size: .88rem; font-weight: 700; }
 .tc-aa__metric strong { color: #0d285b; font-size: clamp(1.35rem, 1.7vw, 1.8rem); white-space: nowrap; }
 .tc-aa__metric small { color: #5b98ca; font-size: .73rem; }
+.tc-audit__header { margin-bottom: 14px; }
+.tc-audit__header .tc-aa__heading h1 { font-size: clamp(1.35rem, 1.8vw, 1.85rem); }
+.tc-audit__header .tc-aa__heading p { font-size: .82rem; }
+.tc-audit__header .tc-aa__heading-icon { width: 52px; height: 52px; flex-basis: 52px; font-size: 1.45rem; }
+.tc-audit__metrics .tc-aa__metric { min-height: 112px; flex-direction: column; justify-content: center; gap: 7px; text-align: center; }
+.tc-audit__metrics .tc-aa__metric-icon { flex-basis: 42px; width: 42px; height: 42px; font-size: 1.25rem; }
+.tc-audit__metrics .tc-aa__metric > div { justify-items: center; }
+.tc-audit__metrics .tc-aa__metric > div > span { font-size: .76rem; }
+.tc-audit__metrics .tc-aa__metric strong { font-size: 1.38rem; }
+.tc-audit__metrics .tc-aa__metric small { font-size: .64rem; }
+.tc-audit__export-menu { position: relative; }
+.tc-audit__export-menu > summary { cursor: pointer; list-style: none; }
+.tc-audit__export-menu > summary::-webkit-details-marker { display: none; }
+.tc-audit__export-options { position: absolute; z-index: 30; top: calc(100% + 8px); right: 0; display: grid; width: 255px; gap: 4px; padding: 8px; border: 1px solid #d8e6f4; border-radius: 12px; background: #fff; box-shadow: 0 15px 35px rgba(12,57,120,.18); }
+.tc-audit__export-options a { display: flex; align-items: center; gap: 10px; padding: 9px; border-radius: 8px; color: #17376b; text-decoration: none; }
+.tc-audit__export-options a:hover { background: #edf5ff; }
+.tc-audit__export-options a > i { display: grid; flex: 0 0 32px; width: 32px; height: 32px; place-items: center; border-radius: 8px; color: #0873ed; background: #e5f2ff; font-size: 1.05rem; }
+.tc-audit__export-options a:nth-child(1) > i { color: #e33449; background: #ffe8e9; }
+.tc-audit__export-options a:nth-child(2) > i { color: #0b9b65; background: #dff8ec; }
+.tc-audit__export-options a span { display: grid; gap: 2px; }
+.tc-audit__export-options strong { font-size: .75rem; }
+.tc-audit__export-options small { color: #7588aa; font-size: .63rem; font-weight: 500; }
 .tc-aa__card { padding: 15px 17px; border: 1px solid #d3e3f6; border-radius: 16px; background: #fff; box-shadow: 0 7px 18px #1050a30a; }
 .tc-aa__card h2 { margin: 0 0 9px; color: #132f65; font-size: 1.08rem; }
 .tc-aa__filters { margin-bottom: 14px; }
