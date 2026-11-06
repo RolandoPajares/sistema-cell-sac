@@ -207,7 +207,16 @@ final class ServicioMenuDinamico
             'route' => $enabled ? $route : null,
             'enabled' => $enabled,
             'pending' => ! $enabled,
-            'active' => $enabled && request()->routeIs($route, $route.'.*'),
+            'active' => $enabled && $this->activeRoute($route),
         ];
+    }
+
+    private function activeRoute(string $route): bool
+    {
+        if ($route === 'management.inventory') {
+            return request()->routeIs('management.inventory', 'management.inventory.movements');
+        }
+
+        return request()->routeIs($route, $route.'.*');
     }
 }

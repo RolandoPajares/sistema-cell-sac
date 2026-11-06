@@ -284,7 +284,8 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::get('/inventario', [InventarioController::class, 'index'])->name('inventory');
     Route::get('/inventario/movimientos', [InventarioController::class, 'index'])->name('inventory.movements');
     Route::get('/inventario/diseno/transferencias', [TransferenciaExistenciaController::class, 'index'])->name('inventory.preview.transfers');
-    Route::get('/inventario/transferencias/exportar', [TransferenciaExistenciaController::class, 'export'])->name('inventory.transfers_export');
+    Route::get('/inventario/transferencias/exportar/{format?}', [TransferenciaExistenciaController::class, 'export'])
+        ->whereIn('format', ['pdf', 'excel', 'csv'])->name('inventory.transfers_export');
     Route::post('/inventario/transferencias', [TransferenciaExistenciaController::class, 'store'])->name('inventory.transfer_request');
     Route::post('/inventario/transferencias/{transfer}/approve', [TransferenciaExistenciaController::class, 'approve'])->whereNumber('transfer')->name('inventory.transfer_approve');
     Route::post('/inventario/transferencias/{transfer}/dispatch', [TransferenciaExistenciaController::class, 'dispatch'])->whereNumber('transfer')->name('inventory.transfer_dispatch');

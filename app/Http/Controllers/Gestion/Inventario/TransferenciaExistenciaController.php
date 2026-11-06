@@ -8,9 +8,11 @@ use App\Http\Requests\Gestion\Inventario\GuardarTransferenciaExistenciaRequest;
 use App\Models\Inventario\TransferenciaExistencia;
 use App\Models\User;
 use App\Servicios\ServicioTransferenciasExistencias;
+use App\Servicios\ExportadorTabular;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TransferenciaExistenciaController extends Controller
@@ -94,32 +96,38 @@ class TransferenciaExistenciaController extends Controller
         return $this->success('Transferencia conciliada y cerrada.');
     }
 
-    public function export(Request $request, ServicioTransferenciasExistencias $transfers): StreamedResponse
+    public function export(Request $request, ServicioTransferenciasExistencias $transfers, ExportadorTabular $exporter, string $format = 'csv'): Response|StreamedResponse
     {
         $filters = $request->validate([
             'buscar' => ['nullable', 'string', 'max:100'],
             'estado' => ['nullable', 'in:solicitada,aprobada,en tránsito,recibida parcialmente,recibida totalmente,cerrada,rechazada,cancelada'],
         ]);
+        abort_unless(in_array($format, ['pdf', 'excel', 'csv'], true), 422, 'Formato de exportación no permitido.');
         $records = $transfers->exportQuery($this->actor($request), $filters)->with([
             'sedeOrigen:id,nombre', 'sedeDestino:id,nombre', 'almacenOrigen:id,nombre', 'almacenDestino:id,nombre',
-        ])->lazy(500);
+        ])->limit(5000)->get();
 
-        return response()->streamDownload(function () use ($records): void {
-            $output = fopen('php://output', 'w');
-            if ($output === false) {
-                return;
-            }
-            fwrite($output, "\xEF\xBB\xBF");
-            fputcsv($output, ['Codigo', 'Sede origen', 'Almacen origen', 'Sede destino', 'Almacen destino', 'Estado', 'Solicitado', 'Despachado', 'Recibido']);
-            foreach ($records as $transfer) {
-                fputcsv($output, [
-                    $transfer->codigo, $transfer->sedeOrigen?->nombre, $transfer->almacenOrigen?->nombre,
-                    $transfer->sedeDestino?->nombre, $transfer->almacenDestino?->nombre, $transfer->estado,
-                    $transfer->creado_en?->toDateTimeString(), $transfer->enviado_en?->toDateTimeString(), $transfer->recibido_en?->toDateTimeString(),
-                ]);
-            }
-            fclose($output);
-        }, 'transferencias.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+        $rows = $records->map(static fn (TransferenciaExistencia $transfer): array => [
+            $transfer->codigo, $transfer->sedeOrigen?->nombre, $transfer->almacenOrigen?->nombre,
+            $transfer->sedeDestino?->nombre, $transfer->almacenDestino?->nombre, $transfer->estado,
+            $transfer->creado_en?->toDateTimeString(), $transfer->enviado_en?->toDateTimeString(), $transfer->recibido_en?->toDateTimeString(),
+        ])->all();
+
+        return $exporter->download($format, 'transferencias',
+            ['Código', 'Sede origen', 'Almacén origen', 'Sede destino', 'Almacén destino', 'Estado', 'Solicitada', 'Despachada', 'Recibida'],
+            $rows,
+            [
+                'title' => 'REPORTE DE TRANSFERENCIAS',
+                'subtitle' => 'Transferencias reales consultadas desde MariaDB.',
+                'module' => 'Inventario y Logística',
+                'report_name' => 'Transferencias',
+                'filters' => $filters,
+                'generated_by' => (string) $request->user()->nombre,
+                'role' => 'Usuario autorizado',
+                'scope' => 'Empresa y permisos RBAC vigentes.',
+                'indicators' => [['label' => 'Transferencias incluidas', 'value' => count($rows)]],
+            ],
+        );
     }
 
     private function actor(Request $request): User
