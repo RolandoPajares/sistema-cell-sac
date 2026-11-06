@@ -207,6 +207,85 @@
   cursor: not-allowed;
 }
 
+.modulo-campanias .campanias-export-menu {
+  position: relative;
+}
+
+.modulo-campanias .campanias-export-menu > summary {
+  list-style: none;
+}
+
+.modulo-campanias .campanias-export-menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+.modulo-campanias .campanias-export-options {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 224px;
+  display: grid;
+  gap: 4px;
+  padding: 7px;
+  border: 1px solid #d6e6f3;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 15px 35px rgba(12, 57, 120, .18);
+}
+
+.modulo-campanias .campanias-export-options a {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px;
+  border-radius: 8px;
+  color: #254574;
+  text-decoration: none;
+}
+
+.modulo-campanias .campanias-export-options a:hover {
+  color: #0874ed;
+  background: #edf6ff;
+}
+
+.modulo-campanias .campanias-export-options a > i {
+  display: grid;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 8px;
+  color: #0873ed;
+  background: #e5f2ff;
+  font-size: 1rem;
+}
+
+.modulo-campanias .campanias-export-options a:nth-child(1) > i {
+  color: #e33449;
+  background: #ffe8e9;
+}
+
+.modulo-campanias .campanias-export-options a:nth-child(2) > i {
+  color: #0b9b65;
+  background: #dff8ec;
+}
+
+.modulo-campanias .campanias-export-options a span {
+  display: grid;
+  gap: 2px;
+}
+
+.modulo-campanias .campanias-export-options strong {
+  font-size: .74rem;
+}
+
+.modulo-campanias .campanias-export-options small {
+  color: #7588aa;
+  font-size: .61rem;
+  font-weight: 500;
+}
+
 .modulo-campanias .campanias-clear-button {
   text-decoration: none;
 }
