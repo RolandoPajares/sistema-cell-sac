@@ -401,7 +401,11 @@ body > main .product-detail-specs li strong {
 body > main .product-detail-meta strong { color: #0b4eb9; }
 body > main .product-detail-rating { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin: -12px 0 18px; color: #667085; font-size: .9rem; }
 body > main .rating-muted { color: #667085; }
-body > main .rating-stars { display: inline-flex; gap: 2px; color: #f5b400; font-size: 1rem; }
+body > main .rating-stars, body > main .review-widget-stars { display: inline-flex; gap: 2px; color: #f5b400; font-size: 1rem; }
+body > main .rating-stars button, body > main .review-widget-stars button { padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; }
+body > main .rating-stars button:hover, body > main .rating-stars button:focus-visible, body > main .review-widget-stars button:hover, body > main .review-widget-stars button:focus-visible { color: #d99000; transform: scale(1.08); }
+body > main .review-widget { display: grid; gap: 12px; max-width: 520px; padding: 18px; border: 1px solid #dce3ed; border-radius: 10px; background: #f8fbff; }
+body > main .review-widget-stars { font-size: 1.35rem; }
 body > main .product-detail-sku { padding-left: 14px; border-left: 1px solid #d0d5dd; }
 body > main .detail-gallery { position: relative; }
 body > main .detail-gallery-actions { position: absolute; z-index: 3; top: 16px; right: 16px; display: flex; gap: 10px; }

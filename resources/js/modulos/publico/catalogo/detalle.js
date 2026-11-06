@@ -97,6 +97,31 @@
         updateFavoriteButtons(favoriteActive);
     }));
 
+    const ratingKey = `producto-valoracion-${root.dataset.productId}`;
+    const ratingWidgets = [...root.querySelectorAll('[data-rating-widget], [data-review-widget]')];
+    const ratingSummary = root.querySelector('[data-rating-summary]');
+    const reviewMessage = root.querySelector('[data-review-message]');
+    let selectedRating = 0;
+    try { selectedRating = Number(window.sessionStorage.getItem(ratingKey) || 0); } catch { selectedRating = 0; }
+    const updateRating = (rating) => {
+        selectedRating = Math.max(0, Math.min(5, Number(rating) || 0));
+        ratingWidgets.forEach((widget) => widget.querySelectorAll('[data-rating-value]').forEach((button) => {
+            const value = Number(button.dataset.ratingValue);
+            const active = value <= selectedRating;
+            button.setAttribute('aria-checked', String(value === selectedRating));
+            button.classList.toggle('is-selected', active);
+            button.querySelector('i')?.classList.toggle('bi-star-fill', active);
+            button.querySelector('i')?.classList.toggle('bi-star', !active);
+        }));
+        if (ratingSummary) ratingSummary.textContent = selectedRating ? `Tu valoración: ${selectedRating}/5` : 'Sin valoración registrada';
+        if (reviewMessage) reviewMessage.textContent = selectedRating ? `Tu valoración de ${selectedRating}/5 se guardó en este navegador.` : 'Aún no hay reseñas persistidas. Tu valoración se guarda en este navegador.';
+    };
+    updateRating(selectedRating);
+    ratingWidgets.forEach((widget) => widget.querySelectorAll('[data-rating-value]').forEach((button) => button.addEventListener('click', () => {
+        updateRating(button.dataset.ratingValue);
+        try { window.sessionStorage.setItem(ratingKey, String(selectedRating)); } catch {}
+    })));
+
     let variantes = [];
     try { variantes = JSON.parse(root.dataset.variantData || '[]'); } catch { variantes = []; }
     const selectedVariant = root.querySelector('[data-selected-variant]');
