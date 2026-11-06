@@ -10,6 +10,11 @@ $selectedCategory = request('categoria');
 $selectedBrand = request('marca');
 @endphp
 <section class="catalog-page">
+    <div class="catalog-reference-hero">
+        <div class="container catalog-reference-hero__inner">
+            <div><span class="eyebrow">TECHNOLOGY CELL</span><h1>Encuentra tu próximo <span>celular ideal</span></h1><p>Las mejores marcas, precios vigentes y garantía real.</p><a class="btn btn-primary" href="#productos">Explorar catálogo <i class="bi bi-arrow-right"></i></a></div>
+        </div>
+    </div>
     <div class="container">
         <nav class="catalog-breadcrumbs" aria-label="Ruta de navegación">
             <a href="{{ route('home') }}">Inicio</a><span aria-hidden="true">›</span><span aria-current="page">Catálogo</span>
@@ -74,7 +79,7 @@ $selectedBrand = request('marca');
                 </form>
             </aside>
 
-            <div class="catalog-content">
+            <div class="catalog-content" id="productos">
                 <div class="catalog-toolbar">
                     <div class="catalog-heading">
                         <h1>{{ $selectedCategory ? $categories->firstWhere('id', (int) $selectedCategory)?->nombre : 'Catálogo' }}</h1>
