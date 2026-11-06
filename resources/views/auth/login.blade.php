@@ -9,14 +9,6 @@
   <div class="auth-intro">
     <span class="auth-reference__badge"><i class="bi bi-stars"></i> MD SmartCommerce</span>
     <h1>Bienvenido a<br>Technology <span>CELL</span></h1>
-    <p>Ingresa a tu cuenta y disfruta de una experiencia de compra inteligente, segura y personalizada.</p>
-    <ul>
-        <li><i class="bi bi-bag"></i><span><b>Catálogo actualizado</b><small>Las mejores marcas y modelos.</small></span></li>
-        <li><i class="bi bi-lightning-charge-fill"></i><span><b>SmartMatch</b><small>Te ayuda a encontrar tu celular ideal.</small></span></li>
-        <li><i class="bi bi-bar-chart"></i><span><b>Comparador inteligente</b><small>Analiza y elige con confianza.</small></span></li>
-        <li><i class="bi bi-shield-check"></i><span><b>Compras seguras</b><small>Tu información siempre protegida.</small></span></li>
-    </ul>
-    <img class="auth-reference__devices" src="{{ asset('assets/cell-legacy/img/publico/inicio/secciones/hero-devices.png') }}" alt="Celulares, audífonos y reloj inteligente">
  </div>
  <div class="auth-wrap panel">
     <div class="auth-brand"><img src="{{ asset('assets/cell-legacy/img/marca/logo.jpeg') }}" alt="Technology Cell"></div>

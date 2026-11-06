@@ -123,6 +123,12 @@ body.modulo-about > main .feature { border: 1px solid #dce8fb; border-radius: 18
 }
 
 @media (min-width: 761px) {
+  .auth-reference { min-height: 560px; }
+  .auth-reference__inner { min-height: 560px; }
+  .auth-intro { min-height: 500px; padding: 0 16px 0 54px; justify-content: center; display: flex; flex-direction: column; }
+}
+
+@media (min-width: 761px) {
   .auth-reference__inner { gap: 24px; }
   body.modulo-autenticacion .auth-wrap { max-width: 500px; padding: 20px 28px; }
   body.modulo-autenticacion .auth-brand img { width: 125px; height: 48px; }
