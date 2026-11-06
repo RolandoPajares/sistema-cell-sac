@@ -48,15 +48,15 @@ document.querySelectorAll('[data-auditoria-operaciones]').forEach((panel) => {
         const campos = {
             Operación: evento.accion,
             Usuario: evento.usuario,
+            'Dirección IP': evento.direccion_ip,
+            'Sede ID': evento.sede_id,
             Módulo: evento.modulo,
             Entidad: `${evento.entidad}${evento.entidad_id ? ` #${evento.entidad_id}` : ''}`,
             Resultado: evento.resultado,
-            'Dirección IP': evento.direccion_ip,
-            'Sede ID': evento.sede_id,
             'Tabla afectada': evento.tabla,
             Origen: evento.origen,
-            'Fecha y hora': evento.fecha,
             Observaciones: evento.observaciones,
+            'Fecha y hora': evento.fecha,
         };
         Object.entries(campos).forEach(([etiqueta, valor]) => {
             const item = document.createElement('div');

@@ -221,8 +221,8 @@ final class PanelAnalisisAuditoriaController extends Controller
         $consultaBase = $autorizacion->scopeRecordsFor(RegistroAuditoria::query(), $usuario, 'gestion.auditoria.consultar');
         $pagina['opcionesFiltros'] = [
             'usuario_id' => User::query()->whereIn('id', (clone $consultaBase)->whereNotNull('usuario_id')->distinct()->pluck('usuario_id'))->orderBy('nombre')->pluck('nombre', 'id'),
-            'modulo' => (clone $consultaBase)->whereNotNull('modulo')->distinct()->orderBy('modulo')->pluck('modulo', 'modulo'),
-            'accion' => (clone $consultaBase)->distinct()->orderBy('accion')->pluck('accion', 'accion'),
+            'modulo' => (clone $consultaBase)->whereNotNull('modulo')->distinct()->orderBy('modulo')->pluck('modulo', 'modulo')->mapWithKeys(fn (string $modulo): array => [$modulo => $this->etiquetaAuditoria($modulo)]),
+            'accion' => (clone $consultaBase)->distinct()->orderBy('accion')->pluck('accion', 'accion')->mapWithKeys(fn (string $accion): array => [$accion => $this->etiquetaAuditoria($accion)]),
             'rol_codigo' => (clone $consultaBase)->whereNotNull('rol_codigo')->distinct()->orderBy('rol_codigo')->pluck('rol_codigo', 'rol_codigo'),
             'resultado' => (clone $consultaBase)->whereNotNull('resultado')->distinct()->orderBy('resultado')->pluck('resultado', 'resultado'),
         ];
@@ -239,22 +239,22 @@ final class PanelAnalisisAuditoriaController extends Controller
                     ->orWhere('observaciones', 'like', '%'.$filtros['buscar'].'%');
             }));
 
-        $registros = $consulta->latest('creado_en')->latest('id')->paginate(15)->withQueryString();
+        $registros = $consulta->latest('creado_en')->latest('id')->paginate(10)->withQueryString();
         $pagina['filas'] = $registros->map(fn (RegistroAuditoria $registro): array => [
             $registro->creado_en?->format('Y-m-d H:i:s') ?? '—',
             $registro->user?->nombre ?? '—',
-            (string) ($registro->modulo ?? $registro->entidad),
-            $registro->accion,
+            $this->etiquetaAuditoria($registro->accion),
+            $this->etiquetaAuditoria($registro->modulo ?? $registro->entidad),
             $registro->observaciones ?? $registro->entidad,
             $registro->direccion_ip ?? '—',
             $registro->resultado ?? 'registrado',
         ])->all();
-        $pagina['detalles'] = $registros->getCollection()->map(static fn (RegistroAuditoria $registro): array => [
+        $pagina['detalles'] = $registros->getCollection()->map(fn (RegistroAuditoria $registro): array => [
             'id' => (string) $registro->id,
             'fecha' => $registro->ocurrido_en?->format('Y-m-d H:i:s') ?? $registro->creado_en?->format('Y-m-d H:i:s') ?? '—',
             'usuario' => $registro->user?->nombre ?? 'Sistema',
-            'modulo' => $registro->modulo ?? $registro->modulo_codigo ?? $registro->entidad,
-            'accion' => $registro->accion,
+            'modulo' => $this->etiquetaAuditoria($registro->modulo ?? $registro->modulo_codigo ?? $registro->entidad),
+            'accion' => $this->etiquetaAuditoria($registro->accion),
             'entidad' => $registro->entidad,
             'entidad_id' => $registro->entidad_id ?? $registro->identificador_entidad,
             'resultado' => $registro->resultado ?? 'registrado',
@@ -308,7 +308,7 @@ final class PanelAnalisisAuditoriaController extends Controller
         };
         $filtros = match ($tipo) {
             'globales' => [['Tipo de reporte', 'reporte', 'Seleccionar reporte'], ['Estado', 'estado', 'Todos los estados'], ['Desde', 'desde', 'fecha'], ['Hasta', 'hasta', 'fecha']],
-            default => [['Desde', 'desde', 'fecha'], ['Hasta', 'hasta', 'fecha'], ['Usuario', 'usuario_id', 'Todos los usuarios'], ['Módulo', 'modulo', 'Todos los módulos'], ['Tipo de operación', 'accion', 'Todas las acciones'], ['Resultado', 'resultado', 'Todos los resultados'], ['Buscar', 'buscar', 'text']],
+            default => [['Desde', 'desde', 'fecha'], ['Hasta', 'hasta', 'fecha'], ['Usuario', 'usuario_id', 'Todos los usuarios'], ['Módulo', 'modulo', 'Todos los módulos'], ['Tipo de operación', 'accion', 'Todas las acciones'], ['Resultado', 'resultado', 'Todos los resultados']],
         };
 
         return [
@@ -319,6 +319,27 @@ final class PanelAnalisisAuditoriaController extends Controller
             'barras' => [], 'resumen' => 'Resumen de registros', 'resumen_filas' => [], 'paginacion' => null,
             'opcionesFiltros' => [], 'opcionesReportes' => ['ventas' => 'Ventas confirmadas', 'pedidos' => 'Pedidos válidos', 'clientes' => 'Clientes', 'productos' => 'Productos', 'inventario' => 'Movimientos de inventario', 'compras' => 'Compras', 'campanas' => 'Campañas'],
         ];
+    }
+
+    private function etiquetaAuditoria(?string $valor): string
+    {
+        $valor = trim((string) $valor);
+        $etiquetas = [
+            'inicio_sesion' => 'Inicio de sesión',
+            'inicio_sesion_fallido' => 'Inicio de sesión fallido',
+            'cierre_sesion' => 'Cierre de sesión',
+            'catalogo_analisis_auditoria_reducido' => 'Catálogo de auditoría reducido',
+            'exito' => 'Exitoso',
+            'fallo' => 'Fallido',
+            'denegado' => 'Denegado',
+            'seguridad' => 'Seguridad',
+            'inventario' => 'Inventario',
+            'ventas' => 'Ventas',
+            'pedidos' => 'Pedidos',
+            'reportes' => 'Reportes',
+        ];
+
+        return $etiquetas[$valor] ?? mb_convert_case(str_replace(['_', '.'], ' ', $valor), MB_CASE_TITLE, 'UTF-8');
     }
 
     private function vista(string $tipo): string
