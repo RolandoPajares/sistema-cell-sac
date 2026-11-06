@@ -36,11 +36,43 @@ class CuentaController extends Controller
         abort_unless($user instanceof User, 403);
 
         if ($user->isRole('administrador')) {
+            $user->loadMissing('customer');
+
             return view('paneles.administrador.perfil.editar', [
                 'role' => 'administrador',
             ]);
         }
 
         return ($this->dashboardResolver->for($user))($request);
+    }
+
+    /**
+     * Muestra el perfil personal con la misma estructura para todos los roles.
+     *
+     * Las operaciones de actualización continúan delegándose a las rutas
+     * existentes de cuenta; este método solo resuelve la vista correspondiente.
+     *
+     * @param  Request  $request  Solicitud autenticada de la cuenta actual.
+     * @return View Vista de perfil correspondiente al rol del usuario.
+     */
+    public function profile(Request $request): View
+    {
+        $user = $request->user();
+        abort_unless($user instanceof User, 403);
+        $user->loadMissing('customer');
+
+        $profileViews = [
+            'administrador' => 'paneles.administrador.perfil.mostrar',
+            'compras_logistica' => 'paneles.compras-logistica.perfil.mostrar',
+            'ventas_mayoristas' => 'paneles.ventas-mayoristas.perfil.mostrar',
+            'ventas_minoristas' => 'paneles.ventas-minoristas.perfil.mostrar',
+            'marketing' => 'paneles.marketing.perfil.mostrar',
+            'cliente_mayorista' => 'paneles.cliente-mayorista.perfil.mostrar',
+            'cliente_minorista' => 'paneles.cliente-minorista.perfil.mostrar',
+        ];
+
+        return view($profileViews[$user->rol] ?? $profileViews['cliente_minorista'], [
+            'role' => $user->rol,
+        ]);
     }
 }

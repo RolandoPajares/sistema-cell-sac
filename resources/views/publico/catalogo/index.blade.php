@@ -114,7 +114,9 @@ $selectedBrand = request('marca');
                     <div class="empty panel catalog-empty">No encontramos productos con esos filtros.</div>
                     @endforelse
                 </div>
-                <nav class="pagination" aria-label="Paginación">{{ $products->links() }}</nav>
+                <div class="pagination">
+                    {{ $products->onEachSide(1)->links('components.publico.catalogo.paginacion') }}
+                </div>
             </div>
         </div>
     </div>

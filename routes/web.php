@@ -89,6 +89,7 @@ Route::post('/cerrar-sesion', [AutenticacionController::class, 'logout'])->middl
 
 Route::middleware(['auth', 'cuenta.activa', 'sesion.usuario'])->group(function (): void {
     Route::get('/mi-cuenta', [CuentaController::class, 'dashboard'])->name('dashboard');
+    Route::get('/mi-cuenta/perfil', [CuentaController::class, 'profile'])->name('account.profile.show');
     Route::put('/mi-cuenta/perfil', [CuentaAdministracionController::class, 'updateProfile'])->name('account.profile');
     Route::put('/mi-cuenta/password', [CuentaAdministracionController::class, 'updatePassword'])->name('account.password');
 

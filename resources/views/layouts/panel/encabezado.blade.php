@@ -2,7 +2,7 @@
     $currentUser = auth()->user();
     $isAdministrator = $currentUser?->isRole('administrador') ?? false;
     $adminBrandRoute = $isAdministrator ? 'management.dashboard' : 'dashboard';
-    $adminAccountRoute = $isAdministrator ? 'management.account' : 'dashboard';
+    $adminAccountRoute = $isAdministrator ? 'management.account' : 'account.profile.show';
 @endphp
 
 <header class="admin-topbar">
@@ -34,7 +34,7 @@
             <i class="bi bi-chevron-down admin-user-chevron" aria-hidden="true"></i>
         </summary>
         <div class="admin-user-menu-panel">
-            <a href="{{ route($adminAccountRoute) }}"><i class="bi bi-person-circle" aria-hidden="true"></i><span>{{ $isAdministrator ? 'Mi perfil' : 'Mi cuenta' }}</span></a>
+            <a href="{{ route($adminAccountRoute) }}"><i class="bi bi-person-circle" aria-hidden="true"></i><span>Mi perfil</span></a>
             @if ($isAdministrator)
                 <a href="{{ route('management.account.preferences') }}"><i class="bi bi-sliders" aria-hidden="true"></i><span>Preferencias</span></a>
                 <a href="{{ route('management.account.security') }}"><i class="bi bi-shield-lock" aria-hidden="true"></i><span>Seguridad de la cuenta</span></a>

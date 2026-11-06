@@ -48,6 +48,19 @@ it('keeps the administrator account configuration on the account route', functio
         ->assertViewIs('paneles.administrador.perfil.editar');
 });
 
+it('renders the unified profile for every configured role', function (string $role): void {
+    $user = SpanishAccessFixture::user($role);
+
+    $this->actingAs($user)
+        ->get($role === 'administrador' ? route('management.account') : route('account.profile.show'))
+        ->assertOk()
+        ->assertSee('Mi perfil')
+        ->assertSee('Datos personales')
+        ->assertSee('Seguridad de la cuenta')
+        ->assertSee('Preferencias')
+        ->assertSee('Sesiones activas');
+})->with(User::ROLES);
+
 it('forbids non administrators from the administrator dashboard route', function (): void {
     $user = User::factory()->create(['rol' => 'marketing']);
 
