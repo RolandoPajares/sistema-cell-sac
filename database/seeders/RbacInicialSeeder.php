@@ -284,10 +284,6 @@ class RbacInicialSeeder extends Seeder
         return [
             'admin.dashboard' => ['module' => 'panel', 'name' => 'Dashboard global', 'route' => 'management.dashboard', 'icon' => 'bi-speedometer2', 'active' => true],
             'admin.company' => ['module' => 'organizacion', 'name' => 'Datos de la empresa', 'route' => 'management.company_settings.data', 'icon' => 'bi-building', 'active' => true],
-            'admin.sites' => ['module' => 'organizacion', 'name' => 'Sedes', 'route' => 'management.company_settings.sites', 'icon' => 'bi-buildings', 'active' => true],
-            'admin.warehouses' => ['module' => 'organizacion', 'name' => 'Almacenes', 'route' => 'management.company_settings.warehouses', 'icon' => 'bi-house-gear', 'active' => true],
-            'admin.staff' => ['module' => 'organizacion', 'name' => 'Personal por sede', 'route' => 'management.company_settings.staff', 'icon' => 'bi-person-workspace', 'active' => true],
-            'admin.responsibles' => ['module' => 'organizacion', 'name' => 'Responsables de sede', 'route' => 'management.company_settings.responsibles', 'icon' => 'bi-person-badge', 'active' => true],
             'admin.users' => ['module' => 'seguridad', 'name' => 'Gestión de usuarios', 'route' => 'management.users', 'icon' => 'bi-people', 'active' => true],
             'admin.roles' => ['module' => 'seguridad', 'name' => 'Roles y permisos', 'route' => 'management.roles_permissions', 'icon' => 'bi-key', 'active' => true],
             'admin.permissions_matrix' => ['module' => 'seguridad', 'name' => 'Matriz de privilegios', 'route' => 'management.permissions_matrix', 'icon' => 'bi-grid-3x3-gap', 'active' => true],
@@ -560,7 +556,7 @@ class RbacInicialSeeder extends Seeder
         }
 
         $adminGroups = [
-            ['codigo' => 'organizacion', 'etiqueta' => 'Organización y sedes', 'icono' => 'bi-buildings', 'pantallas' => ['admin.company', 'admin.sites', 'admin.warehouses', 'admin.staff', 'admin.responsibles']],
+            ['codigo' => 'organizacion', 'etiqueta' => 'Organización y sedes', 'icono' => 'bi-buildings', 'pantallas' => ['admin.company']],
             ['codigo' => 'seguridad', 'etiqueta' => 'Seguridad y delegación', 'icono' => 'bi-shield-lock', 'pantallas' => ['admin.users', 'admin.roles', 'admin.permissions_matrix', 'admin.user_assignments', 'admin.menus', 'admin.modules']],
             ['codigo' => 'operaciones', 'etiqueta' => 'Operaciones comerciales', 'icono' => 'bi-briefcase', 'pantallas' => ['admin.retail_sales', 'admin.online_orders', 'admin.purchases', 'admin.quotations', 'admin.customers', 'admin.suppliers', 'admin.returns']],
             ['codigo' => 'inventario', 'etiqueta' => 'Inventario y logística', 'icono' => 'bi-boxes', 'pantallas' => ['admin.products', 'admin.categories', 'admin.inventory', 'admin.stock_movements', 'admin.transfers', 'admin.shipments', 'admin.imei']],

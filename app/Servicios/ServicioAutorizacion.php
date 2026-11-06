@@ -25,7 +25,7 @@ final class ServicioAutorizacion
         'suppliers' => 'proveedores', 'returns' => 'devoluciones', 'support' => 'soporte',
         'campaigns' => 'campanias', 'coupons' => 'cupones', 'segments' => 'segmentos',
         'reports' => 'reportes', 'audit' => 'auditoria', 'users' => 'seguridad',
-        'roles_permissions' => 'seguridad', 'user_assignments' => 'seguridad',
+        'roles_permissions' => 'seguridad', 'permissions_matrix' => 'seguridad', 'user_assignments' => 'seguridad',
         'menus' => 'seguridad', 'modules' => 'seguridad', 'security_sessions' => 'seguridad',
         'payments' => 'pagos', 'billing' => 'facturacion', 'refunds' => 'reembolsos',
         'notifications' => 'notificaciones', 'integrations' => 'integraciones',

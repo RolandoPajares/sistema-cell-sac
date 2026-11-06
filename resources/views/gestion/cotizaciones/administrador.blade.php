@@ -32,9 +32,9 @@
                 <details class="cotizaciones-export-menu">
                     <summary class="cotizaciones-filter-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar</summary>
                     <div class="cotizaciones-export-options">
-                        <a href="{{ route('management.quotations.export.list', ['format' => 'excel'] + request()->query()) }}">Excel (.xlsx)</a>
-                        <a href="{{ route('management.quotations.export.list', ['format' => 'pdf'] + request()->query()) }}">PDF (.pdf)</a>
-                        <a href="{{ route('management.quotations.export.list', ['format' => 'csv'] + request()->query()) }}">CSV (.csv)</a>
+                        <a href="{{ route('management.quotations.export.list', ['format' => 'pdf'] + request()->query()) }}"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i><span><strong>Exportar PDF</strong><small>Documento imprimible</small></span></a>
+                        <a href="{{ route('management.quotations.export.list', ['format' => 'excel'] + request()->query()) }}"><i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i><span><strong>Exportar Excel</strong><small>Archivo compatible .xlsx</small></span></a>
+                        <a href="{{ route('management.quotations.export.list', ['format' => 'csv'] + request()->query()) }}"><i class="bi bi-filetype-csv" aria-hidden="true"></i><span><strong>Exportar CSV</strong><small>Datos delimitados</small></span></a>
                     </div>
                 </details>
                 <button class="cotizaciones-primary-button" type="button" data-admin-dialog-open="nueva-cotizacion" @disabled($customers->isEmpty() || $products->isEmpty())>

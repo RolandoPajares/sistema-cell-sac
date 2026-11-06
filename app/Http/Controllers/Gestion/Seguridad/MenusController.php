@@ -103,7 +103,9 @@ class MenusController extends Controller
         $modules = $ready
             ? DB::table('modulos')->orderBy('orden')->orderBy('nombre')->get()
                 ->map(function ($module): object {
-                    $module->screens = DB::table('pantallas')->where('modulo_id', $module->id)->orderBy('nombre')->get();
+                    $module->screens = DB::table('pantallas')->where('modulo_id', $module->id)->orderBy('nombre')->get()->each(function (object $screen): void {
+                        $screen->ruta_funcional = is_string($screen->ruta) && $this->isActionableRoute($screen->ruta);
+                    });
 
                     return $module;
                 })

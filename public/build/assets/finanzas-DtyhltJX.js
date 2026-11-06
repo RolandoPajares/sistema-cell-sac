@@ -1,1 +1,0 @@
-import{n as e}from"./facturacion-BoNY4sB7.js";import{t}from"./pagos-CptiA64_.js";import{t as n}from"./reembolsos-Che5tTTv.js";var r={facturacion:e,pagos:t,reembolsos:n};document.querySelectorAll(`[data-finance-module]`).forEach(e=>{r[e.dataset.financeModule]?.(e)});

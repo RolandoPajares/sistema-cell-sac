@@ -7,6 +7,7 @@
         <div class="gestion-pendiente-detail-grid">
             <div><small>Código</small><strong data-pending-detail="codigo">—</strong></div>
             <div><small>Pedido</small><strong data-pending-detail="pedido_id">—</strong></div>
+            <div><small>Venta</small><strong data-pending-detail="venta_codigo">—</strong></div>
             <div><small>Cliente</small><strong data-pending-detail="cliente_nombre">—</strong></div>
             <div><small>Producto</small><strong data-pending-detail="producto_nombre">—</strong></div>
             <div><small>Tipo</small><strong data-pending-detail="tipo">—</strong></div>

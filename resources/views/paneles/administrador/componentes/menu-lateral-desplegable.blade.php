@@ -25,7 +25,6 @@
         ]],
         ['key' => 'organizacion', 'label' => 'Empresa y operación interna', 'icon' => 'bi-buildings', 'items' => [
             $enabledItem('management.company_settings.data', 'Datos de la empresa', 'bi-building'),
-            $enabledItem('management.company_settings.warehouses', 'Almacenes', 'bi-box-seam'),
         ]],
         ['key' => 'seguridad', 'label' => 'Seguridad y Delegación', 'icon' => 'bi-shield-lock', 'items' => [
             $enabledItem('management.users', 'Gestión de usuarios', 'bi-person-gear'),
