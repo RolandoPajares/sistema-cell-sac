@@ -296,7 +296,7 @@ class RbacInicialSeeder extends Seeder
             'admin.delegation' => ['module' => 'seguridad', 'name' => 'Políticas de aprobación y delegación', 'route' => null, 'icon' => 'bi-person-lock', 'active' => false],
             'admin.sessions' => ['module' => 'seguridad', 'name' => 'Sesiones y accesos', 'route' => 'management.security_sessions', 'icon' => 'bi-pc-display-horizontal', 'active' => false],
             'admin.account_status' => ['module' => 'seguridad', 'name' => 'Bloqueo y reactivación de cuentas', 'route' => 'management.users', 'icon' => 'bi-person-lock', 'active' => true],
-            'admin.retail_sales' => ['module' => 'ventas', 'name' => 'Ventas minoristas', 'route' => 'management.sales', 'icon' => 'bi-cart-check', 'active' => true],
+            'admin.retail_sales' => ['module' => 'ventas', 'name' => 'Ventas', 'route' => 'management.sales', 'icon' => 'bi-cart-check', 'active' => true],
             'admin.wholesale_sales' => ['module' => 'ventas', 'name' => 'Ventas mayoristas', 'route' => null, 'icon' => 'bi-box-seam', 'active' => false],
             'admin.online_orders' => ['module' => 'pedidos', 'name' => 'Pedidos online', 'route' => 'management.orders', 'icon' => 'bi-bag-check', 'active' => true],
             'admin.purchases' => ['module' => 'compras', 'name' => 'Compras', 'route' => 'management.purchases', 'icon' => 'bi-cart-plus', 'active' => true],
@@ -564,7 +564,7 @@ class RbacInicialSeeder extends Seeder
         $adminGroups = [
             ['codigo' => 'organizacion', 'etiqueta' => 'Organización y sedes', 'icono' => 'bi-buildings', 'pantallas' => ['admin.company', 'admin.sites', 'admin.warehouses', 'admin.staff', 'admin.responsibles']],
             ['codigo' => 'seguridad', 'etiqueta' => 'Seguridad y delegación', 'icono' => 'bi-shield-lock', 'pantallas' => ['admin.users', 'admin.roles', 'admin.user_assignments', 'admin.menus', 'admin.modules', 'admin.delegation', 'admin.sessions', 'admin.account_status']],
-            ['codigo' => 'operaciones', 'etiqueta' => 'Operaciones comerciales', 'icono' => 'bi-briefcase', 'pantallas' => ['admin.retail_sales', 'admin.wholesale_sales', 'admin.online_orders', 'admin.purchases', 'admin.quotations', 'admin.customers', 'admin.suppliers', 'admin.returns', 'support.reclamos']],
+            ['codigo' => 'operaciones', 'etiqueta' => 'Operaciones comerciales', 'icono' => 'bi-briefcase', 'pantallas' => ['admin.retail_sales', 'admin.online_orders', 'admin.purchases', 'admin.quotations', 'admin.customers', 'admin.suppliers', 'admin.returns']],
             ['codigo' => 'inventario', 'etiqueta' => 'Inventario y logística', 'icono' => 'bi-boxes', 'pantallas' => ['admin.products', 'admin.categories', 'admin.inventory', 'admin.stock_movements', 'admin.transfers', 'admin.shipments', 'admin.imei']],
             ['codigo' => 'finanzas', 'etiqueta' => 'Finanzas y facturación', 'icono' => 'bi-wallet2', 'pantallas' => ['admin.payments', 'admin.cash_registers', 'admin.receivables', 'admin.refunds', 'admin.electronic_invoices', 'admin.credit_debit_notes', 'admin.series', 'admin.sunat']],
             ['codigo' => 'ecommerce', 'etiqueta' => 'Ecommerce y marketing', 'icono' => 'bi-shop', 'pantallas' => ['admin.public_catalog', 'admin.prices', 'admin.campaigns', 'admin.promotions', 'admin.segments', 'admin.store_settings']],
