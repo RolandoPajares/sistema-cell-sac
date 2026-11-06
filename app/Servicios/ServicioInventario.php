@@ -58,6 +58,32 @@ class ServicioInventario
             ->get(['almacenes.id', 'almacenes.nombre', 'sedes.nombre AS sede_nombre']);
     }
 
+    public function disponibilidadDeLinea(User $usuario, Producto $producto, ?int $varianteId = null): int
+    {
+        $ubicacion = $this->authorization->operationLocation($usuario);
+        abort_unless($ubicacion['empresa_id'] !== null && $ubicacion['sede_id'] !== null && $ubicacion['almacen_id'] !== null, 403);
+        abort_unless((int) $producto->empresa_id === (int) $ubicacion['empresa_id'], 403);
+
+        $consulta = DB::table('existencias_almacen')
+            ->where('empresa_id', $ubicacion['empresa_id'])
+            ->where('sede_id', $ubicacion['sede_id'])
+            ->where('almacen_id', $ubicacion['almacen_id'])
+            ->where('producto_id', $producto->id);
+
+        if ($varianteId === null) {
+            $consulta->whereNull('variante_id');
+        } else {
+            $consulta->where('variante_id', $varianteId);
+        }
+
+        $saldo = $consulta->first(['cantidad_fisica', 'cantidad_reservada']);
+        if ($saldo === null) {
+            return 0;
+        }
+
+        return max(0, (int) floor((float) $saldo->cantidad_fisica - (float) $saldo->cantidad_reservada));
+    }
+
     /**
      * @param  array{empresa_id:int,sede_id:?int}  $alcance
      * @param  array{buscar?:?string,categoria?:?int,estado?:?string,proveedor?:?int,stock?:?string,oferta?:bool}  $filtros

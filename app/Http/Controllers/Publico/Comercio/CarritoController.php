@@ -9,6 +9,7 @@ use App\Http\Requests\AplicarCuponRequest;
 use App\Models\Catalogo\Producto;
 use App\Models\Comercio\Cupon;
 use App\Servicios\ServicioAutorizacion;
+use App\Servicios\ServicioCarrito;
 use App\Servicios\ServicioInventario;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,21 +21,25 @@ class CarritoController extends Controller
     public function __construct(
         private readonly ServicioInventario $inventario,
         private readonly ServicioAutorizacion $autorizacion,
+        private readonly ServicioCarrito $carritoService,
     ) {}
 
     public function index(Request $request): View
     {
-        $cart = (array) $request->session()->get('cart', []);
-        $disponibilidad = $cart === [] ? [] : $this->inventario->disponibilidadParaOperacion($request->user(), array_keys($cart));
-        $products = Producto::query()->with('images')->active()->whereIn('id', array_keys($disponibilidad))->get()->keyBy('id');
-        $lines = collect($cart)->map(function (int|string $quantity, int|string $id) use ($products, $disponibilidad): ?array {
+        $cart = $this->carritoService->normalizar((array) $request->session()->get('cart', []));
+        $products = Producto::query()->with('images', 'variants')->active()->whereIn('id', array_keys($cart))->get()->keyBy('id');
+        $lines = collect($cart)->map(function (array $linea, int $id) use ($products, $request): ?array {
             $product = $products->get((int) $id);
+            $varianteId = $linea['variante_id'];
+            $variante = $varianteId === null ? null : $product?->variants->firstWhere('id', $varianteId);
+            $disponible = $product ? $this->inventario->disponibilidadDeLinea($request->user(), $product, $varianteId) : 0;
 
             return $product ? [
                 'product' => $product,
-                'quantity' => (int) $quantity,
-                'disponible' => $disponibilidad[(int) $id],
-                'subtotal' => (float) $product->effective_price * (int) $quantity,
+                'variant' => $variante,
+                'quantity' => $linea['cantidad'],
+                'disponible' => $disponible,
+                'subtotal' => (float) $product->effective_price * $linea['cantidad'],
             ] : null;
         })->filter()->values();
 
@@ -45,14 +50,29 @@ class CarritoController extends Controller
     {
         abort_unless($product->activo, 404);
         $quantity = (int) ($request->validated('cantidad') ?? 1);
-        $disponibilidad = $this->inventario->disponibilidadParaOperacion($request->user(), [$product->id]);
-        abort_unless(array_key_exists($product->id, $disponibilidad), 404);
+        $variantId = $request->validated('variante_id');
+        $variantId = $variantId === null ? null : (int) $variantId;
+        $hasVariants = $product->variants()->exists();
+        abort_if($hasVariants && $variantId === null, 422, 'Selecciona una variante.');
+        abort_if(! $hasVariants && $variantId !== null, 422, 'Esta combinación no está disponible.');
+        if ($variantId !== null) {
+            abort_unless($product->variants()->whereKey($variantId)->where('estado', 'activo')->exists(), 422, 'Esta combinación no está disponible.');
+        }
+        $disponible = $this->inventario->disponibilidadDeLinea($request->user(), $product, $variantId);
+        abort_if($disponible < $quantity, 422, 'La cantidad supera el stock disponible.');
 
-        $cart = (array) $request->session()->get('cart', []);
-        $nuevaCantidad = (int) ($cart[$product->id] ?? 0) + $quantity;
-        abort_if($nuevaCantidad > $disponibilidad[$product->id], 422, 'Stock insuficiente en el almacén autorizado o falta seleccionar el identificador del equipo.');
-        $cart[$product->id] = $nuevaCantidad;
+        $cart = $this->carritoService->normalizar((array) $request->session()->get('cart', []));
+        $existente = $cart[$product->id] ?? null;
+        $nuevaCantidad = $existente !== null && $existente['variante_id'] === $variantId
+            ? $existente['cantidad'] + $quantity
+            : $quantity;
+        abort_if($nuevaCantidad > $disponible, 422, 'La cantidad supera el stock disponible.');
+        $cart[$product->id] = ['cantidad' => $nuevaCantidad, 'variante_id' => $variantId];
         $request->session()->put('cart', $cart);
+
+        if ($request->boolean('comprar_ahora')) {
+            return redirect()->route('checkout.form');
+        }
 
         return back()->with('status', 'Producto agregado al carrito.');
     }
@@ -60,15 +80,16 @@ class CarritoController extends Controller
     public function update(ActualizarCarritoRequest $request, Producto $product): RedirectResponse
     {
         $quantity = (int) $request->validated('cantidad');
-        $cart = (array) $request->session()->get('cart', []);
+        $cart = $this->carritoService->normalizar((array) $request->session()->get('cart', []));
+        $linea = $cart[$product->id] ?? null;
 
         if ($quantity === 0) {
             unset($cart[$product->id]);
         } else {
-            $disponibilidad = $this->inventario->disponibilidadParaOperacion($request->user(), [$product->id]);
-            abort_unless(array_key_exists($product->id, $disponibilidad), 404);
-            abort_if($quantity > $disponibilidad[$product->id], 422, 'Stock insuficiente en el almacén autorizado o falta seleccionar el identificador del equipo.');
-            $cart[$product->id] = $quantity;
+            abort_unless($linea !== null, 404);
+            $disponible = $this->inventario->disponibilidadDeLinea($request->user(), $product, $linea['variante_id']);
+            abort_if($quantity > $disponible, 422, 'La cantidad supera el stock disponible.');
+            $cart[$product->id]['cantidad'] = $quantity;
         }
 
         $request->session()->put('cart', $cart);
@@ -95,20 +116,21 @@ class CarritoController extends Controller
     public function updateLegacy(Request $request): RedirectResponse
     {
         $submitted = (array) $request->input('cart', $request->input('items', []));
-        $cart = [];
-        $disponibilidad = $submitted === [] ? [] : $this->inventario->disponibilidadParaOperacion($request->user(), array_keys($submitted));
+        $cart = $this->carritoService->normalizar($submitted);
 
-        foreach ($submitted as $id => $rawQuantity) {
-            $quantity = filter_var($rawQuantity, FILTER_VALIDATE_INT);
+        foreach ($cart as $id => $linea) {
+            $quantity = $linea['cantidad'];
+            $product = Producto::query()->find((int) $id);
 
-            if (! array_key_exists((int) $id, $disponibilidad) || $quantity === false || $quantity < 1) {
+            if (! $product || $quantity < 1) {
                 continue;
             }
 
-            $cart[(int) $id] = min($quantity, $disponibilidad[(int) $id]);
+            $disponible = $this->inventario->disponibilidadDeLinea($request->user(), $product, $linea['variante_id']);
+            $cart[(int) $id]['cantidad'] = min($quantity, $disponible);
         }
 
-        $request->session()->put('cart', array_filter($cart));
+        $request->session()->put('cart', array_filter($cart, fn (array $linea): bool => $linea['cantidad'] > 0));
 
         return back()->with('status', 'Carrito actualizado.');
     }

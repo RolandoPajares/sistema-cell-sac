@@ -9,6 +9,7 @@ use App\Models\Catalogo\Categoria;
 use App\Models\Catalogo\Producto;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -72,6 +73,55 @@ class ServicioCatalogo
         }
 
         $this->productoDao->sincronizarImagenPortada((int) $producto->id, $rutaImagen);
+    }
+
+    /**
+     * @param  Collection<int, Producto>  $productos
+     * @return Collection<int, Producto>
+     */
+    public function relacionados(Producto $producto): Collection
+    {
+        return Producto::query()
+            ->with(['category', 'images', 'variants'])
+            ->active()
+            ->where('id', '<>', $producto->getKey())
+            ->where(function (Builder $query) use ($producto): void {
+                $query->where('categoria_id', $producto->categoria_id)
+                    ->orWhere('marca', $producto->marca);
+            })
+            ->orderByRaw('CASE WHEN marca = ? THEN 0 ELSE 1 END', [$producto->marca])
+            ->orderByDesc('precio_oferta')
+            ->orderByDesc('id')
+            ->limit(4)
+            ->get();
+    }
+
+    public function agregarDisponibilidadVariantes(Collection $variantes): void
+    {
+        $ids = $variantes->pluck('id')->map(fn (mixed $id): int => (int) $id)->all();
+        if ($ids === []) {
+            return;
+        }
+
+        $saldos = DB::table('existencias_almacen as existencia')
+            ->join('almacenes as almacen', 'almacen.id', '=', 'existencia.almacen_id')
+            ->join('sedes as sede', 'sede.id', '=', 'existencia.sede_id')
+            ->join('empresas as empresa', 'empresa.id', '=', 'existencia.empresa_id')
+            ->whereIn('existencia.variante_id', $ids)
+            ->where('existencia.cantidad_fisica', '>', DB::raw('existencia.cantidad_reservada'))
+            ->where('almacen.activo', true)
+            ->where('almacen.permite_venta', true)
+            ->where('sede.activa', true)
+            ->where('empresa.activo', true)
+            ->select('existencia.variante_id')
+            ->selectRaw('SUM(existencia.cantidad_fisica - existencia.cantidad_reservada) AS unidades')
+            ->groupBy('existencia.variante_id')
+            ->pluck('unidades', 'variante_id');
+
+        $variantes->each(function (Model $variante) use ($saldos): void {
+            $variante->setAttribute('existencias_disponibles', max(0, (int) floor((float) ($saldos[$variante->id] ?? 0))));
+            $variante->setAttribute('url_imagen_principal', $variante->images->first()?->ruta_imagen);
+        });
     }
 
     public function crearProductoConVariante(
@@ -149,13 +199,11 @@ class ServicioCatalogo
         }
 
         $disponibles = array_fill_keys($ids, 0);
-        if ($usuario !== null) {
-            if ($this->autorizacion->allows($usuario, 'gestion.pedidos.crear')) {
-                try {
-                    $disponibles = array_replace($disponibles, $this->inventario->disponibilidadParaOperacion($usuario, $ids));
-                } catch (HttpExceptionInterface) {
-                    $disponibles = array_fill_keys($ids, 0);
-                }
+        if ($usuario !== null && $this->autorizacion->allows($usuario, 'gestion.pedidos.crear')) {
+            try {
+                $disponibles = array_replace($disponibles, $this->inventario->disponibilidadParaOperacion($usuario, $ids));
+            } catch (HttpExceptionInterface) {
+                $disponibles = array_fill_keys($ids, 0);
             }
         } else {
             $serializados = DB::table('variantes_productos')->whereIn('producto_id', $ids)
