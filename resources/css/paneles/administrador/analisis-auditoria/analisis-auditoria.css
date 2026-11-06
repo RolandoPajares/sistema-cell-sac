@@ -171,10 +171,13 @@
 .tc-audit__status--success { color: #087847; background: #dcf8e8; }
 .tc-audit__status--warning { color: #986706; background: #fff1cc; }
 .tc-audit__status--danger { color: #b42338; background: #ffe1e6; }
-.tc-audit__pagination { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 14px; color: #56749e; font-size: .75rem; }
-.tc-audit__pagination nav .pagination { display: flex; gap: 5px; margin: 0; padding: 0; list-style: none; }
-.tc-audit__pagination nav .page-link { display: inline-flex; min-width: 31px; height: 31px; align-items: center; justify-content: center; padding: 0 8px; border: 1px solid #c9dbf1; border-radius: 8px; color: #2560a4; background: #fff; text-decoration: none; }
-.tc-audit__pagination nav .active .page-link { color: #fff; border-color: #0875ed; background: #0875ed; }
+.tc-audit__pagination { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 14px; color: #56749e; font-size: .72rem; }
+.tc-audit__pagination-nav { display: inline-flex; align-items: center; gap: 4px; }
+.tc-audit__pagination-page, .tc-audit__pagination-control { display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; border: 1px solid #c9dbf1; border-radius: 7px; color: #2560a4; background: #fff; font-size: .72rem; font-weight: 700; line-height: 1; text-decoration: none; }
+.tc-audit__pagination-page.is-active { color: #fff; border-color: #0875ed; background: #0875ed; box-shadow: 0 3px 8px rgba(8,117,237,.18); }
+.tc-audit__pagination-control { color: #4774a8; }
+.tc-audit__pagination-control:hover, .tc-audit__pagination-page:not(.is-active):hover { border-color: #0875ed; color: #0875ed; }
+.tc-audit__pagination-control.is-disabled { color: #a8bdd7; background: #f6f9fd; cursor: default; }
 .tc-audit__detail { position: sticky; top: 16px; min-height: 480px; padding: 0; overflow: hidden; }
 .tc-audit__detail-heading { display: flex; align-items: center; gap: 9px; padding: 15px 17px; border-bottom: 1px solid #dce9f8; color: #132f65; background: linear-gradient(90deg, #eef6ff, #fff); }
 .tc-audit__detail-heading i { color: #0875ed; font-size: 1.15rem; }
