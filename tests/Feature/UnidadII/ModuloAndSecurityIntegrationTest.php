@@ -898,7 +898,8 @@ it('creates an administrator-managed wholesale user and customer profile atomica
             'rol' => 'cliente_mayorista',
             'password' => 'IntegracionSegura123',
             'password_confirmation' => 'IntegracionSegura123',
-            'documento' => 'RUC-20001',
+            'tipo_documento' => 'ruc',
+            'documento' => '20123456789',
             'razon_social' => 'Empresa Mayorista',
             'telefono' => '999555666',
             'ciudad' => 'Lima',
@@ -911,7 +912,7 @@ it('creates an administrator-managed wholesale user and customer profile atomica
     $this->assertDatabaseHas('clientes', [
         'usuario_id' => $user->id,
         'tipo' => 'mayorista',
-        'documento' => 'RUC-20001',
+        'documento' => '20123456789',
     ]);
 });
 

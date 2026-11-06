@@ -58,7 +58,7 @@ it('completa el recorrido real de rol, matriz, usuario, acceso y revocacion', fu
         ->assertRedirect();
 
     $this->actingAs($administrador)
-        ->get(route('management.roles_permissions'))
+        ->get(route('management.permissions_matrix', ['rol' => $roleId]))
         ->assertOk()
         ->assertSee('Operador comercial')
         ->assertSee($permission->nombre);

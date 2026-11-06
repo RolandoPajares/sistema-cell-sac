@@ -24,19 +24,21 @@ it('seeds the seven RBAC roles without inventing organization data', function ()
         ->and(DB::table('empresas')->count())->toBe(0)
         ->and(DB::table('sedes')->count())->toBe(0)
         ->and(DB::table('almacenes')->count())->toBe(0)
-        ->and(DB::table('permisos')->count())->toBe(184)
+        ->and(DB::table('permisos')->count())->toBe(180)
         ->and(DB::table('pantallas')->whereIn('codigo', ['admin.payments', 'admin.cash_registers', 'admin.refunds'])
             ->where('habilitada', true)->count())->toBe(3)
         ->and(DB::table('pantallas')->where('codigo', 'admin.cash_registers')->value('ruta'))
         ->toBe('management.payments.preview.cash_registers')
         ->and(DB::table('permisos')->where('codigo', 'pantalla.admin.payments.consultar')->exists())->toBeTrue()
-        ->and(DB::table('permisos')->where('codigo', 'pantalla.admin.warehouses.consultar')->exists())->toBeTrue()
-        ->and(DB::table('permisos')->where('codigo', 'pantalla.admin.sites.consultar')->exists())->toBeTrue()
+        ->and(DB::table('permisos')->whereIn('codigo', [
+            'pantalla.admin.warehouses.consultar',
+            'pantalla.admin.sites.consultar',
+            'pantalla.admin.staff.consultar',
+            'pantalla.admin.responsibles.consultar',
+        ])->count())->toBe(0)
         ->and(DB::table('pantallas')->where('codigo', 'admin.company')->value('ruta'))->toBe('management.company_settings.data')
         ->and(DB::table('permisos')->where('codigo', 'pantalla.admin.company.consultar')->exists())->toBeTrue()
-        ->and(DB::table('pantallas')->where('codigo', 'admin.staff')->where('habilitada', true)->value('ruta'))
-        ->toBe('management.company_settings.staff')
-        ->and(DB::table('permisos')->where('codigo', 'pantalla.admin.staff.consultar')->exists())->toBeTrue()
+        ->and(DB::table('pantallas')->whereIn('codigo', ['admin.staff', 'admin.responsibles', 'admin.sites', 'admin.warehouses'])->count())->toBe(0)
         ->and(DB::table('permisos')->where('codigo', 'gestion.seguridad.actualizar')->exists())->toBeTrue();
 });
 

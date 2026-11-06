@@ -5,6 +5,7 @@ namespace App\Infraestructura\Persistencia\Pdo;
 use App\Dominio\Catalogo\ProductoDao;
 use App\Dominio\Catalogo\ProductoEntidad;
 use App\Dominio\Catalogo\VarianteProductoEntidad;
+use Closure;
 use DomainException;
 use PDO;
 use RuntimeException;
@@ -12,6 +13,11 @@ use RuntimeException;
 final class PdoProductoDao implements ProductoDao
 {
     public function __construct(private readonly PdoConexion $conexion) {}
+
+    public function enTransaccion(Closure $operacion): mixed
+    {
+        return $this->conexion->ejecutarEnTransaccion(fn (): mixed => $operacion($this));
+    }
 
     public function buscarPorId(int $id, bool $incluirVariantes = true): ?ProductoEntidad
     {
@@ -59,36 +65,41 @@ final class PdoProductoDao implements ProductoDao
             throw new DomainException('No se puede actualizar un producto sin identificador.');
         }
         $this->validarProducto($producto);
-        $consulta = $this->conexion->preparar('UPDATE productos SET marca = :marca, nombre = :nombre, categoria_id = :categoria_id, categoria = :categoria, precio = :precio, precio_oferta = :precio_oferta, activo = :activo, empresa_id = :empresa_id WHERE id = :id');
-        $consulta->execute([
-            'id' => $producto->id, 'marca' => $producto->marca, 'nombre' => $producto->nombre,
-            'categoria_id' => $producto->categoriaId, 'categoria' => $producto->categoria, 'precio' => $producto->precio,
-            'precio_oferta' => $producto->precioOferta, 'activo' => $producto->activo ? 1 : 0, 'empresa_id' => $producto->empresaId,
-        ]);
-        $actualizado = $this->buscarPorId($producto->id);
-        if ($actualizado === null) {
-            throw new RuntimeException('El producto no existe o no pudo actualizarse.');
-        }
+        return $this->enTransaccion(function () use ($producto): ProductoEntidad {
+            $consulta = $this->conexion->preparar('UPDATE productos SET marca = :marca, nombre = :nombre, categoria_id = :categoria_id, categoria = :categoria, precio = :precio, precio_oferta = :precio_oferta, activo = :activo, empresa_id = :empresa_id WHERE id = :id');
+            $consulta->execute([
+                'id' => $producto->id, 'marca' => $producto->marca, 'nombre' => $producto->nombre,
+                'categoria_id' => $producto->categoriaId, 'categoria' => $producto->categoria, 'precio' => $producto->precio,
+                'precio_oferta' => $producto->precioOferta, 'activo' => $producto->activo ? 1 : 0, 'empresa_id' => $producto->empresaId,
+            ]);
+            $actualizado = $this->buscarPorId($producto->id);
+            if ($actualizado === null) {
+                throw new RuntimeException('El producto no existe o no pudo actualizarse.');
+            }
 
-        return $actualizado;
+            return $actualizado;
+        });
     }
 
     public function crearVariante(VarianteProductoEntidad $variante): VarianteProductoEntidad
     {
         $this->validarVariante($variante);
-        if ($this->buscarPorId($variante->productoId, false) === null) {
-            throw new DomainException('No se puede crear una variante para un producto inexistente.');
-        }
 
-        $consulta = $this->conexion->preparar('INSERT INTO variantes_productos (producto_id, codigo_sku, codigo_barras, nombre_color, codigo_color, existencias, controla_serie, estado) VALUES (:producto_id, :codigo_sku, :codigo_barras, :nombre_color, :codigo_color, :existencias, :controla_serie, :estado)');
-        $consulta->execute([
-            'producto_id' => $variante->productoId, 'codigo_sku' => $variante->codigoSku,
-            'codigo_barras' => $variante->codigoBarras, 'nombre_color' => $variante->nombreColor,
-            'codigo_color' => $variante->codigoColor, 'existencias' => $variante->existencias,
-            'controla_serie' => $variante->controlaSerie ? 1 : 0, 'estado' => $variante->estado,
-        ]);
+        return $this->enTransaccion(function () use ($variante): VarianteProductoEntidad {
+            if ($this->buscarPorId($variante->productoId, false) === null) {
+                throw new DomainException('No se puede crear una variante para un producto inexistente.');
+            }
 
-        return $this->buscarVariantePorId($this->conexion->ultimoId());
+            $consulta = $this->conexion->preparar('INSERT INTO variantes_productos (producto_id, codigo_sku, codigo_barras, nombre_color, codigo_color, existencias, controla_serie, estado) VALUES (:producto_id, :codigo_sku, :codigo_barras, :nombre_color, :codigo_color, :existencias, :controla_serie, :estado)');
+            $consulta->execute([
+                'producto_id' => $variante->productoId, 'codigo_sku' => $variante->codigoSku,
+                'codigo_barras' => $variante->codigoBarras, 'nombre_color' => $variante->nombreColor,
+                'codigo_color' => $variante->codigoColor, 'existencias' => $variante->existencias,
+                'controla_serie' => $variante->controlaSerie ? 1 : 0, 'estado' => $variante->estado,
+            ]);
+
+            return $this->buscarVariantePorId($this->conexion->ultimoId());
+        });
     }
 
     public function actualizarVariante(VarianteProductoEntidad $variante): VarianteProductoEntidad
@@ -97,27 +108,33 @@ final class PdoProductoDao implements ProductoDao
             throw new DomainException('No se puede actualizar una variante sin identificador.');
         }
         $this->validarVariante($variante);
-        $consulta = $this->conexion->preparar('UPDATE variantes_productos SET producto_id = :producto_id, codigo_sku = :codigo_sku, codigo_barras = :codigo_barras, nombre_color = :nombre_color, codigo_color = :codigo_color, existencias = :existencias, controla_serie = :controla_serie, estado = :estado WHERE id = :id');
-        $consulta->execute([
-            'id' => $variante->id, 'producto_id' => $variante->productoId, 'codigo_sku' => $variante->codigoSku,
-            'codigo_barras' => $variante->codigoBarras, 'nombre_color' => $variante->nombreColor,
-            'codigo_color' => $variante->codigoColor, 'existencias' => $variante->existencias,
-            'controla_serie' => $variante->controlaSerie ? 1 : 0, 'estado' => $variante->estado,
-        ]);
+        return $this->enTransaccion(function () use ($variante): VarianteProductoEntidad {
+            $consulta = $this->conexion->preparar('UPDATE variantes_productos SET producto_id = :producto_id, codigo_sku = :codigo_sku, codigo_barras = :codigo_barras, nombre_color = :nombre_color, codigo_color = :codigo_color, existencias = :existencias, controla_serie = :controla_serie, estado = :estado WHERE id = :id');
+            $consulta->execute([
+                'id' => $variante->id, 'producto_id' => $variante->productoId, 'codigo_sku' => $variante->codigoSku,
+                'codigo_barras' => $variante->codigoBarras, 'nombre_color' => $variante->nombreColor,
+                'codigo_color' => $variante->codigoColor, 'existencias' => $variante->existencias,
+                'controla_serie' => $variante->controlaSerie ? 1 : 0, 'estado' => $variante->estado,
+            ]);
 
-        return $this->buscarVariantePorId($variante->id);
+            return $this->buscarVariantePorId($variante->id);
+        });
     }
 
     public function eliminarVariante(int $id): void
     {
-        $consulta = $this->conexion->preparar('DELETE FROM variantes_productos WHERE id = :id');
-        $consulta->execute(['id' => $id]);
+        $this->enTransaccion(function () use ($id): void {
+            $consulta = $this->conexion->preparar('DELETE FROM variantes_productos WHERE id = :id');
+            $consulta->execute(['id' => $id]);
+        });
     }
 
     public function eliminar(int $id): void
     {
-        $consulta = $this->conexion->preparar('DELETE FROM productos WHERE id = :id');
-        $consulta->execute(['id' => $id]);
+        $this->enTransaccion(function () use ($id): void {
+            $consulta = $this->conexion->preparar('DELETE FROM productos WHERE id = :id');
+            $consulta->execute(['id' => $id]);
+        });
     }
 
     public function sincronizarImagenPortada(int $productoId, string $rutaImagen): void

@@ -196,6 +196,14 @@ final class ServicioMenuDinamico
     /** @return array<string,mixed>|null */
     private function makeItem(object $row, User $user): ?array
     {
+        if (is_string($row->ruta)
+            && $row->ruta !== 'dashboard'
+            && ! str_starts_with($row->ruta, 'management.account')
+            && is_string($row->modulo_codigo)
+            && ! $this->autorizacion->allows($user, 'gestion.'.$row->modulo_codigo.'.consultar')) {
+            return null;
+        }
+
         if (is_string($row->permiso_codigo) && ! $this->autorizacion->allows($user, $row->permiso_codigo)) {
             return null;
         }

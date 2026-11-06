@@ -1783,6 +1783,7 @@ it('accepts zero only for an inventory adjustment', function (): void {
 it('does not create a public user when the customer role is missing', function (): void {
     $this->post(route('register.store'), [
         'nombre' => 'Prueba', 'correo' => 'prueba@example.test',
+        'tipo_cliente' => 'minorista',
         'password' => 'ClaveSegura123', 'password_confirmation' => 'ClaveSegura123',
         'rol' => 'administrador',
     ])->assertStatus(503);
@@ -1798,6 +1799,7 @@ it('assigns only the server-selected customer role at public registration', func
 
     $this->post(route('register.store'), [
         'nombre' => 'Prueba', 'correo' => 'prueba@example.test',
+        'tipo_cliente' => 'minorista',
         'password' => 'ClaveSegura123', 'password_confirmation' => 'ClaveSegura123',
         'rol' => 'administrador',
     ])->assertRedirect(route('dashboard'));

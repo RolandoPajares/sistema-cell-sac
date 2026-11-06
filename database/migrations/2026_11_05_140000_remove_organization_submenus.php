@@ -36,9 +36,16 @@ return new class extends Migration
             }
 
             if (Schema::hasTable('permisos')) {
+                $permissionUpdate = ['activo' => false];
+                if (Schema::hasColumn('permisos', 'actualizado_en')) {
+                    $permissionUpdate['actualizado_en'] = now();
+                } elseif (Schema::hasColumn('permisos', 'updated_at')) {
+                    $permissionUpdate['updated_at'] = now();
+                }
+
                 DB::table('permisos')
                     ->whereIn('pantalla_id', $screenIds)
-                    ->update(['activo' => false, 'actualizado_en' => now()]);
+                    ->update($permissionUpdate);
             }
         });
     }

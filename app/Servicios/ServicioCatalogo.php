@@ -3,6 +3,8 @@
 namespace App\Servicios;
 
 use App\Dominio\Catalogo\ProductoDao;
+use App\Dominio\Catalogo\ProductoEntidad;
+use App\Dominio\Catalogo\VarianteProductoEntidad;
 use App\Models\Catalogo\Categoria;
 use App\Models\Catalogo\Producto;
 use App\Models\User;
@@ -70,6 +72,35 @@ class ServicioCatalogo
         }
 
         $this->productoDao->sincronizarImagenPortada((int) $producto->id, $rutaImagen);
+    }
+
+    public function crearProductoConVariante(
+        ProductoEntidad $producto,
+        string $codigoSku,
+        string $nombreColor,
+        int $existencias,
+    ): ProductoEntidad {
+        return $this->productoDao->enTransaccion(function (ProductoDao $dao) use ($producto, $codigoSku, $nombreColor, $existencias): ProductoEntidad {
+            $creado = $dao->crear($producto);
+            $dao->crearVariante(new VarianteProductoEntidad(
+                id: null,
+                productoId: (int) $creado->id,
+                codigoSku: $codigoSku,
+                codigoBarras: null,
+                nombreColor: $nombreColor,
+                codigoColor: null,
+                existencias: $existencias,
+                controlaSerie: false,
+                estado: 'activo',
+            ));
+
+            $resultado = $dao->buscarPorId((int) $creado->id);
+            if ($resultado === null) {
+                throw new \RuntimeException('El producto creado no pudo ser recuperado con su variante.');
+            }
+
+            return $resultado;
+        });
     }
 
     /**

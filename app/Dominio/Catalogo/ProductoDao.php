@@ -2,8 +2,13 @@
 
 namespace App\Dominio\Catalogo;
 
+use Closure;
+
 interface ProductoDao
 {
+    /** @param Closure(self): mixed $operacion */
+    public function enTransaccion(Closure $operacion): mixed;
+
     public function buscarPorId(int $id, bool $incluirVariantes = true): ?ProductoEntidad;
 
     public function crear(ProductoEntidad $producto): ProductoEntidad;

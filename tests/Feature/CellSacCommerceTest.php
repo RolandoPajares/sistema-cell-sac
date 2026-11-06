@@ -36,6 +36,7 @@ it('registers public accounts only as retail customers', function () {
     $response = $this->post(route('register.store'), [
         'nombre' => 'Cliente Prueba',
         'correo' => 'cliente@example.test',
+        'tipo_cliente' => 'minorista',
         'password' => 'PruebaSegura123',
         'password_confirmation' => 'PruebaSegura123',
     ]);
