@@ -37,3 +37,16 @@
 @media (max-width: 1180px) { .admin-marketing-filters { grid-template-columns: minmax(15rem, 1.5fr) repeat(2, minmax(8rem, 1fr)) auto auto; }.admin-marketing-filters label:nth-of-type(3) { grid-column: 2; }.admin-marketing-filters label:nth-of-type(4) { grid-column: 3; }.admin-marketing-filter-button { grid-column: 4; grid-row: 2; }.admin-marketing-clear-button { grid-column: 5; grid-row: 2; } }
 @media (max-width: 900px) { .admin-marketing-heading-row { align-items: flex-start; flex-direction: column; }.admin-marketing-actions { justify-content: flex-start; }.admin-marketing-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }.admin-marketing-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }.admin-marketing-filters label:first-child { grid-column: 1 / -1; }.admin-marketing-filter-button, .admin-marketing-clear-button, .admin-marketing-filters label:nth-of-type(3), .admin-marketing-filters label:nth-of-type(4) { grid-column: auto; grid-row: auto; }.admin-marketing-bottom-grid { grid-template-columns: 1fr; } }
 @media (max-width: 560px) { .admin-marketing-module { padding: .9rem .7rem; }.admin-marketing-actions, .admin-marketing-button { width: 100%; }.admin-marketing-button { justify-content: center; }.admin-marketing-kpis, .admin-marketing-filters { grid-template-columns: 1fr; }.admin-marketing-filters label:first-child, .admin-marketing-filter-button, .admin-marketing-clear-button { grid-column: auto; }.admin-marketing-card-header, .admin-marketing-table-footer { align-items: flex-start; flex-direction: column; }.admin-marketing-count { align-self: flex-start; } }
+
+/* Evita desbordes cuando el panel comparte espacio con el sidebar administrativo. */
+.admin-marketing-module { max-width: 100%; min-width: 0; overflow-x: hidden; }
+.admin-marketing-heading-row { min-width: 0; }
+.admin-marketing-heading-row > div:first-child { flex: 1 1 26rem; min-width: 0; }
+.admin-marketing-actions { flex: 1 1 34rem; max-width: 100%; min-width: 0; }
+.admin-marketing-kpi > div { min-width: 0; }
+.admin-marketing-kpi small, .admin-marketing-kpi em { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 1180px) {
+    .admin-marketing-heading-row { align-items: flex-start; flex-direction: column; }
+    .admin-marketing-actions { justify-content: flex-start; width: 100%; }
+}
