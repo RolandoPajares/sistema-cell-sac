@@ -1,10 +1,21 @@
 <?php
 
+/**
+ * Ejecuta la operación raizFrontendQa definida por la clase SeguridadFrontendTest.
+ *
+ * @return string Resultado de la operación.
+ */
 function raizFrontendQa(): string
 {
     return dirname(__DIR__, 2);
 }
 
+/**
+ * Ejecuta la operación contenidoFrontendQa definida por la clase SeguridadFrontendTest.
+ *
+ * @param  mixed  $ruta  Parámetro recibido por la operación.
+ * @return string Resultado de la operación.
+ */
 function contenidoFrontendQa(string $ruta): string
 {
     $contenido = file_get_contents(raizFrontendQa().DIRECTORY_SEPARATOR.$ruta);

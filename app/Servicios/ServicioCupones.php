@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Define la responsabilidad de la clase ServicioCupones dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ServicioCupones
 {
     /**
@@ -110,6 +115,14 @@ class ServicioCupones
         }, 3);
     }
 
+    /**
+     * Modifica el estado o elimina el registro según la operación solicitada.
+     *
+     * @param  mixed  $coupon  Parámetro recibido por la operación.
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return Cupon Resultado de la operación.
+     */
     public function deactivate(Cupon $coupon, User $actor, ?string $ip): Cupon
     {
         $this->authorization()->assertAllowed($actor, 'gestion.cupones.eliminar');
@@ -131,6 +144,12 @@ class ServicioCupones
         }, 3);
     }
 
+    /**
+     * Ejecuta la operación status definida por la clase ServicioCupones.
+     *
+     * @param  mixed  $coupon  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     public function status(Cupon $coupon): string
     {
         if (! $coupon->activo || $coupon->finaliza_en->isPast()
@@ -150,16 +169,31 @@ class ServicioCupones
         }
     }
 
+    /**
+     * Ejecuta la operación authorization definida por la clase ServicioCupones.
+     *
+     * @return ServicioAutorizacion Resultado de la operación.
+     */
     private function authorization(): ServicioAutorizacion
     {
         return app(ServicioAutorizacion::class);
     }
 
+    /**
+     * Ejecuta la operación empresaDisponible definida por la clase ServicioCupones.
+     *
+     * @return bool Resultado de la operación.
+     */
     public function empresaDisponible(): bool
     {
         return Schema::hasColumn('cupones', 'empresa_id') && $this->authorization()->activeCompanyId() !== null;
     }
 
+    /**
+     * Ejecuta la operación empresaActual definida por la clase ServicioCupones.
+     *
+     * @return int Resultado de la operación.
+     */
     private function empresaActual(): int
     {
         abort_unless(Schema::hasColumn('cupones', 'empresa_id'), 503,

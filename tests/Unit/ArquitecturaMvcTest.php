@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Ejecuta la operación archivosDeProyecto definida por la clase ArquitecturaMvcTest.
+ *
+ * @param  mixed  $directorio  Parámetro recibido por la operación.
+ * @param  mixed  $extension  Parámetro recibido por la operación.
+ * @return array Resultado de la operación.
+ */
 function archivosDeProyecto(string $directorio, string $extension): array
 {
     $archivos = [];
@@ -20,6 +27,11 @@ function archivosDeProyecto(string $directorio, string $extension): array
     return $archivos;
 }
 
+/**
+ * Ejecuta la operación raizProyectoQa definida por la clase ArquitecturaMvcTest.
+ *
+ * @return string Resultado de la operación.
+ */
 function raizProyectoQa(): string
 {
     return dirname(__DIR__, 2);
@@ -82,6 +94,6 @@ test('la capa de servicios no renderiza vistas directamente', function (): void 
         $contenido = file_get_contents($servicio);
         expect($contenido)->toBeString()
             ->and(preg_match('/\\bview\\s*\\(/i', $contenido))->toBe(0)
-            ->and($contenido)->not->toContain("resources/views");
+            ->and($contenido)->not->toContain('resources/views');
     }
 });

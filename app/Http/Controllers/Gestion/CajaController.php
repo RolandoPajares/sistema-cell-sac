@@ -16,8 +16,20 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
+/**
+ * Define la responsabilidad de la clase CajaController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class CajaController extends Controller
 {
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $authorization  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(FiltroCajasRequest $request, ServicioAutorizacion $authorization): View
     {
         $companyId = $authorization->activeCompanyId();
@@ -63,6 +75,13 @@ class CajaController extends Controller
         ]);
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $boxes  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function store(GuardarCajaRequest $request, ServicioCajas $boxes): RedirectResponse
     {
         $boxes->crear($request->validated(), $request->user(), $request->ip());
@@ -70,6 +89,14 @@ class CajaController extends Controller
         return redirect()->route('management.payments.preview.cash_registers')->with('status', 'Caja creada correctamente.');
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $caja  Parámetro recibido por la operación.
+     * @param  mixed  $boxes  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function update(ActualizarCajaRequest $request, Caja $caja, ServicioCajas $boxes): RedirectResponse
     {
         $boxes->actualizar($caja, $request->validated(), $request->user(), $request->ip());
@@ -77,6 +104,14 @@ class CajaController extends Controller
         return redirect()->route('management.payments.preview.cash_registers')->with('status', 'Caja actualizada correctamente.');
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $caja  Parámetro recibido por la operación.
+     * @param  mixed  $boxes  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function updateStatus(CambiarEstadoCajaRequest $request, Caja $caja, ServicioCajas $boxes): RedirectResponse
     {
         $box = $boxes->cambiarEstado($caja, (bool) $request->validated('activa'), $request->user(), $request->ip());

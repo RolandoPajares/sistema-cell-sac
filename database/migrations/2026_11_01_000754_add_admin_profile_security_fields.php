@@ -6,6 +6,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Ejecuta la operación up definida por la clase 2026_11_01_000754_add_admin_profile_security_fields.
+     *
+     * @return void Resultado de la operación.
+     */
     public function up(): void
     {
         $userTable = Schema::hasTable('usuarios') ? 'usuarios' : 'users';
@@ -101,6 +106,11 @@ return new class extends Migration
         }
     }
 
+    /**
+     * Ejecuta la operación down definida por la clase 2026_11_01_000754_add_admin_profile_security_fields.
+     *
+     * @return void Resultado de la operación.
+     */
     public function down(): void
     {
         throw new LogicException('This account-security migration is forward-only to preserve profile, session, and notification data.');

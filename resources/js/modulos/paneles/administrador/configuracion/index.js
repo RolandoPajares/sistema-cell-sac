@@ -29,6 +29,13 @@ document.querySelectorAll('[data-admin-settings]').forEach((root) => {
 
     root.dataset.adminSettingsBehaviorReady = 'true';
 
+/**
+ * Recupera y presenta el detalle de la información solicitada.
+ *
+ * @param {*} message - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const showFeedback = (message) => {
         if (!feedback) {
             return;

@@ -11,8 +11,18 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
+/**
+ * Define la responsabilidad de la clase ServicioCajas dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ServicioCajas
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly ServicioAutorizacion $authorization,
         private readonly RegistradorAuditoria $audit,
@@ -72,6 +82,15 @@ class ServicioCajas
         }, 3);
     }
 
+    /**
+     * Ejecuta la operación cambiarEstado definida por la clase ServicioCajas.
+     *
+     * @param  mixed  $box  Parámetro recibido por la operación.
+     * @param  mixed  $active  Parámetro recibido por la operación.
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return Caja Resultado de la operación.
+     */
     public function cambiarEstado(Caja $box, bool $active, User $actor, ?string $ip): Caja
     {
         $this->assertAdministrator($actor, 'gestion.pagos.actualizar');
@@ -93,6 +112,16 @@ class ServicioCajas
         }, 3);
     }
 
+    /**
+     * Ejecuta la operación abrirSesion definida por la clase ServicioCajas.
+     *
+     * @param  mixed  $box  Parámetro recibido por la operación.
+     * @param  mixed  $initialBalance  Parámetro recibido por la operación.
+     * @param  mixed  $token  Parámetro recibido por la operación.
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return SesionCaja Resultado de la operación.
+     */
     public function abrirSesion(Caja $box, string $initialBalance, string $token, User $actor, ?string $ip): SesionCaja
     {
         $this->assertAdministrator($actor, 'gestion.pagos.crear');
@@ -128,6 +157,11 @@ class ServicioCajas
         }, 3);
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function registrarMovimiento(
         SesionCaja $session,
         string $direction,
@@ -200,6 +234,16 @@ class ServicioCajas
         ];
     }
 
+    /**
+     * Ejecuta la operación cerrarSesion definida por la clase ServicioCajas.
+     *
+     * @param  mixed  $session  Parámetro recibido por la operación.
+     * @param  mixed  $declaredBalance  Parámetro recibido por la operación.
+     * @param  mixed  $token  Parámetro recibido por la operación.
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return SesionCaja Resultado de la operación.
+     */
     public function cerrarSesion(SesionCaja $session, string $declaredBalance, string $token, User $actor, ?string $ip): SesionCaja
     {
         $this->assertAdministrator($actor, 'gestion.pagos.actualizar');
@@ -237,6 +281,11 @@ class ServicioCajas
         }, 3);
     }
 
+    /**
+     * Ejecuta la operación lockCompany definida por la clase ServicioCajas.
+     *
+     * @return void Resultado de la operación.
+     */
     private function lockCompany(): void
     {
         $companyId = $this->authorization->activeCompanyId();
@@ -244,6 +293,14 @@ class ServicioCajas
         DB::table('empresas')->where('id', $companyId)->lockForUpdate()->first();
     }
 
+    /**
+     * Ejecuta la operación eventEntityId definida por la clase ServicioCajas.
+     *
+     * @param  mixed  $token  Parámetro recibido por la operación.
+     * @param  mixed  $entity  Parámetro recibido por la operación.
+     * @param  mixed  $action  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     private function eventEntityId(string $token, string $entity, string $action): ?int
     {
         abort_unless(Str::isUuid($token), 422,
@@ -259,6 +316,13 @@ class ServicioCajas
         return (int) $event->entidad_id;
     }
 
+    /**
+     * Ejecuta la operación amount definida por la clase ServicioCajas.
+     *
+     * @param  mixed  $value  Parámetro recibido por la operación.
+     * @param  mixed  $positive  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function amount(string $value, bool $positive): string
     {
         abort_unless(preg_match('/\A(?:0|[1-9][0-9]{0,12})(?:\.[0-9]{1,2})?\z/', $value) === 1,
@@ -269,18 +333,39 @@ class ServicioCajas
         return $amount;
     }
 
+    /**
+     * Ejecuta la operación assertAdministrator definida por la clase ServicioCajas.
+     *
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $permission  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     private function assertAdministrator(User $actor, string $permission): void
     {
         abort_unless($this->authorization->hasRole($actor, 'administrador'), 403);
         $this->authorization->assertAllowed($actor, $permission);
     }
 
+    /**
+     * Ejecuta la operación assertSite definida por la clase ServicioCajas.
+     *
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $site  Parámetro recibido por la operación.
+     * @param  mixed  $permission  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     private function assertSite(User $actor, Sede $site, string $permission): void
     {
         abort_unless($site->activa && (int) $site->empresa_id === $this->authorization->activeCompanyId()
             && $this->authorization->allowsRecord($actor, $permission, (int) $site->empresa_id, (int) $site->id), 403);
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @param  mixed  $box  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     private function hasOpenSession(Caja $box): bool
     {
         return DB::table('sesiones_caja')->where('caja_id', $box->getKey())->where('estado', 'abierta')->exists();

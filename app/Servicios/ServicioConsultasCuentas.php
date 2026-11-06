@@ -8,8 +8,19 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
+/**
+ * Define la responsabilidad de la clase ServicioConsultasCuentas dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ServicioConsultasCuentas
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(private ServicioAutorizacion $autorizacion) {}
 
     /**
@@ -136,6 +147,12 @@ class ServicioConsultasCuentas
         ];
     }
 
+    /**
+     * Ejecuta la operación nombreReceptor definida por la clase ServicioConsultasCuentas.
+     *
+     * @param  mixed  $datos  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function nombreReceptor(string $datos): string
     {
         $receptor = json_decode($datos, true);
@@ -166,16 +183,39 @@ class ServicioConsultasCuentas
             ->implode(' · ');
     }
 
+    /**
+     * Ejecuta la operación formatearImporte definida por la clase ServicioConsultasCuentas.
+     *
+     * @param  mixed  $importe  Parámetro recibido por la operación.
+     * @param  mixed  $moneda  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function formatearImporte(float $importe, string $moneda): string
     {
         return $moneda.' '.number_format($importe, 2, ',', ' ');
     }
 
+    /**
+     * Ejecuta la operación porcentaje definida por la clase ServicioConsultasCuentas.
+     *
+     * @param  mixed  $parte  Parámetro recibido por la operación.
+     * @param  mixed  $total  Parámetro recibido por la operación.
+     * @return int Resultado de la operación.
+     */
     private function porcentaje(int $parte, int $total): int
     {
         return $total === 0 ? 0 : (int) round(($parte / $total) * 100);
     }
 
+    /**
+     * Ejecuta la operación gradienteSaldos definida por la clase ServicioConsultasCuentas.
+     *
+     * @param  mixed  $vigentes  Parámetro recibido por la operación.
+     * @param  mixed  $vencidos  Parámetro recibido por la operación.
+     * @param  mixed  $pagados  Parámetro recibido por la operación.
+     * @param  mixed  $total  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function gradienteSaldos(int $vigentes, int $vencidos, int $pagados, int $total): string
     {
         $porcentajeVigentes = $this->porcentaje($vigentes, $total);

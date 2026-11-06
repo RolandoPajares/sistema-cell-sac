@@ -9,12 +9,22 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Define la responsabilidad de la clase ServicioPedidos dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ServicioPedidos
 {
     private const MAX_ITEM_QUANTITY = 1000;
 
     private const MAX_ORDER_TOTAL_CENTS = 9999999999;
 
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly ServicioInventario $inventoryService,
         private readonly RegistradorAuditoria $auditLogger,
@@ -109,6 +119,15 @@ class ServicioPedidos
         }, 3);
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $order  Parámetro recibido por la operación.
+     * @param  mixed  $user  Parámetro recibido por la operación.
+     * @param  mixed  $status  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     public function updateStatus(Pedido $order, User $user, string $status, ?string $ip): void
     {
         abort_unless($this->authorization->allowsRecord(

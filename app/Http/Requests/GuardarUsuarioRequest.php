@@ -9,14 +9,29 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
+/**
+ * Define la responsabilidad de la clase GuardarUsuarioRequest dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class GuardarUsuarioRequest extends FormRequest
 {
+    /**
+     * Determina si la operación cumple las condiciones de autorización o validación.
+     *
+     * @return bool Resultado de la operación.
+     */
     public function authorize(): bool
     {
         return $this->user() !== null
             && app(ServicioAutorizacion::class)->allowsGlobal($this->user(), 'gestion.seguridad.crear');
     }
 
+    /**
+     * Define la configuración de validación utilizada por el componente.
+     *
+     * @return array Resultado de la operación.
+     */
     public function rules(): array
     {
         $customerRole = $this->isCustomerRole();
@@ -37,6 +52,11 @@ class GuardarUsuarioRequest extends FormRequest
         ];
     }
 
+    /**
+     * Define la configuración de validación utilizada por el componente.
+     *
+     * @return array Resultado de la operación.
+     */
     public function attributes(): array
     {
         return [
@@ -53,6 +73,11 @@ class GuardarUsuarioRequest extends FormRequest
         ];
     }
 
+    /**
+     * Define la configuración de validación utilizada por el componente.
+     *
+     * @return array Resultado de la operación.
+     */
     public function messages(): array
     {
         return [
@@ -97,6 +122,11 @@ class GuardarUsuarioRequest extends FormRequest
         return [];
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @return bool Resultado de la operación.
+     */
     private function isCustomerRole(): bool
     {
         return in_array($this->string('rol')->toString(), ['cliente_mayorista', 'cliente_minorista'], true);

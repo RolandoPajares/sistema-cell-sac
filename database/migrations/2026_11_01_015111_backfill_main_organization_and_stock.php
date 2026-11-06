@@ -5,6 +5,11 @@ use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
+    /**
+     * Ejecuta la operación up definida por la clase 2026_11_01_015111_backfill_main_organization_and_stock.
+     *
+     * @return void Resultado de la operación.
+     */
     public function up(): void
     {
         if (DB::getDriverName() === 'sqlite') {
@@ -108,6 +113,11 @@ return new class extends Migration
         });
     }
 
+    /**
+     * Ejecuta la operación down definida por la clase 2026_11_01_015111_backfill_main_organization_and_stock.
+     *
+     * @return void Resultado de la operación.
+     */
     public function down(): void
     {
         throw new LogicException('The opening-balance backfill is forward-only and preserves legacy rows.');

@@ -15,13 +15,29 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
+/**
+ * Define la responsabilidad de la clase CarritoController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class CarritoController extends Controller
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly ServicioInventario $inventario,
         private readonly ServicioAutorizacion $autorizacion,
     ) {}
 
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(Request $request): View
     {
         $cart = (array) $request->session()->get('cart', []);
@@ -41,6 +57,13 @@ class CarritoController extends Controller
         return view('publico.comercio.carrito', ['lines' => $lines, 'total' => $lines->sum('subtotal')]);
     }
 
+    /**
+     * Ejecuta la operación add definida por la clase CarritoController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $product  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function add(AgregarCarritoRequest $request, Producto $product): RedirectResponse
     {
         abort_unless($product->activo, 404);
@@ -57,6 +80,13 @@ class CarritoController extends Controller
         return back()->with('status', 'Producto agregado al carrito.');
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $product  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function update(ActualizarCarritoRequest $request, Producto $product): RedirectResponse
     {
         $quantity = (int) $request->validated('cantidad');
@@ -76,6 +106,13 @@ class CarritoController extends Controller
         return back();
     }
 
+    /**
+     * Modifica el estado o elimina el registro según la operación solicitada.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $product  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function remove(Request $request, Producto $product): RedirectResponse
     {
         $cart = (array) $request->session()->get('cart', []);
@@ -85,6 +122,12 @@ class CarritoController extends Controller
         return back()->with('status', 'Producto retirado del carrito.');
     }
 
+    /**
+     * Ejecuta la operación clear definida por la clase CarritoController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function clear(Request $request): RedirectResponse
     {
         $request->session()->forget(['cart', 'coupon_code']);
@@ -92,6 +135,12 @@ class CarritoController extends Controller
         return back()->with('status', 'Carrito vaciado.');
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function updateLegacy(Request $request): RedirectResponse
     {
         $submitted = (array) $request->input('cart', $request->input('items', []));
@@ -113,6 +162,12 @@ class CarritoController extends Controller
         return back()->with('status', 'Carrito actualizado.');
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function applyCoupon(AplicarCuponRequest $request): RedirectResponse
     {
         $code = mb_strtoupper($request->string('codigo')->trim()->toString());

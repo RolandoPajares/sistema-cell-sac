@@ -9,28 +9,44 @@ use App\Http\Requests\RegistrarRecepcionParcialCompraRequest;
 use App\Models\Catalogo\Producto;
 use App\Models\Compras\Compra;
 use App\Models\Compras\Proveedor;
-use App\Servicios\ServicioAutorizacion;
-use App\Servicios\ServicioCompras;
 use App\Servicios\ExportadorTabular;
 use App\Servicios\RegistradorAuditoria;
+use App\Servicios\ServicioAutorizacion;
+use App\Servicios\ServicioCompras;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
-use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
+/**
+ * Define la responsabilidad de la clase CompraController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class CompraController extends Controller
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly ServicioCompras $purchaseService,
         private readonly ServicioAutorizacion $authorization,
     ) {}
 
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(Request $request): View
     {
         $filters = $request->validate([
@@ -234,6 +250,15 @@ class CompraController extends Controller
         ]);
     }
 
+    /**
+     * Genera la salida exportable de la información disponible.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $format  Parámetro recibido por la operación.
+     * @param  mixed  $exporter  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return Response|StreamedResponse Resultado de la operación.
+     */
     public function export(Request $request, string $format, ExportadorTabular $exporter, RegistradorAuditoria $audit): Response|StreamedResponse
     {
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
@@ -292,6 +317,12 @@ class CompraController extends Controller
         return $response;
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function store(GuardarCompraRequest $request): RedirectResponse
     {
         $datos = $request->validated();
@@ -301,6 +332,12 @@ class CompraController extends Controller
         return back()->with('status', 'Compra registrada como pendiente; aún no se ha recibido mercadería.');
     }
 
+    /**
+     * Procesa e incorpora la información importada.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function import(ImportarComprasRequest $request): RedirectResponse
     {
         $expected = ['proveedor_id', 'fecha_compra', 'producto_id', 'variante_id', 'cantidad', 'costo_unitario'];
@@ -314,7 +351,9 @@ class CompraController extends Controller
         }
         $rows = [];
         while (($row = fgetcsv($handle)) !== false) {
-            if (count($row) === 1 && trim((string) $row[0]) === '') continue;
+            if (count($row) === 1 && trim((string) $row[0]) === '') {
+                continue;
+            }
             if (count($row) !== count($expected)) {
                 fclose($handle);
                 throw ValidationException::withMessages(['archivo' => 'El CSV contiene una fila con columnas inválidas.']);
@@ -336,7 +375,9 @@ class CompraController extends Controller
             }
         }
         fclose($handle);
-        if ($rows === []) throw ValidationException::withMessages(['archivo' => 'El CSV no contiene líneas de compra.']);
+        if ($rows === []) {
+            throw ValidationException::withMessages(['archivo' => 'El CSV no contiene líneas de compra.']);
+        }
 
         DB::transaction(function () use ($rows, $request): void {
             foreach ($rows as $data) {
@@ -356,6 +397,13 @@ class CompraController extends Controller
         return back()->with('status', count($rows).' compra(s) importada(s) correctamente.');
     }
 
+    /**
+     * Ejecuta la operación approve definida por la clase CompraController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $compra  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function approve(Request $request, Compra $compra): RedirectResponse
     {
         $this->purchaseService->aprobar($compra, $request->user(), $request->ip());
@@ -363,6 +411,13 @@ class CompraController extends Controller
         return back()->with('status', 'La compra está aprobada; aún no se ha recibido mercadería.');
     }
 
+    /**
+     * Ejecuta la operación receive definida por la clase CompraController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $compra  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function receive(Request $request, Compra $compra): RedirectResponse
     {
         $this->purchaseService->recibir($compra, $request->user(), $request->ip());
@@ -370,6 +425,13 @@ class CompraController extends Controller
         return back()->with('status', 'La compra está recibida.');
     }
 
+    /**
+     * Modifica el estado o elimina el registro según la operación solicitada.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $compra  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function cancel(Request $request, Compra $compra): RedirectResponse
     {
         $this->purchaseService->anular($compra, $request->user(), $request->ip());
@@ -377,6 +439,13 @@ class CompraController extends Controller
         return back()->with('status', 'La compra pendiente fue anulada y quedó conservada en auditoría.');
     }
 
+    /**
+     * Ejecuta la operación recibirParcial definida por la clase CompraController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $compra  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function recibirParcial(RegistrarRecepcionParcialCompraRequest $request, Compra $compra): RedirectResponse
     {
         $datos = $request->validated();

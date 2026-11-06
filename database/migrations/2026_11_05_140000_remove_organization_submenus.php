@@ -50,6 +50,11 @@ return new class extends Migration
         });
     }
 
+    /**
+     * Ejecuta la operación down definida por la clase 2026_11_05_140000_remove_organization_submenus.
+     *
+     * @return void Resultado de la operación.
+     */
     public function down(): void
     {
         throw new LogicException('This RBAC menu cleanup is forward-only.');

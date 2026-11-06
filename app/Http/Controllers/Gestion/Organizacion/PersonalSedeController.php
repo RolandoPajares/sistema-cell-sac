@@ -12,8 +12,20 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
+/**
+ * Define la responsabilidad de la clase PersonalSedeController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class PersonalSedeController extends Controller
 {
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function listar(FiltroPersonalSedeRequest $request, ServicioAutorizacion $autorizacion): View
     {
         $usuario = $request->user();
@@ -103,6 +115,13 @@ final class PersonalSedeController extends Controller
             ->whereIn('asignacion.sede_id', $idsSede);
     }
 
+    /**
+     * Ejecuta la operación restringirAsignacionesVigentes definida por la clase PersonalSedeController.
+     *
+     * @param  mixed  $consulta  Parámetro recibido por la operación.
+     * @param  mixed  $ahora  Parámetro recibido por la operación.
+     * @return Builder Resultado de la operación.
+     */
     private function restringirAsignacionesVigentes(Builder $consulta, Carbon $ahora): Builder
     {
         return $consulta->where('asignacion.activo', true)

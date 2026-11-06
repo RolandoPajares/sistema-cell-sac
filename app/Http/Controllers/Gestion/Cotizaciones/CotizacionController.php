@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Gestion\Cotizaciones;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\GuardarCotizacionRequest;
 use App\Http\Requests\ActualizarCotizacionRequest;
+use App\Http\Requests\GuardarCotizacionRequest;
 use App\Http\Requests\RegistrarEnvioCotizacionRequest;
 use App\Models\Catalogo\Producto;
 use App\Models\Clientes\Cliente;
@@ -23,13 +23,29 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Define la responsabilidad de la clase CotizacionController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class CotizacionController extends Controller
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly ServicioCotizaciones $quotationService,
         private readonly ServicioAutorizacion $authorization,
     ) {}
 
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(Request $request): View
     {
         if ($request->routeIs('management.quotations')) {
@@ -63,6 +79,12 @@ class CotizacionController extends Controller
         ]);
     }
 
+    /**
+     * Ejecuta la operación administratorIndex definida por la clase CotizacionController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     private function administratorIndex(Request $request): View
     {
         $filters = $request->validate([
@@ -188,6 +210,11 @@ class CotizacionController extends Controller
         ]);
     }
 
+    /**
+     * Genera la salida exportable de la información disponible.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function export(
         Request $request,
         string $format,
@@ -254,6 +281,13 @@ class CotizacionController extends Controller
         return $response;
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $quotation  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function update(ActualizarCotizacionRequest $request, Cotizacion $quotation): RedirectResponse
     {
         $this->quotationService->actualizar($quotation, $request->validated(), $request->user(), $request->ip());
@@ -261,6 +295,12 @@ class CotizacionController extends Controller
         return back()->with('status', 'La cotización se actualizó en MariaDB.');
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function store(GuardarCotizacionRequest $request): RedirectResponse
     {
         $this->quotationService->create($request->validated(), $request->user());
@@ -268,6 +308,13 @@ class CotizacionController extends Controller
         return back()->with('status', 'Cotización guardada como borrador; aún no se envía al cliente.');
     }
 
+    /**
+     * Ejecuta la operación aprobar definida por la clase CotizacionController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $quotation  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function aprobar(Request $request, Cotizacion $quotation): RedirectResponse
     {
         $this->quotationService->aprobar($quotation, $request->user(), $request->ip());
@@ -275,6 +322,13 @@ class CotizacionController extends Controller
         return back()->with('status', 'La cotizacion fue aprobada y registrada en MariaDB.');
     }
 
+    /**
+     * Modifica el estado o elimina el registro según la operación solicitada.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $quotation  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function deactivate(Request $request, Cotizacion $quotation): RedirectResponse
     {
         $this->quotationService->desactivar($quotation, $request->user(), $request->ip());
@@ -282,6 +336,13 @@ class CotizacionController extends Controller
         return back()->with('status', 'La cotizacion fue desactivada y conservada en el historial.');
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $quotation  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function registrarEnvioManual(RegistrarEnvioCotizacionRequest $request, Cotizacion $quotation): RedirectResponse
     {
         $cotizacion = $this->quotationService->registrarEnvioManual($quotation, $request->user(), $request->ip());
@@ -289,6 +350,15 @@ class CotizacionController extends Controller
         return back()->with('status', 'Se registro el envio manual de la cotizacion '.$cotizacion->id.'.');
     }
 
+    /**
+     * Ejecuta la operación descargar definida por la clase CotizacionController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $quotation  Parámetro recibido por la operación.
+     * @param  mixed  $exportador  Parámetro recibido por la operación.
+     * @param  mixed  $auditoria  Parámetro recibido por la operación.
+     * @return Response|StreamedResponse Resultado de la operación.
+     */
     public function descargar(Request $request, Cotizacion $quotation, ExportadorTabular $exportador, RegistradorAuditoria $auditoria): Response|StreamedResponse
     {
         $usuario = $request->user();

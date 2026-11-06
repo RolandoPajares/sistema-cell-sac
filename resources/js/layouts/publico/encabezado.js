@@ -1,3 +1,8 @@
+/**
+ * Ejecuta la operación inicializarEncabezado utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const inicializarEncabezado = () => {
     const botonMenu = document.querySelector('.menu-toggle');
     const navegacion = document.querySelector('.navlinks');

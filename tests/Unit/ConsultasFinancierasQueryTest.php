@@ -18,6 +18,11 @@ use Tests\TestCase;
 
 uses(TestCase::class);
 
+/**
+ * Ejecuta la operación prepareFinanzasAuthorization definida por la clase ConsultasFinancierasQueryTest.
+ *
+ * @return ServicioAutorizacion Resultado de la operación.
+ */
 function prepareFinanzasAuthorization(): ServicioAutorizacion
 {
     Schema::create('empresas', function (Blueprint $table): void {
@@ -237,6 +242,11 @@ test('arma el listado de pagos desde Eloquent sin ofrecer acciones de escritura'
         ->and($module['export_route'])->toBeNull();
 });
 
+/**
+ * Ejecuta la operación prepareFinancialOperationsTables definida por la clase ConsultasFinancierasQueryTest.
+ *
+ * @return void Resultado de la operación.
+ */
 function prepareFinancialOperationsTables(): void
 {
     Schema::create('pedidos', function (Blueprint $table): void {
@@ -373,6 +383,11 @@ function prepareFinancialOperationsTables(): void
     ]);
 }
 
+/**
+ * Ejecuta la operación prepareFinancialOperations definida por la clase ConsultasFinancierasQueryTest.
+ *
+ * @return array Resultado de la operación.
+ */
 function prepareFinancialOperations(): array
 {
     $authorization = prepareFinanzasAuthorization();

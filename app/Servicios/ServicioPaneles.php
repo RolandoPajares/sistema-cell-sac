@@ -8,8 +8,18 @@ use App\Models\Compras\Proveedor;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
+/**
+ * Define la responsabilidad de la clase ServicioPaneles dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class ServicioPaneles
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly ServicioAutorizacion $autorizacion,
         private readonly ServicioMenuDinamico $menus,

@@ -15,10 +15,28 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Define la responsabilidad de la clase CuentasFinancierasController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class CuentasFinancierasController extends Controller
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @param  mixed  $consultasCuentas  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(private ServicioConsultasCuentas $consultasCuentas) {}
 
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(Request $request, ServicioAutorizacion $autorizacion): View
     {
         $datosConfiguracion = require resource_path('views/paneles/administrador/finanzas-facturacion/componentes/datos.php');
@@ -91,6 +109,13 @@ class CuentasFinancierasController extends Controller
         return view('paneles.administrador.finanzas-facturacion.cuentas.listar', ['paginaReal' => $pagina]);
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $cuentas  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function crearCuentaPorPagar(CrearCuentaPorPagarRequest $request, ServicioCuentasFinancieras $cuentas): RedirectResponse
     {
         $cuentaId = $cuentas->crearCuentaPorPagar(
@@ -100,6 +125,13 @@ class CuentasFinancierasController extends Controller
         return redirect()->route('management.payments.preview.accounts')->with('status', 'Cuenta por pagar #'.$cuentaId.' registrada desde la compra recibida.');
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $cuentas  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function aplicarCobro(AplicarCobroCuentaRequest $request, ServicioCuentasFinancieras $cuentas): RedirectResponse
     {
         $datos = $request->validated();
@@ -108,6 +140,13 @@ class CuentasFinancierasController extends Controller
         return redirect()->route('management.payments.preview.accounts')->with('status', 'El cobro registrado se aplicó a la cuenta por cobrar.');
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $cuentas  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function aplicarPago(AplicarPagoCuentaRequest $request, ServicioCuentasFinancieras $cuentas): RedirectResponse
     {
         $datos = $request->validated();

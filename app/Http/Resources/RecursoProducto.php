@@ -6,6 +6,11 @@ use App\Models\Catalogo\ImagenProducto;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * Define la responsabilidad de la clase RecursoProducto dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class RecursoProducto extends JsonResource
 {
     /** @return array<string, mixed> */

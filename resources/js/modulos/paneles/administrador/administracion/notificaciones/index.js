@@ -1,3 +1,10 @@
+/**
+ * Ejecuta la operación initializeNotificaciones utilizada por el módulo JavaScript.
+ *
+ * @param {*} root - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 export const initializeNotificaciones = (root) => {
     if (!root || root.dataset.adminSystemNotificationsReady === 'true') {
         return;

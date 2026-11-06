@@ -10,6 +10,11 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Define la responsabilidad de la clase ServicioConfiguracionSistema dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class ServicioConfiguracionSistema
 {
     /** @param array{empresa_id:?int,sede_id:?int} $ubicacion
@@ -107,6 +112,14 @@ final class ServicioConfiguracionSistema
         return compact('sesiones', 'eventos', 'controles');
     }
 
+    /**
+     * Ejecuta la operación consultaAuditoria definida por la clase ServicioConfiguracionSistema.
+     *
+     * @param  mixed  $usuario  Parámetro recibido por la operación.
+     * @param  mixed  $empresaId  Parámetro recibido por la operación.
+     * @param  mixed  $sedeId  Parámetro recibido por la operación.
+     * @return Builder Resultado de la operación.
+     */
     private function consultaAuditoria(User $usuario, ?int $empresaId, ?int $sedeId): Builder
     {
         return DB::table('registros_auditoria')->where(function ($consulta) use ($usuario, $empresaId): void {

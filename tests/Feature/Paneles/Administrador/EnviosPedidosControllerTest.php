@@ -1,12 +1,17 @@
 <?php
 
+use App\Models\Comercio\EnvioPedido;
+use App\Servicios\ServicioEnviosPedidos;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use App\Models\Comercio\EnvioPedido;
-use App\Servicios\ServicioEnviosPedidos;
 use Tests\SpanishAccessFixture;
 
+/**
+ * Ejecuta la operación prepararEsquemaEnviosParaPrueba definida por la clase EnviosPedidosControllerTest.
+ *
+ * @return void Resultado de la operación.
+ */
 function prepararEsquemaEnviosParaPrueba(): void
 {
     if (! Schema::hasTable('envios_pedidos')) {

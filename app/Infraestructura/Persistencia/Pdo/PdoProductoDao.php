@@ -10,15 +10,39 @@ use DomainException;
 use PDO;
 use RuntimeException;
 
+/**
+ * Define la responsabilidad de la clase PdoProductoDao dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class PdoProductoDao implements ProductoDao
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @param  mixed  $conexion  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(private readonly PdoConexion $conexion) {}
 
+    /**
+     * Ejecuta la operación indicada dentro del contexto transaccional establecido.
+     *
+     * @param  mixed  $operacion  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     public function enTransaccion(Closure $operacion): mixed
     {
         return $this->conexion->ejecutarEnTransaccion(fn (): mixed => $operacion($this));
     }
 
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $id  Parámetro recibido por la operación.
+     * @param  mixed  $incluirVariantes  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     public function buscarPorId(int $id, bool $incluirVariantes = true): ?ProductoEntidad
     {
         $consulta = $this->conexion->preparar('SELECT id, marca, nombre, categoria_id, categoria, precio, precio_oferta, activo, empresa_id FROM productos WHERE id = :id LIMIT 1');
@@ -39,6 +63,12 @@ final class PdoProductoDao implements ProductoDao
         );
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $producto  Parámetro recibido por la operación.
+     * @return ProductoEntidad Resultado de la operación.
+     */
     public function crear(ProductoEntidad $producto): ProductoEntidad
     {
         $this->validarProducto($producto);
@@ -59,12 +89,19 @@ final class PdoProductoDao implements ProductoDao
         });
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $producto  Parámetro recibido por la operación.
+     * @return ProductoEntidad Resultado de la operación.
+     */
     public function actualizar(ProductoEntidad $producto): ProductoEntidad
     {
         if ($producto->id === null) {
             throw new DomainException('No se puede actualizar un producto sin identificador.');
         }
         $this->validarProducto($producto);
+
         return $this->enTransaccion(function () use ($producto): ProductoEntidad {
             $consulta = $this->conexion->preparar('UPDATE productos SET marca = :marca, nombre = :nombre, categoria_id = :categoria_id, categoria = :categoria, precio = :precio, precio_oferta = :precio_oferta, activo = :activo, empresa_id = :empresa_id WHERE id = :id');
             $consulta->execute([
@@ -81,6 +118,12 @@ final class PdoProductoDao implements ProductoDao
         });
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $variante  Parámetro recibido por la operación.
+     * @return VarianteProductoEntidad Resultado de la operación.
+     */
     public function crearVariante(VarianteProductoEntidad $variante): VarianteProductoEntidad
     {
         $this->validarVariante($variante);
@@ -102,12 +145,19 @@ final class PdoProductoDao implements ProductoDao
         });
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $variante  Parámetro recibido por la operación.
+     * @return VarianteProductoEntidad Resultado de la operación.
+     */
     public function actualizarVariante(VarianteProductoEntidad $variante): VarianteProductoEntidad
     {
         if ($variante->id === null) {
             throw new DomainException('No se puede actualizar una variante sin identificador.');
         }
         $this->validarVariante($variante);
+
         return $this->enTransaccion(function () use ($variante): VarianteProductoEntidad {
             $consulta = $this->conexion->preparar('UPDATE variantes_productos SET producto_id = :producto_id, codigo_sku = :codigo_sku, codigo_barras = :codigo_barras, nombre_color = :nombre_color, codigo_color = :codigo_color, existencias = :existencias, controla_serie = :controla_serie, estado = :estado WHERE id = :id');
             $consulta->execute([
@@ -121,6 +171,12 @@ final class PdoProductoDao implements ProductoDao
         });
     }
 
+    /**
+     * Modifica el estado o elimina el registro según la operación solicitada.
+     *
+     * @param  mixed  $id  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     public function eliminarVariante(int $id): void
     {
         $this->enTransaccion(function () use ($id): void {
@@ -129,6 +185,12 @@ final class PdoProductoDao implements ProductoDao
         });
     }
 
+    /**
+     * Modifica el estado o elimina el registro según la operación solicitada.
+     *
+     * @param  mixed  $id  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     public function eliminar(int $id): void
     {
         $this->enTransaccion(function () use ($id): void {
@@ -137,6 +199,13 @@ final class PdoProductoDao implements ProductoDao
         });
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @param  mixed  $productoId  Parámetro recibido por la operación.
+     * @param  mixed  $rutaImagen  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     public function sincronizarImagenPortada(int $productoId, string $rutaImagen): void
     {
         if (trim($rutaImagen) === '') {
@@ -185,6 +254,12 @@ final class PdoProductoDao implements ProductoDao
         ), $consulta->fetchAll(PDO::FETCH_ASSOC));
     }
 
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $id  Parámetro recibido por la operación.
+     * @return VarianteProductoEntidad Resultado de la operación.
+     */
     private function buscarVariantePorId(int $id): VarianteProductoEntidad
     {
         $consulta = $this->conexion->preparar('SELECT id, producto_id, codigo_sku, codigo_barras, nombre_color, codigo_color, existencias, controla_serie, estado FROM variantes_productos WHERE id = :id LIMIT 1');
@@ -201,6 +276,12 @@ final class PdoProductoDao implements ProductoDao
         );
     }
 
+    /**
+     * Determina si la operación cumple las condiciones de autorización o validación.
+     *
+     * @param  mixed  $producto  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     private function validarProducto(ProductoEntidad $producto): void
     {
         if ($producto->marca === '' || $producto->nombre === '' || $producto->categoria === '' || $producto->precio === '' || $producto->categoriaId < 1) {
@@ -208,6 +289,12 @@ final class PdoProductoDao implements ProductoDao
         }
     }
 
+    /**
+     * Determina si la operación cumple las condiciones de autorización o validación.
+     *
+     * @param  mixed  $variante  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     private function validarVariante(VarianteProductoEntidad $variante): void
     {
         if ($variante->productoId < 1 || $variante->nombreColor === '' || $variante->existencias < 0 || $variante->estado === '') {

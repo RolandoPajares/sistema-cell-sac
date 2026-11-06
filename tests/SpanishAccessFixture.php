@@ -6,6 +6,11 @@ use App\Models\User;
 use Database\Seeders\RbacInicialSeeder;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Define la responsabilidad de la clase SpanishAccessFixture dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class SpanishAccessFixture
 {
     /** @return array{empresa_id:int,sede_id:int,almacen_id:int} */
@@ -42,6 +47,13 @@ final class SpanishAccessFixture
         return ['empresa_id' => (int) $companyId, 'sede_id' => (int) $siteId, 'almacen_id' => (int) $warehouseId];
     }
 
+    /**
+     * Ejecuta la operación assign definida por la clase SpanishAccessFixture.
+     *
+     * @param  mixed  $user  Parámetro recibido por la operación.
+     * @param  mixed  $roleCode  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     public static function assign(User $user, string $roleCode): void
     {
         $organization = self::organization();
@@ -66,6 +78,12 @@ final class SpanishAccessFixture
         ]);
     }
 
+    /**
+     * Ejecuta la operación user definida por la clase SpanishAccessFixture.
+     *
+     * @param  mixed  $roleCode  Parámetro recibido por la operación.
+     * @return User Resultado de la operación.
+     */
     public static function user(string $roleCode): User
     {
         $user = User::factory()->create(['rol' => $roleCode]);
@@ -74,6 +92,14 @@ final class SpanishAccessFixture
         return $user;
     }
 
+    /**
+     * Ejecuta la operación grantScreenReadPermission definida por la clase SpanishAccessFixture.
+     *
+     * @param  mixed  $user  Parámetro recibido por la operación.
+     * @param  mixed  $screenCode  Parámetro recibido por la operación.
+     * @param  mixed  $routeName  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     public static function grantScreenReadPermission(User $user, string $screenCode, string $routeName): void
     {
         $screen = DB::table('pantallas')->where('codigo', $screenCode)->first();

@@ -91,11 +91,23 @@ return new class extends Migration
         }
     }
 
+    /**
+     * Ejecuta la operación down definida por la clase 2026_11_01_015103_reconcile_devoluciones_garantias_foreign_key_types.
+     *
+     * @return void Resultado de la operación.
+     */
     public function down(): void
     {
         throw new LogicException('Return key normalization is forward-only and preserves inherited business rows.');
     }
 
+    /**
+     * Ejecuta la operación assertValuesFitTarget definida por la clase 2026_11_01_015103_reconcile_devoluciones_garantias_foreign_key_types.
+     *
+     * @param  mixed  $column  Parámetro recibido por la operación.
+     * @param  mixed  $unsigned  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     private function assertValuesFitTarget(string $column, bool $unsigned): void
     {
         $hasOutOfRangeValues = DB::table('devoluciones_garantias')
@@ -107,6 +119,14 @@ return new class extends Migration
         }
     }
 
+    /**
+     * Ejecuta la operación assertNoOrphans definida por la clase 2026_11_01_015103_reconcile_devoluciones_garantias_foreign_key_types.
+     *
+     * @param  mixed  $column  Parámetro recibido por la operación.
+     * @param  mixed  $referenceTable  Parámetro recibido por la operación.
+     * @param  mixed  $referenceColumn  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     private function assertNoOrphans(string $column, string $referenceTable, string $referenceColumn): void
     {
         $orphanExists = DB::table('devoluciones_garantias')
@@ -123,6 +143,15 @@ return new class extends Migration
         }
     }
 
+    /**
+     * Ejecuta la operación ensureForeignKey definida por la clase 2026_11_01_015103_reconcile_devoluciones_garantias_foreign_key_types.
+     *
+     * @param  mixed  $column  Parámetro recibido por la operación.
+     * @param  mixed  $referenceTable  Parámetro recibido por la operación.
+     * @param  mixed  $referenceColumn  Parámetro recibido por la operación.
+     * @param  mixed  $nullable  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     private function ensureForeignKey(string $column, string $referenceTable, string $referenceColumn, bool $nullable): void
     {
         foreach (Schema::getForeignKeys('devoluciones_garantias') as $foreignKey) {

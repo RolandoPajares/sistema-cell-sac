@@ -17,13 +17,29 @@ use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Define la responsabilidad de la clase PedidoController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class PedidoController extends Controller
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly ServicioPedidos $orderService,
         private readonly ServicioAutorizacion $authorization,
     ) {}
 
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(Request $request): View
     {
         $user = $request->user();
@@ -56,6 +72,12 @@ class PedidoController extends Controller
         return view('publico.comercio.pedidos', ['orders' => $query->paginate(20)]);
     }
 
+    /**
+     * Ejecuta la operación adminIndex definida por la clase PedidoController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     private function adminIndex(Request $request): View
     {
         $filters = $this->adminFilters($request);
@@ -110,6 +132,15 @@ class PedidoController extends Controller
         ]);
     }
 
+    /**
+     * Genera la salida exportable de la información disponible.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $format  Parámetro recibido por la operación.
+     * @param  mixed  $exportador  Parámetro recibido por la operación.
+     * @param  mixed  $auditoria  Parámetro recibido por la operación.
+     * @return Response|StreamedResponse Resultado de la operación.
+     */
     public function export(Request $request, string $format, ExportadorTabular $exportador, RegistradorAuditoria $auditoria): Response|StreamedResponse
     {
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
@@ -147,6 +178,12 @@ class PedidoController extends Controller
         return $respuesta;
     }
 
+    /**
+     * Recupera y presenta el detalle de la información solicitada.
+     *
+     * @param  mixed  $order  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function show(Pedido $order): View
     {
         $order->loadMissing('user');
@@ -155,6 +192,13 @@ class PedidoController extends Controller
         return view('publico.comercio.pedido', ['order' => $order->load('details.product', 'user')]);
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $order  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function updateStatus(ActualizarEstadoPedidoRequest $request, Pedido $order): RedirectResponse
     {
         $order->loadMissing('user');
@@ -274,6 +318,13 @@ class PedidoController extends Controller
         return $this->authorization->scopeRecordsFor(Pedido::query(), $request->user(), 'gestion.pedidos.consultar', 'usuario_id');
     }
 
+    /**
+     * Ejecuta la operación trendPercent definida por la clase PedidoController.
+     *
+     * @param  mixed  $current  Parámetro recibido por la operación.
+     * @param  mixed  $previous  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     private function trendPercent(int $current, int $previous): ?float
     {
         if ($previous === 0) {

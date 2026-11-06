@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Tests\SpanishAccessFixture;
 
+/**
+ * Ejecuta la operación prepararEsquemaNotificacionesParaPrueba definida por la clase AlertasGlobalesControllerTest.
+ *
+ * @return void Resultado de la operación.
+ */
 function prepararEsquemaNotificacionesParaPrueba(): void
 {
     if (! Schema::hasTable('notificaciones')) {
@@ -37,6 +42,15 @@ function prepararEsquemaNotificacionesParaPrueba(): void
     }
 }
 
+/**
+ * Registra la información recibida y coordina su persistencia.
+ *
+ * @param  mixed  $destinatario  Parámetro recibido por la operación.
+ * @param  mixed  $mensaje  Parámetro recibido por la operación.
+ * @param  mixed  $leidaEn  Parámetro recibido por la operación.
+ * @param  mixed  $tipo  Parámetro recibido por la operación.
+ * @return Notificacion Resultado de la operación.
+ */
 function crearNotificacionParaPrueba(User $destinatario, string $mensaje, ?string $leidaEn = null, string $tipo = 'App\\Notifications\\AvisoSistema'): Notificacion
 {
     return Notificacion::factory()->create([

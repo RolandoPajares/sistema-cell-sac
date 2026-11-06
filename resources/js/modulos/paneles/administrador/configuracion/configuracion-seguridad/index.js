@@ -1,7 +1,21 @@
+/**
+ * Ejecuta la operación initializeConfiguracionSeguridad utilizada por el módulo JavaScript.
+ *
+ * @param {*} root - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 export const initializeConfiguracionSeguridad = (root) => {
     initializeSettingsRoot(root);
 };
 
+/**
+ * Ejecuta la operación initializeSettingsRoot utilizada por el módulo JavaScript.
+ *
+ * @param {*} root - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const initializeSettingsRoot = (root) => {
     if (!root || root.dataset.adminSettingsReady === 'true') {
         return;

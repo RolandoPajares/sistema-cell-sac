@@ -14,8 +14,18 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
+/**
+ * Define la responsabilidad de la clase ServicioCatalogo dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ServicioCatalogo
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly ServicioInventario $inventario,
         private readonly ServicioAutorizacion $autorizacion,
@@ -63,6 +73,12 @@ class ServicioCatalogo
         return $productsQuery->orderBy($field, $direction)->orderBy('id');
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @param  mixed  $producto  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     public function sincronizarImagenPortada(Producto $producto): void
     {
         $rutaImagen = $producto->url_imagen;
@@ -74,6 +90,11 @@ class ServicioCatalogo
         $this->productoDao->sincronizarImagenPortada((int) $producto->id, $rutaImagen);
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function crearProductoConVariante(
         ProductoEntidad $producto,
         string $codigoSku,

@@ -15,6 +15,12 @@ use Tests\TestCase;
 
 uses(TestCase::class);
 
+/**
+ * Ejecuta la operación prepareGlobalDashboardAuthorization definida por la clase DashboardGlobalExportTest.
+ *
+ * @param  mixed  $userId  Parámetro recibido por la operación.
+ * @return void Resultado de la operación.
+ */
 function prepareGlobalDashboardAuthorization(int $userId = 1): void
 {
     Schema::create('empresas', function (Blueprint $table): void {

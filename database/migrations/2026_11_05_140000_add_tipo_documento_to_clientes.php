@@ -6,6 +6,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Ejecuta la operación up definida por la clase 2026_11_05_140000_add_tipo_documento_to_clientes.
+     *
+     * @return void Resultado de la operación.
+     */
     public function up(): void
     {
         if (! Schema::hasTable('clientes') || Schema::hasColumn('clientes', 'tipo_documento')) {
@@ -17,6 +22,11 @@ return new class extends Migration
         });
     }
 
+    /**
+     * Ejecuta la operación down definida por la clase 2026_11_05_140000_add_tipo_documento_to_clientes.
+     *
+     * @return void Resultado de la operación.
+     */
     public function down(): void
     {
         if (Schema::hasTable('clientes') && Schema::hasColumn('clientes', 'tipo_documento')) {

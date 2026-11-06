@@ -14,18 +14,40 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
+/**
+ * Define la responsabilidad de la clase AutenticacionController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class AutenticacionController extends Controller
 {
+    /**
+     * Ejecuta la operación loginForm definida por la clase AutenticacionController.
+     *
+     * @return View Resultado de la operación.
+     */
     public function loginForm(): View
     {
         return view('auth.login');
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @return View Resultado de la operación.
+     */
     public function registerForm(): View
     {
         return view('auth.register');
     }
 
+    /**
+     * Ejecuta la operación login definida por la clase AutenticacionController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function login(InicioSesionRequest $request, RegistradorAuditoria $audit): RedirectResponse
     {
         $credentials = [
@@ -60,6 +82,13 @@ class AutenticacionController extends Controller
         return redirect()->intended($destination);
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function register(RegistroRequest $request, RegistradorAuditoria $audit): RedirectResponse
     {
         $data = $request->validated();
@@ -116,6 +145,12 @@ class AutenticacionController extends Controller
         return redirect()->route('dashboard');
     }
 
+    /**
+     * Ejecuta la operación logout definida por la clase AutenticacionController.
+     *
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function logout(RegistradorAuditoria $audit): RedirectResponse
     {
         $user = Auth::user();

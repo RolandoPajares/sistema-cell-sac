@@ -1,3 +1,8 @@
+/**
+ * Ejecuta la operación rutaBase utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const rutaBase = (() => {
   const rutaActual = location.pathname;
   const indicePublico = rutaActual.indexOf("/public/");
@@ -20,6 +25,13 @@ if (chatAsistente) {
   const claveHistorial = "md-assistant-history-v1";
 
   //  escapa caracteres HTML especiales en un valor dado para prevenir vulnerabilidades de inyección de código y asegurar que el contenido se muestre correctamente en el chat.
+/**
+ * Ejecuta la operación escaparHtml utilizada por el módulo JavaScript.
+ *
+ * @param {*} valor - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
   const escaparHtml = (valor) =>
     String(valor).replace(
       /[&<>'"]/g,
@@ -32,10 +44,20 @@ if (chatAsistente) {
           '"': "&quot;",
         })[caracter],
     );
+/**
+ * Ejecuta la operación desplazarChat utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
   const desplazarChat = () => {
     mensajes.scrollTop = mensajes.scrollHeight;
   };
   //  guarda el historial de mensajes del chat en el almacenamiento de sesión, limitando la cantidad de entradas guardadas a las últimas 20 para mantener un registro de la conversación.
+/**
+ * Registra la información recibida y coordina la actualización de la interfaz.
+ *
+ * @returns {*} Resultado de la operación.
+ */
   const guardarHistorial = () => {
     const entradas = [
       ...mensajes.querySelectorAll(".assistant-message[data-history='1']"),
@@ -47,6 +69,19 @@ if (chatAsistente) {
   };
 
   //  agrega un mensaje al chat con el rol especificado (usuario o asistente), el contenido HTML proporcionado y una opción para guardar el mensaje en el historial, desplazando automáticamente la vista del chat hacia abajo.
+/**
+ * Ejecuta la operación agregarMensaje utilizada por el módulo JavaScript.
+ *
+ * @param {*} rol - Parámetro recibido por la función.
+ *
+ * @param {*} contenidoHtml - Parámetro recibido por la función.
+ *
+ * @param {*} guardar - Parámetro recibido por la función.
+ *
+ * @param {*} true - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
   const agregarMensaje = (rol, contenidoHtml, guardar = true) => {
     const articulo = document.createElement("article");
     articulo.className = `assistant-message assistant-message-${rol}`;
@@ -59,6 +94,13 @@ if (chatAsistente) {
     return articulo;
   };
   //  renderiza una lista de productos en formato HTML, mostrando el nombre, precio y porcentaje de coincidencia para cada producto, y generando enlaces a las páginas de detalle de los productos.
+/**
+ * Ejecuta la operación renderizarProductos utilizada por el módulo JavaScript.
+ *
+ * @param {*} productos - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
   const renderizarProductos = (productos) => {
     if (!Array.isArray(productos) || productos.length === 0) return "";
     const productBase = chatAsistente.dataset.productBase || `${rutaBase}catalogo/`;
@@ -66,6 +108,11 @@ if (chatAsistente) {
   };
 
   //  restaura el historial de mensajes del chat desde el almacenamiento de sesión, agregando cada entrada al chat y asegurando que se muestren correctamente los mensajes previos al recargar la página.
+/**
+ * Ejecuta la operación restaurarHistorial utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
   const restaurarHistorial = () => {
     try {
       const historial = JSON.parse(
@@ -88,6 +135,13 @@ if (chatAsistente) {
   restaurarHistorial();
 
 //  envía la pregunta del usuario al asistente, muestra un indicador de escritura mientras se procesa la respuesta y maneja errores en caso de que la solicitud falle, actualizando el chat con la respuesta del asistente o un mensaje de error.
+/**
+ * Ejecuta la operación preguntarAsistente utilizada por el módulo JavaScript.
+ *
+ * @param {*} pregunta - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
   const preguntarAsistente = async (pregunta) => {
     const textoLimpio = pregunta.trim();
     if (!textoLimpio) return;

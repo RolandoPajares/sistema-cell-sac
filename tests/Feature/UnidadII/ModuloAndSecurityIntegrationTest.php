@@ -46,6 +46,12 @@ function productoParaIntegracionUnidadDos(array $attributes = []): Producto
     return $product;
 }
 
+/**
+ * Registra la información recibida y coordina su persistencia.
+ *
+ * @param  mixed  $nombre  Parámetro recibido por la operación.
+ * @return UploadedFile Resultado de la operación.
+ */
 function crearImagenPngParaPruebaCatalogo(string $nombre): UploadedFile
 {
     $contenido = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=', true);
@@ -53,6 +59,11 @@ function crearImagenPngParaPruebaCatalogo(string $nombre): UploadedFile
     return UploadedFile::fake()->createWithContent($nombre, $contenido === false ? '' : $contenido);
 }
 
+/**
+ * Ejecuta la operación prepararEsquemaDispositivosRecepcionCompra definida por la clase ModuloAndSecurityIntegrationTest.
+ *
+ * @return void Resultado de la operación.
+ */
 function prepararEsquemaDispositivosRecepcionCompra(): void
 {
     if (! Schema::hasTable('dispositivos')) {

@@ -6,6 +6,11 @@ use App\Servicios\ServicioAutorizacion;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+/**
+ * Define la responsabilidad de la clase GuardarRolRequest dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class GuardarRolRequest extends FormRequest
 {
     /**
@@ -32,6 +37,11 @@ class GuardarRolRequest extends FormRequest
         ];
     }
 
+    /**
+     * Define la configuración de validación utilizada por el componente.
+     *
+     * @return array Resultado de la operación.
+     */
     public function messages(): array
     {
         return [

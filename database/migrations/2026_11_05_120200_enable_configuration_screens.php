@@ -15,6 +15,11 @@ return new class extends Migration
         'admin.backups' => ['module' => 'respaldos', 'route' => 'management.backups', 'name' => 'Respaldos y recuperación - consultar'],
     ];
 
+    /**
+     * Ejecuta la operación up definida por la clase 2026_11_05_120200_enable_configuration_screens.
+     *
+     * @return void Resultado de la operación.
+     */
     public function up(): void
     {
         if (! Schema::hasTable('pantallas') || ! Schema::hasTable('permisos') || ! Schema::hasTable('roles_permisos')) {
@@ -82,6 +87,11 @@ return new class extends Migration
         }
     }
 
+    /**
+     * Ejecuta la operación down definida por la clase 2026_11_05_120200_enable_configuration_screens.
+     *
+     * @return void Resultado de la operación.
+     */
     public function down(): void
     {
         throw new LogicException('This RBAC repair is forward-only to avoid revoking administrator permissions.');

@@ -15,8 +15,18 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
+/**
+ * Define la responsabilidad de la clase ServicioTransferenciasExistencias dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ServicioTransferenciasExistencias
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly ServicioAutorizacion $authorization,
         private readonly ServicioInventario $inventory,
@@ -130,6 +140,15 @@ class ServicioTransferenciasExistencias
         }, 3);
     }
 
+    /**
+     * Ejecuta la operación approve definida por la clase ServicioTransferenciasExistencias.
+     *
+     * @param  mixed  $transfer  Parámetro recibido por la operación.
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $key  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return TransferenciaExistencia Resultado de la operación.
+     */
     public function approve(TransferenciaExistencia $transfer, User $actor, string $key, ?string $ip): TransferenciaExistencia
     {
         $this->authorization->assertAllowed($actor, 'gestion.inventario.aprobar');
@@ -519,11 +538,26 @@ class ServicioTransferenciasExistencias
             });
     }
 
+    /**
+     * Determina si la operación cumple las condiciones de autorización o validación.
+     *
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $transfer  Parámetro recibido por la operación.
+     * @param  mixed  $siteColumn  Parámetro recibido por la operación.
+     * @param  mixed  $permission  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     private function authorizeTransferSite(User $actor, TransferenciaExistencia $transfer, string $siteColumn, string $permission): void
     {
         abort_unless($this->authorization->allowsRecord($actor, $permission, (int) $transfer->empresa_id, (int) $transfer->{$siteColumn}), 403, 'No tienes permiso para operar transferencias en esta sede.');
     }
 
+    /**
+     * Ejecuta la operación assertWarehouseStillActive definida por la clase ServicioTransferenciasExistencias.
+     *
+     * @param  mixed  $transfer  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     private function assertWarehouseStillActive(TransferenciaExistencia $transfer): void
     {
         foreach ([['almacen_origen_id', 'sede_origen_id'], ['almacen_destino_id', 'sede_destino_id']] as [$warehouseColumn, $siteColumn]) {
@@ -534,6 +568,15 @@ class ServicioTransferenciasExistencias
         }
     }
 
+    /**
+     * Ejecuta la operación balance definida por la clase ServicioTransferenciasExistencias.
+     *
+     * @param  mixed  $transfer  Parámetro recibido por la operación.
+     * @param  mixed  $detail  Parámetro recibido por la operación.
+     * @param  mixed  $warehouseId  Parámetro recibido por la operación.
+     * @param  mixed  $lock  Parámetro recibido por la operación.
+     * @return object Resultado de la operación.
+     */
     private function balance(TransferenciaExistencia $transfer, DetalleTransferenciaExistencia $detail, int $warehouseId, bool $lock): object
     {
         $siteId = $warehouseId === (int) $transfer->almacen_origen_id ? $transfer->sede_origen_id : $transfer->sede_destino_id;
@@ -553,6 +596,13 @@ class ServicioTransferenciasExistencias
         return $balance;
     }
 
+    /**
+     * Ejecuta la operación assertProductVariant definida por la clase ServicioTransferenciasExistencias.
+     *
+     * @param  mixed  $productId  Parámetro recibido por la operación.
+     * @param  mixed  $variantId  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     private function assertProductVariant(int $productId, ?int $variantId): void
     {
         if ($variantId !== null) {
@@ -560,6 +610,12 @@ class ServicioTransferenciasExistencias
         }
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @param  mixed  $detail  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     private function isSerialized(DetalleTransferenciaExistencia $detail): bool
     {
         if ($detail->variante_id !== null && (bool) DB::table('variantes_productos')->where('id', $detail->variante_id)->value('controla_serie')) {
@@ -570,6 +626,13 @@ class ServicioTransferenciasExistencias
             ->when($detail->variante_id === null, fn ($query) => $query->whereNull('variante_id'), fn ($query) => $query->where('variante_id', $detail->variante_id))->exists();
     }
 
+    /**
+     * Ejecuta la operación availableDeviceQuery definida por la clase ServicioTransferenciasExistencias.
+     *
+     * @param  mixed  $detail  Parámetro recibido por la operación.
+     * @param  mixed  $warehouseId  Parámetro recibido por la operación.
+     * @return QueryBuilder Resultado de la operación.
+     */
     private function availableDeviceQuery(DetalleTransferenciaExistencia $detail, int $warehouseId): QueryBuilder
     {
         return DB::table('dispositivos')->where('producto_id', $detail->producto_id)
@@ -606,6 +669,16 @@ class ServicioTransferenciasExistencias
             })->distinct()->lockForUpdate()->get('dispositivos.*');
     }
 
+    /**
+     * Ejecuta la operación changeDevice definida por la clase ServicioTransferenciasExistencias.
+     *
+     * @param  mixed  $device  Parámetro recibido por la operación.
+     * @param  mixed  $movement  Parámetro recibido por la operación.
+     * @param  mixed  $oldStatus  Parámetro recibido por la operación.
+     * @param  mixed  $newStatus  Parámetro recibido por la operación.
+     * @param  mixed  $warehouseId  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     private function changeDevice(object $device, MovimientoInventario $movement, string $oldStatus, string $newStatus, ?int $warehouseId): void
     {
         abort_unless($device->estado === $oldStatus, 409, 'El IMEI o numero de serie ya fue procesado por otra operacion.');
@@ -642,16 +715,34 @@ class ServicioTransferenciasExistencias
         abort_if(count($serials) !== count(array_unique($serials)), 422, 'No repitas IMEI o numeros de serie.');
     }
 
+    /**
+     * Ejecuta la operación returnedQuantity definida por la clase ServicioTransferenciasExistencias.
+     *
+     * @param  mixed  $detail  Parámetro recibido por la operación.
+     * @return int Resultado de la operación.
+     */
     private function returnedQuantity(DetalleTransferenciaExistencia $detail): int
     {
         return Schema::hasColumn('detalles_transferencias_existencias', 'cantidad_devuelta') ? (int) $detail->cantidad_devuelta : 0;
     }
 
+    /**
+     * Ejecuta la operación reconciledQuantity definida por la clase ServicioTransferenciasExistencias.
+     *
+     * @param  mixed  $detail  Parámetro recibido por la operación.
+     * @return int Resultado de la operación.
+     */
     private function reconciledQuantity(DetalleTransferenciaExistencia $detail): int
     {
         return Schema::hasColumn('detalles_transferencias_existencias', 'cantidad_conciliada') ? (int) $detail->cantidad_conciliada : 0;
     }
 
+    /**
+     * Ejecuta la operación newCode definida por la clase ServicioTransferenciasExistencias.
+     *
+     * @param  mixed  $companyId  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function newCode(int $companyId): string
     {
         do {
@@ -661,6 +752,15 @@ class ServicioTransferenciasExistencias
         return $code;
     }
 
+    /**
+     * Ejecuta la operación eventId definida por la clase ServicioTransferenciasExistencias.
+     *
+     * @param  mixed  $transferId  Parámetro recibido por la operación.
+     * @param  mixed  $actorId  Parámetro recibido por la operación.
+     * @param  mixed  $action  Parámetro recibido por la operación.
+     * @param  mixed  $key  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function eventId(int $transferId, int $actorId, string $action, string $key): string
     {
         $hash = substr(hash('sha256', implode('|', [$transferId, $actorId, $action, Str::lower($key)])), 0, 32);

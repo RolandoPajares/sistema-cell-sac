@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\SpanishAccessFixture;
 
+/**
+ * Ejecuta la operación prepararTablasEcommercePersistente definida por la clase EcommercePersistenciaTest.
+ *
+ * @return void Resultado de la operación.
+ */
 function prepararTablasEcommercePersistente(): void
 {
     Schema::create('precios_mayoristas', function (Blueprint $tabla): void {

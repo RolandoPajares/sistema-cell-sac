@@ -18,8 +18,20 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
+/**
+ * Define la responsabilidad de la clase CuentaAdministracionController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class CuentaAdministracionController extends Controller
 {
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function updateProfile(ActualizarPerfilRequest $request, RegistradorAuditoria $audit): RedirectResponse
     {
         $user = $request->user();
@@ -35,6 +47,13 @@ class CuentaAdministracionController extends Controller
         return back()->with('status', 'Perfil actualizado.');
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function updatePassword(ActualizarContrasenaRequest $request, RegistradorAuditoria $audit): RedirectResponse
     {
         $user = $request->user();
@@ -51,6 +70,12 @@ class CuentaAdministracionController extends Controller
         return back()->with('status', 'Contraseña actualizada.');
     }
 
+    /**
+     * Ejecuta la operación security definida por la clase CuentaAdministracionController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function security(Request $request): View
     {
         $sessionsAvailable = Schema::hasTable('sesiones_usuarios');
@@ -61,6 +86,12 @@ class CuentaAdministracionController extends Controller
         return view('paneles.administrador.perfil.seguridad', compact('sessions', 'sessionsAvailable'));
     }
 
+    /**
+     * Ejecuta la operación sessions definida por la clase CuentaAdministracionController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function sessions(Request $request): View
     {
         $available = Schema::hasTable('sesiones_usuarios');
@@ -72,6 +103,14 @@ class CuentaAdministracionController extends Controller
         return view('paneles.administrador.perfil.sesiones', compact('sessions', 'available', 'currentHash'));
     }
 
+    /**
+     * Ejecuta la operación revokeSession definida por la clase CuentaAdministracionController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $sessionId  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function revokeSession(Request $request, int $sessionId, RegistradorAuditoria $audit): RedirectResponse
     {
         abort_unless(Schema::hasTable('sesiones_usuarios'), 503, 'La auditoría de sesiones requiere la migración de seguridad.');
@@ -94,6 +133,11 @@ class CuentaAdministracionController extends Controller
         return back()->with('status', 'La sesión seleccionada fue revocada.');
     }
 
+    /**
+     * Ejecuta la operación preferences definida por la clase CuentaAdministracionController.
+     *
+     * @return View Resultado de la operación.
+     */
     public function preferences(): View
     {
         $preferencesAvailable = Schema::hasColumn('usuarios', 'preferencias');
@@ -101,6 +145,13 @@ class CuentaAdministracionController extends Controller
         return view('paneles.administrador.perfil.preferencias', compact('preferencesAvailable'));
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function updatePreferences(ActualizarPreferenciasRequest $request, RegistradorAuditoria $audit): RedirectResponse
     {
         abort_unless(Schema::hasColumn('usuarios', 'preferencias'), 503, 'Las preferencias requieren la migración de seguridad de cuenta.');
@@ -114,6 +165,13 @@ class CuentaAdministracionController extends Controller
         return back()->with('status', 'Preferencias guardadas.');
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function updateAvatar(ActualizarAvatarRequest $request, RegistradorAuditoria $audit): RedirectResponse
     {
         abort_unless(Schema::hasColumn('usuarios', 'foto_perfil'), 503, 'La fotografía de perfil requiere la migración de seguridad de cuenta.');
@@ -138,6 +196,12 @@ class CuentaAdministracionController extends Controller
         return back()->with('status', 'Fotografía de perfil actualizada.');
     }
 
+    /**
+     * Ejecuta la operación activity definida por la clase CuentaAdministracionController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function activity(Request $request): View
     {
         $available = Schema::hasTable('registros_auditoria');
@@ -148,6 +212,13 @@ class CuentaAdministracionController extends Controller
         return view('paneles.administrador.perfil.actividad', compact('activity', 'available'));
     }
 
+    /**
+     * Ejecuta la operación notifications definida por la clase CuentaAdministracionController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $servicio  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function notifications(Request $request, ServicioNotificaciones $servicio): View
     {
         $available = Schema::hasTable('notificaciones');
@@ -156,6 +227,14 @@ class CuentaAdministracionController extends Controller
         return view('paneles.administrador.perfil.notificaciones', compact('notificaciones', 'available'));
     }
 
+    /**
+     * Ejecuta la operación markNotificationRead definida por la clase CuentaAdministracionController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $notificationId  Parámetro recibido por la operación.
+     * @param  mixed  $servicio  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function markNotificationRead(Request $request, string $notificationId, ServicioNotificaciones $servicio): RedirectResponse
     {
         abort_unless(Schema::hasTable('notificaciones'), 503, 'La tabla de notificaciones no está disponible.');

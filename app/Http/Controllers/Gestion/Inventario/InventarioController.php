@@ -17,13 +17,29 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
+/**
+ * Define la responsabilidad de la clase InventarioController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class InventarioController extends Controller
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly ServicioInventario $inventoryService,
         private readonly ServicioAutorizacion $authorization,
     ) {}
 
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(Request $request): View
     {
         $filters = $this->filters($request);
@@ -95,6 +111,13 @@ class InventarioController extends Controller
         ]);
     }
 
+    /**
+     * Ejecuta la operación adjust definida por la clase InventarioController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $product  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function adjust(AjustarInventarioRequest $request, Producto $product): RedirectResponse
     {
         $data = $request->validated();
@@ -115,6 +138,12 @@ class InventarioController extends Controller
             : 'Movimiento de inventario registrado.');
     }
 
+    /**
+     * Ejecuta la operación adjustLegacy definida por la clase InventarioController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function adjustLegacy(AjustarInventarioRequest $request): RedirectResponse
     {
         $product = Producto::findOrFail((int) $request->input('producto_id'));
@@ -214,6 +243,13 @@ class InventarioController extends Controller
             ->map(static fn (Collection $movements): ?MovimientoInventario => $movements->first());
     }
 
+    /**
+     * Ejecuta la operación trendPercent definida por la clase InventarioController.
+     *
+     * @param  mixed  $current  Parámetro recibido por la operación.
+     * @param  mixed  $previous  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     private function trendPercent(int $current, int $previous): ?float
     {
         if ($previous === 0) {

@@ -6,6 +6,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Ejecuta la operación up definida por la clase 2026_11_05_120000_enable_admin_responsibles_screen.
+     *
+     * @return void Resultado de la operación.
+     */
     public function up(): void
     {
         if (! Schema::hasTable('pantallas') || ! Schema::hasTable('permisos') || ! Schema::hasTable('roles_permisos')) {
@@ -71,6 +76,11 @@ return new class extends Migration
         }
     }
 
+    /**
+     * Ejecuta la operación down definida por la clase 2026_11_05_120000_enable_admin_responsibles_screen.
+     *
+     * @return void Resultado de la operación.
+     */
     public function down(): void
     {
         throw new LogicException('This RBAC repair is forward-only to avoid revoking an existing administrator permission.');

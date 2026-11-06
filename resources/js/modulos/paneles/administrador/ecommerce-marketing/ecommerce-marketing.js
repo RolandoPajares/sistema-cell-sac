@@ -1,3 +1,12 @@
+/**
+ * Gestiona la interacción y actualiza el estado visual correspondiente.
+ *
+ * @param {*} dialog - Parámetro recibido por la función.
+ *
+ * @param {*} trigger - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const openDialog = (dialog, trigger) => {
     if (!dialog?.open) {
         dialog?.showModal();
@@ -5,6 +14,17 @@ const openDialog = (dialog, trigger) => {
     }
 };
 
+/**
+ * Ejecuta la operación wireDialogClose utilizada por el módulo JavaScript.
+ *
+ * @param {*} dialog - Parámetro recibido por la función.
+ *
+ * @param {*} selector - Parámetro recibido por la función.
+ *
+ * @param {*} onClose - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const wireDialogClose = (dialog, selector, onClose = () => {}) => {
     dialog.querySelectorAll(selector).forEach((button) => button.addEventListener('click', () => dialog.close()));
     dialog.addEventListener('click', (event) => {
@@ -42,6 +62,11 @@ if (pricesPage) {
     let activeMode = 'configuracion';
     let activeBulkStep = 0;
 
+/**
+ * Actualiza la información visible o el estado del componente.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const updateRows = () => {
         const query = search.value.trim().toLocaleLowerCase('es');
         let count = 0;
@@ -80,6 +105,13 @@ if (pricesPage) {
     });
 
     const titles = { configuracion: 'Configuración de precios', masiva: 'Actualización masiva', detalle: 'Detalle de precio', editar: 'Editar precio' };
+/**
+ * Ejecuta la operación renderBulkStep utilizada por el módulo JavaScript.
+ *
+ * @param {*} step - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const renderBulkStep = (step) => {
         activeBulkStep = step;
         bulkSteps.forEach((stage) => { stage.hidden = Number(stage.dataset.emBulkStep) !== step; });
@@ -92,6 +124,11 @@ if (pricesPage) {
         bulkConfirm.disabled = step !== bulkSteps.length - 1;
     };
 
+/**
+ * Ejecuta la operación resetBulkFlow utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const resetBulkFlow = () => {
         renderBulkStep(0);
         bulkFile.value = '';
@@ -101,6 +138,11 @@ if (pricesPage) {
         bulkFeedback.hidden = true;
     };
 
+/**
+ * Ejecuta la operación validateEditPrice utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const validateEditPrice = () => {
         const fields = [...dialog.querySelectorAll('[data-em-dialog-fields="editar"] input[required], [data-em-dialog-fields="editar"] select[required], [data-em-dialog-fields="editar"] textarea[required]')];
         const startsAt = dialog.querySelector('[data-em-edit-start]');
@@ -311,6 +353,19 @@ if (storePage) {
     });
 }
 
+/**
+ * Ejecuta la operación mountPreviewForm utilizada por el módulo JavaScript.
+ *
+ * @param {*} page - Parámetro recibido por la función.
+ *
+ * @param {*} cardSelector - Parámetro recibido por la función.
+ *
+ * @param {*} buttonSelector - Parámetro recibido por la función.
+ *
+ * @param {*} title - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const mountPreviewForm = (page, cardSelector, buttonSelector, title) => {
     const card = page.querySelector(cardSelector);
     const button = page.querySelector(buttonSelector);
@@ -384,6 +439,13 @@ const couponPage = document.querySelector('[data-em-coupon-page]');
 if (couponPage) {
     const dialogs = Object.fromEntries([...couponPage.querySelectorAll('[data-em-coupon-dialog]')].map((dialog) => [dialog.dataset.emCouponDialog, dialog]));
     let lastTrigger;
+/**
+ * Ejecuta la operación formatPeriod utilizada por el módulo JavaScript.
+ *
+ * @param {*} value - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const formatPeriod = (value) => value ? value.replace('T', ' ') : 'Sin fecha';
 
     Object.values(dialogs).forEach((dialog) => wireDialogClose(dialog, '[data-em-coupon-close]', () => {
@@ -515,6 +577,13 @@ if (segmentPage) {
     const editForm = editDialog.querySelector('[data-em-segment-edit-form]');
     const removeForm = dialogs.remove.querySelector('[data-em-segment-remove-form]');
     const segmentBaseUrl = segmentPage.dataset.emSegmentBaseUrl;
+/**
+ * Ejecuta la operación roleLabel utilizada por el módulo JavaScript.
+ *
+ * @param {*} role - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const roleLabel = (role) => role.replace(/_/g, ' ');
 
     Object.values(dialogs).forEach((dialog) => wireDialogClose(dialog, '[data-em-segment-close]', () => {
@@ -522,6 +591,11 @@ if (segmentPage) {
         lastTrigger?.focus();
     }));
 
+/**
+ * Actualiza la información visible o el estado del componente.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const updateSegmentPreview = () => {
         const roles = roleCheckboxes.filter((checkbox) => checkbox.checked).map((checkbox) => roleLabel(checkbox.value));
         editDialog.querySelector('[data-em-segment-preview]').textContent = roles.length

@@ -1,5 +1,19 @@
+/**
+ * Ejecuta la operación csrfToken utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const csrfToken = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 
+/**
+ * Solicita o carga la información necesaria para la interacción.
+ *
+ * @param {*} url - Parámetro recibido por la función.
+ *
+ * @param {*} options - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 export async function request(url, options = {}) {
     const headers = new Headers(options.headers ?? {});
 
@@ -21,8 +35,28 @@ export async function request(url, options = {}) {
     return body;
 }
 
+/**
+ * Ejecuta la operación get utilizada por el módulo JavaScript.
+ *
+ * @param {*} url - Parámetro recibido por la función.
+ *
+ * @param {*} options - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 export const get = (url, options = {}) => request(url, { ...options, method: 'GET' });
 
+/**
+ * Solicita o carga la información necesaria para la interacción.
+ *
+ * @param {*} url - Parámetro recibido por la función.
+ *
+ * @param {*} body - Parámetro recibido por la función.
+ *
+ * @param {*} options - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 export const post = (url, body, options = {}) => request(url, {
     ...options,
     method: 'POST',

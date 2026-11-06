@@ -28,12 +28,25 @@ use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Define la responsabilidad de la clase FinanzasController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class FinanzasController extends Controller
 {
     private const PAGE_SIZE = 25;
 
     private const MAX_EXPORT_ROWS = 5000;
 
+    /**
+     * Ejecuta la operación pagos definida por la clase FinanzasController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $financialQueries  Parámetro recibido por la operación.
+     * @param  mixed  $authorization  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function pagos(FiltroPagosRequest $request, ServicioConsultasFinancieras $financialQueries, ServicioAutorizacion $authorization): View
     {
         $filters = $request->validated();
@@ -88,6 +101,14 @@ class FinanzasController extends Controller
         ]);
     }
 
+    /**
+     * Ejecuta la operación reembolsos definida por la clase FinanzasController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $financialQueries  Parámetro recibido por la operación.
+     * @param  mixed  $authorization  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function reembolsos(FiltroReembolsosRequest $request, ServicioConsultasFinancieras $financialQueries, ServicioAutorizacion $authorization): View
     {
         $filters = $request->validated();
@@ -145,6 +166,13 @@ class FinanzasController extends Controller
         ]);
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $operations  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function registrarPago(RegistrarPagoRequest $request, ServicioOperacionesFinancieras $operations): RedirectResponse
     {
         $payment = $operations->registrarPago($request->validated(), $request->user(), $request->ip());
@@ -153,6 +181,14 @@ class FinanzasController extends Controller
             ->with('status', 'Solicitud registrada como pendiente. No se ha confirmado ningún cobro ni pago.');
     }
 
+    /**
+     * Recupera y presenta el detalle de la información solicitada.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $pago  Parámetro recibido por la operación.
+     * @param  mixed  $authorization  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function detallePago(Request $request, Pago $pago, ServicioAutorizacion $authorization): View
     {
         abort_unless($authorization->allowsRecord($request->user(), 'gestion.pagos.consultar', (int) $pago->empresa_id, (int) $pago->sede_id), 404);
@@ -174,6 +210,14 @@ class FinanzasController extends Controller
         ]);
     }
 
+    /**
+     * Ejecuta la operación confirmarPagoEfectivo definida por la clase FinanzasController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $pago  Parámetro recibido por la operación.
+     * @param  mixed  $operations  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function confirmarPagoEfectivo(ConfirmarPagoEfectivoRequest $request, Pago $pago, ServicioOperacionesFinancieras $operations): RedirectResponse
     {
         $data = $request->validated();
@@ -184,6 +228,14 @@ class FinanzasController extends Controller
             ->with('status', 'Efectivo confirmado y movimiento de caja registrado.');
     }
 
+    /**
+     * Ejecuta la operación anularPago definida por la clase FinanzasController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $pago  Parámetro recibido por la operación.
+     * @param  mixed  $operations  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function anularPago(AnularOperacionFinancieraRequest $request, Pago $pago, ServicioOperacionesFinancieras $operations): RedirectResponse
     {
         $operations->anularPago($pago, $request->user(), $request->validated('motivo'), $request->ip());
@@ -191,6 +243,13 @@ class FinanzasController extends Controller
         return redirect()->route('management.payments.show', $pago)->with('status', 'Solicitud pendiente anulada.');
     }
 
+    /**
+     * Ejecuta la operación solicitarReembolso definida por la clase FinanzasController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $operations  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function solicitarReembolso(SolicitarReembolsoRequest $request, ServicioOperacionesFinancieras $operations): RedirectResponse
     {
         $refund = $operations->solicitarReembolso($request->validated(), $request->user(), $request->ip());
@@ -199,6 +258,14 @@ class FinanzasController extends Controller
             ->with('status', 'Solicitud de reembolso registrada. No se ha enviado dinero.');
     }
 
+    /**
+     * Recupera y presenta el detalle de la información solicitada.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $reembolso  Parámetro recibido por la operación.
+     * @param  mixed  $authorization  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function detalleReembolso(Request $request, Reembolso $reembolso, ServicioAutorizacion $authorization): View
     {
         $reembolso->load(['pago:id,empresa_id,sede_id,codigo,moneda,importe,estado,referencia', 'devolucion:id,codigo,estado,resolucion', 'autorizadoPor:id,nombre']);
@@ -218,6 +285,14 @@ class FinanzasController extends Controller
         ]);
     }
 
+    /**
+     * Ejecuta la operación aprobarReembolso definida por la clase FinanzasController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $reembolso  Parámetro recibido por la operación.
+     * @param  mixed  $operations  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function aprobarReembolso(AprobarReembolsoRequest $request, Reembolso $reembolso, ServicioOperacionesFinancieras $operations): RedirectResponse
     {
         $operations->aprobarReembolso($reembolso, $request->user(), $request->ip());
@@ -226,6 +301,14 @@ class FinanzasController extends Controller
             ->with('status', 'Solicitud aprobada para gestión. No se ha ejecutado el reembolso.');
     }
 
+    /**
+     * Ejecuta la operación anularReembolso definida por la clase FinanzasController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $reembolso  Parámetro recibido por la operación.
+     * @param  mixed  $operations  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function anularReembolso(AnularOperacionFinancieraRequest $request, Reembolso $reembolso, ServicioOperacionesFinancieras $operations): RedirectResponse
     {
         $operations->anularReembolso($reembolso, $request->user(), $request->validated('motivo'), $request->ip());
@@ -233,6 +316,17 @@ class FinanzasController extends Controller
         return redirect()->route('management.refunds.show', $reembolso)->with('status', 'Solicitud pendiente anulada.');
     }
 
+    /**
+     * Genera la salida exportable de la información disponible.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $format  Parámetro recibido por la operación.
+     * @param  mixed  $financialQueries  Parámetro recibido por la operación.
+     * @param  mixed  $authorization  Parámetro recibido por la operación.
+     * @param  mixed  $exporter  Parámetro recibido por la operación.
+     * @param  mixed  $auditor  Parámetro recibido por la operación.
+     * @return Response|StreamedResponse Resultado de la operación.
+     */
     public function exportarPagos(FiltroPagosRequest $request, string $format, ServicioConsultasFinancieras $financialQueries, ServicioAutorizacion $authorization, ExportadorTabular $exporter, RegistradorAuditoria $auditor): Response|StreamedResponse
     {
         $authorization->assertAllowed($request->user(), 'gestion.pagos.exportar');
@@ -247,6 +341,17 @@ class FinanzasController extends Controller
         );
     }
 
+    /**
+     * Genera la salida exportable de la información disponible.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $format  Parámetro recibido por la operación.
+     * @param  mixed  $financialQueries  Parámetro recibido por la operación.
+     * @param  mixed  $authorization  Parámetro recibido por la operación.
+     * @param  mixed  $exporter  Parámetro recibido por la operación.
+     * @param  mixed  $auditor  Parámetro recibido por la operación.
+     * @return Response|StreamedResponse Resultado de la operación.
+     */
     public function exportarReembolsos(FiltroReembolsosRequest $request, string $format, ServicioConsultasFinancieras $financialQueries, ServicioAutorizacion $authorization, ExportadorTabular $exporter, RegistradorAuditoria $auditor): Response|StreamedResponse
     {
         $authorization->assertAllowed($request->user(), 'gestion.reembolsos.exportar');
@@ -323,6 +428,12 @@ class FinanzasController extends Controller
         ];
     }
 
+    /**
+     * Ejecuta la operación paymentCounterparty definida por la clase FinanzasController.
+     *
+     * @param  mixed  $payment  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function paymentCounterparty(Pago $payment): string
     {
         if ($payment->tipo === 'pago') {
@@ -335,6 +446,12 @@ class FinanzasController extends Controller
             ?? 'Sin cliente asociado');
     }
 
+    /**
+     * Ejecuta la operación paymentOrigin definida por la clase FinanzasController.
+     *
+     * @param  mixed  $payment  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function paymentOrigin(Pago $payment): string
     {
         return match (true) {
@@ -391,11 +508,24 @@ class FinanzasController extends Controller
         ])->values()->all();
     }
 
+    /**
+     * Ejecuta la operación money definida por la clase FinanzasController.
+     *
+     * @param  mixed  $amount  Parámetro recibido por la operación.
+     * @param  mixed  $currency  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function money(float $amount, string $currency): string
     {
         return $currency.' '.number_format($amount, 2, '.', ',');
     }
 
+    /**
+     * Ejecuta la operación moneyTotals definida por la clase FinanzasController.
+     *
+     * @param  mixed  $totals  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function moneyTotals(Collection $totals): string
     {
         if ($totals->isEmpty()) {
@@ -406,6 +536,13 @@ class FinanzasController extends Controller
             ->implode(' · ');
     }
 
+    /**
+     * Ejecuta la operación safeExportText definida por la clase FinanzasController.
+     *
+     * @param  mixed  $value  Parámetro recibido por la operación.
+     * @param  mixed  $format  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private static function safeExportText(string $value, string $format): string
     {
         $clean = trim(preg_replace('/[\p{C}\p{Z}]+/u', ' ', $value) ?? '');

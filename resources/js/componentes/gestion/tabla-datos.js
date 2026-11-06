@@ -5,6 +5,19 @@
  * @param {string} nombreArchivo
  * @returns {void}
  */
+/**
+ * Ejecuta la operación exportarTablaVisible utilizada por el módulo JavaScript.
+ *
+ * @param {*} tabla - Parámetro recibido por la función.
+ *
+ * @param {*} nombreArchivo - Parámetro recibido por la función.
+ *
+ * @param {*} reporte - Parámetro recibido por la función.
+ *
+ * @param {*} csv - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 export function exportarTablaVisible(tabla, nombreArchivo = 'reporte.csv') {
     if (!tabla) {
         return;

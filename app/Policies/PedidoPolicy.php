@@ -6,8 +6,20 @@ use App\Models\Comercio\Pedido;
 use App\Models\User;
 use App\Servicios\ServicioAutorizacion;
 
+/**
+ * Define la responsabilidad de la clase PedidoPolicy dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class PedidoPolicy
 {
+    /**
+     * Recupera y presenta el detalle de la información solicitada.
+     *
+     * @param  mixed  $user  Parámetro recibido por la operación.
+     * @param  mixed  $order  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     public function view(User $user, Pedido $order): bool
     {
         $autorizacion = app(ServicioAutorizacion::class);
@@ -37,6 +49,13 @@ class PedidoPolicy
                 || ($autorizacion->hasRole($order->user, 'cliente_minorista') && $autorizacion->hasRole($user, 'ventas_minoristas')));
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $user  Parámetro recibido por la operación.
+     * @param  mixed  $order  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     public function updateStatus(User $user, Pedido $order): bool
     {
         $autorizacion = app(ServicioAutorizacion::class);

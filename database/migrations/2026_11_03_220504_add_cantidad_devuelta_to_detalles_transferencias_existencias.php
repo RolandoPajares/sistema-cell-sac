@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Ejecuta la operación up definida por la clase 2026_11_03_220504_add_cantidad_devuelta_to_detalles_transferencias_existencias.
+     *
+     * @return void Resultado de la operación.
+     */
     public function up(): void
     {
         if (! Schema::hasTable('detalles_transferencias_existencias')) {
@@ -26,6 +31,11 @@ return new class extends Migration
         }
     }
 
+    /**
+     * Ejecuta la operación down definida por la clase 2026_11_03_220504_add_cantidad_devuelta_to_detalles_transferencias_existencias.
+     *
+     * @return void Resultado de la operación.
+     */
     public function down(): void
     {
         if (! Schema::hasTable('detalles_transferencias_existencias')) {

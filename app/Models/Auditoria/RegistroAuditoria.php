@@ -6,6 +6,11 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Define la responsabilidad de la clase RegistroAuditoria dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class RegistroAuditoria extends Model
 {
     protected $table = 'registros_auditoria';
@@ -21,6 +26,11 @@ class RegistroAuditoria extends Model
 
     public $timestamps = false;
 
+    /**
+     * Ejecuta la operación casts definida por la clase RegistroAuditoria.
+     *
+     * @return array Resultado de la operación.
+     */
     protected function casts(): array
     {
         return [
@@ -32,6 +42,11 @@ class RegistroAuditoria extends Model
         ];
     }
 
+    /**
+     * Ejecuta la operación user definida por la clase RegistroAuditoria.
+     *
+     * @return BelongsTo Resultado de la operación.
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'usuario_id');

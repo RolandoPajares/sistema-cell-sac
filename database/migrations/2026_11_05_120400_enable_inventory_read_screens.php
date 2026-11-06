@@ -12,6 +12,11 @@ return new class extends Migration
         'admin.imei' => ['route' => 'management.inventory.preview.serials', 'name' => 'IMEI y números de serie - consultar'],
     ];
 
+    /**
+     * Ejecuta la operación up definida por la clase 2026_11_05_120400_enable_inventory_read_screens.
+     *
+     * @return void Resultado de la operación.
+     */
     public function up(): void
     {
         if (! Schema::hasTable('pantallas') || ! Schema::hasTable('permisos') || ! Schema::hasTable('roles_permisos')) {
@@ -77,6 +82,11 @@ return new class extends Migration
         }
     }
 
+    /**
+     * Ejecuta la operación down definida por la clase 2026_11_05_120400_enable_inventory_read_screens.
+     *
+     * @return void Resultado de la operación.
+     */
     public function down(): void
     {
         throw new LogicException('This RBAC repair is forward-only to avoid revoking administrator permissions.');

@@ -14,6 +14,11 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class TransferenciaExistenciaFactory extends Factory
 {
+    /**
+     * Ejecuta la operación configure definida por la clase TransferenciaExistenciaFactory.
+     *
+     * @return static Resultado de la operación.
+     */
     public function configure(): static
     {
         return $this->afterMaking(function (TransferenciaExistencia $transfer): void {

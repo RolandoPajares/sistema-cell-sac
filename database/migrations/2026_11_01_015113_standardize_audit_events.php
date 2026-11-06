@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Ejecuta la operación up definida por la clase 2026_11_01_015113_standardize_audit_events.
+     *
+     * @return void Resultado de la operación.
+     */
     public function up(): void
     {
         Schema::table('registros_auditoria', function (Blueprint $table): void {
@@ -50,6 +55,11 @@ return new class extends Migration
         DB::unprepared("CREATE TRIGGER `tc_auditoria_bd` BEFORE DELETE ON `registros_auditoria` FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'registros_auditoria is append-only'");
     }
 
+    /**
+     * Ejecuta la operación down definida por la clase 2026_11_01_015113_standardize_audit_events.
+     *
+     * @return void Resultado de la operación.
+     */
     public function down(): void
     {
         throw new LogicException('Audit events are forward-only and must remain traceable.');

@@ -18,10 +18,21 @@ use Throwable;
 
 #[Signature('technology-cell:inicializar {--confirmar : Autoriza la creación inicial de empresa y administrador} {--vista-previa : Describe las operaciones sin escribir datos}')]
 #[Description('Inicializa una instalación vacía sin modificar cuentas existentes')]
+/**
+ * Define la responsabilidad de la clase InicializarTechnologyCell dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class InicializarTechnologyCell extends Command
 {
     private const VERSION = 'instalacion-inicial-a25';
 
+    /**
+     * Ejecuta la operación principal asignada al componente.
+     *
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return int Resultado de la operación.
+     */
     public function handle(RegistradorAuditoria $audit): int
     {
         if ($this->option('vista-previa')) {
@@ -201,6 +212,11 @@ class InicializarTechnologyCell extends Command
         return self::SUCCESS;
     }
 
+    /**
+     * Ejecuta la operación mostrarPlan definida por la clase InicializarTechnologyCell.
+     *
+     * @return void Resultado de la operación.
+     */
     private function mostrarPlan(): void
     {
         $this->line('Vista previa: crear los catálogos RBAC iniciales, una empresa, una sede, un almacén y un administrador.');
@@ -208,6 +224,11 @@ class InicializarTechnologyCell extends Command
         $this->line('Datos requeridos: códigos y nombres de empresa, sede y almacén; nombre, correo y contraseña del administrador.');
     }
 
+    /**
+     * Ejecuta la operación mostrarConciliacion definida por la clase InicializarTechnologyCell.
+     *
+     * @return void Resultado de la operación.
+     */
     private function mostrarConciliacion(): void
     {
         $this->line('Base configurada: '.DB::connection()->getDatabaseName());

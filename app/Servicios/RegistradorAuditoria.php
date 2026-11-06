@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
+/**
+ * Define la responsabilidad de la clase RegistradorAuditoria dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class RegistradorAuditoria
 {
     /** @var array<string,bool> */
@@ -120,6 +125,12 @@ final class RegistradorAuditoria
         RegistroAuditoria::query()->create($context);
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @param  mixed  $column  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     private function hasColumn(string $column): bool
     {
         return $this->columnCache[$column] ??= Schema::hasColumn('registros_auditoria', $column);
@@ -150,6 +161,12 @@ final class RegistradorAuditoria
         return $safe;
     }
 
+    /**
+     * Ejecuta la operación moduleForEntity definida por la clase RegistradorAuditoria.
+     *
+     * @param  mixed  $entity  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     private function moduleForEntity(string $entity): ?string
     {
         return match ($entity) {
@@ -163,6 +180,14 @@ final class RegistradorAuditoria
         };
     }
 
+    /**
+     * Ejecuta la operación entityLocation definida por la clase RegistradorAuditoria.
+     *
+     * @param  mixed  $entity  Parámetro recibido por la operación.
+     * @param  mixed  $entityId  Parámetro recibido por la operación.
+     * @param  mixed  $column  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     private function entityLocation(string $entity, ?int $entityId, string $column): ?int
     {
         $auditableTables = [

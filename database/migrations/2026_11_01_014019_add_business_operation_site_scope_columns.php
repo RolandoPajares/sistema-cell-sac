@@ -66,6 +66,11 @@ return new class extends Migration
         }
     }
 
+    /**
+     * Ejecuta la operación down definida por la clase 2026_11_01_014019_add_business_operation_site_scope_columns.
+     *
+     * @return void Resultado de la operación.
+     */
     public function down(): void
     {
         throw new LogicException('Business scope columns are forward-only after data backfill; use a reviewed recovery plan instead of dropping them.');

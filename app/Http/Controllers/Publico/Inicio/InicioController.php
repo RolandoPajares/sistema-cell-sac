@@ -10,8 +10,19 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
+/**
+ * Define la responsabilidad de la clase InicioController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class InicioController extends Controller
 {
+    /**
+     * Ejecuta la operación __invoke definida por la clase InicioController.
+     *
+     * @param  mixed  $catalogo  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function __invoke(ServicioCatalogo $catalogo): View
     {
         $featuredProducts = $catalogo->conExistenciasPotenciales(Producto::query()
@@ -46,6 +57,13 @@ class InicioController extends Controller
         ]);
     }
 
+    /**
+     * Ejecuta la operación categoryId definida por la clase InicioController.
+     *
+     * @param  mixed  $categories  Parámetro recibido por la operación.
+     * @param  mixed  $needle  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     private function categoryId(Collection $categories, string $needle): ?int
     {
         return $categories

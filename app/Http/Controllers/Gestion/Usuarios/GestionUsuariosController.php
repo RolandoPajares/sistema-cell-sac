@@ -24,8 +24,19 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Define la responsabilidad de la clase GestionUsuariosController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class GestionUsuariosController extends Controller
 {
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(Request $request): View
     {
         abort_unless(app(ServicioAutorizacion::class)->allowsGlobal($request->user(), 'gestion.seguridad.consultar'), 403);
@@ -59,6 +70,15 @@ class GestionUsuariosController extends Controller
         ]);
     }
 
+    /**
+     * Genera la salida exportable de la información disponible.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $format  Parámetro recibido por la operación.
+     * @param  mixed  $exporter  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return Response|StreamedResponse Resultado de la operación.
+     */
     public function export(Request $request, string $format, ExportadorTabular $exporter, RegistradorAuditoria $audit): Response|StreamedResponse
     {
         abort_unless(app(ServicioAutorizacion::class)->allowsGlobal($request->user(), 'gestion.seguridad.consultar'), 403);
@@ -100,6 +120,14 @@ class GestionUsuariosController extends Controller
         return $response;
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $delegacion  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function store(GuardarUsuarioRequest $request, ServicioDelegacion $delegacion, RegistradorAuditoria $audit): RedirectResponse
     {
         $data = $request->validated();
@@ -174,6 +202,15 @@ class GestionUsuariosController extends Controller
         return back()->with('status', 'Cuenta creada. La contraseña no se volverá a mostrar.');
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $user  Parámetro recibido por la operación.
+     * @param  mixed  $delegacion  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function updateStatus(CambiarEstadoUsuarioRequest $request, User $user, ServicioDelegacion $delegacion, RegistradorAuditoria $audit): RedirectResponse
     {
         abort_unless(Schema::hasColumn('usuarios', 'activo'), 503, 'El bloqueo de cuentas requiere el esquema de seguridad de usuarios.');
@@ -202,6 +239,15 @@ class GestionUsuariosController extends Controller
         return back()->with('status', $active ? 'La cuenta fue reactivada.' : 'La cuenta fue desactivada y sus sesiones revocadas.');
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $user  Parámetro recibido por la operación.
+     * @param  mixed  $delegacion  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function update(ActualizarUsuarioRequest $request, User $user, ServicioDelegacion $delegacion, RegistradorAuditoria $audit): RedirectResponse
     {
         abort_unless($delegacion->puedeAdministrarUsuario($request->user(), $user), 403, 'No puedes editar una cuenta con privilegios superiores a los tuyos.');
@@ -243,6 +289,11 @@ class GestionUsuariosController extends Controller
             ->when($filters['estado'] !== null && Schema::hasColumn('usuarios', 'activo'), fn (Builder $query): Builder => $query->where('activo', $filters['estado'] === 'activo'));
     }
 
+    /**
+     * Ejecuta la operación roleDistribution definida por la clase GestionUsuariosController.
+     *
+     * @return Collection Resultado de la operación.
+     */
     private function roleDistribution(): Collection
     {
         $global = DB::table('usuarios_roles as asignacion')

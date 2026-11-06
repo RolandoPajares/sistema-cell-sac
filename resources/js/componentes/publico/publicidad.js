@@ -28,8 +28,22 @@ if (sistemaPublicidad) {
   };
 
   //  guarda el estado actual de la publicidad en el almacenamiento de sesión, serializando el objeto de estado como JSON.
+/**
+ * Registra la información recibida y coordina la actualización de la interfaz.
+ *
+ * @returns {*} Resultado de la operación.
+ */
   const guardarEstado = () =>
     sessionStorage.setItem(claveEstado, JSON.stringify(estado));
+/**
+ * Registra la información recibida y coordina la actualización de la interfaz.
+ *
+ * @param {*} elemento - Parámetro recibido por la función.
+ *
+ * @param {*} evento - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
   const registrarCampania = (elemento, evento) => {
     const urlSeguimiento = elemento?.dataset.trackUrl;
 
@@ -48,11 +62,25 @@ if (sistemaPublicidad) {
     }).catch(() => {});
   };
   //  cierra el modal de publicidad, ocultándolo y eliminando la clase que indica que la publicidad está abierta en el cuerpo de la página.
+/**
+ * Ejecuta la operación cerrarModal utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
   const cerrarModal = () => {
     modal.hidden = true;
     document.body.classList.remove("body-publicidad-abierta");
   };
   //  muestra el modal de publicidad, ocultando la tarjeta contextual y actualizando el estado de impactos y contextos si se contabiliza la visualización.
+/**
+ * Ejecuta la operación mostrarModal utilizada por el módulo JavaScript.
+ *
+ * @param {*} contabilizar - Parámetro recibido por la función.
+ *
+ * @param {*} true - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
   const mostrarModal = (contabilizar = true) => {
     tarjetaContextual.hidden = true;
     modal.hidden = false;
@@ -69,6 +97,11 @@ if (sistemaPublicidad) {
   };
 
   //  muestra la tarjeta contextual de publicidad si no se ha alcanzado el límite de impactos y el contexto actual no ha sido registrado previamente, actualizando el estado y guardándolo.
+/**
+ * Ejecuta la operación mostrarContextual utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
   const mostrarContextual = () => {
     if (estado.impactos >= limite || estado.contextos.includes(contexto))
       return;

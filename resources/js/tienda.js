@@ -11,6 +11,11 @@ const modulosPorPagina = [
     ['modulo-asistente', 'publico/asistente/index'],
 ];
 
+/**
+ * Ejecuta la operación inicializarBotonSubir utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const inicializarBotonSubir = () => {
     const botonSubir = document.getElementById('toTop');
 
@@ -24,6 +29,11 @@ const inicializarBotonSubir = () => {
     botonSubir.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 };
 
+/**
+ * Solicita o carga la información necesaria para la interacción.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const cargarModulosDePagina = async () => {
     const modulos = modulosPorPagina
         .filter(([clase]) => document.body.classList.contains(clase))
@@ -32,6 +42,11 @@ const cargarModulosDePagina = async () => {
     await Promise.all(modulos);
 };
 
+/**
+ * Ejecuta la operación inicializarTienda utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const inicializarTienda = () => {
     inicializarBotonSubir();
     cargarModulosDePagina();

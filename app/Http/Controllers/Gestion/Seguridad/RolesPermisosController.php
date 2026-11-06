@@ -16,8 +16,19 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
+/**
+ * Define la responsabilidad de la clase RolesPermisosController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class RolesPermisosController extends Controller
 {
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(ServicioAutorizacion $autorizacion): View
     {
         abort_unless($autorizacion->allowsGlobal(request()->user(), 'gestion.seguridad.consultar'), 403);
@@ -32,6 +43,12 @@ class RolesPermisosController extends Controller
         return view('gestion.roles-permisos.listar', compact('ready', 'roles', 'permissionCount', 'search', 'status'));
     }
 
+    /**
+     * Ejecuta la operación matrix definida por la clase RolesPermisosController.
+     *
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function matrix(ServicioAutorizacion $autorizacion): View
     {
         abort_unless($autorizacion->allowsGlobal(request()->user(), 'gestion.seguridad.consultar'), 403);
@@ -48,6 +65,11 @@ class RolesPermisosController extends Controller
         return view('gestion.roles-permisos.matriz', compact('ready', 'roles', 'selectedRole', 'permissions', 'permissionCount', 'moduleCount', 'screenCount', 'assignedPermissionCount'));
     }
 
+    /**
+     * Ejecuta la operación permissionCatalog definida por la clase RolesPermisosController.
+     *
+     * @return mixed Resultado de la operación.
+     */
     private function permissionCatalog()
     {
         return DB::table('permisos')->join('modulos', 'modulos.id', '=', 'permisos.modulo_id')
@@ -58,6 +80,13 @@ class RolesPermisosController extends Controller
             ->groupBy('modulo_codigo');
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $auditoria  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function store(GuardarRolRequest $request, RegistradorAuditoria $auditoria): RedirectResponse
     {
         abort_unless(Schema::hasTable('roles'), 503, 'La migración RBAC todavía no está aplicada.');
@@ -78,6 +107,11 @@ class RolesPermisosController extends Controller
         return back()->with('status', 'El rol '.$role->nombre.' fue creado sin privilegios iniciales.');
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function updatePermissions(
         ActualizarPermisosRolRequest $request,
         Rol $role,
@@ -125,6 +159,15 @@ class RolesPermisosController extends Controller
         return back()->with('status', 'Los privilegios del rol fueron actualizados.');
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $role  Parámetro recibido por la operación.
+     * @param  mixed  $delegacion  Parámetro recibido por la operación.
+     * @param  mixed  $auditoria  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function update(ActualizarRolRequest $request, Rol $role, ServicioDelegacion $delegacion, RegistradorAuditoria $auditoria): RedirectResponse
     {
         abort_if($role->codigo === 'administrador', 422, 'El rol del administrador está reservado y no puede editarse.');
@@ -149,6 +192,15 @@ class RolesPermisosController extends Controller
         return back()->with('status', 'El rol fue actualizado.');
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $role  Parámetro recibido por la operación.
+     * @param  mixed  $delegacion  Parámetro recibido por la operación.
+     * @param  mixed  $auditoria  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function updateStatus(Request $request, Rol $role, ServicioDelegacion $delegacion, RegistradorAuditoria $auditoria): RedirectResponse
     {
         abort_if($role->codigo === 'administrador', 422, 'El rol del administrador está reservado y no puede desactivarse.');

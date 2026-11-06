@@ -16,6 +16,11 @@ use Throwable;
 
 #[Signature('technology-cell:habilitar-submenus-organizacion {--aplicar : Aplica los cambios RBAC aprobados} {--incluir-personal : Prepara únicamente la pantalla Personal por sede}')]
 #[Description('Prepara o habilita las pantallas RBAC existentes de empresa, sedes y almacenes')]
+/**
+ * Define la responsabilidad de la clase HabilitarSubmenusOrganizacion dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class HabilitarSubmenusOrganizacion extends Command
 {
     /** @var array<string, array{modulo:string,nombre:string,ruta:string,icono:string}> */
@@ -46,6 +51,12 @@ final class HabilitarSubmenusOrganizacion extends Command
         ],
     ];
 
+    /**
+     * Ejecuta la operación principal asignada al componente.
+     *
+     * @param  mixed  $registradorAuditoria  Parámetro recibido por la operación.
+     * @return int Resultado de la operación.
+     */
     public function handle(RegistradorAuditoria $registradorAuditoria): int
     {
         $pantallasObjetivo = $this->pantallasObjetivo();
@@ -447,6 +458,12 @@ final class HabilitarSubmenusOrganizacion extends Command
         return array_diff_key(self::PANTALLAS_OBJETIVO, ['admin.staff' => true]);
     }
 
+    /**
+     * Ejecuta la operación hayAdministradorVigente definida por la clase HabilitarSubmenusOrganizacion.
+     *
+     * @param  mixed  $rolId  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     private function hayAdministradorVigente(int $rolId): bool
     {
         return DB::table('usuarios_roles as asignacion')

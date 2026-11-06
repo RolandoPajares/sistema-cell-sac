@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
 
+/**
+ * Define la responsabilidad de la clase ServicioRespaldos dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class ServicioRespaldos
 {
     /** @return list<array{nombre:string,tamano:int,modificado:int}> */
@@ -27,6 +32,14 @@ final class ServicioRespaldos
             ])->values()->all();
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $usuario  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @param  mixed  $auditoria  Parámetro recibido por la operación.
+     * @return array Resultado de la operación.
+     */
     public function crear(User $usuario, ?string $ip, RegistradorAuditoria $auditoria): array
     {
         $conexion = config('database.connections.mysql');
@@ -75,6 +88,12 @@ final class ServicioRespaldos
         return ['nombre' => $nombre, 'tamano' => File::size($destino)];
     }
 
+    /**
+     * Ejecuta la operación rutaSegura definida por la clase ServicioRespaldos.
+     *
+     * @param  mixed  $nombre  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     public function rutaSegura(string $nombre): string
     {
         abort_unless(preg_match('/^[A-Za-z0-9_.-]+\.sql$/', $nombre) === 1, 404);
@@ -84,11 +103,21 @@ final class ServicioRespaldos
         return $ruta;
     }
 
+    /**
+     * Ejecuta la operación directorio definida por la clase ServicioRespaldos.
+     *
+     * @return string Resultado de la operación.
+     */
     private function directorio(): string
     {
         return storage_path('app/private/respaldos');
     }
 
+    /**
+     * Ejecuta la operación binario definida por la clase ServicioRespaldos.
+     *
+     * @return string Resultado de la operación.
+     */
     private function binario(): string
     {
         $candidatos = [

@@ -17,8 +17,19 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
+/**
+ * Define la responsabilidad de la clase AsignacionRolesController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class AsignacionRolesController extends Controller
 {
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(ServicioAutorizacion $autorizacion): View
     {
         abort_unless($autorizacion->allowsGlobal(request()->user(), 'gestion.seguridad.consultar'), 403);
@@ -30,6 +41,11 @@ final class AsignacionRolesController extends Controller
         return view('gestion.roles-permisos.asignaciones', compact('ready', 'users', 'roles', 'sites'));
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function store(
         AsignarRolUsuarioRequest $request,
         User $user,
@@ -98,6 +114,11 @@ final class AsignacionRolesController extends Controller
         return back()->with('status', 'El rol fue asignado al usuario.');
     }
 
+    /**
+     * Realiza la operación específica definida por este método y devuelve su resultado.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function sync(
         Request $request,
         User $user,
@@ -170,6 +191,11 @@ final class AsignacionRolesController extends Controller
         return back()->with('status', 'Los roles del usuario fueron actualizados.');
     }
 
+    /**
+     * Ejecuta la operación revokeGlobal definida por la clase AsignacionRolesController.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function revokeGlobal(
         Request $request,
         User $user,
@@ -180,6 +206,11 @@ final class AsignacionRolesController extends Controller
         return $this->revokeAssignment($request, $user, $role, null, $delegacion, $auditoria);
     }
 
+    /**
+     * Ejecuta la operación revokeAtSite definida por la clase AsignacionRolesController.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function revokeAtSite(
         Request $request,
         User $user,
@@ -191,6 +222,11 @@ final class AsignacionRolesController extends Controller
         return $this->revokeAssignment($request, $user, $role, $site, $delegacion, $auditoria);
     }
 
+    /**
+     * Ejecuta la operación revokeAssignment definida por la clase AsignacionRolesController.
+     *
+     * @return mixed Resultado de la operación.
+     */
     private function revokeAssignment(
         Request $request,
         User $user,

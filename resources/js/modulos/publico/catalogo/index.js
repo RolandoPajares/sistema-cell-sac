@@ -20,6 +20,13 @@
         .map((miniatura) => miniatura.dataset.src || "")
         .filter((rutaImagen) => rutaImagen !== "");
 
+/**
+ * Ejecuta la operación mostrarImagenModal utilizada por el módulo JavaScript.
+ *
+ * @param {*} indice - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const mostrarImagenModal = (indice) => {
         if (!imagenesDisponiblesModal.length || !imagenPrincipalModal) {
             return;
@@ -74,6 +81,11 @@
     });
 
     // Elimina el parámetro del producto al cerrar para que una recarga no vuelva a abrir el detalle.
+/**
+ * Ejecuta la operación quitarProductoDeLaDireccion utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const quitarProductoDeLaDireccion = () => {
         const direccionUrl = new URL(window.location.href);
         

@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Ejecuta la operación up definida por la clase 2026_11_01_015110_add_commerce_integration_columns.
+     *
+     * @return void Resultado de la operación.
+     */
     public function up(): void
     {
         foreach (['categorias', 'productos', 'clientes', 'proveedores', 'campanas_publicitarias'] as $tableName) {
@@ -84,6 +89,11 @@ return new class extends Migration
         }
     }
 
+    /**
+     * Ejecuta la operación down definida por la clase 2026_11_01_015110_add_commerce_integration_columns.
+     *
+     * @return void Resultado de la operación.
+     */
     public function down(): void
     {
         throw new LogicException('Commerce integration columns are forward-only to protect legacy data.');

@@ -12,10 +12,20 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Define la responsabilidad de la clase ServicioVentas dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ServicioVentas
 {
     private const MAX_CENTIMOS = 999999999999999;
 
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly ServicioInventario $inventario,
         private readonly RegistradorAuditoria $auditoria,
@@ -98,6 +108,15 @@ class ServicioVentas
         }, 3);
     }
 
+    /**
+     * Ejecuta la operación anular definida por la clase ServicioVentas.
+     *
+     * @param  mixed  $venta  Parámetro recibido por la operación.
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $motivo  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return Venta Resultado de la operación.
+     */
     public function anular(Venta $venta, User $actor, string $motivo, ?string $ip): Venta
     {
         $motivo = trim($motivo);
@@ -387,7 +406,7 @@ class ServicioVentas
     }
 
     /** @param Collection<int, DetalleVenta> $detalles
-     *  @param array<int|string, array<int, int|string>> $dispositivosPorDetalle
+     * @param  array<int|string, array<int, int|string>>  $dispositivosPorDetalle
      */
     private function dispositivosDeVentaCoinciden(Collection $detalles, array $dispositivosPorDetalle): bool
     {
@@ -404,6 +423,12 @@ class ServicioVentas
         return true;
     }
 
+    /**
+     * Ejecuta la operación centimos definida por la clase ServicioVentas.
+     *
+     * @param  mixed  $precio  Parámetro recibido por la operación.
+     * @return int Resultado de la operación.
+     */
     private function centimos(string $precio): int
     {
         abort_unless(preg_match('/\A\d{1,8}(?:\.\d{1,2})?\z/', $precio) === 1, 422, 'El precio del producto no es válido.');
@@ -412,6 +437,12 @@ class ServicioVentas
         return (int) $entero * 100 + (int) str_pad($decimal, 2, '0');
     }
 
+    /**
+     * Procesa e incorpora la información importada.
+     *
+     * @param  mixed  $centimos  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
+     */
     private function importe(int $centimos): string
     {
         return intdiv($centimos, 100).'.'.str_pad((string) ($centimos % 100), 2, '0', STR_PAD_LEFT);

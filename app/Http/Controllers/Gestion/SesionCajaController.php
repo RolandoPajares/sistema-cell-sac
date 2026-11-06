@@ -17,8 +17,20 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
+/**
+ * Define la responsabilidad de la clase SesionCajaController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class SesionCajaController extends Controller
 {
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $authorization  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(FiltroSesionesCajaRequest $request, ServicioAutorizacion $authorization): View
     {
         $companyId = $authorization->activeCompanyId();
@@ -57,6 +69,13 @@ class SesionCajaController extends Controller
         ]);
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $boxes  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function store(AbrirSesionCajaRequest $request, ServicioCajas $boxes): RedirectResponse
     {
         $data = $request->validated();
@@ -67,6 +86,15 @@ class SesionCajaController extends Controller
             ->with('status', 'Sesión de caja abierta.');
     }
 
+    /**
+     * Recupera y presenta el detalle de la información solicitada.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $sesionCaja  Parámetro recibido por la operación.
+     * @param  mixed  $authorization  Parámetro recibido por la operación.
+     * @param  mixed  $boxes  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function show(Request $request, SesionCaja $sesionCaja, ServicioAutorizacion $authorization, ServicioCajas $boxes): View
     {
         abort_unless($authorization->hasRole($request->user(), 'administrador'), 403);
@@ -87,6 +115,14 @@ class SesionCajaController extends Controller
         ]);
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $sesionCaja  Parámetro recibido por la operación.
+     * @param  mixed  $boxes  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function storeMovement(RegistrarMovimientoCajaRequest $request, SesionCaja $sesionCaja, ServicioCajas $boxes): RedirectResponse
     {
         $data = $request->validated();
@@ -97,6 +133,14 @@ class SesionCajaController extends Controller
             ->with('status', 'Movimiento de caja registrado.');
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $sesionCaja  Parámetro recibido por la operación.
+     * @param  mixed  $boxes  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function update(CerrarSesionCajaRequest $request, SesionCaja $sesionCaja, ServicioCajas $boxes): RedirectResponse
     {
         $data = $request->validated();

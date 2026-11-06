@@ -6,6 +6,11 @@ use App\Models\Catalogo\Producto;
 use App\Models\Marketing\Campania;
 use Illuminate\Support\Collection;
 
+/**
+ * Define la responsabilidad de la clase ServicioInteligenciaComercial dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ServicioInteligenciaComercial
 {
     private const MAX_OPTIMIZATION_ITERATIONS = 60;

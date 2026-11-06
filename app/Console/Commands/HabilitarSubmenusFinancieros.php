@@ -12,6 +12,11 @@ use Throwable;
 
 #[Signature('technology-cell:habilitar-submenus-financieros {--aplicar : Autoriza habilitar los submenús financieros existentes}')]
 #[Description('Corrige el acceso RBAC de pagos, cajas y reembolsos sin cambiar roles ni privilegios comerciales')]
+/**
+ * Define la responsabilidad de la clase HabilitarSubmenusFinancieros dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class HabilitarSubmenusFinancieros extends Command
 {
     /** @var array<string, array{modulo:string,nombre:string,ruta:string}> */
@@ -33,6 +38,12 @@ final class HabilitarSubmenusFinancieros extends Command
         ],
     ];
 
+    /**
+     * Ejecuta la operación principal asignada al componente.
+     *
+     * @param  mixed  $registradorAuditoria  Parámetro recibido por la operación.
+     * @return int Resultado de la operación.
+     */
     public function handle(RegistradorAuditoria $registradorAuditoria): int
     {
         foreach (['usuarios', 'roles', 'usuarios_roles', 'modulos', 'pantallas', 'permisos',
@@ -167,6 +178,12 @@ final class HabilitarSubmenusFinancieros extends Command
         return self::SUCCESS;
     }
 
+    /**
+     * Ejecuta la operación hayAdministradorVigente definida por la clase HabilitarSubmenusFinancieros.
+     *
+     * @param  mixed  $rolId  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     private function hayAdministradorVigente(int $rolId): bool
     {
         return DB::table('usuarios_roles as asignacion')

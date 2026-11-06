@@ -1,7 +1,23 @@
+/**
+ * Ejecuta la operación initializeRolesPermisos utilizada por el módulo JavaScript.
+ *
+ * @param {*} root - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 export const initializeRolesPermisos = (root) => {
     initializeSystemFilterStatus(root, 'roles y permisos');
 };
 
+/**
+ * Ejecuta la operación initializeSystemFilterStatus utilizada por el módulo JavaScript.
+ *
+ * @param {*} root - Parámetro recibido por la función.
+ *
+ * @param {*} moduleName - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const initializeSystemFilterStatus = (root, moduleName) => {
     if (!root || root.dataset.adminSystemRolesReady === 'true') {
         return;

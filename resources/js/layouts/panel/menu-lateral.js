@@ -11,9 +11,33 @@ const anchoCompacto = 82;
 const anchoPredeterminado = 298;
 const anchoMaximo = 480;
 
+/**
+ * Ejecuta la operación esVistaMovil utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const esVistaMovil = () => matchMedia("(max-width: 800px)").matches;
+/**
+ * Ejecuta la operación anchoDisponible utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const anchoDisponible = () => Math.min(anchoMaximo, Math.floor(window.innerWidth * 0.45));
+/**
+ * Ejecuta la operación ajustarAncho utilizada por el módulo JavaScript.
+ *
+ * @param {*} ancho - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const ajustarAncho = (ancho) => Math.max(anchoCompacto, Math.min(ancho, anchoDisponible()));
+/**
+ * Ejecuta la operación leerPreferencia utilizada por el módulo JavaScript.
+ *
+ * @param {*} clave - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const leerPreferencia = (clave) => {
     try {
         return localStorage.getItem(clave);
@@ -21,6 +45,15 @@ const leerPreferencia = (clave) => {
         return null;
     }
 };
+/**
+ * Registra la información recibida y coordina la actualización de la interfaz.
+ *
+ * @param {*} clave - Parámetro recibido por la función.
+ *
+ * @param {*} valor - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const guardarPreferencia = (clave, valor) => {
     try {
         localStorage.setItem(clave, valor);
@@ -35,6 +68,13 @@ if (!Number.isFinite(anchoAmpliado) || anchoAmpliado <= anchoCompacto) {
     anchoAmpliado = anchoPredeterminado;
 }
 
+/**
+ * Ejecuta la operación mostrarAncho utilizada por el módulo JavaScript.
+ *
+ * @param {*} ancho - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const mostrarAncho = (ancho) => {
     const anchoFinal = ajustarAncho(ancho);
     document.body.style.setProperty("--reference-sidebar-width", `${anchoFinal}px`);
@@ -42,6 +82,17 @@ const mostrarAncho = (ancho) => {
     return anchoFinal;
 };
 
+/**
+ * Ejecuta la operación contraerBarra utilizada por el módulo JavaScript.
+ *
+ * @param {*} contraida - Parámetro recibido por la función.
+ *
+ * @param {*} guardar - Parámetro recibido por la función.
+ *
+ * @param {*} true - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const contraerBarra = (contraida, guardar = true) => {
     aplicacion?.classList.toggle("is-sidebar-collapsed", contraida);
     botonAlternar?.setAttribute("aria-expanded", String(!contraida));
@@ -57,6 +108,11 @@ if (tirador) {
     mostrarAncho(anchoAmpliado);
 }
 
+/**
+ * Ejecuta la operación cerrarBarraLateralMovil utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const cerrarBarraLateralMovil = () => {
     barraLateral?.classList.remove("is-open");
     fondo?.classList.remove("is-visible");
@@ -91,6 +147,13 @@ if (!esVistaMovil() && debeContraerBarra) {
 if (tirador) {
     let inicioArrastre = null;
 
+/**
+ * Ejecuta la operación terminarArrastre utilizada por el módulo JavaScript.
+ *
+ * @param {*} event - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const terminarArrastre = (event) => {
         if (!inicioArrastre || event.pointerId !== inicioArrastre.pointerId) {
             return;

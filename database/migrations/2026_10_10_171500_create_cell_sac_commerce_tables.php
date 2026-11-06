@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Ejecuta la operación up definida por la clase 2026_10_10_171500_create_cell_sac_commerce_tables.
+     *
+     * @return void Resultado de la operación.
+     */
     public function up(): void
     {
         if (Schema::hasTable('categorias')) {
@@ -318,6 +323,11 @@ return new class extends Migration
         });
     }
 
+    /**
+     * Ejecuta la operación completeExistingSchema definida por la clase 2026_10_10_171500_create_cell_sac_commerce_tables.
+     *
+     * @return void Resultado de la operación.
+     */
     private function completeExistingSchema(): void
     {
         if (Schema::hasTable('pedidos')) {
@@ -430,6 +440,13 @@ return new class extends Migration
         }
     }
 
+    /**
+     * Ejecuta la operación foreignKeyExists definida por la clase 2026_10_10_171500_create_cell_sac_commerce_tables.
+     *
+     * @param  mixed  $table  Parámetro recibido por la operación.
+     * @param  mixed  $constraint  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
+     */
     private function foreignKeyExists(string $table, string $constraint): bool
     {
         return DB::table('information_schema.TABLE_CONSTRAINTS')
@@ -439,6 +456,11 @@ return new class extends Migration
             ->exists();
     }
 
+    /**
+     * Ejecuta la operación down definida por la clase 2026_10_10_171500_create_cell_sac_commerce_tables.
+     *
+     * @return void Resultado de la operación.
+     */
     public function down(): void
     {
         foreach ([

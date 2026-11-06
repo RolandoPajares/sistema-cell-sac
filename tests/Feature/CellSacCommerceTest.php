@@ -8,6 +8,12 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Tests\SpanishAccessFixture;
 
+/**
+ * Ejecuta la operación productForCellSac definida por la clase CellSacCommerceTest.
+ *
+ * @param  mixed  $attributes  Parámetro recibido por la operación.
+ * @return Producto Resultado de la operación.
+ */
 function productForCellSac(array $attributes = []): Producto
 {
     $scope = SpanishAccessFixture::organization();

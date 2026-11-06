@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Define la responsabilidad de la clase Notificacion dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class Notificacion extends Model
 {
     /** @use HasFactory<NotificacionFactory> */
@@ -28,6 +33,11 @@ final class Notificacion extends Model
         'tipo', 'tipo_notificable', 'notificable_id', 'datos', 'leido_en',
     ];
 
+    /**
+     * Ejecuta la operación casts definida por la clase Notificacion.
+     *
+     * @return array Resultado de la operación.
+     */
     protected function casts(): array
     {
         return [
@@ -38,11 +48,21 @@ final class Notificacion extends Model
         ];
     }
 
+    /**
+     * Ejecuta la operación nombreTipo definida por la clase Notificacion.
+     *
+     * @return string Resultado de la operación.
+     */
     public function nombreTipo(): string
     {
         return class_basename((string) $this->tipo);
     }
 
+    /**
+     * Ejecuta la operación datosLegibles definida por la clase Notificacion.
+     *
+     * @return string Resultado de la operación.
+     */
     public function datosLegibles(): string
     {
         $datos = is_array($this->datos)

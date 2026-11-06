@@ -4,6 +4,11 @@ namespace App\Models\Comercio;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Define la responsabilidad de la clase Cupon dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class Cupon extends Model
 {
     public const CREATED_AT = 'creado_en';
@@ -17,6 +22,11 @@ class Cupon extends Model
         'usos', 'inicia_en', 'finaliza_en', 'activo',
     ];
 
+    /**
+     * Ejecuta la operación casts definida por la clase Cupon.
+     *
+     * @return array Resultado de la operación.
+     */
     protected function casts(): array
     {
         return [

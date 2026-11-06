@@ -10,10 +10,28 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Define la responsabilidad de la clase EstablecerContextoAuditoria dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 final class EstablecerContextoAuditoria
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(private readonly ServicioAutorizacion $autorizacion) {}
 
+    /**
+     * Ejecuta la operación principal asignada al componente.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $next  Parámetro recibido por la operación.
+     * @return Response Resultado de la operación.
+     */
     public function handle(Request $request, Closure $next): Response
     {
         if (DB::getDriverName() !== 'mysql'

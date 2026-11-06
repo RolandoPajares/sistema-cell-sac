@@ -4,6 +4,15 @@ const cargadoresJs = import.meta.glob('../modulos/paneles/*/index.js');
 const rol = document.body.dataset.panelRole;
 const carpetaRol = rol?.replaceAll('_', '-');
 
+/**
+ * Solicita o carga la información necesaria para la interacción.
+ *
+ * @param {*} cargadores - Parámetro recibido por la función.
+ *
+ * @param {*} ruta - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const cargarRecurso = (cargadores, ruta) => {
     const cargador = cargadores[ruta];
 

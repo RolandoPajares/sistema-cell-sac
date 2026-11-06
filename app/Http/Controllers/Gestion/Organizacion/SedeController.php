@@ -16,8 +16,20 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
+/**
+ * Define la responsabilidad de la clase SedeController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class SedeController extends Controller
 {
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(FiltroSedesRequest $request, ServicioAutorizacion $autorizacion): View
     {
         $usuario = $request->user();
@@ -66,6 +78,11 @@ class SedeController extends Controller
         ]);
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function store(
         GuardarSedeRequest $request,
         ServicioAutorizacion $autorizacion,
@@ -99,6 +116,11 @@ class SedeController extends Controller
         return back()->with('status', 'La sede quedó registrada.');
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function update(
         GuardarSedeRequest $request,
         Sede $sede,
@@ -138,6 +160,11 @@ class SedeController extends Controller
         return back()->with('status', 'Los datos de la sede quedaron actualizados.');
     }
 
+    /**
+     * Ejecuta la operación cambiarEstado definida por la clase SedeController.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function cambiarEstado(
         CambiarEstadoSedeRequest $request,
         Sede $sede,

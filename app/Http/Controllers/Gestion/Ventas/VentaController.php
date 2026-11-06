@@ -23,16 +23,26 @@ use App\Servicios\ServicioCotizaciones;
 use App\Servicios\ServicioVentas;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Response;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
+/**
+ * Define la responsabilidad de la clase VentaController dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class VentaController extends Controller
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly ConsultaVentas $ventas,
         private readonly ServicioVentas $registro,
@@ -40,6 +50,12 @@ class VentaController extends Controller
         private readonly ServicioCotizaciones $cotizaciones,
     ) {}
 
+    /**
+     * Obtiene y prepara la información solicitada para la operación.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function index(FiltroVentaRequest $request): View
     {
         $filtros = $this->filters($request->validated());
@@ -160,16 +176,35 @@ class VentaController extends Controller
         ]);
     }
 
+    /**
+     * Ejecuta la operación panelMayorista definida por la clase VentaController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function panelMayorista(Request $request): View
     {
         return $this->panelPorTipoCliente($request, 'mayorista');
     }
 
+    /**
+     * Ejecuta la operación panelMinorista definida por la clase VentaController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     public function panelMinorista(Request $request): View
     {
         return $this->panelPorTipoCliente($request, 'minorista');
     }
 
+    /**
+     * Ejecuta la operación panelPorTipoCliente definida por la clase VentaController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $tipoCliente  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
+     */
     private function panelPorTipoCliente(Request $request, string $tipoCliente): View
     {
         $usuarioActual = $request->user();
@@ -275,6 +310,12 @@ class VentaController extends Controller
         return view($vista, compact('datos', 'filtros'));
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function store(GuardarVentaRequest $request): RedirectResponse
     {
         abort_unless(Schema::hasColumns('ventas', ['canal', 'observaciones']), 503, 'La migración de canal y observaciones está pendiente de autorización y aplicación.');
@@ -285,6 +326,13 @@ class VentaController extends Controller
         return redirect()->route('management.sales')->with('status', 'Venta '.$venta->codigo.' confirmada. No se registró ningún pago.');
     }
 
+    /**
+     * Ejecuta la operación convertirCotizacion definida por la clase VentaController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $quotation  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function convertirCotizacion(ConvertirCotizacionRequest $request, Cotizacion $quotation): RedirectResponse
     {
         $venta = $this->cotizaciones->convertirAventa($quotation, (int) $request->validated('almacen_id'), $request->user(), $request->ip());
@@ -292,6 +340,13 @@ class VentaController extends Controller
         return redirect()->route('management.sales')->with('status', 'La cotizacion se convirtio en la venta '.$venta->codigo.' como borrador. No se descontaron existencias.');
     }
 
+    /**
+     * Ejecuta la operación confirmarBorrador definida por la clase VentaController.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $venta  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function confirmarBorrador(ConfirmarVentaCotizacionRequest $request, Venta $venta): RedirectResponse
     {
         $ventaConfirmada = $this->registro->confirmarBorradorCotizacion(
@@ -304,6 +359,13 @@ class VentaController extends Controller
         return redirect()->route('management.sales')->with('status', 'La venta '.$ventaConfirmada->codigo.' fue confirmada y sus existencias se descontaron una sola vez. No se registro pago.');
     }
 
+    /**
+     * Actualiza la información existente con los datos recibidos.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $order  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function update(ActualizarVentaRequest $request, Venta $order): RedirectResponse
     {
         $venta = $this->registro->actualizarBorrador($order, $request->validated(), $request->user(), $request->ip());
@@ -311,6 +373,13 @@ class VentaController extends Controller
         return redirect()->route('management.sales')->with('status', 'Se actualizaron los datos de la venta '.$venta->codigo.'.');
     }
 
+    /**
+     * Modifica el estado o elimina el registro según la operación solicitada.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $venta  Parámetro recibido por la operación.
+     * @return RedirectResponse Resultado de la operación.
+     */
     public function cancel(AnularVentaRequest $request, Venta $venta): RedirectResponse
     {
         $this->registro->anular($venta, $request->user(), $request->validated('motivo'), $request->ip());
@@ -318,6 +387,15 @@ class VentaController extends Controller
         return redirect()->route('management.sales')->with('status', 'La venta está anulada.');
     }
 
+    /**
+     * Genera la salida exportable de la información disponible.
+     *
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $format  Parámetro recibido por la operación.
+     * @param  mixed  $exporter  Parámetro recibido por la operación.
+     * @param  mixed  $audit  Parámetro recibido por la operación.
+     * @return Response|StreamedResponse Resultado de la operación.
+     */
     public function export(FiltroVentaRequest $request, string $format = 'csv', ?ExportadorTabular $exporter = null, ?RegistradorAuditoria $audit = null): Response|StreamedResponse
     {
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
@@ -358,6 +436,12 @@ class VentaController extends Controller
         return $response;
     }
 
+    /**
+     * Ejecuta la operación filters definida por la clase VentaController.
+     *
+     * @param  mixed  $input  Parámetro recibido por la operación.
+     * @return array Resultado de la operación.
+     */
     private function filters(array $input): array
     {
         $today = CarbonImmutable::today();
@@ -380,6 +464,13 @@ class VentaController extends Controller
         ];
     }
 
+    /**
+     * Ejecuta la operación parseDate definida por la clase VentaController.
+     *
+     * @param  mixed  $value  Parámetro recibido por la operación.
+     * @param  mixed  $fallback  Parámetro recibido por la operación.
+     * @return CarbonImmutable Resultado de la operación.
+     */
     private function parseDate(string $value, CarbonImmutable $fallback): CarbonImmutable
     {
         if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {

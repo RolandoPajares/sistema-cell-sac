@@ -4,6 +4,11 @@ document.querySelectorAll('[data-ventas-diseno]').forEach((page) => {
     const rows = [...page.querySelectorAll('[data-oc-row]')];
     const empty = page.querySelector('[data-oc-empty]');
 
+/**
+ * Gestiona la interacción y actualiza el estado visual correspondiente.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const applyFilters = () => {
         const query = search?.value.trim().toLocaleLowerCase('es') ?? '';
         let visible = 0;

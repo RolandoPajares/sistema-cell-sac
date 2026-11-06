@@ -5,6 +5,11 @@ namespace App\Models\Comercio;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Define la responsabilidad de la clase LogisticaMayorista dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class LogisticaMayorista extends Model
 {
     protected $table = 'logistica_mayorista';
@@ -24,6 +29,11 @@ class LogisticaMayorista extends Model
 
     public $timestamps = false;
 
+    /**
+     * Ejecuta la operación order definida por la clase LogisticaMayorista.
+     *
+     * @return BelongsTo Resultado de la operación.
+     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Pedido::class, 'pedido_id');

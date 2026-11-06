@@ -188,6 +188,13 @@ afterEach(function (): void {
     RefreshDatabaseState::$migrated = false;
 });
 
+/**
+ * Registra la información recibida y coordina su persistencia.
+ *
+ * @param  mixed  $codigoRol  Parámetro recibido por la operación.
+ * @param  mixed  $nombre  Parámetro recibido por la operación.
+ * @return User Resultado de la operación.
+ */
 function crearUsuarioParaPedidos(string $codigoRol, ?string $nombre = null): User
 {
     $usuario = User::create([
@@ -206,6 +213,15 @@ function crearUsuarioParaPedidos(string $codigoRol, ?string $nombre = null): Use
     return $usuario;
 }
 
+/**
+ * Registra la información recibida y coordina su persistencia.
+ *
+ * @param  mixed  $customer  Parámetro recibido por la operación.
+ * @param  mixed  $status  Parámetro recibido por la operación.
+ * @param  mixed  $channel  Parámetro recibido por la operación.
+ * @param  mixed  $createdAt  Parámetro recibido por la operación.
+ * @return Pedido Resultado de la operación.
+ */
 function crearPedidoParaFiltroPedidosOnline(User $customer, string $status, string $channel, DateTimeInterface $createdAt): Pedido
 {
     $order = Pedido::query()->create([

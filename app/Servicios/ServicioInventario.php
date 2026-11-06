@@ -10,8 +10,18 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Define la responsabilidad de la clase ServicioInventario dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ServicioInventario
 {
+    /**
+     * Inicializa la instancia con las dependencias y el estado requeridos.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function __construct(
         private readonly ServicioAutorizacion $authorization,
         private readonly RegistradorAuditoria $audit,
@@ -271,6 +281,13 @@ class ServicioInventario
         return $disponibilidad;
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @param  mixed  $product  Parámetro recibido por la operación.
+     * @param  mixed  $user  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
+     */
     public function registerNewProduct(Producto $product, User $user): void
     {
         abort_unless(DB::transactionLevel() > 0 && Schema::hasTable('existencias_almacen'), 503, 'El inventario requiere una transacción y un almacén configurado.');
@@ -291,6 +308,16 @@ class ServicioInventario
         ]);
     }
 
+    /**
+     * Ejecuta la operación adjust definida por la clase ServicioInventario.
+     *
+     * @param  mixed  $product  Parámetro recibido por la operación.
+     * @param  mixed  $movementType  Parámetro recibido por la operación.
+     * @param  mixed  $quantity  Parámetro recibido por la operación.
+     * @param  mixed  $notes  Parámetro recibido por la operación.
+     * @param  mixed  $user  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     public function adjust(Producto $product, string $movementType, int $quantity, string $notes, User $user): ?MovimientoInventario
     {
         $this->authorization->assertAllowed($user, 'gestion.inventario.ajustar');
@@ -312,6 +339,11 @@ class ServicioInventario
         }, 3);
     }
 
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function registrarMovimientoEnAlmacen(
         Producto $producto,
         ?int $varianteId,
@@ -386,6 +418,16 @@ class ServicioInventario
         }, 3);
     }
 
+    /**
+     * Ejecuta la operación changeLockedProduct definida por la clase ServicioInventario.
+     *
+     * @param  mixed  $product  Parámetro recibido por la operación.
+     * @param  mixed  $movementType  Parámetro recibido por la operación.
+     * @param  mixed  $quantity  Parámetro recibido por la operación.
+     * @param  mixed  $notes  Parámetro recibido por la operación.
+     * @param  mixed  $user  Parámetro recibido por la operación.
+     * @return mixed Resultado de la operación.
+     */
     public function changeLockedProduct(Producto $product, string $movementType, int $quantity, string $notes, User $user): ?MovimientoInventario
     {
         abort_unless(DB::transactionLevel() > 0, 503, 'El movimiento de inventario requiere una transacción.');
@@ -445,6 +487,11 @@ class ServicioInventario
         ]);
     }
 
+    /**
+     * Ejecuta la operación changeLockedProductInWarehouse definida por la clase ServicioInventario.
+     *
+     * @return mixed Resultado de la operación.
+     */
     public function changeLockedProductInWarehouse(
         Producto $product,
         ?int $variantId,

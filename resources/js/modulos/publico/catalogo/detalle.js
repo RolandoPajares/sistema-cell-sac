@@ -20,6 +20,15 @@
         (boton) => !boton.hidden
     );
 
+/**
+ * Ejecuta la operación establecerImagenPrincipal utilizada por el módulo JavaScript.
+ *
+ * @param {*} fuenteImagen - Parámetro recibido por la función.
+ *
+ * @param {*} botonMiniatura - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const establecerImagenPrincipal = (fuenteImagen, botonMiniatura) => {
         if (fuenteImagen && imagenPrincipal) {
             imagenPrincipal.src = fuenteImagen;
@@ -39,6 +48,11 @@
         }
     };
 
+/**
+ * Actualiza la información visible o el estado del componente.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const actualizarFlechasNavegacion = () => {
         const mostrarFlechas = miniaturasVisibles.length > 1;
         const botonAnterior = raizGaleria.querySelector("[data-gallery-prev]");
@@ -67,6 +81,13 @@
         }
     });
 
+/**
+ * Ejecuta la operación avanzarPasoGaleria utilizada por el módulo JavaScript.
+ *
+ * @param {*} desplazamiento - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const avanzarPasoGaleria = (desplazamiento) => {
         if (!miniaturasVisibles.length) {
             return;
@@ -91,6 +112,13 @@
         avanzarPasoGaleria(1);
     });
 
+/**
+ * Ejecuta la operación ocultarMiniaturaNoDisponible utilizada por el módulo JavaScript.
+ *
+ * @param {*} imagenMiniatura - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const ocultarMiniaturaNoDisponible = (imagenMiniatura) => {
         imagenMiniatura.closest(".gallery-thumb")?.remove();
         
@@ -111,6 +139,11 @@
         }
     });
 
+/**
+ * Ejecuta la operación mostrarMarcadorPosicion utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const mostrarMarcadorPosicion = () => {
         if (imagenPrincipal) {
             imagenPrincipal.hidden = true;

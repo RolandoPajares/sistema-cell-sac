@@ -5,6 +5,11 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
 
+/**
+ * Define la responsabilidad de la clase ActualizarCajaRequest dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class ActualizarCajaRequest extends GuardarCajaRequest
 {
     /** @return array<string, array<int, string|ValidationRule>> */

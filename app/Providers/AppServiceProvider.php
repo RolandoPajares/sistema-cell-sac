@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
-use App\Dominio\Catalogo\ProductoDao;
 use App\Contratos\Productos\AlcanceProductos;
 use App\Contratos\Productos\AuditoriaProductos;
+use App\Dominio\Catalogo\ProductoDao;
 use App\Infraestructura\Persistencia\Pdo\PdoConexion;
 use App\Infraestructura\Persistencia\Pdo\PdoProductoDao;
 use App\Models\Marketing\Campania;
@@ -21,8 +21,18 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
+/**
+ * Define la responsabilidad de la clase AppServiceProvider dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class AppServiceProvider extends ServiceProvider
 {
+    /**
+     * Registra la información recibida y coordina su persistencia.
+     *
+     * @return void Resultado de la operación.
+     */
     public function register(): void
     {
         $this->app->singleton(ProductoDao::class, function (): ProductoDao {
@@ -32,6 +42,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AuditoriaProductos::class, AdaptadorAuditoriaProductos::class);
     }
 
+    /**
+     * Ejecuta la operación boot definida por la clase AppServiceProvider.
+     *
+     * @return void Resultado de la operación.
+     */
     public function boot(): void
     {
         Model::preventLazyLoading(! app()->isProduction());

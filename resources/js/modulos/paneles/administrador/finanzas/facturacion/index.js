@@ -1,3 +1,10 @@
+/**
+ * Ejecuta la operación initializeFacturacion utilizada por el módulo JavaScript.
+ *
+ * @param {*} root - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 export const initializeFacturacion = (root) => {
     if (!root || root.dataset.financeFacturacionReady === 'true') {
         return;
@@ -8,6 +15,13 @@ export const initializeFacturacion = (root) => {
     initializeInvoiceDemo(root);
 };
 
+/**
+ * Ejecuta la operación initializeInvoiceDemo utilizada por el módulo JavaScript.
+ *
+ * @param {*} root - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const initializeInvoiceDemo = (root) => {
     const dialog = root.querySelector('[data-pending-modal="crear"]');
     const wizard = dialog?.querySelector('[data-invoice-wizard]');
@@ -26,6 +40,13 @@ const initializeInvoiceDemo = (root) => {
     const acknowledgement = wizard.querySelector('[data-invoice-ack]');
     let currentStep = 0;
 
+/**
+ * Ejecuta la operación render utilizada por el módulo JavaScript.
+ *
+ * @param {*} step - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const render = (step) => {
         currentStep = step;
         stages.forEach((stage) => {
@@ -42,6 +63,11 @@ const initializeInvoiceDemo = (root) => {
         confirm.disabled = false;
     };
 
+/**
+ * Ejecuta la operación populateReview utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const populateReview = () => {
         review.replaceChildren();
         wizard.querySelectorAll('[data-invoice-step="0"] input, [data-invoice-step="0"] select, [data-invoice-step="0"] textarea').forEach((field) => {
@@ -106,6 +132,15 @@ const initializeInvoiceDemo = (root) => {
     render(0);
 };
 
+/**
+ * Ejecuta la operación bindFinanceFilterStatus utilizada por el módulo JavaScript.
+ *
+ * @param {*} root - Parámetro recibido por la función.
+ *
+ * @param {*} moduleName - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
 const bindFinanceFilterStatus = (root, moduleName) => {
     const status = root.querySelector('[data-finance-filter-status]');
 

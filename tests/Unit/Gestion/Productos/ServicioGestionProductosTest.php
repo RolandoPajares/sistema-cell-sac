@@ -40,6 +40,11 @@ afterEach(function (): void {
     Schema::dropIfExists('productos');
 });
 
+/**
+ * Ejecuta la operación usuarioGestionProductos definida por la clase ServicioGestionProductosTest.
+ *
+ * @return User Resultado de la operación.
+ */
 function usuarioGestionProductos(): User
 {
     $usuario = new User;

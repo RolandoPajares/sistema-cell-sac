@@ -25,6 +25,12 @@ function unsavedUser(array $attributes): User
     return $user;
 }
 
+/**
+ * Ejecuta la operación unsavedProduct definida por la clase RbacAuthorizationTest.
+ *
+ * @param  mixed  $id  Parámetro recibido por la operación.
+ * @return Producto Resultado de la operación.
+ */
 function unsavedProduct(int $id = 10): Producto
 {
     $product = new Producto;

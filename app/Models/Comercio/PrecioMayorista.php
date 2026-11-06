@@ -4,6 +4,11 @@ namespace App\Models\Comercio;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Define la responsabilidad de la clase PrecioMayorista dentro de su módulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
 class PrecioMayorista extends Model
 {
     public const CREATED_AT = 'creado_en';
@@ -16,6 +21,11 @@ class PrecioMayorista extends Model
         'empresa_id', 'producto_id', 'variante_id', 'precio', 'vigente_desde', 'vigente_hasta', 'motivo', 'creado_por_usuario_id',
     ];
 
+    /**
+     * Ejecuta la operación casts definida por la clase PrecioMayorista.
+     *
+     * @return array Resultado de la operación.
+     */
     protected function casts(): array
     {
         return [
