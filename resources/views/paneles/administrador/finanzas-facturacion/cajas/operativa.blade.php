@@ -1,14 +1,14 @@
 @extends('layouts.administracion')
 
-@section('title', 'Gestión de cajas')
+@section('title', 'Cajas, aperturas y cierres')
 @section('body_class', 'modulo-finanzas-facturacion')
 
 @section('content')
 <section class="tc-ff" data-cajas-operativas data-cajas-reopen="{{ old('_form') === 'crear' && $errors->any() ? 'crear' : '' }}">
     <header class="tc-ff__header">
         <div>
-            <div class="tc-ff__breadcrumb"><i class="bi bi-house" aria-hidden="true"></i><span>Finanzas y Facturación</span><i class="bi bi-chevron-right" aria-hidden="true"></i><strong>Gestión de cajas</strong></div>
-            <h1><i class="bi bi-cash-stack" aria-hidden="true"></i>Gestión de cajas</h1>
+            <div class="tc-ff__breadcrumb"><i class="bi bi-house" aria-hidden="true"></i><span>Finanzas y Facturación</span><i class="bi bi-chevron-right" aria-hidden="true"></i><strong>Cajas, aperturas y cierres</strong></div>
+            <h1><i class="bi bi-cash-stack" aria-hidden="true"></i>Cajas, aperturas y cierres</h1>
             <p>Consulta y administra cajas de las sedes de la empresa activa.</p>
         </div>
         <div class="tc-ff__header-actions">

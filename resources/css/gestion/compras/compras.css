@@ -72,6 +72,13 @@
     gap: 7px;
 }
 
+.compras-export-menu { position: relative; }
+.compras-export-menu summary { cursor: pointer; list-style: none; }
+.compras-export-menu summary::-webkit-details-marker { display: none; }
+.compras-export-options { position: absolute; z-index: 30; top: calc(100% + 6px); right: 0; display: grid; min-width: 168px; gap: 3px; padding: 6px; border: 1px solid #d5e4f3; border-radius: 9px; background: #fff; box-shadow: 0 12px 26px rgba(25, 78, 139, .16); }
+.compras-export-options a { display: flex; align-items: center; gap: 7px; padding: 8px 10px; border-radius: 6px; color: #174b91; font-size: .67rem; font-weight: 750; text-decoration: none; }
+.compras-export-options a:hover, .compras-export-options a:focus-visible { background: #edf6ff; }
+
 .compras-primary-button,
 .compras-secondary-button,
 .compras-filter-button {
@@ -467,7 +474,7 @@
     .modulo-compras .admin-main { padding: 16px 12px 28px; }
     .compras-hero { align-items: flex-start; flex-direction: column; }
     .compras-hero-actions { width: 100%; justify-content: stretch; }
-    .compras-hero-actions > button { flex: 1 1 auto; }
+    .compras-hero-actions > * { flex: 1 1 auto; }
     .compras-recent-row .compras-reception-open { flex: 1 0 100%; width: 100%; margin-left: 14px; }
     .compras-kpi-grid { gap: 8px; }
     .compras-kpi { min-height: 83px; gap: 8px; padding: 10px; }

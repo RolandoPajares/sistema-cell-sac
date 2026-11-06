@@ -23,7 +23,7 @@
             <div class="gestion-operacion-actions">
                 @foreach ($ui['actions'] as $action)
                     @if (isset($action['route']) && isset($action['formats']))
-                        <details class="gestion-pendiente-export-menu"><summary class="gestion-pendiente-secondary"><i class="bi {{ $action['icon'] }}" aria-hidden="true"></i> {{ $action['label'] }}</summary><div class="gestion-pendiente-export-options">@foreach ($action['formats'] as $format)<a href="{{ route($action['route'], array_merge(request()->query(), ['format' => $format])) }}">{{ strtoupper($format) }} (.{{ $format === 'excel' ? 'xlsx' : $format }})</a>@endforeach</div></details>
+                        <details class="gestion-pendiente-export-menu"><summary class="gestion-pendiente-secondary"><i class="bi {{ $action['icon'] }}" aria-hidden="true"></i> {{ $action['label'] }} <i class="bi bi-chevron-down" aria-hidden="true"></i></summary><div class="gestion-pendiente-export-options">@foreach ($action['formats'] as $format)<a href="{{ route($action['route'], array_merge(request()->query(), ['format' => $format])) }}"><i class="bi {{ $format === 'excel' ? 'bi-file-earmark-spreadsheet' : ($format === 'pdf' ? 'bi-file-earmark-pdf' : 'bi-filetype-csv') }}" aria-hidden="true"></i> {{ strtoupper($format) }} (.{{ $format === 'excel' ? 'xlsx' : $format }})</a>@endforeach</div></details>
                     @elseif (isset($action['route']))
                         <a class="gestion-pendiente-secondary" href="{{ route($action['route'], request()->query()) }}"><i class="bi {{ $action['icon'] }}" aria-hidden="true"></i> {{ $action['label'] }}</a>
                     @elseif (($action['modal'] ?? null) === 'crear')

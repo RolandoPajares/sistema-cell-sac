@@ -29,7 +29,14 @@
                 <p>Organiza tus productos en categorías para una mejor gestión.</p>
             </div>
             <div class="categorias-actions">
-                <details class="categorias-export-menu"><summary class="categorias-export-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar</summary><div class="categorias-export-options"><a href="{{ route('management.categories.export', ['format' => 'excel'] + $categoryQuery) }}">Excel (.xlsx)</a><a href="{{ route('management.categories.export', ['format' => 'pdf'] + $categoryQuery) }}">PDF (.pdf)</a><a href="{{ route('management.categories.export', ['format' => 'csv'] + $categoryQuery) }}">CSV (.csv)</a></div></details>
+                <details class="productos-export-menu categorias-export-menu">
+                    <summary><i class="bi bi-download" aria-hidden="true"></i><span>Exportar</span><i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
+                    <div class="productos-export-options categorias-export-options">
+                        <a href="{{ route('management.categories.export', ['format' => 'pdf'] + $categoryQuery) }}"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i><span>Exportar PDF<small>Documento imprimible</small></span></a>
+                        <a href="{{ route('management.categories.export', ['format' => 'excel'] + $categoryQuery) }}"><i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i><span>Exportar Excel<small>Archivo compatible .xlsx</small></span></a>
+                        <a href="{{ route('management.categories.export', ['format' => 'csv'] + $categoryQuery) }}"><i class="bi bi-filetype-csv" aria-hidden="true"></i><span>Exportar CSV<small>Datos delimitados</small></span></a>
+                    </div>
+                </details>
                 <button class="categorias-primary-button" type="button" data-open-category-create><i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva categoría</button>
             </div>
         </header>

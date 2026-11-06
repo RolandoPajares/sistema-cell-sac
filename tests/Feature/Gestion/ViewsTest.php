@@ -13,7 +13,7 @@ use Tests\SpanishAccessFixture;
 it('renders each management module with its canonical list view', function () {
     $admin = SpanishAccessFixture::user('administrador');
     $viewsByRoute = [
-        'management.audit' => 'gestion.auditoria.listar',
+        'management.audit' => 'paneles.administrador.analisis-auditoria.auditoria-operaciones.listar',
         'management.campaigns' => 'gestion.campanias.listar',
         'management.categories' => 'gestion.categorias.listar',
         'management.customers' => 'gestion.clientes.listar',

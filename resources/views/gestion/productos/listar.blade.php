@@ -125,8 +125,10 @@
                 </footer>
             </section>
 
-            <aside class="productos-sidebar">
-                <section class="productos-side-card">
+        </div>
+
+        <div class="productos-below-table">
+                <section class="productos-side-card productos-quick-card">
                     <header class="productos-card-header"><div class="productos-card-title"><i class="bi bi-grid-3x3-gap-fill" aria-hidden="true"></i><div><h2>Accesos rápidos</h2></div></div></header>
                     <div class="productos-quick-grid">
                         <button type="button" data-open-product-create><span><i class="bi bi-plus-circle" aria-hidden="true"></i></span><b>Registrar<br>producto</b></button>
@@ -147,7 +149,6 @@
                         <a href="{{ route('management.products', ['oferta' => 1]) }}"><span class="productos-advice-icon is-purple"><i class="bi bi-percent" aria-hidden="true"></i></span><span><b>{{ number_format($offerCount) }} productos en oferta</b><small>Precio de oferta menor al precio actual.</small></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
                     </div>
                 </section>
-            </aside>
         </div>
     </section>
 

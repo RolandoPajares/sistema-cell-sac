@@ -2441,6 +2441,21 @@
   gap: 10px;
 }
 
+.categorias-export-menu {
+  position: relative;
+}
+
+.categorias-export-menu[open] {
+  z-index: 20;
+}
+
+.categorias-export-menu > summary {
+  list-style: none;
+}
+
+.categorias-export-menu > summary::-webkit-details-marker {
+  display: none;
+}
 .categorias-export-button,
 .categorias-primary-button {
   min-height: 42px;

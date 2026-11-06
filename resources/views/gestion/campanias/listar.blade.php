@@ -39,6 +39,11 @@
                 <h1>Campañas <i class="bi bi-megaphone-fill" aria-hidden="true"></i></h1>
                 <p>Promociones y banners con registro de vistas y clics.</p>
             </div>
+            <div class="campanias-hero-actions" aria-label="Acciones de campañas">
+                <button class="campanias-primary-button" type="button" data-open-campaign-create><i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva campaña</button>
+                <button class="campanias-toolbar-button" type="button" data-open-campaign-import><i class="bi bi-upload" aria-hidden="true"></i> Importar</button>
+                <details class="campanias-export-menu"><summary class="campanias-toolbar-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar <i class="bi bi-chevron-down" aria-hidden="true"></i></summary><div class="campanias-export-options"><a href="{{ route('management.campaigns.export', ['format' => 'pdf', 'buscar' => $filters['buscar'], 'ubicacion' => $filters['ubicacion'], 'estado' => $filters['estado']]) }}"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i><span><strong>Exportar PDF</strong><small>Documento imprimible</small></span></a><a href="{{ route('management.campaigns.export', ['format' => 'excel', 'buscar' => $filters['buscar'], 'ubicacion' => $filters['ubicacion'], 'estado' => $filters['estado']]) }}"><i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i><span><strong>Exportar Excel</strong><small>Archivo compatible .xlsx</small></span></a><a href="{{ route('management.campaigns.export', ['format' => 'csv', 'buscar' => $filters['buscar'], 'ubicacion' => $filters['ubicacion'], 'estado' => $filters['estado']]) }}"><i class="bi bi-filetype-csv" aria-hidden="true"></i><span><strong>Exportar CSV</strong><small>Datos delimitados</small></span></a></div></details>
+            </div>
         </header>
 
         <nav class="campanias-tabs" aria-label="Secciones de campañas">
@@ -51,9 +56,6 @@
             <label><span class="visually-hidden">Filtrar por ubicación</span><select name="ubicacion"><option value="">Todas las ubicaciones</option>@foreach ($locationLabels as $value => $label)<option value="{{ $value }}" @selected(($filters['ubicacion'] ?? null) === $value)>{{ $label }}</option>@endforeach</select></label>
             <label><span class="visually-hidden">Filtrar por estado</span><select name="estado"><option value="">Todos los estados</option><option value="activa" @selected(($filters['estado'] ?? null) === 'activa')>Activas</option><option value="inactiva" @selected(($filters['estado'] ?? null) === 'inactiva')>Inactivas</option></select></label>
             <button class="campanias-toolbar-button" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i> Filtrar</button>
-            <button class="campanias-primary-button" type="button" data-open-campaign-create><i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva campaña</button>
-            <button class="campanias-toolbar-button" type="button" data-open-campaign-import><i class="bi bi-upload" aria-hidden="true"></i> Importar</button>
-            <details class="campanias-export-menu"><summary class="campanias-toolbar-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar</summary><div class="campanias-export-options"><a href="{{ route('management.campaigns.export', ['format' => 'excel', 'buscar' => $filters['buscar'], 'ubicacion' => $filters['ubicacion'], 'estado' => $filters['estado']]) }}">Excel (.xlsx)</a><a href="{{ route('management.campaigns.export', ['format' => 'pdf', 'buscar' => $filters['buscar'], 'ubicacion' => $filters['ubicacion'], 'estado' => $filters['estado']]) }}">PDF (.pdf)</a><a href="{{ route('management.campaigns.export', ['format' => 'csv', 'buscar' => $filters['buscar'], 'ubicacion' => $filters['ubicacion'], 'estado' => $filters['estado']]) }}">CSV (.csv)</a></div></details>
             @if (($filters['buscar'] ?? null) || ($filters['ubicacion'] ?? null) || ($filters['estado'] ?? null))
                 <a class="campanias-clear-button" href="{{ route('management.campaigns') }}">Limpiar filtros</a>
             @endif

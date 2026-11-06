@@ -3,7 +3,6 @@
 use App\Http\Controllers\Auth\AutenticacionController;
 use App\Http\Controllers\Cuenta\CuentaAdministracionController;
 use App\Http\Controllers\Cuenta\CuentaController;
-use App\Http\Controllers\Gestion\Auditoria\AuditoriaController;
 use App\Http\Controllers\Gestion\CajaController;
 use App\Http\Controllers\Gestion\Campanias\CampaniaController;
 use App\Http\Controllers\Gestion\Campanias\PublicidadInteligenteController;
@@ -208,13 +207,9 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::post('/usuarios', [GestionUsuariosController::class, 'store'])->name('users.store');
     Route::put('/usuarios/{user}', [GestionUsuariosController::class, 'update'])->whereNumber('user')->name('users.update');
     Route::patch('/usuarios/{user}/estado', [GestionUsuariosController::class, 'updateStatus'])->whereNumber('user')->name('users.activate');
-    Route::get('/auditoria', [AuditoriaController::class, 'index'])->name('audit');
+    Route::get('/auditoria', [PanelAnalisisAuditoriaController::class, 'operaciones'])->name('audit');
     Route::get('/analisis/diseno/auditoria-operaciones', [PanelAnalisisAuditoriaController::class, 'operaciones'])
         ->middleware('role:administrador')->name('audit.preview.operations');
-    Route::get('/analisis/diseno/historial-roles', [PanelAnalisisAuditoriaController::class, 'roles'])
-        ->middleware('role:administrador')->name('audit.preview.roles');
-    Route::get('/analisis/diseno/eventos-seguridad', [PanelAnalisisAuditoriaController::class, 'seguridad'])
-        ->middleware('role:administrador')->name('audit.preview.security');
 
     Route::get('/categorias', [CategoriaController::class, 'index'])->name('categories');
     Route::get('/categorias/exportar/{format?}', [CategoriaController::class, 'export'])
@@ -284,7 +279,8 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::get('/inventario', [InventarioController::class, 'index'])->name('inventory');
     Route::get('/inventario/movimientos', [InventarioController::class, 'index'])->name('inventory.movements');
     Route::get('/inventario/diseno/transferencias', [TransferenciaExistenciaController::class, 'index'])->name('inventory.preview.transfers');
-    Route::get('/inventario/transferencias/exportar', [TransferenciaExistenciaController::class, 'export'])->name('inventory.transfers_export');
+    Route::get('/inventario/transferencias/exportar/{format?}', [TransferenciaExistenciaController::class, 'export'])
+        ->whereIn('format', ['pdf', 'excel', 'csv'])->name('inventory.transfers_export');
     Route::post('/inventario/transferencias', [TransferenciaExistenciaController::class, 'store'])->name('inventory.transfer_request');
     Route::post('/inventario/transferencias/{transfer}/approve', [TransferenciaExistenciaController::class, 'approve'])->whereNumber('transfer')->name('inventory.transfer_approve');
     Route::post('/inventario/transferencias/{transfer}/dispatch', [TransferenciaExistenciaController::class, 'dispatch'])->whereNumber('transfer')->name('inventory.transfer_dispatch');
@@ -351,12 +347,8 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::get('/reportes', [ReporteController::class, 'index'])->name('reports');
     Route::get('/analisis/diseno/reportes-globales', [PanelAnalisisAuditoriaController::class, 'globales'])
         ->middleware('role:administrador')->name('reports.preview.global');
-    Route::get('/analisis/diseno/reportes-sede', [PanelAnalisisAuditoriaController::class, 'sedes'])
-        ->middleware('role:administrador')->name('reports.preview.sites');
-    Route::get('/analisis/diseno/exportaciones', [PanelAnalisisAuditoriaController::class, 'exportaciones'])
-        ->middleware('role:administrador')->name('reports.preview.exports');
     Route::get('/analisis/diseno/{tipo}/exportar/{format?}', [PanelAnalisisAuditoriaController::class, 'exportar'])
-        ->whereIn('tipo', ['globales', 'sedes', 'operaciones', 'roles', 'seguridad', 'exportaciones'])
+        ->whereIn('tipo', ['globales', 'operaciones'])
         ->whereIn('format', ['pdf', 'excel', 'csv'])
         ->middleware('role:administrador')->name('reports.preview.export');
     Route::get('/reportes/exportar/{format?}', [ReporteController::class, 'export'])
@@ -398,9 +390,6 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::post('/finanzas/cuentas-por-cobrar/aplicar-cobro', [CuentasFinancierasController::class, 'aplicarCobro'])
         ->name('payments.accounts.receivables.update');
     Route::get('/finanzas/diseno/reembolsos', static fn () => redirect()->route('management.refunds'))->middleware('role:administrador')->name('refunds.preview');
-    Route::get('/finanzas/diseno/notas', static fn () => redirect()->route('management.billing'))->middleware('role:administrador')->name('billing.preview.notes');
-    Route::get('/finanzas/diseno/series', static fn () => redirect()->route('management.billing'))->middleware('role:administrador')->name('billing.preview.series');
-    Route::get('/finanzas/diseno/sunat', static fn () => redirect()->route('management.billing'))->middleware('role:administrador')->name('billing.preview.sunat');
     Route::get('/roles-permisos', [RolesPermisosController::class, 'index'])->name('roles_permissions');
     Route::get('/matriz-privilegios', [RolesPermisosController::class, 'matrix'])->name('permissions_matrix');
     Route::post('/roles-permisos', [RolesPermisosController::class, 'store'])->name('roles_permissions.store');
@@ -511,7 +500,7 @@ Route::prefix('admin')->middleware(['auth', 'cuenta.activa', 'sesion.usuario', '
     Route::get('/inventory', [InventarioController::class, 'index'])->name('inventory');
     Route::post('/inventory', [InventarioController::class, 'adjustLegacy'])->name('inventory.store');
     Route::get('/reports', [ReporteController::class, 'index'])->name('reports');
-    Route::get('/audit', [AuditoriaController::class, 'index'])->name('audit');
+    Route::get('/audit', [PanelAnalisisAuditoriaController::class, 'operaciones'])->name('audit');
 });
 
 Route::middleware(['auth', 'cuenta.activa', 'sesion.usuario'])->group(function (): void {

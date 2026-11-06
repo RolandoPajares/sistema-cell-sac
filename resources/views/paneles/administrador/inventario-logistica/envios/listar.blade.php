@@ -11,9 +11,13 @@
             <h1><i class="bi bi-truck" aria-hidden="true"></i> Envíos y entregas</h1>
             <p>Consulta de envíos de pedidos y sus últimos eventos registrados.</p>
         </div>
-        <details class="tc-il__export-menu">
-            <summary class="tc-il__button tc-il__button--primary"><i class="bi bi-download" aria-hidden="true"></i> Exportar</summary>
-            <div><a href="{{ route('management.inventory.preview.shipments.export', ['format' => 'excel'] + request()->query()) }}">Excel (.xlsx)</a><a href="{{ route('management.inventory.preview.shipments.export', ['format' => 'pdf'] + request()->query()) }}">PDF (.pdf)</a><a href="{{ route('management.inventory.preview.shipments.export', ['format' => 'csv'] + request()->query()) }}">CSV (.csv)</a></div>
+        <details class="productos-export-menu tc-il__export-menu">
+            <summary><i class="bi bi-download" aria-hidden="true"></i><span>Exportar</span><i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
+            <div class="productos-export-options">
+                <a href="{{ route('management.inventory.preview.shipments.export', ['format' => 'pdf'] + request()->query()) }}"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i><span>Exportar PDF<small>Documento imprimible</small></span></a>
+                <a href="{{ route('management.inventory.preview.shipments.export', ['format' => 'excel'] + request()->query()) }}"><i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i><span>Exportar Excel<small>Archivo compatible .xlsx</small></span></a>
+                <a href="{{ route('management.inventory.preview.shipments.export', ['format' => 'csv'] + request()->query()) }}"><i class="bi bi-filetype-csv" aria-hidden="true"></i><span>Exportar CSV<small>Datos delimitados</small></span></a>
+            </div>
         </details>
     </header>
 

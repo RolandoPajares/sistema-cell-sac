@@ -36,8 +36,8 @@
             </div>
             <div class="compras-hero-actions">
                 <button class="compras-secondary-button" type="button" data-admin-dialog-open="importar-compras"><i class="bi bi-upload" aria-hidden="true"></i> Importar</button>
-                <details class="compras-export-menu"><summary class="compras-secondary-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar</summary><div class="compras-export-options"><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'excel'])) }}">Excel (.xlsx)</a><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'pdf'])) }}">PDF (.pdf)</a><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'csv'])) }}">CSV (.csv)</a></div></details>
-                <button class="compras-primary-button" type="button" data-admin-dialog-open="nueva-compra" @disabled(! $canCreate)>
+                <details class="compras-export-menu"><summary class="compras-secondary-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar <i class="bi bi-chevron-down" aria-hidden="true"></i></summary><div class="compras-export-options"><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'excel'])) }}"><i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i> Excel (.xlsx)</a><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'pdf'])) }}"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i> PDF (.pdf)</a><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'csv'])) }}"><i class="bi bi-filetype-csv" aria-hidden="true"></i> CSV (.csv)</a></div></details>
+                <button class="compras-primary-button" type="button" data-admin-dialog-open="nueva-compra" @disabled(! $canCreate || $suppliers->isEmpty() || $products->isEmpty())>
                     <i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva compra
                 </button>
             </div>

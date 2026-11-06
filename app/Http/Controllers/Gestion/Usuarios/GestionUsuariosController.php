@@ -153,6 +153,7 @@ class GestionUsuariosController extends Controller
                 Cliente::query()->create([
                     'usuario_id' => $user->getKey(),
                     'tipo' => $data['rol'] === 'cliente_mayorista' ? 'mayorista' : 'minorista',
+                    'tipo_documento' => $data['tipo_documento'],
                     'documento' => $data['documento'],
                     'razon_social' => $data['razon_social'] ?? null,
                     'nombre_contacto' => $data['nombre'],

@@ -445,12 +445,12 @@
 
 .inventario-table th:nth-child(1),
 .inventario-table td:nth-child(1) {
-  width: 34px;
+  width: 24%;
 }
 
 .inventario-table th:nth-child(2),
 .inventario-table td:nth-child(2) {
-  width: 24%;
+  width: 10%;
 }
 
 .inventario-table th:nth-child(3),
@@ -460,36 +460,31 @@
 
 .inventario-table th:nth-child(4),
 .inventario-table td:nth-child(4) {
-  width: 10%;
+  width: 11%;
 }
 
 .inventario-table th:nth-child(5),
 .inventario-table td:nth-child(5) {
-  width: 11%;
+  width: 9%;
 }
 
 .inventario-table th:nth-child(6),
 .inventario-table td:nth-child(6) {
-  width: 9%;
+  width: 11%;
 }
 
 .inventario-table th:nth-child(7),
 .inventario-table td:nth-child(7) {
-  width: 11%;
+  width: 14%;
 }
 
 .inventario-table th:nth-child(8),
 .inventario-table td:nth-child(8) {
-  width: 14%;
+  width: 9%;
 }
 
 .inventario-table th:nth-child(9),
 .inventario-table td:nth-child(9) {
-  width: 9%;
-}
-
-.inventario-table th:nth-child(10),
-.inventario-table td:nth-child(10) {
   width: 105px;
 }
 
@@ -503,16 +498,6 @@
 
 .inventario-table tbody tr:hover td {
   background: #f7fbff;
-}
-
-.inventario-checkbox {
-  width: 15px;
-  height: 15px;
-  display: inline-block;
-  border: 1px solid #abc2df;
-  border-radius: 4px;
-  background: #fff;
-  vertical-align: middle;
 }
 
 .inventario-product-cell {

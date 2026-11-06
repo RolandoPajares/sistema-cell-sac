@@ -665,6 +665,13 @@
 .gestion-operacion-actions .gestion-pendiente-primary { padding-inline: 1rem; }
 .gestion-operacion-actions .gestion-pendiente-secondary { padding-inline: .9rem; }
 
+.gestion-pendiente-export-menu { position: relative; }
+.gestion-pendiente-export-menu summary { cursor: pointer; list-style: none; }
+.gestion-pendiente-export-menu summary::-webkit-details-marker { display: none; }
+.gestion-pendiente-export-options { position: absolute; z-index: 30; top: calc(100% + 6px); right: 0; display: grid; min-width: 168px; gap: 3px; padding: 6px; border: 1px solid var(--gestion-operacion-border); border-radius: 9px; background: #fff; box-shadow: 0 12px 26px rgba(25, 78, 139, .16); }
+.gestion-pendiente-export-options a { display: flex; align-items: center; gap: 7px; padding: 8px 10px; border-radius: 6px; color: #174b91; font-size: .67rem; font-weight: 750; text-decoration: none; }
+.gestion-pendiente-export-options a:hover, .gestion-pendiente-export-options a:focus-visible { background: #edf6ff; }
+
 .gestion-operacion-kpis {
     display: grid;
     gap: .75rem;

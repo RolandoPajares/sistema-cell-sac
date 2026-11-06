@@ -34,8 +34,15 @@
 }
 
 .modulo-campanias .campanias-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
   margin-bottom: 12px;
 }
+
+.modulo-campanias .campanias-hero-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.modulo-campanias .campanias-hero-actions > * { flex: 0 0 auto; }
 
 .modulo-campanias .campanias-eyebrow {
   display: inline-flex;
@@ -98,7 +105,7 @@
 
 .modulo-campanias .campanias-toolbar {
   display: grid;
-  grid-template-columns: minmax(170px, 1.7fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(72px, 0.6fr) minmax(132px, 1.1fr) minmax(78px, 0.6fr) minmax(82px, 0.6fr);
+  grid-template-columns: minmax(170px, 1.7fr) minmax(120px, 1fr) minmax(120px, 1fr) auto auto;
   gap: 8px;
   align-items: center;
   margin-bottom: 13px;
@@ -198,6 +205,85 @@
   color: #8ca2bd;
   background: #f8fbff;
   cursor: not-allowed;
+}
+
+.modulo-campanias .campanias-export-menu {
+  position: relative;
+}
+
+.modulo-campanias .campanias-export-menu > summary {
+  list-style: none;
+}
+
+.modulo-campanias .campanias-export-menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+.modulo-campanias .campanias-export-options {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 224px;
+  display: grid;
+  gap: 4px;
+  padding: 7px;
+  border: 1px solid #d6e6f3;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 15px 35px rgba(12, 57, 120, .18);
+}
+
+.modulo-campanias .campanias-export-options a {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px;
+  border-radius: 8px;
+  color: #254574;
+  text-decoration: none;
+}
+
+.modulo-campanias .campanias-export-options a:hover {
+  color: #0874ed;
+  background: #edf6ff;
+}
+
+.modulo-campanias .campanias-export-options a > i {
+  display: grid;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 8px;
+  color: #0873ed;
+  background: #e5f2ff;
+  font-size: 1rem;
+}
+
+.modulo-campanias .campanias-export-options a:nth-child(1) > i {
+  color: #e33449;
+  background: #ffe8e9;
+}
+
+.modulo-campanias .campanias-export-options a:nth-child(2) > i {
+  color: #0b9b65;
+  background: #dff8ec;
+}
+
+.modulo-campanias .campanias-export-options a span {
+  display: grid;
+  gap: 2px;
+}
+
+.modulo-campanias .campanias-export-options strong {
+  font-size: .74rem;
+}
+
+.modulo-campanias .campanias-export-options small {
+  color: #7588aa;
+  font-size: .61rem;
+  font-weight: 500;
 }
 
 .modulo-campanias .campanias-clear-button {
@@ -1275,7 +1361,7 @@
 
 @media (max-width: 1250px) {
   .modulo-campanias .campanias-toolbar {
-    grid-template-columns: minmax(170px, 1.5fr) repeat(2, minmax(112px, 1fr)) repeat(4, minmax(72px, 0.75fr));
+    grid-template-columns: minmax(170px, 1.5fr) repeat(2, minmax(112px, 1fr)) auto;
   }
 
   .modulo-campanias .campanias-kpi-grid {
@@ -1294,6 +1380,9 @@
 }
 
 @media (max-width: 820px) {
+  .modulo-campanias .campanias-hero { align-items: flex-start; flex-direction: column; }
+  .modulo-campanias .campanias-hero-actions { justify-content: flex-start; }
+
   .modulo-campanias .admin-main {
     padding: 18px 16px 32px;
   }
@@ -1302,8 +1391,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .modulo-campanias .campanias-search,
-  .modulo-campanias .campanias-primary-button {
+  .modulo-campanias .campanias-search {
     grid-column: 1 / -1;
   }
 

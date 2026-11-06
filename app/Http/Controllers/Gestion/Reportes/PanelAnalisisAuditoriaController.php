@@ -4,18 +4,20 @@ namespace App\Http\Controllers\Gestion\Reportes;
 
 use App\Http\Controllers\Controller;
 use App\Models\Auditoria\RegistroAuditoria;
-use App\Models\Catalogo\Categoria;
 use App\Models\Catalogo\Producto;
 use App\Models\Clientes\Cliente;
 use App\Models\Comercio\Pedido;
 use App\Models\Comercio\Venta;
+use App\Models\Compras\Compra;
+use App\Models\Inventario\MovimientoInventario;
+use App\Models\Marketing\Campania;
 use App\Models\User;
 use App\Servicios\ExportadorTabular;
 use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ServicioAutorizacion;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Response;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -23,37 +25,21 @@ final class PanelAnalisisAuditoriaController extends Controller
 {
     public function globales(Request $request, ServicioAutorizacion $autorizacion): View
     {
-        return $this->mostrar($request, 'globales', $autorizacion);
-    }
+        $autorizacion->assertAllowed($request->user(), 'gestion.reportes.consultar');
 
-    public function sedes(Request $request, ServicioAutorizacion $autorizacion): View
-    {
-        return $this->mostrar($request, 'sedes', $autorizacion);
+        return $this->mostrar($request, 'globales', $autorizacion);
     }
 
     public function operaciones(Request $request, ServicioAutorizacion $autorizacion): View
     {
+        $autorizacion->assertAllowed($request->user(), 'gestion.auditoria.consultar');
+
         return $this->mostrar($request, 'operaciones', $autorizacion);
-    }
-
-    public function roles(Request $request, ServicioAutorizacion $autorizacion): View
-    {
-        return $this->mostrar($request, 'roles', $autorizacion);
-    }
-
-    public function seguridad(Request $request, ServicioAutorizacion $autorizacion): View
-    {
-        return $this->mostrar($request, 'seguridad', $autorizacion);
-    }
-
-    public function exportaciones(Request $request, ServicioAutorizacion $autorizacion): View
-    {
-        return $this->mostrar($request, 'exportaciones', $autorizacion);
     }
 
     public function mostrar(Request $request, string $tipo, ServicioAutorizacion $autorizacion): View
     {
-        abort_unless(in_array($tipo, ['globales', 'sedes', 'operaciones', 'roles', 'seguridad', 'exportaciones'], true), 404);
+        abort_unless(in_array($tipo, ['globales', 'operaciones'], true), 404);
 
         $usuario = $request->user();
         $filtros = $request->validate([
@@ -67,10 +53,14 @@ final class PanelAnalisisAuditoriaController extends Controller
             'canal' => ['nullable', 'string', 'max:30'],
             'sede' => ['nullable', 'integer', 'min:1'],
             'usuario_id' => ['nullable', 'integer', 'min:1'],
+            'reporte' => ['nullable', 'in:ventas,pedidos,clientes,productos,inventario,compras,campanas'],
+            'buscar' => ['nullable', 'string', 'max:120'],
         ]);
 
+        $filtros['reporte'] = $filtros['reporte'] ?? 'ventas';
+
         $pagina = $this->estructura($tipo);
-        if (in_array($tipo, ['globales', 'sedes'], true)) {
+        if ($tipo === 'globales') {
             $this->cargarReporte($pagina, $tipo, $usuario, $autorizacion, $filtros);
         } else {
             $this->cargarAuditoria($pagina, $tipo, $usuario, $autorizacion, $filtros);
@@ -80,15 +70,16 @@ final class PanelAnalisisAuditoriaController extends Controller
             'pagina' => $pagina,
             'tipo' => $tipo,
             'filtros' => $filtros,
-            'puedeExportar' => $autorizacion->allows($usuario, 'gestion.reportes.exportar'),
+            'puedeExportar' => $tipo === 'globales' && $autorizacion->allows($usuario, 'gestion.reportes.exportar'),
+            'puedeExportarAuditoria' => $tipo === 'operaciones' && $autorizacion->allows($usuario, 'gestion.auditoria.exportar'),
         ]);
     }
 
     public function exportar(Request $request, string $tipo, ServicioAutorizacion $autorizacion, ExportadorTabular $exportador, RegistradorAuditoria $auditoria, string $format = 'csv'): Response|StreamedResponse
     {
-        abort_unless(in_array($tipo, ['globales', 'sedes', 'operaciones', 'roles', 'seguridad', 'exportaciones'], true), 404);
+        abort_unless(in_array($tipo, ['globales', 'operaciones'], true), 404);
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
-        $autorizacion->assertAllowed($request->user(), 'gestion.reportes.exportar');
+        $autorizacion->assertAllowed($request->user(), $tipo === 'globales' ? 'gestion.reportes.exportar' : 'gestion.auditoria.exportar');
         $filtros = $request->validate([
             'desde' => ['nullable', 'date'],
             'hasta' => ['nullable', 'date', 'after_or_equal:desde'],
@@ -100,10 +91,17 @@ final class PanelAnalisisAuditoriaController extends Controller
             'resultado' => ['nullable', 'string', 'max:20'],
             'rol_codigo' => ['nullable', 'string', 'max:40'],
             'estado' => ['nullable', 'string', 'max:30'],
+            'reporte' => ['nullable', 'in:ventas,pedidos,clientes,productos,inventario,compras,campanas'],
+            'buscar' => ['nullable', 'string', 'max:120'],
         ]);
 
-        if (in_array($tipo, ['globales', 'sedes'], true)) {
-            $consulta = $autorizacion->scopeRecordsFor(Venta::query(), $request->user(), 'gestion.ventas.consultar')
+        if ($tipo === 'globales' && ($filtros['reporte'] ?? 'ventas') !== 'ventas') {
+            $pagina = $this->estructura('globales');
+            $this->cargarReportePorTipo($pagina, (string) $filtros['reporte'], $request->user(), $autorizacion, $filtros);
+            $columnas = $pagina['columnas'];
+            $filas = $pagina['filas'];
+        } elseif ($tipo === 'globales') {
+            $consulta = $autorizacion->scopeRecordsFor(Venta::query()->where('estado', 'confirmada'), $request->user(), 'gestion.ventas.consultar')
                 ->when(isset($filtros['desde']), fn (Builder $q) => $q->whereDate('fecha_venta', '>=', $filtros['desde']))
                 ->when(isset($filtros['hasta']), fn (Builder $q) => $q->whereDate('fecha_venta', '<=', $filtros['hasta']))
                 ->when(isset($filtros['sede']), fn (Builder $q) => $q->where('sede_id', $filtros['sede']))
@@ -125,9 +123,6 @@ final class PanelAnalisisAuditoriaController extends Controller
                 ->when(isset($filtros['accion']), fn (Builder $q) => $q->where('accion', $filtros['accion']))
                 ->when(isset($filtros['resultado']), fn (Builder $q) => $q->where('resultado', $filtros['resultado']))
                 ->when(isset($filtros['rol_codigo']), fn (Builder $q) => $q->where('rol_codigo', $filtros['rol_codigo']))
-                ->when($tipo === 'roles', fn (Builder $q) => $q->where(fn (Builder $filtro) => $filtro->where('entidad', 'like', '%rol%')->orWhere('entidad', 'like', '%permiso%')))
-                ->when($tipo === 'seguridad', fn (Builder $q) => $q->where(fn (Builder $filtro) => $filtro->where('modulo', 'like', '%seguridad%')->orWhere('accion', 'like', '%login%')->orWhere('accion', 'like', '%acceso%')))
-                ->when($tipo === 'exportaciones', fn (Builder $q) => $q->where('accion', 'like', '%export%'))
                 ->select(['id', 'usuario_id', 'modulo', 'accion', 'entidad', 'entidad_id', 'resultado', 'direccion_ip', 'creado_en']);
             $registros = $consulta->get();
             $columnas = ['Id', 'Usuario ID', 'Módulo', 'Acción', 'Entidad', 'Entidad ID', 'Resultado', 'Dirección IP', 'Fecha'];
@@ -165,55 +160,59 @@ final class PanelAnalisisAuditoriaController extends Controller
     /** @param array<string, mixed> $pagina @param array<string, mixed> $filtros */
     private function cargarReporte(array &$pagina, string $tipo, User $usuario, ServicioAutorizacion $autorizacion, array $filtros): void
     {
-        $consultaVentas = $autorizacion->scopeRecordsFor(Venta::query(), $usuario, 'gestion.ventas.consultar')
-            ->when(isset($filtros['desde']), fn (Builder $consulta) => $consulta->whereDate('fecha_venta', '>=', $filtros['desde']))
-            ->when(isset($filtros['hasta']), fn (Builder $consulta) => $consulta->whereDate('fecha_venta', '<=', $filtros['hasta']))
-            ->when(isset($filtros['sede']), fn (Builder $consulta) => $consulta->where('sede_id', $filtros['sede']))
-            ->when(isset($filtros['estado']), fn (Builder $consulta) => $consulta->where('estado', $filtros['estado']))
-            ->when(isset($filtros['canal']), fn (Builder $consulta) => $consulta->whereHas('pedido', fn (Builder $pedido) => $pedido->where('canal', $filtros['canal'])));
+        $this->cargarReportePorTipo($pagina, (string) ($filtros['reporte'] ?? 'ventas'), $usuario, $autorizacion, $filtros);
 
-        if ($tipo === 'sedes') {
-            $consultaBase = $autorizacion->scopeRecordsFor(Venta::query(), $usuario, 'gestion.ventas.consultar');
-            $pagina['opcionesFiltros'] = [
-                'sede' => (clone $consultaBase)->join('sedes', 'sedes.id', '=', 'ventas.sede_id')->select('sedes.id', 'sedes.nombre')->distinct()->orderBy('sedes.nombre')->pluck('sedes.nombre', 'sedes.id'),
-                'canal' => Pedido::query()->whereIn('id', (clone $consultaBase)->whereNotNull('pedido_id')->distinct()->pluck('pedido_id'))->whereNotNull('canal')->distinct()->orderBy('canal')->pluck('canal', 'canal'),
-            ];
-            $resultados = (clone $consultaVentas)->join('sedes', 'sedes.id', '=', 'ventas.sede_id')
-                ->select('sedes.id', 'sedes.nombre')->selectRaw('COUNT(ventas.id) AS cantidad')
-                ->selectRaw('COALESCE(SUM(ventas.total), 0) AS total')
-                ->groupBy('sedes.id', 'sedes.nombre')->orderBy('sedes.nombre')->paginate(15)->withQueryString();
-            $pagina['filas'] = $resultados->map(fn (object $fila): array => [$fila->nombre, number_format((float) $fila->total, 2), (string) $fila->cantidad])->all();
-            $pagina['metricas'][0][1] = (string) $resultados->total();
-            $pagina['metricas'][1][1] = number_format((float) (clone $consultaVentas)->sum('total'), 2);
-            $pagina['metricas'][2][1] = (string) (clone $consultaVentas)->count();
-            $pagina['metricas'][3][1] = (string) (clone $consultaVentas)->whereNotNull('cliente_id')->distinct('cliente_id')->count('cliente_id');
-            $maximo = max(1, (float) $resultados->getCollection()->max('total'));
-            $pagina['barras'] = $resultados->getCollection()->map(fn (object $fila): array => [$fila->nombre, (int) round(((float) $fila->total / $maximo) * 100), number_format((float) $fila->total, 2)])->all();
-            $pagina['resumen_filas'] = $resultados->getCollection()->map(fn (object $fila): array => [$fila->nombre, number_format((float) $fila->total, 2)])->all();
-            $pagina['paginacion'] = $resultados;
+    }
 
-            return;
-        }
-
-        $pagina['opcionesFiltros'] = [
-            'estado' => (clone $autorizacion->scopeRecordsFor(Venta::query(), $usuario, 'gestion.ventas.consultar'))->distinct()->orderBy('estado')->pluck('estado', 'estado'),
-            'canal' => Pedido::query()->whereIn('id', (clone $autorizacion->scopeRecordsFor(Venta::query(), $usuario, 'gestion.ventas.consultar'))->whereNotNull('pedido_id')->distinct()->pluck('pedido_id'))->whereNotNull('canal')->distinct()->orderBy('canal')->pluck('canal', 'canal'),
-        ];
-        $pagina['metricas'][0][1] = number_format((float) (clone $consultaVentas)->sum('total'), 2);
-        $pagina['metricas'][1][1] = (string) (clone $consultaVentas)->count();
-        $pagina['metricas'][2][1] = (string) $autorizacion->scopeRecordsFor(Cliente::query(), $usuario, 'gestion.clientes.consultar')->count();
-        $pagina['metricas'][3][1] = (string) $autorizacion->scopeRecordsFor(Producto::query(), $usuario, 'gestion.productos.consultar')->where('activo', true)->count();
-        $pagina['filas'] = [
-            ['Ventas registradas', 'Ventas', (string) $pagina['metricas'][0][1]],
-            ['Ventas físicas', 'Ventas', (string) (clone $consultaVentas)->whereNull('pedido_id')->count()],
-            ['Clientes registrados', 'Clientes', (string) $pagina['metricas'][2][1]],
-            ['Productos activos', 'Catálogo', (string) $pagina['metricas'][3][1]],
-            ['Categorías registradas', 'Catálogo', (string) $autorizacion->scopeRecordsFor(Categoria::query(), $usuario, 'gestion.categorias.consultar')->count()],
-        ];
-        $valoresGrafica = array_map(static fn (array $fila): float => (float) str_replace(',', '', (string) $fila[2]), $pagina['filas']);
-        $maximo = max(1, ...$valoresGrafica);
-        $pagina['barras'] = array_map(static fn (array $fila): array => [$fila[0], (int) round(((float) str_replace(',', '', (string) $fila[2]) / $maximo) * 100), $fila[2]], $pagina['filas']);
-        $pagina['resumen_filas'] = array_map(static fn (array $fila): array => [$fila[0], $fila[2]], $pagina['filas']);
+    /** @param array<string, mixed> $pagina @param array<string, mixed> $filtros */
+    private function cargarReportePorTipo(array &$pagina, string $reporte, User $usuario, ServicioAutorizacion $autorizacion, array $filtros): void
+    {
+        $reporte = array_key_exists($reporte, ['ventas' => true, 'pedidos' => true, 'clientes' => true, 'productos' => true, 'inventario' => true, 'compras' => true, 'campanas' => true]) ? $reporte : 'ventas';
+        $consulta = match ($reporte) {
+            'ventas' => $autorizacion->scopeRecordsFor(Venta::query()->where('estado', 'confirmada'), $usuario, 'gestion.ventas.consultar'),
+            'pedidos' => $autorizacion->scopeRecordsFor(Pedido::query()->whereNotIn('estado', ['Cancelado', 'Cancelada']), $usuario, 'gestion.pedidos.consultar'),
+            'clientes' => $autorizacion->scopeRecordsFor(Cliente::query(), $usuario, 'gestion.clientes.consultar'),
+            'productos' => $autorizacion->scopeRecordsFor(Producto::query(), $usuario, 'gestion.productos.consultar'),
+            'inventario' => $autorizacion->scopeRecordsFor(MovimientoInventario::query()->with('product'), $usuario, 'gestion.inventario.consultar'),
+            'compras' => $autorizacion->scopeRecordsFor(Compra::query()->where('activo', true)->whereNotIn('estado', ['Cancelada', 'Cancelado']), $usuario, 'gestion.compras.consultar'),
+            'campanas' => $autorizacion->scopeRecordsFor(Campania::query(), $usuario, 'gestion.campanias.consultar'),
+        };
+        $campoFecha = in_array($reporte, ['ventas'], true) ? 'fecha_venta' : ($reporte === 'compras' ? 'fecha_compra' : 'creado_en');
+        $consulta->when(isset($filtros['desde']), fn (Builder $query) => $query->whereDate($campoFecha, '>=', $filtros['desde']))
+            ->when(isset($filtros['hasta']), fn (Builder $query) => $query->whereDate($campoFecha, '<=', $filtros['hasta']))
+            ->when(isset($filtros['estado']) && in_array($reporte, ['ventas', 'pedidos', 'clientes', 'compras'], true), fn (Builder $query) => $query->where('estado', $filtros['estado']));
+        $pagina['opcionesFiltros'] = ['estado' => (clone $consulta)->whereNotNull('estado')->distinct()->orderBy('estado')->pluck('estado', 'estado')];
+        $registros = $consulta->latest($campoFecha)->latest('id')->paginate(15)->withQueryString();
+        $pagina['paginacion'] = $registros;
+        $pagina['tabla'] = match ($reporte) {
+            'ventas' => 'Ventas confirmadas', 'pedidos' => 'Pedidos válidos', 'clientes' => 'Clientes',
+            'productos' => 'Productos', 'inventario' => 'Movimientos de inventario', 'compras' => 'Compras', 'campanas' => 'Campañas',
+        };
+        $pagina['columnas'] = match ($reporte) {
+            'ventas' => ['ID', 'Código', 'Total', 'Estado', 'Fecha'], 'pedidos' => ['ID', 'Usuario ID', 'Total', 'Estado', 'Fecha'],
+            'clientes' => ['ID', 'Cliente', 'Correo', 'Tipo', 'Activo', 'Fecha'], 'productos' => ['ID', 'Producto', 'Categoría', 'Precio', 'Stock', 'Activo'],
+            'inventario' => ['ID', 'Producto', 'Movimiento', 'Cantidad', 'Notas', 'Fecha'], 'compras' => ['ID', 'Proveedor ID', 'Total', 'Estado', 'Fecha'],
+            'campanas' => ['ID', 'Campaña', 'Ubicación', 'Vistas', 'Clics', 'Activo', 'Fecha'],
+        };
+        $pagina['filas'] = $registros->getCollection()->map(static function (object $registro) use ($reporte): array {
+            return match ($reporte) {
+                'ventas' => [(string) $registro->id, (string) $registro->codigo, (string) $registro->total, (string) $registro->estado, (string) $registro->fecha_venta],
+                'pedidos' => [(string) $registro->id, (string) $registro->usuario_id, (string) $registro->total, (string) $registro->estado, (string) $registro->creado_en],
+                'clientes' => [(string) $registro->id, (string) $registro->nombre_contacto, (string) $registro->correo, (string) $registro->tipo, $registro->activo ? 'Sí' : 'No', (string) $registro->creado_en],
+                'productos' => [(string) $registro->id, (string) $registro->nombre, (string) $registro->categoria, (string) $registro->precio, (string) $registro->existencias, $registro->activo ? 'Sí' : 'No'],
+                'inventario' => [(string) $registro->id, (string) ($registro->product?->nombre ?? $registro->producto_id), (string) $registro->tipo_movimiento, (string) $registro->cantidad, (string) $registro->notas, (string) $registro->creado_en],
+                'compras' => [(string) $registro->id, (string) $registro->proveedor_id, (string) $registro->total, (string) $registro->estado, (string) $registro->fecha_compra],
+                'campanas' => [(string) $registro->id, (string) $registro->nombre, (string) $registro->ubicacion, (string) $registro->vistas, (string) $registro->clics, $registro->activo ? 'Sí' : 'No', (string) $registro->creado_en],
+            };
+        })->all();
+        $pagina['metricas'][0][0] = 'Registros';
+        $pagina['metricas'][0][1] = (string) $registros->total();
+        $pagina['metricas'][1][0] = in_array($reporte, ['ventas', 'pedidos', 'compras'], true) ? 'Importe total' : 'Registros en página';
+        $pagina['metricas'][1][1] = in_array($reporte, ['ventas', 'pedidos', 'compras'], true) ? number_format((float) (clone $consulta)->sum('total'), 2) : (string) $registros->count();
+        $pagina['metricas'][2][1] = $reporte === 'ventas' ? (string) (clone $consulta)->whereNotNull('cliente_id')->distinct()->count('cliente_id') : '—';
+        $pagina['metricas'][3][1] = $reporte === 'productos' ? (string) (clone $consulta)->where('activo', true)->count() : '—';
+        $pagina['barras'] = [];
+        $pagina['resumen_filas'] = [['Registros visibles', (string) $registros->count()]];
     }
 
     /** @param array<string, mixed> $pagina @param array<string, mixed> $filtros */
@@ -222,8 +221,8 @@ final class PanelAnalisisAuditoriaController extends Controller
         $consultaBase = $autorizacion->scopeRecordsFor(RegistroAuditoria::query(), $usuario, 'gestion.auditoria.consultar');
         $pagina['opcionesFiltros'] = [
             'usuario_id' => User::query()->whereIn('id', (clone $consultaBase)->whereNotNull('usuario_id')->distinct()->pluck('usuario_id'))->orderBy('nombre')->pluck('nombre', 'id'),
-            'modulo' => (clone $consultaBase)->whereNotNull('modulo')->distinct()->orderBy('modulo')->pluck('modulo', 'modulo'),
-            'accion' => (clone $consultaBase)->distinct()->orderBy('accion')->pluck('accion', 'accion'),
+            'modulo' => (clone $consultaBase)->whereNotNull('modulo')->distinct()->orderBy('modulo')->pluck('modulo', 'modulo')->mapWithKeys(fn (string $modulo): array => [$modulo => $this->etiquetaAuditoria($modulo)]),
+            'accion' => (clone $consultaBase)->distinct()->orderBy('accion')->pluck('accion', 'accion')->mapWithKeys(fn (string $accion): array => [$accion => $this->etiquetaAuditoria($accion)]),
             'rol_codigo' => (clone $consultaBase)->whereNotNull('rol_codigo')->distinct()->orderBy('rol_codigo')->pluck('rol_codigo', 'rol_codigo'),
             'resultado' => (clone $consultaBase)->whereNotNull('resultado')->distinct()->orderBy('resultado')->pluck('resultado', 'resultado'),
         ];
@@ -234,31 +233,45 @@ final class PanelAnalisisAuditoriaController extends Controller
             ->when(isset($filtros['modulo']), fn (Builder $q) => $q->where('modulo', $filtros['modulo']))
             ->when(isset($filtros['accion']), fn (Builder $q) => $q->where('accion', $filtros['accion']))
             ->when(isset($filtros['resultado']), fn (Builder $q) => $q->where('resultado', $filtros['resultado']))
-            ->when(isset($filtros['rol_codigo']), fn (Builder $q) => $q->where('rol_codigo', $filtros['rol_codigo']));
+            ->when(isset($filtros['buscar']), fn (Builder $q) => $q->where(function (Builder $buscar) use ($filtros): void {
+                $buscar->where('accion', 'like', '%'.$filtros['buscar'].'%')
+                    ->orWhere('entidad', 'like', '%'.$filtros['buscar'].'%')
+                    ->orWhere('observaciones', 'like', '%'.$filtros['buscar'].'%');
+            }));
 
-        if ($tipo === 'roles') {
-            $consulta->where(function (Builder $q): void {
-                $q->where('entidad', 'like', '%rol%')->orWhere('entidad', 'like', '%permiso%')->orWhere('modulo', 'like', '%seguridad%');
-            });
-        } elseif ($tipo === 'seguridad') {
-            $consulta->where(function (Builder $q): void {
-                $q->where('modulo', 'like', '%seguridad%')->orWhere('accion', 'like', '%login%')->orWhere('accion', 'like', '%acceso%');
-            });
-        } elseif ($tipo === 'exportaciones') {
-            $consulta->where('accion', 'like', '%export%');
-        }
-
-        $registros = $consulta->latest('creado_en')->latest('id')->paginate(15)->withQueryString();
+        $registros = $consulta->latest('creado_en')->latest('id')->paginate(10)->withQueryString();
         $pagina['filas'] = $registros->map(fn (RegistroAuditoria $registro): array => [
             $registro->creado_en?->format('Y-m-d H:i:s') ?? '—',
             $registro->user?->nombre ?? '—',
-            (string) ($registro->modulo ?? $registro->entidad),
-            $registro->accion,
+            $this->etiquetaAuditoria($registro->accion),
+            $this->etiquetaAuditoria($registro->modulo ?? $registro->entidad),
             $registro->observaciones ?? $registro->entidad,
             $registro->direccion_ip ?? '—',
             $registro->resultado ?? 'registrado',
         ])->all();
-        $pagina['metricas'][0][1] = (string) $registros->total();
+        $pagina['detalles'] = $registros->getCollection()->map(fn (RegistroAuditoria $registro): array => [
+            'id' => (string) $registro->id,
+            'fecha' => $registro->ocurrido_en?->format('Y-m-d H:i:s') ?? $registro->creado_en?->format('Y-m-d H:i:s') ?? '—',
+            'usuario' => $registro->user?->nombre ?? 'Sistema',
+            'modulo' => $this->etiquetaAuditoria($registro->modulo ?? $registro->modulo_codigo ?? $registro->entidad),
+            'accion' => $this->etiquetaAuditoria($registro->accion),
+            'entidad' => $registro->entidad,
+            'entidad_id' => $registro->entidad_id ?? $registro->identificador_entidad,
+            'resultado' => $registro->resultado ?? 'registrado',
+            'direccion_ip' => $registro->direccion_ip ?? '—',
+            'sede_id' => $registro->sede_id ?? '—',
+            'tabla' => $registro->tabla_afectada ?? $registro->entidad,
+            'observaciones' => $registro->observaciones ?? $registro->observacion ?? 'Sin observaciones registradas.',
+            'origen' => $registro->origen ?? 'laravel',
+        ])->values()->all();
+        $pagina['metricas'][0][0] = 'Eventos hoy';
+        $pagina['metricas'][0][1] = (string) (clone $consultaBase)->whereDate('creado_en', now()->toDateString())->count();
+        $pagina['metricas'][1][0] = 'Operaciones exitosas';
+        $pagina['metricas'][1][1] = (string) (clone $consulta)->whereIn('resultado', ['exito', 'exitoso'])->count();
+        $pagina['metricas'][2][0] = 'Accesos denegados';
+        $pagina['metricas'][2][1] = (string) (clone $consulta)->whereIn('resultado', ['denegado', 'fallo', 'fallido'])->count();
+        $pagina['metricas'][3][0] = 'Usuarios activos';
+        $pagina['metricas'][3][1] = (string) User::query()->where('activo', true)->count();
         $conteosResultado = (clone $consulta)->reorder()->selectRaw("COALESCE(resultado, 'registrado') AS resultado, COUNT(*) AS cantidad")
             ->groupBy('resultado')->pluck('cantidad', 'resultado');
         $pagina['metricas'][1][1] = (string) $conteosResultado->filter(fn ($cantidad, $resultado): bool => in_array(mb_strtolower((string) $resultado), ['exito', 'exitoso'], true))->sum();
@@ -276,39 +289,26 @@ final class PanelAnalisisAuditoriaController extends Controller
     private function estructura(string $tipo): array
     {
         $titulos = [
-            'globales' => ['Reportes globales', 'bi-bar-chart-line', 'Indicadores calculados desde ventas, clientes, productos y categorías de MariaDB.'],
-            'sedes' => ['Reportes por sede', 'bi-geo-alt', 'Ventas agregadas por sedes autorizadas.'],
-            'operaciones' => ['Auditoría de operaciones', 'bi-shield-check', 'Registros de auditoría persistidos en MariaDB.'],
-            'roles' => ['Historial de roles y permisos', 'bi-clock-history', 'Eventos de roles y permisos registrados en auditoría.'],
-            'seguridad' => ['Eventos de seguridad', 'bi-shield-exclamation', 'Eventos de seguridad disponibles en el registro de auditoría.'],
-            'exportaciones' => ['Exportaciones autorizadas', 'bi-download', 'Eventos de exportación que cuentan con registro de auditoría.'],
+            'globales' => ['Reportes globales', 'bi-bar-chart-line', 'Indicadores y resultados calculados desde registros reales de MariaDB.'],
+            'operaciones' => ['Auditoría de operaciones', 'bi-shield-check', 'Eventos de operaciones persistidos en el registro append-only de MariaDB.'],
         ];
         [$titulo, $icono, $descripcion] = $titulos[$tipo];
-        $reporte = in_array($tipo, ['globales', 'sedes'], true);
+        $reporte = $tipo === 'globales';
         $columnas = $reporte
-            ? ($tipo === 'sedes' ? ['Sede', 'Ventas registradas', 'Cantidad'] : ['Indicador', 'Origen', 'Valor real'])
+            ? ['Indicador', 'Origen', 'Valor real']
             : ['Fecha y hora', 'Usuario', 'Módulo', 'Acción', 'Detalle', 'Dirección IP', 'Resultado'];
         $metricas = match ($tipo) {
             'globales' => [['Ventas registradas', '0', 'bi-cart3', 'azul'], ['Transacciones', '0', 'bi-receipt', 'verde'], ['Clientes', '0', 'bi-people', 'violeta'], ['Productos activos', '0', 'bi-box-seam', 'ambar']],
-            'sedes' => [['Sedes con ventas', '0', 'bi-building', 'azul'], ['Importe de ventas', '0', 'bi-currency-exchange', 'verde'], ['Ventas', '0', 'bi-receipt', 'violeta'], ['Clientes atendidos', '0', 'bi-people', 'ambar']],
             default => [['Registros encontrados', '0', 'bi-list-check', 'azul'], ['Exitosos', '0', 'bi-check-lg', 'verde'], ['Advertencias', '0', 'bi-exclamation-triangle', 'ambar'], ['Fallidos', '0', 'bi-shield-exclamation', 'rojo']],
         };
 
         $acciones = match ($tipo) {
-            'globales' => [['Exportar', 'bi-download', 'exportar'], ['Generar reporte', 'bi-bar-chart', 'generar']],
-            'sedes' => [['Actualizar', 'bi-arrow-clockwise', 'actualizar'], ['Exportar', 'bi-download', 'exportar'], ['Generar reporte', 'bi-bar-chart', 'generar']],
-            'operaciones' => [['Exportar registros', 'bi-download', 'exportar'], ['Consultar historial', 'bi-clock-history', 'historial']],
-            'roles' => [['Comparar cambios', 'bi-clock-history', 'comparar'], ['Exportar historial', 'bi-download', 'exportar']],
-            'seguridad' => [['Configurar alertas', 'bi-bell', 'alertas'], ['Exportar eventos', 'bi-download', 'exportar']],
-            default => [['Exportar historial', 'bi-file-earmark-arrow-down', 'exportar'], ['Solicitar exportación', 'bi-plus-lg', 'solicitar']],
+            'globales' => [['Exportar reporte', 'bi-download', 'exportar']],
+            default => [],
         };
         $filtros = match ($tipo) {
-            'globales' => [['Canal', 'canal', 'Todos los canales'], ['Estado', 'estado', 'Todos los estados'], ['Desde', 'desde', 'fecha'], ['Hasta', 'hasta', 'fecha']],
-            'sedes' => [['Sede', 'sede', 'Todas las sedes autorizadas'], ['Canal', 'canal', 'Todos los canales'], ['Desde', 'desde', 'fecha'], ['Hasta', 'hasta', 'fecha']],
-            'operaciones' => [['Usuario', 'usuario_id', 'Todos los usuarios'], ['Módulo', 'modulo', 'Todos los módulos'], ['Acción', 'accion', 'Todas las acciones'], ['Resultado', 'resultado', 'Todos los resultados']],
-            'roles' => [['Usuario responsable', 'usuario_id', 'Todos los usuarios'], ['Rol afectado', 'rol_codigo', 'Todos los roles'], ['Tipo de cambio', 'accion', 'Todos los cambios'], ['Desde', 'desde', 'fecha']],
-            'seguridad' => [['Tipo de evento', 'accion', 'Todos los eventos'], ['Resultado', 'resultado', 'Todos los resultados'], ['Usuario', 'usuario_id', 'Todos los usuarios'], ['Desde', 'desde', 'fecha']],
-            default => [['Módulo', 'modulo', 'Todos los módulos'], ['Solicitante', 'usuario_id', 'Todos los usuarios'], ['Acción', 'accion', 'Todas las acciones'], ['Resultado', 'resultado', 'Todos los resultados']],
+            'globales' => [['Tipo de reporte', 'reporte', 'Seleccionar reporte'], ['Estado', 'estado', 'Todos los estados'], ['Desde', 'desde', 'fecha'], ['Hasta', 'hasta', 'fecha']],
+            default => [['Desde', 'desde', 'fecha'], ['Hasta', 'hasta', 'fecha'], ['Usuario', 'usuario_id', 'Todos los usuarios'], ['Módulo', 'modulo', 'Todos los módulos'], ['Tipo de operación', 'accion', 'Todas las acciones'], ['Resultado', 'resultado', 'Todos los resultados']],
         };
 
         return [
@@ -317,8 +317,29 @@ final class PanelAnalisisAuditoriaController extends Controller
             'filtrosBloqueados' => [],
             'tabla' => $titulo, 'columnas' => $columnas, 'filas' => [], 'grafico' => 'Registros por grupo',
             'barras' => [], 'resumen' => 'Resumen de registros', 'resumen_filas' => [], 'paginacion' => null,
-            'opcionesFiltros' => [],
+            'opcionesFiltros' => [], 'opcionesReportes' => ['ventas' => 'Ventas confirmadas', 'pedidos' => 'Pedidos válidos', 'clientes' => 'Clientes', 'productos' => 'Productos', 'inventario' => 'Movimientos de inventario', 'compras' => 'Compras', 'campanas' => 'Campañas'],
         ];
+    }
+
+    private function etiquetaAuditoria(?string $valor): string
+    {
+        $valor = trim((string) $valor);
+        $etiquetas = [
+            'inicio_sesion' => 'Inicio de sesión',
+            'inicio_sesion_fallido' => 'Inicio de sesión fallido',
+            'cierre_sesion' => 'Cierre de sesión',
+            'catalogo_analisis_auditoria_reducido' => 'Catálogo de auditoría reducido',
+            'exito' => 'Exitoso',
+            'fallo' => 'Fallido',
+            'denegado' => 'Denegado',
+            'seguridad' => 'Seguridad',
+            'inventario' => 'Inventario',
+            'ventas' => 'Ventas',
+            'pedidos' => 'Pedidos',
+            'reportes' => 'Reportes',
+        ];
+
+        return $etiquetas[$valor] ?? mb_convert_case(str_replace(['_', '.'], ' ', $valor), MB_CASE_TITLE, 'UTF-8');
     }
 
     private function vista(string $tipo): string
@@ -328,6 +349,6 @@ final class PanelAnalisisAuditoriaController extends Controller
 
     private function directorio(string $tipo): string
     {
-        return ['globales' => 'reportes-globales', 'sedes' => 'reportes-sede', 'operaciones' => 'auditoria-operaciones', 'roles' => 'historial-roles', 'seguridad' => 'eventos-seguridad', 'exportaciones' => 'exportaciones'][$tipo];
+        return ['globales' => 'reportes-globales', 'operaciones' => 'auditoria-operaciones'][$tipo];
     }
 }

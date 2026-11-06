@@ -2,5 +2,5 @@
 @section('title', 'Auditoría de operaciones')
 @section('body_class', 'modulo-analisis-auditoria')
 @section('content')
-    @include('paneles.administrador.analisis-auditoria.componentes.pagina', ['tipo' => 'operaciones'])
+    @include('paneles.administrador.analisis-auditoria.auditoria-operaciones.contenido')
 @endsection

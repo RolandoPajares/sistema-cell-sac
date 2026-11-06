@@ -12,7 +12,14 @@
             <p>Solicita, aprueba, despacha y recibe existencias entre almacenes de la empresa.</p>
         </div>
         <div class="tc-il__header-actions">
-            <a class="tc-il__button" href="{{ route('management.inventory.transfers_export', request()->query()) }}"><i class="bi bi-download" aria-hidden="true"></i>Exportar CSV</a>
+            <details class="productos-export-menu tc-il__export-menu">
+                <summary><i class="bi bi-download" aria-hidden="true"></i><span>Exportar</span><i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
+                <div class="productos-export-options">
+                    <a href="{{ route('management.inventory.transfers_export', ['format' => 'pdf'] + request()->query()) }}"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i><span>Exportar PDF<small>Documento imprimible</small></span></a>
+                    <a href="{{ route('management.inventory.transfers_export', ['format' => 'excel'] + request()->query()) }}"><i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i><span>Exportar Excel<small>Archivo compatible .xlsx</small></span></a>
+                    <a href="{{ route('management.inventory.transfers_export', ['format' => 'csv'] + request()->query()) }}"><i class="bi bi-filetype-csv" aria-hidden="true"></i><span>Exportar CSV<small>Datos delimitados</small></span></a>
+                </div>
+            </details>
             <button type="button" class="tc-il__button tc-il__button--primary" data-transfer-open><i class="bi bi-plus-lg" aria-hidden="true"></i>Nueva solicitud</button>
         </div>
     </header>

@@ -89,7 +89,7 @@
             </header>
             <div class="inventario-table-wrap">
                 <table class="inventario-table">
-                    <thead><tr><th><span class="inventario-checkbox" aria-hidden="true"></span></th><th>Producto</th><th>SKU</th><th>Categoría</th><th>Existencias físicas</th><th>Reservado</th><th>Proveedor</th><th>Último movimiento</th><th>Estado</th><th>Acción</th></tr></thead>
+                    <thead><tr><th>Producto</th><th>SKU</th><th>Categoría</th><th>Existencias físicas</th><th>Reservado</th><th>Proveedor</th><th>Último movimiento</th><th>Estado</th><th>Acción</th></tr></thead>
                     <tbody>
                         @forelse ($products as $product)
                             @php
@@ -101,7 +101,6 @@
                                 $movementClass = match ($movement?->tipo_movimiento) { 'entrada' => 'entry', 'salida' => 'exit', 'ajuste' => 'adjustment', default => 'empty' };
                             @endphp
                             <tr>
-                                <td><span class="inventario-checkbox" aria-hidden="true"></span></td>
                                 <td class="inventario-product-cell">
                                     @if ($image)<img src="{{ $image }}" alt="{{ $product->nombre }}">@else<span class="inventario-product-image"><i class="bi bi-box-seam" aria-hidden="true"></i></span>@endif
                                     <span><strong>{{ $product->marca }} {{ $product->nombre }}</strong><small>{{ $product->nombre }}</small></span>
@@ -122,7 +121,7 @@
                                 <td class="inventario-actions-cell"><button class="inventario-view-button" type="button" data-open-inventory-movement data-movement-type="ajuste" data-inventory-product="{{ $product->id }}" title="Registrar conteo físico para {{ $product->nombre }}"><i class="bi bi-clipboard-check" aria-hidden="true"></i><span>Ajustar</span></button><button class="inventario-more-button" type="button" data-open-inventory-detail aria-label="Consultar información de inventario"><i class="bi bi-three-dots-vertical" aria-hidden="true"></i></button></td>
                             </tr>
                         @empty
-                            <tr><td colspan="10" class="inventario-empty"><i class="bi bi-inbox" aria-hidden="true"></i>@if ($products->total() === 0 && !($filters['buscar'] || $filters['categoria'] || $filters['estado'] || $filters['proveedor']))<strong>No hay productos registrados.</strong><span>Los productos aparecerán aquí cuando se registren en el catálogo.</span>@else<strong>No hay productos para los filtros aplicados.</strong><span>Prueba con otros filtros de inventario.</span>@endif</td></tr>
+                            <tr><td colspan="9" class="inventario-empty"><i class="bi bi-inbox" aria-hidden="true"></i>@if ($products->total() === 0 && !($filters['buscar'] || $filters['categoria'] || $filters['estado'] || $filters['proveedor']))<strong>No hay productos registrados.</strong><span>Los productos aparecerán aquí cuando se registren en el catálogo.</span>@else<strong>No hay productos para los filtros aplicados.</strong><span>Prueba con otros filtros de inventario.</span>@endif</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -309,11 +308,11 @@
                 const headings = [...row.closest('table').querySelectorAll('thead th')];
                 const cells = [...row.querySelectorAll('td')];
                 details.replaceChildren();
-                cells.slice(1, headings.length - 1).forEach((cell, index) => {
+                cells.slice(0, headings.length - 1).forEach((cell, index) => {
                     const wrapper = document.createElement('div');
                     const term = document.createElement('dt');
                     const description = document.createElement('dd');
-                    term.textContent = headings[index + 1]?.textContent.trim() ?? `Dato ${index + 1}`;
+                    term.textContent = headings[index]?.textContent.trim() ?? `Dato ${index + 1}`;
                     description.textContent = cell.textContent.trim();
                     wrapper.append(term, description);
                     details.append(wrapper);
