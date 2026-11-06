@@ -10,6 +10,17 @@
     const counter = root.querySelector('[data-gallery-counter]');
     let activeIndex = 0;
 
+/**
+ * Ejecuta la operación setImage utilizada por el módulo JavaScript.
+ *
+ * @param {*} source - Parámetro recibido por la función.
+ *
+ * @param {*} index - Parámetro recibido por la función.
+ *
+ * @param {*} activeIndex - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const setImage = (source, index = activeIndex) => {
         if (!source || !mainImage) return;
         mainImage.src = source;
@@ -24,6 +35,13 @@
         if (counter) counter.textContent = `${activeIndex + 1} de ${thumbs.length} imágenes`;
     };
 
+/**
+ * Ejecuta la operación moveImage utilizada por el módulo JavaScript.
+ *
+ * @param {*} step - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const moveImage = (step) => {
         if (thumbs.length < 2) return;
         const index = (activeIndex + step + thumbs.length) % thumbs.length;
@@ -49,6 +67,36 @@
     zoomDialog?.querySelector('[data-zoom-close]')?.addEventListener('click', () => zoomDialog.close());
     zoomDialog?.addEventListener('click', (event) => { if (event.target === zoomDialog) zoomDialog.close(); });
 
+    const favoriteButtons = [...root.querySelectorAll('[data-favorite-toggle]')];
+    const favoriteStorageKey = `producto-favorito-${root.dataset.productId}`;
+    let favoriteActive = false;
+    try { favoriteActive = window.sessionStorage.getItem(favoriteStorageKey) === '1'; } catch { favoriteActive = false; }
+/**
+ * Ejecuta la operación updateFavoriteButtons utilizada por el módulo JavaScript.
+ *
+ * @param {*} active - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
+    const updateFavoriteButtons = (active) => {
+        favoriteButtons.forEach((button) => {
+            button.setAttribute('aria-pressed', String(active));
+            button.classList.toggle('is-favorite', active);
+            button.title = active ? 'Quitar de favoritos' : 'Añadir a favoritos';
+            const icon = button.querySelector('i');
+            icon?.classList.toggle('bi-heart-fill', active);
+            icon?.classList.toggle('bi-heart', !active);
+            const label = button.querySelector('[data-favorite-label]');
+            if (label) label.textContent = active ? 'Quitar de favoritos' : 'Añadir a favoritos';
+        });
+    };
+    updateFavoriteButtons(favoriteActive);
+    favoriteButtons.forEach((button) => button.addEventListener('click', () => {
+        favoriteActive = !favoriteActive;
+        try { window.sessionStorage.setItem(favoriteStorageKey, favoriteActive ? '1' : '0'); } catch {}
+        updateFavoriteButtons(favoriteActive);
+    }));
+
     let variantes = [];
     try { variantes = JSON.parse(root.dataset.variantData || '[]'); } catch { variantes = []; }
     const selectedVariant = root.querySelector('[data-selected-variant]');
@@ -58,6 +106,13 @@
     const purchaseButtons = [...root.querySelectorAll('[data-add-to-cart], .product-detail-buy--success')];
     const formMessage = root.querySelector('[data-form-message]');
 
+/**
+ * Ejecuta la operación updateVariant utilizada por el módulo JavaScript.
+ *
+ * @param {*} variant - Parámetro recibido por la función.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const updateVariant = (variant) => {
         if (!variant) return;
         const stock = Number(variant.stock || 0);
@@ -83,6 +138,11 @@
     const initialVariant = variantes.find((variant) => String(variant.id) === selectedVariant?.value) || variantes[0];
     if (initialVariant) updateVariant(initialVariant);
 
+/**
+ * Ejecuta la operación clampQuantity utilizada por el módulo JavaScript.
+ *
+ * @returns {*} Resultado de la operación.
+ */
     const clampQuantity = () => {
         if (!quantityInput) return;
         const max = Number(quantityInput.max || 1);

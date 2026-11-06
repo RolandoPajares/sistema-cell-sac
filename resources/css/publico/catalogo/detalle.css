@@ -408,6 +408,7 @@ body > main .detail-gallery-actions { position: absolute; z-index: 3; top: 16px;
 body > main .detail-icon-button { display: grid; width: 42px; height: 42px; place-items: center; border: 1px solid #d7dee9; border-radius: 50%; background: #fff; color: #102044; box-shadow: 0 4px 16px #10204418; cursor: pointer; }
 body > main .detail-icon-button:hover:not(:disabled), body > main .detail-icon-button:focus-visible { border-color: #075ee8; color: #075ee8; }
 body > main .detail-icon-button:disabled { cursor: not-allowed; opacity: .55; }
+body > main .detail-icon-button.is-favorite, body > main .product-favorite-disabled.is-favorite { border-color: #ef476f; color: #d72655; }
 body > main .gallery-counter { position: absolute; z-index: 2; right: 16px; bottom: 14px; padding: 5px 10px; border-radius: 999px; background: #102044bd; color: #fff; font-size: .75rem; }
 body > main .product-variant-selector { margin: 8px 0 18px; padding: 0; border: 0; }
 body > main .product-variant-selector legend { margin-bottom: 8px; color: #273142; font-size: .95rem; font-weight: 700; }
@@ -428,7 +429,8 @@ body > main .product-detail-buy { width: 100%; text-decoration: none; }
 body > main .product-detail-buy--primary { background: #075ee8; color: #fff; }
 body > main .product-detail-buy--primary:hover:not(:disabled) { background: #0649b7; }
 body > main .product-detail-buy--success { background: #16c957; color: #073c1d; }
-body > main .product-favorite-disabled { display: flex; width: 100%; align-items: center; justify-content: center; gap: 8px; margin: 10px 0 20px; padding: 11px; border: 1px solid #98a2b3; border-radius: 9px; background: #fff; color: #475467; font: inherit; font-weight: 700; }
+body > main .product-favorite-disabled { display: flex; width: 100%; align-items: center; justify-content: center; gap: 8px; margin: 10px 0 20px; padding: 11px; border: 1px solid #98a2b3; border-radius: 9px; background: #fff; color: #475467; font: inherit; font-weight: 700; cursor: pointer; }
+body > main .product-favorite-disabled:hover, body > main .product-favorite-disabled:focus-visible { border-color: #075ee8; color: #075ee8; }
 body > main .product-favorite-disabled small { color: #98a2b3; font-weight: 400; }
 body > main .product-detail-form-message { margin: 10px 0; color: #b42318; font-size: .9rem; font-weight: 700; }
 body > main .product-trust-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding-top: 16px; border-top: 1px solid #e4e7ec; }

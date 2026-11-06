@@ -46,7 +46,7 @@
                 <div class="detail-main-image" data-zoom-source>
                     @if($primaryImage)<img data-main-product-image src="{{ $primaryImage }}" alt="{{ $product->marca }} {{ $product->nombre }}">@endif
                     <div class="detail-product-placeholder detail-product-placeholder--{{ $visualType }}" data-image-placeholder @if($primaryImage) hidden @endif role="img" aria-label="Imagen no disponible"><span class="detail-product-icon"><strong>{{ $product->marca }}</strong><i class="bi {{ $visualType === 'audio' ? 'bi-headphones' : ($visualType === 'celular' ? 'bi-phone' : 'bi-box-seam') }}" aria-hidden="true"></i></span><span>Imagen no disponible</span></div>
-                    <div class="detail-gallery-actions"><button type="button" class="detail-icon-button" disabled title="Favoritos no configurados"><i class="bi bi-heart" aria-hidden="true"></i><span class="visually-hidden">Añadir a favoritos</span></button><button type="button" class="detail-icon-button" data-zoom-open title="Ampliar imagen"><i class="bi bi-zoom-in" aria-hidden="true"></i><span class="visually-hidden">Ampliar imagen</span></button></div>
+                    <div class="detail-gallery-actions"><button type="button" class="detail-icon-button" data-favorite-toggle aria-pressed="false" title="Añadir a favoritos"><i class="bi bi-heart" aria-hidden="true"></i><span class="visually-hidden" data-favorite-label>Añadir a favoritos</span></button><button type="button" class="detail-icon-button" data-zoom-open title="Ampliar imagen"><i class="bi bi-zoom-in" aria-hidden="true"></i><span class="visually-hidden">Ampliar imagen</span></button></div>
                     <button class="gallery-arrow prev" type="button" data-gallery-prev aria-label="Imagen anterior" hidden><i class="bi bi-chevron-left" aria-hidden="true"></i></button><button class="gallery-arrow next" type="button" data-gallery-next aria-label="Imagen siguiente" hidden><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
                     <span class="gallery-counter" data-gallery-counter>{{ $imageItems->count() }} imágenes</span>
                 </div>
@@ -78,7 +78,7 @@
                     @endauth
                     <p class="product-detail-form-message" data-form-message role="status" hidden></p>
                 </form>
-                <button type="button" class="product-favorite-disabled" disabled><i class="bi bi-heart" aria-hidden="true"></i> Añadir a favoritos <small>Función no persistida</small></button>
+                <button type="button" class="product-favorite-disabled" data-favorite-toggle aria-pressed="false"><i class="bi bi-heart" aria-hidden="true"></i> <span data-favorite-label>Añadir a favoritos</span><small>Guardado en este navegador</small></button>
                 <div class="product-trust-grid"><div><i class="bi bi-shield-check" aria-hidden="true"></i><span><strong>Producto original</strong><small>Información del catálogo</small></span></div><div><i class="bi bi-lock" aria-hidden="true"></i><span><strong>Pago seguro</strong><small>Flujo protegido por sesión</small></span></div><div><i class="bi bi-headset" aria-hidden="true"></i><span><strong>Soporte técnico</strong><small>Atención Technology Cell</small></span></div></div>
             </div>
         </div>
