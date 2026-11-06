@@ -1140,6 +1140,36 @@
 
 .ventas-row-actions { display: inline-flex; align-items: center; gap: 5px; }
 
+/* El ancho útil incluye la barra lateral administrativa. En portátiles y
+   ventanas reducidas el panel lateral debe bajar, nunca cubrir la tabla. */
+@media (max-width: 1450px) {
+    .ventas-layout-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ventas-side-column {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: start;
+    }
+
+    .ventas-quick-card {
+        grid-row: auto;
+    }
+
+    .ventas-filters {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .ventas-search {
+        grid-column: span 2;
+    }
+
+    .ventas-clear-link {
+        grid-column: 1 / -1;
+        justify-self: end;
+    }
+}
+
 @media (max-width: 700px) {
     .modulo-ventas .ventas-dialog { width: calc(100vw - 16px); max-height: 95vh; }
     .ventas-dialog-card { max-height: 95vh; }
