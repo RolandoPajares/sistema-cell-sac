@@ -83,7 +83,7 @@
             </section>
 
             <div class="pedidos-toolbar">
-                <button class="pedidos-primary-button" type="button" disabled title="Los pedidos se crean desde la tienda"><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo pedido</button>
+                <a class="pedidos-primary-button" href="{{ route('catalog.index') }}" title="Abrir la tienda para crear un pedido real"><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo pedido</a>
                 <details class="pedidos-export-menu"><summary class="pedidos-toolbar-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar <i class="bi bi-chevron-down" aria-hidden="true"></i></summary><div class="pedidos-export-options"><a href="{{ route('management.orders.export', ['format' => 'excel'] + request()->query()) }}">Excel (.xlsx)</a><a href="{{ route('management.orders.export', ['format' => 'pdf'] + request()->query()) }}">PDF (.pdf)</a><a href="{{ route('management.orders.export', ['format' => 'csv'] + request()->query()) }}">CSV (.csv)</a></div></details>
                 <button class="pedidos-toolbar-button" type="button" data-refresh-orders><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Actualizar</button>
             </div>
