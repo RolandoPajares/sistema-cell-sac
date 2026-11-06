@@ -10,17 +10,13 @@
     const counter = root.querySelector('[data-gallery-counter]');
     let activeIndex = 0;
 
-/**
- * Ejecuta la operación setImage utilizada por el módulo JavaScript.
- *
- * @param {*} source - Parámetro recibido por la función.
- *
- * @param {*} index - Parámetro recibido por la función.
- *
- * @param {*} activeIndex - Parámetro recibido por la función.
- *
- * @returns {*} Resultado de la operación.
- */
+    /**
+     * Actualiza la imagen principal, miniatura activa y contador de la galería.
+     *
+     * @param {string|undefined} source - URL de la imagen que se mostrará.
+     * @param {number} [index=activeIndex] - Índice de la miniatura seleccionada.
+     * @returns {void} No devuelve valor; actualiza el DOM.
+     */
     const setImage = (source, index = activeIndex) => {
         if (!source || !mainImage) return;
         mainImage.src = source;
@@ -35,13 +31,12 @@
         if (counter) counter.textContent = `${activeIndex + 1} de ${thumbs.length} imágenes`;
     };
 
-/**
- * Ejecuta la operación moveImage utilizada por el módulo JavaScript.
- *
- * @param {*} step - Parámetro recibido por la función.
- *
- * @returns {*} Resultado de la operación.
- */
+    /**
+     * Avanza o retrocede circularmente entre las imágenes de la galería.
+     *
+     * @param {number} step - Desplazamiento relativo, normalmente 1 o -1.
+     * @returns {void} No devuelve valor; delega la actualización en setImage.
+     */
     const moveImage = (step) => {
         if (thumbs.length < 2) return;
         const index = (activeIndex + step + thumbs.length) % thumbs.length;
@@ -68,16 +63,26 @@
     zoomDialog?.addEventListener('click', (event) => { if (event.target === zoomDialog) zoomDialog.close(); });
 
     const favoriteButtons = [...root.querySelectorAll('[data-favorite-toggle]')];
-    const favoriteStorageKey = `producto-favorito-${root.dataset.productId}`;
-    let favoriteActive = false;
-    try { favoriteActive = window.sessionStorage.getItem(favoriteStorageKey) === '1'; } catch { favoriteActive = false; }
-/**
- * Ejecuta la operación updateFavoriteButtons utilizada por el módulo JavaScript.
- *
- * @param {*} active - Parámetro recibido por la función.
- *
- * @returns {*} Resultado de la operación.
- */
+    const authenticated = root.dataset.authenticated === '1';
+    const loginUrl = root.dataset.loginUrl || '/login';
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    const formMessage = root.querySelector('[data-form-message]');
+    /**
+     * Redirige al inicio de sesión conservando la URL del detalle actual.
+     *
+     * @returns {void} Cambia la ubicación del navegador.
+     */
+    const goToLogin = () => {
+        const returnUrl = window.location.pathname + window.location.search;
+        window.location.assign(loginUrl + '?redirect=' + encodeURIComponent(returnUrl));
+    };
+    let favoriteActive = root.dataset.favoriteInitial === '1';
+    /**
+     * Sincroniza el estado visual y accesible de todos los botones de favorito.
+     *
+     * @param {boolean} active - Indica si el producto está guardado como favorito.
+     * @returns {void} No devuelve valor; actualiza atributos, iconos y etiquetas.
+     */
     const updateFavoriteButtons = (active) => {
         favoriteButtons.forEach((button) => {
             button.setAttribute('aria-pressed', String(active));
@@ -91,18 +96,31 @@
         });
     };
     updateFavoriteButtons(favoriteActive);
-    favoriteButtons.forEach((button) => button.addEventListener('click', () => {
-        favoriteActive = !favoriteActive;
-        try { window.sessionStorage.setItem(favoriteStorageKey, favoriteActive ? '1' : '0'); } catch {}
-        updateFavoriteButtons(favoriteActive);
+    favoriteButtons.forEach((button) => button.addEventListener('click', async () => {
+        if (!authenticated) { goToLogin(); return; }
+        favoriteButtons.forEach((item) => { item.disabled = true; });
+        try {
+            const response = await fetch(root.dataset.favoriteUrl, { method: 'POST', headers: { Accept: 'application/json', 'X-CSRF-TOKEN': csrfToken || '' } });
+            if (!response.ok) throw new Error('favorite-request-failed');
+            const data = await response.json();
+            favoriteActive = Boolean(data.favorito);
+            updateFavoriteButtons(favoriteActive);
+            root.querySelectorAll('[data-favorite-status]').forEach((status) => { status.textContent = favoriteActive ? 'Guardado en tu cuenta' : 'Eliminado de tu cuenta'; });
+        } catch {
+            if (formMessage) { formMessage.textContent = 'No se pudo guardar el favorito.'; formMessage.hidden = false; }
+        } finally { favoriteButtons.forEach((item) => { item.disabled = false; }); }
     }));
 
-    const ratingKey = `producto-valoracion-${root.dataset.productId}`;
     const ratingWidgets = [...root.querySelectorAll('[data-rating-widget], [data-review-widget]')];
     const ratingSummary = root.querySelector('[data-rating-summary]');
     const reviewMessage = root.querySelector('[data-review-message]');
-    let selectedRating = 0;
-    try { selectedRating = Number(window.sessionStorage.getItem(ratingKey) || 0); } catch { selectedRating = 0; }
+    let selectedRating = Number(root.dataset.ratingInitial || 0);
+    /**
+     * Actualiza la selección visual de estrellas y el mensaje de valoración.
+     *
+     * @param {number|string} rating - Valor recibido del control de estrellas.
+     * @returns {void} No devuelve valor; normaliza y refleja la selección en el DOM.
+     */
     const updateRating = (rating) => {
         selectedRating = Math.max(0, Math.min(5, Number(rating) || 0));
         ratingWidgets.forEach((widget) => widget.querySelectorAll('[data-rating-value]').forEach((button) => {
@@ -113,13 +131,24 @@
             button.querySelector('i')?.classList.toggle('bi-star-fill', active);
             button.querySelector('i')?.classList.toggle('bi-star', !active);
         }));
-        if (ratingSummary) ratingSummary.textContent = selectedRating ? `Tu valoración: ${selectedRating}/5` : 'Sin valoración registrada';
-        if (reviewMessage) reviewMessage.textContent = selectedRating ? `Tu valoración de ${selectedRating}/5 se guardó en este navegador.` : 'Aún no hay reseñas persistidas. Tu valoración se guarda en este navegador.';
+        if (reviewMessage && selectedRating) reviewMessage.textContent = 'Tu valoración actual: ' + selectedRating + '/5.';
     };
     updateRating(selectedRating);
-    ratingWidgets.forEach((widget) => widget.querySelectorAll('[data-rating-value]').forEach((button) => button.addEventListener('click', () => {
-        updateRating(button.dataset.ratingValue);
-        try { window.sessionStorage.setItem(ratingKey, String(selectedRating)); } catch {}
+    ratingWidgets.forEach((widget) => widget.querySelectorAll('[data-rating-value]').forEach((button) => button.addEventListener('click', async () => {
+        if (!authenticated) { goToLogin(); return; }
+        const rating = Number(button.dataset.ratingValue);
+        ratingWidgets.forEach((item) => { item.querySelectorAll('[data-rating-value]').forEach((ratingButton) => { ratingButton.disabled = true; }); });
+        try {
+            const body = new URLSearchParams({ valoracion: String(rating) });
+            const response = await fetch(root.dataset.reviewUrl, { method: 'POST', headers: { Accept: 'application/json', 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8', 'X-CSRF-TOKEN': csrfToken || '' }, body });
+            if (!response.ok) throw new Error('review-request-failed');
+            const data = await response.json();
+            updateRating(data.valoracion);
+            if (ratingSummary) ratingSummary.textContent = 'Promedio: ' + data.promedio + '/5 (' + data.cantidad + ' reseñas)';
+            if (reviewMessage) reviewMessage.textContent = 'Tu valoración se guardó en la base de datos.';
+        } catch {
+            if (reviewMessage) reviewMessage.textContent = 'No se pudo guardar la valoración.';
+        } finally { ratingWidgets.forEach((item) => { item.querySelectorAll('[data-rating-value]').forEach((ratingButton) => { ratingButton.disabled = false; }); }); }
     })));
 
     let variantes = [];
@@ -129,15 +158,13 @@
     const skuLabel = root.querySelector('[data-current-sku]');
     const quantityInput = root.querySelector('[data-quantity-input]');
     const purchaseButtons = [...root.querySelectorAll('[data-add-to-cart], .product-detail-buy--success')];
-    const formMessage = root.querySelector('[data-form-message]');
 
-/**
- * Ejecuta la operación updateVariant utilizada por el módulo JavaScript.
- *
- * @param {*} variant - Parámetro recibido por la función.
- *
- * @returns {*} Resultado de la operación.
- */
+    /**
+     * Actualiza SKU, stock, cantidad máxima, botones e imagen de la variante elegida.
+     *
+     * @param {{id: number|string, stock?: number|string, sku?: string, image?: string}} variant - Variante seleccionada.
+     * @returns {void} No devuelve valor; refleja la variante en el formulario.
+     */
     const updateVariant = (variant) => {
         if (!variant) return;
         const stock = Number(variant.stock || 0);
@@ -163,11 +190,11 @@
     const initialVariant = variantes.find((variant) => String(variant.id) === selectedVariant?.value) || variantes[0];
     if (initialVariant) updateVariant(initialVariant);
 
-/**
- * Ejecuta la operación clampQuantity utilizada por el módulo JavaScript.
- *
- * @returns {*} Resultado de la operación.
- */
+    /**
+     * Limita la cantidad del formulario al intervalo entre uno y el stock máximo.
+     *
+     * @returns {void} No devuelve valor; corrige el valor del input cuando existe.
+     */
     const clampQuantity = () => {
         if (!quantityInput) return;
         const max = Number(quantityInput.max || 1);
