@@ -28,6 +28,10 @@ class AgregarCarritoRequest extends FormRequest
      */
     public function rules(): array
     {
-        return ['cantidad' => ['nullable', 'integer', 'min:1', 'max:20']];
+        return [
+            'cantidad' => ['nullable', 'integer', 'min:1', 'max:20'],
+            'variante_id' => ['nullable', 'integer', 'min:1'],
+            'comprar_ahora' => ['nullable', 'boolean'],
+        ];
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\FinalizarCompraRequest;
 use App\Models\Catalogo\Producto;
 use App\Servicios\ServicioInventario;
+use App\Servicios\ServicioCarrito;
 use App\Servicios\ServicioPedidos;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,6 +27,7 @@ class FinalizarCompraController extends Controller
     public function __construct(
         private readonly ServicioPedidos $orderService,
         private readonly ServicioInventario $inventario,
+        private readonly ServicioCarrito $carritoService,
     ) {}
 
     /**
@@ -39,21 +41,22 @@ class FinalizarCompraController extends Controller
         if (! is_string($request->session()->get('checkout_token'))) {
             $request->session()->put('checkout_token', bin2hex(random_bytes(32)));
         }
-        $cart = (array) $request->session()->get('cart', []);
-        $disponibilidad = $cart === [] ? [] : $this->inventario->disponibilidadParaOperacion($request->user(), array_keys($cart));
-        $products = Producto::query()->active()->whereIn('id', array_keys($disponibilidad))->get()->keyBy('id');
-        $lines = collect($cart)->map(function (int|string $quantity, int|string $id) use ($products, $disponibilidad): ?array {
+        $cart = $this->carritoService->normalizar((array) $request->session()->get('cart', []));
+        $products = Producto::query()->with('variants')->active()->whereIn('id', array_keys($cart))->get()->keyBy('id');
+        $lines = collect($cart)->map(function (array $linea, int $id) use ($products, $request): ?array {
             $product = $products->get((int) $id);
+            $disponible = $product ? $this->inventario->disponibilidadDeLinea($request->user(), $product, $linea['variante_id']) : 0;
 
-            if (! $product || (int) $quantity < 1) {
+            if (! $product || $linea['cantidad'] < 1) {
                 return null;
             }
 
             return [
                 'product' => $product,
-                'quantity' => (int) $quantity,
-                'disponible' => $disponibilidad[(int) $id],
-                'subtotal' => (float) $product->effective_price * (int) $quantity,
+                'variant' => $linea['variante_id'] === null ? null : $product->variants->firstWhere('id', $linea['variante_id']),
+                'quantity' => $linea['cantidad'],
+                'disponible' => $disponible,
+                'subtotal' => (float) $product->effective_price * $linea['cantidad'],
             ];
         })->filter()->values();
         $puedeConfirmar = $lines->isNotEmpty() && $lines->count() === count($cart)

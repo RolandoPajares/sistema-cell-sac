@@ -51,7 +51,13 @@ class CatalogoController extends Controller
 
         $product->load('category', 'images', 'features', 'variants.images');
         $catalogService->agregarDisponibilidad($product->newCollection([$product]), $request->user());
+        $catalogService->agregarDisponibilidadVariantes($product->variants);
+        $relatedProducts = $catalogService->relacionados($product);
+        $catalogService->agregarDisponibilidad($relatedProducts, $request->user());
 
-        return view('publico.catalogo.detalle', ['product' => $product]);
+        return view('publico.catalogo.detalle', [
+            'product' => $product,
+            'relatedProducts' => $relatedProducts,
+        ]);
     }
 }
