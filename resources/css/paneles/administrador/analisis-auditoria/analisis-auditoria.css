@@ -151,7 +151,7 @@
 .tc-audit__filter-grid label { display: grid; gap: 5px; color: #2a4572; font-size: .76rem; font-weight: 700; }
 .tc-audit__filter-grid input, .tc-audit__filter-grid select { width: 100%; min-height: 42px; padding: 0 11px; border: 1px solid #c5d8f2; border-radius: 9px; color: #304e7a; background: #fff; font: inherit; font-size: .82rem; }
 .tc-audit__filter-grid button { min-height: 42px; }
-.tc-audit__workspace { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(300px, .75fr); align-items: start; gap: 14px; }
+.tc-audit__workspace { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 14px; }
 .tc-audit__table-card { min-width: 0; }
 .tc-audit { color: #173766; font-size: 13px; }
 .tc-audit__table { table-layout: fixed; font-size: 11px !important; line-height: 1.25; white-space: nowrap !important; }
@@ -178,16 +178,26 @@
 .tc-audit__pagination-control { color: #4774a8; }
 .tc-audit__pagination-control:hover, .tc-audit__pagination-page:not(.is-active):hover { border-color: #0875ed; color: #0875ed; }
 .tc-audit__pagination-control.is-disabled { color: #a8bdd7; background: #f6f9fd; cursor: default; }
-.tc-audit__detail { position: sticky; top: 16px; min-height: 480px; padding: 0; overflow: hidden; }
-.tc-audit__detail-heading { display: flex; align-items: center; gap: 9px; padding: 15px 17px; border-bottom: 1px solid #dce9f8; color: #132f65; background: linear-gradient(90deg, #eef6ff, #fff); }
-.tc-audit__detail-heading i { color: #0875ed; font-size: 1.15rem; }
-.tc-audit__detail-heading h2 { margin: 0; font-size: .98rem; }
-.tc-audit__detail-empty { display: grid; min-height: 400px; place-items: center; align-content: center; gap: 9px; padding: 25px; color: #7891b2; text-align: center; }
-.tc-audit__detail-empty i { color: #7ca9df; font-size: 2rem; }
-.tc-audit__detail-empty p { max-width: 210px; margin: 0; font-size: .8rem; }
-.tc-audit__detail-list { display: grid; gap: 0; margin: 0; padding: 8px 17px 17px; }
-.tc-audit__detail-list > div { display: grid; grid-template-columns: 105px minmax(0, 1fr); gap: 12px; padding: 8px 0; border-bottom: 1px solid #e4edf8; }
+/* Compatibilidad con la paginación Tailwind generada por Laravel en cachés antiguas. */
+.tc-audit__pagination nav .pagination { display: inline-flex; align-items: center; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.tc-audit__pagination nav .pagination li { display: inline-flex; }
+.tc-audit__pagination nav .pagination a,
+.tc-audit__pagination nav .pagination span { display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; padding: 0; border: 1px solid #c9dbf1; border-radius: 7px; color: #2560a4; background: #fff; font-size: .72rem; line-height: 1; text-decoration: none; }
+.tc-audit__pagination nav .pagination svg { width: 14px; height: 14px; }
+.tc-audit__pagination nav .pagination .active span { color: #fff; border-color: #0875ed; background: #0875ed; }
+.tc-audit__pagination nav .pagination .disabled span { color: #a8bdd7; background: #f6f9fd; }
+.tc-audit__modal { width: min(620px, calc(100vw - 32px)); max-width: 620px; margin: auto; padding: 0; border: 0; border-radius: 14px; color: #173766; background: transparent; box-shadow: 0 24px 70px rgba(18,59,112,.28); }
+.tc-audit__modal::backdrop { background: rgba(12,35,72,.48); backdrop-filter: blur(2px); }
+.tc-audit__modal-card { overflow: hidden; border: 1px solid #cfe0f4; border-radius: 14px; background: #fff; }
+.tc-audit__modal-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid #dce9f8; background: linear-gradient(90deg, #eef6ff, #fff); }
+.tc-audit__modal-heading > div { display: flex; align-items: center; gap: 9px; }
+.tc-audit__modal-heading i { color: #0875ed; font-size: 1.05rem; }
+.tc-audit__modal-heading h2 { margin: 0; color: #132f65; font-size: .98rem; }
+.tc-audit__modal-close { display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; border: 1px solid #c9dbf1; border-radius: 7px; color: #52749f; background: #fff; cursor: pointer; }
+.tc-audit__modal-close:hover { color: #0875ed; border-color: #0875ed; }
+.tc-audit__detail-list { display: grid; gap: 0; margin: 0; padding: 8px 18px 14px; }
+.tc-audit__detail-list > div { display: grid; grid-template-columns: 125px minmax(0, 1fr); gap: 14px; padding: 9px 0; border-bottom: 1px solid #e4edf8; }
 .tc-audit__detail-list dt { color: #6a83a4; font-size: .68rem; font-weight: 800; }
 .tc-audit__detail-list dd { margin: 0; color: #183a6a; font-size: .72rem; font-weight: 700; overflow-wrap: anywhere; }
-@media (max-width: 1050px) { .tc-audit__workspace { grid-template-columns: minmax(0, 1fr); } .tc-audit__detail { position: static; } }
+@media (max-width: 1050px) { .tc-audit__workspace { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 700px) { .tc-audit__header { align-items: start; flex-direction: column; } .tc-audit__filter-grid { grid-template-columns: minmax(0, 1fr); } .tc-audit__pagination { align-items: start; flex-direction: column; } }
