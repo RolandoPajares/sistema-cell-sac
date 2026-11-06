@@ -1,27 +1,23 @@
 @extends('layouts.administracion')
 
 @section('title', 'Módulos y pantallas')
+@section('body_class', 'modulo-seguridad-rbac')
+
 @section('content')
-    <section class="admin-page">
-        <header class="admin-page-head"><div><span class="eyebrow">Seguridad y delegación</span><h1>Módulos y pantallas</h1><p>El catálogo central controla qué pantallas registradas se muestran en la navegación.</p></div></header>
-        @unless ($ready)
-            <div class="admin-alert admin-alert--error" role="status">El catálogo dinámico queda pendiente hasta aplicar las migraciones RBAC.</div>
-        @else
-            @foreach ($modules as $module)
-                <section class="form-card module-registry-card"><header><div><h2><i class="bi {{ $module->icono }}" aria-hidden="true"></i> {{ $module->nombre }}</h2><small>{{ $module->codigo }} · {{ $module->habilitado ? 'Activo' : 'Inactivo' }}</small></div><form method="post" action="{{ route('management.modules.update', $module->id) }}" data-confirm="¿Cambiar el estado del módulo?">@csrf @method('PATCH')<input type="hidden" name="habilitado" value="{{ $module->habilitado ? 0 : 1 }}"><button class="btn btn-outline-primary btn-sm" type="submit" @disabled($module->codigo === 'seguridad' && $module->habilitado)>{{ $module->habilitado ? 'Desactivar módulo' : 'Activar módulo' }}</button></form></header>
-                    <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Pantalla</th><th>Ruta registrada</th><th>Estado</th><th>Acción</th></tr></thead><tbody>
-                        @foreach ($module->screens as $screen)
-                            <tr><td>{{ $screen->nombre }}</td><td>{{ $screen->ruta ?? 'Sin ruta' }}</td><td>{{ $screen->habilitada ? 'Activa' : 'Pendiente / inactiva' }}</td><td>
-                                <form method="post" action="{{ route('management.modules.screens.update', $screen->id) }}" data-confirm="¿Cambiar el estado de esta pantalla?">
-                                    @csrf @method('PATCH')
-                                    <input type="hidden" name="habilitada" value="{{ $screen->habilitada ? 0 : 1 }}">
-                                    <button class="btn btn-outline-primary btn-sm" type="submit">{{ $screen->habilitada ? 'Desactivar' : 'Activar' }}</button>
-                                </form>
-                            </td></tr>
-                        @endforeach
-                    </tbody></table></div>
-                </section>
-            @endforeach
-        @endunless
-    </section>
+<section class="tc-rbac-page" data-module-page>
+<header class="tc-rbac-hero"><div><span class="tc-rbac-eyebrow">Seguridad y delegación</span><h1>Módulos y pantallas</h1><p>Administra únicamente funcionalidades y rutas que ya existen en Laravel.</p></div><a class="tc-rbac-primary" href="{{ route('management.menus') }}"><i class="bi bi-list-nested" aria-hidden="true"></i> Configurar menús</a></header>
+@unless($ready)<div class="tc-rbac-alert" role="alert">El catálogo dinámico no está disponible.</div>@else
+<nav class="tc-rbac-tabs" aria-label="Administración de seguridad"><a href="{{ route('management.roles_permissions') }}">Roles y matriz</a><a href="{{ route('management.user_assignments') }}">Asignación de roles</a><a href="{{ route('management.menus') }}">Menús</a><a class="is-active" href="{{ route('management.modules') }}">Módulos y pantallas</a></nav>
+<section class="tc-rbac-toolbar"><label class="tc-rbac-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar</span><input type="search" data-module-filter placeholder="Buscar módulo o pantalla"></label><span class="tc-rbac-summary"><strong>{{ $modules->count() }}</strong> módulos · <strong>{{ $modules->sum(fn($module) => $module->screens->count()) }}</strong> pantallas</span></section>
+@foreach($modules as $module)
+<section class="tc-rbac-card tc-rbac-module-card" data-module-row data-search="{{ strtolower($module->nombre.' '.$module->codigo.' '.$module->screens->pluck('nombre')->join(' ')) }}"><header class="tc-rbac-menu-header"><div><h2><i class="bi {{ $module->icono ?: 'bi-grid' }}" aria-hidden="true"></i> {{ $module->nombre }}</h2><small>{{ $module->codigo }} · {{ $module->descripcion ?: 'Sin descripción' }}</small></div><span class="tc-rbac-status tc-rbac-status--{{ $module->habilitado ? 'active' : 'inactive' }}">{{ $module->habilitado ? 'Activo' : 'Inactivo' }}</span></header>
+<div class="tc-rbac-table-wrap"><table class="tc-rbac-role-table"><thead><tr><th>Pantalla</th><th>Código</th><th>Ruta asociada</th><th>Estado</th><th>Acción</th></tr></thead><tbody>@foreach($module->screens as $screen)<tr><td><strong>{{ $screen->nombre }}</strong><small>{{ $screen->icono ?: 'Sin icono' }}</small></td><td><code>{{ $screen->codigo }}</code></td><td><code>{{ $screen->ruta ?: 'Sin ruta funcional' }}</code></td><td><span class="tc-rbac-status tc-rbac-status--{{ $screen->habilitada && $screen->ruta ? 'active' : 'inactive' }}">{{ $screen->habilitada && $screen->ruta ? 'Activa' : 'Pendiente' }}</span></td><td><button type="button" class="tc-rbac-action" data-open-dialog="pantalla-{{ $screen->id }}"><i class="bi bi-eye" aria-hidden="true"></i> Ver / editar</button></td></tr>@endforeach</tbody></table></div></section>
+@foreach($module->screens as $screen)<dialog class="tc-rbac-dialog" id="pantalla-{{ $screen->id }}" aria-labelledby="pantalla-title-{{ $screen->id }}"><div class="tc-rbac-dialog-card"><header><div><span class="tc-rbac-dialog-icon"><i class="bi {{ $screen->icono ?: 'bi-window' }}"></i></span><div><small>Catálogo de pantallas</small><h2 id="pantalla-title-{{ $screen->id }}">{{ $screen->nombre }}</h2></div></div><button type="button" class="tc-rbac-dialog-close" data-close-dialog aria-label="Cerrar"><i class="bi bi-x-lg"></i></button></header><div class="tc-rbac-dialog-body"><dl class="tc-rbac-detail-list"><div><dt>Código</dt><dd>{{ $screen->codigo }}</dd></div><div><dt>Ruta Laravel</dt><dd>{{ $screen->ruta ?: 'No registrada' }}</dd></div><div><dt>Módulo</dt><dd>{{ $module->nombre }}</dd></div></dl>@if($screen->habilitada && $screen->ruta)<form method="post" action="{{ route('management.modules.screens.update', $screen->id) }}" data-confirm="¿Cambiar el estado de esta pantalla?">@csrf @method('PATCH')<input type="hidden" name="habilitada" value="0"><button class="tc-rbac-action tc-rbac-action--danger" type="submit"><i class="bi bi-pause-circle"></i> Desactivar pantalla</button></form>@elseif($screen->ruta)<form method="post" action="{{ route('management.modules.screens.update', $screen->id) }}">@csrf @method('PATCH')<input type="hidden" name="habilitada" value="1"><button class="tc-rbac-primary" type="submit"><i class="bi bi-play-circle"></i> Activar pantalla</button></form>@else<p class="tc-rbac-alert">No se puede activar: esta pantalla no tiene una ruta funcional registrada.</p>@endif<footer><button type="button" class="tc-rbac-secondary" data-close-dialog>Cerrar</button></footer></div></div></dialog>@endforeach
+@endforeach
+@endunless
+</section>
 @endsection
+
+@push('scripts')<script>
+(()=>{const page=document.querySelector('[data-module-page]');if(!page)return;page.querySelectorAll('[data-open-dialog]').forEach(b=>b.addEventListener('click',()=>{const d=document.getElementById(b.dataset.openDialog);if(d&&!d.open)d.showModal()}));document.querySelectorAll('[data-close-dialog]').forEach(b=>b.addEventListener('click',()=>b.closest('dialog')?.close()));document.querySelectorAll('.tc-rbac-dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d)d.close()}));page.querySelector('[data-module-filter]')?.addEventListener('input',e=>{const v=e.target.value.toLowerCase().trim();page.querySelectorAll('[data-module-row]').forEach(r=>r.hidden=v!==''&&!r.dataset.search.includes(v))});})();
+</script>@endpush

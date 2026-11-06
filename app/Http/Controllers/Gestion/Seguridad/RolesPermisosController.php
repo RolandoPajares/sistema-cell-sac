@@ -30,7 +30,8 @@ class RolesPermisosController extends Controller
             ? DB::table('permisos')->join('modulos', 'modulos.id', '=', 'permisos.modulo_id')
                 ->where('permisos.activo', true)
                 ->orderBy('modulos.orden')->orderBy('permisos.accion')->orderBy('permisos.nombre')
-                ->get(['permisos.id', 'permisos.codigo', 'permisos.nombre', 'permisos.accion', 'modulos.nombre as modulo_nombre', 'modulos.codigo as modulo_codigo'])
+                ->leftJoin('pantallas', 'pantallas.id', '=', 'permisos.pantalla_id')
+                ->get(['permisos.id', 'permisos.codigo', 'permisos.nombre', 'permisos.accion', 'permisos.pantalla_id', 'pantallas.nombre as pantalla_nombre', 'modulos.nombre as modulo_nombre', 'modulos.codigo as modulo_codigo'])
                 ->groupBy('modulo_codigo')
             : collect();
         $permissionCount = $ready ? DB::table('permisos')->where('activo', true)->count() : 0;

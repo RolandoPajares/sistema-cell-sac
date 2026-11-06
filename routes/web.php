@@ -434,6 +434,7 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::put('/roles-permisos/{role}/permisos', [RolesPermisosController::class, 'updatePermissions'])->whereNumber('role')->name('roles_permissions.permissions');
     Route::get('/asignaciones-roles', [AsignacionRolesController::class, 'index'])->name('user_assignments');
     Route::post('/usuarios/{user}/roles', [AsignacionRolesController::class, 'store'])->whereNumber('user')->name('user_assignments.store');
+    Route::put('/usuarios/{user}/roles', [AsignacionRolesController::class, 'sync'])->whereNumber('user')->name('user_assignments.sync');
     Route::delete('/usuarios/{user}/roles/{role}', [AsignacionRolesController::class, 'revokeGlobal'])->whereNumber('user')->whereNumber('role')->name('user_assignments.revoke');
     Route::delete('/usuarios/{user}/roles/{role}/sedes/{site}', [AsignacionRolesController::class, 'revokeAtSite'])->whereNumber('user')->whereNumber('role')->whereNumber('site')->name('user_assignments.revoke_site');
     Route::get('/menus', [MenusController::class, 'index'])->name('menus');

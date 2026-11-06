@@ -39,8 +39,8 @@ class MenusController extends Controller
             'orden' => ['required', 'integer', 'min:0', 'max:10000'],
             'habilitado' => ['required', 'boolean'],
         ]);
-        if ($validated['habilitado'] && $element->pantalla?->ruta && ! $this->isActionableRoute($element->pantalla->ruta)) {
-            abort(422, 'La opción solo puede habilitarse cuando su pantalla tiene una ruta funcional.');
+        if ($validated['habilitado']) {
+            abort_unless($element->pantalla !== null && $element->pantalla->habilitada && is_string($element->pantalla->ruta) && $this->isActionableRoute($element->pantalla->ruta), 422, 'La opción solo puede habilitarse cuando su pantalla existe, está activa y tiene una ruta funcional.');
         }
 
         $before = $element->only(['orden', 'habilitado']);
@@ -155,6 +155,7 @@ class MenusController extends Controller
     private function isIndispensableScreen(Pantalla $screen): bool
     {
         return in_array($screen->codigo, [
+            'admin.dashboard',
             'admin.users',
             'admin.roles',
             'admin.user_assignments',

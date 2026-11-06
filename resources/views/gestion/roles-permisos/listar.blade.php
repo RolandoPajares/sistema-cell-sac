@@ -1,75 +1,54 @@
 @extends('layouts.administracion')
 
-@section('title', 'Roles y permisos')
+@section('title', 'Roles, permisos y matriz')
+@section('body_class', 'modulo-seguridad-rbac')
+
 @section('content')
-    <section class="admin-page">
-        <header class="admin-page-head"><div><span class="eyebrow">Seguridad y delegación</span><h1>Roles y matriz de privilegios</h1><p>Los permisos se verifican en rutas y servicios. La matriz solo administra concesiones RBAC.</p></div></header>
+    <section class="tc-rbac-page" data-rbac-page>
+        <header class="tc-rbac-hero">
+            <div><span class="tc-rbac-eyebrow">Seguridad y delegación</span><h1>Roles y permisos</h1><p>Configura roles, privilegios efectivos y el acceso real a las pantallas del sistema.</p></div>
+            <button class="tc-rbac-primary" type="button" data-open-dialog="nuevo-rol"><i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo rol</button>
+        </header>
 
         @unless ($ready)
-            <div class="admin-alert admin-alert--error" role="status">Las tablas RBAC no están presentes en la base actual. Esta pantalla no crea ni simula roles hasta que se aplique la migración aprobada.</div>
+            <div class="tc-rbac-alert" role="alert">El esquema RBAC no está disponible. La pantalla permanece en modo consulta y no simula operaciones.</div>
         @else
-            <div class="admin-page-actions"><a class="btn btn-outline-primary" href="{{ route('management.user_assignments') }}"><i class="bi bi-person-gear" aria-hidden="true"></i> Asignaciones de usuarios</a><a class="btn btn-outline-primary" href="{{ route('management.menus') }}"><i class="bi bi-list-nested" aria-hidden="true"></i> Configurar menús</a><a class="btn btn-outline-primary" href="{{ route('management.modules') }}"><i class="bi bi-grid" aria-hidden="true"></i> Módulos y pantallas</a></div>
+            <nav class="tc-rbac-tabs" aria-label="Administración de seguridad"><a class="is-active" href="#roles">Roles y permisos</a><a href="#matriz">Matriz de privilegios</a><a href="{{ route('management.user_assignments') }}">Asignación de roles</a><a href="{{ route('management.menus') }}">Menús</a><a href="{{ route('management.modules') }}">Módulos y pantallas</a></nav>
+            <section class="tc-rbac-toolbar" id="roles"><label class="tc-rbac-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar roles</span><input type="search" data-role-filter placeholder="Buscar por nombre o descripción"></label><span class="tc-rbac-summary"><strong>{{ $roles->count() }}</strong> roles · <strong>{{ $permissionCount }}</strong> permisos activos</span></section>
+            <section class="tc-rbac-card tc-rbac-role-table"><div class="tc-rbac-table-wrap"><table><thead><tr><th>Rol</th><th>Descripción</th><th>Alcance</th><th>Usuarios</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
+                @foreach ($roles as $role)
+                    <tr data-role-row data-search="{{ strtolower($role->nombre.' '.$role->descripcion.' '.$role->codigo) }}"><td><strong>{{ $role->nombre }}</strong><small>{{ $role->codigo }} @if($role->es_sistema) · Sistema @endif</small></td><td>{{ $role->descripcion ?: 'Sin descripción registrada.' }}</td><td><span class="tc-rbac-pill tc-rbac-pill--scope">{{ ucfirst($role->alcance_permitido) }}</span></td><td>{{ $role->usuarios_count }}</td><td><span class="tc-rbac-status tc-rbac-status--{{ $role->activo ? 'active' : 'inactive' }}"><i class="bi bi-circle-fill" aria-hidden="true"></i>{{ $role->activo ? 'Activo' : 'Inactivo' }}</span></td><td class="tc-rbac-actions"><button class="tc-rbac-action" type="button" data-open-dialog="editar-rol-{{ $role->id }}"><i class="bi bi-pencil" aria-hidden="true"></i><span>Editar</span></button><a class="tc-rbac-action tc-rbac-action--primary" href="#matriz-{{ $role->id }}"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i><span>Matriz</span></a>@if($role->codigo !== 'administrador')<form method="post" action="{{ route('management.roles_permissions.status', $role) }}" data-confirm="¿{{ $role->activo ? 'Desactivar' : 'Reactivar' }} este rol?">@csrf @method('PATCH')<input type="hidden" name="activo" value="{{ $role->activo ? 0 : 1 }}"><button class="tc-rbac-action tc-rbac-action--danger" type="submit"><i class="bi bi-{{ $role->activo ? 'pause-circle' : 'play-circle' }}" aria-hidden="true"></i><span>{{ $role->activo ? 'Desactivar' : 'Activar' }}</span></button></form>@endif</td></tr>
+                @endforeach
+            </tbody></table></div></section>
 
-            <form method="post" action="{{ route('management.roles_permissions.store') }}" class="form-card role-create-form">
-                @csrf
-                <h2>Crear rol configurable</h2>
-                <div class="two-column">
-                    <label>Código<input name="codigo" maxlength="40" pattern="[a-z][a-z0-9_]*" required placeholder="supervisor_sede"></label>
-                    <label>Nombre<input name="nombre" maxlength="120" required></label>
-                    <label>Alcance máximo<select name="alcance_permitido" required><option value="sede">Sede</option><option value="propio">Registros propios</option><option value="empresa">Empresa</option></select></label>
-                    <label>Descripción<textarea name="descripcion" maxlength="255"></textarea></label>
-                </div>
-                <button class="btn btn-primary" type="submit">Crear rol sin permisos</button>
-            </form>
-
-            <div class="role-matrix-summary"><strong>{{ $roles->count() }} roles configurados</strong><span>{{ $permissionCount }} permisos activos disponibles</span></div>
-            @foreach ($roles as $role)
-                @php($rolePermissions = $role->permisos->keyBy('id'))
-                <details class="form-card role-matrix-card" @if ($loop->first) open @endif>
-                    <summary><span><strong>{{ $role->nombre }}</strong><small>{{ $role->codigo }} · alcance {{ $role->alcance_permitido }} · {{ $role->usuarios_count }} asignaciones globales</small></span><i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
-                    @if ($role->codigo === 'administrador')
-                        <p class="admin-alert admin-alert--success">Rol global del sistema. Conserva privilegios completos y no puede editarse desde esta matriz para evitar bloquear la administración.</p>
-                    @else
-                        <form method="post" action="{{ route('management.roles_permissions.update', $role) }}" class="role-edit-form">
+            <section class="tc-rbac-matrix-section" id="matriz"><header class="tc-rbac-section-head"><div><span class="tc-rbac-eyebrow">Autorización efectiva</span><h2>Matriz de privilegios por módulo</h2><p>Las filas y acciones provienen del catálogo RBAC real almacenado en MariaDB.</p></div><span class="tc-rbac-change-note" data-pending-note hidden>Hay cambios pendientes</span></header>
+                @foreach ($roles as $role)
+                    @php($rolePermissions = $role->permisos->keyBy('id'))
+                    <article class="tc-rbac-card tc-rbac-matrix-card" id="matriz-{{ $role->id }}"><header><div><h3>{{ $role->nombre }}</h3><small>{{ $role->codigo }} · alcance {{ $role->alcance_permitido }}</small></div>@if($role->codigo === 'administrador')<span class="tc-rbac-locked"><i class="bi bi-lock-fill" aria-hidden="true"></i> Rol protegido</span>@endif</header>
+                        @if ($role->codigo === 'administrador')<p class="tc-rbac-info">El rol administrador conserva sus privilegios completos para evitar bloquear la recuperación de la configuración.</p>@endif
+                        <form method="post" action="{{ route('management.roles_permissions.permissions', $role) }}" data-permission-form>
                             @csrf @method('PUT')
-                            <div class="two-column">
-                                <label>Nombre<input name="nombre" value="{{ $role->nombre }}" maxlength="120" required></label>
-                                <label>Alcance máximo<select name="alcance_permitido" required><option value="empresa" @selected($role->alcance_permitido === 'empresa')>Empresa</option><option value="sede" @selected($role->alcance_permitido === 'sede')>Sede</option><option value="propio" @selected($role->alcance_permitido === 'propio')>Registros propios</option></select></label>
-                                <label>Descripción<textarea name="descripcion" maxlength="255">{{ $role->descripcion }}</textarea></label>
-                            </div>
-                            <button class="btn btn-outline-primary" type="submit">Guardar datos del rol</button>
-                        </form>
-                        <form method="post" action="{{ route('management.roles_permissions.permissions', $role) }}">
-                            @csrf @method('PUT')
-                            <label>Alcance de todas las concesiones
-                                <select name="alcance" required>
-                                    <option value="empresa" @selected($role->alcance_permitido === 'empresa')>Empresa</option>
-                                    <option value="sede" @selected($role->alcance_permitido === 'sede')>Sede</option>
-                                    <option value="propio" @selected($role->alcance_permitido === 'propio')>Registros propios</option>
-                                </select>
-                            </label>
-                            <div class="permission-modules">
-                                @foreach ($permissions as $moduleCode => $modulePermissions)
-                                    <fieldset class="permission-module">
-                                        <legend>{{ $modulePermissions->first()->modulo_nombre }}</legend>
-                                        <div class="permission-grid">
-                                            @foreach ($modulePermissions as $permission)
-                                                <label><input type="checkbox" name="permisos[]" value="{{ $permission->id }}" @checked($rolePermissions->has($permission->id))> {{ $permission->nombre }}</label>
-                                            @endforeach
-                                        </div>
-                                    </fieldset>
+                            <input type="hidden" name="alcance" value="{{ $role->alcance_permitido }}">
+                            <div class="tc-rbac-matrix-wrap"><table class="tc-rbac-matrix"><thead><tr><th>Módulo / pantalla</th><th>Ver</th><th>Crear</th><th>Editar</th><th>Eliminar</th><th>Otras</th></tr></thead><tbody>
+                                @foreach ($permissions as $modulePermissions)
+                                    @foreach ($modulePermissions->groupBy(fn ($permission) => $permission->pantalla_id ?: 'module-'.$permission->modulo_codigo) as $screenPermissions)
+                                        @php($firstPermission = $screenPermissions->first())
+                                        <tr><th><span class="tc-rbac-module-name">{{ $firstPermission->pantalla_nombre ?: $firstPermission->modulo_nombre }}</span><small>{{ $firstPermission->modulo_nombre }}</small></th>@foreach (['consultar','crear','actualizar','eliminar'] as $action)<td>@php($permission = $screenPermissions->firstWhere('accion', $action))@if($permission)<label class="tc-rbac-check"><input type="checkbox" name="permisos[]" value="{{ $permission->id }}" @checked($rolePermissions->has($permission->id)) @disabled($role->codigo === 'administrador')}><span aria-hidden="true"></span><b class="visually-hidden">{{ $permission->nombre }}</b></label>@else<span class="tc-rbac-na">—</span>@endif</td>@endforeach<td>@php($otherPermissions = $screenPermissions->filter(fn ($item) => !in_array($item->accion, ['consultar','crear','actualizar','eliminar'], true)))@foreach($otherPermissions as $permission)<label class="tc-rbac-check tc-rbac-check--other"><input type="checkbox" name="permisos[]" value="{{ $permission->id }}" @checked($rolePermissions->has($permission->id)) @disabled($role->codigo === 'administrador')}><span aria-hidden="true"></span><b>{{ ucfirst($permission->accion) }}</b></label>@endforeach@if($otherPermissions->isEmpty())<span class="tc-rbac-na">—</span>@endif</td></tr>
+                                    @endforeach
                                 @endforeach
-                            </div>
-                            <button class="btn btn-primary" type="submit">Guardar privilegios</button>
+                            </tbody></table></div>
+                            @if($role->codigo !== 'administrador')<footer class="tc-rbac-form-footer"><span class="tc-rbac-saved-state" data-saved-state>Sin cambios pendientes</span><button class="tc-rbac-primary" type="submit"><i class="bi bi-save" aria-hidden="true"></i> Guardar privilegios</button></footer>@endif
                         </form>
-                        <form method="post" action="{{ route('management.roles_permissions.status', $role) }}" data-confirm="¿{{ $role->activo ? 'Desactivar' : 'Reactivar' }} este rol?">
-                            @csrf @method('PATCH')
-                            <input type="hidden" name="activo" value="{{ $role->activo ? 0 : 1 }}">
-                            <button class="btn btn-outline-danger" type="submit">{{ $role->activo ? 'Desactivar rol' : 'Reactivar rol' }}</button>
-                        </form>
-                    @endif
-                </details>
-            @endforeach
+                    </article>
+                @endforeach
+            </section>
         @endunless
     </section>
+
+    @if($ready)<dialog class="tc-rbac-dialog" id="nuevo-rol" aria-labelledby="nuevo-rol-title"><div class="tc-rbac-dialog-card"><header><div><span class="tc-rbac-dialog-icon"><i class="bi bi-shield-plus" aria-hidden="true"></i></span><div><small>Seguridad y delegación</small><h2 id="nuevo-rol-title">Crear nuevo rol</h2></div></div><button type="button" class="tc-rbac-dialog-close" data-close-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><form method="post" action="{{ route('management.roles_permissions.store') }}" class="tc-rbac-dialog-body">@csrf<label>Código interno<input name="codigo" pattern="[a-z][a-z0-9_]*" maxlength="40" required placeholder="supervisor_sede"></label><label>Nombre<input name="nombre" maxlength="120" required></label><label>Descripción<textarea name="descripcion" maxlength="255"></textarea></label><label>Alcance permitido<select name="alcance_permitido" required><option value="sede">Sede</option><option value="propio">Registros propios</option><option value="empresa">Empresa</option></select></label><footer><button type="button" class="tc-rbac-secondary" data-close-dialog>Cancelar</button><button class="tc-rbac-primary" type="submit"><i class="bi bi-check2" aria-hidden="true"></i> Guardar rol</button></footer></form></div></dialog>@endif
+    @foreach($roles as $role)@if($role->codigo !== 'administrador')<dialog class="tc-rbac-dialog" id="editar-rol-{{ $role->id }}" aria-labelledby="editar-rol-title-{{ $role->id }}"><div class="tc-rbac-dialog-card"><header><div><span class="tc-rbac-dialog-icon"><i class="bi bi-pencil-square" aria-hidden="true"></i></span><div><small>Editar configuración</small><h2 id="editar-rol-title-{{ $role->id }}">{{ $role->nombre }}</h2></div></div><button type="button" class="tc-rbac-dialog-close" data-close-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><form method="post" action="{{ route('management.roles_permissions.update', $role) }}" class="tc-rbac-dialog-body">@csrf @method('PUT')<label>Nombre<input name="nombre" value="{{ $role->nombre }}" maxlength="120" required></label><label>Descripción<textarea name="descripcion" maxlength="255">{{ $role->descripcion }}</textarea></label><label>Alcance permitido<select name="alcance_permitido" required><option value="empresa" @selected($role->alcance_permitido === 'empresa')>Empresa</option><option value="sede" @selected($role->alcance_permitido === 'sede')>Sede</option><option value="propio" @selected($role->alcance_permitido === 'propio')>Registros propios</option></select></label><footer><button type="button" class="tc-rbac-secondary" data-close-dialog>Cancelar</button><button class="tc-rbac-primary" type="submit"><i class="bi bi-save" aria-hidden="true"></i> Guardar cambios</button></footer></form></div></dialog>@endif@endforeach
 @endsection
+
+@push('scripts')<script>
+(() => { const page = document.querySelector('[data-rbac-page]'); if (!page) return; const open = (id) => { const d = document.getElementById(id); if (d && !d.open) d.showModal(); }; page.querySelectorAll('[data-open-dialog]').forEach((b) => b.addEventListener('click', () => open(b.dataset.openDialog))); document.querySelectorAll('[data-close-dialog]').forEach((b) => b.addEventListener('click', () => b.closest('dialog')?.close())); document.querySelectorAll('.tc-rbac-dialog').forEach((d) => d.addEventListener('click', (e) => { if (e.target === d) d.close(); })); const filter = page.querySelector('[data-role-filter]'); filter?.addEventListener('input', () => { const value = filter.value.toLowerCase().trim(); page.querySelectorAll('[data-role-row]').forEach((row) => { row.hidden = value !== '' && !row.dataset.search.includes(value); }); }); page.querySelectorAll('[data-permission-form] input[type=checkbox]').forEach((input) => input.addEventListener('change', () => { const state = input.form.querySelector('[data-saved-state]'); if (state) state.textContent = 'Cambios pendientes de guardar'; })); })();
+</script>@endpush

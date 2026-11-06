@@ -1,42 +1,29 @@
 @extends('layouts.administracion')
 
-@section('title', 'Menús dinámicos')
+@section('title', 'Menús y submenús')
+@section('body_class', 'modulo-seguridad-rbac')
+
 @section('content')
-    <section class="admin-page">
-        <header class="admin-page-head"><div><span class="eyebrow">Seguridad y delegación</span><h1>Menús y submenús</h1><p>La navegación se guarda en MySQL y se filtra por permisos en cada petición.</p></div></header>
-        @unless ($ready)
-            <div class="admin-alert admin-alert--error" role="status">Las tablas RBAC aún no existen. La navegación permanece en el esquema de compatibilidad hasta aplicar las migraciones.</div>
-        @else
-            @foreach ($menus as $menu)
-                <section class="form-card menu-editor-card">
-                    <header><div><h2>{{ $menu->nombre }}</h2><small>{{ $menu->codigo }} · {{ $menu->contexto }}</small></div></header>
-                    <form method="post" action="{{ route('management.menus.roles', $menu) }}" class="menu-role-form">
-                        @csrf @method('PUT')
-                        <fieldset><legend>Roles con acceso a esta navegación</legend>
-                            @foreach ($roles as $role)
-                                <label><input type="checkbox" name="roles[]" value="{{ $role->id }}" @checked($menu->roles->contains('id', $role->id))> {{ $role->nombre }}</label>
-                            @endforeach
-                        </fieldset>
-                        <button class="btn btn-primary btn-sm" type="submit">Guardar roles</button>
-                    </form>
-                    <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Opción / grupo</th><th>Ruta</th><th>Orden</th><th>Estado</th><th></th></tr></thead><tbody>
-                        @foreach ($menu->elementos as $element)
-                            <tr class="menu-editor-group"><td><i class="bi {{ $element->icono }}" aria-hidden="true"></i> {{ $element->etiqueta }} <small>{{ $element->tipo }}</small></td><td>—</td><td>{{ $element->orden }}</td><td>{{ $element->habilitado ? 'Activo' : 'Inactivo' }}</td><td>Grupo</td></tr>
-                            @foreach ($element->elementosHijos as $child)
-                                <tr><td>↳ {{ $child->etiqueta }}</td><td>{{ $child->pantalla?->ruta ?? 'Sin ruta' }}</td><td>{{ $child->orden }}</td><td>{{ $child->habilitado ? 'Activo' : 'Inactivo' }}@if (! $child->pantalla?->habilitada || ! $child->pantalla?->ruta)<small> · Pendiente</small>@endif</td><td>
-                                <form method="post" action="{{ route('management.menus.elements.update', $child) }}" class="menu-element-form">
-                                        @csrf @method('PATCH')
-                                        <label class="visually-hidden" for="orden-{{ $child->id }}">Orden de {{ $child->etiqueta }}</label><input id="orden-{{ $child->id }}" type="number" name="orden" min="0" max="10000" value="{{ $child->orden }}" required>
-                                        <input type="hidden" name="habilitado" value="0">
-                                        <label><input type="checkbox" name="habilitado" value="1" @checked($child->habilitado)> Habilitada</label>
-                                        <button class="btn btn-outline-primary btn-sm" type="submit">Guardar</button>
-                                    </form>
-                                </td></tr>
-                            @endforeach
-                        @endforeach
-                    </tbody></table></div>
-                </section>
-            @endforeach
-        @endunless
-    </section>
+<section class="tc-rbac-page" data-menu-page>
+<header class="tc-rbac-hero"><div><span class="tc-rbac-eyebrow">Seguridad y delegación</span><h1>Menús y submenús</h1><p>Configura la navegación lateral con elementos y rutas registradas en el catálogo real.</p></div><a class="tc-rbac-primary" href="{{ route('management.modules') }}"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i> Ver pantallas</a></header>
+@unless($ready)<div class="tc-rbac-alert" role="alert">Las tablas RBAC no están disponibles. No se permiten cambios simulados.</div>@else
+<nav class="tc-rbac-tabs" aria-label="Administración de seguridad"><a href="{{ route('management.roles_permissions') }}">Roles y matriz</a><a href="{{ route('management.user_assignments') }}">Asignación de roles</a><a class="is-active" href="{{ route('management.menus') }}">Menús</a><a href="{{ route('management.modules') }}">Módulos y pantallas</a></nav>
+<section class="tc-rbac-toolbar"><label class="tc-rbac-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar menús</span><input type="search" data-menu-filter placeholder="Buscar opción de menú"></label><span class="tc-rbac-summary"><strong>{{ $menus->count() }}</strong> navegaciones configuradas</span></section>
+@foreach($menus as $menu)
+@php($children = $menu->elementos->flatMap(fn($element) => $element->elementosHijos))
+<section class="tc-rbac-card tc-rbac-menu-card" data-menu-row data-search="{{ strtolower($menu->nombre.' '.$menu->codigo.' '.$children->pluck('etiqueta')->join(' ')) }}"><header class="tc-rbac-menu-header"><div><h2><i class="bi bi-list-nested" aria-hidden="true"></i> {{ $menu->nombre }}</h2><small>{{ $menu->codigo }} · {{ $menu->contexto }}</small></div><button type="button" class="tc-rbac-action tc-rbac-action--primary" data-open-dialog="menu-roles-{{ $menu->id }}"><i class="bi bi-people" aria-hidden="true"></i> Roles autorizados</button></header>
+<div class="tc-rbac-table-wrap"><table class="tc-rbac-role-table"><thead><tr><th>Orden</th><th>Opción</th><th>Ruta registrada</th><th>Estado</th><th>Acción</th></tr></thead><tbody>
+@foreach($menu->elementos as $element)<tr class="tc-rbac-menu-group"><td>{{ $element->orden }}</td><td><i class="bi {{ $element->icono }}" aria-hidden="true"></i> <strong>{{ $element->etiqueta }}</strong><small>Grupo {{ $element->tipo }}</small></td><td>—</td><td><span class="tc-rbac-status tc-rbac-status--{{ $element->habilitado ? 'active' : 'inactive' }}">{{ $element->habilitado ? 'Activo' : 'Inactivo' }}</span></td><td>Grupo</td></tr>
+@foreach($element->elementosHijos as $child)<tr><td>{{ $child->orden }}</td><td>↳ {{ $child->etiqueta }}</td><td><code>{{ $child->pantalla?->ruta ?: 'Sin ruta' }}</code></td><td><span class="tc-rbac-status tc-rbac-status--{{ $child->habilitado && $child->pantalla?->habilitada ? 'active' : 'inactive' }}">{{ $child->habilitado && $child->pantalla?->habilitada ? 'Activo' : 'Inactivo' }}</span></td><td><button type="button" class="tc-rbac-action" data-open-dialog="menu-element-{{ $child->id }}"><i class="bi bi-pencil" aria-hidden="true"></i> Editar</button></td></tr>@endforeach
+@endforeach
+</tbody></table></div></section>
+<dialog class="tc-rbac-dialog" id="menu-roles-{{ $menu->id }}" aria-labelledby="menu-roles-title-{{ $menu->id }}"><div class="tc-rbac-dialog-card"><header><div><span class="tc-rbac-dialog-icon"><i class="bi bi-people" aria-hidden="true"></i></span><div><small>Acceso a navegación</small><h2 id="menu-roles-title-{{ $menu->id }}">{{ $menu->nombre }}</h2></div></div><button type="button" class="tc-rbac-dialog-close" data-close-dialog aria-label="Cerrar"><i class="bi bi-x-lg"></i></button></header><form method="post" action="{{ route('management.menus.roles', $menu) }}" class="tc-rbac-dialog-body">@csrf @method('PUT')<p class="tc-rbac-info">Solo se puede asignar un menú a roles que tengan todos sus permisos y rutas vigentes.</p><div class="tc-rbac-choice-grid">@foreach($roles as $role)<label class="tc-rbac-choice"><input type="checkbox" name="roles[]" value="{{ $role->id }}" @checked($menu->roles->contains('id', $role->id))><span><strong>{{ $role->nombre }}</strong><small>{{ ucfirst($role->alcance_permitido) }}</small></span></label>@endforeach</div><footer><button type="button" class="tc-rbac-secondary" data-close-dialog>Cancelar</button><button class="tc-rbac-primary" type="submit"><i class="bi bi-save"></i> Guardar roles</button></footer></form></div></dialog>
+@foreach($menu->elementos as $element)@foreach($element->elementosHijos as $child)<dialog class="tc-rbac-dialog" id="menu-element-{{ $child->id }}" aria-labelledby="menu-element-title-{{ $child->id }}"><div class="tc-rbac-dialog-card"><header><div><span class="tc-rbac-dialog-icon"><i class="bi bi-list-check"></i></span><div><small>Configuración de submenú</small><h2 id="menu-element-title-{{ $child->id }}">{{ $child->etiqueta }}</h2></div></div><button type="button" class="tc-rbac-dialog-close" data-close-dialog aria-label="Cerrar"><i class="bi bi-x-lg"></i></button></header><form method="post" action="{{ route('management.menus.elements.update', $child) }}" class="tc-rbac-dialog-body">@csrf @method('PATCH')<label>Orden<input type="number" min="0" max="10000" name="orden" value="{{ $child->orden }}" required></label><label class="tc-rbac-choice"><input type="hidden" name="habilitado" value="0"><input type="checkbox" name="habilitado" value="1" @checked($child->habilitado)><span><strong>Elemento habilitado</strong><small>Solo se activa si la pantalla tiene ruta funcional.</small></span></label><footer><button type="button" class="tc-rbac-secondary" data-close-dialog>Cancelar</button><button class="tc-rbac-primary" type="submit"><i class="bi bi-save"></i> Guardar cambios</button></footer></form></div></dialog>@endforeach@endforeach
+@endforeach
+@endunless
+</section>
 @endsection
+
+@push('scripts')<script>
+(()=>{const page=document.querySelector('[data-menu-page]');if(!page)return;page.querySelectorAll('[data-open-dialog]').forEach(b=>b.addEventListener('click',()=>{const d=document.getElementById(b.dataset.openDialog);if(d&&!d.open)d.showModal()}));document.querySelectorAll('[data-close-dialog]').forEach(b=>b.addEventListener('click',()=>b.closest('dialog')?.close()));document.querySelectorAll('.tc-rbac-dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d)d.close()}));page.querySelector('[data-menu-filter]')?.addEventListener('input',e=>{const v=e.target.value.toLowerCase().trim();page.querySelectorAll('[data-menu-row]').forEach(r=>r.hidden=v!==''&&!r.dataset.search.includes(v))});})();
+</script>@endpush
