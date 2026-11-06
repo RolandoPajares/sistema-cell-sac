@@ -1,0 +1,1 @@
+document.getElementById(`compareForm`)?.addEventListener(`submit`,()=>{let e=[...document.querySelectorAll(`.compare-select`)].map(e=>e.value).filter(Boolean),t=document.getElementById(`compareIds`);t&&(t.value=[...new Set(e)].slice(0,3).join(`,`))});

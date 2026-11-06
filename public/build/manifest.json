@@ -1,0 +1,486 @@
+{
+  "_analitica-clientes-Bartvo8z.js": {
+    "file": "assets/analitica-clientes-Bartvo8z.js",
+    "name": "analitica-clientes",
+    "imports": [
+      "_rolldown-runtime-DK3Fl9T5.js"
+    ]
+  },
+  "_configuracion-comercial-Ue-Acgfe.js": {
+    "file": "assets/configuracion-comercial-Ue-Acgfe.js",
+    "name": "configuracion-comercial",
+    "imports": [
+      "_rolldown-runtime-DK3Fl9T5.js"
+    ]
+  },
+  "_configuracion-empresa-JAgBp0ba.js": {
+    "file": "assets/configuracion-empresa-JAgBp0ba.js",
+    "name": "configuracion-empresa",
+    "imports": [
+      "_rolldown-runtime-DK3Fl9T5.js"
+    ]
+  },
+  "_configuracion-general-3U54Nsdl.js": {
+    "file": "assets/configuracion-general-3U54Nsdl.js",
+    "name": "configuracion-general",
+    "imports": [
+      "_rolldown-runtime-DK3Fl9T5.js"
+    ]
+  },
+  "_configuracion-seguridad-CgXV7zd7.js": {
+    "file": "assets/configuracion-seguridad-CgXV7zd7.js",
+    "name": "configuracion-seguridad",
+    "imports": [
+      "_rolldown-runtime-DK3Fl9T5.js"
+    ]
+  },
+  "_dialogos-panel-BTTu1_ZF.js": {
+    "file": "assets/dialogos-panel-BTTu1_ZF.js",
+    "name": "dialogos-panel",
+    "imports": [
+      "_rolldown-runtime-DK3Fl9T5.js"
+    ]
+  },
+  "_facturacion-BoNY4sB7.js": {
+    "file": "assets/facturacion-BoNY4sB7.js",
+    "name": "facturacion",
+    "imports": [
+      "_rolldown-runtime-DK3Fl9T5.js"
+    ]
+  },
+  "_filtros-C02lgJAn.js": {
+    "file": "assets/filtros-C02lgJAn.js",
+    "name": "filtros",
+    "imports": [
+      "_rolldown-runtime-DK3Fl9T5.js"
+    ]
+  },
+  "_filtros-tablas-BO0xFDOR.js": {
+    "file": "assets/filtros-tablas-BO0xFDOR.js",
+    "name": "filtros-tablas",
+    "imports": [
+      "_rolldown-runtime-DK3Fl9T5.js"
+    ]
+  },
+  "_gestion-C3b9uwNY.js": {
+    "file": "assets/gestion-C3b9uwNY.js",
+    "name": "gestion",
+    "imports": [
+      "_rolldown-runtime-DK3Fl9T5.js",
+      "_filtros-C02lgJAn.js",
+      "_panel-proveedores-CbioUHW7.js",
+      "_filtros-tablas-BO0xFDOR.js",
+      "_previsualizacion-campanias-OcDNVeEz.js",
+      "_dialogos-panel-BTTu1_ZF.js"
+    ]
+  },
+  "_integraciones-Di4PviBi.js": {
+    "file": "assets/integraciones-Di4PviBi.js",
+    "name": "integraciones",
+    "imports": [
+      "_rolldown-runtime-DK3Fl9T5.js"
+    ]
+  },
+  "_menu-lateral-desplegable-C72HHG9D.js": {
+    "file": "assets/menu-lateral-desplegable-C72HHG9D.js",
+    "name": "menu-lateral-desplegable",
+    "imports": [
+      "_rolldown-runtime-DK3Fl9T5.js"
+    ]
+  },
+  "_metricas-marketing-BjBEG-kD.js": {
+    "file": "assets/metricas-marketing-BjBEG-kD.js",
+    "name": "metricas-marketing",
+    "imports": [
+      "_rolldown-runtime-DK3Fl9T5.js"
+    ]
+  },
+  "_notificaciones-DMp-YRtj.js": {
+    "file": "assets/notificaciones-DMp-YRtj.js",
+    "name": "notificaciones",
+    "imports": [
+      "_rolldown-runtime-DK3Fl9T5.js"
+    ]
+  },
+  "_pagos-CptiA64_.js": {
+    "file": "assets/pagos-CptiA64_.js",
+    "name": "pagos",
+    "imports": [
+      "_rolldown-runtime-DK3Fl9T5.js"
+    ]
+  },
+  "_panel-proveedores-CbioUHW7.js": {
+    "file": "assets/panel-proveedores-CbioUHW7.js",
+    "name": "panel-proveedores",
+    "imports": [
+      "_rolldown-runtime-DK3Fl9T5.js"
+    ]
+  },
+  "_preload-helper-BPGwDd3O.js": {
+    "file": "assets/preload-helper-BPGwDd3O.js",
+    "name": "preload-helper"
+  },
+  "_previsualizacion-campanias-OcDNVeEz.js": {
+    "file": "assets/previsualizacion-campanias-OcDNVeEz.js",
+    "name": "previsualizacion-campanias",
+    "imports": [
+      "_rolldown-runtime-DK3Fl9T5.js"
+    ]
+  },
+  "_reembolsos-Che5tTTv.js": {
+    "file": "assets/reembolsos-Che5tTTv.js",
+    "name": "reembolsos",
+    "imports": [
+      "_rolldown-runtime-DK3Fl9T5.js"
+    ]
+  },
+  "_reportes-CwtWBKb8.js": {
+    "file": "assets/reportes-CwtWBKb8.js",
+    "name": "reportes",
+    "imports": [
+      "_rolldown-runtime-DK3Fl9T5.js"
+    ]
+  },
+  "_reportes-financieros-D96cigQm.js": {
+    "file": "assets/reportes-financieros-D96cigQm.js",
+    "name": "reportes-financieros",
+    "imports": [
+      "_rolldown-runtime-DK3Fl9T5.js"
+    ]
+  },
+  "_respaldos-mantenimiento-C6EQr6Z-.js": {
+    "file": "assets/respaldos-mantenimiento-C6EQr6Z-.js",
+    "name": "respaldos-mantenimiento",
+    "imports": [
+      "_rolldown-runtime-DK3Fl9T5.js"
+    ]
+  },
+  "_roles-permisos-Dhx-PyZA.js": {
+    "file": "assets/roles-permisos-Dhx-PyZA.js",
+    "name": "roles-permisos",
+    "imports": [
+      "_rolldown-runtime-DK3Fl9T5.js"
+    ]
+  },
+  "_rolldown-runtime-DK3Fl9T5.js": {
+    "file": "assets/rolldown-runtime-DK3Fl9T5.js",
+    "name": "rolldown-runtime"
+  },
+  "resources/css/panel.css": {
+    "file": "assets/panel-DCcRLobS.css",
+    "name": "panel",
+    "names": [
+      "panel.css"
+    ],
+    "src": "resources/css/panel.css",
+    "isEntry": true
+  },
+  "resources/css/paneles/administrador/index.css": {
+    "file": "assets/administrador-DzHCzZy9.css",
+    "src": "resources/css/paneles/administrador/index.css"
+  },
+  "resources/css/paneles/cliente-mayorista/index.css": {
+    "file": "assets/cliente-mayorista-x1XGuNl0.css",
+    "src": "resources/css/paneles/cliente-mayorista/index.css"
+  },
+  "resources/css/paneles/cliente-minorista/index.css": {
+    "file": "assets/cliente-mayorista-x1XGuNl0.css",
+    "src": "resources/css/paneles/cliente-mayorista/index.css"
+  },
+  "resources/css/paneles/compras-logistica/index.css": {
+    "file": "assets/cliente-mayorista-x1XGuNl0.css",
+    "src": "resources/css/paneles/cliente-mayorista/index.css"
+  },
+  "resources/css/paneles/marketing/index.css": {
+    "file": "assets/cliente-mayorista-x1XGuNl0.css",
+    "src": "resources/css/paneles/cliente-mayorista/index.css"
+  },
+  "resources/css/paneles/ventas-mayoristas/index.css": {
+    "file": "assets/cliente-mayorista-x1XGuNl0.css",
+    "src": "resources/css/paneles/cliente-mayorista/index.css"
+  },
+  "resources/css/paneles/ventas-minoristas/index.css": {
+    "file": "assets/cliente-mayorista-x1XGuNl0.css",
+    "src": "resources/css/paneles/cliente-mayorista/index.css"
+  },
+  "resources/css/tienda.css": {
+    "file": "assets/tienda-DtLjAHO2.css",
+    "name": "tienda",
+    "names": [
+      "tienda.css"
+    ],
+    "src": "resources/css/tienda.css",
+    "isEntry": true
+  },
+  "resources/js/modulos/gestion/modulos-pendientes.js": {
+    "file": "assets/modulos-pendientes-CWpIgViD.js",
+    "name": "modulos-pendientes",
+    "src": "resources/js/modulos/gestion/modulos-pendientes.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/modulos/gestion/ventas/index.js": {
+    "file": "assets/ventas-Cstftj5G.js",
+    "name": "ventas",
+    "src": "resources/js/modulos/gestion/ventas/index.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/modulos/paneles/administrador/administracion/index.js": {
+    "file": "assets/administracion-BzWV0qoY.js",
+    "name": "administracion",
+    "src": "resources/js/modulos/paneles/administrador/administracion/index.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_integraciones-Di4PviBi.js",
+      "_notificaciones-DMp-YRtj.js",
+      "_respaldos-mantenimiento-C6EQr6Z-.js",
+      "_roles-permisos-Dhx-PyZA.js"
+    ]
+  },
+  "resources/js/modulos/paneles/administrador/analisis-auditoria/analisis-auditoria.js": {
+    "file": "assets/analisis-auditoria-B2NiB0_X.js",
+    "name": "analisis-auditoria",
+    "src": "resources/js/modulos/paneles/administrador/analisis-auditoria/analisis-auditoria.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/modulos/paneles/administrador/analisis/index.js": {
+    "file": "assets/analisis-CpSGn0ts.js",
+    "name": "analisis",
+    "src": "resources/js/modulos/paneles/administrador/analisis/index.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_analitica-clientes-Bartvo8z.js",
+      "_metricas-marketing-BjBEG-kD.js",
+      "_reportes-CwtWBKb8.js",
+      "_reportes-financieros-D96cigQm.js"
+    ]
+  },
+  "resources/js/modulos/paneles/administrador/configuracion-sistema/configuracion-sistema.js": {
+    "file": "assets/configuracion-sistema-B9sl5ykv.js",
+    "name": "configuracion-sistema",
+    "src": "resources/js/modulos/paneles/administrador/configuracion-sistema/configuracion-sistema.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/modulos/paneles/administrador/configuracion/index.js": {
+    "file": "assets/configuracion-9fqCYeK_.js",
+    "name": "configuracion",
+    "src": "resources/js/modulos/paneles/administrador/configuracion/index.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_configuracion-comercial-Ue-Acgfe.js",
+      "_configuracion-empresa-JAgBp0ba.js",
+      "_configuracion-general-3U54Nsdl.js",
+      "_configuracion-seguridad-CgXV7zd7.js"
+    ]
+  },
+  "resources/js/modulos/paneles/administrador/ecommerce-marketing/ecommerce-marketing.js": {
+    "file": "assets/ecommerce-marketing-D1uchS6a.js",
+    "name": "ecommerce-marketing",
+    "src": "resources/js/modulos/paneles/administrador/ecommerce-marketing/ecommerce-marketing.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/modulos/paneles/administrador/finanzas-facturacion/finanzas-facturacion.js": {
+    "file": "assets/finanzas-facturacion-DUheqZLK.js",
+    "name": "finanzas-facturacion",
+    "src": "resources/js/modulos/paneles/administrador/finanzas-facturacion/finanzas-facturacion.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/modulos/paneles/administrador/finanzas/index.js": {
+    "file": "assets/finanzas-DtyhltJX.js",
+    "name": "finanzas",
+    "src": "resources/js/modulos/paneles/administrador/finanzas/index.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_facturacion-BoNY4sB7.js",
+      "_pagos-CptiA64_.js",
+      "_reembolsos-Che5tTTv.js"
+    ]
+  },
+  "resources/js/modulos/paneles/administrador/index.js": {
+    "file": "assets/administrador-BqM2_yX_.js",
+    "name": "administrador",
+    "src": "resources/js/modulos/paneles/administrador/index.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_menu-lateral-desplegable-C72HHG9D.js",
+      "resources/js/modulos/gestion/modulos-pendientes.js",
+      "resources/js/modulos/gestion/ventas/index.js",
+      "resources/js/modulos/paneles/administrador/administracion/index.js",
+      "resources/js/modulos/paneles/administrador/analisis-auditoria/analisis-auditoria.js",
+      "resources/js/modulos/paneles/administrador/analisis/index.js",
+      "resources/js/modulos/paneles/administrador/configuracion-sistema/configuracion-sistema.js",
+      "resources/js/modulos/paneles/administrador/configuracion/index.js",
+      "resources/js/modulos/paneles/administrador/ecommerce-marketing/ecommerce-marketing.js",
+      "resources/js/modulos/paneles/administrador/finanzas-facturacion/finanzas-facturacion.js",
+      "resources/js/modulos/paneles/administrador/finanzas/index.js",
+      "resources/js/modulos/paneles/administrador/organizacion/organizacion.js",
+      "resources/js/modulos/paneles/administrador/operaciones-comerciales/operaciones-comerciales.js",
+      "resources/js/modulos/paneles/administrador/inventario-logistica/inventario-logistica.js",
+      "resources/js/modulos/paneles/administrador/inventario-logistica/transferencias.js"
+    ],
+    "css": [
+      "assets/administrador-DzHCzZy9.css"
+    ]
+  },
+  "resources/js/modulos/paneles/administrador/inventario-logistica/inventario-logistica.js": {
+    "file": "assets/inventario-logistica-W6ZZMHvA.js",
+    "name": "inventario-logistica",
+    "src": "resources/js/modulos/paneles/administrador/inventario-logistica/inventario-logistica.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/modulos/paneles/administrador/inventario-logistica/transferencias.js": {
+    "file": "assets/transferencias-BKkhM88D.js",
+    "name": "transferencias",
+    "src": "resources/js/modulos/paneles/administrador/inventario-logistica/transferencias.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/modulos/paneles/administrador/operaciones-comerciales/operaciones-comerciales.js": {
+    "file": "assets/operaciones-comerciales-BbVX5abc.js",
+    "name": "operaciones-comerciales",
+    "src": "resources/js/modulos/paneles/administrador/operaciones-comerciales/operaciones-comerciales.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/modulos/paneles/administrador/organizacion/organizacion.js": {
+    "file": "assets/organizacion-DMgTtOhE.js",
+    "name": "organizacion",
+    "src": "resources/js/modulos/paneles/administrador/organizacion/organizacion.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/modulos/paneles/cliente-mayorista/index.js": {
+    "file": "assets/cliente-mayorista-BvRk9kiK.js",
+    "name": "cliente-mayorista",
+    "src": "resources/js/modulos/paneles/cliente-mayorista/index.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/modulos/paneles/cliente-minorista/index.js": {
+    "file": "assets/cliente-minorista-BvRk9kiK.js",
+    "name": "cliente-minorista",
+    "src": "resources/js/modulos/paneles/cliente-minorista/index.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/modulos/paneles/compras-logistica/index.js": {
+    "file": "assets/compras-logistica-BvRk9kiK.js",
+    "name": "compras-logistica",
+    "src": "resources/js/modulos/paneles/compras-logistica/index.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/modulos/paneles/marketing/index.js": {
+    "file": "assets/marketing-BvRk9kiK.js",
+    "name": "marketing",
+    "src": "resources/js/modulos/paneles/marketing/index.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/modulos/paneles/ventas-mayoristas/index.js": {
+    "file": "assets/ventas-mayoristas-BvRk9kiK.js",
+    "name": "ventas-mayoristas",
+    "src": "resources/js/modulos/paneles/ventas-mayoristas/index.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/modulos/paneles/ventas-minoristas/index.js": {
+    "file": "assets/ventas-minoristas-BvRk9kiK.js",
+    "name": "ventas-minoristas",
+    "src": "resources/js/modulos/paneles/ventas-minoristas/index.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/modulos/publico/asistente/index.js": {
+    "file": "assets/asistente-DLe3uAK1.js",
+    "name": "asistente",
+    "src": "resources/js/modulos/publico/asistente/index.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/modulos/publico/catalogo/comparar.js": {
+    "file": "assets/comparar-C44ZXCsD.js",
+    "name": "comparar",
+    "src": "resources/js/modulos/publico/catalogo/comparar.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/modulos/publico/catalogo/detalle.js": {
+    "file": "assets/detalle-CaMnQu6U.js",
+    "name": "detalle",
+    "src": "resources/js/modulos/publico/catalogo/detalle.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/modulos/publico/catalogo/index.js": {
+    "file": "assets/catalogo-BWc3S6xv.js",
+    "name": "catalogo",
+    "src": "resources/js/modulos/publico/catalogo/index.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/panel.js": {
+    "file": "assets/panel-qomep95X.js",
+    "name": "panel",
+    "src": "resources/js/panel.js",
+    "isEntry": true,
+    "imports": [
+      "_menu-lateral-desplegable-C72HHG9D.js",
+      "_preload-helper-BPGwDd3O.js",
+      "_gestion-C3b9uwNY.js"
+    ],
+    "dynamicImports": [
+      "resources/js/modulos/paneles/administrador/index.js",
+      "resources/js/modulos/paneles/cliente-mayorista/index.js",
+      "resources/js/modulos/paneles/cliente-minorista/index.js",
+      "resources/js/modulos/paneles/compras-logistica/index.js",
+      "resources/js/modulos/paneles/marketing/index.js",
+      "resources/js/modulos/paneles/ventas-mayoristas/index.js",
+      "resources/js/modulos/paneles/ventas-minoristas/index.js"
+    ]
+  },
+  "resources/js/tienda.js": {
+    "file": "assets/tienda-CKpGm8rF.js",
+    "name": "tienda",
+    "src": "resources/js/tienda.js",
+    "isEntry": true,
+    "imports": [
+      "_preload-helper-BPGwDd3O.js"
+    ],
+    "dynamicImports": [
+      "_dialogos-panel-BTTu1_ZF.js",
+      "_filtros-tablas-BO0xFDOR.js",
+      "_filtros-C02lgJAn.js",
+      "_gestion-C3b9uwNY.js",
+      "resources/js/modulos/gestion/modulos-pendientes.js",
+      "_panel-proveedores-CbioUHW7.js",
+      "_previsualizacion-campanias-OcDNVeEz.js",
+      "resources/js/modulos/gestion/ventas/index.js",
+      "resources/js/modulos/paneles/administrador/administracion/index.js",
+      "_integraciones-Di4PviBi.js",
+      "_notificaciones-DMp-YRtj.js",
+      "_respaldos-mantenimiento-C6EQr6Z-.js",
+      "_roles-permisos-Dhx-PyZA.js",
+      "_analitica-clientes-Bartvo8z.js",
+      "resources/js/modulos/paneles/administrador/analisis/index.js",
+      "_metricas-marketing-BjBEG-kD.js",
+      "_reportes-CwtWBKb8.js",
+      "_reportes-financieros-D96cigQm.js",
+      "resources/js/modulos/paneles/administrador/analisis-auditoria/analisis-auditoria.js",
+      "_menu-lateral-desplegable-C72HHG9D.js",
+      "_configuracion-comercial-Ue-Acgfe.js",
+      "_configuracion-empresa-JAgBp0ba.js",
+      "_configuracion-general-3U54Nsdl.js",
+      "_configuracion-seguridad-CgXV7zd7.js",
+      "resources/js/modulos/paneles/administrador/configuracion/index.js",
+      "resources/js/modulos/paneles/administrador/configuracion-sistema/configuracion-sistema.js",
+      "resources/js/modulos/paneles/administrador/ecommerce-marketing/ecommerce-marketing.js",
+      "_facturacion-BoNY4sB7.js",
+      "resources/js/modulos/paneles/administrador/finanzas/index.js",
+      "_pagos-CptiA64_.js",
+      "_reembolsos-Che5tTTv.js",
+      "resources/js/modulos/paneles/administrador/finanzas-facturacion/finanzas-facturacion.js",
+      "resources/js/modulos/paneles/administrador/index.js",
+      "resources/js/modulos/paneles/administrador/inventario-logistica/inventario-logistica.js",
+      "resources/js/modulos/paneles/administrador/inventario-logistica/transferencias.js",
+      "resources/js/modulos/paneles/administrador/operaciones-comerciales/operaciones-comerciales.js",
+      "resources/js/modulos/paneles/administrador/organizacion/organizacion.js",
+      "resources/js/modulos/paneles/cliente-mayorista/index.js",
+      "resources/js/modulos/paneles/cliente-minorista/index.js",
+      "resources/js/modulos/paneles/compras-logistica/index.js",
+      "resources/js/modulos/paneles/marketing/index.js",
+      "resources/js/modulos/paneles/ventas-mayoristas/index.js",
+      "resources/js/modulos/paneles/ventas-minoristas/index.js",
+      "resources/js/modulos/publico/asistente/index.js",
+      "resources/js/modulos/publico/catalogo/comparar.js",
+      "resources/js/modulos/publico/catalogo/detalle.js",
+      "resources/js/modulos/publico/catalogo/index.js"
+    ]
+  }
+}

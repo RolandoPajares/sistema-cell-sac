@@ -1,0 +1,1 @@
+import{t as e}from"./rolldown-runtime-DK3Fl9T5.js";var t=e({initializeConfiguracionGeneral:()=>n}),n=e=>{r(e)},r=e=>{e&&e.dataset.adminSettingsReady!==`true`&&(e.dataset.adminSettingsReady=`true`)};export{n,t};
