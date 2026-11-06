@@ -10,6 +10,7 @@ use App\Models\Comercio\Pedido;
 use App\Models\Comercio\Venta;
 use App\Models\Compras\Compra;
 use App\Models\Inventario\MovimientoInventario;
+use App\Models\Marketing\Campania;
 use App\Models\User;
 use App\Servicios\ExportadorTabular;
 use App\Servicios\RegistradorAuditoria;
@@ -52,7 +53,7 @@ final class PanelAnalisisAuditoriaController extends Controller
             'canal' => ['nullable', 'string', 'max:30'],
             'sede' => ['nullable', 'integer', 'min:1'],
             'usuario_id' => ['nullable', 'integer', 'min:1'],
-            'reporte' => ['nullable', 'in:ventas,pedidos,clientes,productos,inventario,compras'],
+            'reporte' => ['nullable', 'in:ventas,pedidos,clientes,productos,inventario,compras,campanas'],
             'buscar' => ['nullable', 'string', 'max:120'],
         ]);
 
@@ -89,7 +90,7 @@ final class PanelAnalisisAuditoriaController extends Controller
             'resultado' => ['nullable', 'string', 'max:20'],
             'rol_codigo' => ['nullable', 'string', 'max:40'],
             'estado' => ['nullable', 'string', 'max:30'],
-            'reporte' => ['nullable', 'in:ventas,pedidos,clientes,productos,inventario,compras'],
+            'reporte' => ['nullable', 'in:ventas,pedidos,clientes,productos,inventario,compras,campanas'],
         ]);
 
         if ($tipo === 'globales' && ($filtros['reporte'] ?? 'ventas') !== 'ventas') {
@@ -164,7 +165,7 @@ final class PanelAnalisisAuditoriaController extends Controller
     /** @param array<string, mixed> $pagina @param array<string, mixed> $filtros */
     private function cargarReportePorTipo(array &$pagina, string $reporte, User $usuario, ServicioAutorizacion $autorizacion, array $filtros): void
     {
-        $reporte = array_key_exists($reporte, ['ventas' => true, 'pedidos' => true, 'clientes' => true, 'productos' => true, 'inventario' => true, 'compras' => true]) ? $reporte : 'ventas';
+        $reporte = array_key_exists($reporte, ['ventas' => true, 'pedidos' => true, 'clientes' => true, 'productos' => true, 'inventario' => true, 'compras' => true, 'campanas' => true]) ? $reporte : 'ventas';
         $consulta = match ($reporte) {
             'ventas' => $autorizacion->scopeRecordsFor(Venta::query()->where('estado', 'confirmada'), $usuario, 'gestion.ventas.consultar'),
             'pedidos' => $autorizacion->scopeRecordsFor(Pedido::query()->whereNotIn('estado', ['Cancelado', 'Cancelada']), $usuario, 'gestion.pedidos.consultar'),
@@ -172,6 +173,7 @@ final class PanelAnalisisAuditoriaController extends Controller
             'productos' => $autorizacion->scopeRecordsFor(Producto::query(), $usuario, 'gestion.productos.consultar'),
             'inventario' => $autorizacion->scopeRecordsFor(MovimientoInventario::query()->with('product'), $usuario, 'gestion.inventario.consultar'),
             'compras' => $autorizacion->scopeRecordsFor(Compra::query()->where('activo', true)->whereNotIn('estado', ['Cancelada', 'Cancelado']), $usuario, 'gestion.compras.consultar'),
+            'campanas' => $autorizacion->scopeRecordsFor(Campania::query(), $usuario, 'gestion.campanias.consultar'),
         };
         $campoFecha = in_array($reporte, ['ventas'], true) ? 'fecha_venta' : ($reporte === 'compras' ? 'fecha_compra' : 'creado_en');
         $consulta->when(isset($filtros['desde']), fn (Builder $query) => $query->whereDate($campoFecha, '>=', $filtros['desde']))
@@ -182,12 +184,13 @@ final class PanelAnalisisAuditoriaController extends Controller
         $pagina['paginacion'] = $registros;
         $pagina['tabla'] = match ($reporte) {
             'ventas' => 'Ventas confirmadas', 'pedidos' => 'Pedidos válidos', 'clientes' => 'Clientes',
-            'productos' => 'Productos', 'inventario' => 'Movimientos de inventario', 'compras' => 'Compras',
+            'productos' => 'Productos', 'inventario' => 'Movimientos de inventario', 'compras' => 'Compras', 'campanas' => 'Campañas',
         };
         $pagina['columnas'] = match ($reporte) {
             'ventas' => ['ID', 'Código', 'Total', 'Estado', 'Fecha'], 'pedidos' => ['ID', 'Usuario ID', 'Total', 'Estado', 'Fecha'],
             'clientes' => ['ID', 'Cliente', 'Correo', 'Tipo', 'Activo', 'Fecha'], 'productos' => ['ID', 'Producto', 'Categoría', 'Precio', 'Stock', 'Activo'],
             'inventario' => ['ID', 'Producto', 'Movimiento', 'Cantidad', 'Notas', 'Fecha'], 'compras' => ['ID', 'Proveedor ID', 'Total', 'Estado', 'Fecha'],
+            'campanas' => ['ID', 'Campaña', 'Ubicación', 'Vistas', 'Clics', 'Activo', 'Fecha'],
         };
         $pagina['filas'] = $registros->getCollection()->map(static function (object $registro) use ($reporte): array {
             return match ($reporte) {
@@ -197,6 +200,7 @@ final class PanelAnalisisAuditoriaController extends Controller
                 'productos' => [(string) $registro->id, (string) $registro->nombre, (string) $registro->categoria, (string) $registro->precio, (string) $registro->existencias, $registro->activo ? 'Sí' : 'No'],
                 'inventario' => [(string) $registro->id, (string) ($registro->product?->nombre ?? $registro->producto_id), (string) $registro->tipo_movimiento, (string) $registro->cantidad, (string) $registro->notas, (string) $registro->creado_en],
                 'compras' => [(string) $registro->id, (string) $registro->proveedor_id, (string) $registro->total, (string) $registro->estado, (string) $registro->fecha_compra],
+                'campanas' => [(string) $registro->id, (string) $registro->nombre, (string) $registro->ubicacion, (string) $registro->vistas, (string) $registro->clics, $registro->activo ? 'Sí' : 'No', (string) $registro->creado_en],
             };
         })->all();
         $pagina['metricas'][0][0] = 'Registros';
@@ -289,7 +293,7 @@ final class PanelAnalisisAuditoriaController extends Controller
             'filtrosBloqueados' => [],
             'tabla' => $titulo, 'columnas' => $columnas, 'filas' => [], 'grafico' => 'Registros por grupo',
             'barras' => [], 'resumen' => 'Resumen de registros', 'resumen_filas' => [], 'paginacion' => null,
-            'opcionesFiltros' => [], 'opcionesReportes' => ['ventas' => 'Ventas confirmadas', 'pedidos' => 'Pedidos válidos', 'clientes' => 'Clientes', 'productos' => 'Productos', 'inventario' => 'Movimientos de inventario', 'compras' => 'Compras'],
+            'opcionesFiltros' => [], 'opcionesReportes' => ['ventas' => 'Ventas confirmadas', 'pedidos' => 'Pedidos válidos', 'clientes' => 'Clientes', 'productos' => 'Productos', 'inventario' => 'Movimientos de inventario', 'compras' => 'Compras', 'campanas' => 'Campañas'],
         ];
     }
 
