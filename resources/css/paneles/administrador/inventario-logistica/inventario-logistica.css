@@ -97,7 +97,7 @@
 .tc-il__ranking > div { display: flex; align-items: center; gap: 9px; padding: 7px 0; border-bottom: 1px solid #e3ebf6; font-size: .68rem; }
 .tc-il__ranking b { display: grid; width: 20px; height: 20px; place-items: center; border-radius: 50%; color: #0658cb; background: #dcecff; }
 .tc-il__ranking span { flex: 1; }
-@media (max-width: 1300px) { .tc-il__metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tc-il__main-grid { grid-template-columns: minmax(0, 1fr); } .tc-il__bottom-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 800px) { .tc-il__metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tc-il__main-grid { grid-template-columns: minmax(0, 1fr); } .tc-il__bottom-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 760px) { .modulo-inventario-logistica .admin-main { padding: 15px 11px 26px; } .tc-il__header { align-items: start; flex-direction: column; } .tc-il__header-actions { width: 100%; } .tc-il__metrics, .tc-il__bottom-grid { grid-template-columns: minmax(0, 1fr); } .tc-il__filter-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tc-il__filter-fields .tc-il__button { grid-column: 1 / -1; } .tc-il__card-heading { flex-wrap: wrap; } }
 
 .tc-il [hidden] { display: none !important; }
