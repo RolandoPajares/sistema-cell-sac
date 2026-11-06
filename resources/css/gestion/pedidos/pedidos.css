@@ -1322,3 +1322,20 @@
     width: 100%;
   }
 }
+
+.pedidos-create-dialog { width: min(560px, calc(100vw - 24px)); max-width: none; padding: 0; border: 0; border-radius: 18px; overflow: hidden; box-shadow: 0 24px 80px rgba(10, 45, 95, .3); }
+.pedidos-create-dialog::backdrop { background: rgba(8, 35, 78, .58); backdrop-filter: blur(3px); }
+.pedidos-create-card { background: #fff; color: #173568; }
+.pedidos-create-header { display: flex; align-items: flex-start; gap: 12px; padding: 20px; background: linear-gradient(135deg, #f7fbff, #eaf5ff); border-bottom: 1px solid #dfebf5; }
+.pedidos-create-header > div { min-width: 0; flex: 1; }
+.pedidos-create-header small { color: #0874ed; font-size: .65rem; font-weight: 800; }
+.pedidos-create-header h2 { margin: 3px 0; color: #102653; font-size: 1.28rem; }
+.pedidos-create-header p { margin: 0; color: #7188aa; font-size: .72rem; }
+.pedidos-create-icon { display: grid; flex: 0 0 42px; width: 42px; height: 42px; place-items: center; border-radius: 12px; color: #0874ed; background: #dceeff; font-size: 1.2rem; }
+.pedidos-create-body { display: grid; gap: 10px; padding: 20px; }
+.pedidos-create-step { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid #e0ebf5; border-radius: 11px; background: #fbfdff; }
+.pedidos-create-step b { display: grid; flex: 0 0 28px; width: 28px; height: 28px; place-items: center; border-radius: 50%; color: #fff; background: #0874ed; }
+.pedidos-create-step span { display: grid; gap: 2px; }
+.pedidos-create-step strong { color: #19396d; font-size: .75rem; }
+.pedidos-create-step small { color: #7990b2; font-size: .66rem; }
+.pedidos-create-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 20px 20px; border-top: 1px solid #e5edf5; }

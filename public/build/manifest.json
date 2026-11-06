@@ -167,7 +167,7 @@
     "name": "rolldown-runtime"
   },
   "resources/css/panel.css": {
-    "file": "assets/panel-DCcRLobS.css",
+    "file": "assets/panel-BTbl7PET.css",
     "name": "panel",
     "names": [
       "panel.css"
@@ -176,7 +176,7 @@
     "isEntry": true
   },
   "resources/css/paneles/administrador/index.css": {
-    "file": "assets/administrador-DzHCzZy9.css",
+    "file": "assets/administrador-CCQ2E6cC.css",
     "src": "resources/css/paneles/administrador/index.css"
   },
   "resources/css/paneles/cliente-mayorista/index.css": {
@@ -296,7 +296,7 @@
     ]
   },
   "resources/js/modulos/paneles/administrador/index.js": {
-    "file": "assets/administrador-BqM2_yX_.js",
+    "file": "assets/administrador-Dcg_EEOx.js",
     "name": "administrador",
     "src": "resources/js/modulos/paneles/administrador/index.js",
     "isDynamicEntry": true,
@@ -318,7 +318,7 @@
       "resources/js/modulos/paneles/administrador/inventario-logistica/transferencias.js"
     ],
     "css": [
-      "assets/administrador-DzHCzZy9.css"
+      "assets/administrador-CCQ2E6cC.css"
     ]
   },
   "resources/js/modulos/paneles/administrador/inventario-logistica/inventario-logistica.js": {
@@ -406,7 +406,7 @@
     "isDynamicEntry": true
   },
   "resources/js/panel.js": {
-    "file": "assets/panel-qomep95X.js",
+    "file": "assets/panel-DIzCkuhZ.js",
     "name": "panel",
     "src": "resources/js/panel.js",
     "isEntry": true,
@@ -426,7 +426,7 @@
     ]
   },
   "resources/js/tienda.js": {
-    "file": "assets/tienda-CKpGm8rF.js",
+    "file": "assets/tienda-B003pCg8.js",
     "name": "tienda",
     "src": "resources/js/tienda.js",
     "isEntry": true,

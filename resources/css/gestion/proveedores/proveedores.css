@@ -8,6 +8,10 @@
     linear-gradient(135deg, #edf7ff 0%, #eaf5ff 54%, #f8fbff 100%);
 }
 
+.proveedores-hero { position: relative; }
+.proveedores-hero-create { position: absolute; top: 0; right: 0; }
+@media (max-width: 700px) { .proveedores-hero-create { position: static; margin-top: 12px; } }
+
 .proveedores-page,
 .proveedores-page *,
 .proveedores-page *::before,
