@@ -89,17 +89,20 @@ class AutenticacionController extends Controller
             ]);
 
             if ($role === 'cliente_mayorista') {
-                Cliente::create([
+                $customerData = [
                     'usuario_id' => $user->getKey(),
                     'tipo' => 'mayorista',
-                    'tipo_documento' => 'RUC',
                     'documento' => $data['ruc'],
                     'razon_social' => $data['nombre'],
                     'nombre_contacto' => $data['nombre'],
                     'correo' => mb_strtolower($data['correo']),
                     'activo' => true,
                     'creado_en' => now(),
-                ]);
+                ];
+                if (Schema::hasColumn('clientes', 'tipo_documento')) {
+                    $customerData['tipo_documento'] = 'RUC';
+                }
+                Cliente::create($customerData);
             }
 
             $audit->record($user->getKey(), 'registro_publico', 'autenticacion', $user->getKey(), null, ['rol' => $role], $request->ip());
