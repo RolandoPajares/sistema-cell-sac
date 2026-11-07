@@ -1,4 +1,4 @@
-@extends('layouts.tienda')
+@extends('layouts.auth.principal')
 
 @section('body_class', 'modulo-autenticacion')
 @section('title', 'Iniciar sesión')

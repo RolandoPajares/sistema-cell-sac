@@ -1,4 +1,4 @@
-@extends('layouts.administracion')
+@extends('layouts.panel.principal')
 
 @section('title', 'Publicidad inteligente')
 @section('body_class', 'modulo-publicidad-inteligente')

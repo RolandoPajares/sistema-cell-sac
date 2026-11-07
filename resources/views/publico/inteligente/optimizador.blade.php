@@ -1,4 +1,4 @@
-@extends('layouts.tienda')
+@extends('layouts.tienda.principal')
 
 @section('title', 'Optimizador de compra')
 @section('body_class', 'modulo-optimizador')

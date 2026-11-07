@@ -39,7 +39,7 @@ class CategoriaController extends Controller
         $filtros = $this->filtros($request);
         $resumen = $this->resumenCategorias($alcance['empresa_id']);
 
-        return view('gestion.categorias.listar', [
+        return view('gestion.inventario.categorias.listar', [
             'categories' => $this->consultaCategorias($filtros, $alcance['empresa_id'])->paginate(7)->withQueryString(),
             'filters' => $filtros,
             'totalCategories' => $resumen['total'],

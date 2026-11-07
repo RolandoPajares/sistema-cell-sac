@@ -34,14 +34,14 @@ final class DashboardGlobalSedesController extends Controller
         $filters = $this->filters($request);
         $sites = $this->sites();
 
-        return view('paneles.administrador.dashboard-global.sedes.listar', [
+        return view('gestion.analitica.dashboard-global.sedes.listar', [
             'filters' => $filters,
             'sites' => $sites,
             'results' => $this->results($filters, $sites),
             'hasSite' => $this->hasSite(),
             'hasChannel' => $this->hasChannel(),
             'channels' => $this->hasChannel() ? DB::table('pedidos')->whereNotNull('canal')->distinct()->orderBy('canal')->pluck('canal') : collect(),
-            'canExport' => $authorization->allows($request->user(), 'gestion.reportes.exportar'),
+            'canExport' => $authorization->allows($request->user(), 'gestion.analitica.reportes.exportar'),
         ]);
     }
 
@@ -57,7 +57,7 @@ final class DashboardGlobalSedesController extends Controller
      */
     public function export(Request $request, string $format, ExportadorTabular $exporter, ServicioAutorizacion $authorization, RegistradorAuditoria $auditor): Response|StreamedResponse
     {
-        $authorization->assertAllowed($request->user(), 'gestion.reportes.exportar');
+        $authorization->assertAllowed($request->user(), 'gestion.analitica.reportes.exportar');
         abort_unless(in_array($format, ['pdf', 'excel', 'csv'], true), 404);
 
         $filters = $this->filters($request);

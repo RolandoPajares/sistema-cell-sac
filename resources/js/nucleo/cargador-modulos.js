@@ -1,4 +1,4 @@
-const modulos = import.meta.glob('../modulos/**/*.js');
+const modulos = import.meta.glob('../publico/**/*.js');
 
 /**
  * Solicita o carga la información necesaria para la interacción.
@@ -8,7 +8,7 @@ const modulos = import.meta.glob('../modulos/**/*.js');
  * @returns {*} Resultado de la operación.
  */
 export async function cargarModulo(ruta) {
-    const clave = `../modulos/${ruta.replace(/^\/+|\/+$/g, '')}.js`;
+    const clave = `../publico/${ruta.replace(/^\/+|\/+$/g, '')}.js`;
     const modulo = modulos[clave];
 
     return modulo ? modulo() : null;

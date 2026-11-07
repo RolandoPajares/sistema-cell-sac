@@ -157,7 +157,7 @@ class VentaController extends Controller
         $sedesDisponibles = Sede::query()->whereIn('id', $this->ventas->query($request->user(), $filtrosDisponibles)->select('ventas.sede_id'))
             ->orderBy('nombre')->orderBy('id')->get(['id', 'nombre']);
 
-        return view('gestion.ventas.listar', [
+        return view('gestion.comercial.ventas.listar', [
             ...$this->ventas->resumen($request->user(), $filtros),
             'filters' => $filtros,
             'estados' => $estados,
@@ -304,8 +304,8 @@ class VentaController extends Controller
         ];
 
         $vista = $tipoCliente === 'mayorista'
-            ? 'paneles.administrador.operaciones-comerciales.ventas-mayoristas.listar'
-            : 'paneles.administrador.operaciones-comerciales.ventas-minoristas.listar';
+            ? 'gestion.comercial.operaciones-comerciales.ventas-mayoristas.listar'
+            : 'gestion.comercial.operaciones-comerciales.ventas-minoristas.listar';
 
         return view($vista, compact('datos', 'filtros'));
     }

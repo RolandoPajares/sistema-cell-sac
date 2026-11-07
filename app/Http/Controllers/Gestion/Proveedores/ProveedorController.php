@@ -86,7 +86,7 @@ class ProveedorController extends Controller
             ->limit(4)
             ->get();
 
-        return view('gestion.proveedores.listar', [
+        return view('gestion.inventario.proveedores.listar', [
             'suppliers' => $proveedores,
             'selectedSupplier' => $proveedorSeleccionado,
             'purchaseStatusCounts' => $estadosCompra,

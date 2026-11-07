@@ -69,7 +69,7 @@ class PedidoController extends Controller
             abort(403);
         }
 
-        return view('publico.comercio.pedidos', ['orders' => $query->paginate(20)]);
+        return view('cuenta.pedidos.index', ['orders' => $query->paginate(20)]);
     }
 
     /**
@@ -105,7 +105,7 @@ class PedidoController extends Controller
         $statusSummary = $this->statusSummary($statusCounts, $totalOrders);
         $customerSummary = $this->customerSummary($request, $totalOrders);
 
-        return view('publico.comercio.pedidos', [
+        return view('gestion.comercial.pedidos.index', [
             'orders' => $orders,
             'adminView' => true,
             'filters' => $filters,
@@ -189,7 +189,7 @@ class PedidoController extends Controller
         $order->loadMissing('user');
         $this->authorize('view', $order);
 
-        return view('publico.comercio.pedido', ['order' => $order->load('details.product', 'user')]);
+        return view('publico.comercio.confirmacion', ['order' => $order->load('details.product', 'user')]);
     }
 
     /**

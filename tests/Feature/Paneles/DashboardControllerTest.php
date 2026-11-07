@@ -15,12 +15,12 @@ it('renders the role dashboard from the shared account entry point', function (s
         ->assertViewIs($view)
         ->assertViewHas('role', $role);
 })->with([
-    ['marketing', 'paneles.marketing.dashboard'],
-    ['compras_logistica', 'paneles.compras-logistica.dashboard'],
-    ['ventas_mayoristas', 'paneles.ventas-mayoristas.dashboard'],
-    ['ventas_minoristas', 'paneles.ventas-minoristas.dashboard'],
-    ['cliente_mayorista', 'paneles.cliente-mayorista.dashboard'],
-    ['cliente_minorista', 'paneles.cliente-minorista.dashboard'],
+    ['marketing', 'paneles.dashboard-publico'],
+    ['compras_logistica', 'paneles.dashboard-publico'],
+    ['ventas_mayoristas', 'paneles.dashboard-publico'],
+    ['ventas_minoristas', 'paneles.dashboard-publico'],
+    ['cliente_mayorista', 'paneles.dashboard-publico'],
+    ['cliente_minorista', 'paneles.dashboard-publico'],
 ]);
 
 it('renders the administrator dashboard through both existing admin entry points', function (): void {
@@ -29,14 +29,14 @@ it('renders the administrator dashboard through both existing admin entry points
     $this->actingAs($user)
         ->get(route('management.dashboard'))
         ->assertOk()
-        ->assertViewIs('paneles.administrador.dashboard')
+        ->assertViewIs('paneles.dashboard')
         ->assertViewHas('products', 0)
         ->assertSee('No hay productos registrados');
 
     $this->actingAs($user)
         ->get(route('legacy.admin.dashboard'))
         ->assertOk()
-        ->assertViewIs('paneles.administrador.dashboard');
+        ->assertViewIs('paneles.dashboard');
 });
 
 it('keeps the administrator account configuration on the account route', function (): void {
@@ -45,7 +45,7 @@ it('keeps the administrator account configuration on the account route', functio
     $this->actingAs($user)
         ->get(route('dashboard'))
         ->assertOk()
-        ->assertViewIs('paneles.administrador.perfil.editar');
+        ->assertViewIs('paneles.perfil.editar');
 });
 
 it('renders the unified profile for every configured role', function (string $role): void {

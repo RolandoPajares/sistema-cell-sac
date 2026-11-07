@@ -48,7 +48,7 @@ final class DashboardGlobalVentasController extends Controller
         $registeredCount = (clone $orders)->count();
         $nonCancelledCount = (clone $orders)->whereNotIn('estado', ['Cancelado', 'Cancelada'])->count();
 
-        return view('paneles.administrador.dashboard-global.ventas.listar', [
+        return view('gestion.analitica.dashboard-global.ventas.listar', [
             'filters' => $filters,
             'sites' => $this->availableSites($request->user(), $authorization),
             'channels' => $this->hasChannel() ? (clone $orders)->whereNotNull('canal')->distinct()->orderBy('canal')->pluck('canal') : collect(),
@@ -61,7 +61,7 @@ final class DashboardGlobalVentasController extends Controller
             'completedCount' => null,
             'dailyTotals' => collect(),
             'channelTotals' => collect(),
-            'canExport' => $authorization->allows($request->user(), 'gestion.reportes.exportar'),
+            'canExport' => $authorization->allows($request->user(), 'gestion.analitica.reportes.exportar'),
         ]);
     }
 
@@ -78,7 +78,7 @@ final class DashboardGlobalVentasController extends Controller
     public function export(Request $request, string $format, ExportadorTabular $exporter, ServicioAutorizacion $authorization, RegistradorAuditoria $auditor): Response|StreamedResponse
     {
         $this->authorizeDashboard($request->user(), $authorization);
-        $authorization->assertAllowed($request->user(), 'gestion.reportes.exportar');
+        $authorization->assertAllowed($request->user(), 'gestion.analitica.reportes.exportar');
         abort_unless(in_array($format, ['pdf', 'excel', 'csv'], true), 404);
         $filters = $this->filters($request, $authorization);
         $orders = $this->orders($request->user(), $filters, $authorization);

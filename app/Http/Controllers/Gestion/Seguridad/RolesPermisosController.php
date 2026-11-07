@@ -42,7 +42,7 @@ class RolesPermisosController extends Controller
             : collect();
         $permissionCount = $ready ? DB::table('permisos')->where('activo', true)->count() : 0;
 
-        return view('gestion.roles-permisos.listar', compact('ready', 'roles', 'permissionCount', 'search', 'status'));
+        return view('gestion.administracion.roles-permisos.listar', compact('ready', 'roles', 'permissionCount', 'search', 'status'));
     }
 
     /**
@@ -66,7 +66,7 @@ class RolesPermisosController extends Controller
         $screenCount = $ready ? DB::table('pantallas')->where('habilitada', true)->count() : 0;
         $assignedPermissionCount = $ready ? DB::table('roles_permisos')->join('roles', 'roles.id', '=', 'roles_permisos.rol_id')->where('roles.activo', true)->distinct()->count(DB::raw('CONCAT(roles_permisos.rol_id, ":", roles_permisos.permiso_id, ":", roles_permisos.alcance)')) : 0;
 
-        return view('gestion.roles-permisos.matriz', compact('ready', 'roles', 'selectedRole', 'permissions', 'permissionCount', 'moduleCount', 'screenCount', 'assignedPermissionCount', 'recommendedPermissionIds', 'previewItems'));
+        return view('gestion.administracion.roles-permisos.matriz', compact('ready', 'roles', 'selectedRole', 'permissions', 'permissionCount', 'moduleCount', 'screenCount', 'assignedPermissionCount', 'recommendedPermissionIds', 'previewItems'));
     }
 
     /**

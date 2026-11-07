@@ -39,7 +39,7 @@ class CuentasFinancierasController extends Controller
      */
     public function index(Request $request, ServicioAutorizacion $autorizacion): View
     {
-        $datosConfiguracion = require resource_path('views/paneles/administrador/finanzas-facturacion/componentes/datos.php');
+        $datosConfiguracion = require config_path('gestion/finanzas-facturacion.php');
         $pagina = $datosConfiguracion['cuentas'];
         $datosReales = $this->consultasCuentas->obtenerVista(User::query()->findOrFail(auth()->id()));
         $usuario = $request->user();
@@ -106,7 +106,7 @@ class CuentasFinancierasController extends Controller
         $pagina['aside']['descripcion'] = 'Registra obligaciones desde compras recibidas y aplica pagos o cobros locales previamente registrados.';
         $pagina['aviso'] = 'Los saldos se calculan con documentos, compras y aplicaciones registrados en MariaDB.';
 
-        return view('paneles.administrador.finanzas-facturacion.cuentas.listar', ['paginaReal' => $pagina]);
+        return view('gestion.finanzas.cuentas.listar', ['paginaReal' => $pagina]);
     }
 
     /**

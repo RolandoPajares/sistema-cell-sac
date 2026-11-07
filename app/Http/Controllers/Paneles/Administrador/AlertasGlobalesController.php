@@ -56,7 +56,7 @@ final class AlertasGlobalesController extends Controller
             $notificacionSeleccionada = $notificaciones->first();
         }
 
-        return view('paneles.administrador.dashboard-global.alertas.listar', [
+        return view('gestion.analitica.dashboard-global.alertas.listar', [
             'disponible' => $disponible,
             'estado' => $estado,
             'busqueda' => $busqueda,

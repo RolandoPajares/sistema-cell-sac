@@ -58,7 +58,7 @@ class SesionCajaController extends Controller
             ->where('activa', true)->whereDoesntHave('sesiones', static fn (Builder $query): Builder => $query->where('estado', 'abierta'))
             ->with('sede:id,nombre')->orderBy('codigo')->get();
 
-        return view('paneles.administrador.finanzas-facturacion.aperturas-cierres.operativa', [
+        return view('gestion.finanzas.aperturas-cierres.operativa', [
             'sessions' => $sessions,
             'sites' => $sites,
             'boxes' => $boxes,
@@ -104,7 +104,7 @@ class SesionCajaController extends Controller
             && $authorization->allowsRecord($request->user(), 'gestion.pagos.consultar',
                 (int) $site->empresa_id, (int) $site->id), 404);
 
-        return view('paneles.administrador.finanzas-facturacion.aperturas-cierres.detalle', [
+        return view('gestion.finanzas.aperturas-cierres.detalle', [
             'session' => $sesionCaja,
             'movements' => $sesionCaja->movimientos()->with('creador:id,nombre')->latest('id')->paginate(25),
             'balance' => $boxes->arqueo($sesionCaja),

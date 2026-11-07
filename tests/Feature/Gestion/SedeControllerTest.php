@@ -14,7 +14,7 @@ it('muestra el estado vacío de sedes con indicadores reales y permite iniciar u
     $this->actingAs($administrador)
         ->get(route('management.company_settings.sites'))
         ->assertOk()
-        ->assertViewIs('paneles.administrador.organizacion.sedes.listar')
+        ->assertViewIs('gestion.organizacion.sedes.listar')
         ->assertViewHas('sedes', fn ($sedes): bool => $sedes->total() === 0)
         ->assertViewHas('resumen', fn (array $resumen): bool => $resumen['total'] === 0
             && $resumen['activas'] === 0

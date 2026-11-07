@@ -1,4 +1,4 @@
-@extends((auth()->user()->isRole('administrador') || auth()->user()->isRole('ventas_minoristas') || auth()->user()->isRole('ventas_mayoristas')) ? 'layouts.administracion' : 'layouts.tienda')
+@extends((auth()->user()->isRole('administrador') || auth()->user()->isRole('ventas_minoristas') || auth()->user()->isRole('ventas_mayoristas')) ? 'layouts.panel.principal' : 'layouts.tienda.principal')
 @section('title', 'Pedido #'.$order->id)
 @section('content')
 <section class="{{ (auth()->user()->isRole('administrador') || auth()->user()->isRole('ventas_minoristas') || auth()->user()->isRole('ventas_mayoristas')) ? 'admin-page' : 'container content-page' }}">

@@ -75,7 +75,7 @@ class ClienteController extends Controller
             ->get(['id', 'nombre_contacto', 'correo', 'creado_en']);
         $recentActivity = $this->recentActivity($recentOrders, $recentCustomers);
 
-        return view('gestion.clientes.listar', [
+        return view('gestion.comercial.clientes.listar', [
             'customers' => $customers,
             'filters' => $filters,
             'cities' => $consultaClientes()->whereNotNull('ciudad')->where('ciudad', '<>', '')->distinct()->orderBy('ciudad')->pluck('ciudad'),

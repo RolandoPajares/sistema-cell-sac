@@ -64,7 +64,7 @@ class ReporteController extends Controller
         $inventoryReport = $this->inventoryReport();
         $campaignReport = $this->campaignReport($period['from'], $period['to']);
 
-        return view('gestion.reportes.listar', [
+        return view('gestion.analitica.reportes.listar', [
             'filters' => $filters,
             'activeView' => $this->activeView($request),
             'periodLabel' => $this->periodLabel($request, $period['from'], $period['to']),

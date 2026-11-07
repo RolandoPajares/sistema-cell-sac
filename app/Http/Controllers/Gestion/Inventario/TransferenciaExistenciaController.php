@@ -36,7 +36,7 @@ class TransferenciaExistenciaController extends Controller
             'estado' => ['nullable', 'in:solicitada,aprobada,en tránsito,recibida parcialmente,recibida totalmente,cerrada,rechazada,cancelada'],
         ]);
 
-        return view('paneles.administrador.inventario-logistica.transferencias.listar', [
+        return view('gestion.inventario.transferencias.listar', [
             ...$transfers->pageData($this->actor($request), [
                 'buscar' => trim((string) ($filters['buscar'] ?? '')) ?: null,
                 'estado' => $filters['estado'] ?? null,

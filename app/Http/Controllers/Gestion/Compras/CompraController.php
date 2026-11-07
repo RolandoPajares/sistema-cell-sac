@@ -225,7 +225,7 @@ class CompraController extends Controller
             $tokensRecepcion[$purchase->id] = $tokenExistente;
         }
 
-        return view('gestion.compras.listar', [
+        return view('gestion.comercial.compras.listar', [
             'purchases' => $purchases,
             'suppliers' => $suppliers,
             'supplierFilters' => $proveedoresVisibles,

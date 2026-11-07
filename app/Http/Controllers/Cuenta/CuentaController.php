@@ -38,7 +38,7 @@ class CuentaController extends Controller
         if ($user->isRole('administrador')) {
             $user->loadMissing('customer');
 
-            return view('paneles.administrador.perfil.editar', [
+            return view('paneles.perfil.editar', [
                 'role' => 'administrador',
             ]);
         }
@@ -61,17 +61,13 @@ class CuentaController extends Controller
         abort_unless($user instanceof User, 403);
         $user->loadMissing('customer');
 
-        $profileViews = [
-            'administrador' => 'paneles.administrador.perfil.mostrar',
-            'compras_logistica' => 'paneles.compras-logistica.perfil.mostrar',
-            'ventas_mayoristas' => 'paneles.ventas-mayoristas.perfil.mostrar',
-            'ventas_minoristas' => 'paneles.ventas-minoristas.perfil.mostrar',
-            'marketing' => 'paneles.marketing.perfil.mostrar',
-            'cliente_mayorista' => 'paneles.cliente-mayorista.perfil.mostrar',
-            'cliente_minorista' => 'paneles.cliente-minorista.perfil.mostrar',
-        ];
+        if ($user->isRole('administrador')) {
+            return view('paneles.perfil.mostrar', [
+                'role' => 'administrador',
+            ]);
+        }
 
-        return view($profileViews[$user->rol] ?? $profileViews['cliente_minorista'], [
+        return view('paneles.perfil.rol', [
             'role' => $user->rol,
         ]);
     }

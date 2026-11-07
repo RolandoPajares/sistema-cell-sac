@@ -17,11 +17,7 @@
         <input type="search" data-admin-global-search placeholder="Buscar productos, clientes, campañas..." aria-label="Buscar productos, clientes o campañas">
     </label>
     <button class="admin-ai-button" type="button" data-admin-assistant-toggle aria-controls="adminAssistantPanel" aria-expanded="false"><i class="bi bi-stars" aria-hidden="true"></i><span>Asistente IA</span></button>
-    @if ($isAdministrator)
-        <a class="admin-topbar-icon" href="{{ route('management.account.notifications') }}" aria-label="Mis notificaciones"><i class="bi bi-bell" aria-hidden="true"></i></a>
-    @else
-        <span class="admin-topbar-icon" aria-label="Notificaciones"><i class="bi bi-bell" aria-hidden="true"></i></span>
-    @endif
+    @include('layouts.panel.notificaciones')
     <button class="admin-topbar-icon" type="button" aria-label="Ayuda"><i class="bi bi-question-circle" aria-hidden="true"></i></button>
     <details class="admin-user-menu">
         <summary class="admin-user" aria-label="Abrir menú de usuario">

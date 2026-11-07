@@ -32,6 +32,6 @@ final class DispositivosController extends Controller
     {
         $datos = $this->dispositivos->listar($solicitud->user(), $solicitud->validated());
 
-        return view('paneles.administrador.inventario-logistica.series.listar', $datos);
+        return view('gestion.inventario.series.listar', $datos);
     }
 }

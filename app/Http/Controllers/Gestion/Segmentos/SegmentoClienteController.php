@@ -49,7 +49,7 @@ class SegmentoClienteController extends Controller
 
         $allSegments = SegmentoCliente::query();
 
-        return view('gestion.segmentos.listar', [
+        return view('gestion.marketing.segmentos.listar', [
             'segments' => $query->paginate(30)->withQueryString(),
             'activeSegments' => (clone $allSegments)->where('activo', true)->count(),
             'dynamicSegments' => (clone $allSegments)->where('tipo', '!=', 'roles')->count(),

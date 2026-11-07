@@ -50,7 +50,7 @@ class InicioController extends Controller
 
         $categories = Categoria::query()->where('activo', true)->get();
 
-        return view('publico.inicio.index', [
+        return view('publico.paginas.inicio', [
             'featuredProducts' => $featuredProducts,
             'cellCategoryId' => $this->categoryId($categories, 'celular'),
             'accessoryCategoryId' => $this->categoryId($categories, 'accesorio'),

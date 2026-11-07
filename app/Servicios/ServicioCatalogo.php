@@ -89,7 +89,7 @@ class ServicioCatalogo
      */
     public function relacionados(Producto $producto): Collection
     {
-        return Producto::query()
+        $query = Producto::query()
             ->with(['category', 'images', 'variants'])
             ->active()
             ->where('id', '<>', $producto->getKey())
@@ -99,6 +99,20 @@ class ServicioCatalogo
             })
             ->orderByRaw('CASE WHEN marca = ? THEN 0 ELSE 1 END', [$producto->marca])
             ->orderByDesc('precio_oferta')
+            ->orderByDesc('id')
+            ->limit(4);
+
+        $relatedProducts = $query->get();
+
+        if ($relatedProducts->isNotEmpty()) {
+            return $relatedProducts;
+        }
+
+        return Producto::query()
+            ->with(['category', 'images', 'variants'])
+            ->active()
+            ->where('id', '<>', $producto->getKey())
+            ->orderByDesc('creado_en')
             ->orderByDesc('id')
             ->limit(4)
             ->get();

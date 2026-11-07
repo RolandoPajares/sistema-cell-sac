@@ -130,7 +130,7 @@ class GestionProductosController extends Controller
                 ->selectRaw('COUNT(*) AS cantidad, COALESCE(AVG(precio_actual.precio), 0) AS promedio')->first();
         }
 
-        return view('paneles.administrador.ecommerce-marketing.precios.listar', [
+        return view('gestion.marketing.ecommerce-marketing.precios.listar', [
             'productos' => $productos,
             'paginacion' => $paginacion,
             'filtros' => $filtros,
@@ -254,7 +254,7 @@ class GestionProductosController extends Controller
         }
         unset($seccion);
 
-        return view('paneles.administrador.ecommerce-marketing.tienda.listar', [
+        return view('gestion.marketing.ecommerce-marketing.tienda.listar', [
             'empresa' => $empresa,
             'mediosPago' => $mediosPago,
             'configuracionTienda' => $configuracionTienda,
@@ -342,7 +342,7 @@ class GestionProductosController extends Controller
             }
         }
 
-        return view('gestion.productos.listar', [
+        return view('gestion.inventario.productos.listar', [
             'products' => $paginaProductos,
             'categories' => Categoria::query()->where('empresa_id', $alcance['empresa_id'])->where('activo', true)->orderBy('nombre')->get(),
             'brands' => Producto::query()

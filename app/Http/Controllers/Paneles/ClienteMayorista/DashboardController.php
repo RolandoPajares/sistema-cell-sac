@@ -28,6 +28,6 @@ final class DashboardController extends PanelDashboardController
      */
     protected function viewName(): string
     {
-        return 'paneles.cliente-mayorista.dashboard';
+        return 'paneles.dashboard-publico';
     }
 }

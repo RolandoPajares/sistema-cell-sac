@@ -43,7 +43,7 @@ class CuponController extends Controller
             return $coupon;
         }));
 
-        return view('gestion.cupones.listar', [
+        return view('gestion.marketing.cupones.listar', [
             'coupons' => $couponList,
             'filters' => $filters,
             ...$coupons->dashboard($empresaId),

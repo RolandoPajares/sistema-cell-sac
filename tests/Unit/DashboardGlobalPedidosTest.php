@@ -86,7 +86,7 @@ function preparePedidosDashboardAuthorization(): void
     DB::table('modulos')->insert(['id' => 1, 'habilitado' => true]);
     DB::table('permisos')->insert([
         ['id' => 1, 'codigo' => 'gestion.panel.consultar', 'modulo_id' => 1, 'activo' => true],
-        ['id' => 2, 'codigo' => 'gestion.reportes.exportar', 'modulo_id' => 1, 'activo' => true],
+        ['id' => 2, 'codigo' => 'gestion.analitica.reportes.exportar', 'modulo_id' => 1, 'activo' => true],
     ]);
     DB::table('roles_permisos')->insert([
         ['rol_id' => 1, 'permiso_id' => 1, 'alcance' => 'empresa'],

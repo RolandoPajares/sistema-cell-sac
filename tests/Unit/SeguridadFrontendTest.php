@@ -26,7 +26,7 @@ function contenidoFrontendQa(string $ruta): string
 }
 
 test('el asistente escapa mensajes y nombres de productos antes de usar innerHTML', function (): void {
-    $javascript = contenidoFrontendQa('resources/js/modulos/publico/asistente/index.js');
+    $javascript = contenidoFrontendQa('resources/js/publico/asistente/index.js');
 
     expect($javascript)->toContain('const escaparHtml = (valor)')
         ->toContain('"<": "&lt;"')
@@ -44,7 +44,7 @@ test('el formulario de ventas escapa el nombre de producto antes de construir HT
 });
 
 test('el preview CSV escapa caracteres HTML antes de insertarlos en la tabla', function (): void {
-    $vista = contenidoFrontendQa('resources/views/gestion/clientes/listar.blade.php');
+    $vista = contenidoFrontendQa('resources/views/gestion/comercial/clientes/listar.blade.php');
 
     expect($vista)->toContain("replaceAll('&', '&amp;')")
         ->toContain("replaceAll('<', '&lt;')")

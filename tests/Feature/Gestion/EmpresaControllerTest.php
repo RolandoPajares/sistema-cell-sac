@@ -10,7 +10,7 @@ it('consulta la ficha empresarial y sus relaciones reales', function (): void {
     $this->actingAs($administrador)
         ->get(route('management.company_settings.data'))
         ->assertOk()
-        ->assertViewIs('paneles.administrador.organizacion.empresa.listar')
+        ->assertViewIs('gestion.organizacion.empresa.listar')
         ->assertViewHas('empresa', fn ($empresa): bool => (int) $empresa->id === $organizacion['empresa_id']
             && $empresa->razon_social === 'Empresa sintética de pruebas'
             && $empresa->sedes_count === 1

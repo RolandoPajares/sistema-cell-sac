@@ -51,7 +51,7 @@ class GestionUsuariosController extends Controller
         $roleCodes = $this->roleCodes();
         $totalUsers = User::query()->count();
 
-        return view('gestion.usuarios.listar', [
+        return view('gestion.administracion.usuarios.listar', [
             'users' => $users,
             'roles' => $roleCodes,
             'roleLabels' => $this->roleLabels($roleCodes),

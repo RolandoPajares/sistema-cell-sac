@@ -58,7 +58,7 @@ final class DashboardController extends PanelDashboardController
      */
     protected function viewName(): string
     {
-        return 'paneles.administrador.dashboard';
+        return 'paneles.dashboard';
     }
 
     /**

@@ -34,7 +34,7 @@ class SoporteReclamoController extends Controller
      */
     public function index(Request $request, ServicioAutorizacion $authorization): View
     {
-        $module = require resource_path('views/gestion/soporte-reclamos/datos.php');
+        $module = require config_path('gestion/soporte/reclamos.php');
         $siteIds = $authorization->authorizedSiteIds($request->user(), 'gestion.soporte.consultar');
         $query = CasoSoporte::query()->with('cliente:id,nombre_contacto,razon_social');
         if ($siteIds === []) {
@@ -75,7 +75,7 @@ class SoporteReclamoController extends Controller
         $module['kpis'][2]['value'] = (string) (clone $all)->whereIn('estado', ['resuelto', 'cerrado'])->count();
         $module['kpis'][3]['value'] = (string) (clone $all)->whereIn('prioridad', ['alta', 'urgente'])->count();
 
-        return view('gestion.soporte-reclamos.listar', compact('module'));
+        return view('gestion.soporte.reclamos.listar', compact('module'));
     }
 
     /**

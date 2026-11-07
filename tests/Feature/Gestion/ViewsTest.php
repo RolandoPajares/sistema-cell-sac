@@ -13,20 +13,20 @@ use Tests\SpanishAccessFixture;
 it('renders each management module with its canonical list view', function () {
     $admin = SpanishAccessFixture::user('administrador');
     $viewsByRoute = [
-        'management.audit' => 'paneles.administrador.analisis-auditoria.auditoria-operaciones.listar',
-        'management.campaigns' => 'gestion.campanias.listar',
-        'management.categories' => 'gestion.categorias.listar',
-        'management.customers' => 'gestion.clientes.listar',
-        'management.purchases' => 'gestion.compras.listar',
-        'quotations.index' => 'gestion.cotizaciones.listar',
-        'management.quotations' => 'gestion.cotizaciones.administrador',
-        'management.coupons' => 'gestion.cupones.listar',
-        'management.inventory' => 'gestion.inventario.listar',
-        'management.products' => 'gestion.productos.listar',
-        'management.suppliers' => 'gestion.proveedores.listar',
-        'management.reports' => 'gestion.reportes.listar',
-        'management.segments' => 'gestion.segmentos.listar',
-        'management.users' => 'gestion.usuarios.listar',
+        'management.audit' => 'gestion.analitica.analisis-auditoria.auditoria-operaciones.listar',
+        'management.campaigns' => 'gestion.marketing.campanias.listar',
+        'management.categories' => 'gestion.inventario.categorias.listar',
+        'management.customers' => 'gestion.comercial.clientes.listar',
+        'management.purchases' => 'gestion.comercial.compras.listar',
+        'quotations.index' => 'gestion.comercial.cotizaciones.listar',
+        'management.quotations' => 'gestion.comercial.cotizaciones.administrador',
+        'management.coupons' => 'gestion.marketing.cupones.listar',
+        'management.inventory' => 'gestion.inventario.existencias.listar',
+        'management.products' => 'gestion.inventario.productos.listar',
+        'management.suppliers' => 'gestion.inventario.proveedores.listar',
+        'management.reports' => 'gestion.analitica.reportes.listar',
+        'management.segments' => 'gestion.marketing.segmentos.listar',
+        'management.users' => 'gestion.administracion.usuarios.listar',
     ];
 
     foreach ($viewsByRoute as $routeName => $viewName) {
@@ -87,7 +87,7 @@ it('filters the administrator quotation dashboard and calculates real status tot
     $this->actingAs($admin)
         ->get(route('management.quotations', ['estado' => 'Aprobada']))
         ->assertOk()
-        ->assertViewIs('gestion.cotizaciones.administrador')
+        ->assertViewIs('gestion.comercial.cotizaciones.administrador')
         ->assertViewHas('totalQuotations', 2)
         ->assertViewHas('pendingQuotations', 1)
         ->assertViewHas('approvedQuotations', 1)
@@ -327,7 +327,7 @@ it('opens the independent inventory movement history within RBAC scope', functio
     $this->withoutVite()->actingAs($admin)
         ->get(route('management.inventory.movements'))
         ->assertOk()
-        ->assertViewIs('gestion.inventario.listar')
+        ->assertViewIs('gestion.inventario.existencias.listar')
         ->assertViewHas('verHistorialMovimientos', true)
         ->assertViewHas('recentMovements', fn ($movimientos): bool => $movimientos->total() === 1)
         ->assertSee('Historial de movimientos')
@@ -429,7 +429,7 @@ it('filters purchases and calculates their dashboard totals', function () {
             'estado' => 'Recibida',
         ]))
         ->assertOk()
-        ->assertViewIs('gestion.compras.listar')
+        ->assertViewIs('gestion.comercial.compras.listar')
         ->assertViewHas('totalPurchases', 2)
         ->assertViewHas('pendingPurchases', 1)
         ->assertViewHas('receivedPurchases', 1)

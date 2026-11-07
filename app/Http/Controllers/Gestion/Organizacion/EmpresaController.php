@@ -44,7 +44,7 @@ class EmpresaController extends Controller
             ->join('sedes', 'sedes.id', '=', 'almacenes.sede_id')
             ->where('sedes.empresa_id', $empresaId)->count();
 
-        return view('paneles.administrador.organizacion.empresa.listar', [
+        return view('gestion.organizacion.empresa.listar', [
             'empresa' => $empresa,
             'almacenes' => $almacenes,
             'puedeEditar' => $request->user() instanceof User

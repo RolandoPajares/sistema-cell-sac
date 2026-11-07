@@ -5,7 +5,7 @@
         || auth()->user()?->isRole('ventas_minoristas')
         || auth()->user()?->isRole('ventas_mayoristas');
 @endphp
-@extends($isAdmin ? 'layouts.administracion' : 'layouts.tienda')
+@extends($isAdmin ? 'layouts.panel.principal' : 'layouts.tienda.principal')
 
 @section('title', 'Pedidos')
 @section('body_class', 'modulo-pedidos')

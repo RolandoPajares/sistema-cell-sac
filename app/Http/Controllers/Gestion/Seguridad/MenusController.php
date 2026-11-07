@@ -45,7 +45,7 @@ class MenusController extends Controller
         $hiddenElements = $ready ? ElementoMenu::query()->where('habilitado', false)->count() : 0;
         $recentChanges = $ready ? ElementoMenu::query()->where('actualizado_en', '>=', now()->subDays(7))->count() : 0;
 
-        return view('gestion.menus.listar', compact('ready', 'menus', 'roles', 'screens', 'activeMenus', 'activeSubmenus', 'hiddenElements', 'recentChanges'));
+        return view('gestion.administracion.menus.listar', compact('ready', 'menus', 'roles', 'screens', 'activeMenus', 'activeSubmenus', 'hiddenElements', 'recentChanges'));
     }
 
     /**
@@ -183,7 +183,7 @@ class MenusController extends Controller
                 })
             : collect();
 
-        return view('gestion.roles-permisos.modulos', compact('ready', 'modules'));
+        return view('gestion.administracion.roles-permisos.modulos', compact('ready', 'modules'));
     }
 
     /**

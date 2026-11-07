@@ -280,6 +280,6 @@ final class ConfiguracionSistemaController extends Controller
      */
     private function pagina(string $tipo, array $datos): View
     {
-        return view('paneles.administrador.configuracion-sistema.'.$tipo.'.listar', $datos + ['tipo' => $tipo]);
+        return view('gestion.configuracion.configuracion-sistema.'.$tipo.'.listar', $datos + ['tipo' => $tipo]);
     }
 }

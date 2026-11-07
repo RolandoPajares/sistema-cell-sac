@@ -54,7 +54,7 @@ final class DashboardGlobalPedidosController extends Controller
             : collect();
         $availableOrders = $this->orders($request->user(), $filters, $authorization, false);
 
-        return view('paneles.administrador.dashboard-global.pedidos.listar', [
+        return view('gestion.analitica.dashboard-global.pedidos.listar', [
             'filters' => $filters,
             'sites' => $this->availableSites($request->user(), $authorization),
             'channels' => $this->hasChannel() ? (clone $availableOrders)->whereNotNull('canal')->distinct()->orderBy('canal')->pluck('canal') : collect(),
@@ -65,7 +65,7 @@ final class DashboardGlobalPedidosController extends Controller
             'byStatus' => $byStatus,
             'byChannel' => $byChannel,
             'activity' => $activity,
-            'canExport' => $authorization->allows($request->user(), 'gestion.reportes.exportar'),
+            'canExport' => $authorization->allows($request->user(), 'gestion.analitica.reportes.exportar'),
         ]);
     }
 
@@ -82,7 +82,7 @@ final class DashboardGlobalPedidosController extends Controller
     public function export(Request $request, string $format, ExportadorTabular $exporter, ServicioAutorizacion $authorization, RegistradorAuditoria $auditor): Response|StreamedResponse
     {
         $this->authorizeDashboard($request->user(), $authorization);
-        $authorization->assertAllowed($request->user(), 'gestion.reportes.exportar');
+        $authorization->assertAllowed($request->user(), 'gestion.analitica.reportes.exportar');
         abort_unless(in_array($format, ['pdf', 'excel', 'csv'], true), 404);
         $filters = $this->filters($request, $authorization);
         $orders = $this->orders($request->user(), $filters, $authorization);

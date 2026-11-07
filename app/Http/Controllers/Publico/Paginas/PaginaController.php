@@ -44,6 +44,38 @@ class PaginaController extends Controller
     }
 
     /**
+     * Muestra el libro de reclamaciones informativo de la tienda.
+     */
+    public function claimsBook(): View
+    {
+        return view('publico.paginas.libro-reclamaciones');
+    }
+
+    /**
+     * Muestra la política de privacidad informativa de la tienda.
+     */
+    public function privacyPolicy(): View
+    {
+        return view('publico.paginas.politicas-privacidad');
+    }
+
+    /**
+     * Muestra los términos y condiciones informativos de la tienda.
+     */
+    public function terms(): View
+    {
+        return view('publico.paginas.terminos-condiciones');
+    }
+
+    /**
+     * Muestra las preguntas frecuentes de la tienda.
+     */
+    public function frequentlyAskedQuestions(): View
+    {
+        return view('publico.paginas.preguntas-frecuentes');
+    }
+
+    /**
      * Ejecuta la operación sendContact definida por la clase PaginaController.
      *
      * @param  mixed  $request  Parámetro recibido por la operación.

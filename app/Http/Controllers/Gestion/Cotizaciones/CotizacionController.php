@@ -72,7 +72,7 @@ class CotizacionController extends Controller
                 ->where('tipo', 'mayorista')->where('activo', true)->orderBy('nombre_contacto')->get();
         }
 
-        return view('gestion.cotizaciones.listar', [
+        return view('gestion.comercial.cotizaciones.listar', [
             'quotations' => $query->paginate(20),
             'customers' => $customers,
             'products' => Producto::query()->active()->whereIn('empresa_id', $empresasAutorizadas)->orderBy('nombre')->get(),
@@ -182,7 +182,7 @@ class CotizacionController extends Controller
             ->get(['almacenes.id', 'almacenes.nombre', 'almacenes.sede_id', 'sedes.empresa_id', 'sedes.nombre as sede_nombre']);
         $empresasAutorizadas = $almacenesVenta->pluck('empresa_id')->unique()->values();
 
-        return view('gestion.cotizaciones.administrador', [
+        return view('gestion.comercial.cotizaciones.administrador', [
             'quotations' => $quotations,
             'aprobables' => $aprobables,
             'puedeEnviar' => $this->authorization->allows($request->user(), 'gestion.cotizaciones.actualizar'),

@@ -60,7 +60,7 @@ class FinanzasController extends Controller
         $baseQuery = $financialQueries->pagos($request->user(), []);
         $canCreate = $authorization->allows($request->user(), 'gestion.pagos.crear');
 
-        return view('gestion.pagos.listar', [
+        return view('gestion.finanzas.pagos.listar', [
             'module' => [
                 'key' => 'pagos',
                 'area' => 'Finanzas',
@@ -126,7 +126,7 @@ class FinanzasController extends Controller
         $baseQuery = $financialQueries->reembolsos($request->user(), []);
         $canCreate = $authorization->allows($request->user(), 'gestion.reembolsos.crear');
 
-        return view('gestion.reembolsos.listar', [
+        return view('gestion.finanzas.reembolsos.listar', [
             'module' => [
                 'key' => 'reembolsos',
                 'area' => 'Finanzas',
@@ -197,7 +197,7 @@ class FinanzasController extends Controller
         $history = RegistroAuditoria::query()->where('entidad', 'pagos')->where('entidad_id', $pago->getKey())
             ->with('user:id,nombre')->orderBy('id')->get();
 
-        return view('gestion.pagos.detalle', [
+        return view('gestion.finanzas.pagos.detalle', [
             'record' => $pago,
             'history' => $history,
             'canCancel' => $pago->estado === 'pendiente'
@@ -275,7 +275,7 @@ class FinanzasController extends Controller
         $history = RegistroAuditoria::query()->where('entidad', 'reembolsos')->where('entidad_id', $reembolso->getKey())
             ->with('user:id,nombre')->orderBy('id')->get();
 
-        return view('gestion.reembolsos.detalle', [
+        return view('gestion.finanzas.reembolsos.detalle', [
             'record' => $reembolso,
             'history' => $history,
             'canApprove' => $reembolso->estado === 'pendiente'

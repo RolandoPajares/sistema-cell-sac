@@ -38,7 +38,7 @@ final class AsignacionRolesController extends Controller
         $roles = $ready ? Rol::query()->where('activo', true)->orderBy('nombre')->get() : collect();
         $sites = $ready ? Sede::query()->where('activa', true)->orderBy('nombre')->get() : collect();
 
-        return view('gestion.roles-permisos.asignaciones', compact('ready', 'users', 'roles', 'sites'));
+        return view('gestion.administracion.roles-permisos.asignaciones', compact('ready', 'users', 'roles', 'sites'));
     }
 
     /**

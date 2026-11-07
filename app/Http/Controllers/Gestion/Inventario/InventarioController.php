@@ -78,7 +78,7 @@ class InventarioController extends Controller
             ? $consultaMovimientos->paginate(25)->withQueryString()
             : $consultaMovimientos->limit(5)->get();
 
-        return view('gestion.inventario.listar', [
+        return view('gestion.inventario.existencias.listar', [
             'products' => $products,
             'categories' => Categoria::query()->where('empresa_id', $alcance['empresa_id'])->where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
             'suppliers' => Proveedor::query()->where('empresa_id', $alcance['empresa_id'])->where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),

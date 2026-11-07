@@ -1,4 +1,4 @@
-@extends('layouts.tienda')
+@extends('layouts.tienda.principal')
 
 @section('title', 'Nosotros | MD Technology Cell')
 @section('body_class', 'modulo-about')

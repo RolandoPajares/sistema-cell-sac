@@ -71,6 +71,10 @@ Route::post('/campanas/{campaign}/evento', [CampaniaPublicaController::class, 't
 Route::get('/nosotros', [PaginaController::class, 'about'])->name('pages.about');
 Route::get('/contacto', [PaginaController::class, 'contact'])->name('pages.contact');
 Route::post('/contacto', [PaginaController::class, 'sendContact'])->middleware('throttle:contact')->name('pages.contact.store');
+Route::get('/libro-de-reclamaciones', [PaginaController::class, 'claimsBook'])->name('pages.claims');
+Route::get('/politicas-privacidad', [PaginaController::class, 'privacyPolicy'])->name('pages.privacy');
+Route::get('/terminos-condiciones', [PaginaController::class, 'terms'])->name('pages.terms');
+Route::get('/preguntas-frecuentes', [PaginaController::class, 'frequentlyAskedQuestions'])->name('pages.faq');
 
 Route::get('/recomendador', [RecomendacionController::class, 'index'])->name('recommendations');
 Route::get('/comparador', [ComparadorController::class, 'index'])->name('comparison');

@@ -65,7 +65,7 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('contact', fn (Request $request): Limit => Limit::perMinute(5)->by($request->ip()));
         RateLimiter::for('catalog-api', fn (Request $request): Limit => Limit::perMinute(60)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip())));
 
-        View::composer('layouts.tienda', function ($view): void {
+        View::composer(['layouts.tienda.principal', 'layouts.auth.principal'], function ($view): void {
             $campaigns = Campania::with('segments')
                 ->where('activo', true)
                 ->where('inicia_en', '<=', now())
@@ -90,7 +90,7 @@ class AppServiceProvider extends ServiceProvider
             $view->with('publicCampaigns', $eligible);
         });
 
-        View::composer('layouts.administracion', function ($view): void {
+        View::composer('layouts.panel.principal', function ($view): void {
             $user = auth()->user();
             $menu = app(ServicioMenuDinamico::class)->paraUsuario($user);
 
