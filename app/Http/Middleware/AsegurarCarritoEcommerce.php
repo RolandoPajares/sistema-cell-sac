@@ -34,8 +34,8 @@ final class AsegurarCarritoEcommerce
         $user = $request->user();
         abort_unless($user instanceof User, 403);
 
-        $esCliente = $this->autorizacion->hasRole($user, 'cliente_mayorista')
-            || $this->autorizacion->hasRole($user, 'cliente_minorista');
+        $esCliente = $this->autorizacion->allows($user, 'gestion.cotizaciones.consultar')
+            || $this->autorizacion->allows($user, 'gestion.pedidos.consultar');
 
         abort_unless($esCliente || $this->autorizacion->allows($user, 'gestion.pedidos.crear'), 403);
 

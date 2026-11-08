@@ -169,11 +169,11 @@
                                     </details>
                                     @if ($purchase->estado === 'Pendiente' && in_array($purchase->id, $aprobables))
                                         <form method="post" action="{{ route('management.purchases.approve', $purchase) }}">@csrf <button class="compras-reception-open" type="submit">Aprobar</button></form>
-                                        @if (in_array($purchase->id, $anulables, true))<form method="post" action="{{ route('management.purchases.cancel', $purchase) }}" onsubmit="return confirm('¿Anular esta compra pendiente? Se conservará la auditoría.')">@csrf <button class="compras-reception-open" type="submit">Anular</button></form>@endif
+                                        @if (in_array($purchase->id, $anulables, true))<form method="post" action="{{ route('management.purchases.cancel', $purchase) }}">@csrf <button class="compras-reception-open" type="submit" data-confirm="¿Anular esta compra pendiente? Se conservará la auditoría.">Anular</button></form>@endif
                                     @elseif ($purchase->estado === 'Aprobada' && in_array($purchase->id, $recibibles, true) && $purchase->details->contains(fn ($detail) => $detail->cantidad_pendiente > 0 && $detail->variante?->controla_serie))
-                                        <button class="compras-reception-open" type="button" onclick="document.getElementById('detalle-compra-{{ $purchase->id }}').open = true; document.getElementById('recepcion-parcial-{{ $purchase->id }}').open = true;">Recibir</button>
+                                        <button class="compras-reception-open" type="button" data-purchase-reception-open="{{ $purchase->id }}">Recibir</button>
                                     @elseif ($purchase->estado === 'Aprobada' && in_array($purchase->id, $recibibles, true))
-                                        <form method="post" action="{{ route('management.purchases.receive', $purchase) }}" onsubmit="return confirm('¿Confirmas la recepción completa de esta compra?')">@csrf <button class="compras-reception-open" type="submit">Recibir</button></form>
+                                        <form method="post" action="{{ route('management.purchases.receive', $purchase) }}">@csrf <button class="compras-reception-open" type="submit" data-confirm="¿Confirmas la recepción completa de esta compra?">Recibir</button></form>
                                     @endif
                                 </td>
                             </tr>
@@ -209,9 +209,9 @@
                         <span class="compras-status compras-status--{{ $statusClass((string) $pending->estado) }}">{{ $pending->estado }}</span>
                         @if ($pending->estado === 'Pendiente' && in_array($pending->id, $aprobables))
                             <form method="post" action="{{ route('management.purchases.approve', $pending) }}">@csrf <button class="compras-reception-open" type="submit">Aprobar</button></form>
-                            @if (in_array($pending->id, $anulables, true))<form method="post" action="{{ route('management.purchases.cancel', $pending) }}" onsubmit="return confirm('¿Anular esta compra pendiente? Se conservará la auditoría.')">@csrf <button class="compras-reception-open" type="submit">Anular</button></form>@endif
+                            @if (in_array($pending->id, $anulables, true))<form method="post" action="{{ route('management.purchases.cancel', $pending) }}">@csrf <button class="compras-reception-open" type="submit" data-confirm="¿Anular esta compra pendiente? Se conservará la auditoría.">Anular</button></form>@endif
                         @elseif ($pending->estado === 'Aprobada' && in_array($pending->id, $recibibles))
-                            <form method="post" action="{{ route('management.purchases.receive', $pending) }}" onsubmit="return confirm('¿Confirmas la recepción completa de esta compra?')">@csrf <button class="compras-reception-open" type="submit">Recibir mercadería</button></form>
+                            <form method="post" action="{{ route('management.purchases.receive', $pending) }}">@csrf <button class="compras-reception-open" type="submit" data-confirm="¿Confirmas la recepción completa de esta compra?">Recibir mercadería</button></form>
                         @endif
                     </div>
                 @empty

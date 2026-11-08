@@ -23,7 +23,7 @@ class FiltroCajasRequest extends FormRequest
         $authorization = app(ServicioAutorizacion::class);
 
         return $this->user() instanceof User
-            && $authorization->hasRole($this->user(), 'administrador')
+            && $authorization->allowsGlobal($this->user(), 'gestion.seguridad.consultar')
             && $authorization->allowsRoute($this);
     }
 

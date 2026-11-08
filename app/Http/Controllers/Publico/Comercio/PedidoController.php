@@ -44,7 +44,7 @@ class PedidoController extends Controller
     {
         $user = $request->user();
 
-        if ($this->authorization->hasRole($user, 'administrador')
+        if ($this->authorization->allowsGlobal($user, 'gestion.seguridad.consultar')
             && $this->authorization->allowsGlobal($user, 'gestion.pedidos.consultar')) {
             return $this->adminIndex($request);
         }
@@ -54,22 +54,22 @@ class PedidoController extends Controller
         $query = $this->authorization->scopeRecordsFor($query, $request->user(), 'gestion.pedidos.consultar', 'usuario_id');
 
         $tiposCliente = [];
-        if ($this->authorization->hasRole($user, 'ventas_minoristas')) {
-            $tiposCliente[] = 'cliente_minorista';
+        if ($this->authorization->allows($user, 'gestion.ventas.consultar')) {
+            $tiposCliente[] = 'minorista';
         }
-        if ($this->authorization->hasRole($user, 'ventas_mayoristas')) {
-            $tiposCliente[] = 'cliente_mayorista';
+        if ($this->authorization->allows($user, 'gestion.cotizaciones.consultar')) {
+            $tiposCliente[] = 'mayorista';
         }
 
         if ($tiposCliente !== []) {
-            $query->whereHas('user.rolesVigentes', fn (Builder $builder): Builder => $builder->whereIn('codigo', $tiposCliente));
-        } elseif ($this->authorization->hasRole($user, 'cliente_minorista') || $this->authorization->hasRole($user, 'cliente_mayorista')) {
+            $query->whereHas('user.customer', fn (Builder $builder): Builder => $builder->whereIn('tipo', $tiposCliente));
+        } elseif ($this->authorization->allows($user, 'gestion.pedidos.consultar') || $this->authorization->allows($user, 'gestion.cotizaciones.consultar')) {
             $query->whereBelongsTo($request->user(), 'user');
         } else {
             abort(403);
         }
 
-        return view('cuenta.pedidos.index', ['orders' => $query->paginate(20)]);
+        return view('publico.comercio.pedidos-cuenta', ['orders' => $query->paginate(20)]);
     }
 
     /**
@@ -144,7 +144,7 @@ class PedidoController extends Controller
     public function export(Request $request, string $format, ExportadorTabular $exportador, RegistradorAuditoria $auditoria): Response|StreamedResponse
     {
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
-        abort_unless($this->authorization->hasRole($request->user(), 'administrador'), 403);
+        abort_unless($this->authorization->allowsGlobal($request->user(), 'gestion.seguridad.consultar'), 403);
         $this->authorization->assertAllowed($request->user(), 'gestion.pedidos.exportar');
         $filtros = $this->adminFilters($request);
         $pedidos = $this->adminOrderQuery($request, $filtros)

@@ -1,6 +1,6 @@
 /**
  * Interacción exclusiva de los selectores de fecha del dashboard administrativo.
- * Las interacciones de módulos de Gestión viven en modulos/gestion.
+ * Las interacciones compartidas de Gestión viven en modulos/gestion.
  */
 (() => {
     const selectorFecha = document.querySelector('[data-dashboard-date]');

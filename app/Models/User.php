@@ -7,7 +7,6 @@ use App\Models\Clientes\Cliente;
 use App\Models\Comercio\Pedido;
 use App\Models\Inventario\MovimientoInventario;
 use App\Models\Seguridad\Rol;
-use App\Servicios\ServicioAutorizacion;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -17,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 
 #[Fillable(['nombre', 'correo', 'password', 'resumen_contrasena', 'rol', 'foto_perfil', 'preferencias', 'activo', 'bloqueado_hasta', 'acceso_controlado'])]
 #[Hidden(['password', 'resumen_contrasena', 'remember_token', 'token_recordatorio'])]
@@ -38,15 +38,16 @@ class User extends Authenticatable
 
     protected $rememberTokenName = 'token_recordatorio';
 
-    public const ROLES = [
-        'administrador',
-        'compras_logistica',
-        'ventas_mayoristas',
-        'ventas_minoristas',
-        'marketing',
-        'cliente_mayorista',
-        'cliente_minorista',
-    ];
+    /** @return array<int, string> */
+    public static function availableRoleCodes(): array
+    {
+        return DB::table('roles')
+            ->where('activo', true)
+            ->orderBy('id')
+            ->pluck('codigo')
+            ->map(static fn (mixed $code): string => (string) $code)
+            ->all();
+    }
 
     /**
      * Realiza la operación específica definida por este método y devuelve su resultado.
@@ -95,11 +96,6 @@ class User extends Authenticatable
      * @param  mixed  $role  Parámetro recibido por la operación.
      * @return bool Resultado de la operación.
      */
-    public function isRole(string $role): bool
-    {
-        return app(ServicioAutorizacion::class)->hasRole($this, $role);
-    }
-
     /**
      * Ejecuta la operación roles definida por la clase User.
      *

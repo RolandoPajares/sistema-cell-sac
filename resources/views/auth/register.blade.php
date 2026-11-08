@@ -3,6 +3,14 @@
 @section('body_class', 'modulo-autenticacion')
 @section('title', 'Crear cuenta')
 
+@push('styles')
+    @vite('resources/css/auth/register.css')
+@endpush
+
+@push('scripts')
+    @vite('resources/js/auth/register.js')
+@endpush
+
 @section('content')
 <div class="auth-register-page">
 <div class="auth-wrap panel">
@@ -82,21 +90,3 @@
 </div>
 @endsection
 
-@push('scripts')
-<script>
-    (() => {
-        const selector = document.querySelector('[data-customer-type]');
-        const field = document.querySelector('[data-wholesale-field]');
-        const ruc = document.querySelector('#ruc');
-        if (!selector || !field || !ruc) return;
-        const update = () => {
-            const wholesale = selector.value === 'mayorista';
-            field.hidden = !wholesale;
-            ruc.required = wholesale;
-            if (!wholesale) ruc.value = '';
-        };
-        selector.addEventListener('change', update);
-        update();
-    })();
-</script>
-@endpush

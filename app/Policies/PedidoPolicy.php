@@ -45,8 +45,8 @@ class PedidoPolicy
         }
 
         return $order->user !== null
-            && (($autorizacion->hasRole($order->user, 'cliente_mayorista') && $autorizacion->hasRole($user, 'ventas_mayoristas'))
-                || ($autorizacion->hasRole($order->user, 'cliente_minorista') && $autorizacion->hasRole($user, 'ventas_minoristas')));
+            && (($autorizacion->allows($order->user, 'gestion.cotizaciones.consultar') && $autorizacion->allows($user, 'gestion.cotizaciones.consultar'))
+                || ($autorizacion->allows($order->user, 'gestion.pedidos.consultar') && $autorizacion->allows($user, 'gestion.ventas.consultar')));
     }
 
     /**

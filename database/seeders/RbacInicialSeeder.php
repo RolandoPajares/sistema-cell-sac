@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -208,7 +207,7 @@ class RbacInicialSeeder extends Seeder
             return [];
         }
 
-        $codigosEsperados = User::ROLES;
+        $codigosEsperados = array_keys(self::ALCANCES_ROL);
         $codigosExistentes = $rolesExistentes->pluck('codigo')->all();
         sort($codigosEsperados);
         sort($codigosExistentes);

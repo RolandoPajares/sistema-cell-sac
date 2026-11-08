@@ -1,7 +1,7 @@
 @extends('layouts.panel.principal')
 
 @section('title', 'Segmentación')
-@php($isAdmin = auth()->user()?->isRole('administrador'))
+@php($isAdmin = auth()->user()?->can('gestion.seguridad.consultar'))
 @section('body_class', $isAdmin ? 'modulo-segmentos' : '')
 
 @section('content')

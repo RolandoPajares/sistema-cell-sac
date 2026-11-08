@@ -97,7 +97,7 @@ class SesionCajaController extends Controller
      */
     public function show(Request $request, SesionCaja $sesionCaja, ServicioAutorizacion $authorization, ServicioCajas $boxes): View
     {
-        abort_unless($authorization->hasRole($request->user(), 'administrador'), 403);
+        abort_unless($authorization->allowsGlobal($request->user(), 'gestion.seguridad.consultar'), 403);
         $sesionCaja->load(['caja.sede', 'usuarioApertura:id,nombre', 'usuarioCierre:id,nombre']);
         $site = $sesionCaja->caja->sede;
         abort_unless((int) $site->empresa_id === $authorization->activeCompanyId()

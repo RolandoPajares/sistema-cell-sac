@@ -3,6 +3,7 @@
 use App\Models\Catalogo\Categoria;
 use App\Models\Catalogo\Producto;
 use App\Models\User;
+use Database\Seeders\RbacInicialSeeder;
 use Illuminate\Support\Facades\DB;
 use Tests\SpanishAccessFixture;
 
@@ -13,14 +14,14 @@ it('renders the role dashboard from the shared account entry point', function (s
         ->get(route('dashboard'))
         ->assertOk()
         ->assertViewIs($view)
-        ->assertViewHas('role', $role);
+        ->assertViewHas('dashboardKind', 'account');
 })->with([
-    ['marketing', 'paneles.dashboard-publico'],
-    ['compras_logistica', 'paneles.dashboard-publico'],
-    ['ventas_mayoristas', 'paneles.dashboard-publico'],
-    ['ventas_minoristas', 'paneles.dashboard-publico'],
-    ['cliente_mayorista', 'paneles.dashboard-publico'],
-    ['cliente_minorista', 'paneles.dashboard-publico'],
+    ['marketing', 'paneles.dashboard'],
+    ['compras_logistica', 'paneles.dashboard'],
+    ['ventas_mayoristas', 'paneles.dashboard'],
+    ['ventas_minoristas', 'paneles.dashboard'],
+    ['cliente_mayorista', 'paneles.dashboard'],
+    ['cliente_minorista', 'paneles.dashboard'],
 ]);
 
 it('renders the administrator dashboard through both existing admin entry points', function (): void {
@@ -39,27 +40,32 @@ it('renders the administrator dashboard through both existing admin entry points
         ->assertViewIs('paneles.dashboard');
 });
 
-it('keeps the administrator account configuration on the account route', function (): void {
+it('renders the account dashboard on the account route for every permission profile', function (): void {
     $user = SpanishAccessFixture::user('administrador');
 
     $this->actingAs($user)
         ->get(route('dashboard'))
         ->assertOk()
-        ->assertViewIs('paneles.perfil.editar');
+        ->assertViewIs('paneles.dashboard')
+        ->assertViewHas('dashboardKind', 'account');
 });
 
-it('renders the unified profile for every configured role', function (string $role): void {
-    $user = SpanishAccessFixture::user($role);
+it('renders the unified profile for every configured role', function (): void {
+    $this->seed(RbacInicialSeeder::class);
 
-    $this->actingAs($user)
-        ->get($role === 'administrador' ? route('management.account') : route('account.profile.show'))
-        ->assertOk()
-        ->assertSee('Mi perfil')
-        ->assertSee('Datos personales')
-        ->assertSee('Seguridad de la cuenta')
-        ->assertSee('Preferencias')
-        ->assertSee('Sesiones activas');
-})->with(User::ROLES);
+    foreach (User::availableRoleCodes() as $role) {
+        $user = SpanishAccessFixture::user($role);
+
+        $this->actingAs($user)
+            ->get(route('account.profile.show'))
+            ->assertOk()
+            ->assertSee('Mi perfil')
+            ->assertSee('Datos personales')
+            ->assertSee('Seguridad de la cuenta')
+            ->assertSee('Preferencias')
+            ->assertSee('Sesiones activas');
+    }
+});
 
 it('forbids non administrators from the administrator dashboard route', function (): void {
     $user = User::factory()->create(['rol' => 'marketing']);

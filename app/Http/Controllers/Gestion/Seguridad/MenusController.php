@@ -64,7 +64,6 @@ class MenusController extends Controller
             'nombre' => ['required', 'string', 'max:140'],
             'habilitado' => ['required', 'boolean'],
         ]);
-        abort_if($menu->codigo === 'administrador.sidebar' && ! $validated['habilitado'], 422, 'El menú administrativo esencial no se puede desactivar.');
 
         $before = $menu->only(['nombre', 'habilitado']);
         DB::transaction(function () use ($menu, $validated, $auditoria, $request, $before): void {
@@ -131,10 +130,6 @@ class MenusController extends Controller
             'roles.*' => ['integer', 'distinct', Rule::exists('roles', 'id')->where('activo', true)],
         ]);
         $validated['roles'] ??= [];
-        if ($menu->codigo === 'administrador.sidebar') {
-            $adminRoleId = DB::table('roles')->where('codigo', 'administrador')->value('id');
-            abort_unless(in_array((int) $adminRoleId, array_map('intval', $validated['roles']), true), 422, 'El menú global debe permanecer asignado al rol administrador.');
-        }
         $targetRoles = Rol::query()->whereIn('id', $validated['roles'])->get();
         $menuPermissionIds = DB::table('elementos_menu')->where('menu_id', $menu->getKey())->whereNotNull('permiso_id')->pluck('permiso_id')
             ->map(static fn (mixed $id): int => (int) $id)->unique()->all();

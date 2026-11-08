@@ -8,6 +8,7 @@ use App\Http\Requests\RegistroRequest;
 use App\Models\Clientes\Cliente;
 use App\Models\User;
 use App\Servicios\RegistradorAuditoria;
+use App\Servicios\ServicioAutorizacion;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -77,7 +78,7 @@ class AutenticacionController extends Controller
         $request->session()->regenerate();
         $audit->record($user->getKey(), 'inicio_sesion', 'autenticacion', $user->getKey(), null, null, $request->ip());
 
-        $destination = $user->isRole('administrador')
+        $destination = app(ServicioAutorizacion::class)->allows($user, 'gestion.panel.consultar')
             ? route('management.dashboard')
             : route('dashboard');
 

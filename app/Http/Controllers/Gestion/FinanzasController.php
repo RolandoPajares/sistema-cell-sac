@@ -204,7 +204,7 @@ class FinanzasController extends Controller
                 && $authorization->allowsRecord($request->user(), 'gestion.pagos.anular', (int) $pago->empresa_id, (int) $pago->sede_id),
             'canConfirmCash' => $pago->estado === 'pendiente' && $pago->medioPago?->requiere_caja
                 && $pago->sesionCaja?->estado === 'abierta'
-                && $authorization->hasRole($request->user(), 'administrador')
+                && $authorization->allowsGlobal($request->user(), 'gestion.seguridad.consultar')
                 && $authorization->allowsRecord($request->user(), 'gestion.pagos.actualizar',
                     (int) $pago->empresa_id, (int) $pago->sede_id),
         ]);

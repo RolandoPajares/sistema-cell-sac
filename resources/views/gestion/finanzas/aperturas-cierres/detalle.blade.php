@@ -51,11 +51,11 @@
                 <div class="tc-ff__summary"><div><span>Efectivo declarado</span><b>S/ {{ $session->saldo_cierre_declarado }}</b></div><div><span>Diferencia</span><b>S/ {{ $balance['diferencia'] }}</b></div><div><span>Responsable del cierre</span><b>{{ $session->usuarioCierre?->nombre }}</b></div><div><span>Fecha de cierre</span><b>{{ $session->cerrada_en?->format('d/m/Y H:i') }}</b></div></div>
             @elseif ($canClose)
                 <p>Cuenta físicamente el efectivo. Si difiere del saldo esperado, el cierre se bloquea hasta documentar y conciliar la diferencia.</p>
-                <form method="POST" action="{{ route('management.payments.cash_sessions.update', $session) }}" onsubmit="return window.confirm('¿Confirmas el arqueo y cierre de esta sesión?')">
+                <form method="POST" action="{{ route('management.payments.cash_sessions.update', $session) }}">
                     @csrf @method('PATCH')
                     <input type="hidden" name="token" value="{{ (string) \Illuminate\Support\Str::uuid() }}">
                     <div class="tc-ff__form-grid"><label>Efectivo contado al cierre (S/) *<input type="text" name="saldo_cierre_declarado" inputmode="decimal" value="{{ old('saldo_cierre_declarado') }}" required></label></div>
-                    <button class="tc-ff__button tc-ff__button--primary tc-ff__submit" type="submit">Comprobar y cerrar</button>
+                    <button class="tc-ff__button tc-ff__button--primary tc-ff__submit" type="submit" data-confirm="¿Confirmas el arqueo y cierre de esta sesión?">Comprobar y cerrar</button>
                 </form>
             @endif
         </aside>

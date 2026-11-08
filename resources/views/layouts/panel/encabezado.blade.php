@@ -1,6 +1,6 @@
 @php
     $currentUser = auth()->user();
-    $isAdministrator = $currentUser?->isRole('administrador') ?? false;
+    $isAdministrator = $currentUser?->can('gestion.seguridad.consultar') ?? false;
     $adminBrandRoute = $isAdministrator ? 'management.dashboard' : 'dashboard';
     $adminAccountRoute = $isAdministrator ? 'management.account' : 'account.profile.show';
 @endphp
@@ -26,7 +26,7 @@
             @else
                 <span class="admin-avatar">{{ strtoupper(substr($currentUser->nombre, 0, 1)) }}</span>
             @endif
-            <span class="admin-user-copy"><b>{{ $currentUser->nombre }}</b><small>{{ str_replace('_', ' ', $currentUser->rol) }}</small></span>
+            <span class="admin-user-copy"><b>{{ $currentUser->nombre }}</b><small>Cuenta activa</small></span>
             <i class="bi bi-chevron-down admin-user-chevron" aria-hidden="true"></i>
         </summary>
         <div class="admin-user-menu-panel">

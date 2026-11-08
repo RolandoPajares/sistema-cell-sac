@@ -41,7 +41,7 @@ final class EnviosPedidosController extends Controller
     public function mostrar(ListadoEnviosPedidosRequest $solicitud): View
     {
         return view(
-            'gestion.inventario.envios-entregas.listar',
+            'gestion.inventario.envios-entregas.envios.listar',
             $this->envios->listar($solicitud->user(), $solicitud->validated()),
         );
     }

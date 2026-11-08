@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Middleware\AsegurarCarritoEcommerce;
-use App\Http\Middleware\AsegurarRol;
 use App\Http\Middleware\EstablecerContextoAuditoria;
 use App\Http\Middleware\RegistrarSesionUsuario;
 use App\Http\Middleware\VerificarCuentaActiva;
@@ -22,7 +21,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [EstablecerContextoAuditoria::class]);
 
         $middleware->alias([
-            'role' => AsegurarRol::class,
             'carrito.ecommerce' => AsegurarCarritoEcommerce::class,
             'permiso' => VerificarPermiso::class,
             'sesion.usuario' => RegistrarSesionUsuario::class,

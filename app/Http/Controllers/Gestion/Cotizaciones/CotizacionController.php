@@ -54,13 +54,13 @@ class CotizacionController extends Controller
 
         $query = Cotizacion::with('customer', 'details.product')->latest('creado_en')->latest('id');
         $this->authorization->assertAllowed($request->user(), 'gestion.cotizaciones.consultar');
-        if ($this->authorization->hasRole($request->user(), 'cliente_mayorista')) {
+        if ($this->authorization->allows($request->user(), 'gestion.cotizaciones.consultar')) {
             $query->whereHas('customer', fn ($builder) => $builder->where('usuario_id', $request->user()->id));
         } else {
             $query = $this->authorization->scopeRecordsFor($query, $request->user(), 'gestion.cotizaciones.consultar');
         }
 
-        if ($this->authorization->hasRole($request->user(), 'cliente_mayorista')) {
+        if ($this->authorization->allows($request->user(), 'gestion.cotizaciones.consultar')) {
             $customers = Cliente::query()->where('usuario_id', $request->user()->getKey())
                 ->where('tipo', 'mayorista')->where('activo', true)->orderBy('nombre_contacto')->get();
             $empresasAutorizadas = $customers->pluck('empresa_id')->filter()->unique()->values();

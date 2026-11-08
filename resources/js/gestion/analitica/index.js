@@ -1,4 +1,4 @@
-import { initializeAnaliticaClientes } from './analitica-clientes/index.js';
+import { initializeAnaliticaClientes } from './clientes/index.js';
 import { initializeMetricasMarketing } from './metricas-marketing/index.js';
 import { initializeReportes } from './reportes/index.js';
 import { initializeReportesFinancieros } from './reportes-financieros/index.js';

@@ -83,7 +83,7 @@ class CuentaAdministracionController extends Controller
             ? DB::table('sesiones_usuarios')->where('usuario_id', $request->user()->getKey())->orderByDesc('ultimo_acceso')->limit(20)->get()
             : collect();
 
-        return view('paneles.perfil.seguridad', compact('sessions', 'sessionsAvailable'));
+        return view('cuenta.perfil.seguridad', compact('sessions', 'sessionsAvailable'));
     }
 
     /**
@@ -100,7 +100,7 @@ class CuentaAdministracionController extends Controller
             ? DB::table('sesiones_usuarios')->where('usuario_id', $request->user()->getKey())->orderByDesc('ultimo_acceso')->paginate(20)
             : collect();
 
-        return view('paneles.perfil.sesiones', compact('sessions', 'available', 'currentHash'));
+        return view('cuenta.perfil.sesiones', compact('sessions', 'available', 'currentHash'));
     }
 
     /**
@@ -142,7 +142,7 @@ class CuentaAdministracionController extends Controller
     {
         $preferencesAvailable = Schema::hasColumn('usuarios', 'preferencias');
 
-        return view('paneles.perfil.preferencias', compact('preferencesAvailable'));
+        return view('cuenta.perfil.preferencias', compact('preferencesAvailable'));
     }
 
     /**
@@ -209,7 +209,7 @@ class CuentaAdministracionController extends Controller
             ? RegistroAuditoria::query()->where('usuario_id', $request->user()->getKey())->latest('creado_en')->paginate(25)
             : collect();
 
-        return view('paneles.perfil.actividad', compact('activity', 'available'));
+        return view('cuenta.perfil.actividad', compact('activity', 'available'));
     }
 
     /**
@@ -224,7 +224,7 @@ class CuentaAdministracionController extends Controller
         $available = Schema::hasTable('notificaciones');
         $notificaciones = $available ? $servicio->listarDelUsuario($request->user()) : collect();
 
-        return view('paneles.perfil.notificaciones', compact('notificaciones', 'available'));
+        return view('cuenta.perfil.notificaciones', compact('notificaciones', 'available'));
     }
 
     /**

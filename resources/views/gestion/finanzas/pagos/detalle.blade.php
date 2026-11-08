@@ -47,11 +47,11 @@
     @if ($canConfirmCash)
         <section class="admin-finance-table-card">
             <header class="admin-finance-card-header"><div><h2>Verificación manual de efectivo</h2><p>La sesión debe permanecer abierta. Esta acción registrará una entrada o salida real de caja.</p></div></header>
-            <form method="POST" action="{{ route('management.payments.cash.update', $record) }}" class="admin-finance-filters" onsubmit="return window.confirm('¿Confirmas que contaste este efectivo y deseas registrar el movimiento?')">
+            <form method="POST" action="{{ route('management.payments.cash.update', $record) }}" class="admin-finance-filters">
                 @csrf @method('PATCH')
                 <label>Importe contado (S/) *<input type="text" name="importe_contado" inputmode="decimal" value="{{ old('importe_contado') }}" required></label>
                 <label>Observación de verificación *<input type="text" name="observacion" value="{{ old('observacion') }}" maxlength="500" required></label>
-                <button class="admin-finance-button admin-finance-button--primary" type="submit">Confirmar efectivo contado</button>
+                <button class="admin-finance-button admin-finance-button--primary" type="submit" data-confirm="¿Confirmas que contaste este efectivo y deseas registrar el movimiento?">Confirmar efectivo contado</button>
             </form>
         </section>
     @endif
@@ -64,7 +64,7 @@
                 <label>Motivo de anulación
                     <input type="text" name="motivo" value="{{ old('motivo') }}" minlength="10" maxlength="500" required>
                 </label>
-                <button class="admin-finance-button admin-finance-button--secondary" type="submit" onclick="return confirm('¿Anular esta solicitud pendiente?')">Anular solicitud</button>
+                <button class="admin-finance-button admin-finance-button--secondary" type="submit" data-confirm="¿Anular esta solicitud pendiente?">Anular solicitud</button>
             </form>
         </section>
     @endif

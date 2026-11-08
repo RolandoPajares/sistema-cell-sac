@@ -12,6 +12,7 @@ use App\Servicios\ServicioCatalogo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Presenta el catálogo público y expone las acciones de favoritos y valoraciones.
@@ -21,8 +22,8 @@ class CatalogoController extends Controller
     /**
      * Filtra y pagina el catálogo, agregando disponibilidad y opciones de filtro a la vista.
      *
-     * @param FiltroCatalogoRequest $request Filtros validados del catálogo.
-     * @param ServicioCatalogo $catalogService Servicio que construye la consulta y disponibilidad.
+     * @param  FiltroCatalogoRequest  $request  Filtros validados del catálogo.
+     * @param  ServicioCatalogo  $catalogService  Servicio que construye la consulta y disponibilidad.
      * @return View Vista pública con productos paginados y filtros disponibles.
      */
     public function index(FiltroCatalogoRequest $request, ServicioCatalogo $catalogService): View
@@ -42,11 +43,12 @@ class CatalogoController extends Controller
     /**
      * Carga el detalle de un producto activo con stock, variantes, relacionados y valoraciones.
      *
-     * @param Request $request Solicitud que puede identificar al usuario actual.
-     * @param Producto $product Producto resuelto por route model binding.
-     * @param ServicioCatalogo $catalogService Servicio de disponibilidad y relacionados.
+     * @param  Request  $request  Solicitud que puede identificar al usuario actual.
+     * @param  Producto  $product  Producto resuelto por route model binding.
+     * @param  ServicioCatalogo  $catalogService  Servicio de disponibilidad y relacionados.
      * @return View Vista pública del detalle y sus indicadores de valoración/favorito.
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si el producto no está activo.
+     *
+     * @throws HttpException Si el producto no está activo.
      */
     public function show(Request $request, Producto $product, ServicioCatalogo $catalogService): View
     {
@@ -58,9 +60,41 @@ class CatalogoController extends Controller
         $relatedProducts = $catalogService->relacionados($product);
         $catalogService->agregarDisponibilidad($relatedProducts, $request->user());
 
+        $categoryName = $product->category?->nombre ?: $product->categoria;
+        $imageItems = $product->images->pluck('ruta_imagen');
+        if ($imageItems->isEmpty() && $product->url_imagen) {
+            $imageItems = collect([$product->url_imagen]);
+        }
+        $imageItems = $imageItems->map(static fn (string $route): array => [
+            'url' => Producto::urlPublicaDeImagen($route),
+        ])->values();
+        $salePrice = (float) ($product->precio_oferta ?? $product->precio);
+        $originalPrice = (float) ($product->precio_original ?? $product->precio);
+        $variantData = $product->variants->map(static fn ($variant): array => [
+            'id' => (int) $variant->id,
+            'name' => $variant->nombre_color,
+            'sku' => $variant->codigo_sku,
+            'stock' => (int) ($variant->existencias_disponibles ?? $variant->existencias),
+            'image' => $variant->images->first()?->ruta_imagen
+                ? Producto::urlPublicaDeImagen($variant->images->first()->ruta_imagen)
+                : null,
+        ])->values();
+
         return view('publico.catalogo.detalle', [
             'product' => $product,
             'relatedProducts' => $relatedProducts,
+            'categoryName' => $categoryName,
+            'imageItems' => $imageItems,
+            'primaryImage' => $imageItems->first()['url'] ?? null,
+            'salePrice' => $salePrice,
+            'originalPrice' => $originalPrice,
+            'discount' => $originalPrice > $salePrice && $originalPrice > 0
+                ? round((1 - ($salePrice / $originalPrice)) * 100)
+                : 0,
+            'visualType' => str_contains(mb_strtolower((string) $categoryName), 'audio')
+                ? 'audio'
+                : (str_contains(mb_strtolower((string) $categoryName), 'celular') ? 'celular' : 'accesorio'),
+            'variantData' => $variantData,
             'averageRating' => round((float) ($product->reviews->avg('valoracion') ?? 0), 1),
             'reviewCount' => $product->reviews->count(),
             'userRating' => (int) ($request->user()
@@ -78,10 +112,11 @@ class CatalogoController extends Controller
      * Busca la relación existente; si existe la elimina y, si no existe, crea
      * una nueva relación antes de devolver el estado resultante.
      *
-     * @param Request $request Solicitud del usuario autenticado.
-     * @param Producto $product Producto cuyo favorito se alternará.
+     * @param  Request  $request  Solicitud del usuario autenticado.
+     * @param  Producto  $product  Producto cuyo favorito se alternará.
      * @return JsonResponse Estado booleano del favorito después de la operación.
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si el producto no está activo.
+     *
+     * @throws HttpException Si el producto no está activo.
      */
     public function toggleFavorite(Request $request, Producto $product): JsonResponse
     {
@@ -107,10 +142,11 @@ class CatalogoController extends Controller
     /**
      * Crea o actualiza la valoración del usuario para un producto activo.
      *
-     * @param GuardarResenaProductoRequest $request Valoración validada del usuario autenticado.
-     * @param Producto $product Producto cuya valoración se guarda.
+     * @param  GuardarResenaProductoRequest  $request  Valoración validada del usuario autenticado.
+     * @param  Producto  $product  Producto cuya valoración se guarda.
      * @return JsonResponse Valoración guardada, promedio y cantidad recalculados.
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si el producto no está activo.
+     *
+     * @throws HttpException Si el producto no está activo.
      */
     public function storeReview(GuardarResenaProductoRequest $request, Producto $product): JsonResponse
     {

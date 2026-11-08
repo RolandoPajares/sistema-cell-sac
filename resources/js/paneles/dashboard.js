@@ -1,18 +1,18 @@
 import '../../css/paneles/dashboard.css';
-import '../components/panel/menu-lateral-desplegable.js';
+import '../layouts/panel/menu-lateral-desplegable.js';
 import '../gestion/organizacion/organizacion.js';
 import '../gestion/comercial/operaciones-comerciales/operaciones-comerciales.js';
 import '../gestion/inventario/inventario-logistica/inventario-logistica.js';
-import '../gestion/inventario/inventario-logistica/transferencias.js';
+import '../gestion/inventario/transferencias/transferencias.js';
 import '../gestion/finanzas/finanzas-facturacion/finanzas-facturacion.js';
 import '../gestion/marketing/ecommerce-marketing/ecommerce-marketing.js';
-import '../gestion/analitica/auditoria-operaciones/analisis-auditoria.js';
+import '../gestion/analitica/analisis-auditoria/analisis-auditoria.js';
 import '../gestion/configuracion/configuracion-sistema/configuracion-sistema.js';
 import '../gestion/administracion/index.js';
 import '../gestion/analitica/index.js';
 import '../gestion/configuracion/index.js';
 import '../gestion/finanzas/index.js';
-import '../modulos/gestion/ventas/index.js';
+import '../gestion/comercial/ventas/index.js';
 import '../modulos/gestion/modulos-pendientes.js';
 
 const dashboard = document.querySelector('[data-admin-dashboard]');

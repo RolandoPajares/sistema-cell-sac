@@ -173,59 +173,70 @@ trait RefreshSpanishTestDatabase
             });
         }
 
-        Schema::create('caracteristicas_productos', function (Blueprint $table): void {
-            $table->increments('id');
-            $table->unsignedInteger('producto_id');
-            $table->string('nombre', 100);
-            $table->string('valor', 255);
-            $table->foreign('producto_id')->references('id')->on('productos')->cascadeOnDelete();
-        });
-        Schema::create('referencias_imagenes_productos', function (Blueprint $table): void {
-            $table->increments('id');
-            $table->unsignedInteger('producto_id');
-            $table->string('ruta_imagen', 255);
-            $table->integer('orden')->default(0);
-            $table->dateTime('actualizado_en')->nullable();
-            $table->unique(['producto_id', 'ruta_imagen'], 'un_producto_imagen_ruta');
-            $table->index(['producto_id', 'orden', 'id'], 'ind_producto_imagen_orden');
-            $table->foreign('producto_id')->references('id')->on('productos')->cascadeOnDelete();
-        });
-        Schema::create('variantes_productos', function (Blueprint $table): void {
-            $table->increments('id');
-            $table->unsignedInteger('producto_id');
-            $table->string('codigo_sku', 80)->nullable();
-            $table->string('codigo_barras', 80)->nullable();
-            $table->string('nombre_color', 100)->default('Único');
-            $table->string('codigo_color', 20)->nullable();
-            $table->unsignedInteger('existencias')->default(0);
-            $table->boolean('controla_serie')->default(false);
-            $table->string('estado', 20)->default('activo');
-            $table->timestamp('fecha_creacion')->useCurrent();
-            $table->foreign('producto_id')->references('id')->on('productos')->cascadeOnDelete();
-        });
-        Schema::create('imagenes_variantes', function (Blueprint $table): void {
-            $table->increments('id');
-            $table->unsignedInteger('variante_id');
-            $table->string('ruta_imagen', 255);
-            $table->boolean('imagen_principal')->default(false);
-            $table->integer('orden')->default(0);
-            $table->timestamp('fecha_creacion')->useCurrent();
-            $table->index('variante_id', 'ind_variante_imagenes_variante');
-            $table->foreign('variante_id')->references('id')->on('variantes_productos')->cascadeOnDelete();
-        });
-        Schema::create('dispositivos', function (Blueprint $table): void {
-            $table->bigIncrements('id');
-            $table->unsignedInteger('producto_id');
-            $table->unsignedInteger('variante_id')->nullable();
-            $table->string('imei', 20)->nullable();
-            $table->string('numero_serie', 100)->nullable();
-            $table->unsignedBigInteger('detalle_compra_id')->nullable();
-            $table->unsignedBigInteger('almacen_actual_id')->nullable();
-            $table->string('estado', 30)->default('disponible');
-            $table->dateTime('fecha_ingreso')->nullable();
-            $table->dateTime('fecha_salida')->nullable();
-            $table->foreign('producto_id')->references('id')->on('productos');
-        });
+        if (! Schema::hasTable('caracteristicas_productos')) {
+            Schema::create('caracteristicas_productos', function (Blueprint $table): void {
+                $table->increments('id');
+                $table->unsignedInteger('producto_id');
+                $table->string('nombre', 100);
+                $table->string('valor', 255);
+                $table->foreign('producto_id')->references('id')->on('productos')->cascadeOnDelete();
+            });
+        }
+        Schema::dropIfExists('referencias_imagenes_productos');
+        if (! Schema::hasTable('referencias_imagenes_productos')) {
+            Schema::create('referencias_imagenes_productos', function (Blueprint $table): void {
+                $table->increments('id');
+                $table->unsignedInteger('producto_id');
+                $table->string('ruta_imagen', 255);
+                $table->integer('orden')->default(0);
+                $table->dateTime('actualizado_en')->nullable();
+                $table->unique(['producto_id', 'ruta_imagen'], 'un_producto_imagen_ruta');
+                $table->index(['producto_id', 'orden', 'id'], 'ind_producto_imagen_orden');
+                $table->foreign('producto_id')->references('id')->on('productos')->cascadeOnDelete();
+            });
+        }
+        if (! Schema::hasTable('variantes_productos')) {
+            Schema::create('variantes_productos', function (Blueprint $table): void {
+                $table->increments('id');
+                $table->unsignedInteger('producto_id');
+                $table->string('codigo_sku', 80)->nullable();
+                $table->string('codigo_barras', 80)->nullable();
+                $table->string('nombre_color', 100)->default('Único');
+                $table->string('codigo_color', 20)->nullable();
+                $table->unsignedInteger('existencias')->default(0);
+                $table->boolean('controla_serie')->default(false);
+                $table->string('estado', 20)->default('activo');
+                $table->timestamp('fecha_creacion')->useCurrent();
+                $table->foreign('producto_id')->references('id')->on('productos')->cascadeOnDelete();
+            });
+        }
+        if (! Schema::hasTable('imagenes_variantes')) {
+            Schema::create('imagenes_variantes', function (Blueprint $table): void {
+                $table->increments('id');
+                $table->unsignedInteger('variante_id');
+                $table->string('ruta_imagen', 255);
+                $table->boolean('imagen_principal')->default(false);
+                $table->integer('orden')->default(0);
+                $table->timestamp('fecha_creacion')->useCurrent();
+                $table->index('variante_id', 'ind_variante_imagenes_variante');
+                $table->foreign('variante_id')->references('id')->on('variantes_productos')->cascadeOnDelete();
+            });
+        }
+        if (! Schema::hasTable('dispositivos')) {
+            Schema::create('dispositivos', function (Blueprint $table): void {
+                $table->bigIncrements('id');
+                $table->unsignedInteger('producto_id');
+                $table->unsignedInteger('variante_id')->nullable();
+                $table->string('imei', 20)->nullable();
+                $table->string('numero_serie', 100)->nullable();
+                $table->unsignedBigInteger('detalle_compra_id')->nullable();
+                $table->unsignedBigInteger('almacen_actual_id')->nullable();
+                $table->string('estado', 30)->default('disponible');
+                $table->dateTime('fecha_ingreso')->nullable();
+                $table->dateTime('fecha_salida')->nullable();
+                $table->foreign('producto_id')->references('id')->on('productos');
+            });
+        }
         if (! Schema::hasTable('movimientos_dispositivos')) {
             Schema::create('movimientos_dispositivos', function (Blueprint $table): void {
                 $table->bigIncrements('id');
@@ -243,83 +254,97 @@ trait RefreshSpanishTestDatabase
                 $table->primary(['detalle_venta_id', 'dispositivo_id']);
             });
         }
-        Schema::create('existencias_almacen', function (Blueprint $table): void {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('almacen_id');
-            $table->unsignedInteger('variante_id')->nullable();
-            $table->unsignedInteger('producto_id');
-            $table->unsignedBigInteger('sede_id');
-            $table->unsignedBigInteger('empresa_id');
-            $table->decimal('cantidad_fisica', 18, 6)->default(0);
-            $table->decimal('cantidad_reservada', 18, 6)->default(0);
-            $table->dateTime('actualizado_en')->useCurrent();
-            $table->foreign('almacen_id')->references('id')->on('almacenes');
-            $table->foreign('producto_id')->references('id')->on('productos');
-        });
-        Schema::create('detalles_compras', function (Blueprint $table): void {
-            $table->bigIncrements('id');
-            $table->unsignedInteger('compra_id');
-            $table->unsignedInteger('producto_id');
-            $table->unsignedInteger('cantidad');
-            $table->decimal('costo_unitario', 10, 2);
-            $table->unsignedInteger('variante_id')->nullable();
-            $table->decimal('descuento', 15, 2)->default(0);
-            $table->decimal('impuesto', 15, 2)->default(0);
-            $table->decimal('total_linea', 15, 2)->nullable();
-            $table->foreign('compra_id')->references('id')->on('compras');
-            $table->foreign('producto_id')->references('id')->on('productos');
-        });
-        Schema::create('detalles_cotizaciones', function (Blueprint $table): void {
-            $table->bigIncrements('id');
-            $table->unsignedInteger('cotizacion_id');
-            $table->unsignedInteger('producto_id');
-            $table->unsignedInteger('cantidad');
-            $table->decimal('precio_unitario', 10, 2);
-            $table->unsignedInteger('variante_id')->nullable();
-            $table->string('descripcion_historica', 255)->nullable();
-            $table->decimal('descuento', 15, 2)->default(0);
-            $table->decimal('impuesto', 15, 2)->default(0);
-            $table->decimal('total_linea', 15, 2)->nullable();
-        });
-        Schema::create('carritos', function (Blueprint $table): void {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('empresa_id');
-            $table->unsignedBigInteger('sede_id')->nullable();
-            $table->unsignedBigInteger('usuario_id')->nullable();
-            $table->unsignedInteger('cliente_id')->nullable();
-            $table->char('resumen_token', 64)->nullable()->unique();
-            $table->unsignedInteger('pedido_id')->nullable();
-            $table->string('estado', 20)->default('activo');
-            $table->char('moneda', 3)->default('PEN');
-            $table->dateTime('expira_en')->nullable();
-            $table->dateTime('creado_en')->useCurrent();
-            $table->dateTime('actualizado_en')->nullable();
-        });
-        Schema::create('campanas_segmentos', function (Blueprint $table): void {
-            $table->unsignedInteger('campana_id');
-            $table->unsignedBigInteger('segmento_id');
-            $table->primary(['campana_id', 'segmento_id']);
-        });
-        Schema::create('detalles_pedidos', function (Blueprint $table): void {
-            $table->increments('id');
-            $table->unsignedInteger('pedido_id');
-            $table->unsignedInteger('producto_id');
-            $table->unsignedInteger('cantidad');
-            $table->decimal('precio_unitario', 10, 2);
-            $table->unsignedInteger('variante_id')->nullable();
-            $table->string('descripcion_historica', 255)->nullable();
-            $table->decimal('descuento', 15, 2)->default(0);
-            $table->decimal('impuesto', 15, 2)->default(0);
-            $table->foreign('pedido_id')->references('id')->on('pedidos')->cascadeOnDelete();
-            $table->foreign('producto_id')->references('id')->on('productos');
-        });
-        Schema::create('productos_proveedores', function (Blueprint $table): void {
-            $table->unsignedInteger('producto_id');
-            $table->unsignedInteger('proveedor_id');
-            $table->primary(['producto_id', 'proveedor_id']);
-            $table->foreign('producto_id')->references('id')->on('productos')->cascadeOnDelete();
-            $table->foreign('proveedor_id')->references('id')->on('proveedores')->cascadeOnDelete();
-        });
+        if (! Schema::hasTable('existencias_almacen')) {
+            Schema::create('existencias_almacen', function (Blueprint $table): void {
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('almacen_id');
+                $table->unsignedInteger('variante_id')->nullable();
+                $table->unsignedInteger('producto_id');
+                $table->unsignedBigInteger('sede_id');
+                $table->unsignedBigInteger('empresa_id');
+                $table->decimal('cantidad_fisica', 18, 6)->default(0);
+                $table->decimal('cantidad_reservada', 18, 6)->default(0);
+                $table->dateTime('actualizado_en')->useCurrent();
+                $table->foreign('almacen_id')->references('id')->on('almacenes');
+                $table->foreign('producto_id')->references('id')->on('productos');
+            });
+        }
+        if (! Schema::hasTable('detalles_compras')) {
+            Schema::create('detalles_compras', function (Blueprint $table): void {
+                $table->bigIncrements('id');
+                $table->unsignedInteger('compra_id');
+                $table->unsignedInteger('producto_id');
+                $table->unsignedInteger('cantidad');
+                $table->decimal('costo_unitario', 10, 2);
+                $table->unsignedInteger('variante_id')->nullable();
+                $table->decimal('descuento', 15, 2)->default(0);
+                $table->decimal('impuesto', 15, 2)->default(0);
+                $table->decimal('total_linea', 15, 2)->nullable();
+                $table->foreign('compra_id')->references('id')->on('compras');
+                $table->foreign('producto_id')->references('id')->on('productos');
+            });
+        }
+        if (! Schema::hasTable('detalles_cotizaciones')) {
+            Schema::create('detalles_cotizaciones', function (Blueprint $table): void {
+                $table->bigIncrements('id');
+                $table->unsignedInteger('cotizacion_id');
+                $table->unsignedInteger('producto_id');
+                $table->unsignedInteger('cantidad');
+                $table->decimal('precio_unitario', 10, 2);
+                $table->unsignedInteger('variante_id')->nullable();
+                $table->string('descripcion_historica', 255)->nullable();
+                $table->decimal('descuento', 15, 2)->default(0);
+                $table->decimal('impuesto', 15, 2)->default(0);
+                $table->decimal('total_linea', 15, 2)->nullable();
+            });
+        }
+        if (! Schema::hasTable('carritos')) {
+            Schema::create('carritos', function (Blueprint $table): void {
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('empresa_id');
+                $table->unsignedBigInteger('sede_id')->nullable();
+                $table->unsignedBigInteger('usuario_id')->nullable();
+                $table->unsignedInteger('cliente_id')->nullable();
+                $table->char('resumen_token', 64)->nullable()->unique();
+                $table->unsignedInteger('pedido_id')->nullable();
+                $table->string('estado', 20)->default('activo');
+                $table->char('moneda', 3)->default('PEN');
+                $table->dateTime('expira_en')->nullable();
+                $table->dateTime('creado_en')->useCurrent();
+                $table->dateTime('actualizado_en')->nullable();
+            });
+        }
+        if (! Schema::hasTable('campanas_segmentos')) {
+            Schema::create('campanas_segmentos', function (Blueprint $table): void {
+                $table->unsignedInteger('campana_id');
+                $table->unsignedBigInteger('segmento_id');
+                $table->primary(['campana_id', 'segmento_id']);
+            });
+        }
+        if (! Schema::hasTable('detalles_pedidos')) {
+            Schema::create('detalles_pedidos', function (Blueprint $table): void {
+                $table->increments('id');
+                $table->unsignedInteger('pedido_id');
+                $table->unsignedInteger('producto_id');
+                $table->unsignedInteger('cantidad');
+                $table->decimal('precio_unitario', 10, 2);
+                $table->unsignedInteger('variante_id')->nullable();
+                $table->string('descripcion_historica', 255)->nullable();
+                $table->decimal('descuento', 15, 2)->default(0);
+                $table->decimal('impuesto', 15, 2)->default(0);
+                $table->foreign('pedido_id')->references('id')->on('pedidos')->cascadeOnDelete();
+                $table->foreign('producto_id')->references('id')->on('productos');
+            });
+        }
+        if (! Schema::hasTable('productos_proveedores')) {
+            Schema::create('productos_proveedores', function (Blueprint $table): void {
+                $table->unsignedInteger('producto_id');
+                $table->unsignedInteger('proveedor_id');
+                $table->primary(['producto_id', 'proveedor_id']);
+                $table->foreign('producto_id')->references('id')->on('productos')->cascadeOnDelete();
+                $table->foreign('proveedor_id')->references('id')->on('proveedores')->cascadeOnDelete();
+            });
+        }
 
         if (! Schema::hasTable('ventas')) {
             Schema::create('ventas', function (Blueprint $table): void {

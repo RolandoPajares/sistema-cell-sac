@@ -221,7 +221,7 @@ class GestionUsuariosController extends Controller
         DB::transaction(function () use ($user, $active, $request, $audit, $delegacion): void {
             $user = User::query()->lockForUpdate()->findOrFail($user->getKey());
 
-            if (! $active && $user->isRole('administrador')) {
+            if (! $active && $user->can('gestion.seguridad.consultar')) {
                 $delegacion->bloquearAdministradoresGlobales();
                 $user->refresh();
                 abort_if($delegacion->esUltimoAdministradorGlobal($user), 422, 'No se puede desactivar el último administrador global autorizado.');

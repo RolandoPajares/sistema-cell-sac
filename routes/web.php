@@ -112,72 +112,72 @@ Route::middleware(['auth', 'cuenta.activa', 'sesion.usuario'])->group(function (
     Route::patch('/mis-pedidos/{order}/estado', [PedidoController::class, 'updateStatus'])->whereNumber('order')->name('orders.status');
 
     Route::get('/portal-mayorista', [InteligenciaComercialController::class, 'wholesale'])
-        ->middleware('role:administrador,ventas_mayoristas,cliente_mayorista')->name('smart.wholesale');
+        ->middleware('permiso:gestion.cotizaciones.consultar')->name('smart.wholesale');
 
     Route::get('/cotizaciones', [CotizacionController::class, 'index'])
-        ->middleware('role:administrador,ventas_mayoristas,cliente_mayorista')->name('quotations.index');
+        ->middleware('permiso:gestion.cotizaciones.consultar')->name('quotations.index');
     Route::post('/cotizaciones', [CotizacionController::class, 'store'])
-        ->middleware('role:administrador,ventas_mayoristas,cliente_mayorista')->name('quotations.store');
+        ->middleware('permiso:gestion.cotizaciones.crear')->name('quotations.store');
 });
 
 Route::get('/gestion/configuracion-comercial', static fn (): RedirectResponse => redirect()->route('management.products.preview.store_settings'))
-    ->middleware(['auth', 'cuenta.activa', 'sesion.usuario', 'role:administrador'])
+    ->middleware(['auth', 'cuenta.activa', 'sesion.usuario', 'permiso:ruta'])
     ->name('management.commercial_settings');
 
 Route::get('/gestion/analitica-clientes', static fn (): RedirectResponse => redirect()->route('management.reports', ['vista' => 'clientes']))
-    ->middleware(['auth', 'cuenta.activa', 'sesion.usuario', 'role:administrador'])
+    ->middleware(['auth', 'cuenta.activa', 'sesion.usuario', 'permiso:ruta'])
     ->name('management.customer_analytics');
 Route::get('/gestion/metricas-marketing', static fn (): RedirectResponse => redirect()->route('management.reports', ['vista' => 'campanas']))
-    ->middleware(['auth', 'cuenta.activa', 'sesion.usuario', 'role:administrador'])
+    ->middleware(['auth', 'cuenta.activa', 'sesion.usuario', 'permiso:ruta'])
     ->name('management.marketing_metrics');
 Route::get('/gestion/reportes-financieros', static fn (): RedirectResponse => redirect()->route('management.reports', ['vista' => 'ventas']))
-    ->middleware(['auth', 'cuenta.activa', 'sesion.usuario', 'role:administrador'])
+    ->middleware(['auth', 'cuenta.activa', 'sesion.usuario', 'permiso:ruta'])
     ->name('management.financial_reports');
 
 Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario', 'permiso:ruta'])->name('management.')->group(function (): void {
     Route::get('/', AdministradorDashboardController::class)->name('dashboard');
     Route::get('/dashboard-global/ventas', [DashboardGlobalVentasController::class, 'index'])
-        ->middleware('role:administrador')->name('dashboard.sales');
+        ->middleware('permiso:ruta')->name('dashboard.sales');
     Route::get('/dashboard-global/ventas/exportar/{format}', [DashboardGlobalVentasController::class, 'export'])
-        ->whereIn('format', ['pdf', 'excel', 'csv'])->middleware('role:administrador')->name('reports.dashboard_sales.export');
+        ->whereIn('format', ['pdf', 'excel', 'csv'])->middleware('permiso:ruta')->name('reports.dashboard_sales.export');
     Route::get('/dashboard-global/pedidos', [DashboardGlobalPedidosController::class, 'index'])
-        ->middleware('role:administrador')->name('dashboard.orders');
+        ->middleware('permiso:ruta')->name('dashboard.orders');
     Route::get('/dashboard-global/pedidos/exportar/{format}', [DashboardGlobalPedidosController::class, 'export'])
-        ->whereIn('format', ['pdf', 'excel', 'csv'])->middleware('role:administrador')->name('reports.dashboard_orders.export');
+        ->whereIn('format', ['pdf', 'excel', 'csv'])->middleware('permiso:ruta')->name('reports.dashboard_orders.export');
     Route::get('/dashboard-global/sedes', [DashboardGlobalSedesController::class, 'index'])
-        ->middleware('role:administrador')->name('dashboard.sites');
+        ->middleware('permiso:ruta')->name('dashboard.sites');
     Route::get('/dashboard-global/sedes/exportar/{format}', [DashboardGlobalSedesController::class, 'export'])
-        ->whereIn('format', ['pdf', 'excel', 'csv'])->middleware('role:administrador')->name('reports.dashboard_sites.export');
+        ->whereIn('format', ['pdf', 'excel', 'csv'])->middleware('permiso:ruta')->name('reports.dashboard_sites.export');
     Route::get('/dashboard-global/alertas', [AlertasGlobalesController::class, 'mostrar'])
-        ->middleware('role:administrador')->name('dashboard.alerts');
+        ->middleware('permiso:ruta')->name('dashboard.alerts');
     Route::get('/dashboard-global/alertas/exportar/{format}', [AlertasGlobalesController::class, 'exportar'])
-        ->whereIn('format', ['pdf', 'excel', 'csv'])->middleware('role:administrador')->name('reports.dashboard_alerts.export');
+        ->whereIn('format', ['pdf', 'excel', 'csv'])->middleware('permiso:ruta')->name('reports.dashboard_alerts.export');
     Route::get('/organizacion/empresa', [EmpresaController::class, 'index'])
-        ->middleware(['role:administrador', 'permiso:ruta'])->name('company_settings.data');
+        ->middleware(['permiso:ruta', 'permiso:ruta'])->name('company_settings.data');
     Route::put('/organizacion/empresa', [EmpresaController::class, 'update'])
-        ->middleware(['role:administrador', 'permiso:gestion.organizacion.actualizar'])->name('company_settings.data.update');
+        ->middleware(['permiso:ruta', 'permiso:gestion.organizacion.actualizar'])->name('company_settings.data.update');
     Route::get('/organizacion/sedes', [SedeController::class, 'index'])
-        ->middleware(['role:administrador', 'permiso:ruta'])->name('company_settings.sites');
+        ->middleware(['permiso:ruta', 'permiso:ruta'])->name('company_settings.sites');
     Route::post('/organizacion/sedes', [SedeController::class, 'store'])
-        ->middleware(['role:administrador', 'permiso:gestion.organizacion.actualizar'])->name('company_settings.sites.store');
+        ->middleware(['permiso:ruta', 'permiso:gestion.organizacion.actualizar'])->name('company_settings.sites.store');
     Route::put('/organizacion/sedes/{sede}', [SedeController::class, 'update'])
-        ->whereNumber('sede')->middleware(['role:administrador', 'permiso:gestion.organizacion.actualizar'])->name('company_settings.sites.update');
+        ->whereNumber('sede')->middleware(['permiso:ruta', 'permiso:gestion.organizacion.actualizar'])->name('company_settings.sites.update');
     Route::patch('/organizacion/sedes/{sede}/estado', [SedeController::class, 'cambiarEstado'])
-        ->whereNumber('sede')->middleware(['role:administrador', 'permiso:gestion.organizacion.actualizar'])->name('company_settings.sites.status');
+        ->whereNumber('sede')->middleware(['permiso:ruta', 'permiso:gestion.organizacion.actualizar'])->name('company_settings.sites.status');
     Route::get('/organizacion/almacenes', [AlmacenController::class, 'index'])
-        ->middleware(['role:administrador', 'permiso:ruta'])->name('company_settings.warehouses');
+        ->middleware(['permiso:ruta', 'permiso:ruta'])->name('company_settings.warehouses');
     Route::post('/organizacion/almacenes', [AlmacenController::class, 'store'])
-        ->middleware(['role:administrador', 'permiso:gestion.organizacion.actualizar'])->name('company_settings.warehouses.store');
+        ->middleware(['permiso:ruta', 'permiso:gestion.organizacion.actualizar'])->name('company_settings.warehouses.store');
     Route::put('/organizacion/almacenes/{almacen}', [AlmacenController::class, 'update'])
-        ->whereNumber('almacen')->middleware(['role:administrador', 'permiso:gestion.organizacion.actualizar'])->name('company_settings.warehouses.update');
+        ->whereNumber('almacen')->middleware(['permiso:ruta', 'permiso:gestion.organizacion.actualizar'])->name('company_settings.warehouses.update');
     Route::patch('/organizacion/almacenes/{almacen}/estado', [AlmacenController::class, 'cambiarEstado'])
-        ->whereNumber('almacen')->middleware(['role:administrador', 'permiso:gestion.organizacion.actualizar'])->name('company_settings.warehouses.status');
+        ->whereNumber('almacen')->middleware(['permiso:ruta', 'permiso:gestion.organizacion.actualizar'])->name('company_settings.warehouses.status');
     Route::get('/organizacion/personal', [PersonalSedeController::class, 'listar'])
-        ->middleware(['role:administrador', 'permiso:ruta', 'permiso:pantalla.admin.staff.consultar'])->name('company_settings.staff');
+        ->middleware(['permiso:ruta', 'permiso:ruta', 'permiso:pantalla.admin.staff.consultar'])->name('company_settings.staff');
     Route::get('/organizacion/responsables', [ResponsableOrganizacionalController::class, 'index'])
-        ->middleware(['role:administrador', 'permiso:ruta', 'permiso:pantalla.admin.staff.consultar', 'permiso:pantalla.admin.responsibles.consultar'])->name('company_settings.responsibles');
+        ->middleware(['permiso:ruta', 'permiso:ruta', 'permiso:pantalla.admin.staff.consultar', 'permiso:pantalla.admin.responsibles.consultar'])->name('company_settings.responsibles');
     Route::post('/organizacion/responsables', [ResponsableOrganizacionalController::class, 'store'])
-        ->middleware(['role:administrador', 'permiso:gestion.organizacion.actualizar', 'permiso:pantalla.admin.responsibles.consultar'])->name('company_settings.responsibles.store');
+        ->middleware(['permiso:ruta', 'permiso:gestion.organizacion.actualizar', 'permiso:pantalla.admin.responsibles.consultar'])->name('company_settings.responsibles.store');
     Route::get('/cotizaciones', [CotizacionController::class, 'index'])->name('quotations');
     Route::get('/cotizaciones/exportar/{format}', [CotizacionController::class, 'export'])
         ->whereIn('format', ['pdf', 'excel', 'csv'])->name('quotations.export.list');
@@ -189,15 +189,15 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
 
     Route::get('/productos', [GestionProductosController::class, 'index'])->name('products');
     Route::get('/ecommerce/diseno/precios', [GestionProductosController::class, 'preciosCanales'])
-        ->middleware('role:administrador')->name('products.preview.prices');
+        ->middleware('permiso:ruta')->name('products.preview.prices');
     Route::put('/ecommerce/precios-mayoristas', [GestionProductosController::class, 'guardarPrecioMayorista'])
-        ->middleware(['role:administrador', 'permiso:gestion.productos.actualizar'])->name('products.wholesale_prices.update');
+        ->middleware(['permiso:ruta', 'permiso:gestion.productos.actualizar'])->name('products.wholesale_prices.update');
     Route::post('/ecommerce/precios-mayoristas/importar', [GestionProductosController::class, 'importarPreciosMayoristas'])
-        ->middleware(['role:administrador', 'permiso:gestion.productos.actualizar'])->name('products.wholesale_prices.import');
+        ->middleware(['permiso:ruta', 'permiso:gestion.productos.actualizar'])->name('products.wholesale_prices.import');
     Route::get('/ecommerce/diseno/tienda', [GestionProductosController::class, 'configuracionTienda'])
-        ->middleware('role:administrador')->name('products.preview.store_settings');
+        ->middleware('permiso:ruta')->name('products.preview.store_settings');
     Route::put('/ecommerce/tienda/configuracion', [GestionProductosController::class, 'guardarConfiguracionTienda'])
-        ->middleware(['role:administrador', 'permiso:gestion.configuracion.actualizar'])->name('commercial_settings.store.update');
+        ->middleware(['permiso:ruta', 'permiso:gestion.configuracion.actualizar'])->name('commercial_settings.store.update');
     Route::get('/productos/exportar/{format}', [GestionProductosController::class, 'export'])
         ->whereIn('format', ['pdf', 'excel', 'csv'])->name('products.export');
     Route::post('/productos', [GestionProductosController::class, 'store'])->name('products.store');
@@ -222,7 +222,7 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::patch('/usuarios/{user}/estado', [GestionUsuariosController::class, 'updateStatus'])->whereNumber('user')->name('users.activate');
     Route::get('/auditoria', [PanelAnalisisAuditoriaController::class, 'operaciones'])->name('audit');
     Route::get('/analisis/diseno/auditoria-operaciones', [PanelAnalisisAuditoriaController::class, 'operaciones'])
-        ->middleware('role:administrador')->name('audit.preview.operations');
+        ->middleware('permiso:ruta')->name('audit.preview.operations');
 
     Route::get('/categorias', [CategoriaController::class, 'index'])->name('categories');
     Route::get('/categorias/exportar/{format?}', [CategoriaController::class, 'export'])
@@ -246,9 +246,9 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
         ->whereNumber('order')->name('orders.status');
     Route::get('/ventas', [VentaController::class, 'index'])->name('sales');
     Route::get('/ventas/diseno/minoristas', [VentaController::class, 'panelMinorista'])
-        ->middleware('role:administrador')->name('sales.preview.retail');
+        ->middleware('permiso:ruta')->name('sales.preview.retail');
     Route::get('/ventas/diseno/mayoristas', [VentaController::class, 'panelMayorista'])
-        ->middleware('role:administrador')->name('sales.preview.wholesale');
+        ->middleware('permiso:ruta')->name('sales.preview.wholesale');
     Route::get('/ventas/exportar/{format?}', [VentaController::class, 'export'])
         ->whereIn('format', ['pdf', 'excel', 'csv'])->name('sales.export');
     Route::post('/ventas', [VentaController::class, 'store'])->name('sales.store');
@@ -304,19 +304,19 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::post('/inventario/transferencias/{transfer}/cancel', [TransferenciaExistenciaController::class, 'cancel'])->whereNumber('transfer')->name('inventory.transfer_cancel');
     Route::post('/inventario/transferencias/{transfer}/close', [TransferenciaExistenciaController::class, 'close'])->whereNumber('transfer')->name('inventory.transfer_close');
     Route::get('/inventario/diseno/envios', [EnviosPedidosController::class, 'mostrar'])
-        ->middleware(['role:administrador', 'permiso:ruta', 'permiso:pantalla.admin.shipments.consultar'])->name('inventory.preview.shipments');
+        ->middleware(['permiso:ruta', 'permiso:ruta', 'permiso:pantalla.admin.shipments.consultar'])->name('inventory.preview.shipments');
     Route::patch('/inventario/envios/{envioPedido}/estado', [EnviosPedidosController::class, 'actualizarEstado'])
         ->whereNumber('envioPedido')
-        ->middleware(['role:administrador', 'permiso:ruta'])
+        ->middleware(['permiso:ruta', 'permiso:ruta'])
         ->name('inventory.shipments.status.update');
     Route::get('/inventario/diseno/envios/{envio}', [EnviosPedidosController::class, 'detalle'])
         ->whereNumber('envio')
-        ->middleware(['role:administrador', 'permiso:ruta', 'permiso:pantalla.admin.shipments.consultar'])->name('inventory.preview.shipments.show');
+        ->middleware(['permiso:ruta', 'permiso:ruta', 'permiso:pantalla.admin.shipments.consultar'])->name('inventory.preview.shipments.show');
     Route::get('/inventario/diseno/envios/exportar/{format?}', [EnviosPedidosController::class, 'exportar'])
         ->whereIn('format', ['pdf', 'excel', 'csv'])
-        ->middleware(['role:administrador', 'permiso:ruta'])->name('inventory.preview.shipments.export');
+        ->middleware(['permiso:ruta', 'permiso:ruta'])->name('inventory.preview.shipments.export');
     Route::get('/inventario/diseno/series', [DispositivosController::class, 'mostrar'])
-        ->middleware(['role:administrador', 'permiso:ruta', 'permiso:pantalla.admin.imei.consultar'])->name('inventory.preview.serials');
+        ->middleware(['permiso:ruta', 'permiso:ruta', 'permiso:pantalla.admin.imei.consultar'])->name('inventory.preview.serials');
     Route::post('/inventario/{product}', [InventarioController::class, 'adjust'])->whereNumber('product')->name('inventory.adjust');
 });
 
@@ -359,11 +359,11 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::delete('/segmentos/{segment}', [SegmentoClienteController::class, 'deactivate'])->whereNumber('segment')->name('segments.deactivate');
     Route::get('/reportes', [ReporteController::class, 'index'])->name('reports');
     Route::get('/analisis/diseno/reportes-globales', [PanelAnalisisAuditoriaController::class, 'globales'])
-        ->middleware('role:administrador')->name('reports.preview.global');
+        ->middleware('permiso:ruta')->name('reports.preview.global');
     Route::get('/analisis/diseno/{tipo}/exportar/{format?}', [PanelAnalisisAuditoriaController::class, 'exportar'])
         ->whereIn('tipo', ['globales', 'operaciones'])
         ->whereIn('format', ['pdf', 'excel', 'csv'])
-        ->middleware('role:administrador')->name('reports.preview.export');
+        ->middleware('permiso:ruta')->name('reports.preview.export');
     Route::get('/reportes/exportar/{format?}', [ReporteController::class, 'export'])
         ->whereIn('format', ['pdf', 'excel', 'csv'])->name('reports.export');
 });
@@ -386,23 +386,23 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::get('/reembolsos/{reembolso}', [FinanzasController::class, 'detalleReembolso'])->whereNumber('reembolso')->name('refunds.show');
     Route::patch('/reembolsos/{reembolso}/aprobar', [FinanzasController::class, 'aprobarReembolso'])->whereNumber('reembolso')->name('refunds.approve');
     Route::patch('/reembolsos/{reembolso}/anular', [FinanzasController::class, 'anularReembolso'])->whereNumber('reembolso')->name('refunds.cancel');
-    Route::get('/finanzas/diseno/pagos', static fn () => redirect()->route('management.payments'))->middleware('role:administrador')->name('payments.preview.receipts');
-    Route::get('/finanzas/diseno/cajas', [CajaController::class, 'index'])->middleware('role:administrador')->name('payments.preview.cash_registers');
-    Route::post('/finanzas/cajas', [CajaController::class, 'store'])->middleware('role:administrador')->name('payments.cash_registers.store');
-    Route::put('/finanzas/cajas/{caja}', [CajaController::class, 'update'])->whereNumber('caja')->middleware('role:administrador')->name('payments.cash_registers.update');
-    Route::patch('/finanzas/cajas/{caja}/estado', [CajaController::class, 'updateStatus'])->whereNumber('caja')->middleware('role:administrador')->name('payments.cash_registers.status.update');
-    Route::get('/finanzas/diseno/aperturas-cierres', [SesionCajaController::class, 'index'])->middleware('role:administrador')->name('payments.preview.cash_sessions');
-    Route::post('/finanzas/sesiones-caja', [SesionCajaController::class, 'store'])->middleware('role:administrador')->name('payments.cash_sessions.store');
-    Route::get('/finanzas/sesiones-caja/{sesionCaja}', [SesionCajaController::class, 'show'])->whereNumber('sesionCaja')->middleware('role:administrador')->name('payments.cash_sessions.show');
-    Route::post('/finanzas/sesiones-caja/{sesionCaja}/movimientos', [SesionCajaController::class, 'storeMovement'])->whereNumber('sesionCaja')->middleware('role:administrador')->name('payments.cash_sessions.movements.store');
-    Route::patch('/finanzas/sesiones-caja/{sesionCaja}', [SesionCajaController::class, 'update'])->whereNumber('sesionCaja')->middleware('role:administrador')->name('payments.cash_sessions.update');
-    Route::get('/finanzas/diseno/cuentas', [CuentasFinancierasController::class, 'index'])->middleware('role:administrador')->name('payments.preview.accounts');
+    Route::get('/finanzas/diseno/pagos', static fn () => redirect()->route('management.payments'))->middleware('permiso:ruta')->name('payments.preview.receipts');
+    Route::get('/finanzas/diseno/cajas', [CajaController::class, 'index'])->middleware('permiso:ruta')->name('payments.preview.cash_registers');
+    Route::post('/finanzas/cajas', [CajaController::class, 'store'])->middleware('permiso:ruta')->name('payments.cash_registers.store');
+    Route::put('/finanzas/cajas/{caja}', [CajaController::class, 'update'])->whereNumber('caja')->middleware('permiso:ruta')->name('payments.cash_registers.update');
+    Route::patch('/finanzas/cajas/{caja}/estado', [CajaController::class, 'updateStatus'])->whereNumber('caja')->middleware('permiso:ruta')->name('payments.cash_registers.status.update');
+    Route::get('/finanzas/diseno/aperturas-cierres', [SesionCajaController::class, 'index'])->middleware('permiso:ruta')->name('payments.preview.cash_sessions');
+    Route::post('/finanzas/sesiones-caja', [SesionCajaController::class, 'store'])->middleware('permiso:ruta')->name('payments.cash_sessions.store');
+    Route::get('/finanzas/sesiones-caja/{sesionCaja}', [SesionCajaController::class, 'show'])->whereNumber('sesionCaja')->middleware('permiso:ruta')->name('payments.cash_sessions.show');
+    Route::post('/finanzas/sesiones-caja/{sesionCaja}/movimientos', [SesionCajaController::class, 'storeMovement'])->whereNumber('sesionCaja')->middleware('permiso:ruta')->name('payments.cash_sessions.movements.store');
+    Route::patch('/finanzas/sesiones-caja/{sesionCaja}', [SesionCajaController::class, 'update'])->whereNumber('sesionCaja')->middleware('permiso:ruta')->name('payments.cash_sessions.update');
+    Route::get('/finanzas/diseno/cuentas', [CuentasFinancierasController::class, 'index'])->middleware('permiso:ruta')->name('payments.preview.accounts');
     Route::post('/finanzas/cuentas-por-pagar', [CuentasFinancierasController::class, 'crearCuentaPorPagar'])->name('payments.accounts.payables.store');
     Route::post('/finanzas/cuentas-por-pagar/aplicar-pago', [CuentasFinancierasController::class, 'aplicarPago'])
         ->name('payments.accounts.payables.update');
     Route::post('/finanzas/cuentas-por-cobrar/aplicar-cobro', [CuentasFinancierasController::class, 'aplicarCobro'])
         ->name('payments.accounts.receivables.update');
-    Route::get('/finanzas/diseno/reembolsos', static fn () => redirect()->route('management.refunds'))->middleware('role:administrador')->name('refunds.preview');
+    Route::get('/finanzas/diseno/reembolsos', static fn () => redirect()->route('management.refunds'))->middleware('permiso:ruta')->name('refunds.preview');
     Route::get('/roles-permisos', [RolesPermisosController::class, 'index'])->name('roles_permissions');
     Route::get('/matriz-privilegios', [RolesPermisosController::class, 'matrix'])->name('permissions_matrix');
     Route::post('/roles-permisos', [RolesPermisosController::class, 'store'])->name('roles_permissions.store');
@@ -437,15 +437,15 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::get('/configuracion-seguridad', [ConfiguracionSistemaController::class, 'seguridad'])->name('security_settings');
     Route::get('/configuracion-general', [ConfiguracionSistemaController::class, 'general'])->name('general_settings');
     Route::get('/configuracion/diseno/general', [ConfiguracionSistemaController::class, 'general'])
-        ->middleware('role:administrador')->name('general_settings.preview');
+        ->middleware('permiso:ruta')->name('general_settings.preview');
     Route::get('/configuracion/diseno/integraciones', [ConfiguracionSistemaController::class, 'integraciones'])
-        ->middleware('role:administrador')->name('integrations.preview');
+        ->middleware('permiso:ruta')->name('integrations.preview');
     Route::get('/configuracion/diseno/notificaciones', [ConfiguracionSistemaController::class, 'notificaciones'])
-        ->middleware('role:administrador')->name('notifications.preview');
+        ->middleware('permiso:ruta')->name('notifications.preview');
     Route::get('/configuracion/diseno/seguridad', [ConfiguracionSistemaController::class, 'seguridad'])
-        ->middleware('role:administrador')->name('security_settings.preview');
+        ->middleware('permiso:ruta')->name('security_settings.preview');
     Route::get('/configuracion/diseno/respaldos', [ConfiguracionSistemaController::class, 'respaldos'])
-        ->middleware('role:administrador')->name('backups.preview');
+        ->middleware('permiso:ruta')->name('backups.preview');
 });
 
 /*
@@ -477,7 +477,7 @@ Route::middleware(['auth', 'cuenta.activa', 'sesion.usuario'])->group(function (
     Route::get('/cart', [CarritoController::class, 'index'])->name('legacy.cart');
     Route::post('/cart', [CarritoController::class, 'updateLegacy'])->name('legacy.cart.update');
     Route::get('/mayorista', [InteligenciaComercialController::class, 'wholesale'])
-        ->middleware('role:administrador,ventas_mayoristas,cliente_mayorista')->name('legacy.wholesale');
+        ->middleware('permiso:ruta')->name('legacy.wholesale');
 });
 
 Route::get('/smart/assistant', [AsistenteController::class, 'index'])->name('legacy.assistant');

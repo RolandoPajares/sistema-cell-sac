@@ -200,7 +200,7 @@ final class ServicioAutorizacion
         }
 
         $siteId = $this->activeSiteId($user);
-        if ($siteId === null && ($this->hasRole($user, 'administrador') || $this->hasRole($user, 'cliente_mayorista') || $this->hasRole($user, 'cliente_minorista'))) {
+        if ($siteId === null && $this->allowsGlobal($user, 'gestion.organizacion.consultar')) {
             $siteId = $this->singleActiveSiteId();
         }
 
@@ -660,16 +660,11 @@ final class ServicioAutorizacion
                 return null;
             }
 
-            $hasGlobalAdministrator = DB::table('usuarios_roles')
-                ->join('roles', 'roles.id', '=', 'usuarios_roles.rol_id')
-                ->where('usuarios_roles.usuario_id', $user->getKey())
-                ->where('roles.codigo', 'administrador')
-                ->where('usuarios_roles.activo', true)
-                ->where('roles.activo', true)
-                ->where(function ($query): void {
-                    $query->whereNull('usuarios_roles.vigente_hasta')->orWhere('usuarios_roles.vigente_hasta', '>', now());
-                })
-                ->exists();
+            $hasGlobalAdministrator = $this->hasPermissionAtScope(
+                $user,
+                'gestion.organizacion.consultar',
+                'empresa',
+            );
 
             $hasSiteAssignment = DB::table('usuarios_sedes_roles')
                 ->join('roles', 'roles.id', '=', 'usuarios_sedes_roles.rol_id')

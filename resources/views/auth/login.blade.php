@@ -3,6 +3,14 @@
 @section('body_class', 'modulo-autenticacion')
 @section('title', 'Iniciar sesión')
 
+@push('styles')
+    @vite('resources/css/auth/login.css')
+@endpush
+
+@push('scripts')
+    @vite('resources/js/auth/login.js')
+@endpush
+
 @section('content')
 <div class="auth-reference">
  <div class="auth-reference__inner container">

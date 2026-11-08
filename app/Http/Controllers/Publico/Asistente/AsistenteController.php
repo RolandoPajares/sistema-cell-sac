@@ -38,7 +38,7 @@ class AsistenteController extends Controller
      */
     public function index(): View
     {
-        return view('publico.asistente.index');
+        return view('inteligente.asistente.panel');
     }
 
     /**

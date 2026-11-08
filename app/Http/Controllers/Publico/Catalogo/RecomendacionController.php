@@ -30,7 +30,7 @@ class RecomendacionController extends Controller
      */
     public function index(RecomendacionRequest $request): View
     {
-        return view('publico.catalogo.recomendaciones', [
+        return view('inteligente.comprador.recomendaciones', [
             'products' => $this->recommendationService->recommend($request->validated()),
         ]);
     }

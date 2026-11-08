@@ -33,7 +33,7 @@ class InteligenciaComercialController extends Controller
         $budget = (float) ($request->validated('presupuesto') ?? 0);
         $goal = (string) ($request->validated('objetivo') ?? 'variety');
 
-        return view('publico.inteligente.optimizador', [
+        return view('inteligente.cotizador.formulario', [
             'budget' => $budget,
             'goal' => $goal,
             'proposal' => $budget > 0 ? $this->commerce->optimize($budget, $goal) : null,
@@ -47,7 +47,7 @@ class InteligenciaComercialController extends Controller
      */
     public function wholesale(): View
     {
-        return view('publico.inteligente.mayorista', [
+        return view('inteligente.cotizador.resumen', [
             'products' => $this->commerce->wholesaleProducts(),
             'benefits' => [
                 ['icon' => 'bi-cash-stack', 'label' => 'Precios por volumen'],

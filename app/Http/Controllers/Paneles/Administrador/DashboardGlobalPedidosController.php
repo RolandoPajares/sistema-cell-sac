@@ -242,7 +242,7 @@ final class DashboardGlobalPedidosController extends Controller
      */
     private function authorizeDashboard(User $user, ServicioAutorizacion $authorization): void
     {
-        abort_unless($authorization->hasRole($user, 'administrador'), 403);
+        abort_unless($authorization->allowsGlobal($user, 'gestion.seguridad.consultar'), 403);
         $authorization->assertAllowed($user, 'gestion.panel.consultar');
     }
 
@@ -260,7 +260,7 @@ final class DashboardGlobalPedidosController extends Controller
                 static fn ($query) => $query->join('empresas as dashboard_empresas', 'dashboard_empresas.id', '=', 'sedes.empresa_id')
                     ->where('dashboard_empresas.activo', true),
             )
-            ->when($authorization->isSeeded() && ! $this->hasGlobalAdministratorAssignment($user), fn ($query) => $query->whereIn('sedes.id', $this->assignedSiteIds($user, $authorization)))
+            ->when($authorization->isSeeded() && ! $this->hasGlobalOrganizationAccess($user), fn ($query) => $query->whereIn('sedes.id', $this->assignedSiteIds($user, $authorization)))
             ->orderBy('sedes.nombre')
             ->get(['sedes.id', 'sedes.nombre']);
     }
@@ -271,11 +271,14 @@ final class DashboardGlobalPedidosController extends Controller
      * @param  mixed  $user  Parámetro recibido por la operación.
      * @return bool Resultado de la operación.
      */
-    private function hasGlobalAdministratorAssignment(User $user): bool
+    private function hasGlobalOrganizationAccess(User $user): bool
     {
         return DB::table('usuarios_roles')->join('roles', 'roles.id', '=', 'usuarios_roles.rol_id')
             ->where('usuarios_roles.usuario_id', $user->getKey())
-            ->where('roles.codigo', 'administrador')
+            ->join('roles_permisos', 'roles_permisos.rol_id', '=', 'roles.id')
+            ->join('permisos', 'permisos.id', '=', 'roles_permisos.permiso_id')
+            ->where('permisos.codigo', 'gestion.organizacion.consultar')
+            ->where('roles_permisos.alcance', 'empresa')
             ->where('roles.activo', true)
             ->where('usuarios_roles.activo', true)
             ->where(static fn ($query) => $query->whereNull('usuarios_roles.vigente_hasta')->orWhere('usuarios_roles.vigente_hasta', '>', now()))
@@ -295,7 +298,10 @@ final class DashboardGlobalPedidosController extends Controller
                     ->where('dashboard_empresas.activo', true),
             )
             ->where('usuarios_sedes_roles.usuario_id', $user->getKey())
-            ->where('roles.codigo', 'administrador')
+            ->join('roles_permisos', 'roles_permisos.rol_id', '=', 'roles.id')
+            ->join('permisos', 'permisos.id', '=', 'roles_permisos.permiso_id')
+            ->where('permisos.codigo', 'gestion.organizacion.consultar')
+            ->where('roles_permisos.alcance', 'sede')
             ->where('roles.activo', true)
             ->where('usuarios_sedes_roles.activo', true)
             ->where(static fn ($query) => $query->whereNull('usuarios_sedes_roles.vigente_hasta')->orWhere('usuarios_sedes_roles.vigente_hasta', '>', now()))

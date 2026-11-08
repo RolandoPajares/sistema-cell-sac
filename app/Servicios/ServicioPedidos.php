@@ -37,7 +37,7 @@ class ServicioPedidos
      */
     public function checkout(User $user, array $cart, ?string $couponCode, ?string $ip, string $checkoutToken): Pedido
     {
-        if (! $user->isRole('cliente_mayorista') && ! $user->isRole('cliente_minorista')) {
+        if (! $user->can('gestion.cotizaciones.consultar') && ! $user->can('gestion.pedidos.consultar')) {
             $this->authorization->assertAllowed($user, 'gestion.pedidos.crear');
         }
         $cart = $this->cartService->normalizar($cart);

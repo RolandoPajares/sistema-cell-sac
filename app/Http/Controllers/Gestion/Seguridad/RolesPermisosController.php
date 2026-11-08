@@ -123,7 +123,7 @@ class RolesPermisosController extends Controller
         $data = $request->validated();
 
         if ($data['alcance_permitido'] === 'empresa') {
-            abort_unless($request->user()->isRole('administrador'), 403);
+            abort_unless($request->user()->can('gestion.seguridad.consultar'), 403);
         }
 
         $role = DB::transaction(fn (): Rol => Rol::query()->create([
@@ -155,9 +155,16 @@ class RolesPermisosController extends Controller
         abort_unless($delegacion->puedeDelegarPermisos($request->user(), $permissionIds, $scope), 403, 'No puedes delegar permisos o alcances superiores a los que posees.');
 
         if ($scope === 'empresa') {
-            abort_unless($autorizacion->hasRole($request->user(), 'administrador'), 403, 'Solo un administrador global puede conceder alcance empresarial.');
+            abort_unless($autorizacion->allowsGlobal($request->user(), 'gestion.seguridad.consultar'), 403, 'Solo un administrador global puede conceder alcance empresarial.');
         }
         abort_unless($scope === $role->alcance_permitido, 422, 'El alcance del permiso debe coincidir con el alcance permitido del rol.');
+
+        if ($role->alcance_permitido === 'propio' && DB::table('permisos')
+            ->whereIn('id', $permissionIds)
+            ->where('codigo', 'like', 'gestion.%')
+            ->exists()) {
+            abort(422, 'Los roles de alcance propio no pueden recibir permisos administrativos.');
+        }
 
         $protectedPermissionIds = DB::table('permisos')
             ->join('modulos', 'modulos.id', '=', 'permisos.modulo_id')
@@ -178,14 +185,6 @@ class RolesPermisosController extends Controller
             ->unique()
             ->values()
             ->all();
-
-        if (in_array($role->codigo, ['cliente_mayorista', 'cliente_minorista'], true)) {
-            $concedeOperacionAdministrativa = DB::table('permisos')
-                ->whereIn('id', $permissionIds)
-                ->where('codigo', 'gestion.pedidos.crear')
-                ->exists();
-            abort_unless(! $concedeOperacionAdministrativa, 422, 'Los roles de cliente no pueden recibir el permiso administrativo de crear pedidos.');
-        }
 
         abort_if($role->codigo === 'administrador', 422, 'El rol global del administrador es reservado y no puede perder privilegios.');
 
@@ -228,7 +227,7 @@ class RolesPermisosController extends Controller
     {
         abort_if($role->codigo === 'administrador', 422, 'El rol del administrador está reservado y no puede editarse.');
         $data = $request->validated();
-        abort_unless($data['alcance_permitido'] !== 'empresa' || $request->user()->isRole('administrador'), 403, 'Solo un administrador global puede conceder alcance empresarial.');
+        abort_unless($data['alcance_permitido'] !== 'empresa' || $request->user()->can('gestion.seguridad.consultar'), 403, 'Solo un administrador global puede conceder alcance empresarial.');
         abort_unless($delegacion->puedeDelegarPermisos($request->user(), $role->permisos()->pluck('permisos.id')->all(), $data['alcance_permitido']), 403, 'El nuevo alcance excede tus privilegios delegables.');
 
         DB::transaction(function () use ($role, $data, $request, $auditoria): void {

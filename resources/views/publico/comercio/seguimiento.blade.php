@@ -1,9 +1,9 @@
 @php
     $isAdminPanel = (bool) ($adminView ?? false);
     $isAdmin = ($adminView ?? false)
-        || auth()->user()?->isRole('administrador')
-        || auth()->user()?->isRole('ventas_minoristas')
-        || auth()->user()?->isRole('ventas_mayoristas');
+        || auth()->user()?->can('gestion.seguridad.consultar')
+        || auth()->user()?->can('gestion.ventas.consultar')
+        || auth()->user()?->can('gestion.cotizaciones.consultar');
 @endphp
 @extends($isAdmin ? 'layouts.panel.principal' : 'layouts.tienda.principal')
 
@@ -11,7 +11,7 @@
 @section('body_class', 'modulo-pedidos')
 
 @section('content')
-    @if ($isAdminPanel || ($isAdmin && auth()->user()->isRole('administrador')))
+    @if ($isAdminPanel || ($isAdmin && auth()->user()->can('gestion.seguridad.consultar')))
         @php
             $productImage = static function (?string $path): ?string {
                 if (!$path) {
@@ -194,7 +194,7 @@
     @endif
 @endsection
 
-@if ($isAdminPanel || ($isAdmin && auth()->user()->isRole('administrador')))
+@if ($isAdminPanel || ($isAdmin && auth()->user()->can('gestion.seguridad.consultar')))
     @push('scripts')
         <script>
             (() => {

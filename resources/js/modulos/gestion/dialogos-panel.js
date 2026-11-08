@@ -21,6 +21,13 @@ const abrirDialogo = (id) => {
 document.addEventListener("click", (evento) => {
     const abrir = evento.target.closest("[data-admin-dialog-open]");
     const cerrar = evento.target.closest("[data-admin-dialog-close]");
+    const recepcionCompra = evento.target.closest("[data-purchase-reception-open]");
+
+    if (recepcionCompra) {
+        const compraId = recepcionCompra.dataset.purchaseReceptionOpen;
+        document.getElementById(`detalle-compra-${compraId}`)?.setAttribute("open", "");
+        document.getElementById(`recepcion-parcial-${compraId}`)?.setAttribute("open", "");
+    }
 
     if (abrir && !abrir.disabled) {
         evento.preventDefault();

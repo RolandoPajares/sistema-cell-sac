@@ -3,29 +3,6 @@
 @section('body_class', 'modulo-producto')
 @section('title', $product->nombre.' | MD Technology Cell')
 
-@php
-    $categoryName = $product->category?->nombre ?: $product->categoria;
-    $imageItems = $product->images->pluck('ruta_imagen');
-    if ($imageItems->isEmpty() && $product->url_imagen) {
-        $imageItems = collect([$product->url_imagen]);
-    }
-    $imageItems = $imageItems->map(fn (string $route): array => [
-        'url' => \App\Models\Catalogo\Producto::urlPublicaDeImagen($route),
-    ])->values();
-    $primaryImage = $imageItems->first()['url'] ?? null;
-    $salePrice = (float) ($product->precio_oferta ?? $product->precio);
-    $originalPrice = (float) ($product->precio_original ?? $product->precio);
-    $discount = $originalPrice > $salePrice && $originalPrice > 0 ? round((1 - ($salePrice / $originalPrice)) * 100) : 0;
-    $visualType = str_contains(mb_strtolower((string) $categoryName), 'audio') ? 'audio' : (str_contains(mb_strtolower((string) $categoryName), 'celular') ? 'celular' : 'accesorio');
-    $variantData = $product->variants->map(fn ($variant): array => [
-        'id' => (int) $variant->id,
-        'name' => $variant->nombre_color,
-        'sku' => $variant->codigo_sku,
-        'stock' => (int) ($variant->existencias_disponibles ?? $variant->existencias),
-        'image' => $variant->images->first()?->ruta_imagen ? \App\Models\Catalogo\Producto::urlPublicaDeImagen($variant->images->first()->ruta_imagen) : null,
-    ])->values();
-@endphp
-
 @section('content')
 <section class="product-page-light" data-product-detail data-product-id="{{ $product->id }}" data-variant-data='@json($variantData)' data-authenticated="{{ auth()->check() ? '1' : '0' }}" data-login-url="{{ route('login') }}" data-favorite-url="{{ route('catalog.favorite', $product) }}" data-review-url="{{ route('catalog.review.store', $product) }}" data-favorite-initial="{{ $isFavorite ? '1' : '0' }}" data-rating-initial="{{ $userRating }}">
     <div class="container product-detail-container">

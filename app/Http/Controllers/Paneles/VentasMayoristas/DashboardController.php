@@ -16,11 +16,6 @@ final class DashboardController extends PanelDashboardController
      *
      * @return string Resultado de la operación.
      */
-    protected function role(): string
-    {
-        return 'ventas_mayoristas';
-    }
-
     /**
      * Recupera y presenta el detalle de la información solicitada.
      *
@@ -28,6 +23,6 @@ final class DashboardController extends PanelDashboardController
      */
     protected function viewName(): string
     {
-        return 'paneles.dashboard-publico';
+        return 'paneles.dashboard';
     }
 }

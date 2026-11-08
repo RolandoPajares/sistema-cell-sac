@@ -1,13 +1,10 @@
 @extends('layouts.panel.principal')
 
 @section('title', 'Cupones')
-@section('body_class', auth()->user()?->isRole('administrador') ? 'modulo-cupones' : '')
+@section('body_class', auth()->user()?->can('gestion.seguridad.consultar') ? 'modulo-cupones' : '')
 
 @section('content')
-    @php
-        $rolPanel = auth()->user()?->rol ?: auth()->user()?->rolesVigentes()->value('roles.codigo');
-    @endphp
-    @if ($rolPanel !== 'administrador')
+    @if (! (auth()->user()?->can('gestion.seguridad.consultar') ?? false))
         <section class="container content-page">
             <h1>Cupones</h1>
             <p class="notice">Gestiona los cupones disponibles para las promociones comerciales.</p>

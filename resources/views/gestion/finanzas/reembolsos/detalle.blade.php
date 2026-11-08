@@ -45,7 +45,7 @@
                 @csrf
                 @method('PATCH')
                 <input type="hidden" name="confirmacion" value="aprobar">
-                <button class="admin-finance-button admin-finance-button--primary" type="submit" onclick="return confirm('¿Aprobar esta solicitud? Esta acción no envía dinero.')">Aprobar solicitud</button>
+                <button class="admin-finance-button admin-finance-button--primary" type="submit" data-confirm="¿Aprobar esta solicitud? Esta acción no envía dinero.">Aprobar solicitud</button>
             </form>
         </section>
     @endif
@@ -58,7 +58,7 @@
                 <label>Motivo de anulación
                     <input type="text" name="motivo" value="{{ old('motivo') }}" minlength="10" maxlength="500" required>
                 </label>
-                <button class="admin-finance-button admin-finance-button--secondary" type="submit" onclick="return confirm('¿Anular esta solicitud pendiente?')">Anular solicitud</button>
+                <button class="admin-finance-button admin-finance-button--secondary" type="submit" data-confirm="¿Anular esta solicitud pendiente?">Anular solicitud</button>
             </form>
         </section>
     @endif

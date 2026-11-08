@@ -221,7 +221,7 @@ class ServicioCatalogo
         }
 
         $disponibles = array_fill_keys($ids, 0);
-        if ($usuario !== null && (($usuario->isRole('cliente_mayorista') || $usuario->isRole('cliente_minorista')) || $this->autorizacion->allows($usuario, 'gestion.pedidos.crear'))) {
+        if ($usuario !== null && (($usuario->can('gestion.cotizaciones.consultar') || $usuario->can('gestion.pedidos.consultar')) || $this->autorizacion->allows($usuario, 'gestion.pedidos.crear'))) {
             try {
                 $disponibles = array_replace($disponibles, $this->inventario->disponibilidadParaOperacion($usuario, $ids));
             } catch (HttpExceptionInterface) {

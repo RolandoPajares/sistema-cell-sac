@@ -26,7 +26,7 @@ function contenidoFrontendQa(string $ruta): string
 }
 
 test('el asistente escapa mensajes y nombres de productos antes de usar innerHTML', function (): void {
-    $javascript = contenidoFrontendQa('resources/js/publico/asistente/index.js');
+    $javascript = contenidoFrontendQa('resources/js/inteligente/asistente/chat.js');
 
     expect($javascript)->toContain('const escaparHtml = (valor)')
         ->toContain('"<": "&lt;"')
@@ -36,7 +36,7 @@ test('el asistente escapa mensajes y nombres de productos antes de usar innerHTM
 });
 
 test('el formulario de ventas escapa el nombre de producto antes de construir HTML dinámico', function (): void {
-    $javascript = contenidoFrontendQa('resources/js/modulos/gestion/ventas/index.js');
+    $javascript = contenidoFrontendQa('resources/js/gestion/comercial/ventas/index.js');
 
     expect($javascript)->toContain('const escapeHtml = (value)')
         ->toContain('${escapeHtml(productName)}')

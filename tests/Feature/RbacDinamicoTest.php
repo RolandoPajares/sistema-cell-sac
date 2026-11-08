@@ -15,7 +15,7 @@ it('seeds the seven RBAC roles without inventing organization data', function ()
     $this->seed(RbacInicialSeeder::class);
 
     $roleCodes = DB::table('roles')->orderBy('codigo')->pluck('codigo')->all();
-    $expectedRoleCodes = User::ROLES;
+    $expectedRoleCodes = User::availableRoleCodes();
     sort($roleCodes);
     sort($expectedRoleCodes);
 
@@ -293,11 +293,10 @@ it('restricts assigned employee permissions to their company site and customer p
 });
 
 it('builds role-specific menus from the database and enforces route permissions', function (): void {
-    $usersByRole = collect(User::ROLES)->mapWithKeys(fn (string $role): array => [$role => SpanishAccessFixture::user($role)]);
+    $this->seed(RbacInicialSeeder::class);
+    $usersByRole = collect(User::availableRoleCodes())->mapWithKeys(fn (string $role): array => [$role => SpanishAccessFixture::user($role)]);
     $administrator = $usersByRole['administrador'];
     $marketingUser = $usersByRole['marketing'];
-
-    $this->seed(RbacInicialSeeder::class);
 
     $menuService = app(ServicioMenuDinamico::class);
     $administratorMenu = $menuService->paraUsuario($administrator);

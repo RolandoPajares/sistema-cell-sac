@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Servicios\ConsultaVentas;
 use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioInventario;
+use App\Servicios\ServicioMenuDinamico;
 use App\Servicios\ServicioPaneles;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -37,6 +38,7 @@ final class DashboardController extends PanelDashboardController
         private readonly ServicioAutorizacion $autorizacion,
         private readonly ServicioInventario $servicioInventario,
         private readonly ConsultaVentas $consultaVentas,
+        private readonly ServicioMenuDinamico $menuDinamico,
     ) {
         parent::__construct($panelService);
     }
@@ -46,11 +48,6 @@ final class DashboardController extends PanelDashboardController
      *
      * @return string Resultado de la operación.
      */
-    protected function role(): string
-    {
-        return 'administrador';
-    }
-
     /**
      * Recupera y presenta el detalle de la información solicitada.
      *
@@ -186,9 +183,18 @@ final class DashboardController extends PanelDashboardController
             ->whereBetween('finaliza_en', [$now, $now->copy()->addDays(7)])
             ->count();
         $reminders = $this->reminders($productosSinExistencias, $pendingOrders, $expiringCampaigns);
+        $quickLinks = collect($this->menuDinamico->paraUsuario($user)['grupos'])
+            ->flatMap(static fn (array $group): array => $group['items'] ?? [])
+            ->filter(static fn (array $item): bool => ($item['enabled'] ?? false) && is_string($item['route'] ?? null))
+            ->take(9)
+            ->values()
+            ->all();
 
         return [
-            'role' => $user->rol,
+            'dashboardKind' => 'management',
+            'dashboardTitle' => 'Panel de administración',
+            'dashboardBodyClass' => 'modulo-dashboard modulo-admin-dashboard',
+            'userName' => (string) $user->nombre,
             'dashboardNow' => $now,
             'products' => $activeProducts,
             'orders' => $ordersCount,
@@ -216,6 +222,7 @@ final class DashboardController extends PanelDashboardController
             'campaignMaxViews' => $campaignMaxViews,
             'recentActivity' => $recentActivity,
             'reminders' => $reminders,
+            'quickLinks' => $quickLinks,
         ];
     }
 

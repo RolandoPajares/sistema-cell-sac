@@ -169,7 +169,7 @@ class ServicioOperacionesFinancieras
     public function confirmarPagoEfectivo(Pago $payment, string $countedAmount, string $observation, User $actor, ?string $ip): Pago
     {
         $permission = 'gestion.pagos.actualizar';
-        abort_unless($this->authorization->hasRole($actor, 'administrador'), 403);
+        abort_unless($this->authorization->allowsGlobal($actor, 'gestion.seguridad.consultar'), 403);
         $this->authorization->assertAllowed($actor, $permission);
         $countedCents = $this->cents($countedAmount);
         $observation = trim($observation);

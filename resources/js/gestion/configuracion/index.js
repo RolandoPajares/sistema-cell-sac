@@ -1,7 +1,7 @@
-import { initializeConfiguracionComercial } from './configuracion-comercial/index.js';
-import { initializeConfiguracionEmpresa } from './configuracion-empresa/index.js';
-import { initializeConfiguracionGeneral } from './configuracion-general/index.js';
-import { initializeConfiguracionSeguridad } from './configuracion-seguridad/index.js';
+import { initializeConfiguracionComercial } from './comercial/index.js';
+import { initializeConfiguracionEmpresa } from './empresa/index.js';
+import { initializeConfiguracionGeneral } from './general/index.js';
+import { initializeConfiguracionSeguridad } from './seguridad/index.js';
 
 const initializers = {
     'configuracion-empresa': initializeConfiguracionEmpresa,

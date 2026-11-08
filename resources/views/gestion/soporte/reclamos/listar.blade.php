@@ -86,8 +86,33 @@
 
     <dialog class="gestion-pendiente-modal" data-pending-modal="crear" aria-labelledby="soporte-reclamos-crear-title">@include('gestion.soporte.reclamos.crear', ['module' => $module])</dialog>
     <dialog class="gestion-pendiente-modal" data-pending-modal="editar" aria-labelledby="soporte-reclamos-editar-title">@include('gestion.soporte.reclamos.editar', ['module' => $module])</dialog>
-    <dialog class="gestion-pendiente-modal" data-pending-modal="ver" aria-labelledby="soporte-reclamos-ver-title">@include('components.gestion.modulo-pendiente-ver', ['module' => $module])</dialog>
-    <dialog class="gestion-pendiente-modal gestion-pendiente-modal--danger" data-pending-modal="eliminar" aria-labelledby="soporte-reclamos-eliminar-title">@include('components.gestion.modulo-pendiente-eliminar', ['module' => $module])</dialog>
+    <dialog class="gestion-pendiente-modal" data-pending-modal="ver" aria-labelledby="soporte-reclamos-ver-title"><div class="gestion-pendiente-modal-shell">
+    <header class="gestion-pendiente-modal-header">
+        <div><span class="gestion-pendiente-modal-icon"><i class="bi {{ $module['icon'] }}" aria-hidden="true"></i></span><div><span class="gestion-pendiente-eyebrow">{{ $module['area'] }}</span><h2 id="{{ $module['key'] }}-ver-title">Ver {{ $module['record_singular'] ?? 'registro' }}</h2><p>Detalle del registro seleccionado.</p></div></div>
+        <button type="button" class="gestion-pendiente-close" data-pending-close aria-label="Cerrar ventana"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+    </header>
+    <div class="gestion-pendiente-modal-body">
+        <div class="gestion-pendiente-modal-notice"><i class="bi bi-info-circle" aria-hidden="true"></i><div><strong>Vista preparada para integración</strong><p>No hay un registro real seleccionado. El detalle se poblará desde el backend cuando se conecte este módulo.</p></div></div>
+        <div class="gestion-pendiente-detail-grid">
+            @foreach (($module['fields'] ?? []) as $field)
+                <div><small>{{ $field['label'] }}</small><strong>—</strong></div>
+            @endforeach
+        </div>
+    </div>
+    <footer class="gestion-pendiente-modal-footer"><button type="button" class="gestion-pendiente-secondary" data-pending-close>Cerrar</button></footer>
+</div>
+</dialog>
+    <dialog class="gestion-pendiente-modal gestion-pendiente-modal--danger" data-pending-modal="eliminar" aria-labelledby="soporte-reclamos-eliminar-title"><div class="gestion-pendiente-modal-shell">
+    <header class="gestion-pendiente-modal-header">
+        <div><span class="gestion-pendiente-modal-icon gestion-pendiente-modal-icon--danger"><i class="bi bi-trash3" aria-hidden="true"></i></span><div><span class="gestion-pendiente-eyebrow">{{ $module['area'] }}</span><h2 id="{{ $module['key'] }}-eliminar-title">Eliminar {{ $module['record_singular'] ?? 'registro' }}</h2><p>Confirma la acción antes de continuar.</p></div></div>
+        <button type="button" class="gestion-pendiente-close" data-pending-close aria-label="Cerrar ventana"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+    </header>
+    <div class="gestion-pendiente-modal-body">
+        <div class="gestion-pendiente-modal-warning"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i><div><strong>Acción no disponible todavía</strong><p>No se eliminó ningún registro. Esta confirmación es visual y quedará conectada cuando exista una operación autorizada del backend.</p></div></div>
+    </div>
+    <footer class="gestion-pendiente-modal-footer"><button type="button" class="gestion-pendiente-secondary" data-pending-close>Cancelar</button><button type="button" class="gestion-pendiente-danger" data-pending-notice="La eliminación permanece pendiente de integración y no modificó ningún dato.">Eliminar cuando se integre</button></footer>
+</div>
+</dialog>
     <div class="gestion-pendiente-feedback" data-pending-feedback role="status" aria-live="polite" hidden></div>
 </section>
 @endsection

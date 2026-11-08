@@ -391,7 +391,7 @@ it('previsualizes and initializes RBAC with existing roles and an assigned admin
     ];
     $identificadoresRoles = [];
 
-    foreach (User::ROLES as $codigoRol) {
+    foreach (User::availableRoleCodes() as $codigoRol) {
         $identificadoresRoles[$codigoRol] = DB::table('roles')->insertGetId([
             'codigo' => $codigoRol,
             'nombre' => $codigoRol,

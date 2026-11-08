@@ -1,3 +1,5 @@
-@php($pagina = (require config_path('gestion/finanzas-facturacion.php'))['cajas'])
+@php
+    $pagina = (require config_path('gestion/finanzas-facturacion.php'))['cajas'];
+@endphp
 @php($pagina['clave'] = 'cajas')
-@include('components.gestion.finanzas-facturacion.pagina', ['pagina' => $pagina])
+@include('gestion.finanzas.finanzas-facturacion.pagina', ['pagina' => $pagina])
