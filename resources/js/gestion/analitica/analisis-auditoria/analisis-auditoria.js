@@ -1,5 +1,5 @@
 document.querySelectorAll('[data-analisis-auditoria]').forEach((panel) => {
-    const configuracion = JSON.parse(panel.nextElementSibling?.textContent ?? '{}');
+    const configuracion = JSON.parse(atob(panel.dataset.aaConfig ?? 'e30='));
     const dialogo = panel.querySelector('[data-aa-dialog]');
     const detalle = panel.querySelector('[data-aa-detail-data]');
 
@@ -34,7 +34,7 @@ document.querySelectorAll('[data-analisis-auditoria]').forEach((panel) => {
 });
 
 document.querySelectorAll('[data-auditoria-operaciones]').forEach((panel) => {
-    const configuracion = JSON.parse(panel.querySelector('[data-audit-config]')?.textContent ?? '[]');
+    const configuracion = JSON.parse(atob(panel.dataset.auditConfig ?? 'W10='));
     const modal = panel.querySelector('[data-audit-modal]');
     const detalleContenido = panel.querySelector('[data-audit-detail-content]');
     const filas = new Map(configuracion.map((evento) => [String(evento.id), evento]));

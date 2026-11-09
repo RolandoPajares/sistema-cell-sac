@@ -63,7 +63,7 @@ class SedeController extends Controller
             ->orderByDesc('almacenes_count')->orderBy('nombre')->limit(6)->get(['id', 'nombre']);
         $empresa = $empresaId === null ? null : Empresa::query()->find($empresaId, ['id', 'razon_social', 'nombre_comercial']);
 
-        return view('gestion.organizacion.sedes.listar', [
+        return view('gestion.administracion.organizacion.sedes.listar', [
             'sedes' => $sedes,
             'filtros' => $filtros,
             'resumen' => [

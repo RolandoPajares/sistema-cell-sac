@@ -1,7 +1,7 @@
 @extends('layouts.tienda.principal')
 
 @section('body_class', 'modulo-catalog')
-@section('title', 'Cat√°logo | MD Technology Cell')
+@section('title', 'Cat·logo | MD Technology Cell')
 
 @section('content')
 @php
@@ -12,20 +12,20 @@ $selectedBrand = request('marca');
 <section class="catalog-page">
     <div class="catalog-reference-hero">
         <div class="container catalog-reference-hero__inner">
-            <div><span class="eyebrow">TECHNOLOGY CELL</span><h1>Encuentra tu pr√≥ximo <span>celular ideal</span></h1><p>Las mejores marcas, precios vigentes y garant√≠a real.</p><a class="btn btn-primary" href="#productos">Explorar cat√°logo <i class="bi bi-arrow-right"></i></a></div>
+            <div><span class="eyebrow">TECHNOLOGY CELL</span><h1>Encuentra tu prÛximo <span>celular ideal</span></h1><p>Las mejores marcas, precios vigentes y garantÌa real.</p><a class="btn btn-primary" href="#productos">Explorar cat·logo <i class="bi bi-arrow-right"></i></a></div>
         </div>
     </div>
     <div class="container">
-        <nav class="catalog-breadcrumbs" aria-label="Ruta de navegaci√≥n">
-            <a href="{{ route('home') }}">Inicio</a><span aria-hidden="true">‚Ä∫</span><span aria-current="page">Cat√°logo</span>
+        <nav class="catalog-breadcrumbs" aria-label="Ruta de navegaciÛn">
+            <a href="{{ route('home') }}">Inicio</a><span aria-hidden="true">õ</span><span aria-current="page">Cat·logo</span>
         </nav>
 
         <div class="catalog-layout">
-            <aside class="catalog-sidebar" aria-label="Filtros del cat√°logo">
+            <aside class="catalog-sidebar" aria-label="Filtros del cat·logo">
                 <section class="catalog-filter-section">
-                    <h2>Categor√≠as</h2>
-                    <nav class="catalog-filter-list" aria-label="Categor√≠as">
-                        <a class="{{ $selectedCategory ? '' : 'is-active' }}" href="{{ route('catalog.index', collect($baseFilters)->except('categoria')->all()) }}">Todas las categor√≠as</a>
+                    <h2>CategorÌas</h2>
+                    <nav class="catalog-filter-list" aria-label="CategorÌas">
+                        <a class="{{ $selectedCategory ? '' : 'is-active' }}" href="{{ route('catalog.index', collect($baseFilters)->except('categoria')->all()) }}">Todas las categorÌas</a>
                         @foreach($categories as $category)
                         <a class="{{ (string) $selectedCategory === (string) $category->id ? 'is-active' : '' }}" href="{{ route('catalog.index', array_merge($baseFilters, ['categoria' => $category->id])) }}">{{ $category->nombre }}</a>
                         @endforeach
@@ -57,7 +57,7 @@ $selectedBrand = request('marca');
                         type="hidden"
                         name="orden"
                         value="{{ request('orden') }}">
-                    <label for="catalog-min-price">M√≠nimo</label>
+                    <label for="catalog-min-price">MÌnimo</label>
                     <input
                         class="input"
                         id="catalog-min-price"
@@ -66,7 +66,7 @@ $selectedBrand = request('marca');
                         min="0"
                         step="0.01"
                         value="{{ request('min') }}">
-                    <label for="catalog-max-price">M√°ximo</label>
+                    <label for="catalog-max-price">M·ximo</label>
                     <input
                         class="input"
                         id="catalog-max-price"
@@ -82,7 +82,7 @@ $selectedBrand = request('marca');
             <div class="catalog-content" id="productos">
                 <div class="catalog-toolbar">
                     <div class="catalog-heading">
-                        <h1>{{ $selectedCategory ? $categories->firstWhere('id', (int) $selectedCategory)?->nombre : 'Cat√°logo' }}</h1>
+                        <h1>{{ $selectedCategory ? $categories->firstWhere('id', (int) $selectedCategory)?->nombre : 'Cat·logo' }}</h1>
                         <p>Encuentra el celular ideal para ti.</p>
                     </div>
                     <form id="catalog-search-form" class="catalog-search" method="get" action="{{ route('catalog.index') }}" role="search">
@@ -99,7 +99,7 @@ $selectedBrand = request('marca');
                         </button>
                         <label class="visually-hidden" for="catalog-sort">Ordenar por</label>
                         <select id="catalog-sort" name="orden" data-catalog-sort>
-                            <option value="nuevo" @selected(request('orden')==='nuevo' )>M√°s recientes</option>
+                            <option value="nuevo" @selected(request('orden')==='nuevo' )>M·s recientes</option>
                             <option value="precio_asc" @selected(request('orden')==='precio_asc' )>Menor precio</option>
                             <option value="precio_desc" @selected(request('orden')==='precio_desc' )>Mayor precio</option>
                             <option value="nombre" @selected(request('orden')==='nombre' )>Nombre</option>
@@ -124,7 +124,7 @@ $selectedBrand = request('marca');
                         <div class="product-body catalog-product-body">
                             <div class="catalog-product-meta"><span>{{ $product->marca }}</span><span>{{ $product->category?->nombre ?: $product->categoria }}</span></div>
                             <h2>{{ $product->nombre }}</h2>
-                            <div class="catalog-product-specs">{{ trim(($product->almacenamiento ? $product->almacenamiento.' √Ç¬∑ ' : '').\Illuminate\Support\Str::limit(strip_tags((string) $product->descripcion), 38)) }}</div>
+                            <div class="catalog-product-specs">{{ trim(($product->almacenamiento ? $product->almacenamiento.' ¬∑ ' : '').\Illuminate\Support\Str::limit(strip_tags((string) $product->descripcion), 38)) }}</div>
                             <div class="catalog-product-pricing">@if($discount > 0)<div><del>S/ {{ number_format($originalPrice, 2) }}</del><span>-{{ $discount }}%</span></div>@endif</div>
                             <p class="price catalog-product-sale-price">S/ {{ number_format($salePrice, 2) }}</p>
                             <div class="stock catalog-product-stock">{{ $product->existencias_disponibles > 0 ? $product->existencias_disponibles.' unidades disponibles' : 'Agotado' }}</div>

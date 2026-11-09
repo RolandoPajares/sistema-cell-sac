@@ -44,9 +44,9 @@ test('el formulario de ventas escapa el nombre de producto antes de construir HT
 });
 
 test('el preview CSV escapa caracteres HTML antes de insertarlos en la tabla', function (): void {
-    $vista = contenidoFrontendQa('resources/views/gestion/comercial/clientes/listar.blade.php');
+    $javascript = contenidoFrontendQa('resources/js/gestion/vistas-interactivas.js');
 
-    expect($vista)->toContain("replaceAll('&', '&amp;')")
+    expect($javascript)->toContain("replaceAll('&', '&amp;')")
         ->toContain("replaceAll('<', '&lt;')")
         ->toContain("replaceAll('>', '&gt;')");
 });
@@ -54,7 +54,7 @@ test('el preview CSV escapa caracteres HTML antes de insertarlos en la tabla', f
 test('la descripción de producto usa e() antes de nl2br en salida HTML explícita', function (): void {
     $vista = contenidoFrontendQa('resources/views/publico/catalogo/detalle.blade.php');
 
-    expect($vista)->toContain('{!! nl2br(e($product->descripcion)) !!}');
+    expect($vista)->toContain('nl2br(e($product->descripcion))');
 });
 
 test('el cliente HTTP añade CSRF, acepta JSON y rechaza respuestas no exitosas', function (): void {

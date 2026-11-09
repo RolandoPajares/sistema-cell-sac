@@ -22,6 +22,10 @@ use Illuminate\View\View;
  */
 class AutenticacionController extends Controller
 {
+    public function __construct(
+        private readonly ServicioAutorizacion $authorization,
+    ) {}
+
     /**
      * Ejecuta la operación loginForm definida por la clase AutenticacionController.
      *
@@ -78,7 +82,7 @@ class AutenticacionController extends Controller
         $request->session()->regenerate();
         $audit->record($user->getKey(), 'inicio_sesion', 'autenticacion', $user->getKey(), null, null, $request->ip());
 
-        $destination = app(ServicioAutorizacion::class)->allows($user, 'gestion.panel.consultar')
+        $destination = $this->authorization->allows($user, 'gestion.panel.consultar')
             ? route('management.dashboard')
             : route('dashboard');
 

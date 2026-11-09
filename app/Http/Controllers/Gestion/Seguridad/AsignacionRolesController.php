@@ -38,7 +38,19 @@ final class AsignacionRolesController extends Controller
         $roles = $ready ? Rol::query()->where('activo', true)->orderBy('nombre')->get() : collect();
         $sites = $ready ? Sede::query()->where('activa', true)->orderBy('nombre')->get() : collect();
 
-        return view('gestion.administracion.roles-permisos.asignaciones', compact('ready', 'users', 'roles', 'sites'));
+        $assignmentPresentation = [];
+        foreach ($users as $user) {
+            $activeGlobal = $user->roles->filter(static fn (Rol $role): bool => (bool) $role->pivot->activo);
+            $activeSite = $user->rolesPorSede->filter(static fn (Rol $role): bool => (bool) $role->pivot->activo);
+            $assignmentPresentation[$user->getKey()] = [
+                'activeGlobal' => $activeGlobal,
+                'activeSite' => $activeSite,
+                'currentGlobal' => $activeGlobal->pluck('id')->all(),
+                'currentSite' => $activeSite->pluck('id')->all(),
+            ];
+        }
+
+        return view('gestion.administracion.seguridad.asignaciones-delegaciones.listar', compact('ready', 'users', 'roles', 'sites', 'assignmentPresentation'));
     }
 
     /**

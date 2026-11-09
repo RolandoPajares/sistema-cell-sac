@@ -152,7 +152,11 @@ class ServicioCatalogo
         string $nombreColor,
         int $existencias,
     ): ProductoEntidad {
-        return $this->productoDao->enTransaccion(function (ProductoDao $dao) use ($producto, $codigoSku, $nombreColor, $existencias): ProductoEntidad {
+        $dao = $producto->empresaId === null
+            ? $this->productoDao
+            : $this->productoDao->conEmpresa($producto->empresaId);
+
+        return $dao->enTransaccion(function (ProductoDao $dao) use ($producto, $codigoSku, $nombreColor, $existencias): ProductoEntidad {
             $creado = $dao->crear($producto);
             $dao->crearVariante(new VarianteProductoEntidad(
                 id: null,

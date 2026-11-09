@@ -1,27 +1,18 @@
+{{-- Analitica: dashboard-global\sedes\listar.blade.php. Presenta datos preparados por el controlador. --}}
+{{-- Bloque principal: muestra el comportamiento de pedidos e ingresos por sede. --}}
 @extends('layouts.panel.principal')
 
 @section('title', 'Indicadores por sede')
 @section('body_class', 'modulo-dashboard-global')
 
 @section('content')
-@php
-    $totalOrders = $results->sum('pedidos');
-    $totalIncome = $results->sum('ingresos');
-    $maxIncome = max(1, (float) $results->max('ingresos'));
-    $exportParameters = array_filter(['periodo' => $filters['periodo'], 'sede' => $filters['sede'], 'canal' => $filters['canal']]);
-@endphp
+{{-- El controlador entrega los totales, barras y parámetros de exportación preparados. --}}
 <section class="tc-dg" data-dashboard-global="sedes">
-    @include('gestion.analitica.dashboard-global.componentes.cabecera', [
-        'titulo' => 'Indicadores por sede',
-        'icono' => 'bi-buildings',
-        'descripcion' => 'Analiza los pedidos y sus importes registrados por sede.',
-        'exportRoute' => $canExport ? 'management.reports.dashboard_sites.export' : null,
-        'exportParameters' => $exportParameters,
-    ])
+    @include('gestion.analitica.dashboard-global.componentes.cabecera')
 
     <form class="tc-dg__filters tc-dg__filters--four" method="GET" action="{{ route('management.dashboard.sites') }}">
         <label><span><i class="bi bi-calendar3"></i> Rango de fechas</span><select name="periodo">
-            @foreach ([7 => 'Últimos 7 días', 30 => 'Últimos 30 días', 90 => 'Últimos 90 días'] as $days => $label)
+            @foreach ($periodOptions as $days => $label)
                 <option value="{{ $days }}" @selected($filters['periodo'] === $days)>{{ $label }}</option>
             @endforeach
         </select></label>
@@ -42,12 +33,9 @@
     </form>
 
     <div class="tc-dg__metrics tc-dg__metrics--six">
-        @include('gestion.analitica.dashboard-global.componentes.metrica', ['titulo' => 'Sedes registradas', 'icono' => 'bi-shop', 'valor' => number_format($results->count()), 'detalle' => 'Sedes incluidas en el filtro'])
-        @include('gestion.analitica.dashboard-global.componentes.metrica', ['titulo' => 'Importe de pedidos', 'icono' => 'bi-coin', 'tono' => 'verde', 'valor' => 'S/ '.number_format($totalIncome, 2), 'detalle' => 'Pedidos no cancelados del período'])
-        @include('gestion.analitica.dashboard-global.componentes.metrica', ['titulo' => 'Ticket promedio', 'icono' => 'bi-tag', 'tono' => 'violeta', 'valor' => 'S/ '.number_format($totalOrders ? $totalIncome / $totalOrders : 0, 2), 'detalle' => 'Por pedido no cancelado'])
-        @include('gestion.analitica.dashboard-global.componentes.metrica', ['titulo' => 'Crecimiento', 'icono' => 'bi-graph-up', 'tono' => 'ambar', 'valor' => '—', 'detalle' => 'Pendiente de comparación entre períodos'])
-        @include('gestion.analitica.dashboard-global.componentes.metrica', ['titulo' => 'Pedidos', 'icono' => 'bi-calendar-check', 'valor' => number_format($totalOrders), 'detalle' => 'Pedidos no cancelados por sede'])
-        @include('gestion.analitica.dashboard-global.componentes.metrica', ['titulo' => 'Cumplimiento', 'icono' => 'bi-check-circle', 'tono' => 'verde', 'valor' => '—', 'detalle' => 'Sin metas por sede configuradas'])
+        @foreach ($metrics as $metric)
+            @include('gestion.analitica.dashboard-global.componentes.metrica', $metric)
+        @endforeach
     </div>
 
     <div class="tc-dg__grid tc-dg__grid--halves">
@@ -55,7 +43,7 @@
             @if ($results->isEmpty())
                 <p class="tc-dg__empty">No hay sedes con pedidos asociados.</p>
             @else
-                @include('gestion.analitica.dashboard-global.componentes.grafico-barras', ['descripcion' => 'Importes reales de pedidos por sede', 'barras' => $results->take(8)->map(fn ($site) => ['etiqueta' => $site->nombre, 'valor' => 'S/ '.number_format($site->ingresos, 2), 'altura' => $site->ingresos > 0 ? max(4, round($site->ingresos / $maxIncome * 100)) : 0])->values()])
+                @include('gestion.analitica.dashboard-global.componentes.grafico-barras', $siteChart)
             @endif
         </div></article>
         <article class="tc-dg__card"><div class="tc-dg__card-head"><i class="bi bi-graph-up"></i><div><h2>Evolución de ventas por sede</h2><p>Tendencia diaria de ventas (S/).</p></div></div><p class="tc-dg__empty">Pendiente de integrar ventas y atribución de ingresos por sede.</p></article>

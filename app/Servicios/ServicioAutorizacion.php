@@ -151,6 +151,14 @@ final class ServicioAutorizacion
     }
 
     /**
+     * Comprueba si el usuario conserva al menos un permiso efectivo vigente.
+     */
+    public function hasAnyPermission(User $user): bool
+    {
+        return $this->isSeeded() && $this->permissionCodes($user) !== [];
+    }
+
+    /**
      * Hace cumplir un permiso RBAC y detiene la solicitud cuando no está autorizado.
      *
      * Delega la comprobación a {@see allows()} y produce HTTP 403 cuando el usuario
@@ -201,6 +209,9 @@ final class ServicioAutorizacion
 
         $siteId = $this->activeSiteId($user);
         if ($siteId === null && $this->allowsGlobal($user, 'gestion.organizacion.consultar')) {
+            $siteId = $this->singleActiveSiteId();
+        }
+        if ($siteId === null && $this->allows($user, 'gestion.pedidos.consultar')) {
             $siteId = $this->singleActiveSiteId();
         }
 

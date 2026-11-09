@@ -88,10 +88,14 @@ function prepareGlobalDashboardAuthorization(int $userId = 1): void
     DB::table('permisos')->insert([
         ['id' => 1, 'codigo' => 'gestion.panel.consultar', 'modulo_id' => 1, 'activo' => true],
         ['id' => 2, 'codigo' => 'gestion.analitica.reportes.exportar', 'modulo_id' => 1, 'activo' => true],
+        ['id' => 3, 'codigo' => 'gestion.seguridad.consultar', 'modulo_id' => 1, 'activo' => true],
+        ['id' => 4, 'codigo' => 'gestion.organizacion.consultar', 'modulo_id' => 1, 'activo' => true],
     ]);
     DB::table('roles_permisos')->insert([
         ['rol_id' => 1, 'permiso_id' => 1, 'alcance' => 'empresa'],
         ['rol_id' => 1, 'permiso_id' => 2, 'alcance' => 'empresa'],
+        ['rol_id' => 1, 'permiso_id' => 3, 'alcance' => 'empresa'],
+        ['rol_id' => 1, 'permiso_id' => 4, 'alcance' => 'empresa'],
     ]);
     DB::table('usuarios_roles')->insert(['usuario_id' => $userId, 'rol_id' => 1, 'activo' => true]);
 }
@@ -370,10 +374,14 @@ test('limita pedidos a sedes de empresas activas y aplica permisos de exportaciÃ
     DB::table('permisos')->insert([
         ['id' => 1, 'codigo' => 'gestion.panel.consultar', 'modulo_id' => 1, 'activo' => true],
         ['id' => 2, 'codigo' => 'gestion.analitica.reportes.exportar', 'modulo_id' => 1, 'activo' => true],
+        ['id' => 5, 'codigo' => 'gestion.seguridad.consultar', 'modulo_id' => 1, 'activo' => true],
+        ['id' => 6, 'codigo' => 'gestion.organizacion.consultar', 'modulo_id' => 1, 'activo' => true],
     ]);
     DB::table('roles_permisos')->insert([
         ['rol_id' => 1, 'permiso_id' => 1, 'alcance' => 'sede'],
         ['rol_id' => 1, 'permiso_id' => 2, 'alcance' => 'sede'],
+        ['rol_id' => 1, 'permiso_id' => 5, 'alcance' => 'sede'],
+        ['rol_id' => 1, 'permiso_id' => 6, 'alcance' => 'sede'],
     ]);
     DB::table('menus')->insert(['codigo' => 'administrador.sidebar']);
     DB::table('usuarios_sedes_roles')->insert(['usuario_id' => 1, 'sede_id' => 1, 'rol_id' => 1, 'activo' => true]);

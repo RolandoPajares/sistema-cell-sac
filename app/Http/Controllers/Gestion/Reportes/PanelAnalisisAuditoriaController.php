@@ -97,6 +97,11 @@ final class PanelAnalisisAuditoriaController extends Controller
             'pagina' => $pagina,
             'tipo' => $tipo,
             'filtros' => $filtros,
+            'aaConfig' => base64_encode(json_encode([
+                'columnas' => $pagina['columnas'],
+                'filas' => $pagina['filas'],
+            ], JSON_THROW_ON_ERROR)),
+            'auditConfig' => base64_encode(json_encode($pagina['detalles'], JSON_THROW_ON_ERROR)),
             'puedeExportar' => $tipo === 'globales' && $autorizacion->allows($usuario, 'gestion.analitica.reportes.exportar'),
             'puedeExportarAuditoria' => $tipo === 'operaciones' && $autorizacion->allows($usuario, 'gestion.auditoria.exportar'),
         ]);

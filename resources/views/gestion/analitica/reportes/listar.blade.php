@@ -1,60 +1,12 @@
+{{-- Analitica: reportes\listar.blade.php. Presenta datos preparados por el controlador. --}}
+{{-- Bloque principal: organiza filtros, indicadores, gráficos y tablas del reporte global. --}}
 @extends('layouts.panel.principal')
 
 @section('title', 'Reportes globales')
 @section('body_class', 'modulo-reportes')
 
 @section('content')
-    @php
-        $reportTabs = [
-            'resumen' => ['label' => 'Reportes globales', 'icon' => 'bi-bar-chart-line'],
-        ];
-        $salesMax = max(1, ...array_column($salesTrend, 'sales'));
-        $ordersMax = max(1, ...array_column($salesTrend, 'orders'));
-        $chartPoints = [];
-
-        foreach ($salesTrend as $index => $point) {
-            $x = count($salesTrend) > 1 ? ($index / (count($salesTrend) - 1)) * 100 : 50;
-            $y = 100 - (($point['orders'] / $ordersMax) * 100);
-            $chartPoints[] = round($x, 2).','.round($y, 2);
-        }
-
-        $categoryCursor = 0;
-        $categorySegments = [];
-        foreach ($categorySales as $category) {
-            $next = $categoryCursor + $category['percent'];
-            $categorySegments[] = $category['color'].' '.$categoryCursor.'% '.$next.'%';
-            $categoryCursor = $next;
-        }
-        if ($categoryCursor < 100) {
-            $categorySegments[] = '#e8f0fa '.$categoryCursor.'% 100%';
-        }
-        $categoryGradient = $categorySegments !== [] ? implode(', ', $categorySegments) : '#e8f0fa 0 100%';
-
-        $inventoryTotal = max(1, array_sum(array_column($inventorySummary, 'count')));
-        $inventoryCursor = 0;
-        $inventorySegments = [];
-        foreach ($inventorySummary as $stock) {
-            $next = $inventoryCursor + (($stock['count'] / $inventoryTotal) * 100);
-            $inventorySegments[] = $stock['color'].' '.$inventoryCursor.'% '.$next.'%';
-            $inventoryCursor = $next;
-        }
-        if ($inventoryCursor < 100) {
-            $inventorySegments[] = '#e8f0fa '.$inventoryCursor.'% 100%';
-        }
-        $inventoryGradient = implode(', ', $inventorySegments);
-        $orderStatuses = [
-            'Pendiente' => ['label' => 'Pendiente', 'class' => 'pending'],
-            'En proceso' => ['label' => 'En proceso', 'class' => 'processing'],
-            'Enviado' => ['label' => 'Enviado', 'class' => 'processing'],
-            'Entregado' => ['label' => 'Completado', 'class' => 'completed'],
-            'Cancelado' => ['label' => 'Cancelado', 'class' => 'cancelled'],
-        ];
-        $statusTotal = max(1, $orderStatusSummary['total']);
-        $campaignViews = $campaignReport['items']->sum('vistas');
-        $campaignClicks = $campaignReport['items']->sum('clics');
-        $campaignConversion = $campaignViews > 0 ? ($campaignClicks / $campaignViews) * 100 : 0;
-        $activeReportView = 'resumen';
-    @endphp
+    {{-- El controlador entrega indicadores, series y configuraciones visuales ya preparados. --}}
 
     <section class="reportes-page" data-reportes-page>
         <header class="reportes-hero">
@@ -111,7 +63,7 @@
                     @if ($orders > 0 || $sales > 0)
                         <div class="reportes-chart" aria-label="Gráfico de ventas y pedidos">
                             <div class="reportes-chart-scale"><span>S/ {{ number_format($salesMax, 0) }}</span><span>S/ {{ number_format($salesMax * .75, 0) }}</span><span>S/ {{ number_format($salesMax * .5, 0) }}</span><span>S/ {{ number_format($salesMax * .25, 0) }}</span><span>S/ 0</span></div>
-                            <div class="reportes-chart-plot"><div class="reportes-chart-lines"><span></span><span></span><span></span><span></span><span></span></div><div class="reportes-bars">@foreach ($salesTrend as $point)<div class="reportes-bar-column" title="{{ $point['label'] }}: S/ {{ number_format($point['sales'], 2) }} · {{ $point['orders'] }} pedidos"><span class="reportes-bar" style="height: {{ $point['sales_height'] }}%"></span><small>{{ $point['label'] }}</small></div>@endforeach</div><svg class="reportes-orders-line" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Pedidos por día"><polyline points="{{ implode(' ', $chartPoints) }}"></polyline>@foreach ($salesTrend as $index => $point)@php $pointX = count($salesTrend) > 1 ? ($index / (count($salesTrend) - 1)) * 100 : 50; $pointY = 100 - (($point['orders'] / $ordersMax) * 100); @endphp<circle cx="{{ round($pointX, 2) }}" cy="{{ round($pointY, 2) }}" r="1.2"></circle>@endforeach</svg></div>
+                            <div class="reportes-chart-plot"><div class="reportes-chart-lines"><span></span><span></span><span></span><span></span><span></span></div><div class="reportes-bars">@foreach ($salesTrend as $point)<div class="reportes-bar-column" title="{{ $point['label'] }}: S/ {{ number_format($point['sales'], 2) }} · {{ $point['orders'] }} pedidos"><span class="reportes-bar" style="height: {{ $point['sales_height'] }}%"></span><small>{{ $point['label'] }}</small></div>@endforeach</div><svg class="reportes-orders-line" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Pedidos por día"><polyline points="{{ implode(' ', $chartPoints) }}"></polyline>@foreach ($chartCircles as $circle)<circle cx="{{ $circle['x'] }}" cy="{{ $circle['y'] }}" r="1.2"></circle>@endforeach</svg></div>
                         </div>
                     @else
                         <div class="reportes-empty"><i class="bi bi-bar-chart" aria-hidden="true"></i><strong>Sin ventas en este periodo</strong><span>Los datos aparecerán cuando se registren pedidos.</span></div>
@@ -125,7 +77,7 @@
                 <section class="reportes-card reportes-inventory-card"><header class="reportes-card-header"><div><h2>Estado de inventario</h2><p>{{ number_format($activeProducts) }} productos activos en el catálogo.</p></div><button type="button" class="reportes-inline-link" data-report-tab-link="inventario">Ver detalle <i class="bi bi-arrow-right" aria-hidden="true"></i></button></header><div class="reportes-donut-layout reportes-donut-layout--inventory"><div class="reportes-donut reportes-donut--inventory" style="--donut-gradient: conic-gradient({{ $inventoryGradient }})"><div><strong>{{ number_format($activeProducts) }}</strong><span>Productos</span></div></div><ul class="reportes-legend-list">@foreach ($inventorySummary as $stock)<li><span><i style="background: {{ $stock['color'] }}"></i>{{ $stock['label'] }}</span><b>{{ number_format(($stock['count'] / $inventoryTotal) * 100, 1) }}%</b></li>@endforeach</ul></div><div class="reportes-inventory-alert"><span><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i></span><div><strong>{{ number_format($lowStock) }} productos con stock bajo</strong><small>Requieren reposición.</small></div><button type="button" class="reportes-alert-link" data-report-tab-link="inventario">Ver productos</button></div></section>
             </div>
 
-            <section class="reportes-card reportes-orders-card"><header class="reportes-card-header"><div><h2>Últimos pedidos</h2><p>Operaciones registradas en el periodo seleccionado.</p></div><button type="button" class="reportes-inline-link" data-report-tab-link="pedidos">Ver detalle <i class="bi bi-arrow-right" aria-hidden="true"></i></button></header>@include('gestion.analitica.reportes._orders-table', ['latestOrders' => $latestOrders, 'orderStatuses' => $orderStatuses])</section>
+            <section class="reportes-card reportes-orders-card"><header class="reportes-card-header"><div><h2>Últimos pedidos</h2><p>Operaciones registradas en el periodo seleccionado.</p></div><button type="button" class="reportes-inline-link" data-report-tab-link="pedidos">Ver detalle <i class="bi bi-arrow-right" aria-hidden="true"></i></button></header>@include('gestion.analitica.reportes._orders-table')</section>
         </div>
 
         <div class="reportes-footer-note"><i class="bi bi-info-circle" aria-hidden="true"></i><span>Las métricas se calculan con la información registrada en la base de datos. Periodo actual: <strong>{{ $periodLabel }}</strong>.</span><span class="reportes-footer-campaigns">Campañas: {{ number_format($campaignViews) }} vistas · {{ number_format($campaignClicks) }} clics</span></div>
@@ -140,7 +92,7 @@
         <div class="reportes-tab-panel {{ $activeReportView === 'pedidos' ? 'is-active' : '' }}" id="report-panel-pedidos" data-report-panel="pedidos" role="tabpanel" @if ($activeReportView !== 'pedidos') hidden @endif>
             <header class="reportes-view-header"><div><span class="reportes-eyebrow">Pedidos</span><h2>Estado de pedidos</h2><p>Consulta la distribución de pedidos y el detalle de cada estado.</p></div></header>
             <div class="reportes-mini-kpi-grid"><article><span class="reportes-mini-icon reportes-mini-icon--blue"><i class="bi bi-receipt"></i></span><div><small>Pedidos totales</small><strong>{{ number_format($orderStatusSummary['total']) }}</strong></div></article><article><span class="reportes-mini-icon reportes-mini-icon--orange"><i class="bi bi-clock"></i></span><div><small>Pendientes</small><strong>{{ number_format($orderStatusSummary['items'][0]['count']) }}</strong></div></article><article><span class="reportes-mini-icon reportes-mini-icon--green"><i class="bi bi-check-circle"></i></span><div><small>Entregados</small><strong>{{ number_format($orderStatusSummary['items'][3]['count']) }}</strong></div></article><article><span class="reportes-mini-icon reportes-mini-icon--red"><i class="bi bi-x-circle"></i></span><div><small>Cancelados</small><strong>{{ number_format($orderStatusSummary['items'][4]['count']) }}</strong></div></article></div>
-            <div class="reportes-grid reportes-grid--main"><section class="reportes-card reportes-status-card"><header class="reportes-card-header"><div><h2>Distribución por estado</h2><p>{{ number_format($orderStatusSummary['total']) }} pedidos en el periodo.</p></div></header><div class="reportes-status-list">@foreach ($orderStatusSummary['items'] as $status)<div><span><i style="background: {{ $status['color'] }}"></i>{{ $status['label'] }}</span><div class="reportes-progress"><i style="width: {{ ($status['count'] / $statusTotal) * 100 }}%; background: {{ $status['color'] }}"></i></div><b>{{ number_format($status['count']) }}</b><small>{{ number_format(($status['count'] / $statusTotal) * 100, 1) }}%</small></div>@endforeach</div></section><section class="reportes-card reportes-orders-card"><header class="reportes-card-header"><div><h2>Pedidos recientes</h2><p>Últimas operaciones registradas.</p></div></header>@include('gestion.analitica.reportes._orders-table', ['latestOrders' => $latestOrders, 'orderStatuses' => $orderStatuses])</section></div>
+            <div class="reportes-grid reportes-grid--main"><section class="reportes-card reportes-status-card"><header class="reportes-card-header"><div><h2>Distribución por estado</h2><p>{{ number_format($orderStatusSummary['total']) }} pedidos en el periodo.</p></div></header><div class="reportes-status-list">@foreach ($orderStatusSummary['items'] as $status)<div><span><i style="background: {{ $status['color'] }}"></i>{{ $status['label'] }}</span><div class="reportes-progress"><i style="width: {{ ($status['count'] / $statusTotal) * 100 }}%; background: {{ $status['color'] }}"></i></div><b>{{ number_format($status['count']) }}</b><small>{{ number_format(($status['count'] / $statusTotal) * 100, 1) }}%</small></div>@endforeach</div></section><section class="reportes-card reportes-orders-card"><header class="reportes-card-header"><div><h2>Pedidos recientes</h2><p>Últimas operaciones registradas.</p></div></header>@include('gestion.analitica.reportes._orders-table')</section></div>
         </div>
 
         <div class="reportes-tab-panel {{ $activeReportView === 'productos' ? 'is-active' : '' }}" id="report-panel-productos" data-report-panel="productos" role="tabpanel" @if ($activeReportView !== 'productos') hidden @endif>
@@ -158,7 +110,7 @@
         <div class="reportes-tab-panel {{ $activeReportView === 'clientes' ? 'is-active' : '' }}" id="report-panel-clientes" data-report-panel="clientes" role="tabpanel" @if ($activeReportView !== 'clientes') hidden @endif>
             <header class="reportes-view-header"><div><span class="reportes-eyebrow">Clientes</span><h2>Comportamiento de clientes</h2><p>Clientes registrados y compradores con mayor movimiento en el periodo.</p></div></header>
             <div class="reportes-mini-kpi-grid"><article><span class="reportes-mini-icon reportes-mini-icon--blue"><i class="bi bi-people"></i></span><div><small>Total de clientes</small><strong>{{ number_format($customerReport['total']) }}</strong></div></article><article><span class="reportes-mini-icon reportes-mini-icon--green"><i class="bi bi-person-check"></i></span><div><small>Clientes activos</small><strong>{{ number_format($customerReport['active']) }}</strong></div></article><article><span class="reportes-mini-icon reportes-mini-icon--violet"><i class="bi bi-building"></i></span><div><small>Mayoristas</small><strong>{{ number_format($customerReport['mayoristas']) }}</strong></div></article><article><span class="reportes-mini-icon reportes-mini-icon--orange"><i class="bi bi-person"></i></span><div><small>Minoristas</small><strong>{{ number_format($customerReport['minoristas']) }}</strong></div></article></div>
-            <div class="reportes-grid reportes-grid--main"><section class="reportes-card reportes-table-card"><header class="reportes-card-header"><div><h2>Clientes con mayor compra</h2><p>Ranking por total acumulado en el periodo.</p></div></header><div class="reportes-simple-table-wrap"><table class="reportes-simple-table"><thead><tr><th>Cliente</th><th>Tipo</th><th>Pedidos</th><th>Total comprado</th></tr></thead><tbody>@forelse ($customerReport['top'] as $customerOrder)@php $customer = $customerOrder->user?->customer; $customerName = $customer?->razon_social ?: $customer?->nombre_contacto ?: $customerOrder->user?->nombre ?: 'Cliente'; @endphp<tr><td><strong>{{ $customerName }}</strong><small>{{ $customerOrder->user?->correo }}</small></td><td>{{ ucfirst($customer?->tipo ?: 'cliente') }}</td><td>{{ number_format($customerOrder->customer_orders) }}</td><td><strong>S/ {{ number_format((float) $customerOrder->customer_sales, 2) }}</strong></td></tr>@empty<tr><td colspan="4" class="reportes-table-empty">No hay compras de clientes en este periodo.</td></tr>@endforelse</tbody></table></div></section><section class="reportes-card reportes-status-card"><header class="reportes-card-header"><div><h2>Distribución de clientes</h2><p>Clientes activos por tipo.</p></div></header><div class="reportes-status-list">@foreach ([['label' => 'Mayoristas', 'count' => $customerReport['mayoristas'], 'color' => '#7b55ed'], ['label' => 'Minoristas', 'count' => $customerReport['minoristas'], 'color' => '#18b78d']] as $customerType)<div><span><i style="background: {{ $customerType['color'] }}"></i>{{ $customerType['label'] }}</span><div class="reportes-progress"><i style="width: {{ $customerReport['active'] > 0 ? ($customerType['count'] / $customerReport['active']) * 100 : 0 }}%; background: {{ $customerType['color'] }}"></i></div><b>{{ number_format($customerType['count']) }}</b><small>{{ $customerReport['active'] > 0 ? number_format(($customerType['count'] / $customerReport['active']) * 100, 1) : '0.0' }}%</small></div>@endforeach</div></section></div>
+            <div class="reportes-grid reportes-grid--main"><section class="reportes-card reportes-table-card"><header class="reportes-card-header"><div><h2>Clientes con mayor compra</h2><p>Ranking por total acumulado en el periodo.</p></div></header><div class="reportes-simple-table-wrap"><table class="reportes-simple-table"><thead><tr><th>Cliente</th><th>Tipo</th><th>Pedidos</th><th>Total comprado</th></tr></thead><tbody>@forelse ($customerReport['top'] as $customerOrder){{-- El controlador prepara la identidad y los totales de cada cliente. --}}<tr><td><strong>{{ $customerOrder['name'] }}</strong><small>{{ $customerOrder['email'] }}</small></td><td>{{ $customerOrder['type'] }}</td><td>{{ number_format($customerOrder['orders']) }}</td><td><strong>S/ {{ number_format($customerOrder['sales'], 2) }}</strong></td></tr>@empty<tr><td colspan="4" class="reportes-table-empty">No hay compras de clientes en este periodo.</td></tr>@endforelse</tbody></table></div></section><section class="reportes-card reportes-status-card"><header class="reportes-card-header"><div><h2>Distribución de clientes</h2><p>Clientes activos por tipo.</p></div></header><div class="reportes-status-list">@foreach ($customerTypes as $customerType)<div><span><i style="background: {{ $customerType['color'] }}"></i>{{ $customerType['label'] }}</span><div class="reportes-progress"><i style="width: {{ $customerType['percent'] }}%; background: {{ $customerType['color'] }}"></i></div><b>{{ number_format($customerType['count']) }}</b><small>{{ number_format($customerType['percent'], 1) }}%</small></div>@endforeach</div></section></div>
         </div>
 
         <div class="reportes-tab-panel {{ $activeReportView === 'campanas' ? 'is-active' : '' }}" id="report-panel-campanas" data-report-panel="campanas" role="tabpanel" @if ($activeReportView !== 'campanas') hidden @endif>
@@ -169,73 +121,3 @@
     </section>
 @endsection
 
-@push('scripts')
-    <script>
-        (() => {
-            const form = document.querySelector('[data-report-filter-form]');
-            const tabs = [...document.querySelectorAll('[data-report-tab]')];
-            const panels = [...document.querySelectorAll('[data-report-panel]')];
-            const viewInput = form?.querySelector('[data-report-view]');
-            const period = form?.querySelector('[data-report-period]');
-            const from = form?.querySelector('[data-report-from]');
-            const to = form?.querySelector('[data-report-to]');
-
-            const activate = (view, updateUrl = true) => {
-                const selectedTab = tabs.find((tab) => tab.dataset.reportTab === view);
-                if (!selectedTab) {
-                    return;
-                }
-
-                tabs.forEach((tab) => {
-                    const selected = tab === selectedTab;
-                    tab.classList.toggle('is-active', selected);
-                    tab.setAttribute('aria-selected', selected ? 'true' : 'false');
-                });
-                panels.forEach((panel) => {
-                    const selected = panel.dataset.reportPanel === view;
-                    panel.hidden = !selected;
-                    panel.classList.toggle('is-active', selected);
-                });
-                if (viewInput) {
-                    viewInput.value = view;
-                }
-                if (updateUrl) {
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('vista', view);
-                    window.history.replaceState({}, '', url);
-                }
-            };
-
-            tabs.forEach((tab) => tab.addEventListener('click', () => activate(tab.dataset.reportTab)));
-            document.querySelectorAll('[data-report-tab-link]').forEach((link) => {
-                link.addEventListener('click', () => activate(link.dataset.reportTabLink));
-            });
-            form?.addEventListener('submit', () => {
-                if (viewInput) {
-                    viewInput.value = document.querySelector('[data-report-tab].is-active')?.dataset.reportTab || 'resumen';
-                }
-            });
-            period?.addEventListener('change', () => {
-                if (period.value === 'custom') {
-                    return;
-                }
-                if (period.value === 'all') {
-                    from?.removeAttribute('name');
-                    to?.removeAttribute('name');
-                    form?.submit();
-                    return;
-                }
-                const days = Number(period.value);
-                const today = new Date();
-                const start = new Date(today);
-                start.setDate(today.getDate() - (days - 1));
-                const toIso = (date) => [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-');
-                if (from && to) {
-                    from.value = toIso(start);
-                    to.value = toIso(today);
-                }
-                form?.submit();
-            });
-        })();
-    </script>
-@endpush

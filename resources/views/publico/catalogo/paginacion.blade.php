@@ -1,5 +1,5 @@
 @if ($paginator->hasPages())
-    <nav class="catalog-pagination" aria-label="PaginaciÃ³n del catÃ¡logo">
+    <nav class="catalog-pagination" aria-label="Paginación del catálogo">
         <p class="catalog-pagination__summary">
             Mostrando
             <strong>{{ $paginator->firstItem() }}</strong>

@@ -2,7 +2,7 @@
 
 return [
     'key' => 'respaldos-mantenimiento',
-    'area' => 'Administración del sistema',
+    'area' => 'AdministraciÃ³n del sistema',
     'title' => 'Respaldos y mantenimiento',
     'description' => 'Prepara el panel de control para respaldos, revisiones y tareas de mantenimiento.',
     'icon' => 'bi-database-check',
@@ -10,14 +10,15 @@ return [
     'record_plural' => 'tareas',
     'mode' => 'consult',
     'kpis' => [
-        ['label' => 'Último respaldo', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-database-check', 'tone' => 'green'],
-        ['label' => 'Estado del sistema', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-heart-pulse', 'tone' => 'blue'],
-        ['label' => 'Mantenimientos', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-tools', 'tone' => 'orange'],
-        ['label' => 'Revisiones', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-clipboard-check', 'tone' => 'purple'],
+        ['label' => 'Ãšltimo respaldo', 'value' => 'â€”', 'helper' => 'Sin datos integrados', 'icon' => 'bi-database-check', 'tone' => 'green'],
+        ['label' => 'Estado del sistema', 'value' => 'â€”', 'helper' => 'Sin datos integrados', 'icon' => 'bi-heart-pulse', 'tone' => 'blue'],
+        ['label' => 'Mantenimientos', 'value' => 'â€”', 'helper' => 'Sin datos integrados', 'icon' => 'bi-tools', 'tone' => 'orange'],
+        ['label' => 'Revisiones', 'value' => 'â€”', 'helper' => 'Sin datos integrados', 'icon' => 'bi-clipboard-check', 'tone' => 'purple'],
     ],
     'analytics' => [
         ['title' => 'Historial de mantenimiento', 'icon' => 'bi-tools', 'description' => 'Tareas preventivas por periodo.', 'type' => 'line', 'labels' => ['Ene', 'Feb', 'Mar', 'Abr', 'May']],
         ['title' => 'Estado de respaldos', 'icon' => 'bi-pie-chart', 'description' => 'Resumen de disponibilidad de respaldos.', 'type' => 'donut', 'legend' => ['Correctos', 'Pendientes', 'Revisar', 'No disponible']],
     ],
-    'columns' => ['Tarea', 'Última ejecución', 'Responsable', 'Estado', 'Próxima acción'],
+    'columns' => ['Tarea', 'Ãšltima ejecuciÃ³n', 'Responsable', 'Estado', 'PrÃ³xima acciÃ³n'],
+    'content' => ['title' => 'Respaldos y mantenimiento', 'description' => 'Prepara copias de seguridad, controla tareas preventivas y revisa la recuperación del sistema.', 'action' => 'Ver bitácora', 'primary' => 'Crear plan de respaldo', 'summary' => ['Planes de respaldo', 'Tareas de mantenimiento', 'Seguridad y recuperación']],
 ];

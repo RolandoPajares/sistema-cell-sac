@@ -440,6 +440,35 @@
 
 .compras-create-dialog .admin-dialog-body { max-height: calc(100vh - 120px); overflow-y: auto; }
 .compras-create-dialog .form-card { max-width: none; margin: 0; box-shadow: none; }
+
+/* Formulario compartido: se utiliza para registrar y editar compras pendientes. */
+.compras-form { display: grid; gap: 18px; padding: 22px; }
+.compras-form-heading { display: grid; gap: 5px; }
+.compras-form-eyebrow { color: #0874ed; font-size: .68rem; font-weight: 800; text-transform: uppercase; }
+.compras-form-heading h2 { margin: 0; color: #142956; font-size: 1.2rem; }
+.compras-form-heading p { margin: 0; color: #7286a6; font-size: .7rem; }
+.compras-form-section { display: grid; gap: 12px; padding-top: 15px; border-top: 1px solid #e4edf7; }
+.compras-form-section h3, .compras-form-summary h3 { margin: 0; color: #1b3768; font-size: .78rem; }
+.compras-form-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.compras-form-grid { display: grid; gap: 11px; }
+.compras-form-grid--two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.compras-form label { display: grid; gap: 5px; color: #2a4774; font-size: .67rem; font-weight: 800; }
+.compras-form input, .compras-form select { width: 100%; min-height: 38px; padding: 8px 10px; border: 1px solid #d4e2f1; border-radius: 8px; color: #17345f; background: #fff; font: inherit; font-size: .7rem; }
+.compras-form input:focus, .compras-form select:focus { border-color: #2589f5; outline: 0; box-shadow: 0 0 0 3px rgba(37, 137, 245, .13); }
+.compras-items { display: grid; gap: 10px; }
+.compras-item { display: grid; gap: 10px; padding: 13px; border: 1px solid #dce8f4; border-radius: 10px; background: #fbfdff; }
+.compras-item > header { display: flex; align-items: center; justify-content: space-between; }
+.compras-item-remove { padding: 0; border: 0; color: #c03945; background: transparent; font-size: .65rem; cursor: pointer; }
+.compras-item-total { margin: 0; color: #637b9e; font-size: .68rem; text-align: right; }
+.compras-item-total strong { color: #173d76; }
+.compras-form-summary { display: grid; gap: 8px; padding: 14px; border: 1px solid #dbe8f5; border-radius: 10px; background: #f6faff; color: #5e7699; font-size: .7rem; }
+.compras-form-summary p { display: flex; justify-content: space-between; margin: 0; }
+.compras-form-summary strong { color: #173b70; }
+.compras-form-total { padding-top: 9px; border-top: 1px solid #dce8f4; color: #173b70; font-weight: 800; }
+.compras-form-total strong { font-size: .95rem; }
+.compras-form-submit { width: 100%; justify-content: center; }
+.compras-form template { display: none; }
+@media (max-width: 620px) { .compras-form-grid--two { grid-template-columns: 1fr; } .compras-form-section-heading { align-items: stretch; flex-direction: column; } }
 .compras-recent-row .compras-reception-open { flex: 0 0 auto; padding: 5px 8px; border: 1px solid #cfe0f4; border-radius: 7px; color: #086de8; background: #fff; font-size: 0.58rem; font-weight: 800; cursor: pointer; }
 .compras-reception-dialog { width: min(100% - 28px, 560px); max-height: calc(100vh - 28px); overflow: auto; }
 .compras-reception-body { display: grid; gap: 16px; }

@@ -1,3 +1,5 @@
+{{-- Analitica: dashboard-global\alertas\listar.blade.php. Presenta datos preparados por el controlador. --}}
+{{-- Bloque principal: permite consultar alertas y notificaciones mediante filtros de presentación. --}}
 @extends('layouts.panel.principal')
 
 @section('title', 'Alertas y notificaciones')
@@ -5,7 +7,7 @@
 
 @section('content')
 <section class="tc-dg" data-dashboard-global="alertas">
-    @include('gestion.analitica.dashboard-global.componentes.cabecera', ['titulo' => 'Alertas y notificaciones', 'icono' => 'bi-bell', 'descripcion' => 'Consulta las notificaciones persistidas para la cuenta administrativa actual.', 'exportRoute' => $disponible ? 'management.reports.dashboard_alerts.export' : null, 'exportParameters' => array_filter(['estado' => $estado, 'buscar' => $busqueda], static fn ($value) => $value !== null && $value !== '')])
+    @include('gestion.analitica.dashboard-global.componentes.cabecera', $header)
 
     @unless ($disponible)
         <div class="tc-dg__empty" role="status">La tabla notificaciones no está disponible en la base de datos.</div>
@@ -33,10 +35,9 @@
         </form>
 
         <div class="tc-dg__metrics tc-dg__metrics--four">
-            @include('gestion.analitica.dashboard-global.componentes.metrica', ['titulo' => 'Notificaciones', 'icono' => 'bi-bell', 'valor' => number_format($resumen['total']), 'detalle' => 'Registros asociados a esta cuenta'])
-            @include('gestion.analitica.dashboard-global.componentes.metrica', ['titulo' => 'No leídas', 'icono' => 'bi-envelope-exclamation', 'tono' => 'rojo', 'valor' => number_format($resumen['no_leidas']), 'detalle' => 'Según leido_en en MariaDB'])
-            @include('gestion.analitica.dashboard-global.componentes.metrica', ['titulo' => 'Leídas', 'icono' => 'bi-envelope-open', 'tono' => 'verde', 'valor' => number_format($resumen['leidas']), 'detalle' => 'Según leido_en en MariaDB'])
-            @include('gestion.analitica.dashboard-global.componentes.metrica', ['titulo' => 'Tipos registrados', 'icono' => 'bi-tags', 'tono' => 'violeta', 'valor' => number_format($resumen['tipos']), 'detalle' => 'Tipos distintos almacenados'])
+            @foreach ($metrics as $metric)
+                @include('gestion.analitica.dashboard-global.componentes.metrica', $metric)
+            @endforeach
         </div>
 
         <form id="seleccionar-notificacion" method="GET" action="{{ route('management.dashboard.alerts') }}">
@@ -102,7 +103,7 @@
                 @if ($resumen['distribucion'] === [])
                     <p class="tc-dg__empty">No hay datos para construir la distribución.</p>
                 @else
-                    @include('gestion.analitica.dashboard-global.componentes.anillo', ['centro' => number_format($resumen['total']), 'etiqueta' => 'Notificaciones', 'gradiente' => $resumen['gradiente'], 'leyenda' => $resumen['distribucion']])
+                    @include('gestion.analitica.dashboard-global.componentes.anillo', $chart)
                 @endif
             </div></article>
             <article class="tc-dg__card"><div class="tc-dg__card-head"><i class="bi bi-envelope-check"></i><div><h2>Estado de lectura</h2><p>Conteo actual del destinatario autenticado.</p></div></div><div class="tc-dg__task-list"><span>No leídas <b>{{ number_format($resumen['no_leidas']) }}</b></span><span>Leídas <b>{{ number_format($resumen['leidas']) }}</b></span></div></article>

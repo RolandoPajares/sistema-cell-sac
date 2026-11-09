@@ -1,0 +1,48 @@
+<?php $__env->startSection('title', 'Precios minoristas y mayoristas'); ?>
+<?php $__env->startSection('body_class', 'modulo-ecommerce-marketing'); ?>
+<?php $__env->startSection('content'); ?>
+<section class="tc-em" data-ecommerce-precios>
+    <header class="tc-em__header"><div><span class="tc-em__eyebrow"><i class="bi bi-tags"></i> Ecommerce y Marketing</span><h1>Precios minoristas y mayoristas <i class="bi bi-tag"></i></h1><p>Consulta y actualiza precios vigentes registrados para la empresa autorizada.</p></div><div class="tc-em__actions"><?php if ($preciosMayoristasDisponibles && $puedeActualizarPrecioMayorista) { ?><button type="button" class="tc-em__button tc-em__button--primary" data-em-open="masiva"><i class="bi bi-upload"></i> Importar precios CSV</button><?php } ?></div></header>
+    <?php if (session('status')) { ?><div class="tc-em__notice" role="status"><i class="bi bi-check-circle"></i><strong>Operación registrada</strong><span><?php echo e(session('status')); ?></span></div><?php } ?> <?php if ($errors->any()) { ?><div class="tc-em__notice" role="alert"><i class="bi bi-exclamation-circle"></i><strong>No se guardó el precio</strong><span><?php echo e($errors->first()); ?></span></div><?php } ?> <div class="tc-em__notice"><i class="bi bi-info-circle"></i><strong>Precios de MariaDB</strong><span>La base define precio y precio de oferta. <?php echo e($preciosMayoristasDisponibles ? 'Los precios mayoristas proceden de MariaDB.' : 'No contiene un precio mayorista separado.'); ?></span><a href="<?php echo e(route('management.products')); ?>">Abrir gestión de productos <i class="bi bi-arrow-right"></i></a></div>
+    <div class="tc-em__metrics"><article><i class="bi bi-box-seam"></i><span>Productos consultados<strong><?php echo e(number_format($productosConPrecio)); ?></strong><small>Alcance autorizado</small></span></article><article class="tc-em__metric--green"><i class="bi bi-tag"></i><span>Precio promedio vigente<strong><?php echo e($promedioMinorista); ?></strong><small>Precio de oferta cuando existe; en otro caso, precio</small></span></article><article class="tc-em__metric--purple"><i class="bi bi-layers"></i><span>Productos con precio mayorista<strong><?php echo e($preciosMayoristasDisponibles ? number_format($totalPreciosMayoristas) : 'No definido'); ?></strong><small><?php echo e($preciosMayoristasDisponibles ? 'Promedio vigente: '.$promedioMayorista : 'Requiere la estructura propuesta'); ?></small></span></article><article class="tc-em__metric--amber"><i class="bi bi-percent"></i><span>Productos en oferta<strong><?php echo e(number_format($productosEnOferta)); ?></strong><small>Precio de oferta inferior al precio base</small></span></article></div>
+    <div class="tc-em__card tc-em__prices-panel">
+        <div class="tc-em__tabs" role="tablist" aria-label="Canal de precios"><button type="button" role="tab" aria-selected="true" class="is-active" data-em-price-tab="minorista"><i class="bi bi-people"></i> Precio registrado</button><button type="button" role="tab" aria-selected="false" data-em-price-tab="mayorista" <?php if (! $preciosMayoristasDisponibles) {
+            echo 'disabled';
+        } ?> title="<?php echo e($preciosMayoristasDisponibles ? 'Consultar precios vigentes guardados en MariaDB' : 'Precio mayorista requiere la estructura SQL propuesta'); ?>"><i class="bi bi-shop"></i> <?php echo e($preciosMayoristasDisponibles ? 'Precio mayorista' : 'Precio mayorista no definido'); ?></button></div>
+        <form class="tc-em__filters" method="GET" action="<?php echo e(url()->current()); ?>"><label class="tc-em__search"><i class="bi bi-search"></i><input type="search" name="buscar" value="<?php echo e($filtros['buscar'] ?? ''); ?>" data-em-price-search placeholder="Buscar producto por nombre, SKU o código…" aria-label="Buscar productos"></label><label>Categoría<select name="categoria" data-em-price-filter="categoria"><option value="">Todas</option><?php $__currentLoopData = $categorias;
+$__env->addLoop($__currentLoopData);
+foreach ($__currentLoopData as $categoria) {
+    $__env->incrementLoopIndices();
+    $loop = $__env->getLastLoop(); ?><option value="<?php echo e($categoria->id); ?>" <?php if ((string) ($filtros['categoria'] ?? '') === (string) $categoria->id) {
+        echo 'selected';
+    } ?>><?php echo e($categoria->nombre); ?></option><?php } $__env->popLoop();
+$loop = $__env->getLastLoop(); ?></select></label><label>Marca<select name="marca" data-em-price-filter="marca"><option value="">Todas</option><?php $__currentLoopData = $marcas;
+$__env->addLoop($__currentLoopData);
+foreach ($__currentLoopData as $marca) {
+    $__env->incrementLoopIndices();
+    $loop = $__env->getLastLoop(); ?><option value="<?php echo e($marca); ?>" <?php if (($filtros['marca'] ?? '') === $marca) {
+        echo 'selected';
+    } ?>><?php echo e($marca); ?></option><?php } $__env->popLoop();
+$loop = $__env->getLastLoop(); ?></select></label><label>Estado<select name="estado" data-em-price-filter="estado"><option value="">Todos</option><option value="activo" <?php if (($filtros['estado'] ?? '') === 'activo') {
+    echo 'selected';
+} ?>>Activo</option><option value="inactivo" <?php if (($filtros['estado'] ?? '') === 'inactivo') {
+    echo 'selected';
+} ?>>Inactivo</option></select></label><button type="submit" class="tc-em__button" data-em-price-apply><i class="bi bi-funnel"></i> Filtrar</button><a class="tc-em__button" href="<?php echo e(url()->current()); ?>" data-em-price-clear><i class="bi bi-arrow-counterclockwise"></i> Limpiar</a></form>
+        <div class="tc-em__table-heading"><div><h2 data-em-price-heading>Listado de precios (<span data-em-price-channel>Registrado</span>)</h2><small>Mostrando <span data-em-price-count><?php echo e($paginacion->count()); ?></span> productos en esta página · <?php echo e($paginacion->firstItem() ?? 0); ?>–<?php echo e($paginacion->lastItem() ?? 0); ?> de <?php echo e(number_format($paginacion->total())); ?></small></div><?php if ($puedeExportar) { ?><a class="tc-em__button" href="<?php echo e(route('management.products.export', ['format' => 'csv'] + request()->query())); ?>"><i class="bi bi-download"></i> Exportar</a><?php } else { ?><button type="button" class="tc-em__button" disabled title="No tiene permiso de exportación"><i class="bi bi-download"></i> Exportar</button><?php } ?></div>
+        <div class="tc-em__table-wrap"><table><thead><tr><th>#</th><th>Producto</th><th>Categoría</th><th>Marca</th><th>Precio base</th><th>Precio vigente</th><th>Stock disponible</th><th>Estado</th><th>Acciones</th></tr></thead><tbody><?php $__empty_1 = true;
+$__currentLoopData = $productos;
+$__env->addLoop($__currentLoopData);
+foreach ($__currentLoopData as $producto) {
+    $__env->incrementLoopIndices();
+    $loop = $__env->getLastLoop();
+    $__empty_1 = false; ?><tr data-em-price-row data-em-product-id="<?php echo e($producto['id']); ?>" data-em-categoria="<?php echo e($producto['categoria_id']); ?>" data-em-marca="<?php echo e($producto['marca']); ?>" data-em-estado="<?php echo e($producto['estado_codigo']); ?>" data-em-minorista="<?php echo e($producto['minorista']); ?>" data-em-mayorista="<?php echo e($producto['mayorista']); ?>"><td><?php echo e(($paginacion->firstItem() ?? 1) + $loop->index); ?></td><td><div class="tc-em__product"><span><i class="bi <?php echo e($producto['icono']); ?>"></i></span><div><strong><?php echo e($producto['nombre']); ?></strong><small>SKU: <?php echo e($producto['sku']); ?></small></div></div></td><td><?php echo e($producto['categoria']); ?></td><td><span class="tc-em__pill"><?php echo e($producto['marca']); ?></span></td><td><?php echo e($producto['base']); ?></td><td class="tc-em__price" data-em-price-value><?php echo e($producto['minorista']); ?></td><td><span class="tc-em__pill tc-em__pill--green"><?php echo e($producto['stock']); ?></span></td><td><span class="tc-em__pill <?php echo e($producto['activo'] ? 'tc-em__pill--green' : ''); ?>"><?php echo e($producto['estado']); ?></span></td><td><div class="tc-em__row-actions"><button type="button" data-em-open="detalle" data-em-product="<?php echo e($producto['nombre']); ?>" title="Consultar los datos del producto"><i class="bi bi-eye"></i></button><a data-em-price-edit href="<?php echo e(route('management.products', ['editar' => $producto['id']])); ?>" data-em-product-id="<?php echo e($producto['id']); ?>" data-em-product-name="<?php echo e($producto['nombre']); ?>" title="Editar precio base en la gestión del producto" aria-label="Editar precio base de <?php echo e($producto['nombre']); ?>"><i class="bi bi-pencil"></i></a><button type="button" disabled title="La desactivación se realiza en la gestión de productos"><i class="bi bi-trash"></i></button></div></td></tr><?php } $__env->popLoop();
+$loop = $__env->getLastLoop();
+if ($__empty_1) { ?><tr><td colspan="9"><p class="tc-em__empty">No hay productos registrados para los filtros aplicados.</p></td></tr><?php } ?></tbody></table></div>
+        <p class="tc-em__empty" data-em-price-empty hidden>No hay productos que coincidan con los filtros.</p>
+        <div><?php echo e($paginacion->links()); ?></div>
+    </div>
+    <?php echo $__env->make('gestion.marketing.ecommerce-marketing.componentes.modal-precios', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+</section>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.panel.principal', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>

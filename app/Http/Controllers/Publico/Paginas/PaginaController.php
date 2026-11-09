@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\GuardarMensajeContactoRequest;
 use App\Servicios\ServicioContacto;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 /**
@@ -38,9 +39,16 @@ class PaginaController extends Controller
      *
      * @return View Resultado de la operación.
      */
-    public function contact(): View
+    public function contact(Request $request): View
     {
-        return view('publico.paginas.contacto');
+        $user = $request->user();
+
+        return view('publico.paginas.contacto', [
+            'contactDefaults' => [
+                'nombre' => $user?->nombre,
+                'contacto' => $user?->correo,
+            ],
+        ]);
     }
 
     /**

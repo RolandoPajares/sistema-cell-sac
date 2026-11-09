@@ -47,6 +47,33 @@ final class DashboardGlobalVentasController extends Controller
         $orders = $this->orders($request->user(), $filters, $authorization);
         $registeredCount = (clone $orders)->count();
         $nonCancelledCount = (clone $orders)->whereNotIn('estado', ['Cancelado', 'Cancelada'])->count();
+        $dailyTotals = collect();
+        $channelTotals = collect();
+        $maxDaily = max(1, (float) $dailyTotals->max());
+        $maxChannel = max(1, (float) $channelTotals->max());
+        $dailyBars = $dailyTotals->map(static fn ($amount, $day): array => [
+            'etiqueta' => Carbon::parse($day)->format('d/m'),
+            'valor' => 'S/ '.number_format($amount, 2),
+            'altura' => max(4, round($amount / $maxDaily * 100)),
+        ])->values();
+        $channelBars = $channelTotals->map(static fn ($amount, $name): array => [
+            'etiqueta' => $name,
+            'valor' => 'S/ '.number_format($amount, 2),
+            'altura' => max(4, round($amount / $maxChannel * 100)),
+        ])->values();
+        $exportParameters = array_filter([
+            'periodo' => $filters['periodo'],
+            'sede' => $filters['sede'],
+            'canal' => $filters['canal'],
+        ]);
+        $metrics = collect([
+            ['titulo' => 'Pedidos registrados', 'icono' => 'bi-cart3', 'valor' => number_format($registeredCount), 'detalle' => 'Pedidos del período'],
+            ['titulo' => 'Pedidos no cancelados', 'icono' => 'bi-coin', 'tono' => 'verde', 'valor' => number_format($nonCancelledCount), 'detalle' => 'Excluye pedidos cancelados'],
+            ['titulo' => 'Ventas confirmadas', 'icono' => 'bi-tag', 'tono' => 'violeta', 'valor' => '—', 'detalle' => 'Pendiente de fuente de ventas confirmadas'],
+            ['titulo' => 'Cobros confirmados', 'icono' => 'bi-percent', 'tono' => 'ambar', 'valor' => '—', 'detalle' => 'Pendiente de conciliación de pagos'],
+            ['titulo' => 'Ingresos netos', 'icono' => 'bi-check-circle', 'valor' => '—', 'detalle' => 'Pendiente de cobros y reembolsos'],
+            ['titulo' => 'Ticket promedio', 'icono' => 'bi-graph-up', 'tono' => 'verde', 'valor' => '—', 'detalle' => 'Pendiente de ventas confirmadas'],
+        ]);
 
         return view('gestion.analitica.dashboard-global.ventas.listar', [
             'filters' => $filters,
@@ -59,9 +86,22 @@ final class DashboardGlobalVentasController extends Controller
             'income' => null,
             'averageTicket' => null,
             'completedCount' => null,
-            'dailyTotals' => collect(),
-            'channelTotals' => collect(),
+            'dailyBars' => $dailyBars,
+            'channelBars' => $channelBars,
+            'dailyTotals' => $dailyTotals,
+            'channelTotals' => $channelTotals,
+            'exportParameters' => $exportParameters,
             'canExport' => $authorization->allows($request->user(), 'gestion.analitica.reportes.exportar'),
+            'titulo' => 'Indicadores de ventas e ingresos',
+            'icono' => 'bi-graph-up-arrow',
+            'descripcion' => 'Analiza el desempeño de ventas e ingresos de tu negocio.',
+            'exportRoute' => $canExport = $authorization->allows($request->user(), 'gestion.analitica.reportes.exportar') ? 'management.reports.dashboard_sales.export' : null,
+            'metrics' => $metrics,
+            'periodOptions' => [7 => 'Últimos 7 días', 30 => 'Últimos 30 días', 90 => 'Últimos 90 días'],
+            'dailyChartDescription' => 'Ingresos diarios reales',
+            'channelChartDescription' => 'Ingresos reales por canal',
+            'dailyChart' => ['descripcion' => 'Ingresos diarios reales', 'barras' => $dailyBars],
+            'channelChart' => ['descripcion' => 'Ingresos reales por canal', 'barras' => $channelBars],
         ]);
     }
 
@@ -198,7 +238,7 @@ final class DashboardGlobalVentasController extends Controller
             ->when($filters['canal'], static fn (Builder $query, string $channel): Builder => $query->where('canal', $channel));
 
         if ($authorization->isSeeded()) {
-            $isGlobalAdministrator = $this->hasGlobalAdministratorAssignment($user);
+            $isGlobalAdministrator = $authorization->allowsGlobal($user, 'gestion.seguridad.consultar');
             if ($isGlobalAdministrator) {
                 if (Schema::hasColumn('pedidos', 'empresa_id')) {
                     $companyId = $authorization->activeCompanyId();
@@ -230,7 +270,7 @@ final class DashboardGlobalVentasController extends Controller
      */
     private function authorizeDashboard(User $user, ServicioAutorizacion $authorization): void
     {
-        abort_unless($authorization->allowsGlobal($user, 'gestion.seguridad.consultar'), 403);
+        abort_unless($authorization->allows($user, 'gestion.seguridad.consultar'), 403);
         $authorization->assertAllowed($user, 'gestion.panel.consultar');
     }
 

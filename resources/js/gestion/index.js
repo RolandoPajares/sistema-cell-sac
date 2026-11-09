@@ -5,4 +5,6 @@
  * correspondiente en este mismo directorio.
  */
 import '../modulos/gestion/index.js';
+import './analitica/index.js';
+import './analitica/analisis-auditoria/analisis-auditoria.js';
 

@@ -22,8 +22,9 @@ class ActualizarClienteRequest extends GuardarClienteRequest
 
         return [
             'tipo' => ['required', Rule::in(['minorista', 'mayorista'])],
+            'tipo_documento' => ['nullable', Rule::in(['dni', 'ruc'])],
             'documento' => ['required', 'string', 'max:20', Rule::unique('clientes', 'documento')->ignore($customer)],
-            'razon_social' => ['nullable', 'string', 'max:160'],
+            'razon_social' => [Rule::requiredIf(fn (): bool => $this->input('tipo_documento') === 'ruc'), 'nullable', 'string', 'max:160'],
             'nombre_contacto' => ['required', 'string', 'max:160'],
             'correo' => ['required', 'email', 'max:160'],
             'telefono' => ['nullable', 'string', 'max:30'],

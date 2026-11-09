@@ -333,7 +333,7 @@ $queryWithoutPage = request()->except(['page']);
                     </span></div>
                 <button class="ventas-dialog-close" type="button" data-close-sales-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
             </header>
-            @include('gestion.comercial.ventas.crear', ['customers' => $customers, 'products' => $products])
+            @include('gestion.comercial.ventas.registrar', ['customers' => $customers, 'products' => $products])
         </div>
     </dialog>
 
@@ -353,3 +353,6 @@ $queryWithoutPage = request()->except(['page']);
     @endif
 </section>
 @endsection
+
+
+

@@ -6,16 +6,6 @@
 @section('content')
 {{-- La consulta usa siempre el origen real de documentos_electronicos. No se
      muestra la maqueta anterior a ningún rol autorizado. --}}
-@php
-    $moduleKey = $module['key'];
-    $filterOptions = $module['filter_options'] ?? ['types' => [], 'statuses' => []];
-    $filterValues = $module['filters'] ?? [];
-    $exportParameters = array_filter($filterValues, static fn ($value) => $value !== null && $value !== '');
-    $formOptions = $module['form_options'] ?? [];
-    $canSubmit = $moduleKey === 'pagos'
-        ? ($formOptions['documentos'] ?? collect())->isNotEmpty() && ($formOptions['medios'] ?? collect())->isNotEmpty()
-        : ($formOptions['devoluciones'] ?? collect())->isNotEmpty() && ($formOptions['cobros'] ?? collect())->isNotEmpty();
-@endphp
 
 <section class="admin-finance-module admin-finance-module--{{ $moduleKey }}" data-finance-module="{{ $moduleKey }}" data-finance-reopen="{{ old('_form') === 'crear' && $errors->any() ? 'crear' : '' }}">
     <header class="admin-finance-header">
@@ -197,110 +187,6 @@
         </section>
     @endif
 
-    @if ($module['create_route'] ?? false)
-        <dialog class="admin-finance-dialog" data-finance-dialog="crear" aria-labelledby="{{ $moduleKey }}-crear-title">
-            <form method="POST" action="{{ route($module['create_route']) }}" class="gestion-pendiente-modal-shell tc-finance-demo">
-                @csrf
-                <input type="hidden" name="_form" value="crear">
-                @if ($moduleKey === 'pagos')
-                    <input type="hidden" name="token" value="{{ old('token', $module['request_token']) }}">
-                @endif
-                <header class="gestion-pendiente-modal-header">
-                    <div>
-                        <span class="gestion-pendiente-modal-icon"><i class="bi {{ $module['icon'] }}" aria-hidden="true"></i></span>
-                        <div>
-                            <span class="gestion-pendiente-eyebrow">Finanzas · {{ $module['title'] }}</span>
-                            <h2 id="{{ $moduleKey }}-crear-title">{{ $moduleKey === 'pagos' ? 'Registrar pago o cobro pendiente' : 'Solicitud de reembolso' }}</h2>
-                            <p>{{ $moduleKey === 'pagos' ? 'El documento y el medio se consultan en la sede activa.' : 'La aprobación y el desembolso son etapas separadas.' }}</p>
-                        </div>
-                    </div>
-                    <button type="button" class="gestion-pendiente-close" data-finance-close aria-label="Cerrar ventana"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
-                </header>
-                <div class="gestion-pendiente-modal-body tc-finance-demo__body">
-                    @if ($moduleKey === 'pagos')
-                        <div class="tc-finance-form-grid">
-                            <label class="tc-finance-field">Pedido, venta o compra *
-                                <select name="origen" required>
-                                    <option value="">Selecciona un documento</option>
-                                    @foreach ($formOptions['documentos'] as $document)
-                                        <option value="{{ $document['value'] }}" @selected(old('origen') === $document['value'])>{{ $document['label'] }}</option>
-                                    @endforeach
-                                </select>
-                            </label>
-                            <label class="tc-finance-field">Medio de pago *
-                                <select name="medio_pago_id" required data-finance-method>
-                                    <option value="">Selecciona un medio</option>
-                                    @foreach ($formOptions['medios'] as $method)
-                                        <option value="{{ $method->id }}" data-requires-cash="{{ $method->requiere_caja ? '1' : '0' }}" data-requires-bank="{{ $method->requiere_banco ? '1' : '0' }}" @selected((string) old('medio_pago_id') === (string) $method->id) @disabled(($method->requiere_caja && $formOptions['sesiones']->isEmpty()) || ($method->requiere_banco && $formOptions['cuentas']->isEmpty()))>{{ $method->nombre }}</option>
-                                    @endforeach
-                                </select>
-                            </label>
-                            <label class="tc-finance-field" data-finance-cash-field hidden>Sesión de caja *
-                                <select name="sesion_caja_id">
-                                    <option value="">Selecciona una sesión abierta</option>
-                                    @foreach ($formOptions['sesiones'] as $cashSession)
-                                        <option value="{{ $cashSession->id }}" @selected((string) old('sesion_caja_id') === (string) $cashSession->id)>{{ $cashSession->caja?->codigo }} · Sesión #{{ $cashSession->id }}</option>
-                                    @endforeach
-                                </select>
-                            </label>
-                            <label class="tc-finance-field" data-finance-bank-field hidden>Cuenta bancaria de la empresa *
-                                <select name="cuenta_bancaria_id">
-                                    <option value="">Selecciona una cuenta</option>
-                                    @foreach ($formOptions['cuentas'] as $account)
-                                        <option value="{{ $account->id }}" @selected((string) old('cuenta_bancaria_id') === (string) $account->id)>{{ $account->codigo }} · {{ $account->banco }} · {{ $account->moneda }}</option>
-                                    @endforeach
-                                </select>
-                            </label>
-                            <label class="tc-finance-field">Importe solicitado *
-                                <input type="number" name="importe" value="{{ old('importe') }}" min="0.01" step="0.01" required placeholder="0.00">
-                            </label>
-                            <label class="tc-finance-field">Referencia
-                                <input type="text" name="referencia" value="{{ old('referencia') }}" maxlength="120" placeholder="Referencia del documento o solicitud" data-finance-reference>
-                            </label>
-                        </div>
-                        <div class="gestion-pendiente-modal-notice"><i class="bi bi-info-circle" aria-hidden="true"></i><div><strong>Registro pendiente</strong><p>Esta acción no confirma el pago, no carga una tarjeta y no modifica el estado del documento.</p></div></div>
-                    @else
-                        <div class="tc-finance-form-grid">
-                            <label class="tc-finance-field">Devolución resuelta *
-                                <select name="devolucion_id" required>
-                                    <option value="">Selecciona una devolución</option>
-                                    @foreach ($formOptions['devoluciones'] as $return)
-                                        <option value="{{ $return->id }}" @selected((string) old('devolucion_id') === (string) $return->id)>{{ $return->codigo }}</option>
-                                    @endforeach
-                                </select>
-                            </label>
-                            <label class="tc-finance-field">Cobro original *
-                                <select name="pago_id" required>
-                                    <option value="">Selecciona un cobro</option>
-                                    @foreach ($formOptions['cobros'] as $payment)
-                                        <option value="{{ $payment->id }}" @selected((string) old('pago_id') === (string) $payment->id)>{{ $payment->codigo }} · {{ $payment->moneda }} {{ $payment->importe }}</option>
-                                    @endforeach
-                                </select>
-                            </label>
-                            <label class="tc-finance-field">Importe solicitado *
-                                <input type="number" name="importe" value="{{ old('importe') }}" min="0.01" step="0.01" required placeholder="0.00">
-                            </label>
-                        </div>
-                        <div class="gestion-pendiente-modal-notice"><i class="bi bi-info-circle" aria-hidden="true"></i><div><strong>Solicitud pendiente</strong><p>Registrar o aprobar la solicitud no ejecuta una devolución de dinero.</p></div></div>
-                    @endif
-                    @if (! $canSubmit)
-                        <p role="status">No hay documentos y medios elegibles en la sede seleccionada para esta operación.</p>
-                    @endif
-                    @if (old('_form') === 'crear')
-                        @foreach ($errors->all() as $error)
-                            <p class="text-danger" role="alert">{{ $error }}</p>
-                        @endforeach
-                    @endif
-                </div>
-                <footer class="gestion-pendiente-modal-footer">
-                    <button type="button" class="gestion-pendiente-secondary" data-finance-close>Cancelar</button>
-                    <button type="submit" class="gestion-pendiente-primary" @disabled(! $canSubmit)>
-                        <i class="bi bi-check2" aria-hidden="true"></i> Registrar solicitud pendiente
-                    </button>
-                </footer>
-            </form>
-        </dialog>
-    @endif
 </section>
 
 

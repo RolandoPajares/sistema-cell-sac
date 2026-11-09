@@ -25,7 +25,7 @@
 @import '../../gestion/inventario/inventario.css';
 @import '../../gestion/comercial/pedidos/pedidos.css';
 @import '../../gestion/comercial/clientes/clientes.css';
-@import '../../gestion/inventario/proveedores/proveedores.css';
+@import '../../gestion/comercial/proveedores/proveedores.css';
 @import '../../gestion/administracion/usuarios/usuarios.css';
 @import '../../modulos/seguridad-delegacion.css';
 @import '../../modulos/seguridad-delegacion-extra.css';
@@ -37,7 +37,7 @@
 @import './menu-lateral-desplegable.css';
 @import '../../gestion/analitica/dashboard-global/dashboard-global.css';
 @import '../../gestion/organizacion/organizacion.css';
-@import '../../gestion/comercial/operaciones-comerciales/operaciones-comerciales.css';
+@import '../../gestion/comercial/ventas/operaciones-ventas.css';
 @import '../../gestion/inventario/inventario-logistica/inventario-logistica.css';
 @import '../../gestion/finanzas/finanzas-facturacion/finanzas-facturacion.css';
 @import '../../gestion/marketing/ecommerce-marketing/ecommerce-marketing.css';

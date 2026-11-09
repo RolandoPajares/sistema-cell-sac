@@ -53,6 +53,36 @@ final class DashboardGlobalPedidosController extends Controller
             ? RegistroAuditoria::query()->latest('creado_en')->limit(5)->get(['accion', 'entidad', 'entidad_id', 'creado_en'])
             : collect();
         $availableOrders = $this->orders($request->user(), $filters, $authorization, false);
+        $statusColors = ['#0767f5', '#0bc4ee', '#38d5a1', '#ff6575', '#9b82f6'];
+        $statusLegend = [];
+        $gradientStops = [];
+        $position = 0;
+        foreach ($byStatus as $status => $count) {
+            $color = $statusColors[count($statusLegend) % count($statusColors)];
+            $next = $position + ($orders->count() ? $count / $orders->count() * 100 : 0);
+            $gradientStops[] = sprintf('%s %.2f%% %.2f%%', $color, $position, $next);
+            $statusLegend[] = ['nombre' => $status, 'valor' => number_format($count / max(1, $orders->count()) * 100, 1).'%', 'color' => $color];
+            $position = $next;
+        }
+        $statusGradient = $gradientStops ? 'conic-gradient('.implode(', ', $gradientStops).')' : 'conic-gradient(#dce9f6 0 100%)';
+        $maxChannel = max(1, (int) $byChannel->max());
+        $channelBars = $byChannel->map(static fn ($count, $name): array => ['etiqueta' => $name, 'valor' => $count, 'altura' => max(4, round($count / $maxChannel * 100))])->values();
+        $exportParameters = array_filter($filters, static fn ($value): bool => $value !== null && $value !== '');
+        $statusCounts = [
+            'new' => $byStatus->filter(static fn ($count, $status): bool => in_array(mb_strtolower($status), ['pendiente', 'nuevo'], true))->sum(),
+            'processing' => $byStatus->filter(static fn ($count, $status): bool => in_array(mb_strtolower($status), ['en proceso', 'procesando', 'enviado'], true))->sum(),
+            'completed' => $byStatus->filter(static fn ($count, $status): bool => in_array(mb_strtolower($status), ['entregado', 'completado'], true))->sum(),
+            'cancelled' => $byStatus->filter(static fn ($count, $status): bool => in_array(mb_strtolower($status), ['cancelado', 'anulado'], true))->sum(),
+            'active' => $byStatus->filter(static fn ($count, $status): bool => in_array(mb_strtolower($status), ['pendiente', 'nuevo', 'en proceso', 'procesando', 'enviado'], true))->sum(),
+        ];
+        $metrics = collect([
+            ['titulo' => 'Pedidos nuevos', 'icono' => 'bi-cart3', 'valor' => number_format($statusCounts['new']), 'detalle' => 'En el período seleccionado'],
+            ['titulo' => 'En proceso', 'icono' => 'bi-gear', 'valor' => number_format($statusCounts['processing']), 'detalle' => 'En el período seleccionado'],
+            ['titulo' => 'Entregados', 'icono' => 'bi-check-circle', 'tono' => 'verde', 'valor' => number_format($statusCounts['completed']), 'detalle' => 'En el período seleccionado'],
+            ['titulo' => 'Cancelados', 'icono' => 'bi-x-lg', 'tono' => 'rojo', 'valor' => number_format($statusCounts['cancelled']), 'detalle' => 'En el período seleccionado'],
+            ['titulo' => 'Tiempo promedio', 'icono' => 'bi-clock', 'tono' => 'ambar', 'valor' => '—', 'detalle' => 'Sin marca de entrega verificable'],
+            ['titulo' => 'Operaciones activas', 'icono' => 'bi-lightning', 'tono' => 'violeta', 'valor' => number_format($statusCounts['active']), 'detalle' => 'Pedidos pendientes o en proceso'],
+        ]);
 
         return view('gestion.analitica.dashboard-global.pedidos.listar', [
             'filters' => $filters,
@@ -64,8 +94,24 @@ final class DashboardGlobalPedidosController extends Controller
             'orders' => $orders,
             'byStatus' => $byStatus,
             'byChannel' => $byChannel,
+            'statusLegend' => $statusLegend,
+            'statusGradient' => $statusGradient,
+            'channelBars' => $channelBars,
+            'exportParameters' => $exportParameters,
+            'statusCounts' => $statusCounts,
             'activity' => $activity,
             'canExport' => $authorization->allows($request->user(), 'gestion.analitica.reportes.exportar'),
+            'titulo' => 'Pedidos y operaciones recientes',
+            'icono' => 'bi-box-seam',
+            'descripcion' => 'Gestiona los pedidos del negocio y monitorea las operaciones recientes.',
+            'exportRoute' => $authorization->allows($request->user(), 'gestion.analitica.reportes.exportar') ? 'management.reports.dashboard_orders.export' : null,
+            'metrics' => $metrics,
+            'periodOptions' => [7 => 'Últimos 7 días', 30 => 'Últimos 30 días', 90 => 'Últimos 90 días'],
+            'donutCenter' => number_format($orders->count()),
+            'donutLabel' => 'Pedidos totales',
+            'channelChartDescription' => 'Pedidos reales por canal',
+            'ordersDonut' => ['centro' => number_format($orders->count()), 'etiqueta' => 'Pedidos totales', 'gradiente' => $statusGradient, 'leyenda' => $statusLegend],
+            'channelChart' => ['descripcion' => 'Pedidos reales por canal', 'barras' => $channelBars],
         ]);
     }
 
@@ -211,7 +257,7 @@ final class DashboardGlobalPedidosController extends Controller
             ->orderByDesc('creado_en');
 
         if ($authorization->isSeeded()) {
-            $isGlobalAdministrator = $this->hasGlobalAdministratorAssignment($user);
+            $isGlobalAdministrator = $authorization->allowsGlobal($user, 'gestion.seguridad.consultar');
             if ($isGlobalAdministrator) {
                 if (Schema::hasColumn('pedidos', 'empresa_id')) {
                     $companyId = $authorization->activeCompanyId();
@@ -242,7 +288,7 @@ final class DashboardGlobalPedidosController extends Controller
      */
     private function authorizeDashboard(User $user, ServicioAutorizacion $authorization): void
     {
-        abort_unless($authorization->allowsGlobal($user, 'gestion.seguridad.consultar'), 403);
+        abort_unless($authorization->allows($user, 'gestion.seguridad.consultar'), 403);
         $authorization->assertAllowed($user, 'gestion.panel.consultar');
     }
 

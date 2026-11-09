@@ -33,15 +33,49 @@ final class DashboardGlobalSedesController extends Controller
     {
         $filters = $this->filters($request);
         $sites = $this->sites();
+        $results = $this->results($filters, $sites);
+        $totalOrders = $results->sum('pedidos');
+        $totalIncome = $results->sum('ingresos');
+        $maxIncome = max(1, (float) $results->max('ingresos'));
+        $siteBars = $results->take(8)->map(static fn ($site): array => [
+            'etiqueta' => $site->nombre,
+            'valor' => 'S/ '.number_format($site->ingresos, 2),
+            'altura' => $site->ingresos > 0 ? max(4, round($site->ingresos / $maxIncome * 100)) : 0,
+        ])->values();
+        $exportParameters = array_filter([
+            'periodo' => $filters['periodo'],
+            'sede' => $filters['sede'],
+            'canal' => $filters['canal'],
+        ]);
+        $metrics = collect([
+            ['titulo' => 'Sedes registradas', 'icono' => 'bi-shop', 'valor' => number_format($results->count()), 'detalle' => 'Sedes incluidas en el filtro'],
+            ['titulo' => 'Importe de pedidos', 'icono' => 'bi-coin', 'tono' => 'verde', 'valor' => 'S/ '.number_format($totalIncome, 2), 'detalle' => 'Pedidos no cancelados del período'],
+            ['titulo' => 'Ticket promedio', 'icono' => 'bi-tag', 'tono' => 'violeta', 'valor' => 'S/ '.number_format($totalOrders ? $totalIncome / $totalOrders : 0, 2), 'detalle' => 'Por pedido no cancelado'],
+            ['titulo' => 'Crecimiento', 'icono' => 'bi-graph-up', 'tono' => 'ambar', 'valor' => '—', 'detalle' => 'Pendiente de comparación entre períodos'],
+            ['titulo' => 'Pedidos', 'icono' => 'bi-calendar-check', 'valor' => number_format($totalOrders), 'detalle' => 'Pedidos no cancelados por sede'],
+            ['titulo' => 'Cumplimiento', 'icono' => 'bi-check-circle', 'tono' => 'verde', 'valor' => '—', 'detalle' => 'Sin metas por sede configuradas'],
+        ]);
 
         return view('gestion.analitica.dashboard-global.sedes.listar', [
             'filters' => $filters,
             'sites' => $sites,
-            'results' => $this->results($filters, $sites),
+            'results' => $results,
+            'totalOrders' => $totalOrders,
+            'totalIncome' => $totalIncome,
+            'siteBars' => $siteBars,
+            'exportParameters' => $exportParameters,
             'hasSite' => $this->hasSite(),
             'hasChannel' => $this->hasChannel(),
             'channels' => $this->hasChannel() ? DB::table('pedidos')->whereNotNull('canal')->distinct()->orderBy('canal')->pluck('canal') : collect(),
             'canExport' => $authorization->allows($request->user(), 'gestion.analitica.reportes.exportar'),
+            'titulo' => 'Indicadores por sede',
+            'icono' => 'bi-buildings',
+            'descripcion' => 'Analiza los pedidos y sus importes registrados por sede.',
+            'exportRoute' => $authorization->allows($request->user(), 'gestion.analitica.reportes.exportar') ? 'management.reports.dashboard_sites.export' : null,
+            'metrics' => $metrics,
+            'periodOptions' => [7 => 'Últimos 7 días', 30 => 'Últimos 30 días', 90 => 'Últimos 90 días'],
+            'siteChartDescription' => 'Importes reales de pedidos por sede',
+            'siteChart' => ['descripcion' => 'Importes reales de pedidos por sede', 'barras' => $siteBars],
         ]);
     }
 

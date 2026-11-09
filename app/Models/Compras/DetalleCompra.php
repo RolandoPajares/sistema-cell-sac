@@ -16,7 +16,7 @@ class DetalleCompra extends Model
 {
     protected $table = 'detalles_compras';
 
-    protected $fillable = ['compra_id', 'producto_id', 'variante_id', 'cantidad', 'costo_unitario'];
+    protected $fillable = ['compra_id', 'producto_id', 'variante_id', 'cantidad', 'costo_unitario', 'descuento', 'impuesto', 'total_linea'];
 
     public $timestamps = false;
 
@@ -27,7 +27,7 @@ class DetalleCompra extends Model
      */
     protected function casts(): array
     {
-        return ['costo_unitario' => 'decimal:2'];
+        return ['costo_unitario' => 'decimal:2', 'descuento' => 'decimal:2', 'impuesto' => 'decimal:2', 'total_linea' => 'decimal:2'];
     }
 
     /**

@@ -42,7 +42,7 @@ class RolesPermisosController extends Controller
             : collect();
         $permissionCount = $ready ? DB::table('permisos')->where('activo', true)->count() : 0;
 
-        return view('gestion.administracion.roles-permisos.listar', compact('ready', 'roles', 'permissionCount', 'search', 'status'));
+        return view('gestion.administracion.seguridad.roles-permisos.listar', compact('ready', 'roles', 'permissionCount', 'search', 'status'));
     }
 
     /**
@@ -61,12 +61,15 @@ class RolesPermisosController extends Controller
         $permissions = $ready ? $this->permissionCatalog() : collect();
         $recommendedPermissionIds = $ready ? $plantillas->permissionIdsFor($selectedRole?->codigo) : [];
         $previewItems = $ready && $selectedRole ? $this->previewCatalog((int) $selectedRole->getKey()) : collect();
+        $allPermissions = $permissions->flatten();
+        $actions = $allPermissions->pluck('accion')->filter()->unique()->sort()->values();
+        $selectedPermissionIds = $selectedRole?->permisos->pluck('id')->map(fn ($id): int => (int) $id)->all() ?? [];
         $permissionCount = $ready ? DB::table('permisos')->where('activo', true)->count() : 0;
         $moduleCount = $ready ? DB::table('modulos')->where('habilitado', true)->count() : 0;
         $screenCount = $ready ? DB::table('pantallas')->where('habilitada', true)->count() : 0;
         $assignedPermissionCount = $ready ? DB::table('roles_permisos')->join('roles', 'roles.id', '=', 'roles_permisos.rol_id')->where('roles.activo', true)->distinct()->count(DB::raw('CONCAT(roles_permisos.rol_id, ":", roles_permisos.permiso_id, ":", roles_permisos.alcance)')) : 0;
 
-        return view('gestion.administracion.roles-permisos.matriz', compact('ready', 'roles', 'selectedRole', 'permissions', 'permissionCount', 'moduleCount', 'screenCount', 'assignedPermissionCount', 'recommendedPermissionIds', 'previewItems'));
+        return view('gestion.administracion.seguridad.matriz-privilegios.listar', compact('ready', 'roles', 'selectedRole', 'permissions', 'actions', 'selectedPermissionIds', 'permissionCount', 'moduleCount', 'screenCount', 'assignedPermissionCount', 'recommendedPermissionIds', 'previewItems'));
     }
 
     /**

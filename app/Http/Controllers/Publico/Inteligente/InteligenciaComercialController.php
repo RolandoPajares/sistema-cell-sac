@@ -8,7 +8,7 @@ use App\Servicios\ServicioInteligenciaComercial;
 use Illuminate\View\View;
 
 /**
- * Define la responsabilidad de la clase InteligenciaComercialController dentro de su m贸dulo.
+ * Define la responsabilidad de la clase InteligenciaComercialController dentro de su m骴ulo.
  *
  * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
  */
@@ -17,16 +17,16 @@ class InteligenciaComercialController extends Controller
     /**
      * Inicializa la instancia con las dependencias y el estado requeridos.
      *
-     * @param  mixed  $commerce  Par谩metro recibido por la operaci贸n.
-     * @return mixed Resultado de la operaci贸n.
+     * @param  mixed  $commerce  Par醡etro recibido por la operaci髇.
+     * @return mixed Resultado de la operaci髇.
      */
     public function __construct(private readonly ServicioInteligenciaComercial $commerce) {}
 
     /**
-     * Ejecuta la operaci贸n optimizer definida por la clase InteligenciaComercialController.
+     * Ejecuta la operaci髇 optimizer definida por la clase InteligenciaComercialController.
      *
-     * @param  mixed  $request  Par谩metro recibido por la operaci贸n.
-     * @return View Resultado de la operaci贸n.
+     * @param  mixed  $request  Par醡etro recibido por la operaci髇.
+     * @return View Resultado de la operaci髇.
      */
     public function optimizer(OptimizadorInteligenteRequest $request): View
     {
@@ -41,19 +41,20 @@ class InteligenciaComercialController extends Controller
     }
 
     /**
-     * Ejecuta la operaci贸n wholesale definida por la clase InteligenciaComercialController.
+     * Ejecuta la operaci髇 wholesale definida por la clase InteligenciaComercialController.
      *
-     * @return View Resultado de la operaci贸n.
+     * @return View Resultado de la operaci髇.
      */
     public function wholesale(): View
     {
         return view('inteligente.cotizador.resumen', [
             'products' => $this->commerce->wholesaleProducts(),
+            'brands' => ['SAMSUNG', 'Apple', 'oppo', 'XIAOMI', 'HONOR', 'JBL', 'Beats'],
             'benefits' => [
                 ['icon' => 'bi-cash-stack', 'label' => 'Precios por volumen'],
                 ['icon' => 'bi-box-seam', 'label' => 'Stock consultable'],
-                ['icon' => 'bi-headset', 'label' => 'Atenci脙鲁n personalizada'],
-                ['icon' => 'bi-truck', 'label' => 'Env脙颅os seguros'],
+                ['icon' => 'bi-headset', 'label' => 'Atenci贸n personalizada'],
+                ['icon' => 'bi-truck', 'label' => 'Env铆os seguros'],
             ],
         ]);
     }

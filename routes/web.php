@@ -181,6 +181,8 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::get('/cotizaciones', [CotizacionController::class, 'index'])->name('quotations');
     Route::get('/cotizaciones/exportar/{format}', [CotizacionController::class, 'export'])
         ->whereIn('format', ['pdf', 'excel', 'csv'])->name('quotations.export.list');
+    Route::get('/cotizaciones/{quotation}/editar', [CotizacionController::class, 'edit'])
+        ->whereNumber('quotation')->name('quotations.edit');
     Route::get('/cotizaciones/{quotation}/descargar', [CotizacionController::class, 'descargar'])->whereNumber('quotation')->name('quotations.export');
     Route::post('/cotizaciones/{quotation}/envio-manual', [CotizacionController::class, 'registrarEnvioManual'])->whereNumber('quotation')->name('quotations.update.send');
     Route::post('/cotizaciones/{quotation}/aprobar', [CotizacionController::class, 'aprobar'])->whereNumber('quotation')->name('quotations.approve');
@@ -331,6 +333,7 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::get('/compras/exportar/{format}', [CompraController::class, 'export'])
         ->whereIn('format', ['pdf', 'excel', 'csv'])->name('purchases.export');
     Route::post('/compras', [CompraController::class, 'store'])->name('purchases.store');
+    Route::put('/compras/{compra}', [CompraController::class, 'update'])->whereNumber('compra')->name('purchases.update');
     Route::post('/compras/importar', [CompraController::class, 'import'])->name('purchases.import');
     Route::post('/compras/{compra}/aprobar', [CompraController::class, 'approve'])->whereNumber('compra')->name('purchases.approve');
     Route::post('/compras/{compra}/anular', [CompraController::class, 'cancel'])->whereNumber('compra')->name('purchases.cancel');

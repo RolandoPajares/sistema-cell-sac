@@ -3,9 +3,9 @@
         <div class="assistant-avatar">MD</div>
         <div>
             <strong>MD Assistant</strong>
-            <small><span class="assistant-online-dot"></span> Asistente del catÃ¡logo disponible</small>
+            <small><span class="assistant-online-dot"></span> Asistente del catálogo disponible</small>
         </div>
-        <button type="button" class="btn btn-ghost assistant-clear" id="assistantClear">Nueva conversaciÃ³n</button>
+        <button type="button" class="btn btn-ghost assistant-clear" id="assistantClear">Nueva conversación</button>
     </div>
 
     <div class="assistant-messages" id="assistantMessages" aria-live="polite">
@@ -14,11 +14,11 @@
             $name = 'MD Assistant';
         @endphp
 <article class="assistant-message assistant-message-{{ $role }}">
-    <div class="assistant-message-avatar">{{ $role === 'user' ? 'TÃš' : 'MD' }}</div>
+    <div class="assistant-message-avatar">{{ $role === 'user' ? 'TÚ' : 'MD' }}</div>
     <div class="assistant-bubble">
         @if($name)<b>{{ $name }}</b>@endif
 
-            <p>Â¡Hola! Puedo ayudarte a elegir un celular, buscar opciones por presupuesto, comparar necesidades o revisar productos disponibles. EscrÃ­beme, por ejemplo: <em>â€œquiero un celular para gaming menor a S/1500â€</em>.</p>
+            <p>¡Hola! Puedo ayudarte a elegir un celular, buscar opciones por presupuesto, comparar necesidades o revisar productos disponibles. Escríbeme, por ejemplo: <em>“quiero un celular para gaming menor a S/1500�</em>.</p>
 
     </div>
 </article>
@@ -28,13 +28,13 @@
     @php
     $suggestions ??= [
         ['icon' => 'bi-controller', 'label' => 'Gaming < S/1500', 'prompt' => 'Quiero un celular para gaming menor a S/1500'],
-        ['icon' => 'bi-camera', 'label' => 'Buena cÃ¡mara', 'prompt' => 'RecomiÃ©ndame un celular con buena cÃ¡mara'],
-        ['icon' => 'bi-cash-coin', 'label' => 'EconÃ³micos', 'prompt' => 'Â¿QuÃ© celulares econÃ³micos tienes?'],
+        ['icon' => 'bi-camera', 'label' => 'Buena cámara', 'prompt' => 'Recomiéndame un celular con buena cámara'],
+        ['icon' => 'bi-cash-coin', 'label' => 'Económicos', 'prompt' => '¿Qué celulares económicos tienes?'],
         ['icon' => 'bi-mortarboard', 'label' => 'Para estudiar', 'prompt' => 'Necesito un celular para estudiar'],
     ];
 @endphp
 
-<div class="assistant-quick-actions" aria-label="Preguntas rÃ¡pidas">
+<div class="assistant-quick-actions" aria-label="Preguntas rápidas">
     @foreach($suggestions as $suggestion)
         <button type="button" data-assistant-prompt="{{ $suggestion['prompt'] }}"><i class="bi {{ $suggestion['icon'] }}"></i> {{ $suggestion['label'] }}</button>
     @endforeach
@@ -57,5 +57,5 @@
             Enviar
         </button>
     </form>
-    <small class="assistant-disclaimer">Las recomendaciones se generan con los productos y datos disponibles en el catÃ¡logo.</small>
+    <small class="assistant-disclaimer">Las recomendaciones se generan con los productos y datos disponibles en el catálogo.</small>
 </section>

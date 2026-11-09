@@ -181,8 +181,22 @@ class CotizacionController extends Controller
             ->orderBy('sedes.nombre')->orderBy('almacenes.nombre')
             ->get(['almacenes.id', 'almacenes.nombre', 'almacenes.sede_id', 'sedes.empresa_id', 'sedes.nombre as sede_nombre']);
         $empresasAutorizadas = $almacenesVenta->pluck('empresa_id')->unique()->values();
+        $quotationPresentation = $quotations->getCollection()
+            ->concat($recentQuotations)
+            ->unique('id')
+            ->mapWithKeys(function (Cotizacion $quotation): array {
+                $status = (string) $quotation->estado;
 
-        return view('gestion.comercial.cotizaciones.administrador', [
+                return [$quotation->id => [
+                    'status' => $status,
+                    'status_class' => $this->statusClass($status),
+                    'customer_name' => $quotation->customer?->nombre_contacto ?? 'Cliente no disponible',
+                    'reference' => 'COT-'.($quotation->creado_en?->format('Y') ?? now()->format('Y')).'-'.str_pad((string) $quotation->id, 4, '0', STR_PAD_LEFT),
+                ]];
+            })
+            ->all();
+
+        return view('gestion.comercial.cotizaciones.listar', [
             'quotations' => $quotations,
             'aprobables' => $aprobables,
             'puedeEnviar' => $this->authorization->allows($request->user(), 'gestion.cotizaciones.actualizar'),
@@ -207,6 +221,57 @@ class CotizacionController extends Controller
                 'count' => (int) $status->cantidad,
                 'percent' => $totalQuotations > 0 ? round(((int) $status->cantidad / $totalQuotations) * 100) : 0,
             ]),
+            'quotationPresentation' => $quotationPresentation,
+        ]);
+    }
+
+    private function statusClass(string $status): string
+    {
+        return match ($status) {
+            'Borrador' => 'draft',
+            'Pendiente', 'Enviada' => 'pending',
+            'Aprobada' => 'approved',
+            'Convertida' => 'converted',
+            'Rechazada', 'Vencida' => 'rejected',
+            default => 'muted',
+        };
+    }
+
+    /**
+     * Muestra el formulario completo de una cotización que todavía puede editarse.
+     */
+    public function edit(Request $request, Cotizacion $quotation): View
+    {
+        $usuario = $request->user();
+        abort_unless($usuario !== null, 403);
+        $this->authorization->assertAllowed($usuario, 'gestion.cotizaciones.actualizar');
+
+        $quotation = $this->authorization->scopeRecordsFor(
+            Cotizacion::query()->whereKey($quotation->getKey())->where('activo', true),
+            $usuario,
+            'gestion.cotizaciones.actualizar',
+        )->with(['customer', 'details.product'])->firstOrFail();
+
+        abort_unless(in_array($quotation->estado, ['Borrador', 'Pendiente'], true), 409,
+            'Solo se pueden editar cotizaciones en borrador o pendientes.');
+
+        $empresaId = (int) $quotation->empresa_id;
+        $customers = Cliente::query()
+            ->where('empresa_id', $empresaId)
+            ->where('tipo', 'mayorista')
+            ->where('activo', true)
+            ->orderBy('nombre_contacto')
+            ->get();
+        $products = Producto::query()
+            ->active()
+            ->where('empresa_id', $empresaId)
+            ->orderBy('nombre')
+            ->get();
+
+        return view('gestion.comercial.cotizaciones.editar', [
+            'quotation' => $quotation,
+            'customers' => $customers,
+            'products' => $products,
         ]);
     }
 

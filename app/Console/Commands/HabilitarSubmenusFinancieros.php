@@ -79,7 +79,7 @@ final class HabilitarSubmenusFinancieros extends Command
         }
 
         $this->line('Base configurada: '.DB::connection()->getDatabaseName());
-        $this->line('Rol existente: administrador; se conservarán los siete roles y sus asignaciones actuales.');
+        $this->line('Rol existente: administrador; se conservarán los roles y sus asignaciones actuales.');
         foreach ($estado['pantallas'] as $codigo => $pantalla) {
             $this->line($codigo.': '.($pantalla['habilitada'] ? 'habilitada' : 'se habilitará'));
             $this->line('Permiso de consulta: '.($pantalla['permiso_activo'] ? 'vigente' : 'se habilitará'));

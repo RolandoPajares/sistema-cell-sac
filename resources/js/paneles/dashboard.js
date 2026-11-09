@@ -1,7 +1,7 @@
 import '../../css/paneles/dashboard.css';
 import '../layouts/panel/menu-lateral-desplegable.js';
 import '../gestion/organizacion/organizacion.js';
-import '../gestion/comercial/operaciones-comerciales/operaciones-comerciales.js';
+import '../gestion/comercial/ventas/operaciones-ventas.js';
 import '../gestion/inventario/inventario-logistica/inventario-logistica.js';
 import '../gestion/inventario/transferencias/transferencias.js';
 import '../gestion/finanzas/finanzas-facturacion/finanzas-facturacion.js';

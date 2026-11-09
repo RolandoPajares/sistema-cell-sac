@@ -212,8 +212,8 @@ class RbacInicialSeeder extends Seeder
         sort($codigosEsperados);
         sort($codigosExistentes);
 
-        if ($codigosExistentes !== $codigosEsperados) {
-            return ['Los códigos de roles existentes no coinciden exactamente con los siete roles del sistema.'];
+        if (array_diff($codigosEsperados, $codigosExistentes) !== []) {
+            return ['Faltan roles base requeridos por la inicialización del catálogo RBAC.'];
         }
 
         $errores = [];

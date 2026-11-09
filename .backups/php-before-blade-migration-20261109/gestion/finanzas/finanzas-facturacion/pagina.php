@@ -1,0 +1,302 @@
+<?php $__env->startSection('title', $pagina['titulo'].' — '.(($pagina['datosReales'] ?? false) ? 'MariaDB' : 'Vista de diseño')); ?>
+<?php $__env->startSection('body_class', 'modulo-finanzas-facturacion'); ?>
+<?php $__env->startSection('content'); ?>
+<section class="tc-ff" data-finanzas-diseno>
+    <header class="tc-ff__header">
+        <div>
+            <div class="tc-ff__breadcrumb"><i class="bi bi-house" aria-hidden="true"></i><span>Finanzas y Facturación</span><i class="bi bi-chevron-right" aria-hidden="true"></i><strong><?php echo e($pagina['titulo']); ?></strong></div>
+            <h1><i class="bi <?php echo e($pagina['icono']); ?>" aria-hidden="true"></i><?php echo e($pagina['titulo']); ?></h1>
+            <p><?php echo e($pagina['descripcion']); ?></p>
+        </div>
+        <div class="tc-ff__header-actions">
+            <?php $__currentLoopData = $pagina['acciones'];
+$__env->addLoop($__currentLoopData);
+foreach ($__currentLoopData as $accion) {
+    $__env->incrementLoopIndices();
+    $loop = $__env->getLastLoop(); ?>
+                <?php
+            $actionIndex = $loop->index;
+    $routeFlow = ($pagina['datosReales'] ?? false) ? null : match (($pagina['clave'] ?? '').'-'.$actionIndex) {
+        'pagos-0' => 'pago',
+        'pagos-1' => 'cobro',
+        'reembolsos-0' => 'reembolso',
+        default => null,
+    };
+    $modalName = ($pagina['datosReales'] ?? false) ? null : match (($pagina['clave'] ?? '').'-'.$actionIndex) {
+        'cajas-0' => 'arqueos',
+        'cajas-1' => 'nueva-caja',
+        'aperturas-0' => 'apertura',
+        'aperturas-1' => 'cierre',
+        'cuentas-0' => 'obligacion',
+        'cuentas-1' => 'abono',
+        'reembolsos-1' => 'politicas',
+        'notas-0' => 'nota',
+        'notas-1' => 'validacion-documento',
+        'series-0' => 'nueva-serie',
+        'series-1' => 'correlativo',
+        'sunat-0' => 'sunat-reenviar',
+        'sunat-1' => 'sunat-cdr',
+        default => null,
+    };
+    ?>
+                <button class="tc-ff__button <?php echo e(($accion['primaria'] ?? false) ? 'tc-ff__button--primary' : ''); ?>" type="button" <?php if ($routeFlow && ! empty($pagina['rutaReal'])) { ?> data-ff-navigate="<?php echo e(route($pagina['rutaReal'], ['financeAction' => $routeFlow])); ?>" <?php } elseif ($modalName) { ?> data-ff-open="<?php echo e($modalName); ?>" <?php } else { ?> disabled title="Disponible al conectar la operación real" <?php } ?>><i class="bi <?php echo e($accion['icono']); ?>" aria-hidden="true"></i><?php echo e($accion['texto']); ?></button>
+            <?php } $__env->popLoop();
+$loop = $__env->getLastLoop(); ?>
+        </div>
+    </header>
+
+    <div class="tc-ff__notice" role="status"><i class="bi bi-eye" aria-hidden="true"></i><strong><?php echo e(($pagina['datosReales'] ?? false) ? 'Datos de MariaDB' : 'Vista de diseño'); ?></strong><span><?php echo e($pagina['aviso'] ?? 'Las cifras y registros son ejemplos; ninguna acción modifica datos.'); ?></span><?php if (! empty($pagina['rutaReal'])) { ?><a href="<?php echo e(route($pagina['rutaReal'])); ?>">Abrir pantalla actual <i class="bi bi-arrow-right" aria-hidden="true"></i></a><?php } ?></div>
+
+    <div class="tc-ff__metrics">
+        <?php $__currentLoopData = $pagina['metricas'];
+$__env->addLoop($__currentLoopData);
+foreach ($__currentLoopData as $metrica) {
+    $__env->incrementLoopIndices();
+    $loop = $__env->getLastLoop(); ?>
+            <article class="tc-ff__metric tc-ff__metric--<?php echo e($metrica['tono'] ?? 'azul'); ?>"><span class="tc-ff__metric-icon"><i class="bi <?php echo e($metrica['icono']); ?>" aria-hidden="true"></i></span><div><small><?php echo e($metrica['titulo']); ?></small><strong><?php echo e($metrica['valor']); ?></strong><span><?php echo e($metrica['detalle'] ?? 'Dato ilustrativo'); ?></span></div></article>
+        <?php } $__env->popLoop();
+$loop = $__env->getLastLoop(); ?>
+    </div>
+
+    <div class="tc-ff__filters">
+        <label class="tc-ff__search"><i class="bi bi-search" aria-hidden="true"></i><input type="search" data-ff-search placeholder="<?php echo e($pagina['buscar']); ?>" aria-label="<?php echo e($pagina['buscar']); ?>"></label>
+        <div class="tc-ff__filter-fields">
+            <?php $__currentLoopData = $pagina['filtros'];
+$__env->addLoop($__currentLoopData);
+foreach ($__currentLoopData as $filtro) {
+    $__env->incrementLoopIndices();
+    $loop = $__env->getLastLoop(); ?>
+                <label><span><?php echo e($filtro['titulo']); ?></span><select data-ff-filter="<?php echo e($filtro['campo']); ?>"><option value=""><?php echo e($filtro['todos'] ?? 'Todos'); ?></option><?php $__currentLoopData = $filtro['opciones'];
+    $__env->addLoop($__currentLoopData);
+    foreach ($__currentLoopData as $opcion) {
+        $__env->incrementLoopIndices();
+        $loop = $__env->getLastLoop(); ?><option value="<?php echo e($opcion); ?>"><?php echo e($opcion); ?></option><?php } $__env->popLoop();
+    $loop = $__env->getLastLoop(); ?></select></label>
+            <?php } $__env->popLoop();
+$loop = $__env->getLastLoop(); ?>
+            <button class="tc-ff__button tc-ff__button--primary" type="button" data-ff-apply><i class="bi bi-funnel" aria-hidden="true"></i>Aplicar filtros</button>
+        </div>
+    </div>
+
+    <div class="tc-ff__main-grid">
+        <article class="tc-ff__card tc-ff__table-card">
+            <div class="tc-ff__card-heading"><h2><i class="bi <?php echo e($pagina['tablaIcono'] ?? 'bi-list-ul'); ?>" aria-hidden="true"></i><?php echo e($pagina['tablaTitulo']); ?></h2><small><?php echo e(count($pagina['filas'])); ?> registros <?php echo e(($pagina['datosReales'] ?? false) ? 'consultados' : 'de ejemplo'); ?></small></div>
+            <div class="tc-ff__table-wrap"><table><thead><tr><?php $__currentLoopData = $pagina['columnas'];
+$__env->addLoop($__currentLoopData);
+foreach ($__currentLoopData as $columna) {
+    $__env->incrementLoopIndices();
+    $loop = $__env->getLastLoop(); ?><th><?php echo e($columna); ?></th><?php } $__env->popLoop();
+$loop = $__env->getLastLoop(); ?><th>Acciones</th></tr></thead><tbody>
+                <?php $__currentLoopData = $pagina['filas'];
+$__env->addLoop($__currentLoopData);
+foreach ($__currentLoopData as $fila) {
+    $__env->incrementLoopIndices();
+    $loop = $__env->getLastLoop(); ?>
+                    <?php
+            $rowStatus = $fila['filtros']['estado'] ?? '';
+    $rowAction = match ($pagina['clave'] ?? '') {
+        'cajas' => 'editar-caja',
+        'aperturas' => $rowStatus === 'Abierto' ? 'cierre-caja' : 'arqueo',
+        'cuentas' => 'abono',
+        'reembolsos' => match ($rowStatus) {
+            'Pendiente' => 'revisar-reembolso', 'Aprobado' => 'ejecutar-reembolso', default => ''
+        },
+        'notas' => in_array($rowStatus, ['Pendiente', 'Observada'], true) ? 'validacion-documento' : '',
+        'series' => $rowStatus === 'Activa' ? 'cambio-serie' : '',
+        'sunat' => match ($rowStatus) {
+            'Aceptado' => 'sunat-cdr', 'Rechazado', 'Observado' => 'sunat-reenviar', default => ''
+        },
+        default => '',
+    };
+    ?>
+                    <tr data-ff-row data-ff-code="<?php echo e($fila['celdas'][0] ?? ''); ?>" data-ff-row-action="<?php echo e(($pagina['datosReales'] ?? false) ? '' : $rowAction); ?>" <?php $__currentLoopData = ($fila['filtros'] ?? []);
+    $__env->addLoop($__currentLoopData);
+    foreach ($__currentLoopData as $campo => $valor) {
+        $__env->incrementLoopIndices();
+        $loop = $__env->getLastLoop(); ?> data-ff-<?php echo e($campo); ?>="<?php echo e($valor); ?>" <?php } $__env->popLoop();
+    $loop = $__env->getLastLoop(); ?>><?php $__currentLoopData = $fila['celdas'];
+    $__env->addLoop($__currentLoopData);
+    foreach ($__currentLoopData as $celda) {
+        $__env->incrementLoopIndices();
+        $loop = $__env->getLastLoop(); ?><td><?php if (is_array($celda)) { ?><span class="tc-ff__pill tc-ff__pill--<?php echo e($celda['tono'] ?? 'azul'); ?>"><?php echo e($celda['texto']); ?></span><?php } else { ?><?php echo e($celda); ?><?php } ?></td><?php } $__env->popLoop();
+    $loop = $__env->getLastLoop(); ?><td><div class="tc-ff__row-actions"><button type="button" data-ff-detail <?php if (! ($pagina['datosReales'] ?? false)) {
+        echo 'disabled';
+    } ?> title="<?php echo e(($pagina['datosReales'] ?? false) ? 'Consultar detalle real' : 'Consultar detalle de ejemplo'); ?>" aria-label="<?php echo e(($pagina['datosReales'] ?? false) ? 'Consultar detalle real' : 'Consultar detalle de ejemplo'); ?>"><i class="bi bi-eye" aria-hidden="true"></i></button><button type="button" data-ff-row-action <?php if (($pagina['datosReales'] ?? false) || $rowAction === '') {
+        echo 'disabled';
+    } ?> title="<?php echo e(($pagina['datosReales'] ?? false) ? 'Operación no conectada' : ($rowAction === '' ? 'No hay acción demostrativa disponible' : 'Abrir advertencia de '.$rowAction)); ?>" aria-label="Operación no conectada"><i class="bi bi-three-dots-vertical" aria-hidden="true"></i></button></div></td></tr>
+                <?php } $__env->popLoop();
+$loop = $__env->getLastLoop(); ?>
+            </tbody></table></div><p class="tc-ff__empty" data-ff-empty hidden><?php echo e(($pagina['datosReales'] ?? false) ? 'No hay cuentas registradas que coincidan con los filtros.' : 'No hay registros de ejemplo que coincidan con los filtros.'); ?></p>
+        </article>
+        <aside class="tc-ff__card tc-ff__aside"><h2><i class="bi <?php echo e($pagina['aside']['icono']); ?>" aria-hidden="true"></i><?php echo e($pagina['aside']['titulo']); ?></h2><p><?php echo e($pagina['aside']['descripcion'] ?? 'Panel ilustrativo.'); ?></p>
+            <?php if (($pagina['clave'] ?? '') === 'cuentas' && ($pagina['datosReales'] ?? false)) { ?>
+                <form class="tc-ff__form-grid" method="post" action="<?php echo e(route('management.payments.accounts.payables.store')); ?>">
+                    <?php echo csrf_field(); ?>
+                    <label class="tc-ff__form-full">Compra recibida <em>*</em><select name="compra_id" required><option value="">Selecciona una compra recibida</option><?php $__currentLoopData = $pagina['comprasRecibidas'];
+                $__env->addLoop($__currentLoopData);
+                foreach ($__currentLoopData as $compra) {
+                    $__env->incrementLoopIndices();
+                    $loop = $__env->getLastLoop(); ?><option value="<?php echo e($compra->id); ?>"><?php echo e($compra->numero_referencia ?: 'Compra #'.$compra->id); ?> · <?php echo e($compra->nombre); ?> · <?php echo e($compra->moneda); ?> <?php echo e(number_format((float) $compra->total, 2)); ?></option><?php } $__env->popLoop();
+                $loop = $__env->getLastLoop(); ?></select></label>
+                    <label class="tc-ff__form-full">Fecha de vencimiento <em>*</em><input type="date" name="vence_en" min="<?php echo e(now()->toDateString()); ?>" required></label>
+                    <button class="tc-ff__button tc-ff__button--primary tc-ff__submit tc-ff__form-full" type="submit" <?php if ($pagina['comprasRecibidas']->isEmpty()) {
+                        echo 'disabled';
+                    } ?>>Crear cuenta por pagar</button>
+                    <?php if ($pagina['comprasRecibidas']->isEmpty()) { ?><small class="tc-ff__form-full">No hay compras recibidas sin cuenta dentro de las sedes autorizadas.</small><?php } ?>
+                </form>
+                <?php ($cuentasPorPagar = collect($pagina['filas'])->where('tipo_cuenta', 'Por pagar')); ?>
+                <?php ($cuentasPorCobrar = collect($pagina['filas'])->where('tipo_cuenta', 'Por cobrar')); ?>
+                <?php if ($cuentasPorPagar->isNotEmpty()) { ?>
+                    <form class="tc-ff__form-grid" method="post" action="<?php echo e(route('management.payments.accounts.payables.update')); ?>" data-account-application>
+                        <?php echo csrf_field(); ?>
+                        <label class="tc-ff__form-full">Cuenta por pagar <em>*</em><select name="cuenta_pagar_id" required data-account-select><option value="">Selecciona la cuenta</option><?php $__currentLoopData = $cuentasPorPagar;
+                    $__env->addLoop($__currentLoopData);
+                    foreach ($__currentLoopData as $cuenta) {
+                        $__env->incrementLoopIndices();
+                        $loop = $__env->getLastLoop(); ?><option value="<?php echo e($cuenta['cuenta_id']); ?>"><?php echo e($cuenta['celdas'][0]); ?> · <?php echo e($cuenta['celdas'][1]); ?> · saldo <?php echo e($cuenta['celdas'][5]); ?></option><?php } $__env->popLoop();
+                    $loop = $__env->getLastLoop(); ?></select></label>
+                        <label class="tc-ff__form-full">Pago ya registrado <em>*</em><select name="pago_id" required data-registered-payment-select><option value="">Selecciona un pago registrado</option><?php $__currentLoopData = $pagina['pagosPorCuenta'];
+                    $__env->addLoop($__currentLoopData);
+                    foreach ($__currentLoopData as $cuentaId => $pagos) {
+                        $__env->incrementLoopIndices();
+                        $loop = $__env->getLastLoop(); ?><optgroup label="Cuenta <?php echo e($cuentaId); ?>"><?php $__currentLoopData = $pagos;
+                        $__env->addLoop($__currentLoopData);
+                        foreach ($__currentLoopData as $pago) {
+                            $__env->incrementLoopIndices();
+                            $loop = $__env->getLastLoop(); ?><option value="<?php echo e($pago->id); ?>" data-cuenta="<?php echo e($cuentaId); ?>"><?php echo e($pago->codigo); ?> · <?php echo e($pago->moneda); ?> <?php echo e(number_format((float) $pago->importe, 2)); ?></option><?php } $__env->popLoop();
+                        $loop = $__env->getLastLoop(); ?></optgroup><?php } $__env->popLoop();
+                    $loop = $__env->getLastLoop(); ?></select></label>
+                        <label class="tc-ff__form-full">Importe a aplicar <em>*</em><input type="number" name="importe" min="0.01" step="0.01" required></label>
+                        <button class="tc-ff__button tc-ff__button--primary tc-ff__submit tc-ff__form-full" type="submit" <?php if (collect($pagina['pagosPorCuenta'])->flatten(1)->isEmpty()) {
+                            echo 'disabled';
+                        } ?>>Aplicar pago registrado</button>
+                        <?php if (collect($pagina['pagosPorCuenta'])->flatten(1)->isEmpty()) { ?><small class="tc-ff__form-full">No hay pagos registrados sin aplicar a las cuentas visibles.</small><?php } ?>
+                    </form>
+                <?php } ?>
+                <?php if ($cuentasPorCobrar->isNotEmpty()) { ?>
+                    <form class="tc-ff__form-grid" method="post" action="<?php echo e(route('management.payments.accounts.receivables.update')); ?>" data-account-application>
+                        <?php echo csrf_field(); ?>
+                        <label class="tc-ff__form-full">Cuenta por cobrar <em>*</em><select name="cuenta_cobrar_id" required data-account-select><option value="">Selecciona la cuenta</option><?php $__currentLoopData = $cuentasPorCobrar;
+                    $__env->addLoop($__currentLoopData);
+                    foreach ($__currentLoopData as $cuenta) {
+                        $__env->incrementLoopIndices();
+                        $loop = $__env->getLastLoop(); ?><option value="<?php echo e($cuenta['cuenta_id']); ?>"><?php echo e($cuenta['celdas'][0]); ?> · <?php echo e($cuenta['celdas'][1]); ?> · saldo <?php echo e($cuenta['celdas'][5]); ?></option><?php } $__env->popLoop();
+                    $loop = $__env->getLastLoop(); ?></select></label>
+                        <label class="tc-ff__form-full">Cobro ya registrado <em>*</em><select name="pago_id" required data-registered-payment-select><option value="">Selecciona un cobro registrado</option><?php $__currentLoopData = $pagina['pagosCobroPorCuenta'];
+                    $__env->addLoop($__currentLoopData);
+                    foreach ($__currentLoopData as $cuentaId => $pagos) {
+                        $__env->incrementLoopIndices();
+                        $loop = $__env->getLastLoop(); ?><optgroup label="Cuenta <?php echo e($cuentaId); ?>"><?php $__currentLoopData = $pagos;
+                        $__env->addLoop($__currentLoopData);
+                        foreach ($__currentLoopData as $pago) {
+                            $__env->incrementLoopIndices();
+                            $loop = $__env->getLastLoop(); ?><option value="<?php echo e($pago->id); ?>" data-cuenta="<?php echo e($cuentaId); ?>"><?php echo e($pago->codigo); ?> · <?php echo e($pago->moneda); ?> <?php echo e(number_format((float) $pago->importe, 2)); ?></option><?php } $__env->popLoop();
+                        $loop = $__env->getLastLoop(); ?></optgroup><?php } $__env->popLoop();
+                    $loop = $__env->getLastLoop(); ?></select></label>
+                        <label class="tc-ff__form-full">Importe a aplicar <em>*</em><input type="number" name="importe" min="0.01" step="0.01" required></label>
+                        <button class="tc-ff__button tc-ff__button--primary tc-ff__submit tc-ff__form-full" type="submit" <?php if (collect($pagina['pagosCobroPorCuenta'])->flatten(1)->isEmpty()) {
+                            echo 'disabled';
+                        } ?>>Aplicar cobro registrado</button>
+                        <?php if (collect($pagina['pagosCobroPorCuenta'])->flatten(1)->isEmpty()) { ?><small class="tc-ff__form-full">No hay cobros registrados sin aplicar a las cuentas visibles.</small><?php } ?>
+                    </form>
+                <?php } ?>
+            <?php } elseif (($pagina['aside']['tipo'] ?? 'formulario') === 'resumen') { ?>
+                <div class="tc-ff__summary"><strong><?php echo e($pagina['aside']['destacado']); ?></strong><?php $__currentLoopData = $pagina['aside']['filas'];
+                $__env->addLoop($__currentLoopData);
+                foreach ($__currentLoopData as $fila) {
+                    $__env->incrementLoopIndices();
+                    $loop = $__env->getLastLoop(); ?><div><span><?php echo e($fila[0]); ?></span><b><?php echo e($fila[1]); ?></b></div><?php } $__env->popLoop();
+                $loop = $__env->getLastLoop(); ?></div>
+            <?php } else { ?>
+                <div class="tc-ff__form-grid"><?php $__currentLoopData = $pagina['aside']['campos'];
+                $__env->addLoop($__currentLoopData);
+                foreach ($__currentLoopData as $campo) {
+                    $__env->incrementLoopIndices();
+                    $loop = $__env->getLastLoop(); ?><label class="<?php echo e(($campo['ancho'] ?? '') === 'completo' ? 'tc-ff__form-full' : ''); ?>"><?php echo e($campo['etiqueta']); ?> <?php if ($campo['requerido'] ?? false) { ?><em>*</em><?php } ?> <?php if (($campo['tipo'] ?? 'select') === 'textarea') { ?><textarea disabled placeholder="<?php echo e($campo['ayuda']); ?>"></textarea><?php } elseif (($campo['tipo'] ?? '') === 'texto') { ?><input type="text" disabled placeholder="<?php echo e($campo['ayuda']); ?>"><?php } else { ?><select disabled><option><?php echo e($campo['ayuda']); ?></option></select><?php } ?></label><?php } $__env->popLoop();
+                $loop = $__env->getLastLoop(); ?></div>
+                <button class="tc-ff__button tc-ff__button--primary tc-ff__submit" type="button" disabled><i class="bi <?php echo e($pagina['aside']['icono']); ?>" aria-hidden="true"></i><?php echo e($pagina['aside']['accion']); ?></button>
+            <?php } ?>
+        </aside>
+    </div>
+
+    <div class="tc-ff__bottom-grid">
+        <?php $__currentLoopData = $pagina['paneles'];
+$__env->addLoop($__currentLoopData);
+foreach ($__currentLoopData as $panel) {
+    $__env->incrementLoopIndices();
+    $loop = $__env->getLastLoop(); ?>
+            <article class="tc-ff__card"><div class="tc-ff__card-heading"><h2><i class="bi <?php echo e($panel['icono']); ?>" aria-hidden="true"></i><?php echo e($panel['titulo']); ?></h2></div>
+                <?php if ($panel['tipo'] === 'anillo') { ?>
+                    <div class="tc-ff__donut-layout"><div class="tc-ff__donut" style="--tc-ff-donut: <?php echo e($panel['gradiente']); ?>"><span><strong><?php echo e($panel['valor']); ?></strong><small><?php echo e($panel['unidad']); ?></small></span></div><ul class="tc-ff__legend"><?php $__currentLoopData = $panel['filas'];
+                    $__env->addLoop($__currentLoopData);
+                    foreach ($__currentLoopData as $fila) {
+                        $__env->incrementLoopIndices();
+                        $loop = $__env->getLastLoop(); ?><li><i></i><span><?php echo e($fila[0]); ?></span><b><?php echo e($fila[1]); ?></b></li><?php } $__env->popLoop();
+                    $loop = $__env->getLastLoop(); ?></ul></div>
+                <?php } elseif ($panel['tipo'] === 'columnas') { ?>
+                    <div class="tc-ff__columns" role="img" aria-label="Gráfico ilustrativo: <?php echo e($panel['titulo']); ?>"><?php $__currentLoopData = $panel['filas'];
+                    $__env->addLoop($__currentLoopData);
+                    foreach ($__currentLoopData as $fila) {
+                        $__env->incrementLoopIndices();
+                        $loop = $__env->getLastLoop(); ?><div><b><?php echo e($fila[1]); ?></b><i style="height: <?php echo e($fila[2]); ?>%"></i><small><?php echo e($fila[0]); ?></small></div><?php } $__env->popLoop();
+                    $loop = $__env->getLastLoop(); ?></div>
+                <?php } elseif ($panel['tipo'] === 'barras') { ?>
+                    <div class="tc-ff__bars"><?php $__currentLoopData = $panel['filas'];
+                    $__env->addLoop($__currentLoopData);
+                    foreach ($__currentLoopData as $fila) {
+                        $__env->incrementLoopIndices();
+                        $loop = $__env->getLastLoop(); ?><div><span><?php echo e($fila[0]); ?></span><i><b style="width: <?php echo e($fila[2]); ?>%"></b></i><strong><?php echo e($fila[1]); ?></strong></div><?php } $__env->popLoop();
+                    $loop = $__env->getLastLoop(); ?></div>
+                <?php } else { ?>
+                    <div class="tc-ff__ranking"><?php $__currentLoopData = $panel['filas'];
+                    $__env->addLoop($__currentLoopData);
+                    foreach ($__currentLoopData as $fila) {
+                        $__env->incrementLoopIndices();
+                        $loop = $__env->getLastLoop(); ?><div><b><?php echo e($loop->iteration); ?></b><span><?php echo e($fila[0]); ?></span><strong><?php echo e($fila[1]); ?></strong></div><?php } $__env->popLoop();
+                    $loop = $__env->getLastLoop(); ?></div>
+                <?php } ?>
+            </article>
+        <?php } $__env->popLoop();
+$loop = $__env->getLastLoop(); ?>
+    </div>
+
+    <dialog class="tc-ff__dialog" data-ff-dialog="detalle" aria-labelledby="ff-detail-title"><div class="tc-ff__dialog-card"><header class="tc-ff__dialog-header"><div><span class="tc-ff__dialog-icon"><i class="bi bi-eye" aria-hidden="true"></i></span><div><h2 id="ff-detail-title"><?php echo e(($pagina['datosReales'] ?? false) ? 'Detalle de registro consultado' : 'Detalle de registro ilustrativo'); ?></h2><p>Consulta de solo lectura.</p></div></div><button type="button" class="tc-ff__dialog-close" data-ff-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="tc-ff__dialog-body"><dl class="tc-ff__detail-list" data-ff-detail-fields></dl><p class="tc-ff__notice-inline"><?php echo e(($pagina['datosReales'] ?? false) ? 'Detalle generado con los datos reales de esta fila.' : 'Los datos corresponden a esta vista de ejemplo; no se consultó información financiera real.'); ?></p></div><footer class="tc-ff__dialog-footer"><button type="button" class="tc-ff__button" data-ff-close>Cerrar</button></footer></div></dialog>
+
+    <dialog class="tc-ff__dialog" data-ff-dialog="operation" aria-labelledby="ff-operation-title"><div class="tc-ff__dialog-card"><header class="tc-ff__dialog-header"><div><span class="tc-ff__dialog-icon tc-ff__dialog-icon--warning"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i></span><div><h2 id="ff-operation-title" data-ff-operation-title>Confirmar acción</h2><p>La confirmación no ejecuta la operación financiera.</p></div></div><button type="button" class="tc-ff__dialog-close" data-ff-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="tc-ff__dialog-body"><p data-ff-operation-warning></p><label class="tc-ff__field" data-ff-operation-choice-group hidden>Decisión visual<select data-ff-operation-choice><option value="">Selecciona una opción</option><option value="aprobar">Aprobar solicitud</option><option value="rechazar">Rechazar solicitud</option></select></label><label class="tc-ff__field" data-ff-operation-reason-group hidden>Motivo de rechazo *<textarea rows="3" data-ff-operation-reason></textarea></label><label class="tc-ff__check" data-ff-operation-ack-wrap><input type="checkbox" data-ff-operation-ack> Confirmo que entiendo que esta es una maqueta y no produce cambios reales.</label><p class="tc-ff__error" data-ff-operation-error role="alert" hidden></p><p class="tc-ff__feedback" data-ff-operation-feedback role="status" aria-live="polite" hidden></p></div><footer class="tc-ff__dialog-footer"><button type="button" class="tc-ff__button" data-ff-close>Cancelar</button><button type="button" class="tc-ff__button tc-ff__button--primary" data-ff-operation-confirm>Confirmar (demostración)</button></footer></div></dialog>
+
+    <?php if (($pagina['clave'] ?? '') === 'reembolsos') { ?>
+        <dialog class="tc-ff__dialog" data-ff-dialog="politicas" aria-labelledby="ff-policy-title"><div class="tc-ff__dialog-card"><header class="tc-ff__dialog-header"><div><span class="tc-ff__dialog-icon"><i class="bi bi-file-earmark-text" aria-hidden="true"></i></span><div><h2 id="ff-policy-title">Políticas de reembolso</h2><p>Consulta informativa.</p></div></div><button type="button" class="tc-ff__dialog-close" data-ff-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="tc-ff__dialog-body"><p>No hay políticas aprobadas conectadas a esta vista. Los criterios, plazos y límites deben integrarse desde la fuente autorizada.</p><p class="tc-ff__notice-inline">No se muestran plazos ni reglas inventadas.</p></div><footer class="tc-ff__dialog-footer"><button type="button" class="tc-ff__button" data-ff-close>Cerrar</button></footer></div></dialog>
+    <?php } ?>
+
+    <?php if (($pagina['clave'] ?? '') === 'cajas') { ?>
+        <dialog class="tc-ff__dialog" data-ff-dialog="caja" aria-labelledby="ff-box-title"><div class="tc-ff__dialog-card"><header class="tc-ff__dialog-header"><div><span class="tc-ff__dialog-icon"><i class="bi bi-safe" aria-hidden="true"></i></span><div><h2 id="ff-box-title" data-ff-box-title>Nueva caja</h2><p>Datos administrativos de ejemplo; no se abrirá una caja.</p></div></div><button type="button" class="tc-ff__dialog-close" data-ff-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="tc-ff__dialog-body"><div class="tc-ff__field-grid"><label class="tc-ff__field">Sede *<select required><option value="">Selecciona una sede</option><option>Sede Central (ejemplo)</option><option>Sede Norte (ejemplo)</option><option>Sede Sur (ejemplo)</option></select></label><label class="tc-ff__field">Nombre de caja *<input type="text" required maxlength="80" placeholder="Nombre administrativo"></label><label class="tc-ff__field">Responsable *<input type="text" required maxlength="120" placeholder="Responsable asignado"></label><label class="tc-ff__field">Estado administrativo *<select required><option value="">Selecciona estado</option><option>Activa</option><option>Inactiva</option></select></label><label class="tc-ff__field tc-ff__field--full">Observaciones<textarea rows="2" maxlength="300" placeholder="Nota administrativa"></textarea></label></div><p class="tc-ff__notice-inline" data-ff-box-notice>No se valida apertura simultánea ni se actualiza una caja real.</p><p class="tc-ff__error" data-ff-simple-error role="alert" hidden></p><p class="tc-ff__feedback" data-ff-simple-feedback role="status" aria-live="polite" hidden></p></div><footer class="tc-ff__dialog-footer"><button type="button" class="tc-ff__button" data-ff-close>Cancelar</button><button type="button" class="tc-ff__button tc-ff__button--primary" data-ff-simple-confirm>Guardar (demostración)</button></footer></div></dialog>
+        <dialog class="tc-ff__dialog" data-ff-dialog="arqueos" aria-labelledby="ff-count-title"><div class="tc-ff__dialog-card"><header class="tc-ff__dialog-header"><div><span class="tc-ff__dialog-icon"><i class="bi bi-list-check" aria-hidden="true"></i></span><div><h2 id="ff-count-title">Arqueos de caja</h2><p>Consulta de solo lectura.</p></div></div><button type="button" class="tc-ff__dialog-close" data-ff-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="tc-ff__dialog-body"><p>No hay arqueos reales cargados en esta vista.</p><p class="tc-ff__notice-inline">Los resúmenes del panel son ilustrativos y no representan conciliaciones verificadas.</p></div><footer class="tc-ff__dialog-footer"><button type="button" class="tc-ff__button" data-ff-close>Cerrar</button></footer></div></dialog>
+    <?php } ?>
+
+    <?php if (($pagina['clave'] ?? '') === 'aperturas') { ?>
+        <dialog class="tc-ff__dialog" data-ff-dialog="apertura" aria-labelledby="ff-open-title"><div class="tc-ff__dialog-card"><header class="tc-ff__dialog-header"><div><span class="tc-ff__dialog-icon"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i></span><div><h2 id="ff-open-title">Apertura de caja</h2><p>Flujo demostrativo; no crea un turno ni modifica saldos.</p></div></div><button type="button" class="tc-ff__dialog-close" data-ff-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="tc-ff__dialog-body" data-ff-stepper><nav class="tc-ff__steps" aria-label="Etapas de apertura"><span data-ff-step-indicator="0">1. Caja y turno</span><span data-ff-step-indicator="1">2. Saldo inicial</span><span data-ff-step-indicator="2">3. Revisar</span></nav><section data-ff-step="0"><div class="tc-ff__field-grid"><label class="tc-ff__field">Caja *<select required><option value="">Selecciona caja de ejemplo</option><option>CA-001 · Sede Central</option><option>CA-002 · Sede Norte</option></select></label><label class="tc-ff__field">Responsable *<input type="text" required maxlength="120" placeholder="Responsable"></label><label class="tc-ff__field">Turno *<select required><option value="">Selecciona turno</option><option>Mañana</option><option>Tarde</option><option>Noche</option></select></label><label class="tc-ff__field">Fecha y hora de apertura *<input type="datetime-local" required></label></div><p class="tc-ff__notice-inline">La disponibilidad de caja y la existencia de otra apertura no se verifican aquí.</p></section><section data-ff-step="1" hidden><div class="tc-ff__field-grid"><label class="tc-ff__field">Saldo inicial contado (S/) *<input type="number" min="0" step="0.01" required placeholder="0.00"></label><label class="tc-ff__field">Observación<input type="text" maxlength="200" placeholder="Referencia opcional"></label></div><p>El saldo es solo un dato de prueba. No se crea un movimiento ni una apertura.</p></section><section data-ff-step="2" hidden><h3>Revisión de apertura</h3><p>Verifica caja, responsable, turno y saldo inicial antes de continuar.</p><label class="tc-ff__check"><input type="checkbox" data-ff-step-ack> Confirmo que revisé los campos ilustrativos.</label><p class="tc-ff__feedback" data-ff-step-feedback role="status" aria-live="polite" hidden></p></section><p class="tc-ff__error" data-ff-step-error role="alert" hidden></p></div><footer class="tc-ff__dialog-footer"><button type="button" class="tc-ff__button" data-ff-close>Cancelar</button><button type="button" class="tc-ff__button" data-ff-step-previous hidden>Anterior</button><button type="button" class="tc-ff__button tc-ff__button--primary" data-ff-step-next>Siguiente</button><button type="button" class="tc-ff__button tc-ff__button--primary" data-ff-step-confirm hidden>Confirmar apertura (demostración)</button></footer></div></dialog>
+        <dialog class="tc-ff__dialog" data-ff-dialog="cierre" aria-labelledby="ff-close-title"><div class="tc-ff__dialog-card"><header class="tc-ff__dialog-header"><div><span class="tc-ff__dialog-icon tc-ff__dialog-icon--warning"><i class="bi bi-clipboard-check" aria-hidden="true"></i></span><div><h2 id="ff-close-title">Cierre y arqueo de caja</h2><p>Flujo separado de la apertura. El cierre real es irreversible.</p></div></div><button type="button" class="tc-ff__dialog-close" data-ff-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="tc-ff__dialog-body" data-ff-stepper><nav class="tc-ff__steps" aria-label="Etapas de cierre"><span data-ff-step-indicator="0">1. Caja y turno</span><span data-ff-step-indicator="1">2. Conteo y diferencia</span><span data-ff-step-indicator="2">3. Revisión</span></nav><section data-ff-step="0"><div class="tc-ff__field-grid"><label class="tc-ff__field">Caja *<input type="text" required maxlength="80" placeholder="Caja de ejemplo"></label><label class="tc-ff__field">Turno *<select required><option value="">Selecciona turno</option><option>Mañana</option><option>Tarde</option><option>Noche</option></select></label></div><p class="tc-ff__notice-inline">No se consultan aperturas ni saldos activos. No puede comprobarse si otra persona ya inició un cierre.</p></section><section data-ff-step="1" hidden><div class="tc-ff__field-grid"><label class="tc-ff__field">Efectivo contado (S/) *<input type="number" min="0" step="0.01" required placeholder="0.00"></label><label class="tc-ff__field">Otros medios contados (S/)<input type="number" min="0" step="0.01" placeholder="0.00"></label><label class="tc-ff__field tc-ff__field--full">Diferencia observada (S/) *<input type="number" step="0.01" required placeholder="0.00"></label><label class="tc-ff__field tc-ff__field--full">Motivo / observaciones *<textarea required rows="2" maxlength="500" placeholder="Explica diferencias o incidencias"></textarea></label></div><p>No se comparan importes con movimientos reales ni se calcula una conciliación.</p></section><section data-ff-step="2" hidden><h3>Revisión de cierre</h3><p>Un cierre definitivo requiere validación, autorización y registro financiero backend.</p><label class="tc-ff__check"><input type="checkbox" data-ff-step-ack> Confirmo que revisé el conteo ilustrativo y que el cierre no se ejecutará.</label><p class="tc-ff__feedback" data-ff-step-feedback role="status" aria-live="polite" hidden></p></section><p class="tc-ff__error" data-ff-step-error role="alert" hidden></p></div><footer class="tc-ff__dialog-footer"><button type="button" class="tc-ff__button" data-ff-close>Cancelar</button><button type="button" class="tc-ff__button" data-ff-step-previous hidden>Anterior</button><button type="button" class="tc-ff__button tc-ff__button--primary" data-ff-step-next>Siguiente</button><button type="button" class="tc-ff__button tc-ff__button--primary" data-ff-step-confirm hidden>Confirmar cierre (demostración)</button></footer></div></dialog>
+    <?php } ?>
+
+    <?php if (($pagina['clave'] ?? '') === 'cuentas') { ?>
+        <dialog class="tc-ff__dialog" data-ff-dialog="obligacion" aria-labelledby="ff-account-title"><div class="tc-ff__dialog-card"><header class="tc-ff__dialog-header"><div><span class="tc-ff__dialog-icon"><i class="bi bi-file-earmark-plus" aria-hidden="true"></i></span><div><h2 id="ff-account-title">Nueva obligación</h2><p>Distingue el saldo por cobrar del saldo por pagar.</p></div></div><button type="button" class="tc-ff__dialog-close" data-ff-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="tc-ff__dialog-body"><div class="tc-ff__field-grid"><label class="tc-ff__field">Tipo de cuenta *<select required><option value="">Selecciona tipo</option><option>Por cobrar · cliente</option><option>Por pagar · proveedor</option></select></label><label class="tc-ff__field">Cliente / proveedor *<input type="text" required maxlength="150" placeholder="Nombre de tercero"></label><label class="tc-ff__field">Documento relacionado *<input type="text" required maxlength="80" placeholder="Referencia interna o comprobante"></label><label class="tc-ff__field">Moneda *<select required><option value="">Selecciona moneda</option><option>PEN</option><option>USD</option></select></label><label class="tc-ff__field">Fecha de emisión *<input type="date" required></label><label class="tc-ff__field">Fecha de vencimiento *<input type="date" required></label><label class="tc-ff__field">Importe *<input type="number" min="0.01" step="0.01" required placeholder="0.00"></label><label class="tc-ff__field">Observaciones<input type="text" maxlength="200" placeholder="Detalle opcional"></label></div><p class="tc-ff__notice-inline">Documento, saldo y duplicidad no se verifican contra datos reales.</p><p class="tc-ff__error" data-ff-simple-error role="alert" hidden></p><p class="tc-ff__feedback" data-ff-simple-feedback role="status" aria-live="polite" hidden></p></div><footer class="tc-ff__dialog-footer"><button type="button" class="tc-ff__button" data-ff-close>Cancelar</button><button type="button" class="tc-ff__button tc-ff__button--primary" data-ff-simple-confirm>Guardar (demostración)</button></footer></div></dialog>
+        <dialog class="tc-ff__dialog" data-ff-dialog="abono" aria-labelledby="ff-payment-title"><div class="tc-ff__dialog-card"><header class="tc-ff__dialog-header"><div><span class="tc-ff__dialog-icon"><i class="bi bi-coin" aria-hidden="true"></i></span><div><h2 id="ff-payment-title">Registrar abono</h2><p>Pago de deuda o cobro parcial, según el documento.</p></div></div><button type="button" class="tc-ff__dialog-close" data-ff-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="tc-ff__dialog-body"><div class="tc-ff__field-grid"><label class="tc-ff__field">Tipo *<select required data-ff-account-kind><option value="">Selecciona tipo</option><option>Por cobrar · cobro recibido</option><option>Por pagar · pago a proveedor</option></select></label><label class="tc-ff__field">Documento *<input type="text" required maxlength="80" data-ff-account-document placeholder="Referencia del documento"></label><label class="tc-ff__field tc-ff__field--full">Saldo de referencia<input type="text" readonly data-ff-account-balance placeholder="Saldo no consultado"></label><label class="tc-ff__field">Fecha *<input type="date" required></label><label class="tc-ff__field">Monto del abono *<input type="number" min="0.01" step="0.01" required data-ff-account-amount placeholder="0.00"></label><label class="tc-ff__field">Método *<select required><option value="">Selecciona método</option><option>Transferencia</option><option>Tarjeta</option><option>Efectivo</option><option>QR</option></select></label><label class="tc-ff__field">Referencia<input type="text" maxlength="100" placeholder="N.º de operación"></label><label class="tc-ff__field tc-ff__field--full">Observaciones<textarea rows="2" maxlength="300"></textarea></label></div><p class="tc-ff__warning" data-ff-account-warning>El saldo real no está consultado. Un monto superior debe bloquearse en la integración backend.</p><p class="tc-ff__error" data-ff-simple-error role="alert" hidden></p><p class="tc-ff__feedback" data-ff-simple-feedback role="status" aria-live="polite" hidden></p></div><footer class="tc-ff__dialog-footer"><button type="button" class="tc-ff__button" data-ff-close>Cancelar</button><button type="button" class="tc-ff__button tc-ff__button--primary" data-ff-simple-confirm>Confirmar abono (demostración)</button></footer></div></dialog>
+    <?php } ?>
+
+    <?php if (($pagina['clave'] ?? '') === 'notas') { ?>
+        <dialog class="tc-ff__dialog" data-ff-dialog="nota" aria-labelledby="ff-note-title"><div class="tc-ff__dialog-card"><header class="tc-ff__dialog-header"><div><span class="tc-ff__dialog-icon"><i class="bi bi-file-earmark-minus" aria-hidden="true"></i></span><div><h2 id="ff-note-title">Nueva nota de crédito o débito</h2><p>Asistente visual; no emite ni numera documentos fiscales.</p></div></div><button type="button" class="tc-ff__dialog-close" data-ff-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="tc-ff__dialog-body" data-ff-stepper><nav class="tc-ff__steps" aria-label="Etapas de nota"><span data-ff-step-indicator="0">1. Origen y tipo</span><span data-ff-step-indicator="1">2. Motivo y sustento</span><span data-ff-step-indicator="2">3. Revisar</span></nav><section data-ff-step="0"><div class="tc-ff__field-grid"><label class="tc-ff__field">Comprobante de origen *<input type="text" required maxlength="80" placeholder="Número de factura o boleta"></label><label class="tc-ff__field">Tipo de nota *<select required><option value="">Selecciona tipo</option><option>Nota de crédito</option><option>Nota de débito</option></select></label><label class="tc-ff__field">Cliente / razón social *<input type="text" required maxlength="150" placeholder="Cliente del comprobante"></label><label class="tc-ff__field">Importe de referencia *<input type="number" min="0.01" step="0.01" required placeholder="0.00"></label></div><p class="tc-ff__notice-inline">No se consulta el comprobante ni se determinan reglas tributarias.</p></section><section data-ff-step="1" hidden><div class="tc-ff__field-grid"><label class="tc-ff__field">Motivo *<select required><option value="">Selecciona motivo</option><option>Descuento comercial</option><option>Devolución de mercadería</option><option>Intereses por mora</option><option>Diferencia de precios</option><option>Otro</option></select></label><label class="tc-ff__field">Sustento (nombre de archivo)<input type="file" accept=".pdf,image/*" data-ff-note-evidence></label><label class="tc-ff__field tc-ff__field--full">Observaciones *<textarea rows="3" required maxlength="500" placeholder="Describe el ajuste solicitado"></textarea></label></div><small data-ff-note-evidence-name>No se ha seleccionado sustento. El archivo no se leerá ni transmitirá.</small></section><section data-ff-step="2" hidden><h3>Revisión visual</h3><p>El comprobante de origen, motivo e importe se validarían con reglas tributarias y autorización antes de cualquier emisión.</p><label class="tc-ff__check"><input type="checkbox" data-ff-step-ack> Confirmo que revisé la información ilustrativa.</label><p class="tc-ff__feedback" data-ff-step-feedback role="status" aria-live="polite" hidden></p></section><p class="tc-ff__error" data-ff-step-error role="alert" hidden></p></div><footer class="tc-ff__dialog-footer"><button type="button" class="tc-ff__button" data-ff-close>Cancelar</button><button type="button" class="tc-ff__button" data-ff-step-previous hidden>Anterior</button><button type="button" class="tc-ff__button tc-ff__button--primary" data-ff-step-next>Siguiente</button><button type="button" class="tc-ff__button tc-ff__button--primary" data-ff-step-confirm hidden>Confirmar (demostración)</button></footer></div></dialog>
+    <?php } ?>
+
+    <?php if (($pagina['clave'] ?? '') === 'series') { ?>
+        <dialog class="tc-ff__dialog" data-ff-dialog="nueva-serie" aria-labelledby="ff-series-title"><div class="tc-ff__dialog-card"><header class="tc-ff__dialog-header"><div><span class="tc-ff__dialog-icon"><i class="bi bi-list-ol" aria-hidden="true"></i></span><div><h2 id="ff-series-title">Nueva serie</h2><p>Configuración ilustrativa; no reserva correlativos fiscales.</p></div></div><button type="button" class="tc-ff__dialog-close" data-ff-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="tc-ff__dialog-body"><div class="tc-ff__field-grid"><label class="tc-ff__field">Tipo de comprobante *<select required><option value="">Selecciona tipo</option><option>Factura</option><option>Boleta</option><option>Nota de crédito</option><option>Nota de débito</option></select></label><label class="tc-ff__field">Sede *<select required><option value="">Selecciona sede</option><option>Sede Principal (ejemplo)</option><option>Sede Norte (ejemplo)</option></select></label><label class="tc-ff__field">Serie *<input type="text" required maxlength="8" pattern="[A-Z0-9]{2,8}" placeholder="Ej. F003"></label><label class="tc-ff__field">Correlativo inicial *<input type="text" required maxlength="12" pattern="[0-9]+" placeholder="Solo referencia visual"></label><label class="tc-ff__field">Correlativo final *<input type="text" required maxlength="12" pattern="[0-9]+" placeholder="Solo referencia visual"></label><label class="tc-ff__field">Estado inicial *<select required><option value="">Selecciona estado</option><option>En revisión</option><option>Pausada</option></select></label></div><p class="tc-ff__notice-inline">La numeración fiscal debe configurarse y validarse en la integración autorizada.</p><p class="tc-ff__error" data-ff-simple-error role="alert" hidden></p><p class="tc-ff__feedback" data-ff-simple-feedback role="status" aria-live="polite" hidden></p></div><footer class="tc-ff__dialog-footer"><button type="button" class="tc-ff__button" data-ff-close>Cancelar</button><button type="button" class="tc-ff__button tc-ff__button--primary" data-ff-simple-confirm>Guardar serie (demostración)</button></footer></div></dialog>
+        <dialog class="tc-ff__dialog" data-ff-dialog="correlativo" aria-labelledby="ff-correlative-title"><div class="tc-ff__dialog-card"><header class="tc-ff__dialog-header"><div><span class="tc-ff__dialog-icon"><i class="bi bi-gear" aria-hidden="true"></i></span><div><h2 id="ff-correlative-title">Configurar correlativo</h2><p>Los valores no se reservan ni incrementan.</p></div></div><button type="button" class="tc-ff__dialog-close" data-ff-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="tc-ff__dialog-body"><div class="tc-ff__field-grid"><label class="tc-ff__field">Serie *<input type="text" required maxlength="8" placeholder="Serie existente de ejemplo"></label><label class="tc-ff__field">Sede *<select required><option value="">Selecciona sede</option><option>Sede Principal (ejemplo)</option><option>Sede Norte (ejemplo)</option></select></label><label class="tc-ff__field">Actual *<input type="text" required maxlength="12" pattern="[0-9]+" placeholder="No consultar&aacute; correlativo real"></label><label class="tc-ff__field">Final *<input type="text" required maxlength="12" pattern="[0-9]+" placeholder="Límite de referencia"></label></div><p class="tc-ff__warning">Modificar una serie activa puede causar saltos o duplicidades. El cambio real requiere autorización y control transaccional.</p><p class="tc-ff__error" data-ff-simple-error role="alert" hidden></p><p class="tc-ff__feedback" data-ff-simple-feedback role="status" aria-live="polite" hidden></p></div><footer class="tc-ff__dialog-footer"><button type="button" class="tc-ff__button" data-ff-close>Cancelar</button><button type="button" class="tc-ff__button tc-ff__button--primary" data-ff-simple-confirm>Confirmar cambios (demostración)</button></footer></div></dialog>
+    <?php } ?>
+
+    <?php if (($pagina['clave'] ?? '') === 'sunat') { ?>
+        <dialog class="tc-ff__dialog" data-ff-dialog="sunat-reenviar" aria-labelledby="ff-sunat-retry-title"><div class="tc-ff__dialog-card"><header class="tc-ff__dialog-header"><div><span class="tc-ff__dialog-icon tc-ff__dialog-icon--warning"><i class="bi bi-cloud-arrow-up" aria-hidden="true"></i></span><div><h2 id="ff-sunat-retry-title">Reenviar comprobante</h2><p>Integración SUNAT pendiente.</p></div></div><button type="button" class="tc-ff__dialog-close" data-ff-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="tc-ff__dialog-body"><p>El comprobante no se enviará. No hay conexión, respuesta ni ticket consultados.</p><p class="tc-ff__notice-inline">Confirmar solo mostrará el aviso de integración pendiente.</p><p class="tc-ff__feedback" data-ff-sunat-feedback role="status" aria-live="polite" hidden></p></div><footer class="tc-ff__dialog-footer"><button type="button" class="tc-ff__button" data-ff-close>Cancelar</button><button type="button" class="tc-ff__button tc-ff__button--primary" data-ff-sunat-confirm>Reenviar (demostración)</button></footer></div></dialog>
+        <dialog class="tc-ff__dialog" data-ff-dialog="sunat-cdr" aria-labelledby="ff-sunat-cdr-title"><div class="tc-ff__dialog-card"><header class="tc-ff__dialog-header"><div><span class="tc-ff__dialog-icon"><i class="bi bi-download" aria-hidden="true"></i></span><div><h2 id="ff-sunat-cdr-title">Consulta / descarga de CDR</h2><p>Integración SUNAT pendiente.</p></div></div><button type="button" class="tc-ff__dialog-close" data-ff-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="tc-ff__dialog-body"><label class="tc-ff__field">Comprobante *<input type="text" required maxlength="40" placeholder="Serie y correlativo"></label><p>No se consultará SUNAT ni se generará o descargará un CDR. El resultado queda sin consultar.</p><p class="tc-ff__error" data-ff-sunat-error role="alert" hidden></p><p class="tc-ff__feedback" data-ff-sunat-cdr-feedback role="status" aria-live="polite" hidden></p></div><footer class="tc-ff__dialog-footer"><button type="button" class="tc-ff__button" data-ff-close>Cancelar</button><button type="button" class="tc-ff__button tc-ff__button--primary" data-ff-sunat-cdr-confirm>Consultar / descargar (demostración)</button></footer></div></dialog>
+    <?php } ?>
+</section>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.panel.principal', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>

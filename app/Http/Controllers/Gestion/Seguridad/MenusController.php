@@ -38,6 +38,7 @@ class MenusController extends Controller
         $menus = $ready
             ? Menu::query()->with(['roles', 'elementos' => fn ($query) => $query->with(['elementosHijos.pantalla', 'elementosHijos.permiso', 'pantalla', 'permiso'])])->orderBy('nombre')->get()
             : collect();
+        $selectedMenu = $menus->first();
         $roles = $ready ? Rol::query()->where('activo', true)->orderBy('nombre')->get() : collect();
         $screens = $ready ? Pantalla::query()->where('habilitada', true)->orderBy('nombre')->get(['id', 'nombre', 'codigo', 'ruta']) : collect();
         $activeMenus = $ready ? Menu::query()->where('habilitado', true)->count() : 0;
@@ -45,7 +46,7 @@ class MenusController extends Controller
         $hiddenElements = $ready ? ElementoMenu::query()->where('habilitado', false)->count() : 0;
         $recentChanges = $ready ? ElementoMenu::query()->where('actualizado_en', '>=', now()->subDays(7))->count() : 0;
 
-        return view('gestion.administracion.menus.listar', compact('ready', 'menus', 'roles', 'screens', 'activeMenus', 'activeSubmenus', 'hiddenElements', 'recentChanges'));
+        return view('gestion.administracion.seguridad.menus.listar', compact('ready', 'menus', 'selectedMenu', 'roles', 'screens', 'activeMenus', 'activeSubmenus', 'hiddenElements', 'recentChanges'));
     }
 
     /**
@@ -178,7 +179,7 @@ class MenusController extends Controller
                 })
             : collect();
 
-        return view('gestion.administracion.roles-permisos.modulos', compact('ready', 'modules'));
+        return view('gestion.administracion.seguridad.modulos-pantallas.listar', compact('ready', 'modules'));
     }
 
     /**

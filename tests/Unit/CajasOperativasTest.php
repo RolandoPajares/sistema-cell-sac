@@ -132,11 +132,13 @@ function prepareCajaFixture(): array
         ['id' => 1, 'codigo' => 'gestion.pagos.crear', 'modulo_id' => 1, 'activo' => true],
         ['id' => 2, 'codigo' => 'gestion.pagos.actualizar', 'modulo_id' => 1, 'activo' => true],
         ['id' => 3, 'codigo' => 'gestion.pagos.consultar', 'modulo_id' => 1, 'activo' => true],
+        ['id' => 4, 'codigo' => 'gestion.seguridad.consultar', 'modulo_id' => 1, 'activo' => true],
     ]);
     DB::table('roles_permisos')->insert([
         ['rol_id' => 1, 'permiso_id' => 1, 'alcance' => 'empresa'],
         ['rol_id' => 1, 'permiso_id' => 2, 'alcance' => 'empresa'],
         ['rol_id' => 1, 'permiso_id' => 3, 'alcance' => 'empresa'],
+        ['rol_id' => 1, 'permiso_id' => 4, 'alcance' => 'empresa'],
     ]);
     DB::table('usuarios_roles')->insert(['usuario_id' => 7, 'rol_id' => 1, 'activo' => true]);
     $actor = new User;

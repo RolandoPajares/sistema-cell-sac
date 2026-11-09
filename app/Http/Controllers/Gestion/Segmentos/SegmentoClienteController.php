@@ -8,6 +8,7 @@ use App\Http\Requests\GuardarSegmentoClienteRequest;
 use App\Models\Marketing\SegmentoCliente;
 use App\Servicios\ExportadorTabular;
 use App\Servicios\RegistradorAuditoria;
+use App\Servicios\ServicioAutorizacion;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -16,18 +17,18 @@ use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
- * Define la responsabilidad de la clase SegmentoClienteController dentro de su m贸dulo.
+ * Define la responsabilidad de la clase SegmentoClienteController dentro de su m骴ulo.
  *
  * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
  */
 class SegmentoClienteController extends Controller
 {
     /**
-     * Obtiene y prepara la informaci贸n solicitada para la operaci贸n.
+     * Obtiene y prepara la informaci髇 solicitada para la operaci髇.
      *
-     * @return View Resultado de la operaci贸n.
+     * @return View Resultado de la operaci髇.
      */
-    public function index(): View
+    public function index(Request $request, ServicioAutorizacion $authorization): View
     {
         $search = trim((string) request('buscar', ''));
         $tipo = request('tipo');
@@ -54,15 +55,16 @@ class SegmentoClienteController extends Controller
             'activeSegments' => (clone $allSegments)->where('activo', true)->count(),
             'dynamicSegments' => (clone $allSegments)->where('tipo', '!=', 'roles')->count(),
             'roles' => DB::table('roles')->where('activo', true)->orderBy('nombre')->pluck('codigo'),
+            'isAdmin' => $authorization->allows($request->user(), 'gestion.seguridad.consultar'),
         ]);
     }
 
     /**
-     * Registra la informaci贸n recibida y coordina su persistencia.
+     * Registra la informaci髇 recibida y coordina su persistencia.
      *
-     * @param  mixed  $request  Par谩metro recibido por la operaci贸n.
-     * @param  mixed  $audit  Par谩metro recibido por la operaci贸n.
-     * @return RedirectResponse Resultado de la operaci贸n.
+     * @param  mixed  $request  Par醡etro recibido por la operaci髇.
+     * @param  mixed  $audit  Par醡etro recibido por la operaci髇.
+     * @return RedirectResponse Resultado de la operaci髇.
      */
     public function store(GuardarSegmentoClienteRequest $request, RegistradorAuditoria $audit): RedirectResponse
     {
@@ -75,21 +77,21 @@ class SegmentoClienteController extends Controller
         ]);
         $audit->record($request->user()->id, 'segment.created', 'segmentos_clientes', (int) $segment->id, null, ['nombre' => $segment->nombre, 'criterios' => $segment->criterios], $request->ip());
 
-        return back()->with('status', 'Segmento creado. Sus campa脙卤as se mostrar脙隆n a los roles seleccionados.');
+        return back()->with('status', 'Segmento creado. Sus campa帽as se mostrar谩n a los roles seleccionados.');
     }
 
     /**
-     * Genera la salida exportable de la informaci贸n disponible.
+     * Genera la salida exportable de la informaci髇 disponible.
      *
-     * @param  mixed  $request  Par谩metro recibido por la operaci贸n.
-     * @param  mixed  $exporter  Par谩metro recibido por la operaci贸n.
-     * @param  mixed  $audit  Par谩metro recibido por la operaci贸n.
-     * @return Response|StreamedResponse Resultado de la operaci贸n.
+     * @param  mixed  $request  Par醡etro recibido por la operaci髇.
+     * @param  mixed  $exporter  Par醡etro recibido por la operaci髇.
+     * @param  mixed  $audit  Par醡etro recibido por la operaci髇.
+     * @return Response|StreamedResponse Resultado de la operaci髇.
      */
     public function export(Request $request, ExportadorTabular $exporter, RegistradorAuditoria $audit): Response|StreamedResponse
     {
         $format = (string) ($request->route('format') ?: $request->string('format', 'csv')->toString());
-        abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportaci贸n no permitido.');
+        abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportaci髇 no permitido.');
         $query = SegmentoCliente::query()->orderBy('nombre')
             ->when($request->filled('buscar'), fn ($q) => $q->where(fn ($terms) => $terms->where('nombre', 'like', '%'.$request->string('buscar')->toString().'%')->orWhere('tipo', 'like', '%'.$request->string('buscar')->toString().'%')))
             ->when($request->string('tipo')->toString() === 'roles', fn ($q) => $q->where('tipo', 'roles'))
@@ -118,12 +120,12 @@ class SegmentoClienteController extends Controller
     }
 
     /**
-     * Actualiza la informaci贸n existente con los datos recibidos.
+     * Actualiza la informaci髇 existente con los datos recibidos.
      *
-     * @param  mixed  $request  Par谩metro recibido por la operaci贸n.
-     * @param  mixed  $segment  Par谩metro recibido por la operaci贸n.
-     * @param  mixed  $audit  Par谩metro recibido por la operaci贸n.
-     * @return RedirectResponse Resultado de la operaci贸n.
+     * @param  mixed  $request  Par醡etro recibido por la operaci髇.
+     * @param  mixed  $segment  Par醡etro recibido por la operaci髇.
+     * @param  mixed  $audit  Par醡etro recibido por la operaci髇.
+     * @return RedirectResponse Resultado de la operaci髇.
      */
     public function update(ActualizarSegmentoClienteRequest $request, SegmentoCliente $segment, RegistradorAuditoria $audit): RedirectResponse
     {
@@ -140,12 +142,12 @@ class SegmentoClienteController extends Controller
     }
 
     /**
-     * Modifica el estado o elimina el registro seg煤n la operaci贸n solicitada.
+     * Modifica el estado o elimina el registro seg鷑 la operaci髇 solicitada.
      *
-     * @param  mixed  $request  Par谩metro recibido por la operaci贸n.
-     * @param  mixed  $segment  Par谩metro recibido por la operaci贸n.
-     * @param  mixed  $audit  Par谩metro recibido por la operaci贸n.
-     * @return RedirectResponse Resultado de la operaci贸n.
+     * @param  mixed  $request  Par醡etro recibido por la operaci髇.
+     * @param  mixed  $segment  Par醡etro recibido por la operaci髇.
+     * @param  mixed  $audit  Par醡etro recibido por la operaci髇.
+     * @return RedirectResponse Resultado de la operaci髇.
      */
     public function deactivate(Request $request, SegmentoCliente $segment, RegistradorAuditoria $audit): RedirectResponse
     {

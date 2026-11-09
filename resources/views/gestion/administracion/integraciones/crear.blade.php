@@ -1,13 +1,58 @@
+{{-- Encabezado del formulario para registrar una nueva integración. --}}
 <div class="gestion-pendiente-modal-shell">
     <header class="gestion-pendiente-modal-header">
-        <div><span class="gestion-pendiente-modal-icon"><i class="bi {{ $module['icon'] }}" aria-hidden="true"></i></span><div><span class="gestion-pendiente-eyebrow">{{ $module['area'] }}</span><h2 id="{{ $module['key'] }}-{{ $mode }}-title">{{ $mode === 'crear' ? 'Nuevo' : 'Editar' }} {{ $module['record_singular'] ?? 'registro' }}</h2><p>{{ $mode === 'crear' ? 'Completa la información del nuevo registro.' : 'Actualiza la información del registro seleccionado.' }}</p></div></div>
-        <button type="button" class="gestion-pendiente-close" data-pending-close aria-label="Cerrar ventana"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+        <div>
+            <span class="gestion-pendiente-modal-icon"><i class="bi {{ $module['icon'] }}" aria-hidden="true"></i></span>
+            <div>
+                <span class="gestion-pendiente-eyebrow">{{ $module['area'] }}</span>
+                <h2 id="{{ $module['key'] }}-crear-title">Nueva {{ $module['record_singular'] ?? 'integración' }}</h2>
+                <p>Completa la información de la nueva integración.</p>
+            </div>
+        </div>
+        <button type="button" class="gestion-pendiente-close" data-pending-close aria-label="Cerrar ventana">
+            <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
     </header>
+
+    {{-- Aviso sobre el estado actual de la integración con el backend. --}}
     <div class="gestion-pendiente-modal-body">
-        <div class="gestion-pendiente-modal-notice"><i class="bi bi-database-exclamation" aria-hidden="true"></i><div><strong>Formulario frontend</strong><p>Los campos están preparados visualmente. No se guardará información hasta conectar el módulo con una ruta y un endpoint autorizados.</p></div></div>
+        <div class="gestion-pendiente-modal-notice">
+            <i class="bi bi-database-exclamation" aria-hidden="true"></i>
+            <div>
+                <strong>Formulario frontend</strong>
+                <p>Los campos están preparados visualmente. El guardado requiere una ruta y un endpoint autorizados.</p>
+            </div>
+        </div>
+
+        {{-- Campos de captura de la integración. --}}
         <form data-pending-form>
-            @include('gestion.' . $module['key'] . '.formulario', ['module' => $module, 'mode' => $mode])
+            <div class="gestion-pendiente-form-fields">
+                @foreach (($module['fields'] ?? []) as $field)
+                    <label class="gestion-pendiente-field{{ ($field['wide'] ?? false) ? ' gestion-pendiente-field--wide' : '' }}" for="{{ $module['key'] }}-crear-{{ $loop->index }}">
+                        <span>{{ $field['label'] }} @if ($field['required'] ?? false)<b>*</b>@endif</span>
+                        @if (($field['type'] ?? 'text') === 'textarea')
+                            <textarea id="{{ $module['key'] }}-crear-{{ $loop->index }}" rows="3" placeholder="{{ $field['placeholder'] ?? '' }}"></textarea>
+                        @elseif (($field['type'] ?? 'text') === 'select')
+                            <select id="{{ $module['key'] }}-crear-{{ $loop->index }}">
+                                <option value="">{{ $field['placeholder'] ?? 'Seleccionar' }}</option>
+                                @foreach (($field['options'] ?? []) as $option)
+                                    <option value="{{ $option }}">{{ $option }}</option>
+                                @endforeach
+                            </select>
+                        @else
+                            <input id="{{ $module['key'] }}-crear-{{ $loop->index }}" type="{{ $field['type'] ?? 'text' }}" placeholder="{{ $field['placeholder'] ?? '' }}">
+                        @endif
+                    </label>
+                @endforeach
+            </div>
         </form>
     </div>
-    <footer class="gestion-pendiente-modal-footer"><button type="button" class="gestion-pendiente-secondary" data-pending-close>Cancelar</button><button type="button" class="gestion-pendiente-primary" data-pending-notice="No se guardaron cambios: la integración backend de este módulo está pendiente."><i class="bi bi-save" aria-hidden="true"></i> Guardar cuando se integre</button></footer>
+
+    {{-- Acciones visuales del formulario de creación. --}}
+    <footer class="gestion-pendiente-modal-footer">
+        <button type="button" class="gestion-pendiente-secondary" data-pending-close>Cancelar</button>
+        <button type="button" class="gestion-pendiente-primary" data-pending-notice="El guardado requiere la integración del backend.">
+            <i class="bi bi-save" aria-hidden="true"></i> Guardar cuando se integre
+        </button>
+    </footer>
 </div>

@@ -19,11 +19,11 @@ it('renders each management module with its canonical list view', function () {
         'management.customers' => 'gestion.comercial.clientes.listar',
         'management.purchases' => 'gestion.comercial.compras.listar',
         'quotations.index' => 'gestion.comercial.cotizaciones.listar',
-        'management.quotations' => 'gestion.comercial.cotizaciones.administrador',
+        'management.quotations' => 'gestion.comercial.cotizaciones.listar',
         'management.coupons' => 'gestion.marketing.cupones.listar',
         'management.inventory' => 'gestion.inventario.existencias.listar',
         'management.products' => 'gestion.inventario.productos.listar',
-        'management.suppliers' => 'gestion.inventario.proveedores.listar',
+        'management.suppliers' => 'gestion.comercial.proveedores.listar',
         'management.reports' => 'gestion.analitica.reportes.listar',
         'management.segments' => 'gestion.marketing.segmentos.listar',
         'management.users' => 'gestion.administracion.usuarios.listar',
@@ -87,7 +87,7 @@ it('filters the administrator quotation dashboard and calculates real status tot
     $this->actingAs($admin)
         ->get(route('management.quotations', ['estado' => 'Aprobada']))
         ->assertOk()
-        ->assertViewIs('gestion.comercial.cotizaciones.administrador')
+        ->assertViewIs('gestion.comercial.cotizaciones.listar')
         ->assertViewHas('totalQuotations', 2)
         ->assertViewHas('pendingQuotations', 1)
         ->assertViewHas('approvedQuotations', 1)

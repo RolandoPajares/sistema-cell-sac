@@ -1,3 +1,5 @@
+{{-- Componente de analitica: dashboard-global\componentes\cabecera.blade.php. Renderiza un bloque visual reutilizable. --}}
+{{-- Bloque visual: centraliza el título, descripción y acciones exportables del dashboard. --}}
 <header class="tc-dg__header">
     <div>
         <span class="tc-dg__eyebrow">Dashboard Global</span>

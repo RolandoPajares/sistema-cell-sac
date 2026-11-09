@@ -5,15 +5,16 @@ namespace App\Http\Controllers\Publico\Comercio;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FinalizarCompraRequest;
 use App\Models\Catalogo\Producto;
-use App\Servicios\ServicioInventario;
 use App\Servicios\ServicioCarrito;
+use App\Servicios\ServicioInventario;
 use App\Servicios\ServicioPedidos;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
- * Define la responsabilidad de la clase FinalizarCompraController dentro de su m贸dulo.
+ * Define la responsabilidad de la clase FinalizarCompraController dentro de su m骴ulo.
  *
  * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
  */
@@ -22,7 +23,7 @@ class FinalizarCompraController extends Controller
     /**
      * Inicializa la instancia con las dependencias y el estado requeridos.
      *
-     * @return mixed Resultado de la operaci贸n.
+     * @return mixed Resultado de la operaci髇.
      */
     public function __construct(
         private readonly ServicioPedidos $orderService,
@@ -31,13 +32,13 @@ class FinalizarCompraController extends Controller
     ) {}
 
     /**
-     * Prepara la pantalla de checkout a partir del carrito normalizado de la sesi贸n.
+     * Prepara la pantalla de checkout a partir del carrito normalizado de la sesi髇.
      *
      * Genera un token de checkout si falta, carga productos activos, calcula disponibilidad
-     * y subtotales, y marca si todas las l铆neas pueden confirmarse sin modificar la base de datos.
+     * y subtotales, y marca si todas las l韓eas pueden confirmarse sin modificar la base de datos.
      *
-     * @param Request $request Solicitud que contiene la sesi贸n y el usuario comprador.
-     * @return View Vista de checkout con l铆neas, total, token y condici贸n de confirmaci贸n.
+     * @param  Request  $request  Solicitud que contiene la sesi髇 y el usuario comprador.
+     * @return View Vista de checkout con l韓eas, total, token y condici髇 de confirmaci髇.
      */
     public function index(Request $request): View
     {
@@ -76,18 +77,19 @@ class FinalizarCompraController extends Controller
     /**
      * Convierte el carrito validado en un pedido mediante el servicio de pedidos.
      *
-     * Rechaza un carrito vac铆o, delega la operaci贸n transaccional al servicio de checkout
-     * con usuario, cup贸n, IP y token, y limpia las claves de sesi贸n solo despu茅s de recibir
+     * Rechaza un carrito vac韔, delega la operaci髇 transaccional al servicio de checkout
+     * con usuario, cup髇, IP y token, y limpia las claves de sesi髇 solo despu閟 de recibir
      * el pedido creado.
      *
-     * @param FinalizarCompraRequest $request Datos validados del checkout.
-     * @return RedirectResponse Redirecci贸n al detalle del pedido registrado.
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si la sesi贸n no contiene l铆neas de carrito.
+     * @param  FinalizarCompraRequest  $request  Datos validados del checkout.
+     * @return RedirectResponse Redirecci髇 al detalle del pedido registrado.
+     *
+     * @throws HttpException Si la sesi髇 no contiene l韓eas de carrito.
      */
     public function store(FinalizarCompraRequest $request): RedirectResponse
     {
         $cart = (array) $request->session()->get('cart', []);
-        abort_if($cart === [], 422, 'El carrito est脙隆 vac脙颅o.');
+        abort_if($cart === [], 422, 'El carrito est谩 vac铆o.');
 
         $order = $this->orderService->checkout(
             $request->user(),
@@ -99,6 +101,6 @@ class FinalizarCompraController extends Controller
 
         $request->session()->forget(['cart', 'coupon_code', 'checkout_token']);
 
-        return redirect()->route('orders.show', $order)->with('status', 'Pedido registrado. El sistema todav脙颅a no procesa pagos.');
+        return redirect()->route('orders.show', $order)->with('status', 'Pedido registrado. El sistema todav铆a no procesa pagos.');
     }
 }

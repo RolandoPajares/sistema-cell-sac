@@ -38,7 +38,11 @@ class ServicioPedidos
     public function checkout(User $user, array $cart, ?string $couponCode, ?string $ip, string $checkoutToken): Pedido
     {
         if (! $user->can('gestion.cotizaciones.consultar') && ! $user->can('gestion.pedidos.consultar')) {
-            $this->authorization->assertAllowed($user, 'gestion.pedidos.crear');
+            abort_unless(
+                $this->authorization->allows($user, 'gestion.pedidos.crear')
+                    || $this->authorization->allows($user, 'gestion.pedidos.consultar'),
+                403,
+            );
         }
         $cart = $this->cartService->normalizar($cart);
         abort_if($cart === [] || preg_match('/^[a-f0-9]{64}$/', $checkoutToken) !== 1, 422, 'La solicitud de compra no es válida.');

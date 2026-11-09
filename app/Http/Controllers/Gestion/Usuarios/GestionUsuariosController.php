@@ -50,22 +50,40 @@ class GestionUsuariosController extends Controller
             ->withQueryString();
         $roleCodes = $this->roleCodes();
         $totalUsers = User::query()->count();
+        $roleLabels = $this->roleLabels($roleCodes);
+        $roleDistribution = $this->roleDistribution();
+        $recentUsers = User::query()
+            ->with(['customer:id,usuario_id,ciudad', 'rolesVigentes', 'rolesPorSedeVigentes'])
+            ->latest('creado_en')
+            ->latest('id')
+            ->limit(5)
+            ->get(['id', 'nombre', 'correo', 'rol', 'creado_en']);
 
-        return view('gestion.administracion.usuarios.listar', [
+        return view('gestion.administracion.seguridad.usuarios.listar', [
             'users' => $users,
             'roles' => $roleCodes,
-            'roleLabels' => $this->roleLabels($roleCodes),
+            'roleLabels' => $roleLabels,
             'roleScopes' => $this->roleScopes($roleCodes),
-            'roleDistribution' => $this->roleDistribution(),
-            'recentUsers' => User::query()->with(['customer:id,usuario_id,ciudad', 'rolesVigentes', 'rolesPorSedeVigentes'])->latest('creado_en')->latest('id')->limit(5)->get(['id', 'nombre', 'correo', 'rol', 'creado_en']),
+            'roleDistribution' => $this->prepareRoleDistribution($roleDistribution),
+            'recentUsers' => $recentUsers,
             'filters' => $filters,
+            'hasFilters' => $this->hasFilters($filters),
+            'userPresentation' => $this->prepareUserPresentation($users->getCollection()),
+            'recentUserPresentation' => $this->prepareUserPresentation($recentUsers),
+            'exportUrls' => [
+                'pdf' => route('management.users.export', array_merge($request->query(), ['format' => 'pdf'])),
+                'csv' => route('management.users.export', array_merge($request->query(), ['format' => 'csv'])),
+                'excel' => route('management.users.export', array_merge($request->query(), ['format' => 'excel'])),
+            ],
+            'paginationQuery' => $request->except(['page', 'por_pagina']),
+            'pageSizes' => [10, 20, 50],
             'cities' => Cliente::query()->whereNotNull('ciudad')->where('ciudad', '<>', '')->distinct()->orderBy('ciudad')->pluck('ciudad'),
             'sites' => Sede::query()->where('activa', true)->orderBy('nombre')->get(['id', 'nombre', 'empresa_id']),
             'totalUsers' => $totalUsers,
             'activeUsers' => $hasAccountStatus ? User::query()->where('activo', true)->count() : null,
             'inactiveUsers' => $hasAccountStatus ? User::query()->where('activo', false)->count() : null,
             'accountStatusAvailable' => $hasAccountStatus,
-            'rolesConfigured' => count($this->roleCodes()),
+            'rolesConfigured' => count($roleCodes),
             'currentMonthUsers' => User::query()->whereBetween('creado_en', [now()->startOfMonth(), now()->endOfMonth()])->count(),
         ]);
     }
@@ -318,6 +336,70 @@ class GestionUsuariosController extends Controller
 
         return DB::query()->fromSub($global->union($sites), 'asignaciones_vigentes')
             ->select('rol')->selectRaw('COUNT(*) as total')->groupBy('rol')->orderByDesc('total')->get();
+    }
+
+    /**
+     * Prepara los datos visuales de cada cuenta sin ejecutar transformaciones en Blade.
+     *
+     * @param  Collection<int, User>  $accounts
+     * @return array<int, array{initials:string, roles:string, avatarIndex:int, roleIndex:int}>
+     */
+    private function prepareUserPresentation(Collection $accounts): array
+    {
+        $presentation = [];
+
+        foreach ($accounts->values() as $index => $account) {
+            $presentation[$account->getKey()] = [
+                'initials' => $this->initialsFor($account->nombre),
+                'roles' => $this->formatRoles($account),
+                'avatarIndex' => $index % 5,
+                'roleIndex' => $index % 7,
+            ];
+        }
+
+        return $presentation;
+    }
+
+    /**
+     * Prepara la distribución de roles para que la vista solo la represente.
+     *
+     * @param  Collection<int, object>  $distribution
+     * @return array<int, object{rol:string, total:int}>
+     */
+    private function prepareRoleDistribution(Collection $distribution): array
+    {
+        return $distribution->values()->map(function (object $item): object {
+            $total = (int) $item->total;
+
+            return (object) [
+                'rol' => (string) $item->rol,
+                'total' => $total,
+            ];
+        })->all();
+    }
+
+    /** @param array{buscar:?string,rol:?string,estado:?string,ciudad:?string,fecha:?string,por_pagina:int} $filters */
+    private function hasFilters(array $filters): bool
+    {
+        return filled($filters['buscar'])
+            || filled($filters['rol'])
+            || filled($filters['estado'])
+            || filled($filters['ciudad'])
+            || filled($filters['fecha']);
+    }
+
+    private function formatRoles(User $account): string
+    {
+        return $account->rolesVigentes
+            ->concat($account->rolesPorSedeVigentes)
+            ->pluck('nombre')
+            ->unique()
+            ->join(', ') ?: 'Sin rol vigente';
+    }
+
+    private function initialsFor(?string $name): string
+    {
+        return mb_strtoupper(mb_substr(trim((string) $name), 0, 1));
     }
 
     /** @return array{buscar:?string,rol:?string,estado:?string,ciudad:?string,fecha:?string,por_pagina:int} */

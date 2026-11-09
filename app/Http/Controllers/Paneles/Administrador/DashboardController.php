@@ -149,7 +149,7 @@ final class DashboardController extends PanelDashboardController
         $orderStatusChart = $this->statusChart($orderStatuses, $orderStatusTotal);
 
         $recentOrders = $consultaPedidos()
-            ->with('user:id,nombre,correo')
+            ->with(['user:id,nombre,correo', 'details.product:id,nombre'])
             ->latest('creado_en')
             ->latest('id')
             ->limit(5)
@@ -168,6 +168,9 @@ final class DashboardController extends PanelDashboardController
             ->limit(4)
             ->get(['id', 'nombre', 'titulo', 'vistas', 'clics', 'finaliza_en']);
         $campaignMaxViews = max(1, (int) $campaigns->max('vistas'));
+        $campaignProgress = $campaigns->mapWithKeys(static fn (Campania $campaign): array => [
+            $campaign->id => min(100, round(((int) $campaign->vistas / $campaignMaxViews) * 100)),
+        ])->all();
 
         $recentActivity = $consultaAuditoria()
             ->with('user:id,nombre')
@@ -210,16 +213,23 @@ final class DashboardController extends PanelDashboardController
             'newCustomers' => $newCustomers,
             'newCustomersTrendPercent' => $this->trendPercent($newCustomers, $newCustomersPreviousMonth),
             'monthlySales' => $monthlySales,
+            'monthlySalesBarHeights' => collect($monthlySales)->mapWithKeys(fn (array $month): array => [
+                $month['key'] => $salesChartMax > 0 ? max(4, round(($month['value'] / $salesChartMax) * 100, 2)) : 4,
+            ])->all(),
             'maxMonthlySales' => $maxMonthlySales,
             'salesChartMax' => $salesChartMax,
             'orderStatuses' => $orderStatuses,
             'orderStatusTotal' => $orderStatusTotal,
             'orderStatusChart' => $orderStatusChart,
             'recentOrders' => $recentOrders,
+            'recentOrderProducts' => $recentOrders->mapWithKeys(static fn (Pedido $order): array => [
+                $order->id => $order->details->first()?->product?->nombre,
+            ])->all(),
             'lowStockProducts' => $productosSinExistenciasListado,
             'topProducts' => $topProducts,
             'campaigns' => $campaigns,
             'campaignMaxViews' => $campaignMaxViews,
+            'campaignProgress' => $campaignProgress,
             'recentActivity' => $recentActivity,
             'reminders' => $reminders,
             'quickLinks' => $quickLinks,

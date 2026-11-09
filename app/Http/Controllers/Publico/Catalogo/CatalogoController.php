@@ -33,10 +33,41 @@ class CatalogoController extends Controller
         $products = $catalogService->query($filters)->paginate(20)->withQueryString();
         $catalogService->agregarDisponibilidad($products->getCollection(), $request->user());
 
+        $products->getCollection()->transform(function (Producto $product): Producto {
+            $salePrice = (float) ($product->precio_oferta ?? $product->precio);
+            $originalPrice = (float) ($product->precio_original ?? $product->precio);
+
+            return $product->setAttribute('catalog_sale_price', $salePrice)
+                ->setAttribute('catalog_original_price', $originalPrice)
+                ->setAttribute('catalog_discount', $originalPrice > $salePrice && $originalPrice > 0
+                    ? round((1 - ($salePrice / $originalPrice)) * 100)
+                    : 0);
+        });
+
+        $selectedCategory = $filters['categoria'] ?? null;
+        $selectedBrand = $filters['marca'] ?? null;
+        $selectedOrder = $filters['orden'] ?? 'nuevo';
+        $minimumPrice = $filters['min'] ?? null;
+        $maximumPrice = $filters['max'] ?? null;
+        $baseFilters = collect($filters)->except('page')->all();
+        $filterOptions = $catalogService->filterOptions();
+
         return view('publico.catalogo.index', [
             'products' => $products,
-            ...$catalogService->filterOptions(),
+            ...$filterOptions,
             'query' => (string) ($filters['q'] ?? ''),
+            'baseFilters' => $baseFilters,
+            'baseFiltersWithoutCategory' => collect($baseFilters)->except('categoria')->all(),
+            'baseFiltersWithoutBrand' => collect($baseFilters)->except('marca')->all(),
+            'selectedCategoryName' => $selectedCategory !== null
+                ? $filterOptions['categories']->firstWhere('id', (int) $selectedCategory)?->nombre
+                : null,
+            'selectedCategory' => $selectedCategory,
+            'selectedBrand' => $selectedBrand,
+            'selectedOrder' => $selectedOrder,
+            'minimumPrice' => $minimumPrice,
+            'maximumPrice' => $maximumPrice,
+            'canAddToCart' => $request->user() !== null,
         ]);
     }
 
@@ -103,6 +134,7 @@ class CatalogoController extends Controller
             'isFavorite' => $request->user()
                 ? $product->favorites()->where('usuario_id', $request->user()->getKey())->exists()
                 : false,
+            'isAuthenticated' => $request->user() !== null,
         ]);
     }
 

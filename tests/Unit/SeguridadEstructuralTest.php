@@ -12,7 +12,7 @@ function formulariosBlade(string $directorio): array
     $iterador = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directorio));
 
     foreach ($iterador as $archivo) {
-        if (! $archivo->isFile() || strtolower($archivo->getExtension()) !== 'php' || ! str_ends_with($archivo->getFilename(), '.blade.php')) {
+        if (! $archivo->isFile() || ! str_ends_with(strtolower($archivo->getFilename()), '.blade.php')) {
             continue;
         }
 
@@ -43,13 +43,13 @@ test('los formularios Blade mutantes incluyen protección CSRF', function (): vo
 
     foreach ($formularios as [$vista, $formulario]) {
         $esMutante = preg_match("~method\\s*=\\s*[\"']?(?:post|put|patch|delete)\\b~i", $formulario) === 1
-            || preg_match("~@method\\s*\\(\\s*[\"']?(?:PUT|PATCH|DELETE)~i", $formulario) === 1;
+            || preg_match("~(?:method_field\\s*\\(\\s*[\"']?(?:PUT|PATCH|DELETE)|@method\\s*\\(\\s*[\"']?(?:PUT|PATCH|DELETE))~i", $formulario) === 1;
 
         if (! $esMutante) {
             continue;
         }
 
-        expect(str_contains($formulario, '@csrf'))->toBeTrue("Formulario sin @csrf en {$vista}");
+        expect(str_contains($formulario, 'csrf_field') || str_contains($formulario, '@csrf'))->toBeTrue("Formulario sin CSRF en {$vista}");
     }
 });
 

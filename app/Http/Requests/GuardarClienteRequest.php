@@ -32,12 +32,33 @@ class GuardarClienteRequest extends FormRequest
     {
         return [
             'tipo' => ['required', Rule::in(['minorista', 'mayorista'])],
+            'tipo_documento' => ['nullable', Rule::in(['dni', 'ruc'])],
             'documento' => ['required', 'string', 'max:20', Rule::unique('clientes', 'documento')],
-            'razon_social' => ['nullable', 'string', 'max:160'],
+            'razon_social' => [Rule::requiredIf(fn (): bool => $this->input('tipo_documento') === 'ruc'), 'nullable', 'string', 'max:160'],
             'nombre_contacto' => ['required', 'string', 'max:160'],
             'correo' => ['required', 'email', 'max:160'],
             'telefono' => ['nullable', 'string', 'max:30'],
             'ciudad' => ['nullable', 'string', 'max:80'],
+        ];
+    }
+
+    /** @return array<string, string> */
+    public function attributes(): array
+    {
+        return [
+            'tipo_documento' => 'tipo de documento',
+            'documento' => 'documento de identificación',
+            'nombre_contacto' => 'nombre de contacto',
+            'razon_social' => 'razón social',
+        ];
+    }
+
+    /** @return array<string, string> */
+    public function messages(): array
+    {
+        return [
+            'tipo_documento.in' => 'El tipo de documento seleccionado no es válido.',
+            'documento.unique' => 'El documento ya está registrado.',
         ];
     }
 }

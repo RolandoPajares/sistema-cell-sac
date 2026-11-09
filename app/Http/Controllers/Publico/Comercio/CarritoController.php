@@ -15,9 +15,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
- * Define la responsabilidad de la clase CarritoController dentro de su m√≥dulo.
+ * Define la responsabilidad de la clase CarritoController dentro de su mÛdulo.
  *
  * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
  */
@@ -26,7 +27,7 @@ class CarritoController extends Controller
     /**
      * Inicializa la instancia con las dependencias y el estado requeridos.
      *
-     * @return mixed Resultado de la operaci√≥n.
+     * @return mixed Resultado de la operaciÛn.
      */
     public function __construct(
         private readonly ServicioInventario $inventario,
@@ -37,11 +38,11 @@ class CarritoController extends Controller
     /**
      * Construye la vista del carrito con productos activos, variantes, stock y subtotales.
      *
-     * Normaliza primero el contenido de la sesi√≥n y consulta solo los productos presentes
-     * en ella. Las l√≠neas cuyo producto ya no est√° disponible se excluyen de la vista.
+     * Normaliza primero el contenido de la sesiÛn y consulta solo los productos presentes
+     * en ella. Las lÌneas cuyo producto ya no est· disponible se excluyen de la vista.
      *
-     * @param Request $request Solicitud cuyo usuario y sesi√≥n contienen el carrito.
-     * @return View Vista p√∫blica del carrito con l√≠neas y total calculado.
+     * @param  Request  $request  Solicitud cuyo usuario y sesiÛn contienen el carrito.
+     * @return View Vista p˙blica del carrito con lÌneas y total calculado.
      */
     public function index(Request $request): View
     {
@@ -66,16 +67,17 @@ class CarritoController extends Controller
     }
 
     /**
-     * Valida disponibilidad y agrega un producto o variante a la sesi√≥n del carrito.
+     * Valida disponibilidad y agrega un producto o variante a la sesiÛn del carrito.
      *
      * Exige variante cuando el producto la ofrece, valida que pertenezca al producto,
      * compara la cantidad acumulada contra el inventario disponible y redirige al checkout
-     * cuando se solicita la opci√≥n de compra inmediata.
+     * cuando se solicita la opciÛn de compra inmediata.
      *
-     * @param AgregarCarritoRequest $request Datos validados de cantidad, variante y compra inmediata.
-     * @param Producto $product Producto activo que se agregar√°.
-     * @return RedirectResponse Redirecci√≥n al checkout o a la p√°gina anterior con el estado de la operaci√≥n.
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si el producto, variante o stock no es v√°lido.
+     * @param  AgregarCarritoRequest  $request  Datos validados de cantidad, variante y compra inmediata.
+     * @param  Producto  $product  Producto activo que se agregar·.
+     * @return RedirectResponse RedirecciÛn al checkout o a la p·gina anterior con el estado de la operaciÛn.
+     *
+     * @throws HttpException Si el producto, variante o stock no es v·lido.
      */
     public function add(AgregarCarritoRequest $request, Producto $product): RedirectResponse
     {
@@ -85,9 +87,9 @@ class CarritoController extends Controller
         $variantId = $variantId === null ? null : (int) $variantId;
         $hasVariants = $product->variants()->exists();
         abort_if($hasVariants && $variantId === null, 422, 'Selecciona una variante.');
-        abort_if(! $hasVariants && $variantId !== null, 422, 'Esta combinaci√≥n no est√° disponible.');
+        abort_if(! $hasVariants && $variantId !== null, 422, 'Esta combinaciÛn no est· disponible.');
         if ($variantId !== null) {
-            abort_unless($product->variants()->whereKey($variantId)->where('estado', 'activo')->exists(), 422, 'Esta combinaci√≥n no est√° disponible.');
+            abort_unless($product->variants()->whereKey($variantId)->where('estado', 'activo')->exists(), 422, 'Esta combinaciÛn no est· disponible.');
         }
         $disponible = $this->inventario->disponibilidadDeLinea($request->user(), $product, $variantId);
         abort_if($disponible < $quantity, 422, 'La cantidad supera el stock disponible.');
@@ -109,15 +111,16 @@ class CarritoController extends Controller
     }
 
     /**
-     * Cambia o elimina la cantidad de un producto que ya est√° en el carrito.
+     * Cambia o elimina la cantidad de un producto que ya est· en el carrito.
      *
-     * La cantidad cero elimina la l√≠nea; una cantidad positiva exige que la l√≠nea exista
+     * La cantidad cero elimina la lÌnea; una cantidad positiva exige que la lÌnea exista
      * y no supere la disponibilidad calculada para su variante.
      *
-     * @param ActualizarCarritoRequest $request Cantidad validada por el formulario.
-     * @param Producto $product Producto cuya l√≠nea se actualiza.
-     * @return RedirectResponse Redirecci√≥n a la p√°gina anterior con la sesi√≥n actualizada.
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si la l√≠nea no existe o supera el stock.
+     * @param  ActualizarCarritoRequest  $request  Cantidad validada por el formulario.
+     * @param  Producto  $product  Producto cuya lÌnea se actualiza.
+     * @return RedirectResponse RedirecciÛn a la p·gina anterior con la sesiÛn actualizada.
+     *
+     * @throws HttpException Si la lÌnea no existe o supera el stock.
      */
     public function update(ActualizarCarritoRequest $request, Producto $product): RedirectResponse
     {
@@ -140,11 +143,11 @@ class CarritoController extends Controller
     }
 
     /**
-     * Modifica el estado o elimina el registro seg√∫n la operaci√≥n solicitada.
+     * Modifica el estado o elimina el registro seg˙n la operaciÛn solicitada.
      *
-     * @param  mixed  $request  Par√°metro recibido por la operaci√≥n.
-     * @param  mixed  $product  Par√°metro recibido por la operaci√≥n.
-     * @return RedirectResponse Resultado de la operaci√≥n.
+     * @param  mixed  $request  Par·metro recibido por la operaciÛn.
+     * @param  mixed  $product  Par·metro recibido por la operaciÛn.
+     * @return RedirectResponse Resultado de la operaciÛn.
      */
     public function remove(Request $request, Producto $product): RedirectResponse
     {
@@ -156,10 +159,10 @@ class CarritoController extends Controller
     }
 
     /**
-     * Ejecuta la operaci√≥n clear definida por la clase CarritoController.
+     * Ejecuta la operaciÛn clear definida por la clase CarritoController.
      *
-     * @param  mixed  $request  Par√°metro recibido por la operaci√≥n.
-     * @return RedirectResponse Resultado de la operaci√≥n.
+     * @param  mixed  $request  Par·metro recibido por la operaciÛn.
+     * @return RedirectResponse Resultado de la operaciÛn.
      */
     public function clear(Request $request): RedirectResponse
     {
@@ -169,10 +172,10 @@ class CarritoController extends Controller
     }
 
     /**
-     * Actualiza la informaci√≥n existente con los datos recibidos.
+     * Actualiza la informaciÛn existente con los datos recibidos.
      *
-     * @param  mixed  $request  Par√°metro recibido por la operaci√≥n.
-     * @return RedirectResponse Resultado de la operaci√≥n.
+     * @param  mixed  $request  Par·metro recibido por la operaciÛn.
+     * @return RedirectResponse Resultado de la operaciÛn.
      */
     public function updateLegacy(Request $request): RedirectResponse
     {
@@ -197,24 +200,24 @@ class CarritoController extends Controller
     }
 
     /**
-     * Realiza la operaci√≥n espec√≠fica definida por este m√©todo y devuelve su resultado.
+     * Realiza la operaciÛn especÌfica definida por este mÈtodo y devuelve su resultado.
      *
-     * @param  mixed  $request  Par√°metro recibido por la operaci√≥n.
-     * @return RedirectResponse Resultado de la operaci√≥n.
+     * @param  mixed  $request  Par·metro recibido por la operaciÛn.
+     * @return RedirectResponse Resultado de la operaciÛn.
      */
     public function applyCoupon(AplicarCuponRequest $request): RedirectResponse
     {
         $code = mb_strtoupper($request->string('codigo')->trim()->toString());
         abort_unless(Schema::hasColumn('cupones', 'empresa_id'), 503,
-            'Los cupones no est√°n disponibles hasta configurar su empresa propietaria.');
+            'Los cupones no est·n disponibles hasta configurar su empresa propietaria.');
         $ubicacion = $this->autorizacion->operationLocation($request->user());
-        abort_unless($ubicacion['empresa_id'] !== null, 503, 'No hay una empresa autorizada para validar el cup√≥n.');
+        abort_unless($ubicacion['empresa_id'] !== null, 503, 'No hay una empresa autorizada para validar el cupÛn.');
         $coupon = Cupon::query()->where('empresa_id', $ubicacion['empresa_id'])->where('codigo', $code)->where('activo', true)
             ->where('inicia_en', '<=', now())->where('finaliza_en', '>=', now())->first();
 
-        abort_unless($coupon && ($coupon->limite_usos === null || $coupon->usos < $coupon->limite_usos), 422, 'Cup√É¬≥n no v√É¬°lido o agotado.');
+        abort_unless($coupon && ($coupon->limite_usos === null || $coupon->usos < $coupon->limite_usos), 422, 'Cup√≥n no v√°lido o agotado.');
         $request->session()->put('coupon_code', $coupon->codigo);
 
-        return back()->with('status', 'Cup√É¬≥n guardado. El descuento se validar√É¬° nuevamente al confirmar el pedido.');
+        return back()->with('status', 'Cup√≥n guardado. El descuento se validar√° nuevamente al confirmar el pedido.');
     }
 }

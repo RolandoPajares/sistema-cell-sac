@@ -1283,6 +1283,44 @@
 .clientes-import-footer { position: sticky; bottom: 0; background: #fff; }
 .clientes-import-footer [hidden] { display: none !important; }
 
+/* Formulario CRM: replica el acabado azul del registro de clientes y mantiene la vista sin estilos incrustados. */
+.cliente-registro-form {
+  display: grid !important;
+  gap: 18px !important;
+  padding: 24px 32px 30px !important;
+  color: #172d5b;
+  background: #fff;
+}
+
+.cliente-registro-heading { display: grid; gap: 6px; }
+.cliente-registro-heading h2 { margin: 2px 0 0; color: #13295a; font-size: 1.45rem; letter-spacing: -0.03em; }
+.cliente-registro-heading p { margin: 0; color: #7187ad; font-size: 0.78rem; }
+.cliente-registro-form fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.cliente-person-switcher legend,
+.cliente-registro-section h3 { margin-bottom: 8px; color: #1d3768; font-size: 0.76rem; font-weight: 800; }
+.cliente-person-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 4px; border: 1px solid #d6e5f8; border-radius: 12px; background: #f5f9ff; }
+.cliente-person-option { min-height: 38px; border: 0; border-radius: 9px; color: #6982aa; background: transparent; font-size: 0.75rem; font-weight: 800; cursor: pointer; }
+.cliente-person-option.is-active { color: #fff; background: linear-gradient(100deg, #0867ef, #168af5); box-shadow: 0 5px 13px rgba(8, 109, 239, 0.2); }
+.cliente-registro-section { display: grid; gap: 12px; padding-top: 16px; border-top: 1px solid #e6eef8; }
+.cliente-field-grid { display: grid; gap: 12px; }
+.cliente-field-grid--two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.cliente-registro-form label { display: grid; gap: 6px; color: #1c3768; font-size: 0.72rem; font-weight: 800; }
+.cliente-registro-form input,
+.cliente-registro-form select { width: 100%; min-height: 42px; padding: 10px 13px; border: 1px solid #cbdcf2; border-radius: 10px; outline: 0; color: #152e60; background: #fff; font: inherit; font-size: 0.75rem; }
+.cliente-registro-form input::placeholder { color: #9aacc5; font-weight: 500; }
+.cliente-registro-form input:focus,
+.cliente-registro-form select:focus { border-color: #1684f5; box-shadow: 0 0 0 3px rgba(22, 132, 245, 0.14); }
+.cliente-registro-form [data-legal-only][hidden],
+.cliente-registro-form [data-natural-label][hidden],
+.cliente-registro-form [data-legal-label][hidden] { display: none; }
+.cliente-registro-submit { width: 100%; min-height: 44px; margin-top: 2px; border: 0; border-radius: 10px; color: #fff; background: linear-gradient(100deg, #0867ef, #168af5); box-shadow: 0 8px 18px rgba(8, 109, 239, 0.2); font-size: 0.76rem; font-weight: 800; cursor: pointer; }
+.cliente-registro-submit:hover { background: linear-gradient(100deg, #075bd4, #087be4); }
+
+@media (max-width: 560px) {
+  .cliente-registro-form { padding: 20px 15px 24px !important; }
+  .cliente-field-grid--two { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 560px) {
   .clientes-import-dialog { width: min(100% - 18px, 820px); }
   .clientes-import-header, .clientes-import-body, .clientes-import-footer { padding-right: 15px; padding-left: 15px; }

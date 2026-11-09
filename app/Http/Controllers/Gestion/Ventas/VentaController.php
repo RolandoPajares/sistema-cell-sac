@@ -171,6 +171,8 @@ class VentaController extends Controller
             'latestSales' => (clone $query)->with('cliente')->orderByDesc('ventas.fecha_venta')->orderByDesc('ventas.id')->limit(5)->get(),
             'customers' => $customers,
             'products' => $products,
+            'currentUserName' => $request->user()?->nombre ?? '',
+            'defaultSaleDate' => now()->toDateString(),
             'canCreate' => $canCreate,
             'editOrder' => $editOrder,
         ]);
@@ -304,8 +306,8 @@ class VentaController extends Controller
         ];
 
         $vista = $tipoCliente === 'mayorista'
-            ? 'gestion.comercial.operaciones-comerciales.ventas-mayoristas.listar'
-            : 'gestion.comercial.operaciones-comerciales.ventas-minoristas.listar';
+            ? 'gestion.comercial.ventas.mayoristas.listar'
+            : 'gestion.comercial.ventas.minoristas.listar';
 
         return view($vista, compact('datos', 'filtros'));
     }

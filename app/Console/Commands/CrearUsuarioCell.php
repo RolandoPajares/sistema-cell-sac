@@ -8,7 +8,7 @@ use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
 #[Signature('cell:user-create')]
-#[Description('Crea una cuenta CELL SAC con uno de los siete roles permitidos.')]
+#[Description('Crea una cuenta CELL SAC con un rol activo del catálogo RBAC.')]
 /**
  * Define la responsabilidad de la clase CrearUsuarioCell dentro de su módulo.
  *

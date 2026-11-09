@@ -89,10 +89,12 @@ function prepareFinanzasAuthorization(): ServicioAutorizacion
     DB::table('permisos')->insert([
         ['id' => 1, 'codigo' => 'gestion.pagos.consultar', 'modulo_id' => 1, 'activo' => true],
         ['id' => 2, 'codigo' => 'gestion.reembolsos.consultar', 'modulo_id' => 1, 'activo' => true],
+        ['id' => 9, 'codigo' => 'gestion.organizacion.consultar', 'modulo_id' => 1, 'activo' => true],
     ]);
     DB::table('roles_permisos')->insert([
         ['rol_id' => 1, 'permiso_id' => 1, 'alcance' => 'empresa'],
         ['rol_id' => 1, 'permiso_id' => 2, 'alcance' => 'empresa'],
+        ['rol_id' => 1, 'permiso_id' => 9, 'alcance' => 'empresa'],
     ]);
     DB::table('usuarios_roles')->insert(['usuario_id' => 7, 'rol_id' => 1, 'activo' => true]);
 
@@ -399,6 +401,7 @@ function prepareFinancialOperations(): array
         6 => 'gestion.reembolsos.aprobar',
         7 => 'gestion.reembolsos.anular',
         8 => 'gestion.pagos.actualizar',
+        10 => 'gestion.seguridad.consultar',
     ];
     foreach ($permissions as $id => $code) {
         DB::table('permisos')->insert(['id' => $id, 'codigo' => $code, 'modulo_id' => 1, 'activo' => true]);
