@@ -163,6 +163,9 @@ class RbacInicialSeeder extends Seeder
             ['codigo' => 'cliente_mayorista', 'nombre' => 'Cliente mayorista', 'descripcion' => 'Acceso de ecommerce y cotizaciones propias.', 'alcance_permitido' => 'propio'],
             ['codigo' => 'cliente_minorista', 'nombre' => 'Cliente minorista', 'descripcion' => 'Acceso de ecommerce y pedidos propios.', 'alcance_permitido' => 'propio'],
         ];
+        if ($this->esInstalacionLimpia()) {
+            $roles = array_slice($roles, 0, 1);
+        }
 
         $rolesExistentes = DB::table('roles')
             ->get(['id', 'codigo', 'alcance_permitido', 'es_sistema', 'activo'])
@@ -207,7 +210,7 @@ class RbacInicialSeeder extends Seeder
             return [];
         }
 
-        $codigosEsperados = array_keys(self::ALCANCES_ROL);
+        $codigosEsperados = array_keys($this->rolesEsperados());
         $codigosExistentes = $rolesExistentes->pluck('codigo')->all();
         sort($codigosEsperados);
         sort($codigosExistentes);
@@ -217,7 +220,7 @@ class RbacInicialSeeder extends Seeder
         }
 
         $errores = [];
-        foreach (self::ALCANCES_ROL as $codigo => $alcanceEsperado) {
+        foreach ($this->rolesEsperados() as $codigo => $alcanceEsperado) {
             $rol = $rolesExistentes->firstWhere('codigo', $codigo);
             if ($rol === null
                 || $rol->alcance_permitido !== $alcanceEsperado
@@ -228,6 +231,21 @@ class RbacInicialSeeder extends Seeder
         }
 
         return $errores;
+    }
+
+    /** @return array<string, string> */
+    private function rolesEsperados(): array
+    {
+        if ($this->esInstalacionLimpia()) {
+            return ['administrador' => 'empresa'];
+        }
+
+        return self::ALCANCES_ROL;
+    }
+
+    private function esInstalacionLimpia(): bool
+    {
+        return DB::connection()->getDatabaseName() === 'cell_sac_limpia';
     }
 
     /** @return array<string, int> */
@@ -489,6 +507,10 @@ class RbacInicialSeeder extends Seeder
             ]);
         }
 
+        if ($this->esInstalacionLimpia()) {
+            return;
+        }
+
         $roleModules = [
             'compras_logistica' => [
                 'inventario' => ['consultar', 'ajustar', 'transferir'],
@@ -574,6 +596,10 @@ class RbacInicialSeeder extends Seeder
 
         $this->createMenuElements($menus['administrador'], $adminGroups, $screenIds, $permissionIds);
         $this->createMenuElements($menus['administrador'], [['codigo' => 'dashboard', 'etiqueta' => 'Dashboard global', 'icono' => 'bi-speedometer2', 'pantallas' => ['admin.dashboard']]], $screenIds, $permissionIds, 0, false);
+
+        if ($this->esInstalacionLimpia()) {
+            return;
+        }
 
         $roleScreens = [
             'compras_logistica' => ['account.dashboard', 'admin.inventory', 'admin.stock_movements', 'admin.suppliers', 'admin.purchases', 'admin.products'],

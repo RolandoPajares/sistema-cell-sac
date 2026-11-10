@@ -37,6 +37,7 @@ use App\Http\Controllers\Gestion\InventarioLogistica\Almacenes\AlmacenController
 use App\Http\Controllers\Gestion\InventarioLogistica\Categorias\CategoriaController;
 use App\Http\Controllers\Gestion\InventarioLogistica\EnviosEntregas\EnviosPedidosController;
 use App\Http\Controllers\Gestion\InventarioLogistica\ExistenciasMovimientos\InventarioController;
+use App\Http\Controllers\Gestion\InventarioLogistica\Marcas\MarcaController;
 use App\Http\Controllers\Gestion\InventarioLogistica\Productos\GestionProductosController;
 use App\Http\Controllers\Gestion\InventarioLogistica\Series\DispositivosController;
 use App\Http\Controllers\Gestion\InventarioLogistica\Transferencias\TransferenciaExistenciaController;
@@ -207,7 +208,10 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
         ->middleware(['permiso:ruta', 'permiso:gestion.configuracion.actualizar'])->name('commercial_settings.store.update');
     Route::get('/productos/exportar/{format}', [GestionProductosController::class, 'export'])
         ->whereIn('format', ['pdf', 'excel', 'csv'])->name('products.export');
+    Route::get('/productos/plantilla-importacion', [GestionProductosController::class, 'importTemplate'])
+        ->name('products.import_template');
     Route::post('/productos', [GestionProductosController::class, 'store'])->name('products.store');
+    Route::post('/productos/importar', [GestionProductosController::class, 'import'])->name('products.import');
     Route::post('/productos/{product}/variantes', [GestionProductosController::class, 'registrarVariante'])
         ->whereNumber('product')->name('products.variants.store');
     Route::put('/productos/{product}/variantes/{variante}', [GestionProductosController::class, 'actualizarVariante'])
@@ -237,6 +241,11 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::post('/categorias', [CategoriaController::class, 'store'])->name('categories.store');
     Route::put('/categorias/{category}', [CategoriaController::class, 'update'])->name('categories.update');
     Route::delete('/categorias/{category}', [CategoriaController::class, 'deactivate'])->name('categories.deactivate');
+
+    Route::get('/marcas', [MarcaController::class, 'index'])->name('brands');
+    Route::post('/marcas', [MarcaController::class, 'store'])->name('brands.store');
+    Route::put('/marcas/{marca}', [MarcaController::class, 'update'])->whereNumber('marca')->name('brands.update');
+    Route::delete('/marcas/{marca}', [MarcaController::class, 'deactivate'])->whereNumber('marca')->name('brands.deactivate');
 
     Route::get('/clientes', [ClienteController::class, 'index'])->name('customers');
     Route::get('/clientes/exportar/{format}', [ClienteController::class, 'export'])
@@ -338,6 +347,7 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::get('/compras', [CompraController::class, 'index'])->name('purchases');
     Route::get('/compras/exportar/{format}', [CompraController::class, 'export'])
         ->whereIn('format', ['pdf', 'excel', 'csv'])->name('purchases.export');
+    Route::get('/compras/plantilla-importacion', [CompraController::class, 'importTemplate'])->name('purchases.import_template');
     Route::post('/compras', [CompraController::class, 'store'])->name('purchases.store');
     Route::put('/compras/{compra}', [CompraController::class, 'update'])->whereNumber('compra')->name('purchases.update');
     Route::post('/compras/importar', [CompraController::class, 'import'])->name('purchases.import');

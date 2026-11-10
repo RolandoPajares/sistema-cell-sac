@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const dialog = document.querySelector('#nuevo-producto');
+    const importDialog = document.querySelector('#importar-productos');
     const page = document.querySelector('[data-product-page]');
 
     if (!dialog || !page) {
@@ -8,6 +9,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     page.querySelectorAll('[data-open-product-create]').forEach((button) => {
         button.addEventListener('click', () => dialog.showModal());
+    });
+
+    page.querySelectorAll('[data-open-product-import]').forEach((button) => {
+        button.addEventListener('click', () => importDialog?.showModal());
+    });
+
+    importDialog?.querySelectorAll('[data-close-product-import]').forEach((button) => {
+        button.addEventListener('click', () => importDialog.close());
+    });
+
+    importDialog?.addEventListener('click', (event) => {
+        if (event.target === importDialog) {
+            importDialog.close();
+        }
     });
 
     dialog.querySelector('[data-close-product-create]')?.addEventListener('click', () => dialog.close());

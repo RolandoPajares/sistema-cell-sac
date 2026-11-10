@@ -53,7 +53,7 @@ if (paginaProveedores) {
         const tipoPersona = formulario.querySelector('[data-provider-person-type]')?.value;
         const juridica = tipoPersona !== 'natural';
         const tipoDocumento = formulario.querySelector('[data-provider-document-type]');
-        const documentoLabel = formulario.querySelector('[data-provider-document-label]');
+        const documentoLabel = formulario.querySelector('[data-provider-document-label], [data-provider-document-type-label]');
         const nombreLabel = formulario.querySelector('[data-provider-name-label]');
         const documento = formulario.querySelector('[data-provider-document-input]');
 

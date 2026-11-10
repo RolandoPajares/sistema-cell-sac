@@ -10,7 +10,9 @@ use App\Http\Requests\Gestion\InventarioLogistica\Productos\GuardarPrecioMayoris
 use App\Http\Requests\Gestion\InventarioLogistica\Productos\GuardarProductoRequest;
 use App\Http\Requests\Gestion\InventarioLogistica\Productos\GuardarVarianteProductoRequest;
 use App\Http\Requests\Gestion\InventarioLogistica\Productos\ImportarPreciosMayoristasRequest;
+use App\Http\Requests\Gestion\InventarioLogistica\Productos\ImportarProductosRequest;
 use App\Models\Catalogo\Categoria;
+use App\Models\Catalogo\Marca;
 use App\Models\Catalogo\Producto;
 use App\Models\Catalogo\VarianteProducto;
 use App\Models\Compras\Proveedor;
@@ -36,9 +38,13 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
+use ZipArchive;
 
 /**
  * Define la responsabilidad de la clase GestionProductosController dentro de su módulo.
@@ -354,14 +360,9 @@ class GestionProductosController extends Controller
             'exportParameters' => $request->query(),
             'productPresentation' => $productPresentation,
             'categories' => Categoria::query()->where('empresa_id', $alcance['empresa_id'])->where('activo', true)->orderBy('nombre')->get(),
-            'brands' => Producto::query()
-                ->where('empresa_id', $alcance['empresa_id'])
-                ->where('activo', true)
-                ->whereNotNull('marca')
-                ->where('marca', '<>', '')
-                ->distinct()
-                ->orderBy('marca')
-                ->pluck('marca'),
+            'brands' => Schema::hasTable('marcas')
+                ? Marca::query()->where('empresa_id', $alcance['empresa_id'])->where('activo', true)->orderBy('nombre')->pluck('nombre')
+                : Producto::query()->where('empresa_id', $alcance['empresa_id'])->where('activo', true)->whereNotNull('marca')->where('marca', '<>', '')->distinct()->orderBy('marca')->pluck('marca'),
             'suppliers' => Proveedor::query()->where('empresa_id', $alcance['empresa_id'])->where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
             'filters' => $filters,
             'idProductoEditar' => $idProductoEditar,
@@ -400,6 +401,113 @@ class GestionProductosController extends Controller
             'pdf' => $this->downloadCorporateReport($products->get(), 'pdf', $filters, $alcance, $request, $exporter ?? new ExportadorTabular),
             default => abort(404),
         };
+    }
+
+    public function importTemplate(ExportadorTabular $exporter): Response|StreamedResponse
+    {
+        $columns = [
+            'marca', 'nombre', 'categoria_id', 'precio', 'precio_original', 'descuento',
+            'precio_oferta', 'url_imagen', 'existencias', 'almacenamiento', 'color',
+            'etiqueta', 'descripcion', 'activo', 'proveedor_id',
+        ];
+
+        return $exporter->download('excel', 'plantilla-importacion-productos', $columns, [array_fill(0, count($columns), null)], [
+            'title' => 'Plantilla de importación de productos',
+            'description' => 'Completa una fila por producto. No cambies los nombres de las columnas.',
+        ]);
+    }
+
+    public function import(
+        ImportarProductosRequest $request,
+        ServicioInventario $inventario,
+        ServicioGestionProductos $productos,
+    ): RedirectResponse {
+        $alcance = $inventario->alcanceConsulta($request->user(), 'gestion.productos.crear');
+        $columns = [
+            'marca', 'nombre', 'categoria_id', 'precio', 'precio_original', 'descuento',
+            'precio_oferta', 'url_imagen', 'existencias', 'almacenamiento', 'color',
+            'etiqueta', 'descripcion', 'activo', 'proveedor_id',
+        ];
+        $file = $request->file('archivo');
+        $path = $file->getRealPath();
+        $temporaryCsv = null;
+
+        if (strtolower($file->getClientOriginalExtension()) === 'xlsx') {
+            $temporaryCsv = tempnam(sys_get_temp_dir(), 'tc-products-');
+            abort_if($temporaryCsv === false, 422, 'No se pudo preparar el archivo Excel.');
+            $output = fopen($temporaryCsv, 'wb');
+            abort_if($output === false, 422, 'No se pudo preparar el archivo Excel.');
+            fputcsv($output, $columns);
+            foreach ($this->readXlsxRows($file) as $row) {
+                fputcsv($output, $row);
+            }
+            fclose($output);
+            $path = $temporaryCsv;
+        }
+
+        $handle = fopen($path, 'rb');
+        abort_if($handle === false, 422, 'No se pudo leer el archivo de productos.');
+        $header = fgetcsv($handle);
+        if ($header !== $columns) {
+            fclose($handle);
+            $this->deleteTemporaryFile($temporaryCsv);
+            throw ValidationException::withMessages(['archivo' => 'El archivo debe contener exactamente la plantilla de productos.']);
+        }
+
+        $rows = [];
+        while (($row = fgetcsv($handle)) !== false) {
+            if ($row === [] || array_filter($row, static fn (mixed $value): bool => trim((string) $value) !== '') === []) {
+                continue;
+            }
+            if (count($row) !== count($columns)) {
+                fclose($handle);
+                $this->deleteTemporaryFile($temporaryCsv);
+                throw ValidationException::withMessages(['archivo' => 'Todas las filas deben tener las columnas de la plantilla.']);
+            }
+            $rows[] = array_combine($columns, array_map(static fn (mixed $value): string => trim((string) $value), $row));
+        }
+        fclose($handle);
+        $this->deleteTemporaryFile($temporaryCsv);
+
+        if ($rows === []) {
+            throw ValidationException::withMessages(['archivo' => 'El archivo no contiene productos para importar.']);
+        }
+        if (count($rows) > 2000) {
+            throw ValidationException::withMessages(['archivo' => 'La importación admite como máximo 2,000 productos por archivo.']);
+        }
+
+        DB::transaction(function () use ($rows, $alcance, $productos, $request): void {
+            foreach ($rows as $index => $row) {
+                $validator = Validator::make($row, [
+                    'marca' => ['required', 'string', 'max:80'],
+                    'nombre' => ['required', 'string', 'max:160'],
+                    'categoria_id' => ['required', 'integer', Rule::exists('categorias', 'id')->where('empresa_id', $alcance['empresa_id'])],
+                    'precio' => ['required', 'numeric', 'min:0'],
+                    'precio_original' => ['nullable', 'numeric', 'min:0'],
+                    'descuento' => ['nullable', 'string', 'max:20'],
+                    'precio_oferta' => ['nullable', 'numeric', 'min:0', 'lte:precio'],
+                    'url_imagen' => ['nullable', 'string', 'max:255'],
+                    'existencias' => ['nullable', 'integer', 'min:0', 'max:4294967295'],
+                    'almacenamiento' => ['nullable', 'string', 'max:80'],
+                    'color' => ['nullable', 'string', 'max:80'],
+                    'etiqueta' => ['nullable', 'string', 'max:80'],
+                    'descripcion' => ['nullable', 'string'],
+                    'activo' => ['nullable', 'boolean'],
+                    'proveedor_id' => ['nullable', 'integer', Rule::exists('proveedores', 'id')->where('empresa_id', $alcance['empresa_id'])],
+                ]);
+                if ($validator->fails()) {
+                    throw ValidationException::withMessages(['archivo' => 'Fila '.($index + 2).': '.$validator->errors()->first()]);
+                }
+
+                $validated = $validator->validated();
+                $supplierId = isset($validated['proveedor_id']) && $validated['proveedor_id'] !== ''
+                    ? (int) $validated['proveedor_id']
+                    : null;
+                $productos->crear($this->attributes($validated), $supplierId, $request->user(), (string) $request->ip());
+            }
+        }, 3);
+
+        return redirect()->route('management.products')->with('status', count($rows).' productos importados correctamente.');
     }
 
     /**
@@ -609,6 +717,46 @@ class GestionProductosController extends Controller
         unset($data['proveedor_id'], $data['imagen'], $data['continue']);
 
         return $data;
+    }
+
+    /** @return array<int, array<int, string>> */
+    private function readXlsxRows(UploadedFile $file): array
+    {
+        abort_unless(class_exists(ZipArchive::class), 422, 'El servidor no tiene habilitada la lectura de archivos Excel.');
+        $zip = new ZipArchive;
+        abort_unless($zip->open($file->getRealPath()) === true, 422, 'El archivo Excel no se puede abrir.');
+        $sheet = $zip->getFromName('xl/worksheets/sheet1.xml');
+        $zip->close();
+        abort_unless(is_string($sheet), 422, 'El archivo Excel no contiene una hoja válida.');
+
+        $dom = new \DOMDocument;
+        abort_unless(@$dom->loadXML($sheet) === true, 422, 'La hoja Excel no tiene un formato válido.');
+        $namespace = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
+        $rows = [];
+        foreach ($dom->getElementsByTagNameNS($namespace, 'row') as $rowNode) {
+            $values = [];
+            foreach ($rowNode->getElementsByTagNameNS($namespace, 'c') as $cell) {
+                preg_match('/^([A-Z]+)/', (string) $cell->getAttribute('r'), $match);
+                $column = 0;
+                foreach (str_split($match[1] ?? 'A') as $letter) {
+                    $column = ($column * 26) + ord($letter) - 64;
+                }
+                $valueNode = $cell->getElementsByTagNameNS($namespace, 't')->item(0)
+                    ?: $cell->getElementsByTagNameNS($namespace, 'v')->item(0);
+                $values[$column - 1] = $valueNode?->textContent ?? '';
+            }
+            ksort($values);
+            $rows[] = array_pad(array_values($values), 15, '');
+        }
+
+        return array_slice($rows, 1);
+    }
+
+    private function deleteTemporaryFile(?string $path): void
+    {
+        if ($path !== null && file_exists($path)) {
+            unlink($path);
+        }
     }
 
     /**

@@ -29,6 +29,6 @@ class ImportarComprasRequest extends FormRequest
      */
     public function rules(): array
     {
-        return ['archivo' => ['required', 'file', 'mimes:csv,txt', 'max:2048']];
+        return ['archivo' => ['required', 'file', 'mimes:xlsx,csv,txt', 'max:2048']];
     }
 }

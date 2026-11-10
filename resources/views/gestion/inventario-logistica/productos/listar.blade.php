@@ -26,6 +26,10 @@
                 <i class="bi bi-plus-lg" aria-hidden="true"></i>
                 Registrar nuevo producto
             </button>
+            <button class="productos-filter-reset" type="button" data-open-product-import>
+                <i class="bi bi-upload" aria-hidden="true"></i>
+                Importar Excel
+            </button>
             <details class="productos-export-menu">
                 <summary><i class="bi bi-upload" aria-hidden="true"></i><span>Exportar</span><i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
                 <div class="productos-export-options">
@@ -204,6 +208,32 @@
             <button type="button" class="productos-dialog-close" data-close-product-create aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
         </header>
         @include('gestion.inventario-logistica.productos.registrar', ['categories' => $categories, 'brands' => $brands, 'suppliers' => $suppliers])
+    </div>
+</dialog>
+
+<dialog class="productos-dialog" id="importar-productos" aria-labelledby="productos-importar-titulo">
+    <div class="productos-dialog-card">
+        <header class="productos-dialog-header">
+            <div class="productos-dialog-title">
+                <span class="productos-dialog-icon"><i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i></span>
+                <div>
+                    <h2 id="productos-importar-titulo">Importar productos desde Excel</h2>
+                    <p>Descarga la plantilla, completa hasta 2,000 filas y vuelve a cargarla.</p>
+                </div>
+            </div>
+            <button type="button" class="productos-dialog-close" data-close-product-import aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+        </header>
+        <form class="productos-create-form" method="post" action="{{ route('management.products.import') }}" enctype="multipart/form-data">
+            @csrf
+            <div class="productos-create-fields">
+                <p class="productos-form-note productos-create-field--wide">La plantilla usa los campos importables de productos. La empresa y las relaciones se validan contra esta base de datos.</p>
+                <a class="productos-filter-reset productos-create-field--wide" href="{{ route('management.products.import_template') }}"><i class="bi bi-download" aria-hidden="true"></i> Descargar plantilla Excel</a>
+                <label class="productos-create-field productos-create-field--wide"><span>Archivo Excel o CSV <b>*</b></span><input class="productos-create-input" type="file" name="archivo" accept=".xlsx,.csv,.txt,text/csv" required></label>
+            </div>
+            @error('archivo')<small class="form-error">{{ $message }}</small>@enderror
+            <p class="productos-form-note">Columnas: marca, nombre, categoria_id, precio, precio_original, descuento, precio_oferta, url_imagen, existencias, almacenamiento, color, etiqueta, descripcion, activo, proveedor_id.</p>
+            <footer class="productos-create-footer"><button class="productos-create-cancel" type="button" data-close-product-import>Cancelar</button><button class="productos-create-submit" type="submit"><i class="bi bi-upload" aria-hidden="true"></i> Importar productos</button></footer>
+        </form>
     </div>
 </dialog>
 

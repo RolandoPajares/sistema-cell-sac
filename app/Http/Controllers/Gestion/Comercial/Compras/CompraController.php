@@ -18,12 +18,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use ZipArchive;
 
 /**
  * Define la responsabilidad de la clase CompraController dentro de su módulo.
@@ -421,10 +423,35 @@ class CompraController extends Controller
         return back()->with('status', 'La compra fue actualizada correctamente.');
     }
 
+    public function importTemplate(ExportadorTabular $exportador): Response|StreamedResponse
+    {
+        $columns = ['proveedor_id', 'fecha_compra', 'producto_id', 'variante_id', 'cantidad', 'costo_unitario'];
+
+        return $exportador->download('excel', 'plantilla-importacion-compras', $columns, [array_fill(0, count($columns), null)], [
+            'title' => 'Plantilla de importación de compras',
+            'description' => 'Completa una fila por línea de compra. No cambies los nombres de las columnas.',
+        ]);
+    }
+
     public function import(ImportarComprasRequest $request): RedirectResponse
     {
         $expected = ['proveedor_id', 'fecha_compra', 'producto_id', 'variante_id', 'cantidad', 'costo_unitario'];
-        $handle = fopen($request->file('archivo')->getRealPath(), 'rb');
+        $temporaryCsv = null;
+        $file = $request->file('archivo');
+        $path = $file->getRealPath();
+        if (strtolower($file->getClientOriginalExtension()) === 'xlsx') {
+            $temporaryCsv = tempnam(sys_get_temp_dir(), 'tc-import-');
+            abort_if($temporaryCsv === false, 422, 'No se pudo preparar el archivo Excel.');
+            $output = fopen($temporaryCsv, 'wb');
+            abort_if($output === false, 422, 'No se pudo preparar el archivo Excel.');
+            fputcsv($output, $expected);
+            foreach ($this->readXlsxRows($file) as $row) {
+                fputcsv($output, $row);
+            }
+            fclose($output);
+            $path = $temporaryCsv;
+        }
+        $handle = fopen($path, 'rb');
         abort_unless($handle !== false, 422, 'No se pudo leer el archivo CSV.');
         $header = fgetcsv($handle);
         $header = is_array($header) ? array_map(static fn ($value): string => trim((string) $value), $header) : [];
@@ -434,7 +461,7 @@ class CompraController extends Controller
         }
         $rows = [];
         while (($row = fgetcsv($handle)) !== false) {
-            if (count($row) === 1 && trim((string) $row[0]) === '') {
+            if ($row === [] || collect($row)->every(static fn ($value): bool => trim((string) $value) === '')) {
                 continue;
             }
             if (count($row) !== count($expected)) {
@@ -460,6 +487,10 @@ class CompraController extends Controller
         fclose($handle);
         if ($rows === []) {
             throw ValidationException::withMessages(['archivo' => 'El CSV no contiene líneas de compra.']);
+        }
+
+        if ($temporaryCsv !== null && file_exists($temporaryCsv)) {
+            unlink($temporaryCsv);
         }
 
         DB::transaction(function () use ($rows, $request): void {
@@ -546,5 +577,37 @@ class CompraController extends Controller
         return back()->with('status', $compraActualizada?->estado === 'Recibida'
             ? 'La recepci�n complet� la compra y actualiz� las existencias.'
             : 'La recepci�n parcial qued� registrada y la discrepancia se agreg� a la auditor�a.');
+    }
+
+    /** @return array<int, array<int, string>> */
+    private function readXlsxRows(UploadedFile $file): array
+    {
+        abort_unless(class_exists(ZipArchive::class), 422, 'El servidor no tiene habilitada la lectura de archivos Excel.');
+        $zip = new ZipArchive;
+        abort_unless($zip->open($file->getRealPath()) === true, 422, 'El archivo Excel no se puede abrir.');
+        $sheet = $zip->getFromName('xl/worksheets/sheet1.xml');
+        $zip->close();
+        abort_unless(is_string($sheet), 422, 'La plantilla Excel no contiene una hoja válida.');
+        $dom = new \DOMDocument;
+        abort_unless(@$dom->loadXML($sheet) === true, 422, 'La hoja Excel no tiene un formato válido.');
+        $namespace = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
+        $rows = [];
+        foreach ($dom->getElementsByTagNameNS($namespace, 'row') as $rowNode) {
+            $values = [];
+            foreach ($rowNode->getElementsByTagNameNS($namespace, 'c') as $cell) {
+                preg_match('/^([A-Z]+)/', (string) $cell->getAttribute('r'), $match);
+                $column = 0;
+                foreach (str_split($match[1] ?? 'A') as $letter) {
+                    $column = ($column * 26) + ord($letter) - 64;
+                }
+                $valueNode = $cell->getElementsByTagNameNS($namespace, 't')->item(0)
+                    ?: $cell->getElementsByTagNameNS($namespace, 'v')->item(0);
+                $values[$column - 1] = $valueNode?->textContent ?? '';
+            }
+            ksort($values);
+            $rows[] = array_pad(array_values($values), 6, '');
+        }
+
+        return array_slice($rows, 1);
     }
 }

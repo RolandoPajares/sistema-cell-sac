@@ -23,7 +23,7 @@ final class ServicioAutorizacion
 
     /** @var array<string, string> */
     private const ROUTE_MODULES = [
-        'dashboard' => 'panel', 'products' => 'productos', 'categories' => 'categorias',
+        'dashboard' => 'panel', 'products' => 'productos', 'categories' => 'categorias', 'brands' => 'productos',
         'inventory' => 'inventario', 'sales' => 'ventas', 'orders' => 'pedidos',
         'purchases' => 'compras', 'quotations' => 'cotizaciones', 'customers' => 'clientes',
         'suppliers' => 'proveedores', 'returns' => 'devoluciones', 'support' => 'soporte',

@@ -27,7 +27,7 @@
                         <a href="{{ route('management.quotations.export.list', ['format' => 'csv'] + request()->query()) }}"><i class="bi bi-filetype-csv" aria-hidden="true"></i><span><strong>Exportar CSV</strong><small>Datos delimitados</small></span></a>
                     </div>
                 </details>
-                <button class="cotizaciones-primary-button" type="button" data-admin-dialog-open="nueva-cotizacion" @disabled($customers->isEmpty() || $products->isEmpty())>
+                <button class="cotizaciones-primary-button" type="button" data-admin-dialog-open="nueva-cotizacion">
                     <i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva cotización
                 </button>
             </div>
@@ -242,7 +242,7 @@
                 @if ($customers->isNotEmpty() && $products->isNotEmpty())
                     @include('gestion.comercial.cotizaciones.registrar', ['customers' => $customers, 'products' => $products])
                 @else
-                    <p class="cotizaciones-summary-empty">Para crear una cotización, primero registra un cliente mayorista y al menos un producto activo.</p>
+                    <p class="cotizaciones-summary-empty">Para guardar una cotización, primero registra un cliente mayorista y al menos un producto activo. Los datos se cargarán desde esta base de datos.</p>
                 @endif
             </div>
         </dialog>

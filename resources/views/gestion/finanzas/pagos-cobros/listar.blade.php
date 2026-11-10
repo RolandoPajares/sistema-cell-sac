@@ -296,3 +296,7 @@
 
 @endif
 @endsection
+
+@push('scripts')
+    @vite('resources/js/gestion/finanzas/index.js')
+@endpush

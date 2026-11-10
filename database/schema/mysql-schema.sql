@@ -1395,6 +1395,23 @@ CREATE TABLE `menus` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `marcas` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `empresa_id` bigint(20) unsigned NOT NULL,
+  `nombre` varchar(120) NOT NULL,
+  `descripcion` varchar(500) DEFAULT NULL,
+  `logo_path` varchar(500) DEFAULT NULL,
+  `activo` tinyint(1) NOT NULL DEFAULT 1,
+  `creado_en` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `actualizado_en` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `un_marcas_empresa_nombre` (`empresa_id`,`nombre`),
+  KEY `ind_marcas_empresa_activo` (`empresa_id`,`activo`),
+  CONSTRAINT `cf_marcas_empresa` FOREIGN KEY (`empresa_id`) REFERENCES `empresas` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `migraciones_laravel` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `migracion` varchar(255) NOT NULL,
