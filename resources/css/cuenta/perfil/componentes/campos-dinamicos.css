@@ -1,0 +1,49 @@
+.tc-profile-dynamic-fields {
+    display: grid;
+    gap: 12px;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid #e6eef7;
+}
+
+.tc-profile-dynamic-heading {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.tc-profile-dynamic-heading > i {
+    color: #086be7;
+    font-size: 1.25rem;
+}
+
+.tc-profile-dynamic-heading h3 {
+    margin: 0;
+    color: #1d315b;
+    font-size: 0.9rem;
+}
+
+.tc-profile-dynamic-heading p {
+    margin: 3px 0 0;
+    color: #6d82a5;
+    font-size: 0.7rem;
+}
+
+.tc-profile-dynamic-fields textarea,
+.tc-profile-dynamic-fields select {
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 10px;
+    border: 1px solid #d1dfef;
+    border-radius: 8px;
+    color: #10234c;
+    background: #fff;
+    font: inherit;
+    font-size: 0.78rem;
+}
+
+.tc-profile-dynamic-fields textarea:disabled,
+.tc-profile-dynamic-fields select:disabled {
+    color: #60799d;
+    background: #f8fbff;
+}

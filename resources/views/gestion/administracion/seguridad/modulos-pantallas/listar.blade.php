@@ -1,25 +1,25 @@
 @extends('layouts.panel.principal')
 
-@section('title', 'Módulos y pantallas')
+@section('title', 'M�dulos y pantallas')
 @section('body_class', 'modulo-seguridad-rbac')
 
 @section('content')
-{{-- Catálogo de módulos y pantallas registradas en RBAC. --}}
+{{-- Cat�logo de m�dulos y pantallas registradas en RBAC. --}}
 <section class="tc-rbac-page" data-module-page>
     <header class="tc-rbac-hero">
-        <div><span class="tc-rbac-eyebrow">Seguridad y delegación</span>
-            <h1>Módulos y pantallas</h1>
-            <p>Administra únicamente funcionalidades y rutas que ya existen en Laravel.</p>
-        </div><a class="tc-rbac-primary" href="{{ route('management.menus') }}"><i class="bi bi-list-nested" aria-hidden="true"></i> Configurar menús</a>
+        <div><span class="tc-rbac-eyebrow">Seguridad y delegaci�n</span>
+            <h1>M�dulos y pantallas</h1>
+            <p>Administra �nicamente funcionalidades y rutas que ya existen en Laravel.</p>
+        </div><a class="tc-rbac-primary" href="{{ route('management.menus') }}"><i class="bi bi-list-nested" aria-hidden="true"></i> Configurar men�s</a>
     </header>
-    @unless($ready)<div class="tc-rbac-alert" role="alert">El catálogo dinámico no está disponible.</div>@else
-    <nav class="tc-rbac-tabs" aria-label="Administración de seguridad"><a href="{{ route('management.users') }}">Gestión de usuarios</a><a href="{{ route('management.roles_permissions') }}">Roles y permisos</a><a href="{{ route('management.permissions_matrix') }}">Matriz de privilegios</a><a href="{{ route('management.user_assignments') }}">Asignaciones globales y por sede</a><a href="{{ route('management.menus') }}">Menús y submenús dinámicos</a><a class="is-active" href="{{ route('management.modules') }}">Módulos y pantallas</a></nav>
-    <section class="tc-rbac-toolbar"><label class="tc-rbac-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar</span><input type="search" data-module-filter placeholder="Buscar módulo o pantalla"></label><span class="tc-rbac-summary"><strong>{{ $modules->count() }}</strong> módulos · <strong>{{ $modules->sum(fn($module) => $module->screens->count()) }}</strong> pantallas</span></section>
+    @unless($ready)<div class="tc-rbac-alert" role="alert">El cat�logo din�mico no est� disponible.</div>@else
+    <nav class="tc-rbac-tabs" aria-label="Administraci�n de seguridad"><a href="{{ route('management.users') }}">Gesti�n de usuarios</a><a href="{{ route('management.roles_permissions') }}">Roles y permisos</a><a href="{{ route('management.permissions_matrix') }}">Matriz de privilegios</a><a href="{{ route('management.user_assignments') }}">Asignaciones globales y por sede</a><a href="{{ route('management.menus') }}">Men�s y submen�s din�micos</a><a class="is-active" href="{{ route('management.modules') }}">M�dulos y pantallas</a></nav>
+    <section class="tc-rbac-toolbar"><label class="tc-rbac-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar</span><input type="search" data-module-filter placeholder="Buscar m�dulo o pantalla"></label><span class="tc-rbac-summary"><strong>{{ $modules->count() }}</strong> m�dulos � <strong>{{ $modules->sum(fn($module) => $module->screens->count()) }}</strong> pantallas</span></section>
     @foreach($modules as $module)
     <section class="tc-rbac-card tc-rbac-module-card" data-module-row data-search="{{ strtolower($module->nombre.' '.$module->codigo.' '.$module->screens->pluck('nombre')->join(' ')) }}">
         <header class="tc-rbac-menu-header">
             <div>
-                <h2><i class="bi {{ $module->icono ?: 'bi-grid' }}" aria-hidden="true"></i> {{ $module->nombre }}</h2><small>{{ $module->codigo }} · {{ $module->descripcion ?: 'Sin descripción' }}</small>
+                <h2><i class="bi {{ $module->icono ?: 'bi-grid' }}" aria-hidden="true"></i> {{ $module->nombre }}</h2><small>{{ $module->codigo }} � {{ $module->descripcion ?: 'Sin descripci�n' }}</small>
             </div><span class="tc-rbac-status tc-rbac-status--{{ $module->habilitado ? 'active' : 'inactive' }}">{{ $module->habilitado ? 'Activo' : 'Inactivo' }}</span>
         </header>
         <div class="tc-rbac-table-wrap">
@@ -27,10 +27,10 @@
                 <thead>
                     <tr>
                         <th>Pantalla</th>
-                        <th>Código</th>
+                        <th>C�digo</th>
                         <th>Ruta asociada</th>
                         <th>Estado</th>
-                        <th>Acción</th>
+                        <th>Acci�n</th>
                     </tr>
                 </thead>
                 <tbody>@foreach($module->screens as $screen)<tr>
@@ -41,13 +41,13 @@
                         <td><button type="button" class="tc-rbac-action" data-open-dialog="pantalla-{{ $screen->id }}"><i class="bi bi-eye" aria-hidden="true"></i> Ver / editar</button></td>
                     </tr>@endforeach</tbody>
             </table>
-        </div><button type="button" class="tc-rbac-action tc-rbac-action--primary" data-open-dialog="modulo-{{ $module->id }}">Editar módulo</button>
+        </div><button type="button" class="tc-rbac-action tc-rbac-action--primary" data-open-dialog="modulo-{{ $module->id }}">Editar m�dulo</button>
     </section>
     @foreach($module->screens as $screen)<dialog class="tc-rbac-dialog" id="pantalla-{{ $screen->id }}" aria-labelledby="pantalla-title-{{ $screen->id }}">
         <div class="tc-rbac-dialog-card">
             <header>
                 <div><span class="tc-rbac-dialog-icon"><i class="bi {{ $screen->icono ?: 'bi-window' }}"></i></span>
-                    <div><small>Catálogo de pantallas</small>
+                    <div><small>Cat�logo de pantallas</small>
                         <h2 id="pantalla-title-{{ $screen->id }}">{{ $screen->nombre }}</h2>
                     </div>
                 </div><button type="button" class="tc-rbac-dialog-close" data-close-dialog aria-label="Cerrar"><i class="bi bi-x-lg"></i></button>
@@ -55,7 +55,7 @@
             <div class="tc-rbac-dialog-body">
                 <dl class="tc-rbac-detail-list">
                     <div>
-                        <dt>Código</dt>
+                        <dt>C�digo</dt>
                         <dd>{{ $screen->codigo }}</dd>
                     </div>
                     <div>
@@ -63,7 +63,7 @@
                         <dd>{{ $screen->ruta ?: 'No registrada' }}</dd>
                     </div>
                     <div>
-                        <dt>Módulo</dt>
+                        <dt>M�dulo</dt>
                         <dd>{{ $module->nombre }}</dd>
                     </div>
                 </dl>
@@ -75,9 +75,9 @@
     <dialog class="tc-rbac-dialog" id="modulo-{{ $module->id }}">
         <div class="tc-rbac-dialog-card">
             <header>
-                <h2>Editar módulo</h2><button type="button" class="tc-rbac-dialog-close" data-close-dialog aria-label="Cerrar">Ã—</button>
+                <h2>Editar m�dulo</h2><button type="button" class="tc-rbac-dialog-close" data-close-dialog aria-label="Cerrar">×</button>
             </header>
-            <form method="post" action="{{ route('management.modules.update', $module->id) }}" class="tc-rbac-dialog-body">@csrf @method('PATCH')<label>Nombre visible<input type="text" name="nombre" value="{{ $module->nombre }}" maxlength="140" required></label><label>Descripción<textarea name="descripcion" maxlength="255">{{ $module->descripcion }}</textarea></label><label>Icono Bootstrap<input type="text" name="icono" value="{{ $module->icono }}" maxlength="100"></label><label>Orden<input type="number" name="orden" value="{{ $module->orden }}" min="0" max="10000" required></label><input type="hidden" name="habilitado" value="0"><label><input type="checkbox" name="habilitado" value="1" @checked($module->habilitado)> Módulo habilitado</label>
+            <form method="post" action="{{ route('management.modules.update', $module->id) }}" class="tc-rbac-dialog-body">@csrf @method('PATCH')<label>Nombre visible<input type="text" name="nombre" value="{{ $module->nombre }}" maxlength="140" required></label><label>Descripci�n<textarea name="descripcion" maxlength="255">{{ $module->descripcion }}</textarea></label><label>Icono Bootstrap<input type="text" name="icono" value="{{ $module->icono }}" maxlength="100"></label><label>Orden<input type="number" name="orden" value="{{ $module->orden }}" min="0" max="10000" required></label><input type="hidden" name="habilitado" value="0"><label><input type="checkbox" name="habilitado" value="1" @checked($module->habilitado)> M�dulo habilitado</label>
                 <footer><button type="button" class="tc-rbac-secondary" data-close-dialog>Cancelar</button><button class="tc-rbac-primary" type="submit">Guardar cambios</button></footer>
             </form>
         </div>

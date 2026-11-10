@@ -127,7 +127,7 @@
                 @if (($panel['type'] ?? 'empty') === 'performance')
                     <div class="gestion-operacion-performance-empty"><strong>—</strong><span>{{ $panel['metric'] }}</span><div class="gestion-operacion-performance-bar"><span></span></div><small>{{ $panel['empty'] }}</small></div>
                 @else
-                    <div class="gestion-operacion-summary-empty"><i class="bi {{ $panel['empty_icon'] }}" aria-hidden="true"></i><strong>{{ $panel['empty_title'] }}</strong><span>{{ $panel['empty'] }}</span></div>
+                    <div class="gestion-operacion-summary-empty"><i class="bi {{ $panel['empty_icon'] ?? 'bi-inbox' }}" aria-hidden="true"></i><strong>{{ $panel['empty_title'] }}</strong><span>{{ $panel['empty'] }}</span></div>
                 @endif
             </article>
         @endforeach

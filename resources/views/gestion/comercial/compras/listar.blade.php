@@ -250,11 +250,7 @@
             <button class="admin-dialog-close" type="button" data-admin-dialog-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
         </header>
         <div class="admin-dialog-body">
-            @if ($suppliers->isNotEmpty() && $products->isNotEmpty())
             @include('gestion.comercial.compras.registrar', ['suppliers' => $suppliers, 'products' => $products])
-            @else
-            <p class="compras-summary-empty">Para registrar una compra, agrega al menos un proveedor activo y un producto disponible.</p>
-            @endif
         </div>
     </dialog>
 
@@ -281,7 +277,7 @@
             </div><button class="admin-dialog-close" type="button" data-admin-dialog-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
         </header>
         <div class="admin-dialog-body">
-            <form method="post" action="{{ route('management.purchases.import') }}" enctype="multipart/form-data" class="form-card">@csrf<p>Columnas exactas: <code>proveedor_id,fecha_compra,producto_id,variante_id,cantidad,costo_unitario</code>.</p><label>Archivo CSV<input type="file" name="archivo" accept=".csv,text/csv" required></label>
+            <form method="post" action="{{ route('management.purchases.import') }}" enctype="multipart/form-data" class="form-card">@csrf<p>Descarga la plantilla Excel, completa una fila por línea de compra y vuelve a cargarla. Los identificadores deben corresponder a proveedores, productos y variantes existentes.</p><p><strong>Columnas:</strong> <code>proveedor_id, fecha_compra, producto_id, variante_id, cantidad, costo_unitario</code>.</p><a class="compras-secondary-button" href="{{ route('management.purchases.import_template') }}"><i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i> Descargar plantilla Excel</a><label>Archivo Excel<input type="file" name="archivo" accept=".xlsx,.csv,text/csv" required></label>
                 <footer class="compras-form-actions"><button type="button" class="compras-secondary-button" data-admin-dialog-close>Cancelar</button><button type="submit" class="compras-primary-button"><i class="bi bi-upload" aria-hidden="true"></i> Importar</button></footer>
             </form>
         </div>

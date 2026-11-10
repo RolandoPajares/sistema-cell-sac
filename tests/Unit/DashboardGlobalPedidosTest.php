@@ -1,10 +1,10 @@
 <?php
 
-use App\Http\Controllers\Paneles\Administrador\DashboardGlobalPedidosController;
+use App\Http\Controllers\Gestion\Analitica\DashboardGlobal\DashboardGlobalPedidosController;
 use App\Models\User;
-use App\Servicios\ExportadorTabular;
-use App\Servicios\RegistradorAuditoria;
-use App\Servicios\ServicioAutorizacion;
+use App\Servicios\Compartidos\Auditoria\RegistradorAuditoria;
+use App\Servicios\Compartidos\Exportacion\ExportadorTabular;
+use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Publico\Comercio;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ActualizarEstadoPedidoRequest;
+use App\Http\Requests\Gestion\Comercial\Pedidos\ActualizarEstadoPedidoRequest;
 use App\Models\Comercio\Pedido;
-use App\Servicios\ExportadorTabular;
-use App\Servicios\RegistradorAuditoria;
-use App\Servicios\ServicioAutorizacion;
-use App\Servicios\ServicioPedidos;
+use App\Servicios\Compartidos\Auditoria\RegistradorAuditoria;
+use App\Servicios\Compartidos\Comercio\ServicioPedidos;
+use App\Servicios\Compartidos\Exportacion\ExportadorTabular;
+use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

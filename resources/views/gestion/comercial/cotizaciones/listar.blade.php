@@ -27,7 +27,7 @@
                         <a href="{{ route('management.quotations.export.list', ['format' => 'csv'] + request()->query()) }}"><i class="bi bi-filetype-csv" aria-hidden="true"></i><span><strong>Exportar CSV</strong><small>Datos delimitados</small></span></a>
                     </div>
                 </details>
-                <button class="cotizaciones-primary-button" type="button" data-admin-dialog-open="nueva-cotizacion" @disabled($customers->isEmpty() || $products->isEmpty())>
+                <button class="cotizaciones-primary-button" type="button" data-admin-dialog-open="nueva-cotizacion">
                     <i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva cotización
                 </button>
             </div>
@@ -103,25 +103,20 @@
                     </thead>
                     <tbody>
                         @forelse ($quotations as $quotation)
-                            @php
-                                $status = (string) $quotation->estado;
-                                $customerName = $quotation->customer?->nombre_contacto ?? 'Cliente no disponible';
-                                $quotationReference = 'COT-' . ($quotation->creado_en?->format('Y') ?? now()->format('Y')) . '-' . str_pad((string) $quotation->id, 4, '0', STR_PAD_LEFT);
-                            @endphp
                             <tr>
-                                <td><strong class="cotizaciones-code">COT-{{ $quotation->creado_en?->format('Y') ?? now()->format('Y') }}-{{ str_pad((string) $quotation->id, 4, '0', STR_PAD_LEFT) }}</strong></td>
-                                <td><span class="cotizaciones-customer">{{ $customerName }}</span><small>{{ $quotation->customer?->documento ?? '—' }}</small></td>
+                                <td><strong class="cotizaciones-code">{{ $quotationPresentation[$quotation->id]['reference'] }}</strong></td>
+                                <td><span class="cotizaciones-customer">{{ $quotationPresentation[$quotation->id]['customer_name'] }}</span><small>{{ $quotation->customer?->documento ?? '—' }}</small></td>
                                 <td><span class="cotizaciones-type">Mayorista</span></td>
                                 <td>{{ $quotation->creado_en?->format('d/m/Y') ?? '—' }}</td>
                                 <td>{{ $quotation->details_count }}</td>
                                 <td><strong>S/ {{ number_format((float) $quotation->total, 2) }}</strong></td>
-                                <td><span class="cotizaciones-status cotizaciones-status--{{ $quotationPresentation[$quotation->id]['status_class'] }}"><i class="bi bi-circle-fill" aria-hidden="true"></i>{{ $status }}</span></td>
+                                <td><span class="cotizaciones-status cotizaciones-status--{{ $quotationPresentation[$quotation->id]['status_class'] }}"><i class="bi bi-circle-fill" aria-hidden="true"></i>{{ $quotationPresentation[$quotation->id]['status'] }}</span></td>
                                 <td>
                                     <details class="cotizaciones-row-details">
                                         <summary aria-label="Ver detalle de cotización {{ $quotation->id }}" title="Ver detalle"><i class="bi bi-eye" aria-hidden="true"></i></summary>
                                         <div class="cotizaciones-detail-popover">
                                             <strong>Detalle de la cotización</strong>
-                                            <span>{{ $customerName }} · {{ $quotation->creado_en?->format('d/m/Y H:i') ?? 'Fecha no disponible' }}</span>
+                                            <span>{{ $quotationPresentation[$quotation->id]['customer_name'] }} · {{ $quotation->creado_en?->format('d/m/Y H:i') ?? 'Fecha no disponible' }}</span>
                                             <ul>
                                                 @foreach ($quotation->details as $detail)
                                                     <li><span>{{ $detail->product?->nombre ?? 'Producto no disponible' }} × {{ $detail->cantidad }}</span><b>S/ {{ number_format((float) $detail->precio_unitario * (int) $detail->cantidad, 2) }}</b></li>
@@ -130,7 +125,7 @@
                                             @if ($quotation->notas)
                                                 <p>{{ $quotation->notas }}</p>
                                             @endif
-                                            @if (in_array($status, ['Borrador', 'Pendiente'], true) && $puedeEnviar)
+                                            @if (in_array($quotationPresentation[$quotation->id]['status'], ['Borrador', 'Pendiente'], true) && $puedeEnviar)
                                                 <details class="cotizaciones-edit-details">
                                                     <summary>Editar cotización</summary>
                                                     <form method="POST" action="{{ route('management.quotations.update', $quotation) }}" class="cotizaciones-edit-form">
@@ -161,9 +156,9 @@
                                                 </details>
                                             @endif
                                             <div class="cotizaciones-demo-actions" aria-label="Acciones de cotizacion">
-    @if (in_array($status, ['Borrador', 'Pendiente'], true))
+    @if (in_array($quotationPresentation[$quotation->id]['status'], ['Borrador', 'Pendiente'], true))
         @if ($puedeEnviar && $puedeDescargar && filled($quotation->customer?->correo))
-            <button type="button" data-quotation-action="enviar" data-reference="{{ $quotationReference }}" data-customer="{{ $customerName }}" data-recipient="{{ $quotation->customer->correo }}" data-download="{{ route('management.quotations.export', $quotation) }}" data-send="{{ route('management.quotations.update.send', $quotation) }}">Enviar cotizacion</button>
+            <button type="button" data-quotation-action="enviar" data-reference="{{ $quotationPresentation[$quotation->id]['reference'] }}" data-customer="{{ $quotationPresentation[$quotation->id]['customer_name'] }}" data-recipient="{{ $quotation->customer->correo }}" data-download="{{ route('management.quotations.export', $quotation) }}" data-send="{{ route('management.quotations.update.send', $quotation) }}">Enviar cotizacion</button>
         @else
             <button type="button" disabled title="Se requieren permisos de actualizacion y exportacion, y un correo valido del cliente">Enviar cotizacion</button>
         @endif
@@ -174,16 +169,16 @@
             <button type="submit">Aprobar cotizacion</button>
         </form>
     @endif
-    @if ($puedeEnviar && in_array($status, ['Borrador', 'Pendiente'], true))
+    @if ($puedeEnviar && in_array($quotationPresentation[$quotation->id]['status'], ['Borrador', 'Pendiente'], true))
         <form method="POST" action="{{ route('management.quotations.deactivate', $quotation) }}" style="display: contents" data-confirm="¿Desactivar esta cotización? Se conservará el historial.">
             @csrf
             @method('DELETE')
             <button type="submit">Desactivar cotizacion</button>
         </form>
     @endif
-    @if ($status === 'Aprobada')
+    @if ($quotationPresentation[$quotation->id]['status'] === 'Aprobada')
         @if ($puedeCrearVenta)
-            <button type="button" data-quotation-action="convertir" data-reference="{{ $quotationReference }}" data-customer="{{ $customerName }}" data-convert="{{ route('management.sales.convert_quotation', $quotation) }}" data-site-id="{{ $quotation->sede_id }}">Convertir en venta</button>
+            <button type="button" data-quotation-action="convertir" data-reference="{{ $quotationPresentation[$quotation->id]['reference'] }}" data-customer="{{ $quotationPresentation[$quotation->id]['customer_name'] }}" data-convert="{{ route('management.sales.convert_quotation', $quotation) }}" data-site-id="{{ $quotation->sede_id }}">Convertir en venta</button>
         @else
             <button type="button" disabled title="Se requiere el permiso de creacion de ventas">Convertir en venta</button>
         @endif
@@ -247,7 +242,7 @@
                 @if ($customers->isNotEmpty() && $products->isNotEmpty())
                     @include('gestion.comercial.cotizaciones.registrar', ['customers' => $customers, 'products' => $products])
                 @else
-                    <p class="cotizaciones-summary-empty">Para crear una cotización, primero registra un cliente mayorista y al menos un producto activo.</p>
+                    <p class="cotizaciones-summary-empty">Para guardar una cotización, primero registra un cliente mayorista y al menos un producto activo. Los datos se cargarán desde esta base de datos.</p>
                 @endif
             </div>
         </dialog>

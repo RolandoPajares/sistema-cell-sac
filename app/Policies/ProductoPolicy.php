@@ -4,7 +4,7 @@ namespace App\Policies;
 
 use App\Models\Catalogo\Producto;
 use App\Models\User;
-use App\Servicios\ServicioAutorizacion;
+use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
 
 /**
  * Define la responsabilidad de la clase ProductoPolicy dentro de su módulo.

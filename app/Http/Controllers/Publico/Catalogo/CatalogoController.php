@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Publico\Catalogo;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\FiltroCatalogoRequest;
-use App\Http\Requests\GuardarResenaProductoRequest;
+use App\Http\Requests\Compartidos\Catalogo\FiltroCatalogoRequest;
+use App\Http\Requests\Publico\Catalogo\GuardarResenaProductoRequest;
 use App\Models\Catalogo\FavoritoProducto;
 use App\Models\Catalogo\Producto;
 use App\Models\Catalogo\ResenaProducto;
-use App\Servicios\ServicioCatalogo;
+use App\Servicios\Compartidos\Catalogo\ServicioCatalogo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;

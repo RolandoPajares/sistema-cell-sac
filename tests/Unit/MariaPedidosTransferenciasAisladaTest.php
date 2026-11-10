@@ -3,10 +3,10 @@
 use App\Models\Catalogo\Producto;
 use App\Models\Comercio\Pedido;
 use App\Models\User;
-use App\Servicios\ServicioAutorizacion;
-use App\Servicios\ServicioInventario;
-use App\Servicios\ServicioPedidos;
-use App\Servicios\ServicioTransferenciasExistencias;
+use App\Servicios\Compartidos\Comercio\ServicioPedidos;
+use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
+use App\Servicios\Gestion\InventarioLogistica\ServicioInventario;
+use App\Servicios\Gestion\InventarioLogistica\Transferencias\ServicioTransferenciasExistencias;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;

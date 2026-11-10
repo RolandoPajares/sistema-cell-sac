@@ -1,7 +1,7 @@
 /** Evita dobles envíos y deja visible el estado de guardado en formularios administrativos. */
 document.addEventListener('submit', (event) => {
     const form = event.target;
-    if (!(form instanceof HTMLFormElement) || form.dataset.submitLocked === '1') {
+    if (!(form instanceof HTMLFormElement) || form.dataset.submitLocked === '1' || form.dataset.ajaxSubmit === '1') {
         return;
     }
 

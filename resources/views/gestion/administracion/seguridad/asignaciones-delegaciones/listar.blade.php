@@ -31,13 +31,12 @@
                 <tbody>
                     @forelse($users as $user)
                     {{-- Las asignaciones ya fueron preparadas por el controlador. --}}
-                    @php($activeGlobal = $assignmentPresentation[$user->id]['activeGlobal']) @php($activeSite = $assignmentPresentation[$user->id]['activeSite'])
                     <tr data-assignment-row data-search="{{ strtolower($user->nombre.' '.$user->correo) }}">
                         <td><strong>{{ $user->nombre }}</strong><small>{{ $user->correo }}</small></td>
                         <td>
-                            <div class="tc-rbac-assignment-chips">@forelse($activeGlobal as $role)<span class="tc-rbac-pill tc-rbac-pill--scope">{{ $role->nombre }} · Global</span>@empty @endforelse @forelse($activeSite as $role)<span class="tc-rbac-pill tc-rbac-pill--scope">{{ $role->nombre }} · Por sede</span>@empty @endforelse @if($activeGlobal->isEmpty() && $activeSite->isEmpty())<span class="tc-rbac-muted">Sin roles vigentes</span>@endif</div>
+                            <div class="tc-rbac-assignment-chips">@forelse($assignmentPresentation[$user->id]['activeGlobal'] as $role)<span class="tc-rbac-pill tc-rbac-pill--scope">{{ $role->nombre }} · Global</span>@empty @endforelse @forelse($assignmentPresentation[$user->id]['activeSite'] as $role)<span class="tc-rbac-pill tc-rbac-pill--scope">{{ $role->nombre }} · Por sede</span>@empty @endforelse @if($assignmentPresentation[$user->id]['activeGlobal']->isEmpty() && $assignmentPresentation[$user->id]['activeSite']->isEmpty())<span class="tc-rbac-muted">Sin roles vigentes</span>@endif</div>
                         </td>
-                        <td>{{ $activeSite->isNotEmpty() ? 'Sede autorizada' : 'Todas las sedes' }}</td>
+                        <td>{{ $assignmentPresentation[$user->id]['activeSite']->isNotEmpty() ? 'Sede autorizada' : 'Todas las sedes' }}</td>
                         <td><span class="tc-rbac-status tc-rbac-status--{{ $user->activo ? 'active' : 'inactive' }}"><i class="bi bi-circle-fill" aria-hidden="true"></i>{{ $user->activo ? 'Activo' : 'Inactivo' }}</span></td>
                         <td><button class="tc-rbac-action tc-rbac-action--primary" type="button" data-open-dialog="asignar-roles-{{ $user->id }}"><i class="bi bi-person-gear" aria-hidden="true"></i> Asignar roles</button></td>
                     </tr>
@@ -54,7 +53,6 @@
 
 @foreach($users as $user)
 {{-- IDs de roles vigentes usados para marcar las casillas del formulario. --}}
-@php($currentGlobal = $assignmentPresentation[$user->id]['currentGlobal']) @php($currentSite = $assignmentPresentation[$user->id]['currentSite'])
 <dialog class="tc-rbac-dialog" id="asignar-roles-{{ $user->id }}" aria-labelledby="asignar-roles-title-{{ $user->id }}">
     <div class="tc-rbac-dialog-card">
         <header>
@@ -65,7 +63,7 @@
             </div><button type="button" class="tc-rbac-dialog-close" data-close-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
         </header>
         <form method="post" action="{{ route('management.user_assignments.sync', $user) }}" class="tc-rbac-dialog-body">@csrf @method('PUT')<p class="tc-rbac-info">Las casillas marcadas se conservarán. Las desmarcadas se revocarán y quedarán registradas en auditoría.</p>
-            <div class="tc-rbac-choice-grid">@foreach($roles as $role)<label class="tc-rbac-choice"><input type="checkbox" name="roles[]" value="{{ $role->id }}" @checked(in_array($role->id, $role->alcance_permitido === 'sede' ? $currentSite : $currentGlobal, true))><span><strong>{{ $role->nombre }}</strong><small>{{ ucfirst($role->alcance_permitido) }} · {{ $role->codigo }}</small></span></label>@endforeach</div>
+            <div class="tc-rbac-choice-grid">@foreach($roles as $role)<label class="tc-rbac-choice"><input type="checkbox" name="roles[]" value="{{ $role->id }}" @checked(in_array($role->id, $role->alcance_permitido === 'sede' ? $assignmentPresentation[$user->id]['currentSite'] : $assignmentPresentation[$user->id]['currentGlobal'], true))><span><strong>{{ $role->nombre }}</strong><small>{{ ucfirst($role->alcance_permitido) }} · {{ $role->codigo }}</small></span></label>@endforeach</div>
             <footer><button type="button" class="tc-rbac-secondary" data-close-dialog>Cancelar</button><button class="tc-rbac-primary" type="submit"><i class="bi bi-save" aria-hidden="true"></i> Guardar asignación</button></footer>
         </form>
     </div>

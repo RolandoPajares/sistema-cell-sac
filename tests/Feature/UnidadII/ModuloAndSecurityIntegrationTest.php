@@ -10,7 +10,7 @@ use App\Models\Compras\Compra;
 use App\Models\Compras\Proveedor;
 use App\Models\Marketing\Campania;
 use App\Models\User;
-use App\Servicios\ServicioCompras;
+use App\Servicios\Gestion\Comercial\Compras\ServicioCompras;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\UploadedFile;

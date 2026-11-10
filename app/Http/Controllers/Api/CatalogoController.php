@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\FiltroCatalogoRequest;
+use App\Http\Requests\Compartidos\Catalogo\FiltroCatalogoRequest;
 use App\Http\Resources\RecursoProducto;
 use App\Models\Catalogo\Producto;
-use App\Servicios\ServicioCatalogo;
+use App\Servicios\Compartidos\Catalogo\ServicioCatalogo;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 

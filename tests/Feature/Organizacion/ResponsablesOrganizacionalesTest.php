@@ -1,7 +1,7 @@
 <?php
 
-use App\Servicios\RegistradorAuditoria;
-use App\Servicios\ServicioResponsablesOrganizacionales;
+use App\Servicios\Compartidos\Auditoria\RegistradorAuditoria;
+use App\Servicios\Gestion\Administracion\Seguridad\ServicioResponsablesOrganizacionales;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;

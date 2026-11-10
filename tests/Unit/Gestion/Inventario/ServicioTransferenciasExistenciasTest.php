@@ -2,7 +2,7 @@
 
 use App\Models\Inventario\TransferenciaExistencia;
 use App\Models\User;
-use App\Servicios\ServicioTransferenciasExistencias;
+use App\Servicios\Gestion\InventarioLogistica\Transferencias\ServicioTransferenciasExistencias;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;

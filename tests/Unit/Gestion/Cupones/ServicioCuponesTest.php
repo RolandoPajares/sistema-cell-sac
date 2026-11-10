@@ -2,7 +2,7 @@
 
 use App\Models\Comercio\Cupon;
 use App\Models\User;
-use App\Servicios\ServicioCupones;
+use App\Servicios\Gestion\EcommerceMarketing\PromocionesCupones\ServicioCupones;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;

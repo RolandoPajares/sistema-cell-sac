@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\Comercio\EnvioPedido;
-use App\Servicios\ServicioEnviosPedidos;
+use App\Servicios\Gestion\InventarioLogistica\EnviosEntregas\ServicioEnviosPedidos;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;

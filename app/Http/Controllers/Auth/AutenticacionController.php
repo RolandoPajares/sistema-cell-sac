@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\InicioSesionRequest;
-use App\Http\Requests\RegistroRequest;
+use App\Http\Requests\Auth\InicioSesionRequest;
+use App\Http\Requests\Auth\RegistroRequest;
 use App\Models\Clientes\Cliente;
 use App\Models\User;
-use App\Servicios\RegistradorAuditoria;
-use App\Servicios\ServicioAutorizacion;
+use App\Servicios\Compartidos\Auditoria\RegistradorAuditoria;
+use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;

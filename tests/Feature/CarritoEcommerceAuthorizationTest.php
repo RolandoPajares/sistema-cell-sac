@@ -71,11 +71,10 @@ it('mantiene el carrito aislado entre usuarios y permite modificarlo', function 
     expect(session('cart'))->toBe([]);
 });
 
-it('redirects visitors to login and rejects unauthorized users with 403', function (): void {
+it('permite carrito invitado y rechaza operadores sin permiso', function (): void {
     $product = productoParaCarritoEcommerce();
 
-    $this->post(route('cart.add', $product), ['cantidad' => 1])
-        ->assertRedirect(route('login'));
+    $this->post(route('cart.add', $product), ['cantidad' => 1])->assertRedirect();
 
     $employee = SpanishAccessFixture::user('marketing');
     $this->actingAs($employee)
@@ -108,4 +107,24 @@ it('confirms an order for an authorized retail customer', function (): void {
         ->assertRedirect();
 
     expect(Pedido::query()->where('usuario_id', $customer->id)->exists())->toBeTrue();
+});
+
+it('completes a guest checkout and exposes only tokenized tracking', function (): void {
+    $product = productoParaCarritoEcommerce(['precio' => 120]);
+
+    $this->post(route('cart.add', $product), ['cantidad' => 1])->assertRedirect();
+    $token = bin2hex(random_bytes(32));
+    $response = $this->withSession(['checkout_token' => $token])
+        ->post(route('checkout'), [
+            'checkout_token' => $token,
+            'nombre' => 'Comprador Invitado',
+            'correo' => 'invitado@example.test',
+            'telefono' => '999999999',
+            'direccion' => 'Av. Principal 123',
+        ]);
+
+    $response->assertRedirect();
+    $order = Pedido::query()->whereNull('usuario_id')->latest('id')->firstOrFail();
+    $this->get(route('orders.tracking', [$order, 'token' => $token]))->assertOk()->assertSee('Comprador Invitado');
+    $this->get(route('orders.tracking', [$order, 'token' => str_repeat('a', 64)]))->assertNotFound();
 });

@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>@yield('title', 'Panel CELL SAC')</title>
-        @vite(['resources/css/layouts/panel/principal.css', 'resources/css/paneles/dashboard.css', 'resources/js/layouts/panel/principal.js', 'resources/js/gestion/comercial/pedidos/index.js'])
+        @vite(['resources/css/layouts/panel/principal.css', 'resources/css/paneles/dashboard.css', 'resources/js/layouts/panel/principal.js', 'resources/js/gestion/index.js', 'resources/js/gestion/comercial/pedidos/index.js', 'resources/js/gestion/finanzas/index.js', 'resources/js/gestion/administracion/organizacion/organizacion.js'])
         <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.min.css') }}">
         @stack('styles')
     </head>
@@ -17,6 +17,7 @@
                 <main class="admin-main">
                     @if (session('status'))<div class="admin-alert admin-alert--success" role="status">{{ session('status') }}</div>@endif
                     @if ($errors->any())<div class="admin-alert admin-alert--error" role="alert">{{ $errors->first() }}</div>@endif
+                    @if (session('error'))<div class="admin-alert admin-alert--error" role="alert">{{ session('error') }}</div>@endif
                     @yield('content')
                 </main>
             </div>

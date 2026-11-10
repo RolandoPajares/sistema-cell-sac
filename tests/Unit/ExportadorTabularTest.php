@@ -1,6 +1,6 @@
 <?php
 
-use App\Servicios\ExportadorTabular;
+use App\Servicios\Compartidos\Exportacion\ExportadorTabular;
 use Tests\TestCase;
 
 uses(TestCase::class);

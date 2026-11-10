@@ -9,18 +9,19 @@ use App\Infraestructura\Persistencia\Pdo\PdoConexion;
 use App\Infraestructura\Persistencia\Pdo\PdoProductoDao;
 use App\Models\Marketing\Campania;
 use App\Models\User;
-use App\Servicios\AdaptadorAlcanceProductos;
-use App\Servicios\AdaptadorAuditoriaProductos;
-use App\Servicios\ServicioAutorizacion;
-use App\Servicios\ServicioMenuDinamico;
-use App\Servicios\ServicioPresentacionCampanias;
-use App\Servicios\ServicioPresentacionFinanzasFacturacion;
-use App\Servicios\ServicioPresentacionReembolsos;
+use App\Servicios\Compartidos\Productos\AdaptadorAlcanceProductos;
+use App\Servicios\Compartidos\Productos\AdaptadorAuditoriaProductos;
+use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
+use App\Servicios\Compartidos\Seguridad\ServicioMenuDinamico;
+use App\Servicios\Gestion\EcommerceMarketing\Campanas\ServicioPresentacionCampanias;
+use App\Servicios\Gestion\Finanzas\Comprobantes\ServicioPresentacionFinanzasFacturacion;
+use App\Servicios\Gestion\Finanzas\Reembolsos\ServicioPresentacionReembolsos;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -107,6 +108,7 @@ class AppServiceProvider extends ServiceProvider
                 'advertisingContext' => request()->routeIs('home') ? 'inicio' : 'general',
                 'headerAuthenticated' => $user !== null,
                 'headerUser' => $user,
+                'headerUserPhotoUrl' => $user?->foto_perfil ? Storage::disk('public')->url($user->foto_perfil) : null,
                 'cartItemCount' => $cartItemCount,
             ]);
         });

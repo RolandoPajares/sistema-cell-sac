@@ -3,18 +3,21 @@
 namespace App\Http\Controllers\Publico\Comercio;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\FinalizarCompraRequest;
+use App\Http\Requests\Publico\Comercio\FinalizarCompraRequest;
 use App\Models\Catalogo\Producto;
-use App\Servicios\ServicioCarrito;
-use App\Servicios\ServicioInventario;
-use App\Servicios\ServicioPedidos;
+use App\Servicios\Compartidos\Comercio\ServicioPedidos;
+use App\Servicios\Gestion\InventarioLogistica\ServicioInventario;
+use App\Servicios\Publico\Comercio\ServicioCarrito;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
- * Define la responsabilidad de la clase FinalizarCompraController dentro de su mÛdulo.
+ * Define la responsabilidad de la clase FinalizarCompraController dentro de su mÔøΩdulo.
  *
  * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
  */
@@ -23,7 +26,7 @@ class FinalizarCompraController extends Controller
     /**
      * Inicializa la instancia con las dependencias y el estado requeridos.
      *
-     * @return mixed Resultado de la operaciÛn.
+     * @return mixed Resultado de la operaciÔøΩn.
      */
     public function __construct(
         private readonly ServicioPedidos $orderService,
@@ -32,13 +35,13 @@ class FinalizarCompraController extends Controller
     ) {}
 
     /**
-     * Prepara la pantalla de checkout a partir del carrito normalizado de la sesiÛn.
+     * Prepara la pantalla de checkout a partir del carrito normalizado de la sesiÔøΩn.
      *
      * Genera un token de checkout si falta, carga productos activos, calcula disponibilidad
-     * y subtotales, y marca si todas las lÌneas pueden confirmarse sin modificar la base de datos.
+     * y subtotales, y marca si todas las lÔøΩneas pueden confirmarse sin modificar la base de datos.
      *
-     * @param  Request  $request  Solicitud que contiene la sesiÛn y el usuario comprador.
-     * @return View Vista de checkout con lÌneas, total, token y condiciÛn de confirmaciÛn.
+     * @param  Request  $request  Solicitud que contiene la sesiÔøΩn y el usuario comprador.
+     * @return View Vista de checkout con lÔøΩneas, total, token y condiciÔøΩn de confirmaciÔøΩn.
      */
     public function index(Request $request): View
     {
@@ -47,9 +50,9 @@ class FinalizarCompraController extends Controller
         }
         $cart = $this->carritoService->normalizar((array) $request->session()->get('cart', []));
         $products = Producto::query()->with('variants')->active()->whereIn('id', array_keys($cart))->get()->keyBy('id');
-        $lines = collect($cart)->map(function (array $linea, int $id) use ($products, $request): ?array {
+        $lines = collect($cart)->map(function (array $linea, int $id) use ($products): ?array {
             $product = $products->get((int) $id);
-            $disponible = $product ? $this->inventario->disponibilidadDeLinea($request->user(), $product, $linea['variante_id']) : 0;
+            $disponible = $product ? $this->inventario->disponibilidadPublica($product, $linea['variante_id']) : 0;
 
             if (! $product || $linea['cantidad'] < 1) {
                 return null;
@@ -71,35 +74,40 @@ class FinalizarCompraController extends Controller
             'total' => $lines->sum('subtotal'),
             'checkoutToken' => $request->session()->get('checkout_token'),
             'puedeConfirmar' => $puedeConfirmar,
+            'paymentMethods' => Schema::hasTable('medios_pago')
+                ? DB::table('medios_pago')->where('activo', true)->orderBy('nombre')->get(['id', 'nombre'])
+                : new Collection,
         ]);
     }
 
     /**
      * Convierte el carrito validado en un pedido mediante el servicio de pedidos.
      *
-     * Rechaza un carrito vacÌo, delega la operaciÛn transaccional al servicio de checkout
-     * con usuario, cupÛn, IP y token, y limpia las claves de sesiÛn solo despuÈs de recibir
+     * Rechaza un carrito vacÔøΩo, delega la operaciÔøΩn transaccional al servicio de checkout
+     * con usuario, cupÔøΩn, IP y token, y limpia las claves de sesiÔøΩn solo despuÔøΩs de recibir
      * el pedido creado.
      *
      * @param  FinalizarCompraRequest  $request  Datos validados del checkout.
-     * @return RedirectResponse RedirecciÛn al detalle del pedido registrado.
+     * @return RedirectResponse RedirecciÔøΩn al detalle del pedido registrado.
      *
-     * @throws HttpException Si la sesiÛn no contiene lÌneas de carrito.
+     * @throws HttpException Si la sesiÔøΩn no contiene lÔøΩneas de carrito.
      */
     public function store(FinalizarCompraRequest $request): RedirectResponse
     {
         $cart = (array) $request->session()->get('cart', []);
         abort_if($cart === [], 422, 'El carrito est√° vac√≠o.');
 
-        $order = $this->orderService->checkout(
-            $request->user(),
-            $cart,
-            $request->session()->get('coupon_code'),
-            $request->ip(),
-            $request->validated('checkout_token'),
-        );
+        $order = $request->user() !== null
+            ? $this->orderService->checkout($request->user(), $cart, $request->session()->get('coupon_code'), $request->ip(), $request->validated('checkout_token'))
+            : $this->orderService->checkoutGuest($cart, $request->session()->get('coupon_code'), $request->ip(), $request->validated());
 
         $request->session()->forget(['cart', 'coupon_code', 'checkout_token']);
+        $this->orderService->registerPendingPayment($order, $request->validated('medio_pago_id'), $request->user()?->getKey());
+
+        if ($request->user() === null) {
+            return redirect()->route('orders.tracking', [$order, 'token' => $request->validated('checkout_token')])
+                ->with('status', 'Pedido registrado correctamente.');
+        }
 
         return redirect()->route('orders.show', $order)->with('status', 'Pedido registrado. El sistema todav√≠a no procesa pagos.');
     }

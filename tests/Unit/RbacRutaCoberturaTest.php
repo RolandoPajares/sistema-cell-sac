@@ -9,6 +9,7 @@ it('protege cada interfaz operativa de gestión con autenticación, sesión y pe
         'management.account',
         'management.account.activity',
         'management.account.avatar',
+        'management.account.avatar.delete',
         'management.account.notifications',
         'management.account.notifications.read',
         'management.account.password',

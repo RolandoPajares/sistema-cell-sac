@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
-use App\Servicios\RegistradorAuditoria;
+use App\Servicios\Compartidos\Auditoria\RegistradorAuditoria;
 use Database\Seeders\RbacInicialSeeder;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;

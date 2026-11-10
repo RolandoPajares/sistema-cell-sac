@@ -1,57 +1,59 @@
 <?php
 
 use App\Http\Controllers\Auth\AutenticacionController;
-use App\Http\Controllers\Cuenta\CuentaAdministracionController;
-use App\Http\Controllers\Cuenta\CuentaController;
-use App\Http\Controllers\Gestion\CajaController;
-use App\Http\Controllers\Gestion\Campanias\CampaniaController;
-use App\Http\Controllers\Gestion\Campanias\PublicidadInteligenteController;
-use App\Http\Controllers\Gestion\Categorias\CategoriaController;
-use App\Http\Controllers\Gestion\Clientes\ClienteController;
-use App\Http\Controllers\Gestion\Compras\CompraController;
-use App\Http\Controllers\Gestion\ConfiguracionSistemaController;
-use App\Http\Controllers\Gestion\Cotizaciones\CotizacionController;
-use App\Http\Controllers\Gestion\Cupones\CuponController;
-use App\Http\Controllers\Gestion\DevolucionesGarantias\DevolucionGarantiaController;
-use App\Http\Controllers\Gestion\FacturacionController;
-use App\Http\Controllers\Gestion\Finanzas\CuentasFinancierasController;
-use App\Http\Controllers\Gestion\FinanzasController;
-use App\Http\Controllers\Gestion\Inventario\InventarioController;
-use App\Http\Controllers\Gestion\Inventario\TransferenciaExistenciaController;
-use App\Http\Controllers\Gestion\Organizacion\AlmacenController;
-use App\Http\Controllers\Gestion\Organizacion\EmpresaController;
-use App\Http\Controllers\Gestion\Organizacion\PersonalSedeController;
-use App\Http\Controllers\Gestion\Organizacion\ResponsableOrganizacionalController;
-use App\Http\Controllers\Gestion\Organizacion\SedeController;
-use App\Http\Controllers\Gestion\Productos\GestionProductosController;
-use App\Http\Controllers\Gestion\Proveedores\ProveedorController;
-use App\Http\Controllers\Gestion\Reportes\PanelAnalisisAuditoriaController;
-use App\Http\Controllers\Gestion\Reportes\ReporteController;
-use App\Http\Controllers\Gestion\Segmentos\SegmentoClienteController;
-use App\Http\Controllers\Gestion\Seguridad\AsignacionRolesController;
-use App\Http\Controllers\Gestion\Seguridad\MenusController;
-use App\Http\Controllers\Gestion\Seguridad\RolesPermisosController;
-use App\Http\Controllers\Gestion\SesionCajaController;
-use App\Http\Controllers\Gestion\SoporteReclamos\SoporteReclamoController;
-use App\Http\Controllers\Gestion\Usuarios\GestionUsuariosController;
-use App\Http\Controllers\Gestion\Ventas\VentaController;
-use App\Http\Controllers\Paneles\Administrador\AlertasGlobalesController;
-use App\Http\Controllers\Paneles\Administrador\DashboardController as AdministradorDashboardController;
-use App\Http\Controllers\Paneles\Administrador\DashboardGlobalPedidosController;
-use App\Http\Controllers\Paneles\Administrador\DashboardGlobalSedesController;
-use App\Http\Controllers\Paneles\Administrador\DashboardGlobalVentasController;
-use App\Http\Controllers\Paneles\Administrador\DispositivosController;
-use App\Http\Controllers\Paneles\Administrador\EnviosPedidosController;
-use App\Http\Controllers\Publico\Asistente\AsistenteController;
+use App\Http\Controllers\Cuenta\Perfil\CuentaAdministracionController;
+use App\Http\Controllers\Cuenta\Perfil\CuentaController;
+use App\Http\Controllers\Gestion\Administracion\Organizacion\EmpresaController;
+use App\Http\Controllers\Gestion\Administracion\Organizacion\SedeController;
+use App\Http\Controllers\Gestion\Administracion\Seguridad\AsignacionRolesController;
+use App\Http\Controllers\Gestion\Administracion\Seguridad\GestionUsuariosController;
+use App\Http\Controllers\Gestion\Administracion\Seguridad\MenusController;
+use App\Http\Controllers\Gestion\Administracion\Seguridad\PersonalSedeController;
+use App\Http\Controllers\Gestion\Administracion\Seguridad\ResponsableOrganizacionalController;
+use App\Http\Controllers\Gestion\Administracion\Seguridad\RolesPermisosController;
+use App\Http\Controllers\Gestion\Analitica\AuditoriaOperaciones\PanelAnalisisAuditoriaController;
+use App\Http\Controllers\Gestion\Analitica\DashboardGlobal\AlertasGlobalesController;
+use App\Http\Controllers\Gestion\Analitica\DashboardGlobal\DashboardGlobalPedidosController;
+use App\Http\Controllers\Gestion\Analitica\DashboardGlobal\DashboardGlobalSedesController;
+use App\Http\Controllers\Gestion\Analitica\DashboardGlobal\DashboardGlobalVentasController;
+use App\Http\Controllers\Gestion\Analitica\Reportes\ReporteController;
+use App\Http\Controllers\Gestion\Comercial\Clientes\ClienteController;
+use App\Http\Controllers\Gestion\Comercial\Compras\CompraController;
+use App\Http\Controllers\Gestion\Comercial\Cotizaciones\CotizacionController;
+use App\Http\Controllers\Gestion\Comercial\DevolucionesGarantias\DevolucionGarantiaController;
+use App\Http\Controllers\Gestion\Comercial\Proveedores\ProveedorController;
+use App\Http\Controllers\Gestion\Comercial\Ventas\VentaController;
+use App\Http\Controllers\Gestion\Configuracion\ConfiguracionSistemaController;
+use App\Http\Controllers\Gestion\EcommerceMarketing\Campanas\CampaniaController;
+use App\Http\Controllers\Gestion\EcommerceMarketing\Campanas\PublicidadInteligenteController;
+use App\Http\Controllers\Gestion\EcommerceMarketing\PromocionesCupones\CuponController;
+use App\Http\Controllers\Gestion\EcommerceMarketing\Segmentos\SegmentoClienteController;
+use App\Http\Controllers\Gestion\Finanzas\AperturasCierres\SesionCajaController;
+use App\Http\Controllers\Gestion\Finanzas\Cajas\CajaController;
+use App\Http\Controllers\Gestion\Finanzas\Comprobantes\FacturacionController;
+use App\Http\Controllers\Gestion\Finanzas\CuentasCobrarPagar\CuentasFinancierasController;
+use App\Http\Controllers\Gestion\Finanzas\FinanzasController;
+use App\Http\Controllers\Gestion\InventarioLogistica\Almacenes\AlmacenController;
+use App\Http\Controllers\Gestion\InventarioLogistica\Categorias\CategoriaController;
+use App\Http\Controllers\Gestion\InventarioLogistica\EnviosEntregas\EnviosPedidosController;
+use App\Http\Controllers\Gestion\InventarioLogistica\ExistenciasMovimientos\InventarioController;
+use App\Http\Controllers\Gestion\InventarioLogistica\Marcas\MarcaController;
+use App\Http\Controllers\Gestion\InventarioLogistica\Productos\GestionProductosController;
+use App\Http\Controllers\Gestion\InventarioLogistica\Series\DispositivosController;
+use App\Http\Controllers\Gestion\InventarioLogistica\Transferencias\TransferenciaExistenciaController;
+use App\Http\Controllers\Gestion\Soporte\Reclamos\SoporteReclamoController;
+use App\Http\Controllers\Inteligente\Asistente\AsistenteController;
+use App\Http\Controllers\Inteligente\Comprador\ComparadorController;
+use App\Http\Controllers\Inteligente\Comprador\RecomendacionController;
+use App\Http\Controllers\Inteligente\Cotizador\InteligenciaComercialController;
+use App\Http\Controllers\Paneles\PanelDashboardController;
 use App\Http\Controllers\Publico\Catalogo\CatalogoController;
-use App\Http\Controllers\Publico\Catalogo\ComparadorController;
-use App\Http\Controllers\Publico\Catalogo\RecomendacionController;
 use App\Http\Controllers\Publico\Comercio\CampaniaPublicaController;
 use App\Http\Controllers\Publico\Comercio\CarritoController;
 use App\Http\Controllers\Publico\Comercio\FinalizarCompraController;
 use App\Http\Controllers\Publico\Comercio\PedidoController;
+use App\Http\Controllers\Publico\Comercio\SeguimientoPedidoController;
 use App\Http\Controllers\Publico\Inicio\InicioController;
-use App\Http\Controllers\Publico\Inteligente\InteligenciaComercialController;
 use App\Http\Controllers\Publico\Paginas\PaginaController;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
@@ -97,16 +99,6 @@ Route::middleware(['auth', 'cuenta.activa', 'sesion.usuario'])->group(function (
     Route::put('/mi-cuenta/perfil', [CuentaAdministracionController::class, 'updateProfile'])->name('account.profile');
     Route::put('/mi-cuenta/password', [CuentaAdministracionController::class, 'updatePassword'])->name('account.password');
 
-    Route::get('/carrito', [CarritoController::class, 'index'])->name('cart.index');
-    Route::post('/carrito/{product}/agregar', [CarritoController::class, 'add'])
-        ->whereNumber('product')->middleware('carrito.ecommerce')->name('cart.add');
-    Route::patch('/carrito/{product}', [CarritoController::class, 'update'])->whereNumber('product')->name('cart.update');
-    Route::post('/carrito/{product}/quitar', [CarritoController::class, 'remove'])->whereNumber('product')->name('cart.remove');
-    Route::post('/carrito/vaciar', [CarritoController::class, 'clear'])->name('cart.clear');
-    Route::post('/carrito/cupon', [CarritoController::class, 'applyCoupon'])->name('cart.coupon');
-    Route::get('/checkout', [FinalizarCompraController::class, 'index'])->name('checkout.form');
-    Route::post('/checkout', [FinalizarCompraController::class, 'store'])->middleware('throttle:checkout')->name('checkout');
-
     Route::get('/mis-pedidos', [PedidoController::class, 'index'])->name('orders.index');
     Route::get('/mis-pedidos/{order}', [PedidoController::class, 'show'])->whereNumber('order')->name('orders.show');
     Route::patch('/mis-pedidos/{order}/estado', [PedidoController::class, 'updateStatus'])->whereNumber('order')->name('orders.status');
@@ -119,6 +111,20 @@ Route::middleware(['auth', 'cuenta.activa', 'sesion.usuario'])->group(function (
     Route::post('/cotizaciones', [CotizacionController::class, 'store'])
         ->middleware('permiso:gestion.cotizaciones.crear')->name('quotations.store');
 });
+
+Route::middleware(['carrito.ecommerce'])->group(function (): void {
+    Route::get('/carrito', [CarritoController::class, 'index'])->name('cart.index');
+    Route::post('/carrito/{product}/agregar', [CarritoController::class, 'add'])->whereNumber('product')->name('cart.add');
+    Route::patch('/carrito/{product}', [CarritoController::class, 'update'])->whereNumber('product')->name('cart.update');
+    Route::post('/carrito/{product}/quitar', [CarritoController::class, 'remove'])->whereNumber('product')->name('cart.remove');
+    Route::post('/carrito/vaciar', [CarritoController::class, 'clear'])->name('cart.clear');
+    Route::post('/carrito/cupon', [CarritoController::class, 'applyCoupon'])->name('cart.coupon');
+    Route::get('/checkout', [FinalizarCompraController::class, 'index'])->name('checkout.form');
+    Route::post('/checkout', [FinalizarCompraController::class, 'store'])->middleware('throttle:checkout')->name('checkout');
+});
+
+Route::get('/seguimiento-pedido/{order}', [SeguimientoPedidoController::class, 'show'])
+    ->whereNumber('order')->name('orders.tracking');
 
 Route::get('/gestion/configuracion-comercial', static fn (): RedirectResponse => redirect()->route('management.products.preview.store_settings'))
     ->middleware(['auth', 'cuenta.activa', 'sesion.usuario', 'permiso:ruta'])
@@ -135,7 +141,7 @@ Route::get('/gestion/reportes-financieros', static fn (): RedirectResponse => re
     ->name('management.financial_reports');
 
 Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario', 'permiso:ruta'])->name('management.')->group(function (): void {
-    Route::get('/', AdministradorDashboardController::class)->name('dashboard');
+    Route::get('/', PanelDashboardController::class)->name('dashboard');
     Route::get('/dashboard-global/ventas', [DashboardGlobalVentasController::class, 'index'])
         ->middleware('permiso:ruta')->name('dashboard.sales');
     Route::get('/dashboard-global/ventas/exportar/{format}', [DashboardGlobalVentasController::class, 'export'])
@@ -202,7 +208,10 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
         ->middleware(['permiso:ruta', 'permiso:gestion.configuracion.actualizar'])->name('commercial_settings.store.update');
     Route::get('/productos/exportar/{format}', [GestionProductosController::class, 'export'])
         ->whereIn('format', ['pdf', 'excel', 'csv'])->name('products.export');
+    Route::get('/productos/plantilla-importacion', [GestionProductosController::class, 'importTemplate'])
+        ->name('products.import_template');
     Route::post('/productos', [GestionProductosController::class, 'store'])->name('products.store');
+    Route::post('/productos/importar', [GestionProductosController::class, 'import'])->name('products.import');
     Route::post('/productos/{product}/variantes', [GestionProductosController::class, 'registrarVariante'])
         ->whereNumber('product')->name('products.variants.store');
     Route::put('/productos/{product}/variantes/{variante}', [GestionProductosController::class, 'actualizarVariante'])
@@ -232,6 +241,11 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::post('/categorias', [CategoriaController::class, 'store'])->name('categories.store');
     Route::put('/categorias/{category}', [CategoriaController::class, 'update'])->name('categories.update');
     Route::delete('/categorias/{category}', [CategoriaController::class, 'deactivate'])->name('categories.deactivate');
+
+    Route::get('/marcas', [MarcaController::class, 'index'])->name('brands');
+    Route::post('/marcas', [MarcaController::class, 'store'])->name('brands.store');
+    Route::put('/marcas/{marca}', [MarcaController::class, 'update'])->whereNumber('marca')->name('brands.update');
+    Route::delete('/marcas/{marca}', [MarcaController::class, 'deactivate'])->whereNumber('marca')->name('brands.deactivate');
 
     Route::get('/clientes', [ClienteController::class, 'index'])->name('customers');
     Route::get('/clientes/exportar/{format}', [ClienteController::class, 'export'])
@@ -277,6 +291,7 @@ Route::middleware(['auth', 'cuenta.activa', 'sesion.usuario'])->group(function (
     Route::put('/gestion/cuenta/perfil', [CuentaAdministracionController::class, 'updateProfile'])->name('management.account.profile');
     Route::put('/gestion/cuenta/password', [CuentaAdministracionController::class, 'updatePassword'])->name('management.account.password');
     Route::put('/gestion/cuenta/fotografia', [CuentaAdministracionController::class, 'updateAvatar'])->name('management.account.avatar');
+    Route::delete('/gestion/cuenta/fotografia', [CuentaAdministracionController::class, 'deleteAvatar'])->name('management.account.avatar.delete');
     Route::get('/gestion/cuenta/seguridad', [CuentaAdministracionController::class, 'security'])->name('management.account.security');
     Route::get('/gestion/cuenta/sesiones', [CuentaAdministracionController::class, 'sessions'])->name('management.account.sessions');
     Route::delete('/gestion/cuenta/sesiones/{sessionId}', [CuentaAdministracionController::class, 'revokeSession'])->whereNumber('sessionId')->name('management.account.sessions.revoke');
@@ -332,6 +347,7 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::get('/compras', [CompraController::class, 'index'])->name('purchases');
     Route::get('/compras/exportar/{format}', [CompraController::class, 'export'])
         ->whereIn('format', ['pdf', 'excel', 'csv'])->name('purchases.export');
+    Route::get('/compras/plantilla-importacion', [CompraController::class, 'importTemplate'])->name('purchases.import_template');
     Route::post('/compras', [CompraController::class, 'store'])->name('purchases.store');
     Route::put('/compras/{compra}', [CompraController::class, 'update'])->whereNumber('compra')->name('purchases.update');
     Route::post('/compras/importar', [CompraController::class, 'import'])->name('purchases.import');
@@ -409,9 +425,12 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::get('/roles-permisos', [RolesPermisosController::class, 'index'])->name('roles_permissions');
     Route::get('/matriz-privilegios', [RolesPermisosController::class, 'matrix'])->name('permissions_matrix');
     Route::post('/roles-permisos', [RolesPermisosController::class, 'store'])->name('roles_permissions.store');
+    Route::post('/roles-permisos/campos-perfil', [RolesPermisosController::class, 'storeProfileField'])->name('roles_permissions.profile_fields.store');
+    Route::put('/roles-permisos/{role}/campos-perfil', [RolesPermisosController::class, 'updateRoleProfileFields'])->whereNumber('role')->name('roles_permissions.profile_fields.update');
     Route::put('/roles-permisos/{role}', [RolesPermisosController::class, 'update'])->whereNumber('role')->name('roles_permissions.update');
     Route::patch('/roles-permisos/{role}/estado', [RolesPermisosController::class, 'updateStatus'])->whereNumber('role')->name('roles_permissions.status');
     Route::put('/roles-permisos/{role}/permisos', [RolesPermisosController::class, 'updatePermissions'])->whereNumber('role')->name('roles_permissions.permissions');
+    Route::put('/roles-permisos/{role}/pantallas/permisos', [RolesPermisosController::class, 'updateScreenPermissions'])->whereNumber('role')->name('roles_permissions.screen_permissions');
     Route::get('/asignaciones-roles', [AsignacionRolesController::class, 'index'])->name('user_assignments');
     Route::post('/usuarios/{user}/roles', [AsignacionRolesController::class, 'store'])->whereNumber('user')->name('user_assignments.store');
     Route::put('/usuarios/{user}/roles', [AsignacionRolesController::class, 'sync'])->whereNumber('user')->name('user_assignments.sync');
@@ -495,7 +514,7 @@ Route::get('/smart/assistant', [AsistenteController::class, 'index'])->name('leg
 Route::post('/smart/assistant/reply', [AsistenteController::class, 'ask'])->middleware('throttle:10,1')->name('legacy.assistant.reply');
 
 Route::prefix('admin')->middleware(['auth', 'cuenta.activa', 'sesion.usuario', 'permiso:ruta'])->name('legacy.admin.')->group(function (): void {
-    Route::get('/', AdministradorDashboardController::class)->name('dashboard');
+    Route::get('/', PanelDashboardController::class)->name('dashboard');
     Route::get('/account', [CuentaController::class, 'dashboard'])->name('account');
     Route::post('/account/profile', [CuentaAdministracionController::class, 'updateProfile'])->name('account.profile');
     Route::post('/account/password', [CuentaAdministracionController::class, 'updatePassword'])->name('account.password');

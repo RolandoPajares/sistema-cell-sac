@@ -1,9 +1,9 @@
 <?php
 
 use App\Models\User;
-use App\Servicios\ServicioAutorizacion;
-use App\Servicios\ServicioDelegacion;
-use App\Servicios\ServicioMenuDinamico;
+use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
+use App\Servicios\Compartidos\Seguridad\ServicioMenuDinamico;
+use App\Servicios\Gestion\Administracion\Seguridad\ServicioDelegacion;
 use Database\Seeders\RbacInicialSeeder;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;

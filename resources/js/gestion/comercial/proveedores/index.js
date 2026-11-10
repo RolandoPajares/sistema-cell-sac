@@ -49,6 +49,34 @@ if (raizListado && panelProveedor) {
 const paginaProveedores = document.querySelector("[data-proveedores-page]");
 
 if (paginaProveedores) {
+    const actualizarCamposIdentificacion = (formulario) => {
+        const tipoPersona = formulario.querySelector('[data-provider-person-type]')?.value;
+        const juridica = tipoPersona !== 'natural';
+        const tipoDocumento = formulario.querySelector('[data-provider-document-type]');
+        const documentoLabel = formulario.querySelector('[data-provider-document-label], [data-provider-document-type-label]');
+        const nombreLabel = formulario.querySelector('[data-provider-name-label]');
+        const documento = formulario.querySelector('[data-provider-document-input]');
+
+        if (tipoDocumento) {
+            tipoDocumento.value = juridica ? 'ruc' : 'dni';
+            [...tipoDocumento.options].forEach((option) => {
+                option.hidden = juridica ? option.value !== 'ruc' : option.value !== 'dni';
+                option.disabled = option.hidden;
+            });
+        }
+        if (documentoLabel) documentoLabel.innerHTML = `${juridica ? 'RUC' : 'DNI'} <b>*</b>`;
+        if (nombreLabel) nombreLabel.innerHTML = `${juridica ? 'Razón social' : 'Nombres y apellidos'} <b>*</b>`;
+        if (documento) {
+            documento.placeholder = juridica ? 'Ingresar RUC' : 'Ingresar DNI';
+            documento.maxLength = juridica ? 11 : 8;
+        }
+    };
+
+    paginaProveedores.querySelectorAll('.proveedores-form').forEach((formulario) => {
+        actualizarCamposIdentificacion(formulario);
+        formulario.querySelector('[data-provider-person-type]')?.addEventListener('change', () => actualizarCamposIdentificacion(formulario));
+    });
+
     const abrirDialogo = (dialogo) => {
         if (
             dialogo &&

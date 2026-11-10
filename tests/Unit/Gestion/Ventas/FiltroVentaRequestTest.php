@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Requests\FiltroVentaRequest;
+use App\Http\Requests\Gestion\Comercial\Ventas\FiltroVentaRequest;
 use Illuminate\Support\Facades\Validator;
 use Tests\TestCase;
 

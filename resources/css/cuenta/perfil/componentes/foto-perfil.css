@@ -1,0 +1,15 @@
+.tc-profile-photo-actions {
+    display: grid;
+    justify-items: end;
+    gap: 8px;
+}
+
+.tc-profile-photo-delete-form {
+    margin: 0;
+}
+
+@media (max-width: 1100px) {
+    .tc-profile-photo-actions {
+        justify-items: start;
+    }
+}

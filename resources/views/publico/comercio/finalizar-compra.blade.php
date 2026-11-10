@@ -20,6 +20,25 @@
                 <form method="post" action="{{ route('checkout') }}">
                     @csrf
                     <input type="hidden" name="checkout_token" value="{{ $checkoutToken }}">
+                    @guest
+                        <fieldset class="checkout-guest-fields">
+                            <legend>Datos de entrega</legend>
+                            <input name="nombre" value="{{ old('nombre') }}" required maxlength="160" placeholder="Nombre completo">
+                            <input type="email" name="correo" value="{{ old('correo') }}" required maxlength="160" placeholder="Correo electrónico">
+                            <input name="telefono" value="{{ old('telefono') }}" maxlength="30" placeholder="Teléfono">
+                            <input name="direccion" value="{{ old('direccion') }}" required maxlength="255" placeholder="Dirección de entrega">
+                            <textarea name="referencia" maxlength="500" placeholder="Referencia (opcional)">{{ old('referencia') }}</textarea>
+                        </fieldset>
+                    @endguest
+                    @if ($paymentMethods->isNotEmpty())
+                        <label for="medio_pago_id">Medio de pago</label>
+                        <select id="medio_pago_id" name="medio_pago_id">
+                            <option value="">Coordinar pago</option>
+                            @foreach ($paymentMethods as $paymentMethod)
+                                <option value="{{ $paymentMethod->id }}" @selected(old('medio_pago_id') == $paymentMethod->id)>{{ $paymentMethod->nombre }}</option>
+                            @endforeach
+                        </select>
+                    @endif
                     <button class="btn btn-primary" style="width:100%" @disabled(! $puedeConfirmar)>
                         Confirmar pedido
                     </button>

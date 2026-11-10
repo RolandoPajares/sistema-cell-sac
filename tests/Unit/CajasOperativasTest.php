@@ -1,14 +1,14 @@
 <?php
 
-use App\Http\Controllers\Gestion\CajaController;
-use App\Http\Requests\FiltroCajasRequest;
-use App\Http\Requests\GuardarCajaRequest;
+use App\Http\Controllers\Gestion\Finanzas\Cajas\CajaController;
+use App\Http\Requests\Gestion\Finanzas\Cajas\FiltroCajasRequest;
+use App\Http\Requests\Gestion\Finanzas\Cajas\GuardarCajaRequest;
 use App\Models\Finanzas\Caja;
 use App\Models\Finanzas\SesionCaja;
 use App\Models\User;
-use App\Servicios\RegistradorAuditoria;
-use App\Servicios\ServicioAutorizacion;
-use App\Servicios\ServicioCajas;
+use App\Servicios\Compartidos\Auditoria\RegistradorAuditoria;
+use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
+use App\Servicios\Gestion\Finanzas\ServicioCajas;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;

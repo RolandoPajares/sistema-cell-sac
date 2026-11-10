@@ -1,8 +1,8 @@
 <?php
 
 use App\Models\Catalogo\Producto;
-use App\Servicios\ServicioConfiguracionTienda;
-use App\Servicios\ServicioPreciosMayoristas;
+use App\Servicios\Gestion\InventarioLogistica\Productos\ServicioConfiguracionTienda;
+use App\Servicios\Gestion\InventarioLogistica\Productos\ServicioPreciosMayoristas;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;

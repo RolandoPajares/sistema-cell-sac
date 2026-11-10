@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Publico\Inicio;
 use App\Http\Controllers\Controller;
 use App\Models\Catalogo\Categoria;
 use App\Models\Catalogo\Producto;
-use App\Servicios\ServicioCatalogo;
+use App\Servicios\Compartidos\Catalogo\ServicioCatalogo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;

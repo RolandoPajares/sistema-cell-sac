@@ -1,14 +1,14 @@
 <?php
 
-use App\Http\Controllers\Gestion\FinanzasController;
-use App\Http\Requests\FiltroPagosRequest;
+use App\Http\Controllers\Gestion\Finanzas\FinanzasController;
+use App\Http\Requests\Gestion\Finanzas\PagosCobros\FiltroPagosRequest;
 use App\Models\Finanzas\Pago;
 use App\Models\User;
-use App\Servicios\RegistradorAuditoria;
-use App\Servicios\ServicioAutorizacion;
-use App\Servicios\ServicioCajas;
-use App\Servicios\ServicioConsultasFinancieras;
-use App\Servicios\ServicioOperacionesFinancieras;
+use App\Servicios\Compartidos\Auditoria\RegistradorAuditoria;
+use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
+use App\Servicios\Gestion\Finanzas\ServicioCajas;
+use App\Servicios\Gestion\Finanzas\ServicioConsultasFinancieras;
+use App\Servicios\Gestion\Finanzas\ServicioOperacionesFinancieras;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;

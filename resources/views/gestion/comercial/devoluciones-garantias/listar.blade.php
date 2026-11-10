@@ -98,7 +98,7 @@
     {{-- Resumen de seguimiento preparado por el backend. --}}
     <section class="gestion-operacion-bottom-grid" aria-label="Resumen del módulo">
         @foreach ($module['operacion_ui']['panels'] as $panel)
-            <article class="gestion-operacion-summary-card"><header><div><span class="gestion-operacion-summary-icon gestion-operacion-summary-icon--{{ $panel['tone'] }}"><i class="bi {{ $panel['icon'] }}" aria-hidden="true"></i></span><div><h2>{{ $panel['title'] }}</h2><p>{{ $panel['subtitle'] }}</p></div></div><button type="button" data-pending-notice="{{ $panel['notice'] }}">{{ $panel['link'] }} <i class="bi bi-arrow-right" aria-hidden="true"></i></button></header><div class="gestion-operacion-summary-empty"><i class="bi {{ $panel['empty_icon'] }}" aria-hidden="true"></i><strong>{{ $panel['empty_title'] }}</strong><span>{{ $panel['empty'] }}</span></div></article>
+            <article class="gestion-operacion-summary-card"><header><div><span class="gestion-operacion-summary-icon gestion-operacion-summary-icon--{{ $panel['tone'] }}"><i class="bi {{ $panel['icon'] }}" aria-hidden="true"></i></span><div><h2>{{ $panel['title'] }}</h2><p>{{ $panel['subtitle'] }}</p></div></div><button type="button" data-pending-notice="{{ $panel['notice'] }}">{{ $panel['link'] }} <i class="bi bi-arrow-right" aria-hidden="true"></i></button></header><div class="gestion-operacion-summary-empty"><i class="bi {{ $panel['empty_icon'] ?? 'bi-inbox' }}" aria-hidden="true"></i><strong>{{ $panel['empty_title'] }}</strong><span>{{ $panel['empty'] }}</span></div></article>
         @endforeach
     </section>
 

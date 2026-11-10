@@ -1,6 +1,6 @@
 <?php
 
-use App\Servicios\ServicioConsultasCuentas;
+use App\Servicios\Gestion\Finanzas\CuentasCobrarPagar\ServicioConsultasCuentas;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
