@@ -4,7 +4,7 @@ namespace App\Policies;
 
 use App\Models\Comercio\Pedido;
 use App\Models\User;
-use App\Servicios\ServicioAutorizacion;
+use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
 
 /**
  * Define la responsabilidad de la clase PedidoPolicy dentro de su módulo.

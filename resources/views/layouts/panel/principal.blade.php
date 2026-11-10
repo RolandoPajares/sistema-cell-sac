@@ -17,6 +17,7 @@
                 <main class="admin-main">
                     @if (session('status'))<div class="admin-alert admin-alert--success" role="status">{{ session('status') }}</div>@endif
                     @if ($errors->any())<div class="admin-alert admin-alert--error" role="alert">{{ $errors->first() }}</div>@endif
+                    @if (session('error'))<div class="admin-alert admin-alert--error" role="alert">{{ session('error') }}</div>@endif
                     @yield('content')
                 </main>
             </div>

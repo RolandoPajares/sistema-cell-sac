@@ -4,108 +4,56 @@
 @section('body_class', 'modulo-seguridad-rbac')
 
 @section('content')
-{{-- Matriz de permisos agrupados por módulo, pantalla y acción. --}}
-<section class="tc-rbac-page tc-privilege-matrix" data-matrix-page
-    data-current-permissions="@json($selectedPermissionIds)"
-    data-template-permissions="@json($recommendedPermissionIds)"
-    data-preview-items="@json($previewItems->values())"
-    data-role-code="{{ $selectedRole?->codigo }}" data-role-id="{{ $selectedRole?->id }}">
-    <header class="tc-rbac-hero">
-        <div><span class="tc-rbac-eyebrow">Seguridad y delegación</span>
-            <h1>Matriz de privilegios</h1>
-            <p>Visualiza y administra permisos reales por rol, módulo, pantalla y acción.</p>
-        </div>
-    </header>
+<section class="tc-rbac-page tc-privilege-matrix" data-matrix-page data-current-permissions="{{ json_encode($selectedPermissionIds) }}" data-preview-items="{{ json_encode($previewItems->values()) }}" data-role-id="{{ $selectedRole?->id }}">
+    <header class="tc-rbac-hero"><div><span class="tc-rbac-eyebrow">Seguridad y delegaci&oacute;n</span><h1>Matriz de privilegios</h1><p>Administraci&oacute;n din&aacute;mica de roles, m&oacute;dulos y permisos.</p></div><span class="tc-matrix-security-icon" aria-hidden="true"><i class="bi bi-shield-check"></i></span></header>
+    <div class="tc-matrix-toast-host" data-matrix-toast-host aria-live="polite" aria-relevant="additions"></div>
     @unless ($ready)
-    <div class="tc-rbac-alert" role="alert">El esquema RBAC no está disponible.</div>
+        <div class="tc-rbac-alert" role="alert">El esquema RBAC no est&aacute; disponible.</div>
     @else
-    <nav class="tc-rbac-tabs" aria-label="Administración de seguridad"><a href="{{ route('management.users') }}">Gestión de usuarios</a><a href="{{ route('management.roles_permissions') }}">Roles y permisos</a><a class="is-active" href="{{ route('management.permissions_matrix') }}">Matriz de privilegios</a><a href="{{ route('management.user_assignments') }}">Asignaciones globales y por sede</a><a href="{{ route('management.menus') }}">Menús y submenús dinámicos</a><a href="{{ route('management.modules') }}">Módulos y pantallas</a></nav>
-    <section class="tc-matrix-kpis" aria-label="Resumen de privilegios">
-        <article><span class="tc-matrix-kpi-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
-            <div><small>Roles configurados</small><strong>{{ $roles->count() }}</strong><em>Datos reales</em></div>
-        </article>
-        <article><span class="tc-matrix-kpi-icon tc-matrix-kpi-icon--purple"><i class="bi bi-box" aria-hidden="true"></i></span>
-            <div><small>Módulos activos</small><strong>{{ $moduleCount }}</strong><em>Catálogo RBAC</em></div>
-        </article>
-        <article><span class="tc-matrix-kpi-icon tc-matrix-kpi-icon--cyan"><i class="bi bi-display" aria-hidden="true"></i></span>
-            <div><small>Pantallas activas</small><strong>{{ $screenCount }}</strong><em>Rutas registradas</em></div>
-        </article>
-        <article><span class="tc-matrix-kpi-icon tc-matrix-kpi-icon--green"><i class="bi bi-shield-check" aria-hidden="true"></i></span>
-            <div><small>Asignaciones activas</small><strong data-assigned-count>{{ $selectedRole?->permisos->count() ?? 0 }}</strong><em>{{ $assignedPermissionCount }} en todos los roles</em></div>
-        </article>
-    </section>
-    <form class="tc-matrix-toolbar" method="get" action="{{ route('management.permissions_matrix') }}" data-role-selector-form>
-        <label class="tc-matrix-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar permiso</span><input type="search" name="buscar" value="{{ request('buscar') }}" data-matrix-filter placeholder="Buscar por permiso, pantalla o módulo…"></label>
-        <label>Filtrar módulo<select data-module-filter>
-                <option value="">Todos los módulos</option>@foreach ($permissions as $modulePermissions)<option value="{{ $modulePermissions->first()->modulo_codigo }}">{{ $modulePermissions->first()->modulo_nombre }}</option>@endforeach
-            </select></label>
-        <label>Rol<select name="rol" data-role-selector>@foreach ($roles as $role)<option value="{{ $role->id }}" @selected($selectedRole?->id === $role->id)>{{ $role->nombre }}</option>@endforeach</select></label>
-        <button class="tc-rbac-secondary" type="button" data-apply-template><i class="bi bi-magic" aria-hidden="true"></i> Aplicar plantilla recomendada</button><button class="tc-rbac-secondary" type="button" data-preview-menu><i class="bi bi-eye" aria-hidden="true"></i> Vista previa del menú</button>
-    </form>
-    @if ($selectedRole)
-    <form method="post" action="{{ route('management.roles_permissions.permissions', $selectedRole) }}" data-permission-form>@csrf @method('PUT')<input type="hidden" name="alcance" value="{{ $selectedRole->alcance_permitido }}">
-        <div class="tc-matrix-layout tc-matrix-layout--full">
-            <div class="tc-matrix-card">
-                <div class="tc-matrix-scroll">
-                    <table class="tc-matrix-table">
-                        <thead>
-                            <tr>
-                                <th class="tc-matrix-resource-col">MÓDULO / PANTALLA</th>@foreach ($actions as $action)<th>{{ ucfirst($action) }}</th>@endforeach
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($permissions as $modulePermissions)
-                            @php($module = $modulePermissions->first())
-                            <tr class="tc-matrix-module-row" data-matrix-row data-module-code="{{ $module->modulo_codigo }}" data-search="{{ strtolower($module->modulo_nombre.' '.$module->modulo_codigo) }}">
-                                <th><button type="button" class="tc-tree-toggle" data-select-module="{{ $module->modulo_codigo }}" aria-label="Seleccionar permisos de {{ $module->modulo_nombre }}"><i class="bi bi-check2-square" aria-hidden="true"></i></button><i class="bi bi-folder2-open" aria-hidden="true"></i><strong>{{ $module->modulo_nombre }}</strong><span class="tc-rbac-status tc-rbac-status--active">{{ $modulePermissions->count() }} operaciones reales</span></th>@foreach ($actions as $action) @php($permission = $modulePermissions->firstWhere('accion', $action))<td>@if ($permission)<label class="tc-matrix-toggle" title="{{ $permission->nombre }}" aria-label="{{ $permission->nombre }}"><input type="checkbox" name="permisos[]" value="{{ $permission->id }}" data-permission-id="{{ $permission->id }}" data-module="{{ $module->modulo_codigo }}" @checked(in_array((int) $permission->id, $selectedPermissionIds, true)) @disabled($selectedRole->es_sistema || $module->modulo_codigo === 'seguridad')><span></span><b class="visually-hidden">{{ $permission->nombre }}</b></label>@else<span aria-label="Operación no registrada">—</span>@endif</td>@endforeach
-                            </tr>
-                            @foreach ($modulePermissions->filter(fn ($permission): bool => $permission->pantalla_id !== null)->groupBy('pantalla_id') as $screenPermissions)
-                            @php($firstPermission = $screenPermissions->first())
-                            <tr data-matrix-row data-module-code="{{ $module->modulo_codigo }}" data-search="{{ strtolower(($firstPermission->pantalla_nombre ?: '').' '.$firstPermission->modulo_nombre.' '.$screenPermissions->pluck('nombre')->join(' ')) }}">
-                                <th class="tc-matrix-screen"><i class="bi bi-{{ $firstPermission->pantalla_id ? 'window' : 'folder' }}" aria-hidden="true"></i><span>{{ $firstPermission->pantalla_nombre ?: $firstPermission->modulo_nombre }}</span><small>{{ $screenPermissions->count() }} acciones disponibles</small></th>@foreach ($actions as $action) @php($permission = $screenPermissions->firstWhere('accion', $action))<td>@if ($permission)<label class="tc-matrix-toggle" title="{{ $permission->nombre }}" aria-label="{{ $permission->nombre }}"><input type="checkbox" name="permisos[]" value="{{ $permission->id }}" data-permission-id="{{ $permission->id }}" data-module="{{ $module->modulo_codigo }}" @checked(in_array((int) $permission->id, $selectedPermissionIds, true)) @disabled($selectedRole->es_sistema || $module->modulo_codigo === 'seguridad')><span></span><b class="visually-hidden">{{ $permission->nombre }}</b></label>@else<span aria-label="Operación no registrada">—</span>@endif</td>@endforeach
-                            </tr>
+        <section class="tc-matrix-kpis" aria-label="Resumen de privilegios"><article><span class="tc-matrix-kpi-icon"><i class="bi bi-people" aria-hidden="true"></i></span><div><small>Roles configurados</small><strong>{{ $roles->count() }}</strong><em>Roles activos</em></div></article><article><span class="tc-matrix-kpi-icon tc-matrix-kpi-icon--purple"><i class="bi bi-layers" aria-hidden="true"></i></span><div><small>M&oacute;dulos</small><strong>{{ $moduleCount }}</strong><em>Cat&aacute;logo RBAC</em></div></article><article><span class="tc-matrix-kpi-icon tc-matrix-kpi-icon--cyan"><i class="bi bi-display" aria-hidden="true"></i></span><div><small>Pantallas</small><strong>{{ $screenCount }}</strong><em>Cat&aacute;logo RBAC</em></div></article><article><span class="tc-matrix-kpi-icon tc-matrix-kpi-icon--green"><i class="bi bi-shield-check" aria-hidden="true"></i></span><div><small>Asignaciones activas</small><strong data-assigned-count>{{ $assignedPermissionCount }}</strong><em>En roles activos</em></div></article></section>
+        <form class="tc-matrix-toolbar" method="get" action="{{ route('management.permissions_matrix') }}" data-role-selector-form>
+            <label class="tc-matrix-field"><span>Rol</span><select name="rol" data-role-selector><option value="">Seleccionar rol</option>@foreach ($roles as $role)<option value="{{ $role->id }}" @selected($selectedRole?->id === $role->id)>{{ $role->nombre }}</option>@endforeach</select></label>
+            <label class="tc-matrix-field"><span>Alcance</span><select disabled aria-label="Alcance del rol"><option>{{ $selectedRole ? ucfirst($selectedRole->alcance_permitido) : '' }}</option></select></label>
+            <label class="tc-matrix-field tc-matrix-search"><span>Buscar</span><span class="tc-matrix-input"><i class="bi bi-search" aria-hidden="true"></i><input type="search" name="buscar" value="{{ request('buscar') }}" data-matrix-filter placeholder="Buscar m&oacute;dulo o pantalla..."></span></label>
+        </form>
+        @if ($selectedRole)
+            <form method="post" action="{{ route('management.roles_permissions.permissions', $selectedRole) }}" data-permission-form data-ajax-submit="1">@csrf @method('PUT')<input type="hidden" name="alcance" value="{{ $selectedRole->alcance_permitido }}">
+                <div class="tc-matrix-permissions-card"><header class="tc-matrix-card-header"><div><h2 class="tc-matrix-card-kicker">Secciones del sistema ({{ $matrixGroups->count() }})</h2></div><div class="tc-matrix-card-actions"><label class="tc-matrix-module-filter"><span class="visually-hidden">Filtrar por secci&oacute;n</span><select data-module-selector aria-label="Filtrar por secci&oacute;n"><option value="">Todas las secciones</option>@foreach ($matrixGroups as $group)<option value="{{ $group['codigo'] }}">{{ $group['nombre'] }}</option>@endforeach</select></label><button class="tc-rbac-secondary tc-matrix-preview-button" type="button" data-preview-menu><i class="bi bi-eye" aria-hidden="true"></i> Vista previa del menú</button><button class="tc-rbac-secondary" type="button" data-expand-all><i class="bi bi-arrows-expand" aria-hidden="true"></i> Expandir todo</button><button class="tc-rbac-secondary" type="button" data-collapse-all><i class="bi bi-arrows-collapse" aria-hidden="true"></i> Contraer todo</button></div></header>
+                    <div class="tc-matrix-permission-store" hidden aria-hidden="true">
+                        @foreach ($matrixModules as $module)
+                            @foreach ($module['permissions'] as $permission)
+                                <input type="checkbox" name="permisos[]" value="{{ $permission['id'] }}" data-permission-id="{{ $permission['id'] }}" data-permission-module="{{ $module['codigo'] }}" data-permission-screen="" data-permission-action="{{ $permission['accion'] }}" data-permission-label="{{ $permission['nombre'] }}" @checked(in_array($permission['id'], $selectedPermissionIds, true))>
                             @endforeach
+                            @foreach ($module['screens'] as $screen)
+                                <span data-permission-screen-record data-permission-module="{{ $module['codigo'] }}" data-permission-screen="{{ $screen['id'] }}" data-permission-screen-name="{{ $screen['nombre'] }}"></span>
+                                @foreach ($screen['permissions'] as $permission)
+                                    <input type="checkbox" name="permisos[]" value="{{ $permission['id'] }}" data-permission-id="{{ $permission['id'] }}" data-permission-module="{{ $module['codigo'] }}" data-permission-screen="{{ $screen['id'] }}" data-permission-screen-name="{{ $screen['nombre'] }}" data-permission-action="{{ $permission['accion'] }}" data-permission-label="{{ $permission['nombre'] }}" @checked(in_array($permission['id'], $selectedPermissionIds, true))>
+                                @endforeach
                             @endforeach
-                        </tbody>
-                    </table>
-                </div>
-                <footer class="tc-matrix-footer"><span data-saved-state>Rol editable: <strong>{{ $selectedRole->nombre }}</strong>. Los cambios permanecen pendientes hasta guardar. Seguridad y Delegación se conserva protegida.</span>
-                    <div><button class="tc-rbac-secondary" type="button" data-discard-changes>Descartar cambios</button><button class="tc-rbac-primary" type="submit" data-save-changes @disabled($selectedRole->es_sistema)><i class="bi bi-save" aria-hidden="true"></i> Guardar cambios</button></div>
-                </footer>
-            </div>
-            <aside class="tc-matrix-legend">
-                <h2><i class="bi bi-info-circle" aria-hidden="true"></i> Leyenda</h2>
-                <div><span class="tc-legend-switch is-on"></span>
-                    <p><strong>Permiso habilitado</strong><small>El rol puede realizar la acción.</small></p>
-                </div>
-                <div><span class="tc-legend-switch"></span>
-                    <p><strong>Permiso deshabilitado</strong><small>El rol no puede realizar la acción.</small></p>
-                </div>
-                <hr>
-                <h3>Acciones registradas</h3>@foreach ($actions as $action)<span class="tc-legend-action"><b>{{ strtoupper(mb_substr($action, 0, 1)) }}</b>{{ ucfirst($action) }}</span>@endforeach
-            </aside>
-        </div>
-    </form>
-    @else
-    <div class="tc-rbac-alert">No hay roles activos disponibles.</div>
-    @endif
-    @endunless
-    <dialog class="tc-rbac-dialog" data-preview-dialog aria-labelledby="preview-menu-title">
-        <div class="tc-rbac-dialog-card">
-            <header>
-                <div><span class="tc-rbac-dialog-icon"><i class="bi bi-list-nested" aria-hidden="true"></i></span>
-                    <div><small>Previsualización dinámica</small>
-                        <h2 id="preview-menu-title">Menú del rol seleccionado</h2>
+                        @endforeach
                     </div>
-                </div><button type="button" class="tc-rbac-dialog-close" data-close-preview aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
-            </header>
-            <div class="tc-rbac-dialog-body">
-                <p class="tc-rbac-info">La vista se calcula con las casillas actualmente seleccionadas y el catálogo real de menús y pantallas.</p>
-                <div data-preview-content></div>
-                <footer><button type="button" class="tc-rbac-secondary" data-close-preview>Cerrar</button></footer>
-            </div>
-        </div>
-    </dialog>
+                    @forelse ($matrixGroups as $group)
+                        <article class="tc-matrix-module-panel" data-module-panel data-module-code="{{ $group['codigo'] }}" data-search="{{ strtolower($group['nombre'].' '.$group['codigo']) }}"><header class="tc-matrix-module-header" data-module-header><button type="button" class="tc-matrix-collapse" data-toggle-module aria-expanded="false" aria-label="Mostrar {{ $group['nombre'] }}"><i class="bi bi-chevron-down" aria-hidden="true"></i></button><div class="tc-matrix-module-heading"><span class="tc-matrix-module-icon"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i></span><div><h3>{{ $group['nombre'] }}</h3></div></div><i class="tc-matrix-module-chevron bi bi-chevron-down" aria-hidden="true"></i></header><div class="tc-matrix-module-body" hidden>
+                            @forelse ($group['items'] as $item)
+                                <section class="tc-matrix-screen-group" data-matrix-row data-module-code="{{ $group['codigo'] }}" data-module-id="{{ $item['module_id'] }}" data-permission-module="{{ $item['module_code'] }}" data-screen-id="{{ $item['screen_id'] }}" data-screen-name="{{ $item['nombre'] }}" data-module-name="{{ $item['module_name'] }}" data-search="{{ strtolower($group['nombre'].' '.$item['nombre'].' '.$item['screen_name'].' '.$item['module_name']) }}"><header><span class="tc-matrix-screen-label"><i class="bi bi-window" aria-hidden="true"></i><span><strong>{{ $item['nombre'] }}</strong><small>{{ $item['permission_count'] }} acciones registradas · {{ $item['module_name'] }}</small></span></span><button type="button" class="tc-matrix-screen-configure" data-open-permission-modal><i class="bi bi-sliders" aria-hidden="true"></i> Configurar</button></header></section>
+                            @empty
+                                <p class="tc-matrix-empty-line">No hay pantallas activas registradas en esta secci&oacute;n.</p>
+                            @endforelse
+                        </div></article>
+                    @empty
+                        <div class="tc-rbac-empty">No hay secciones configuradas en el men&uacute; del sistema.</div>
+                    @endforelse
+                    <footer class="tc-matrix-footer"><span data-saved-state>Rol editable: <strong>{{ $selectedRole->nombre }}</strong>. Los cambios permanecen pendientes hasta guardar.</span><div><button class="tc-rbac-secondary" type="button" data-discard-changes>Descartar cambios</button><button class="tc-rbac-primary" type="submit" data-save-changes>Guardar cambios</button></div></footer>
+                </div>
+            </form>
+        @else
+            <div class="tc-rbac-alert">No hay roles registrados.</div>
+        @endif
+    @endunless
+    <dialog class="tc-rbac-dialog" data-preview-dialog aria-labelledby="preview-menu-title"><div class="tc-rbac-dialog-card"><header><h2 id="preview-menu-title">Men&uacute; del rol seleccionado</h2><button type="button" data-close-preview aria-label="Cerrar">&times;</button></header><div class="tc-rbac-dialog-body"><p>La vista previa usa men&uacute;s, pantallas y permisos persistidos.</p><div data-preview-content></div></div></div></dialog>
+    @if ($selectedRole)
+        <dialog class="tc-rbac-dialog tc-rbac-permission-dialog" data-permission-dialog aria-labelledby="permission-dialog-title"><div class="tc-permission-dialog-form"><header class="tc-permission-dialog-header"><div><span class="tc-permission-dialog-icon"><i class="bi bi-shield-check" aria-hidden="true"></i></span><div><h2 id="permission-dialog-title">Asignar privilegios</h2><p>Configura los permisos del módulo seleccionado.</p></div></div><button type="button" data-close-permission-dialog aria-label="Cerrar">&times;</button></header><div class="tc-matrix-toast-host tc-matrix-toast-host--dialog" data-matrix-toast-dialog aria-live="polite" aria-relevant="additions"></div><div class="tc-rbac-dialog-body"><div class="tc-permission-dialog-context"><div><small>M&oacute;dulo seleccionado</small><strong data-permission-module-name></strong></div><div><small>Rol</small><strong>{{ $selectedRole->nombre }}</strong></div><div><small>Alcance</small><strong>{{ ucfirst($selectedRole->alcance_permitido) }}</strong></div></div><nav class="tc-permission-dialog-tabs" role="tablist" aria-label="Secciones de permisos"><button type="button" role="tab" aria-selected="true" data-permission-tab="permissions"><i class="bi bi-display" aria-hidden="true"></i> Pantallas del módulo</button><button type="button" role="tab" aria-selected="false" data-permission-tab="summary"><i class="bi bi-list-check" aria-hidden="true"></i> Resumen de permisos</button></nav><section class="tc-permission-dialog-pane" role="tabpanel" data-permission-pane="permissions"><div class="tc-permission-dialog-screen"><i class="bi bi-window" aria-hidden="true"></i><strong data-permission-screen-name></strong></div><div class="tc-permission-dialog-list" data-permission-list></div></section><section class="tc-permission-dialog-pane" role="tabpanel" data-permission-pane="summary" hidden><div data-permission-summary></div></section></div><footer class="tc-permission-dialog-footer"><button type="button" class="tc-rbac-secondary" data-close-permission-dialog>Cancelar</button><button type="button" class="tc-rbac-primary" data-save-screen-permissions><i class="bi bi-floppy" aria-hidden="true"></i> Guardar cambios</button></footer></div></dialog>
+    @endif
 </section>
 @endsection
 

@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\User;
-use App\Servicios\ServicioAutorizacion;
+use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Tests\IsolatedMariaDatabase;

@@ -57,23 +57,14 @@
                 <thead><tr><th>Código</th><th>Origen</th><th>Destino</th><th>Solicitó</th><th>Fecha</th><th>Unidades solicitadas</th><th>Estado</th><th>Operaciones</th></tr></thead>
                 <tbody>
                     @forelse ($transfers as $transfer)
-                        @php
-                            $tone = match ($transfer->estado) {
-                                'solicitada', 'recibida parcialmente' => 'ambar',
-                                'recibida totalmente', 'cerrada' => 'verde',
-                                'rechazada', 'cancelada' => 'rojo',
-                                default => 'azul',
-                            };
-                            $lineCount = $transfer->detalles->sum(fn ($line) => (int) $line->cantidad_solicitada);
-                        @endphp
                         <tr>
                             <td>{{ $transfer->codigo }}</td>
                             <td>{{ $transfer->sedeOrigen?->nombre }} · {{ $transfer->almacenOrigen?->nombre }}</td>
                             <td>{{ $transfer->sedeDestino?->nombre }} · {{ $transfer->almacenDestino?->nombre }}</td>
                             <td>{{ $transfer->solicitante?->nombre ?? '—' }}</td>
                             <td>{{ $transfer->creado_en?->format('d/m/Y H:i') }}</td>
-                            <td>{{ $lineCount }}</td>
-                            <td><span class="tc-il__pill tc-il__pill--{{ $tone }}">{{ ucfirst($transfer->estado) }}</span></td>
+                            <td>{{ $transfer->presentation_line_count }}</td>
+                            <td><span class="tc-il__pill tc-il__pill--{{ $transfer->presentation_tone }}">{{ ucfirst($transfer->estado) }}</span></td>
                             <td>
                                 <details class="tc-il__transfer-detail">
                                     <summary class="tc-il__button">Detalle / acciones</summary>
@@ -99,22 +90,16 @@
                                         @if (in_array($transfer->estado, ['aprobada', 'en tránsito', 'recibida parcialmente'], true))
                                             <div class="tc-il__transfer-actions">
                                                 @foreach ($transfer->detalles as $detail)
-                                                    @php
-                                                        $pendingDispatch = (int) $detail->cantidad_solicitada - (int) $detail->cantidad_enviada;
-                                                        $returned = $supports_return_reconciliation ? (int) $detail->cantidad_devuelta : 0;
-                                                        $reconciled = $supports_difference_reconciliation ? (int) $detail->cantidad_conciliada : 0;
-                                                        $pendingReceipt = (int) $detail->cantidad_enviada - (int) $detail->cantidad_recibida - $returned - $reconciled;
-                                                    @endphp
-                                                    @if ($pendingDispatch > 0)
-                                                        <form method="POST" action="{{ route('management.inventory.transfer_dispatch', $transfer) }}" class="tc-il__transfer-line-form">@csrf<input type="hidden" name="clave_idempotencia" value="{{ \Illuminate\Support\Str::uuid() }}"><input type="hidden" name="items[0][detalle_id]" value="{{ $detail->id }}"><strong>Despachar · {{ $detail->producto?->nombre }}</strong><label>Cantidad<input type="number" name="items[0][cantidad]" min="1" max="{{ $pendingDispatch }}" required></label><label>IMEI / serie, uno por línea si aplica<textarea name="items[0][series]" rows="2" maxlength="4000"></textarea></label><button class="tc-il__button tc-il__button--primary" type="submit">Registrar despacho</button></form>
+                                                    @if ($detail->pending_dispatch > 0)
+                                                        <form method="POST" action="{{ route('management.inventory.transfer_dispatch', $transfer) }}" class="tc-il__transfer-line-form">@csrf<input type="hidden" name="clave_idempotencia" value="{{ \Illuminate\Support\Str::uuid() }}"><input type="hidden" name="items[0][detalle_id]" value="{{ $detail->id }}"><strong>Despachar · {{ $detail->producto?->nombre }}</strong><label>Cantidad<input type="number" name="items[0][cantidad]" min="1" max="{{ $detail->pending_dispatch }}" required></label><label>IMEI / serie, uno por línea si aplica<textarea name="items[0][series]" rows="2" maxlength="4000"></textarea></label><button class="tc-il__button tc-il__button--primary" type="submit">Registrar despacho</button></form>
                                                     @endif
-                                                    @if ($pendingReceipt > 0 && $supports_difference_reconciliation)
-                                                        <form method="POST" action="{{ route('management.inventory.transfer_reconcile', $transfer) }}" class="tc-il__transfer-line-form">@csrf<input type="hidden" name="clave_idempotencia" value="{{ \Illuminate\Support\Str::uuid() }}"><input type="hidden" name="items[0][detalle_id]" value="{{ $detail->id }}"><strong>Conciliar faltante: {{ $detail->producto?->nombre }}</strong><label>Cantidad con diferencia<input type="number" name="items[0][cantidad]" min="1" max="{{ $pendingReceipt }}" required></label><label>IMEI / serie de la diferencia, uno por linea si aplica<textarea name="items[0][series]" rows="2" maxlength="4000"></textarea></label><label>Motivo documentado<input type="text" name="motivo" minlength="5" maxlength="500" required></label><button class="tc-il__button" type="submit">Registrar conciliacion</button></form>
+                                                    @if ($detail->pending_receipt > 0 && $supports_difference_reconciliation)
+                                                        <form method="POST" action="{{ route('management.inventory.transfer_reconcile', $transfer) }}" class="tc-il__transfer-line-form">@csrf<input type="hidden" name="clave_idempotencia" value="{{ \Illuminate\Support\Str::uuid() }}"><input type="hidden" name="items[0][detalle_id]" value="{{ $detail->id }}"><strong>Conciliar faltante: {{ $detail->producto?->nombre }}</strong><label>Cantidad con diferencia<input type="number" name="items[0][cantidad]" min="1" max="{{ $detail->pending_receipt }}" required></label><label>IMEI / serie de la diferencia, uno por linea si aplica<textarea name="items[0][series]" rows="2" maxlength="4000"></textarea></label><label>Motivo documentado<input type="text" name="motivo" minlength="5" maxlength="500" required></label><button class="tc-il__button" type="submit">Registrar conciliacion</button></form>
                                                     @endif
-                                                    @if ($pendingReceipt > 0)
-                                                        <form method="POST" action="{{ route('management.inventory.transfer_receive', $transfer) }}" class="tc-il__transfer-line-form">@csrf<input type="hidden" name="clave_idempotencia" value="{{ \Illuminate\Support\Str::uuid() }}"><input type="hidden" name="items[0][detalle_id]" value="{{ $detail->id }}"><strong>Recibir · {{ $detail->producto?->nombre }}</strong><label>Cantidad recibida<input type="number" name="items[0][cantidad]" min="1" max="{{ $pendingReceipt }}" required></label><label>IMEI / serie recibida, uno por línea si aplica<textarea name="items[0][series]" rows="2" maxlength="4000"></textarea></label><button class="tc-il__button tc-il__button--primary" type="submit">Registrar recepción</button></form>
+                                                    @if ($detail->pending_receipt > 0)
+                                                        <form method="POST" action="{{ route('management.inventory.transfer_receive', $transfer) }}" class="tc-il__transfer-line-form">@csrf<input type="hidden" name="clave_idempotencia" value="{{ \Illuminate\Support\Str::uuid() }}"><input type="hidden" name="items[0][detalle_id]" value="{{ $detail->id }}"><strong>Recibir · {{ $detail->producto?->nombre }}</strong><label>Cantidad recibida<input type="number" name="items[0][cantidad]" min="1" max="{{ $detail->pending_receipt }}" required></label><label>IMEI / serie recibida, uno por línea si aplica<textarea name="items[0][series]" rows="2" maxlength="4000"></textarea></label><button class="tc-il__button tc-il__button--primary" type="submit">Registrar recepción</button></form>
                                                         @if ($supports_return_reconciliation)
-                                                            <form method="POST" action="{{ route('management.inventory.transfer_return', $transfer) }}" class="tc-il__transfer-line-form">@csrf<input type="hidden" name="clave_idempotencia" value="{{ \Illuminate\Support\Str::uuid() }}"><input type="hidden" name="items[0][detalle_id]" value="{{ $detail->id }}"><strong>Devolver al origen · {{ $detail->producto?->nombre }}</strong><label>Cantidad devuelta<input type="number" name="items[0][cantidad]" min="1" max="{{ $pendingReceipt }}" required></label><label>IMEI / serie devuelta, uno por línea si aplica<textarea name="items[0][series]" rows="2" maxlength="4000"></textarea></label><label>Motivo documentado<input type="text" name="motivo" maxlength="500" required></label><button class="tc-il__button" type="submit">Registrar devolución</button></form>
+                                                            <form method="POST" action="{{ route('management.inventory.transfer_return', $transfer) }}" class="tc-il__transfer-line-form">@csrf<input type="hidden" name="clave_idempotencia" value="{{ \Illuminate\Support\Str::uuid() }}"><input type="hidden" name="items[0][detalle_id]" value="{{ $detail->id }}"><strong>Devolver al origen · {{ $detail->producto?->nombre }}</strong><label>Cantidad devuelta<input type="number" name="items[0][cantidad]" min="1" max="{{ $detail->pending_receipt }}" required></label><label>IMEI / serie devuelta, uno por línea si aplica<textarea name="items[0][series]" rows="2" maxlength="4000"></textarea></label><label>Motivo documentado<input type="text" name="motivo" maxlength="500" required></label><button class="tc-il__button" type="submit">Registrar devolución</button></form>
                                                         @endif
                                                     @endif
                                                 @endforeach

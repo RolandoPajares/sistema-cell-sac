@@ -1,4 +1,4 @@
-﻿/** Comportamientos migrados desde vistas PHP. */
+/** Comportamientos migrados desde vistas PHP. */
 /*  */
 
         (() => {
@@ -223,7 +223,7 @@
                     titulo.textContent = textos.titulo;
                     descripcion.textContent = textos.descripcion;
                     mensaje.textContent = textos.mensaje;
-                    referencia.textContent = boton.dataset.reference ?? 'â€”';
+                    referencia.textContent = boton.dataset.reference ?? '—';
                     cliente.textContent = boton.dataset.customer ?? 'Cliente no disponible';
                     const esEnvio = accion === 'enviar';
                     envioManual.hidden = !esEnvio;
@@ -330,13 +330,13 @@
                     const invalidFields = [...(dialog?.querySelectorAll('[required]') ?? [])].filter((field) => !field.checkValidity());
                     if (invalidFields.length > 0) {
                         invalidFields.forEach((field) => field.setAttribute('aria-invalid', 'true'));
-                        error.textContent = 'Completa los campos obligatorios para continuar con esta demostraciÃ³n.';
+                        error.textContent = 'Completa los campos obligatorios para continuar con esta demostración.';
                         error.hidden = false;
                         status.hidden = true;
                         invalidFields[0].focus();
                         return;
                     }
-                    status.textContent = 'IntegraciÃ³n pendiente: no se guardÃ³ la informaciÃ³n ni se ejecutÃ³ ninguna operaciÃ³n comercial.';
+                    status.textContent = 'Integración pendiente: no se guardó la información ni se ejecutó ninguna operación comercial.';
                     status.hidden = false;
                     error.hidden = true;
                     button.disabled = true;
@@ -448,6 +448,6 @@
             })();
         
 
-// Envío de filtros sin eventos inline.
+// Env�o de filtros sin eventos inline.
 document.querySelectorAll('[data-submit-on-change]').forEach((control) => { control.addEventListener('change', () => control.form?.submit()); });
 

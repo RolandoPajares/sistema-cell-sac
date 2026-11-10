@@ -33,7 +33,7 @@ export default defineConfig({
                 'resources/js/gestion/administracion/seguridad/roles-permisos/matriz.js',
                 'resources/js/gestion/administracion/seguridad/roles-permisos/modulos.js',
                 'resources/js/gestion/administracion/seguridad/usuarios/listar.js',
-                'resources/js/cuenta/perfil.js',
+                'resources/js/cuenta/perfil/perfil.js',
                 'resources/js/vistas-inline-migradas.js',
                 'resources/js/gestion/vistas-interactivas.js',
                 'resources/js/gestion/vistas-interactivas.js',

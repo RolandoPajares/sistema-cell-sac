@@ -127,6 +127,98 @@
   color: #637994;
 }
 
+.tc-rbac-profile-fields {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.tc-rbac-section-heading h2 {
+  margin: 4px 0;
+  color: #17395f;
+  font-size: 1.15rem;
+}
+
+.tc-rbac-section-heading p {
+  margin: 0;
+  color: #637994;
+}
+
+.tc-rbac-profile-field-create {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  gap: 10px;
+  align-items: end;
+  padding: 12px;
+  border: 1px solid #e0eaf5;
+  border-radius: 10px;
+}
+
+.tc-rbac-profile-field-create label,
+.tc-rbac-profile-field-row label {
+  display: grid;
+  gap: 5px;
+  color: #355577;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.tc-rbac-profile-field-create input,
+.tc-rbac-profile-field-create select {
+  min-height: 36px;
+  padding: 7px 9px;
+  border: 1px solid #d5e2ef;
+  border-radius: 7px;
+  font: inherit;
+}
+
+.tc-rbac-profile-role-config {
+  border-top: 1px solid #e0eaf5;
+}
+
+.tc-rbac-profile-role-config summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  color: #17395f;
+  cursor: pointer;
+}
+
+.tc-rbac-profile-role-config summary span {
+  color: #637994;
+  font-size: 0.75rem;
+}
+
+.tc-rbac-profile-field-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  align-items: center;
+  margin: 0 0 8px;
+  padding: 9px;
+  border: 1px solid #e0eaf5;
+  border-radius: 8px;
+}
+
+.tc-rbac-profile-field-row legend {
+  width: 100%;
+  color: #17395f;
+  font-weight: 800;
+}
+
+.tc-rbac-profile-field-row legend small {
+  margin-left: 6px;
+  color: #8192aa;
+  font-weight: 500;
+}
+
+@media (max-width: 900px) {
+  .tc-rbac-profile-field-create {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 760px) {
   .role-matrix-summary,
   .menu-role-form,

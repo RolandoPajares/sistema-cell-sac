@@ -3,11 +3,6 @@
 @section('title', 'Portal mayorista')
 @section('body_class', 'modulo-mayorista')
 
-@php
-    $urlImagenPrincipal = static fn ($producto): string => $producto->url_imagen_principal
-        ?: asset('assets/cell-legacy/img/marca/logo.jpeg');
-@endphp
-
 @section('content')
     <section class="mayorista-hero">
         <div class="container mayorista-hero-grid">
@@ -65,7 +60,7 @@
                 @forelse ($products as $product)
                     <article>
                         <span>Disponible</span>
-                        <img class="mayorista-product-photo" src="{{ $urlImagenPrincipal($product) }}" alt="{{ $product->marca }} {{ $product->nombre }}" loading="lazy">
+                        <img class="mayorista-product-photo" src="{{ $product->wholesale_image }}" alt="{{ $product->marca }} {{ $product->nombre }}" loading="lazy">
                         <small>{{ $product->marca }}</small>
                         <h3>{{ $product->nombre }}</h3>
                         <p>1–9 und. <b>S/ {{ number_format((float) $product->effective_price, 2) }}</b><br>10–49 und. <b>S/ {{ number_format($product->wholesale_price_10, 2) }}</b><br>50+ und. <b>S/ {{ number_format($product->wholesale_price_50, 2) }}</b></p>
@@ -82,8 +77,8 @@
             <p>Cuéntanos sobre tu empresa y te enviaremos una propuesta personalizada.</p>
             <form action="{{ route('pages.contact.store') }}" method="post">
                 @csrf
-                <input type="hidden" name="nombre" value="{{ auth()->user()?->nombre ?: 'Solicitud mayorista' }}">
-                <input type="hidden" name="contacto" value="{{ auth()->user()?->correo ?: 'Portal mayorista' }}">
+                <input type="hidden" name="nombre" value="{{ $currentUserName ?: 'Solicitud mayorista' }}">
+                <input type="hidden" name="contacto" value="{{ $currentUserEmail ?: 'Portal mayorista' }}">
                 <label>
                     <i class="bi bi-buildings"></i>
                     <input
@@ -120,7 +115,7 @@
                 <textarea
                     name="mensaje"
                     hidden
-                >Solicitud de cotización mayorista para {{ auth()->user()?->nombre ?: 'cliente' }}.</textarea>
+                >Solicitud de cotización mayorista para {{ $currentUserName ?: 'cliente' }}.</textarea>
                 <button class="btn btn-primary" type="submit">
                     Enviar solicitud
                     <i class="bi bi-arrow-right"></i>

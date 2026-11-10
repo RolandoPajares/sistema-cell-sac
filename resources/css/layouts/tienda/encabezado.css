@@ -120,6 +120,13 @@
   color: var(--primary);
   font-size: 1.9rem;
 }
+.header-account-avatar {
+  width: 32px;
+  height: 32px;
+  border: 2px solid color-mix(in srgb, var(--primary) 35%, transparent);
+  border-radius: 50%;
+  object-fit: cover;
+}
 .header-account b,
 .header-account small {
   display: block;

@@ -16,7 +16,7 @@
             $statusFor = static function (string $status): array {
                 return match ($status) {
                     'Pendiente' => ['label' => 'Pendiente', 'class' => 'pending'],
-                    'En proceso' => ['label' => 'En preparaciÃƒÂ³n', 'class' => 'preparing'],
+                    'En proceso' => ['label' => 'En preparaciÃ³n', 'class' => 'preparing'],
                     'Enviado' => ['label' => 'Enviado', 'class' => 'sent'],
                     'Entregado' => ['label' => 'Entregado', 'class' => 'delivered'],
                     'Cancelado' => ['label' => 'Cancelado', 'class' => 'cancelled'],
@@ -26,11 +26,11 @@
             $shippingFor = static function (string $status): array {
                 return match ($status) {
                     'Pendiente' => ['label' => 'Por preparar', 'class' => 'muted'],
-                    'En proceso' => ['label' => 'En preparaciÃƒÂ³n', 'class' => 'sent'],
-                    'Enviado' => ['label' => 'En trÃƒÂ¡nsito', 'class' => 'sent'],
+                    'En proceso' => ['label' => 'En preparaciÃ³n', 'class' => 'sent'],
+                    'Enviado' => ['label' => 'En trÃ¡nsito', 'class' => 'sent'],
                     'Entregado' => ['label' => 'Entregado', 'class' => 'delivered'],
                     'Cancelado' => ['label' => 'Cancelado', 'class' => 'cancelled'],
-                    default => ['label' => 'Sin informaciÃƒÂ³n', 'class' => 'muted'],
+                    default => ['label' => 'Sin informaciÃ³n', 'class' => 'muted'],
                 };
             };
             $initialsFor = static function (?string $name): string {
@@ -50,27 +50,27 @@
             }
             $donutStyle = 'background: conic-gradient('.implode(', ', $gradientSegments ?: ['#dce8f5 0% 100%']).');';
             $alerts = [
-                ['show' => $pendingOrders > 0, 'icon' => 'exclamation-triangle', 'class' => 'warning', 'title' => number_format($pendingOrders).' pedidos pendientes', 'detail' => 'Requieren atenciÃƒÂ³n inmediata.'],
+                ['show' => $pendingOrders > 0, 'icon' => 'exclamation-triangle', 'class' => 'warning', 'title' => number_format($pendingOrders).' pedidos pendientes', 'detail' => 'Requieren atenciÃ³n inmediata.'],
                 ['show' => $cancelledOrders > 0, 'icon' => 'bag-x', 'class' => 'danger', 'title' => number_format($cancelledOrders).' pedidos cancelados', 'detail' => 'Revisa los reembolsos y el stock.'],
-                ['show' => $staleOrders > 0, 'icon' => 'bell', 'class' => 'purple', 'title' => number_format($staleOrders).' pedidos sin movimiento', 'detail' => 'Sin actualizaciÃƒÂ³n en 48 horas.'],
+                ['show' => $staleOrders > 0, 'icon' => 'bell', 'class' => 'purple', 'title' => number_format($staleOrders).' pedidos sin movimiento', 'detail' => 'Sin actualizaciÃ³n en 48 horas.'],
             ];
         @endphp
 
         <section class="pedidos-page" data-admin-orders-page>
             <header class="pedidos-hero">
                 <div>
-                    <span class="pedidos-eyebrow">OperaciÃƒÂ³n comercial</span>
+                    <span class="pedidos-eyebrow">OperaciÃ³n comercial</span>
                     <h1>Pedidos <i class="bi bi-cart3" aria-hidden="true"></i></h1>
-                    <p>Gestiona pedidos, pagos, envÃƒÂ­os y estados desde un solo lugar.</p>
+                    <p>Gestiona pedidos, pagos, envÃ­os y estados desde un solo lugar.</p>
                 </div>
-                <div class="pedidos-period-card"><i class="bi bi-calendar3" aria-hidden="true"></i><span><small>Periodo consultado</small><strong>{{ $filters['periodo'] === 'all' ? 'Todo el historial' : 'ÃƒÅ¡ltimos '.$filters['periodo'].' dÃƒÂ­as' }}</strong></span><i class="bi bi-chevron-down" aria-hidden="true"></i></div>
+                <div class="pedidos-period-card"><i class="bi bi-calendar3" aria-hidden="true"></i><span><small>Periodo consultado</small><strong>{{ $filters['periodo'] === 'all' ? 'Todo el historial' : 'Ãšltimos '.$filters['periodo'].' dÃ­as' }}</strong></span><i class="bi bi-chevron-down" aria-hidden="true"></i></div>
             </header>
 
             <section class="pedidos-kpi-grid" aria-label="Resumen de pedidos">
                 <article class="pedidos-kpi pedidos-kpi--blue"><span class="pedidos-kpi-icon"><i class="bi bi-cart3" aria-hidden="true"></i></span><div><small>Pedidos hoy</small><strong>{{ number_format($todayOrders) }}</strong><span>vs. ayer</span></div><b class="pedidos-kpi-trend {{ ($todayOrdersTrend ?? 0) >= 0 ? 'is-positive' : 'is-negative' }}"><i class="bi bi-arrow-{{ ($todayOrdersTrend ?? 0) >= 0 ? 'up' : 'down' }}" aria-hidden="true"></i> @if ($todayOrdersTrend !== null){{ number_format(abs($todayOrdersTrend), 1) }}%@else sin periodo anterior @endif</b></article>
-                <article class="pedidos-kpi pedidos-kpi--orange"><span class="pedidos-kpi-icon"><i class="bi bi-clock" aria-hidden="true"></i></span><div><small>Pendientes</small><strong>{{ number_format($pendingOrders) }}</strong><span>Requieren atenciÃƒÂ³n</span></div><b class="pedidos-kpi-trend {{ $pendingOrders > 0 ? 'is-negative' : 'is-positive' }}"><i class="bi bi-{{ $pendingOrders > 0 ? 'arrow-down' : 'check' }}" aria-hidden="true"></i> {{ $pendingOrders > 0 ? 'Revisar' : 'Al dÃƒÂ­a' }}</b></article>
+                <article class="pedidos-kpi pedidos-kpi--orange"><span class="pedidos-kpi-icon"><i class="bi bi-clock" aria-hidden="true"></i></span><div><small>Pendientes</small><strong>{{ number_format($pendingOrders) }}</strong><span>Requieren atenciÃ³n</span></div><b class="pedidos-kpi-trend {{ $pendingOrders > 0 ? 'is-negative' : 'is-positive' }}"><i class="bi bi-{{ $pendingOrders > 0 ? 'arrow-down' : 'check' }}" aria-hidden="true"></i> {{ $pendingOrders > 0 ? 'Revisar' : 'Al dÃ­a' }}</b></article>
                 <article class="pedidos-kpi pedidos-kpi--green"><span class="pedidos-kpi-icon"><i class="bi bi-credit-card" aria-hidden="true"></i></span><div><small>Estado de pago</small><strong>{{ $paidOrders === null ? 'No verificado' : number_format($paidOrders) }}</strong><span>Sin fuente financiera integrada</span></div><b class="pedidos-kpi-trend is-positive"><i class="bi bi-arrow-up" aria-hidden="true"></i> Estado actual</b></article>
-                <article class="pedidos-kpi pedidos-kpi--blue"><span class="pedidos-kpi-icon"><i class="bi bi-truck" aria-hidden="true"></i></span><div><small>En envÃƒÂ­o</small><strong>{{ number_format($shippingOrders) }}</strong><span>En trÃƒÂ¡nsito</span></div><b class="pedidos-kpi-trend is-positive"><i class="bi bi-arrow-up" aria-hidden="true"></i> Seguimiento</b></article>
+                <article class="pedidos-kpi pedidos-kpi--blue"><span class="pedidos-kpi-icon"><i class="bi bi-truck" aria-hidden="true"></i></span><div><small>En envÃ­o</small><strong>{{ number_format($shippingOrders) }}</strong><span>En trÃ¡nsito</span></div><b class="pedidos-kpi-trend is-positive"><i class="bi bi-arrow-up" aria-hidden="true"></i> Seguimiento</b></article>
                 <article class="pedidos-kpi pedidos-kpi--purple"><span class="pedidos-kpi-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span><div><small>Entregados</small><strong>{{ number_format($deliveredOrders) }}</strong><span>Pedidos completados</span></div><b class="pedidos-kpi-trend is-positive"><i class="bi bi-check2" aria-hidden="true"></i> Finalizados</b></article>
                 <article class="pedidos-kpi pedidos-kpi--red"><span class="pedidos-kpi-icon"><i class="bi bi-x-circle" aria-hidden="true"></i></span><div><small>Cancelados</small><strong>{{ number_format($cancelledOrders) }}</strong><span>Pedidos cancelados</span></div><b class="pedidos-kpi-trend {{ $cancelledOrders > 0 ? 'is-negative' : 'is-positive' }}"><i class="bi bi-{{ $cancelledOrders > 0 ? 'arrow-down' : 'check' }}" aria-hidden="true"></i> {{ $cancelledOrders > 0 ? 'Revisar' : 'Sin casos' }}</b></article>
             </section>
@@ -84,17 +84,17 @@
             <dialog class="admin-dialog pedidos-create-dialog" id="nuevo-pedido" aria-labelledby="nuevo-pedido-title">
                 <div class="pedidos-create-card">
                     <header class="pedidos-create-header"><span class="pedidos-create-icon"><i class="bi bi-cart-plus" aria-hidden="true"></i></span><div><small>Operaciones comerciales</small><h2 id="nuevo-pedido-title">Nuevo pedido</h2><p>Selecciona productos y completa el pedido en la tienda.</p></div><button type="button" class="admin-dialog-close" data-admin-dialog-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
-                    <div class="pedidos-create-body"><div class="pedidos-create-step"><b>1</b><span><strong>Selecciona los productos</strong><small>Consulta el catÃƒÂ¡logo y agrega los artÃƒÂ­culos disponibles.</small></span></div><div class="pedidos-create-step"><b>2</b><span><strong>Completa los datos del pedido</strong><small>El cliente, cantidades y total se validan antes de guardar.</small></span></div><div class="pedidos-create-step"><b>3</b><span><strong>Confirma la compra</strong><small>El pedido se registra mediante el flujo real de la tienda.</small></span></div></div>
+                    <div class="pedidos-create-body"><div class="pedidos-create-step"><b>1</b><span><strong>Selecciona los productos</strong><small>Consulta el catÃ¡logo y agrega los artÃ­culos disponibles.</small></span></div><div class="pedidos-create-step"><b>2</b><span><strong>Completa los datos del pedido</strong><small>El cliente, cantidades y total se validan antes de guardar.</small></span></div><div class="pedidos-create-step"><b>3</b><span><strong>Confirma la compra</strong><small>El pedido se registra mediante el flujo real de la tienda.</small></span></div></div>
                     <footer class="pedidos-create-footer"><button type="button" class="pedidos-toolbar-button" data-admin-dialog-close>Cancelar</button><a class="pedidos-primary-button" href="{{ route('catalog.index') }}"><i class="bi bi-shop" aria-hidden="true"></i> Abrir tienda</a></footer>
                 </div>
             </dialog>
 
             <form class="pedidos-filters" method="get" action="{{ route('management.orders') }}">
                 <label class="pedidos-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar pedido o cliente</span><input type="search" name="buscar" value="{{ $filters['buscar'] ?? '' }}" placeholder="Buscar pedido o cliente..."></label>
-                <label><span class="visually-hidden">Filtrar por estado</span><select name="estado"><option value="">Estado: Todos</option><option value="pendiente" @selected(($filters['estado'] ?? null) === 'Pendiente')>Pendiente</option><option value="en_proceso" @selected(($filters['estado'] ?? null) === 'En proceso')>En preparaciÃƒÂ³n</option><option value="enviado" @selected(($filters['estado'] ?? null) === 'Enviado')>Enviado</option><option value="entregado" @selected(($filters['estado'] ?? null) === 'Entregado')>Entregado</option><option value="cancelado" @selected(($filters['estado'] ?? null) === 'Cancelado')>Cancelado</option></select></label>
-                <label><span class="visually-hidden">Filtrar por fecha</span><select name="periodo"><option value="7" @selected($filters['periodo'] === '7')>ÃƒÅ¡ltimos 7 dÃƒÂ­as</option><option value="30" @selected($filters['periodo'] === '30')>ÃƒÅ¡ltimos 30 dÃƒÂ­as</option><option value="90" @selected($filters['periodo'] === '90')>ÃƒÅ¡ltimos 90 dÃƒÂ­as</option><option value="all" @selected($filters['periodo'] === 'all')>Todo el historial</option></select></label>
+                <label><span class="visually-hidden">Filtrar por estado</span><select name="estado"><option value="">Estado: Todos</option><option value="pendiente" @selected(($filters['estado'] ?? null) === 'Pendiente')>Pendiente</option><option value="en_proceso" @selected(($filters['estado'] ?? null) === 'En proceso')>En preparaciÃ³n</option><option value="enviado" @selected(($filters['estado'] ?? null) === 'Enviado')>Enviado</option><option value="entregado" @selected(($filters['estado'] ?? null) === 'Entregado')>Entregado</option><option value="cancelado" @selected(($filters['estado'] ?? null) === 'Cancelado')>Cancelado</option></select></label>
+                <label><span class="visually-hidden">Filtrar por fecha</span><select name="periodo"><option value="7" @selected($filters['periodo'] === '7')>Ãšltimos 7 dÃ­as</option><option value="30" @selected($filters['periodo'] === '30')>Ãšltimos 30 dÃ­as</option><option value="90" @selected($filters['periodo'] === '90')>Ãšltimos 90 dÃ­as</option><option value="all" @selected($filters['periodo'] === 'all')>Todo el historial</option></select></label>
                 <label><span class="visually-hidden">Filtrar por canal</span><select name="canal"><option value="">Canal: Todos</option><option value="ecommerce" @selected(($filters['canal'] ?? null) === 'ecommerce')>Tienda online</option></select></label>
-                <button class="pedidos-more-filters" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i> MÃƒÂ¡s filtros</button>
+                <button class="pedidos-more-filters" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i> MÃ¡s filtros</button>
                 @if (($filters['buscar'] ?? null) || ($filters['estado'] ?? null) || $filters['periodo'] !== '30')<a class="pedidos-clear-filters" href="{{ route('management.orders') }}">Limpiar</a>@endif
             </form>
 
@@ -102,7 +102,7 @@
                 <header class="pedidos-card-header"><div class="pedidos-card-title"><i class="bi bi-receipt" aria-hidden="true"></i><div><h2>Lista de pedidos</h2><p>Mostrando {{ $orders->firstItem() ?? 0 }} a {{ $orders->lastItem() ?? 0 }} de {{ number_format($orders->total()) }} pedidos</p></div></div><span class="pedidos-total-badge">{{ number_format($totalOrders) }} pedidos totales</span></header>
                 <div class="pedidos-table-wrap">
                     <table class="pedidos-table">
-                        <thead><tr><th><span class="pedidos-checkbox" aria-hidden="true"></span></th><th>Pedido</th><th>Cliente</th><th>Fecha</th><th>Canal</th><th>Total</th><th>Estado</th><th>Pago</th><th>EnvÃƒÂ­o</th><th>Acciones</th></tr></thead>
+                        <thead><tr><th><span class="pedidos-checkbox" aria-hidden="true"></span></th><th>Pedido</th><th>Cliente</th><th>Fecha</th><th>Canal</th><th>Total</th><th>Estado</th><th>Pago</th><th>EnvÃ­o</th><th>Acciones</th></tr></thead>
                         <tbody>
                             @forelse ($orders as $order)
                                 @php
@@ -128,7 +128,7 @@
                         </tbody>
                     </table>
                 </div>
-                <footer class="pedidos-pagination"><span>Mostrando {{ $orders->firstItem() ?? 0 }}Ã¢â‚¬â€œ{{ $orders->lastItem() ?? 0 }} de {{ number_format($orders->total()) }} pedidos</span><form class="pedidos-per-page" method="get" action="{{ route('management.orders') }}">@foreach (request()->except(['page', 'por_pagina']) as $key => $value)@if(is_scalar($value))<input type="hidden" name="{{ $key }}" value="{{ $value }}">@endif @endforeach<label for="pedidos-por-pagina">Pedidos por pÃƒÂ¡gina</label><select id="pedidos-por-pagina" name="por_pagina" data-pedidos-per-page aria-label="Pedidos por pÃƒÂ¡gina">@foreach ([10, 20, 50] as $option)<option value="{{ $option }}" @selected(($filters['por_pagina'] ?? 10) === $option)>{{ $option }}</option>@endforeach</select></form>{{ $orders->onEachSide(1)->links() }}</footer>
+                <footer class="pedidos-pagination"><span>Mostrando {{ $orders->firstItem() ?? 0 }}â€“{{ $orders->lastItem() ?? 0 }} de {{ number_format($orders->total()) }} pedidos</span><form class="pedidos-per-page" method="get" action="{{ route('management.orders') }}">@foreach (request()->except(['page', 'por_pagina']) as $key => $value)@if(is_scalar($value))<input type="hidden" name="{{ $key }}" value="{{ $value }}">@endif @endforeach<label for="pedidos-por-pagina">Pedidos por pÃ¡gina</label><select id="pedidos-por-pagina" name="por_pagina" data-pedidos-per-page aria-label="Pedidos por pÃ¡gina">@foreach ([10, 20, 50] as $option)<option value="{{ $option }}" @selected(($filters['por_pagina'] ?? 10) === $option)>{{ $option }}</option>@endforeach</select></form>{{ $orders->onEachSide(1)->links() }}</footer>
             </section>
 
             <div class="pedidos-insights-grid">
@@ -138,49 +138,49 @@
                 </section>
 
                 <section class="pedidos-insight-card">
-                    <header class="pedidos-card-header"><div class="pedidos-card-title"><i class="bi bi-people" aria-hidden="true"></i><div><h2>Pedidos por cliente</h2><p>DistribuciÃƒÂ³n de compradores registrados.</p></div></div><span class="pedidos-insight-period">{{ number_format($totalOrders) }} pedidos</span></header>
+                    <header class="pedidos-card-header"><div class="pedidos-card-title"><i class="bi bi-people" aria-hidden="true"></i><div><h2>Pedidos por cliente</h2><p>DistribuciÃ³n de compradores registrados.</p></div></div><span class="pedidos-insight-period">{{ number_format($totalOrders) }} pedidos</span></header>
                     <div class="pedidos-bars">@foreach ($customerSummary as $summary)<div class="pedidos-bar-row"><span><i class="pedidos-legend-dot pedidos-legend-dot--{{ $summary['color'] }}" aria-hidden="true"></i>{{ $summary['label'] }}</span><div class="pedidos-bar"><i class="pedidos-bar-fill pedidos-bar-fill--{{ $summary['color'] }}" style="width: {{ min(100, $summary['percent']) }}%"></i></div><strong>{{ number_format($summary['percent'], 1) }}%</strong><small>{{ number_format($summary['count']) }}</small></div>@endforeach</div>
                 </section>
             </div>
 
             <div class="pedidos-bottom-grid">
-                <section class="pedidos-secondary-card"><header class="pedidos-card-header"><div class="pedidos-card-title"><i class="bi bi-bag-check" aria-hidden="true"></i><div><h2>Pedidos recientes</h2><p>ÃƒÅ¡ltimas operaciones registradas.</p></div></div><button class="pedidos-view-all" type="button" data-refresh-orders>Actualizar</button></header><div class="pedidos-recent-list">
+                <section class="pedidos-secondary-card"><header class="pedidos-card-header"><div class="pedidos-card-title"><i class="bi bi-bag-check" aria-hidden="true"></i><div><h2>Pedidos recientes</h2><p>Ãšltimas operaciones registradas.</p></div></div><button class="pedidos-view-all" type="button" data-refresh-orders>Actualizar</button></header><div class="pedidos-recent-list">
                     @forelse ($recentOrders as $order)
                         @php $recentStatus = $statusFor($order->estado); $recentProduct = $order->details->first()?->product; $recentImage = $productImage($recentProduct?->url_imagen); @endphp
-                        <button class="pedidos-recent-row" type="button" data-open-order-dialog="pedido-{{ $order->id }}">@if($recentImage)<img src="{{ $recentImage }}" alt="{{ $recentProduct?->nombre }}">@else<span class="pedidos-recent-image"><i class="bi bi-box-seam" aria-hidden="true"></i></span>@endif<span><strong>#PED-{{ str_pad((string) $order->id, 5, '0', STR_PAD_LEFT) }}</strong><small>{{ $order->user?->nombre ?: 'Cliente eliminado' }} Ã‚Â· S/ {{ number_format((float) $order->total, 2) }}</small></span><em class="pedidos-status pedidos-status--{{ $recentStatus['class'] }}">{{ $recentStatus['label'] }}</em></button>
+                        <button class="pedidos-recent-row" type="button" data-open-order-dialog="pedido-{{ $order->id }}">@if($recentImage)<img src="{{ $recentImage }}" alt="{{ $recentProduct?->nombre }}">@else<span class="pedidos-recent-image"><i class="bi bi-box-seam" aria-hidden="true"></i></span>@endif<span><strong>#PED-{{ str_pad((string) $order->id, 5, '0', STR_PAD_LEFT) }}</strong><small>{{ $order->user?->nombre ?: 'Cliente eliminado' }} Â· S/ {{ number_format((float) $order->total, 2) }}</small></span><em class="pedidos-status pedidos-status--{{ $recentStatus['class'] }}">{{ $recentStatus['label'] }}</em></button>
                     @empty
-                        <div class="pedidos-secondary-empty">TodavÃƒÂ­a no hay pedidos recientes.</div>
+                        <div class="pedidos-secondary-empty">TodavÃ­a no hay pedidos recientes.</div>
                     @endforelse
                 </div></section>
 
-                <section class="pedidos-secondary-card"><header class="pedidos-card-header"><div class="pedidos-card-title"><i class="bi bi-stars" aria-hidden="true"></i><div><h2>Actividad reciente</h2><p>ÃƒÅ¡ltimos cambios de la operaciÃƒÂ³n.</p></div></div><button class="pedidos-view-all" type="button" data-refresh-orders>Ver todo Ã¢â€ â€™</button></header><div class="pedidos-activity-list">
+                <section class="pedidos-secondary-card"><header class="pedidos-card-header"><div class="pedidos-card-title"><i class="bi bi-stars" aria-hidden="true"></i><div><h2>Actividad reciente</h2><p>Ãšltimos cambios de la operaciÃ³n.</p></div></div><button class="pedidos-view-all" type="button" data-refresh-orders>Ver todo â†’</button></header><div class="pedidos-activity-list">
                     @forelse ($recentOrders as $order)
                         @php $activity = $statusFor($order->estado); $activityIcon = match($order->estado) { 'Entregado' => 'check2', 'Cancelado' => 'x-lg', 'Enviado' => 'truck', 'En proceso' => 'box-seam', default => 'cart3' }; @endphp
-                        <div class="pedidos-activity-row"><span class="pedidos-activity-icon pedidos-activity-icon--{{ $activity['class'] }}"><i class="bi bi-{{ $activityIcon }}" aria-hidden="true"></i></span><span><strong>Pedido #PED-{{ str_pad((string) $order->id, 5, '0', STR_PAD_LEFT) }} {{ strtolower($activity['label']) }}</strong><small>{{ $order->user?->nombre ?: 'Cliente eliminado' }} Ã‚Â· {{ $order->creado_en?->format('d/m/Y H:i') }}</small></span></div>
+                        <div class="pedidos-activity-row"><span class="pedidos-activity-icon pedidos-activity-icon--{{ $activity['class'] }}"><i class="bi bi-{{ $activityIcon }}" aria-hidden="true"></i></span><span><strong>Pedido #PED-{{ str_pad((string) $order->id, 5, '0', STR_PAD_LEFT) }} {{ strtolower($activity['label']) }}</strong><small>{{ $order->user?->nombre ?: 'Cliente eliminado' }} Â· {{ $order->creado_en?->format('d/m/Y H:i') }}</small></span></div>
                     @empty
-                        <div class="pedidos-secondary-empty">TodavÃƒÂ­a no hay actividad.</div>
+                        <div class="pedidos-secondary-empty">TodavÃ­a no hay actividad.</div>
                     @endforelse
                 </div></section>
 
                 <section class="pedidos-secondary-card pedidos-alert-card"><header class="pedidos-card-header"><div class="pedidos-card-title"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i><div><h2>Alertas e incidencias</h2><p>Situaciones que requieren seguimiento.</p></div></div><span class="pedidos-alert-count">{{ collect($alerts)->where('show', true)->count() }}</span></header><div class="pedidos-alert-list">
-                    @forelse (collect($alerts)->where('show', true) as $alert)<div class="pedidos-alert-row"><span class="pedidos-alert-icon pedidos-alert-icon--{{ $alert['class'] }}"><i class="bi bi-{{ $alert['icon'] }}" aria-hidden="true"></i></span><span><strong>{{ $alert['title'] }}</strong><small>{{ $alert['detail'] }}</small></span></div>@empty<div class="pedidos-secondary-empty"><i class="bi bi-check-circle" aria-hidden="true"></i>OperaciÃƒÂ³n al dÃƒÂ­a.</div>@endforelse
+                    @forelse (collect($alerts)->where('show', true) as $alert)<div class="pedidos-alert-row"><span class="pedidos-alert-icon pedidos-alert-icon--{{ $alert['class'] }}"><i class="bi bi-{{ $alert['icon'] }}" aria-hidden="true"></i></span><span><strong>{{ $alert['title'] }}</strong><small>{{ $alert['detail'] }}</small></span></div>@empty<div class="pedidos-secondary-empty"><i class="bi bi-check-circle" aria-hidden="true"></i>OperaciÃ³n al dÃ­a.</div>@endforelse
                 </div></section>
             </div>
         </section>
 
         @foreach ($orders as $order)
             @php $dialogStatus = $statusFor($order->estado); @endphp
-            <dialog class="pedidos-dialog" id="pedido-{{ $order->id }}"><div class="pedidos-dialog-card"><header class="pedidos-dialog-header"><div><span class="pedidos-eyebrow">Detalle del pedido</span><h2>#PED-{{ str_pad((string) $order->id, 5, '0', STR_PAD_LEFT) }}</h2><p>{{ $order->user?->nombre ?: 'Cliente eliminado' }} Ã‚Â· {{ $orderDate($order->creado_en) }}</p></div><button class="pedidos-dialog-close" type="button" data-close-order-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="pedidos-dialog-body"><div class="pedidos-dialog-summary"><div><small>Total</small><strong>S/ {{ number_format((float) $order->total, 2) }}</strong></div><div><small>Estado</small><span class="pedidos-status pedidos-status--{{ $dialogStatus['class'] }}">{{ $dialogStatus['label'] }}</span></div><div><small>Cliente</small><strong>{{ $order->user?->correo ?: 'Sin correo' }}</strong></div></div><h3>Productos del pedido</h3><div class="pedidos-dialog-products">@forelse($order->details as $line)<div><span>{{ $line->product?->nombre ?: 'Producto eliminado' }} Ãƒâ€” {{ $line->cantidad }}</span><strong>S/ {{ number_format($line->cantidad * $line->precio_unitario, 2) }}</strong></div>@empty<div class="pedidos-secondary-empty">Sin detalle de productos.</div>@endforelse</div><form method="post" action="{{ route('legacy.admin.orders.status', $order) }}" class="pedidos-status-form">@csrf @method('PATCH')<label><span>Actualizar estado</span><select name="estado">@foreach(['Pendiente', 'En proceso', 'Enviado', 'Entregado', 'Cancelado'] as $state)<option value="{{ $state }}" @selected($order->estado === $state)>{{ $state === 'En proceso' ? 'En preparaciÃƒÂ³n' : $state }}</option>@endforeach</select></label><button class="pedidos-primary-button" type="submit"><i class="bi bi-check2" aria-hidden="true"></i> Guardar estado</button></form></div></div></dialog>
+            <dialog class="pedidos-dialog" id="pedido-{{ $order->id }}"><div class="pedidos-dialog-card"><header class="pedidos-dialog-header"><div><span class="pedidos-eyebrow">Detalle del pedido</span><h2>#PED-{{ str_pad((string) $order->id, 5, '0', STR_PAD_LEFT) }}</h2><p>{{ $order->user?->nombre ?: 'Cliente eliminado' }} Â· {{ $orderDate($order->creado_en) }}</p></div><button class="pedidos-dialog-close" type="button" data-close-order-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="pedidos-dialog-body"><div class="pedidos-dialog-summary"><div><small>Total</small><strong>S/ {{ number_format((float) $order->total, 2) }}</strong></div><div><small>Estado</small><span class="pedidos-status pedidos-status--{{ $dialogStatus['class'] }}">{{ $dialogStatus['label'] }}</span></div><div><small>Cliente</small><strong>{{ $order->user?->correo ?: 'Sin correo' }}</strong></div></div><h3>Productos del pedido</h3><div class="pedidos-dialog-products">@forelse($order->details as $line)<div><span>{{ $line->product?->nombre ?: 'Producto eliminado' }} Ã— {{ $line->cantidad }}</span><strong>S/ {{ number_format($line->cantidad * $line->precio_unitario, 2) }}</strong></div>@empty<div class="pedidos-secondary-empty">Sin detalle de productos.</div>@endforelse</div><form method="post" action="{{ route('legacy.admin.orders.status', $order) }}" class="pedidos-status-form">@csrf @method('PATCH')<label><span>Actualizar estado</span><select name="estado">@foreach(['Pendiente', 'En proceso', 'Enviado', 'Entregado', 'Cancelado'] as $state)<option value="{{ $state }}" @selected($order->estado === $state)>{{ $state === 'En proceso' ? 'En preparaciÃ³n' : $state }}</option>@endforeach</select></label><button class="pedidos-primary-button" type="submit"><i class="bi bi-check2" aria-hidden="true"></i> Guardar estado</button></form></div></div></dialog>
         @endforeach
     @else
         <section class="container content-page">
             <header class="admin-page-head">
-                <div><span class="eyebrow">OperaciÃƒÂ³n comercial</span><h1>Pedidos <i class="bi bi-cart3"></i></h1><p>Consulta el historial y actualiza el estado segÃƒÂºn tu rol.</p></div>
+                <div><span class="eyebrow">OperaciÃ³n comercial</span><h1>Pedidos <i class="bi bi-cart3"></i></h1><p>Consulta el historial y actualiza el estado segÃºn tu rol.</p></div>
             </header>
             @forelse ($orders as $order)
-                <article class="data-row"><div><b>Pedido #{{ $order->id }}</b><small>{{ $order->creado_en?->format('d/m/Y H:i') ?? $order->creado_en }} Ã‚Â· {{ $order->estado }}</small></div><strong>S/ {{ number_format((float) $order->total, 2) }}</strong><a class="btn btn-secondary" href="{{ route('orders.show', $order) }}">Ver detalle</a></article>
+                <article class="data-row"><div><b>Pedido #{{ $order->id }}</b><small>{{ $order->creado_en?->format('d/m/Y H:i') ?? $order->creado_en }} Â· {{ $order->estado }}</small></div><strong>S/ {{ number_format((float) $order->total, 2) }}</strong><a class="btn btn-secondary" href="{{ route('orders.show', $order) }}">Ver detalle</a></article>
             @empty
-                <p>AÃƒÂºn no hay pedidos.</p>
+                <p>AÃºn no hay pedidos.</p>
             @endforelse
             {{ $orders->links() }}
         </section>

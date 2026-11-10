@@ -1,13 +1,13 @@
 <?php
 
-use App\Http\Controllers\Gestion\Compras\CompraController;
-use App\Http\Controllers\Gestion\DevolucionesGarantias\DevolucionGarantiaController;
-use App\Http\Controllers\Gestion\Ventas\VentaController;
-use App\Http\Controllers\Paneles\ClienteMinorista\DashboardController as DashboardClienteMinorista;
+use App\Http\Controllers\Gestion\Comercial\Compras\CompraController;
+use App\Http\Controllers\Gestion\Comercial\DevolucionesGarantias\DevolucionGarantiaController;
+use App\Http\Controllers\Gestion\Comercial\Ventas\VentaController;
+use App\Http\Controllers\Paneles\PanelDashboardController;
 use App\Http\Controllers\Paneles\ResolutorDashboard;
 use App\Http\Middleware\RegistrarSesionUsuario;
-use App\Http\Requests\AjustarInventarioRequest;
-use App\Http\Requests\FiltroVentaRequest;
+use App\Http\Requests\Gestion\Comercial\Ventas\FiltroVentaRequest;
+use App\Http\Requests\Gestion\InventarioLogistica\ExistenciasMovimientos\AjustarInventarioRequest;
 use App\Models\Auditoria\RegistroAuditoria;
 use App\Models\Catalogo\Producto;
 use App\Models\Comercio\DevolucionGarantia;
@@ -16,14 +16,14 @@ use App\Models\Comercio\Venta;
 use App\Models\Compras\Compra;
 use App\Models\User;
 use App\Policies\PedidoPolicy;
-use App\Servicios\ConsultaVentas;
-use App\Servicios\ServicioAutorizacion;
-use App\Servicios\ServicioCatalogo;
-use App\Servicios\ServicioCompras;
-use App\Servicios\ServicioInventario;
-use App\Servicios\ServicioMenuDinamico;
-use App\Servicios\ServicioPedidos;
-use App\Servicios\ServicioVentas;
+use App\Servicios\Compartidos\Catalogo\ServicioCatalogo;
+use App\Servicios\Compartidos\Comercial\ConsultaVentas;
+use App\Servicios\Compartidos\Comercio\ServicioPedidos;
+use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
+use App\Servicios\Compartidos\Seguridad\ServicioMenuDinamico;
+use App\Servicios\Gestion\Comercial\Compras\ServicioCompras;
+use App\Servicios\Gestion\Comercial\Ventas\ServicioVentas;
+use App\Servicios\Gestion\InventarioLogistica\ServicioInventario;
 use Database\Seeders\RbacInicialSeeder;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Schema\Blueprint;
@@ -353,7 +353,7 @@ it('selects the dashboard from assigned roles instead of the legacy role field',
     DB::table('usuarios_roles')->insert(['usuario_id' => $user->id, 'rol_id' => 1]);
     DB::table('roles_permisos')->insert(['rol_id' => 1, 'permiso_id' => 1, 'alcance' => 'propio']);
 
-    expect(app(ResolutorDashboard::class)->for($user))->toBeInstanceOf(DashboardClienteMinorista::class);
+    expect(app(ResolutorDashboard::class)->for($user))->toBeInstanceOf(PanelDashboardController::class);
 });
 
 it('resolves a newly persisted role without a hardcoded dashboard role map', function (): void {
@@ -364,7 +364,7 @@ it('resolves a newly persisted role without a hardcoded dashboard role map', fun
     DB::table('usuarios_roles')->insert(['usuario_id' => $user->id, 'rol_id' => 1]);
     DB::table('roles_permisos')->insert(['rol_id' => 1, 'permiso_id' => 1, 'alcance' => 'propio']);
 
-    expect(app(ResolutorDashboard::class)->for($user))->toBeInstanceOf(DashboardClienteMinorista::class);
+    expect(app(ResolutorDashboard::class)->for($user))->toBeInstanceOf(PanelDashboardController::class);
 });
 
 it('forbids the administrative dashboard URL for a user with only own-order permission', function (): void {

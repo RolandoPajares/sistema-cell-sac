@@ -59,6 +59,41 @@
             </table>
         </div>
     </section>
+
+    <section class="tc-rbac-card tc-rbac-profile-fields" aria-labelledby="tc-profile-fields-title">
+        <header class="tc-rbac-section-heading"><div><span class="tc-rbac-eyebrow">Perfil personal</span><h2 id="tc-profile-fields-title">Campos adicionales por rol</h2><p>Define los campos que cada rol puede visualizar, editar y exigir en el perfil personal.</p></div></header>
+        <form method="post" action="{{ route('management.roles_permissions.profile_fields.store') }}" class="tc-rbac-dialog-body tc-rbac-profile-field-create">
+            @csrf
+            <label>Código interno<input name="codigo" pattern="[a-z][a-z0-9_-]*" maxlength="80" required></label>
+            <label>Etiqueta<input name="etiqueta" maxlength="120" required></label>
+            <label>Tipo<select name="tipo" required><option value="text">Texto</option><option value="textarea">Texto largo</option><option value="email">Correo</option><option value="tel">Teléfono</option><option value="date">Fecha</option><option value="number">Número</option><option value="select">Lista</option></select></label>
+            <label>Opciones de lista<textarea name="opciones" rows="2" maxlength="1000" placeholder="Una opción por línea"></textarea></label>
+            <button class="tc-rbac-primary" type="submit"><i class="bi bi-plus-lg" aria-hidden="true"></i> Crear campo</button>
+        </form>
+        @forelse ($roles as $role)
+            <details class="tc-rbac-profile-role-config">
+                <summary><strong>{{ $role->nombre }}</strong><span>{{ $role->camposPerfil->where('pivot.visible', true)->count() }} campos visibles</span></summary>
+                <form method="post" action="{{ route('management.roles_permissions.profile_fields.update', $role) }}">
+                    @csrf @method('PUT')
+                    @forelse ($profileFields as $field)
+                        @php($grant = $role->camposPerfil->firstWhere('id', $field->id)?->pivot)
+                        <fieldset class="tc-rbac-profile-field-row">
+                            <legend>{{ $field->etiqueta }} <small>{{ $field->codigo }}</small></legend>
+                            <input type="hidden" name="campos[{{ $field->id }}][id]" value="{{ $field->id }}">
+                            <label><input type="checkbox" name="campos[{{ $field->id }}][visible]" value="1" @checked($grant?->visible)> Visible</label>
+                            <label><input type="checkbox" name="campos[{{ $field->id }}][editable]" value="1" @checked($grant?->editable)> Editable</label>
+                            <label><input type="checkbox" name="campos[{{ $field->id }}][requerido]" value="1" @checked($grant?->requerido)> Requerido</label>
+                        </fieldset>
+                    @empty
+                        <p>No hay campos adicionales creados.</p>
+                    @endforelse
+                    @if ($profileFields->isNotEmpty())<button class="tc-rbac-primary" type="submit">Guardar configuración de {{ $role->nombre }}</button>@endif
+                </form>
+            </details>
+        @empty
+            <p>No hay roles configurables disponibles.</p>
+        @endforelse
+    </section>
     @endunless
 </section>
 

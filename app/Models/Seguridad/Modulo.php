@@ -44,4 +44,9 @@ class Modulo extends Model
     {
         return $this->hasMany(Pantalla::class, 'modulo_id')->orderBy('nombre');
     }
+
+    public function permisos(): HasMany
+    {
+        return $this->hasMany(Permiso::class, 'modulo_id');
+    }
 }

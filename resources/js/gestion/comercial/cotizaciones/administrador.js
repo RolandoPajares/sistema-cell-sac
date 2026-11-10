@@ -48,7 +48,7 @@
             titulo.textContent = textos.titulo;
             descripcion.textContent = textos.descripcion;
             mensaje.textContent = textos.mensaje;
-            referencia.textContent = boton.dataset.reference ?? "â€”";
+            referencia.textContent = boton.dataset.reference ?? "—";
             cliente.textContent =
                 boton.dataset.customer ?? "Cliente no disponible";
             const esEnvio = accion === "enviar";

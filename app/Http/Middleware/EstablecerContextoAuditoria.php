@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\User;
-use App\Servicios\ServicioAutorizacion;
+use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

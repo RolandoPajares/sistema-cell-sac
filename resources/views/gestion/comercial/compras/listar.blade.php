@@ -250,11 +250,7 @@
             <button class="admin-dialog-close" type="button" data-admin-dialog-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
         </header>
         <div class="admin-dialog-body">
-            @if ($suppliers->isNotEmpty() && $products->isNotEmpty())
             @include('gestion.comercial.compras.registrar', ['suppliers' => $suppliers, 'products' => $products])
-            @else
-            <p class="compras-summary-empty">Para registrar una compra, agrega al menos un proveedor activo y un producto disponible.</p>
-            @endif
         </div>
     </dialog>
 

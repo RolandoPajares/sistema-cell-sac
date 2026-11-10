@@ -1,10 +1,10 @@
 <?php
 
-use App\Http\Controllers\Gestion\Productos\GestionProductosController;
+use App\Http\Controllers\Gestion\InventarioLogistica\Productos\GestionProductosController;
 use App\Models\Catalogo\Producto;
 use App\Models\User;
-use App\Servicios\ExportadorTabular;
-use App\Servicios\ServicioInventario;
+use App\Servicios\Compartidos\Exportacion\ExportadorTabular;
+use App\Servicios\Gestion\InventarioLogistica\ServicioInventario;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;

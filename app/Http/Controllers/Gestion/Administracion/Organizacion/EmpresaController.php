@@ -1,0 +1,104 @@
+<?php
+
+namespace App\Http\Controllers\Gestion\Administracion\Organizacion;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Gestion\Administracion\Organizacion\ActualizarEmpresaRequest;
+use App\Models\Organizacion\Empresa;
+use App\Models\User;
+use App\Servicios\Compartidos\Auditoria\RegistradorAuditoria;
+use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
+
+/**
+ * Define la responsabilidad de la clase EmpresaController dentro de su m�dulo.
+ *
+ * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
+ */
+class EmpresaController extends Controller
+{
+    /**
+     * Obtiene y prepara la informaci�n solicitada para la operaci�n.
+     *
+     * @param  mixed  $request  Par�metro recibido por la operaci�n.
+     * @param  mixed  $autorizacion  Par�metro recibido por la operaci�n.
+     * @return View Resultado de la operaci�n.
+     */
+    public function index(Request $request, ServicioAutorizacion $autorizacion): View
+    {
+        $empresaId = $autorizacion->activeCompanyId();
+        $empresa = $empresaId === null ? null : Empresa::query()
+            ->withCount('sedes')
+            ->withCount(['sedes as sedes_activas_count' => static function (Builder $consulta): void {
+                $consulta->where('activa', true);
+            }])
+            ->find($empresaId);
+        $almacenes = $empresaId === null ? 0 : DB::table('almacenes')
+            ->join('sedes', 'sedes.id', '=', 'almacenes.sede_id')
+            ->where('sedes.empresa_id', $empresaId)->count();
+        $sedesActivas = (int) ($empresa?->sedes_activas_count ?? 0);
+
+        return view('gestion.administracion.organizacion.datos-empresa', [
+            'empresa' => $empresa,
+            'almacenes' => $almacenes,
+            'sedesActivas' => $sedesActivas > 0 ? '1' : '0',
+            'metricas' => $empresa === null ? [] : [
+                ['titulo' => 'Estado de la empresa', 'valor' => $empresa->activo ? 'Activa' : 'Inactiva', 'icono' => 'bi-buildings', 'detalle' => 'Estado almacenado en MariaDB'],
+                ['titulo' => 'Sede interna', 'valor' => $sedesActivas > 0 ? 'Activa' : 'Revisar', 'icono' => 'bi-geo-alt', 'tono' => 'verde', 'detalle' => 'Contexto operativo autorizado'],
+                ['titulo' => 'Almacenes asociados', 'valor' => $almacenes, 'icono' => 'bi-box-seam', 'tono' => 'violeta', 'detalle' => 'Relacionados mediante las sedes'],
+                ['titulo' => 'Moneda base', 'valor' => $empresa->moneda_base, 'icono' => 'bi-currency-exchange', 'detalle' => 'Código registrado para la empresa'],
+            ],
+            'puedeEditar' => $request->user() instanceof User
+                && $autorizacion->allows($request->user(), 'gestion.organizacion.actualizar'),
+        ]);
+    }
+
+    /**
+     * Actualiza la informaci�n existente con los datos recibidos.
+     *
+     * @return mixed Resultado de la operaci�n.
+     */
+    public function update(
+        ActualizarEmpresaRequest $request,
+        ServicioAutorizacion $autorizacion,
+        RegistradorAuditoria $auditoria,
+    ): RedirectResponse {
+        $datos = $request->validated();
+        $usuario = $request->user();
+        $empresaId = $autorizacion->activeCompanyId();
+
+        abort_if($empresaId === null, 409, 'Debe existir una empresa activa autorizada antes de actualizar sus datos.');
+
+        DB::transaction(function () use ($datos, $usuario, $empresaId, $auditoria, $request): void {
+            $empresa = Empresa::query()->whereKey($empresaId)->where('activo', true)->lockForUpdate()->firstOrFail();
+            $valoresAnteriores = [
+                'razon_social' => $empresa->razon_social,
+                'nombre_comercial' => $empresa->nombre_comercial,
+                'ruc' => $empresa->ruc,
+                'moneda_base' => $empresa->moneda_base,
+            ];
+            $empresa->update([
+                'razon_social' => $datos['razon_social'],
+                'nombre_comercial' => $datos['nombre_comercial'] ?? null,
+                'ruc' => $datos['ruc'] ?? null,
+                'moneda_base' => $datos['moneda_base'],
+            ]);
+            $auditoria->record(
+                (int) $usuario->getKey(), 'empresa.actualizada', 'empresas', (int) $empresa->getKey(), $valoresAnteriores,
+                [
+                    'razon_social' => $empresa->razon_social,
+                    'nombre_comercial' => $empresa->nombre_comercial,
+                    'ruc' => $empresa->ruc,
+                    'moneda_base' => $empresa->moneda_base,
+                ], $request->ip(), observations: 'Datos de empresa actualizados desde el panel de organizaci�n.',
+                scope: ['empresa_id' => (int) $empresa->getKey()],
+            );
+        }, 3);
+
+        return back()->with('status', 'Los datos de la empresa quedaron actualizados.');
+    }
+}

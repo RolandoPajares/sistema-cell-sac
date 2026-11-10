@@ -1,3 +1,6 @@
+@import "./componentes/foto-perfil.css";
+@import "./componentes/campos-dinamicos.css";
+
 .perfil-rejilla {
     display: grid;
     grid-template-columns: 280px 1fr;
@@ -608,6 +611,45 @@
 }
 .tc-profile-password-fields {
     margin-bottom: 15px;
+}
+
+.tc-profile-role-functions {
+    grid-column: 1 / -1;
+}
+
+.tc-profile-role-list,
+.tc-profile-function-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tc-profile-function-list {
+    margin-top: 12px;
+}
+
+.tc-profile-role-chip,
+.tc-profile-function-list span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    color: #1557a2;
+    background: #eef6ff;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.tc-profile-function-list span {
+    color: #237744;
+    background: #edf9f0;
+    font-weight: 600;
+}
+
+.tc-profile-muted {
+    color: #6d82a5;
+    font-size: 0.75rem;
 }
 .tc-profile-photo-dialog {
     width: min(440px, calc(100vw - 32px));

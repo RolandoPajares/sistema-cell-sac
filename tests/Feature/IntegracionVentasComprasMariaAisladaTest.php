@@ -3,8 +3,8 @@
 use App\Models\Auditoria\RegistroAuditoria;
 use App\Models\Comercio\Venta;
 use App\Models\User;
-use App\Servicios\ServicioCompras;
-use App\Servicios\ServicioVentas;
+use App\Servicios\Gestion\Comercial\Compras\ServicioCompras;
+use App\Servicios\Gestion\Comercial\Ventas\ServicioVentas;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpKernel\Exception\HttpException;

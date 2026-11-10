@@ -9,8 +9,8 @@
 
 <section class="admin-finance-module admin-finance-module--{{ $module['module_key'] }}" data-finance-module="{{ $module['module_key'] }}" data-finance-reopen="{{ old('_form') === 'crear' && $errors->any() ? 'crear' : '' }}">
     <header class="admin-finance-header">
-        <nav class="admin-finance-breadcrumb" aria-label="Ruta de navegaciÃ³n">
-            <span>AdministraciÃ³n</span>
+        <nav class="admin-finance-breadcrumb" aria-label="Ruta de navegación">
+            <span>Administración</span>
             <i class="bi bi-chevron-right" aria-hidden="true"></i>
             <span>{{ $module['area'] }}</span>
             <i class="bi bi-chevron-right" aria-hidden="true"></i>
@@ -64,11 +64,11 @@
         <label class="admin-finance-search">
             <i class="bi bi-search" aria-hidden="true"></i>
             <span class="visually-hidden">Buscar {{ $module['record_plural'] }}</span>
-            <input type="search" name="buscar" value="{{ $module['filter_values']['buscar'] ?? '' }}" maxlength="120" placeholder="Buscar por cÃ³digo, referencia o documento...">
+            <input type="search" name="buscar" value="{{ $module['filter_values']['buscar'] ?? '' }}" maxlength="120" placeholder="Buscar por código, referencia o documento...">
         </label>
         @if (($module['filter_options']['types'] ?? []) !== [])
             <label>
-                <span class="visually-hidden">Tipo de operaciÃ³n</span>
+                <span class="visually-hidden">Tipo de operación</span>
                 <select name="tipo">
                     <option value="">Tipo: todos</option>
                     @foreach ($module['filter_options']['types'] as $value => $label)
@@ -151,23 +151,23 @@
         <footer class="admin-finance-table-footer">
             <span>
                 @if ($module['total_count'] > 0)
-                    Mostrando {{ $module['pagination']->firstItem() }}â€“{{ $module['pagination']->lastItem() }} de {{ number_format($module['total_count']) }}
+                    Mostrando {{ $module['pagination']->firstItem() }}–{{ $module['pagination']->lastItem() }} de {{ number_format($module['total_count']) }}
                 @else
                     Sin resultados para mostrar
                 @endif
             </span>
             @if ($module['pagination']->hasPages())
-                <nav class="admin-finance-pagination" aria-label="PaginaciÃ³n">
+                <nav class="admin-finance-pagination" aria-label="Paginación">
                     @if ($module['pagination']->previousPageUrl())
-                        <a href="{{ $module['pagination']->previousPageUrl() }}" rel="prev" aria-label="PÃ¡gina anterior"><i class="bi bi-chevron-left" aria-hidden="true"></i></a>
+                        <a href="{{ $module['pagination']->previousPageUrl() }}" rel="prev" aria-label="Página anterior"><i class="bi bi-chevron-left" aria-hidden="true"></i></a>
                     @else
-                        <button type="button" disabled aria-label="PÃ¡gina anterior"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+                        <button type="button" disabled aria-label="Página anterior"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
                     @endif
                     <span class="is-active" aria-current="page">{{ $module['pagination']->currentPage() }} / {{ $module['pagination']->lastPage() }}</span>
                     @if ($module['pagination']->nextPageUrl())
-                        <a href="{{ $module['pagination']->nextPageUrl() }}" rel="next" aria-label="PÃ¡gina siguiente"><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+                        <a href="{{ $module['pagination']->nextPageUrl() }}" rel="next" aria-label="Página siguiente"><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
                     @else
-                        <button type="button" disabled aria-label="PÃ¡gina siguiente"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+                        <button type="button" disabled aria-label="Página siguiente"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
                     @endif
                 </nav>
             @endif
@@ -181,7 +181,7 @@
                     <header>
                         <div><span class="admin-finance-summary-icon admin-finance-summary-icon--{{ $summary['tone'] }}"><i class="bi {{ $summary['icon'] }}" aria-hidden="true"></i></span><h2>{{ $summary['title'] }}</h2></div>
                     </header>
-                    <div class="admin-finance-summary-empty"><i class="bi bi-list-check" aria-hidden="true"></i><strong>{{ $summary['text'] }}</strong><span>Estado leÃ­do del registro</span></div>
+                    <div class="admin-finance-summary-empty"><i class="bi bi-list-check" aria-hidden="true"></i><strong>{{ $summary['text'] }}</strong><span>Estado leído del registro</span></div>
                 </article>
             @endforeach
         </section>
@@ -199,9 +199,9 @@
                     <div>
                         <span class="gestion-pendiente-modal-icon"><i class="bi {{ $module['icon'] }}" aria-hidden="true"></i></span>
                         <div>
-                            <span class="gestion-pendiente-eyebrow">Finanzas Â· {{ $module['title'] }}</span>
+                            <span class="gestion-pendiente-eyebrow">Finanzas · {{ $module['title'] }}</span>
                             <h2 id="{{ $module['module_key'] }}-crear-title">{{ $module['module_key'] === 'pagos' ? 'Registrar pago o cobro pendiente' : 'Solicitud de reembolso' }}</h2>
-                            <p>{{ $module['module_key'] === 'pagos' ? 'El documento y el medio se consultan en la sede activa.' : 'La aprobaciÃ³n y el desembolso son etapas separadas.' }}</p>
+                            <p>{{ $module['module_key'] === 'pagos' ? 'El documento y el medio se consultan en la sede activa.' : 'La aprobación y el desembolso son etapas separadas.' }}</p>
                         </div>
                     </div>
                     <button type="button" class="gestion-pendiente-close" data-finance-close aria-label="Cerrar ventana"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
@@ -225,11 +225,11 @@
                                     @endforeach
                                 </select>
                             </label>
-                            <label class="tc-finance-field" data-finance-cash-field hidden>SesiÃ³n de caja *
+                            <label class="tc-finance-field" data-finance-cash-field hidden>Sesión de caja *
                                 <select name="sesion_caja_id">
-                                    <option value="">Selecciona una sesiÃ³n abierta</option>
+                                    <option value="">Selecciona una sesión abierta</option>
                                     @foreach ($module['form_options']['sesiones'] as $cashSession)
-                                        <option value="{{ $cashSession->id }}" @selected((string) old('sesion_caja_id') === (string) $cashSession->id)>{{ $cashSession->caja?->codigo }} Â· SesiÃ³n #{{ $cashSession->id }}</option>
+                                        <option value="{{ $cashSession->id }}" @selected((string) old('sesion_caja_id') === (string) $cashSession->id)>{{ $cashSession->caja?->codigo }} · Sesión #{{ $cashSession->id }}</option>
                                     @endforeach
                                 </select>
                             </label>
@@ -237,7 +237,7 @@
                                 <select name="cuenta_bancaria_id">
                                     <option value="">Selecciona una cuenta</option>
                                     @foreach ($module['form_options']['cuentas'] as $account)
-                                        <option value="{{ $account->id }}" @selected((string) old('cuenta_bancaria_id') === (string) $account->id)>{{ $account->codigo }} Â· {{ $account->banco }} Â· {{ $account->moneda }}</option>
+                                        <option value="{{ $account->id }}" @selected((string) old('cuenta_bancaria_id') === (string) $account->id)>{{ $account->codigo }} · {{ $account->banco }} · {{ $account->moneda }}</option>
                                     @endforeach
                                 </select>
                             </label>
@@ -248,12 +248,12 @@
                                 <input type="text" name="referencia" value="{{ old('referencia') }}" maxlength="120" placeholder="Referencia del documento o solicitud" data-finance-reference>
                             </label>
                         </div>
-                        <div class="gestion-pendiente-modal-notice"><i class="bi bi-info-circle" aria-hidden="true"></i><div><strong>Registro pendiente</strong><p>Esta acciÃ³n no confirma el pago, no carga una tarjeta y no modifica el estado del documento.</p></div></div>
+                        <div class="gestion-pendiente-modal-notice"><i class="bi bi-info-circle" aria-hidden="true"></i><div><strong>Registro pendiente</strong><p>Esta acción no confirma el pago, no carga una tarjeta y no modifica el estado del documento.</p></div></div>
                     @else
                         <div class="tc-finance-form-grid">
-                            <label class="tc-finance-field">DevoluciÃ³n resuelta *
+                            <label class="tc-finance-field">Devolución resuelta *
                                 <select name="devolucion_id" required>
-                                    <option value="">Selecciona una devoluciÃ³n</option>
+                                    <option value="">Selecciona una devolución</option>
                                     @foreach ($module['form_options']['devoluciones'] as $return)
                                         <option value="{{ $return->id }}" @selected((string) old('devolucion_id') === (string) $return->id)>{{ $return->codigo }}</option>
                                     @endforeach
@@ -263,7 +263,7 @@
                                 <select name="pago_id" required>
                                     <option value="">Selecciona un cobro</option>
                                     @foreach ($module['form_options']['cobros'] as $payment)
-                                        <option value="{{ $payment->id }}" @selected((string) old('pago_id') === (string) $payment->id)>{{ $payment->codigo }} Â· {{ $payment->moneda }} {{ $payment->importe }}</option>
+                                        <option value="{{ $payment->id }}" @selected((string) old('pago_id') === (string) $payment->id)>{{ $payment->codigo }} · {{ $payment->moneda }} {{ $payment->importe }}</option>
                                     @endforeach
                                 </select>
                             </label>
@@ -271,10 +271,10 @@
                                 <input type="number" name="importe" value="{{ old('importe') }}" min="0.01" step="0.01" required placeholder="0.00">
                             </label>
                         </div>
-                        <div class="gestion-pendiente-modal-notice"><i class="bi bi-info-circle" aria-hidden="true"></i><div><strong>Solicitud pendiente</strong><p>Registrar o aprobar la solicitud no ejecuta una devoluciÃ³n de dinero.</p></div></div>
+                        <div class="gestion-pendiente-modal-notice"><i class="bi bi-info-circle" aria-hidden="true"></i><div><strong>Solicitud pendiente</strong><p>Registrar o aprobar la solicitud no ejecuta una devolución de dinero.</p></div></div>
                     @endif
                     @if (! $module['can_submit'])
-                        <p role="status">No hay documentos y medios elegibles en la sede seleccionada para esta operaciÃ³n.</p>
+                        <p role="status">No hay documentos y medios elegibles en la sede seleccionada para esta operación.</p>
                     @endif
                     @if (old('_form') === 'crear')
                         @foreach ($errors->all() as $error)
@@ -295,3 +295,7 @@
 
 @endif
 @endsection
+
+@push('scripts')
+    @vite('resources/js/gestion/finanzas/index.js')
+@endpush

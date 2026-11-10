@@ -4,29 +4,29 @@
     <input type="hidden" name="venta_token" value="{{ session('venta_token') }}">
 
     <div class="ventas-modal-steps" aria-label="Pasos del registro">
-        <span class="is-current"><b>1</b> InformaciÃ³n</span>
+        <span class="is-current"><b>1</b> Información</span>
         <i aria-hidden="true"></i>
         <span><b>2</b> Productos</span>
         <i aria-hidden="true"></i>
-        <span><b>3</b> ConfirmaciÃ³n</span>
+        <span><b>3</b> Confirmación</span>
     </div>
 
     <section class="ventas-modal-section">
-        <header class="ventas-modal-section-header"><i class="bi bi-person-vcard" aria-hidden="true"></i><h3>InformaciÃ³n de la venta</h3></header>
+        <header class="ventas-modal-section-header"><i class="bi bi-person-vcard" aria-hidden="true"></i><h3>Información de la venta</h3></header>
         <div class="ventas-modal-grid ventas-modal-grid--two">
             <label class="ventas-modal-field">
                 <span>Cliente <b>*</b></span>
                 <select name="cliente_id" required data-sales-customer>
                     <option value="">Buscar cliente...</option>
                     @foreach ($customers as $customer)
-                        <option value="{{ $customer->id }}" @selected((string) old('cliente_id') === (string) $customer->id)>{{ $customer->razon_social ?: $customer->nombre_contacto }} Â· {{ $customer->correo }}</option>
+                        <option value="{{ $customer->id }}" @selected((string) old('cliente_id') === (string) $customer->id)>{{ $customer->razon_social ?: $customer->nombre_contacto }} · {{ $customer->correo }}</option>
                     @endforeach
                 </select>
             </label>
             <label class="ventas-modal-field">
                 <span>Tipo de venta <b>*</b></span>
                 <select name="tipo_venta" required>
-                    <option value="fisica" @selected(old('tipo_venta', 'fisica') === 'fisica')>Venta fÃ­sica</option>
+                    <option value="fisica" @selected(old('tipo_venta', 'fisica') === 'fisica')>Venta física</option>
                 </select>
             </label>
             <label class="ventas-modal-field">
@@ -47,11 +47,11 @@
     <section class="ventas-modal-section">
         <header class="ventas-modal-section-header"><i class="bi bi-bag-check" aria-hidden="true"></i><h3>Productos</h3></header>
         <div class="ventas-product-picker">
-            <label class="ventas-modal-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar producto</span><input type="search" placeholder="Buscar producto por nombre, cÃ³digo o categorÃ­a..." data-sales-product-search></label>
+            <label class="ventas-modal-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar producto</span><input type="search" placeholder="Buscar producto por nombre, código o categoría..." data-sales-product-search></label>
             <select class="ventas-product-select" aria-label="Producto para agregar" data-sales-product-picker>
                 <option value="">Selecciona un producto</option>
                 @foreach ($products as $product)
-                    <option value="{{ $product->id }}" data-price="{{ number_format((float) $product->effective_price, 2, '.', '') }}" data-stock="{{ $product->existencias }}">{{ $product->nombre }} Â· S/ {{ number_format((float) $product->effective_price, 2) }} Â· Stock {{ $product->existencias }}</option>
+                    <option value="{{ $product->id }}" data-price="{{ number_format((float) $product->effective_price, 2, '.', '') }}" data-stock="{{ $product->existencias }}">{{ $product->nombre }} · S/ {{ number_format((float) $product->effective_price, 2) }} · Stock {{ $product->existencias }}</option>
                 @endforeach
             </select>
             <button class="ventas-modal-add" type="button" data-sales-add-product><i class="bi bi-plus-lg" aria-hidden="true"></i> Agregar</button>

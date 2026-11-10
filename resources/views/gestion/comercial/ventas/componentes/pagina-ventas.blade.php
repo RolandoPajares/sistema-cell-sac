@@ -4,12 +4,12 @@
             <h1><i class="bi {{ $datos['icono'] }}" aria-hidden="true"></i>{{ $datos['titulo'] }}</h1>
             <p>{{ $datos['descripcion'] }}</p>
         </div>
-        <div class="tc-oc__header-actions">@foreach ($datos['acciones'] as $accion)@if (!empty($accion['ruta']))<a class="tc-oc__button {{ ($accion['primaria'] ?? false) ? 'tc-oc__button--primary' : '' }}" href="{{ $accion['ruta'] }}"><i class="bi {{ $accion['icono'] }}" aria-hidden="true"></i>{{ $accion['texto'] }}</a>@elseif (!empty($accion['modal']))<button type="button" class="tc-oc__button {{ ($accion['primaria'] ?? false) ? 'tc-oc__button--primary' : '' }}" data-oc-open-modal="{{ $accion['modal'] }}"><i class="bi {{ $accion['icono'] }}" aria-hidden="true"></i>{{ $accion['texto'] }}</button>@else<button type="button" class="tc-oc__button {{ ($accion['primaria'] ?? false) ? 'tc-oc__button--primary' : '' }}" disabled title="Esta operaciÃ³n no cuenta con una gestiÃ³n real disponible"><i class="bi {{ $accion['icono'] }}" aria-hidden="true"></i>{{ $accion['texto'] }}</button>@endif @endforeach</div>
+        <div class="tc-oc__header-actions">@foreach ($datos['acciones'] as $accion)@if (!empty($accion['ruta']))<a class="tc-oc__button {{ ($accion['primaria'] ?? false) ? 'tc-oc__button--primary' : '' }}" href="{{ $accion['ruta'] }}"><i class="bi {{ $accion['icono'] }}" aria-hidden="true"></i>{{ $accion['texto'] }}</a>@elseif (!empty($accion['modal']))<button type="button" class="tc-oc__button {{ ($accion['primaria'] ?? false) ? 'tc-oc__button--primary' : '' }}" data-oc-open-modal="{{ $accion['modal'] }}"><i class="bi {{ $accion['icono'] }}" aria-hidden="true"></i>{{ $accion['texto'] }}</button>@else<button type="button" class="tc-oc__button {{ ($accion['primaria'] ?? false) ? 'tc-oc__button--primary' : '' }}" disabled title="Esta operación no cuenta con una gestión real disponible"><i class="bi {{ $accion['icono'] }}" aria-hidden="true"></i>{{ $accion['texto'] }}</button>@endif @endforeach</div>
     </header>
     @if (!empty($datos['datos_reales']))
-    <div class="tc-oc__notice" role="status"><i class="bi bi-database-check" aria-hidden="true"></i><strong>Datos reales</strong><span>Listado e indicadores consultados desde MariaDB. No hay condiciÃ³n de pago registrada para estas ventas.</span><a href="{{ route('management.sales') }}">Abrir gestiÃ³n de ventas <i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
+    <div class="tc-oc__notice" role="status"><i class="bi bi-database-check" aria-hidden="true"></i><strong>Datos reales</strong><span>Listado e indicadores consultados desde MariaDB. No hay condición de pago registrada para estas ventas.</span><a href="{{ route('management.sales') }}">Abrir gestión de ventas <i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
     @else
-    <div class="tc-oc__notice" role="status"><i class="bi bi-eye" aria-hidden="true"></i><strong>Vista de diseÃ±o</strong><span>Las cifras y ventas son ejemplos; los formularios no guardan operaciones.</span><a href="{{ route('management.sales') }}">Abrir gestiÃ³n de ventas actual <i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
+    <div class="tc-oc__notice" role="status"><i class="bi bi-eye" aria-hidden="true"></i><strong>Vista de diseño</strong><span>Las cifras y ventas son ejemplos; los formularios no guardan operaciones.</span><a href="{{ route('management.sales') }}">Abrir gestión de ventas actual <i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
     @endif
     <div class="tc-oc__metrics">@foreach ($datos['metricas'] as $metrica)<article class="tc-oc__metric tc-oc__metric--{{ $metrica['tono'] ?? 'azul' }}"><span class="tc-oc__metric-icon"><i class="bi {{ $metrica['icono'] }}" aria-hidden="true"></i></span>
             <div><small>{{ $metrica['titulo'] }}</small><strong>{{ $metrica['valor'] }}</strong></div><span class="tc-oc__metric-trend">{{ $metrica['tendencia'] }}</span>
@@ -39,7 +39,7 @@
                         </tr>
                     </thead>
                     <tbody>@forelse ($datos['filas'] as $fila)<tr data-oc-row @foreach ($fila['filtros'] as $campo=> $valor) data-oc-{{ $campo }}="{{ $valor }}" @endforeach>@foreach ($fila['celdas'] as $celda)<td>@if (is_array($celda))<span class="tc-oc__pill tc-oc__pill--{{ $celda['tono'] ?? 'azul' }}">{{ $celda['texto'] }}</span>@else{{ $celda }}@endif</td>@endforeach<td>
-                                <div class="tc-oc__row-actions">@if (!empty($datos['ver_detalle_demo']))<button type="button" data-oc-open-detail aria-haspopup="dialog"><i class="bi bi-eye" aria-hidden="true"></i>Ver</button>@else<button type="button" disabled title="La consulta detallada no estÃ¡ disponible en esta pantalla"><i class="bi bi-eye" aria-hidden="true"></i>Ver</button>@endif<button type="button" disabled title="EdiciÃ³n pendiente"><i class="bi bi-three-dots" aria-hidden="true"></i></button></div>
+                                <div class="tc-oc__row-actions">@if (!empty($datos['ver_detalle_demo']))<button type="button" data-oc-open-detail aria-haspopup="dialog"><i class="bi bi-eye" aria-hidden="true"></i>Ver</button>@else<button type="button" disabled title="La consulta detallada no está disponible en esta pantalla"><i class="bi bi-eye" aria-hidden="true"></i>Ver</button>@endif<button type="button" disabled title="Edición pendiente"><i class="bi bi-three-dots" aria-hidden="true"></i></button></div>
                             </td>
                         </tr>@empty<tr>
                             <td colspan="{{ count($datos['columnas']) + 1 }}" class="tc-oc__empty">No hay ventas registradas para estos filtros.</td>
@@ -50,7 +50,7 @@
         </article>
         <aside class="tc-oc__card tc-oc__quick-form">
             <h2><i class="bi {{ $datos['formIcono'] }}" aria-hidden="true"></i>{{ $datos['formTitulo'] }}</h2>
-            <p>@if (!empty($datos['datos_reales']))Completa el registro en el formulario de ventas autorizado.@else Vista previa del formulario. Usa la gestiÃ³n actual para registrar ventas.@endif</p>@foreach ($datos['formCampos'] as $campo)<label>{{ $campo['etiqueta'] }} @if ($campo['requerido'] ?? false)<span>*</span>@endif @if (($campo['tipo'] ?? 'select') === 'select')<select disabled>
+            <p>@if (!empty($datos['datos_reales']))Completa el registro en el formulario de ventas autorizado.@else Vista previa del formulario. Usa la gestión actual para registrar ventas.@endif</p>@foreach ($datos['formCampos'] as $campo)<label>{{ $campo['etiqueta'] }} @if ($campo['requerido'] ?? false)<span>*</span>@endif @if (($campo['tipo'] ?? 'select') === 'select')<select disabled>
                     <option>{{ $campo['ayuda'] }}</option>
                 </select>@else<input type="text" placeholder="{{ $campo['ayuda'] }}" disabled>@endif</label>@endforeach<a href="{{ $datos['rutaFormulario'] ?? route('management.sales') }}" class="tc-oc__button tc-oc__button--primary tc-oc__form-submit"><i class="bi {{ $datos['formIcono'] }}" aria-hidden="true"></i>{{ $datos['formAccion'] }}</a>@if (!empty($datos['condiciones_demo']))<button type="button" class="tc-oc__button tc-oc__terms-button" data-oc-open-modal="condiciones-mayoristas"><i class="bi bi-card-checklist" aria-hidden="true"></i>Definir condiciones comerciales</button>@endif
         </aside>
@@ -69,7 +69,7 @@
             <div class="tc-oc__card-heading">
                 <h2><i class="bi {{ $datos['grafico']['icono'] }}" aria-hidden="true"></i>{{ $datos['grafico']['titulo'] }}</h2>
             </div>
-            <div class="tc-oc__chart" role="img" aria-label="GrÃ¡fico de datos consultados para {{ $datos['grafico']['titulo'] }}">@foreach ($datos['grafico']['barras'] as $barra)<div><strong>{{ $barra[1] }}</strong><i style="height: {{ $barra[2] }}%"></i><small>{{ $barra[0] }}</small></div>@endforeach</div>
+            <div class="tc-oc__chart" role="img" aria-label="Gráfico de datos consultados para {{ $datos['grafico']['titulo'] }}">@foreach ($datos['grafico']['barras'] as $barra)<div><strong>{{ $barra[1] }}</strong><i style="height: {{ $barra[2] }}%"></i><small>{{ $barra[0] }}</small></div>@endforeach</div>
         </article>
         <article class="tc-oc__card">
             <div class="tc-oc__card-heading">
@@ -88,13 +88,13 @@
         </header>
         <div class="tc-oc__dialog-body">
             <div class="tc-oc__dialog-warning"><i class="bi bi-info-circle" aria-hidden="true"></i>
-                <p>DemostraciÃ³n visual: no abre una caja, no registra un saldo inicial y no genera movimientos.</p>
+                <p>Demostración visual: no abre una caja, no registra un saldo inicial y no genera movimientos.</p>
             </div>
             <div class="tc-oc__dialog-fields"><label class="tc-oc__dialog-field">Caja <b>*</b><input type="text" required maxlength="100" placeholder="Nombre de la caja"></label><label class="tc-oc__dialog-field">Saldo inicial (S/) <b>*</b><input type="number" required min="0" step="0.01" inputmode="decimal" placeholder="0.00"></label><label class="tc-oc__dialog-field tc-oc__dialog-field--wide">Observaciones<textarea rows="3" maxlength="500" placeholder="Notas de apertura"></textarea></label></div>
             <p class="tc-oc__dialog-error" data-oc-demo-error role="alert" hidden></p>
             <p class="tc-oc__dialog-feedback" data-oc-demo-status role="status" aria-live="polite" hidden></p>
         </div>
-        <footer class="tc-oc__dialog-footer"><button type="button" class="tc-oc__button" data-oc-close-modal>Cancelar</button><button type="button" class="tc-oc__button tc-oc__button--primary" data-oc-confirm-demo>Confirmar apertura (demostraciÃ³n)</button></footer>
+        <footer class="tc-oc__dialog-footer"><button type="button" class="tc-oc__button" data-oc-close-modal>Cancelar</button><button type="button" class="tc-oc__button tc-oc__button--primary" data-oc-confirm-demo>Confirmar apertura (demostración)</button></footer>
     </dialog>
     @endif
 
@@ -108,13 +108,13 @@
         </header>
         <div class="tc-oc__dialog-body">
             <div class="tc-oc__dialog-warning"><i class="bi bi-info-circle" aria-hidden="true"></i>
-                <p>Los valores ingresados no se guardan ni representan polÃ­ticas comerciales vigentes. Su integraciÃ³n y aprobaciÃ³n estÃ¡n pendientes.</p>
+                <p>Los valores ingresados no se guardan ni representan políticas comerciales vigentes. Su integración y aprobación están pendientes.</p>
             </div>
-            <div class="tc-oc__dialog-fields"><label class="tc-oc__dialog-field">Cliente mayorista <b>*</b><input type="text" required maxlength="160" placeholder="Nombre de la empresa"></label><label class="tc-oc__dialog-field">Volumen estimado (unidades) <b>*</b><input type="number" required min="1" step="1" inputmode="numeric" placeholder="Cantidad estimada"></label><label class="tc-oc__dialog-field">CondiciÃ³n de pago propuesta<input type="text" maxlength="100" placeholder="Pendiente de definir"></label><label class="tc-oc__dialog-field">Descuento solicitado (%)<input type="number" min="0" max="100" step="0.01" inputmode="decimal" placeholder="Sin definir"></label><label class="tc-oc__dialog-field">Vigencia propuesta<input type="date"></label><label class="tc-oc__dialog-field tc-oc__dialog-field--wide">Observaciones<textarea rows="3" maxlength="1000" placeholder="Detalles de la propuesta"></textarea></label></div>
+            <div class="tc-oc__dialog-fields"><label class="tc-oc__dialog-field">Cliente mayorista <b>*</b><input type="text" required maxlength="160" placeholder="Nombre de la empresa"></label><label class="tc-oc__dialog-field">Volumen estimado (unidades) <b>*</b><input type="number" required min="1" step="1" inputmode="numeric" placeholder="Cantidad estimada"></label><label class="tc-oc__dialog-field">Condición de pago propuesta<input type="text" maxlength="100" placeholder="Pendiente de definir"></label><label class="tc-oc__dialog-field">Descuento solicitado (%)<input type="number" min="0" max="100" step="0.01" inputmode="decimal" placeholder="Sin definir"></label><label class="tc-oc__dialog-field">Vigencia propuesta<input type="date"></label><label class="tc-oc__dialog-field tc-oc__dialog-field--wide">Observaciones<textarea rows="3" maxlength="1000" placeholder="Detalles de la propuesta"></textarea></label></div>
             <p class="tc-oc__dialog-error" data-oc-demo-error role="alert" hidden></p>
             <p class="tc-oc__dialog-feedback" data-oc-demo-status role="status" aria-live="polite" hidden></p>
         </div>
-        <footer class="tc-oc__dialog-footer"><button type="button" class="tc-oc__button" data-oc-close-modal>Cancelar</button><button type="button" class="tc-oc__button tc-oc__button--primary" data-oc-confirm-demo>Solicitar condiciÃ³n (demostraciÃ³n)</button></footer>
+        <footer class="tc-oc__dialog-footer"><button type="button" class="tc-oc__button" data-oc-close-modal>Cancelar</button><button type="button" class="tc-oc__button tc-oc__button--primary" data-oc-confirm-demo>Solicitar condición (demostración)</button></footer>
     </dialog>
     <dialog class="tc-oc__dialog" data-oc-detail-dialog aria-labelledby="tc-oc-detail-title">
         <header class="tc-oc__dialog-header"><span class="tc-oc__dialog-icon"><i class="bi bi-eye" aria-hidden="true"></i></span>

@@ -17,7 +17,7 @@ class Pedido extends Model
 {
     protected $table = 'pedidos';
 
-    protected $fillable = ['usuario_id', 'cliente_id', 'cotizacion_id', 'canal', 'tipo_venta', 'observaciones', 'total', 'subtotal', 'descuento', 'cupon_id', 'cupon_codigo', 'estado', 'creado_en', 'empresa_id', 'sede_id', 'almacen_id'];
+    protected $fillable = ['usuario_id', 'cliente_id', 'cliente_invitado_nombre', 'cliente_invitado_correo', 'cliente_invitado_telefono', 'token_acceso_publico', 'direccion_entrega_snapshot', 'cotizacion_id', 'canal', 'tipo_venta', 'observaciones', 'total', 'subtotal', 'descuento', 'cupon_id', 'cupon_codigo', 'estado', 'creado_en', 'empresa_id', 'sede_id', 'almacen_id'];
 
     public $timestamps = false;
 
@@ -33,6 +33,7 @@ class Pedido extends Model
             'subtotal' => 'decimal:2',
             'descuento' => 'decimal:2',
             'creado_en' => 'datetime',
+            'direccion_entrega_snapshot' => 'array',
         ];
     }
 

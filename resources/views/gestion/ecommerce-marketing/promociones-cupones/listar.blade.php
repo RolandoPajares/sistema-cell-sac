@@ -1,10 +1,10 @@
 @extends('layouts.panel.principal')
 
 @section('title', 'Cupones')
-@section('body_class', auth()->user()?->can('gestion.seguridad.consultar') ? 'modulo-cupones' : '')
+@section('body_class', $isAdmin ? 'modulo-cupones' : '')
 
 @section('content')
-    @if (! (auth()->user()?->can('gestion.seguridad.consultar') ?? false))
+    @if (! $isAdmin)
         <section class="container content-page">
             <h1>Cupones</h1>
             <p class="notice">Gestiona los cupones disponibles para las promociones comerciales.</p>
@@ -19,13 +19,6 @@
             {{ $coupons->links() }}
         </section>
     @else
-        @php
-            $statusClass = static fn (string $status): string => match ($status) {
-                'Activo' => 'active',
-                'Programado' => 'scheduled',
-                default => 'finished',
-            };
-        @endphp
         <section class="admin-marketing-module admin-cupones-page" data-pending-module="cupones" data-em-coupon-page>
             @if (session('status'))
                 <p class="gestion-pendiente-feedback" role="status">{{ session('status') }}</p>
@@ -79,7 +72,7 @@
                             <td>Todo el catálogo</td>
                             <td>{{ $coupon->inicia_en?->format('d/m/Y') }}<small>hasta {{ $coupon->finaliza_en?->format('d/m/Y') }}</small></td>
                             <td><div class="admin-marketing-usage"><span>{{ $coupon->usos }} / {{ $coupon->limite_usos ?? '∞' }}</span><i style="--usage: {{ $coupon->limite_usos ? min(100, ((int) $coupon->usos / max(1, (int) $coupon->limite_usos)) * 100) : 0 }}%"></i></div></td>
-                            <td><span class="admin-marketing-status admin-marketing-status--{{ $statusClass($coupon->estado_vigencia) }}"><i class="bi bi-circle-fill" aria-hidden="true"></i>{{ $coupon->estado_vigencia }}</span></td>
+                            <td><span class="admin-marketing-status admin-marketing-status--{{ $statusClasses[$coupon->estado_vigencia] ?? $statusClasses['default'] }}"><i class="bi bi-circle-fill" aria-hidden="true"></i>{{ $coupon->estado_vigencia }}</span></td>
                             <td class="admin-marketing-row-actions" data-em-coupon-row data-em-coupon-code="{{ $coupon->codigo }}" data-em-coupon-type="{{ $coupon->tipo_descuento }}" data-em-coupon-value="{{ number_format((float) $coupon->valor, 2, '.', '') }}" data-em-coupon-minimum="{{ number_format((float) $coupon->minimo_compra, 2, '.', '') }}" data-em-coupon-limit="{{ $coupon->limite_usos ?? '' }}" data-em-coupon-uses="{{ $coupon->usos }}" data-em-coupon-start="{{ $coupon->inicia_en?->format('Y-m-d\\TH:i') ?? '' }}" data-em-coupon-end="{{ $coupon->finaliza_en?->format('Y-m-d\\TH:i') ?? '' }}" data-em-coupon-status="{{ $coupon->estado_vigencia }}" data-em-coupon-update-url="{{ route('management.coupons.update', $coupon) }}" data-em-coupon-deactivate-url="{{ route('management.coupons.deactivate', $coupon) }}">
                                 <button type="button" data-em-coupon-action="detail"><i class="bi bi-eye" aria-hidden="true"></i><span>Ver</span></button>
                                 <button type="button" data-em-coupon-action="edit"><i class="bi bi-pencil" aria-hidden="true"></i><span>Editar</span></button>

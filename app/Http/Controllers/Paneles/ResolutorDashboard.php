@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers\Paneles;
 
-use App\Http\Controllers\Paneles\Administrador\DashboardController as AdministradorDashboardController;
-use App\Http\Controllers\Paneles\ClienteMinorista\DashboardController as CuentaDashboardController;
 use App\Models\User;
-use App\Servicios\ServicioAutorizacion;
-use App\Servicios\ServicioMenuDinamico;
+use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
+use App\Servicios\Compartidos\Seguridad\ServicioMenuDinamico;
 
 /**
  * Resuelve el panel a partir de pantallas autorizadas, no de una lista de roles.
@@ -14,8 +12,7 @@ use App\Servicios\ServicioMenuDinamico;
 final class ResolutorDashboard
 {
     public function __construct(
-        private readonly AdministradorDashboardController $administrador,
-        private readonly CuentaDashboardController $cuenta,
+        private readonly PanelDashboardController $dashboard,
         private readonly ServicioAutorizacion $autorizacion,
         private readonly ServicioMenuDinamico $menus,
     ) {}
@@ -27,11 +24,11 @@ final class ResolutorDashboard
 
         if ($items->contains(static fn (array $item): bool => ($item['enabled'] ?? false)
             && ($item['route'] ?? null) === 'management.dashboard')) {
-            return $this->administrador;
+            return $this->dashboard;
         }
 
         abort_unless($this->autorizacion->hasAnyPermission($user), 403);
 
-        return $this->cuenta;
+        return $this->dashboard;
     }
 }

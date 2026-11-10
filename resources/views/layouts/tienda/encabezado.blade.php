@@ -37,7 +37,11 @@
             </a>
             @if ($headerAuthenticated)
                 <a class="header-account" href="{{ route('dashboard') }}">
-                    <i class="bi bi-person-circle" aria-hidden="true"></i>
+                    @if ($headerUserPhotoUrl)
+                        <img class="header-account-avatar" src="{{ $headerUserPhotoUrl }}" alt="">
+                    @else
+                        <i class="bi bi-person-circle" aria-hidden="true"></i>
+                    @endif
                     <span><b>Mi cuenta</b><small>{{ $headerUser->nombre }}</small></span>
                 </a>
                 <form method="post" action="{{ route('logout') }}">

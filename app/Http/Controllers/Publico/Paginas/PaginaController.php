@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Publico\Paginas;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\GuardarMensajeContactoRequest;
-use App\Servicios\ServicioContacto;
+use App\Http\Requests\Publico\Paginas\GuardarMensajeContactoRequest;
+use App\Servicios\Publico\Paginas\ServicioContacto;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;

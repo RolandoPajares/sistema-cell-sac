@@ -3,10 +3,11 @@
 namespace App\Http\Middleware;
 
 use App\Models\User;
-use App\Servicios\ServicioAutorizacion;
+use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Define la responsabilidad de la clase VerificarPermiso dentro de su módulo.
@@ -30,11 +31,12 @@ class VerificarPermiso
      * o que no superan alguna comprobación RBAC. Cuando autoriza, deja el permiso efectivo
      * en los atributos de la solicitud para que las capas posteriores lo reutilicen.
      *
-     * @param Request $request Solicitud HTTP que se va a autorizar.
-     * @param Closure $next Continuación del pipeline HTTP.
-     * @param string ...$permissions Códigos de permiso o el marcador especial `ruta`.
+     * @param  Request  $request  Solicitud HTTP que se va a autorizar.
+     * @param  Closure  $next  Continuación del pipeline HTTP.
+     * @param  string  ...$permissions  Códigos de permiso o el marcador especial `ruta`.
      * @return Response Respuesta producida por el siguiente middleware o controlador.
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException Si la autorización falla.
+     *
+     * @throws HttpException Si la autorización falla.
      */
     public function handle(Request $request, Closure $next, string ...$permissions): Response
     {

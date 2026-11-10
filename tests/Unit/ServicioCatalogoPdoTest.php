@@ -3,10 +3,10 @@
 use App\Dominio\Catalogo\ProductoEntidad;
 use App\Infraestructura\Persistencia\Pdo\PdoConexion;
 use App\Infraestructura\Persistencia\Pdo\PdoProductoDao;
-use App\Servicios\ServicioAutorizacion;
-use App\Servicios\ServicioCatalogo;
-use App\Servicios\ServicioInventario;
-use App\Servicios\RegistradorAuditoria;
+use App\Servicios\Compartidos\Auditoria\RegistradorAuditoria;
+use App\Servicios\Compartidos\Catalogo\ServicioCatalogo;
+use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
+use App\Servicios\Gestion\InventarioLogistica\ServicioInventario;
 
 it('usa el DAO PDO desde un servicio de negocio y confirma producto con variante atómicamente', function (): void {
     $pdo = new PDO('sqlite::memory:');
@@ -15,8 +15,8 @@ it('usa el DAO PDO desde un servicio de negocio y confirma producto con variante
     $pdo->exec('CREATE TABLE variantes_productos (id INTEGER PRIMARY KEY AUTOINCREMENT, producto_id INTEGER NOT NULL, codigo_sku TEXT NOT NULL, codigo_barras TEXT NULL, nombre_color TEXT NOT NULL, codigo_color TEXT NULL, existencias INTEGER NOT NULL, controla_serie INTEGER NOT NULL, estado TEXT NOT NULL)');
 
     $catalogo = new ServicioCatalogo(
-        new ServicioInventario(new ServicioAutorizacion(), new RegistradorAuditoria()),
-        new ServicioAutorizacion(),
+        new ServicioInventario(new ServicioAutorizacion, new RegistradorAuditoria),
+        new ServicioAutorizacion,
         new PdoProductoDao(new PdoConexion($pdo)),
     );
 

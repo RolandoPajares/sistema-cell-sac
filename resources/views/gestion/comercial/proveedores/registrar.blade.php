@@ -10,12 +10,12 @@
     {{-- Identificación legal y comercial del proveedor. --}}
     <fieldset class="proveedores-form-section">
         <legend>1. Identificación</legend>
-        <label class="proveedores-form-field proveedores-form-field--full"><span>Tipo de persona</span><select name="tipo_persona"><option value="natural">Persona natural</option><option value="juridica" selected>Persona jurídica</option></select></label>
+        <label class="proveedores-form-field proveedores-form-field--full"><span>Tipo de persona</span><select name="tipo_persona" data-provider-person-type><option value="natural">Persona natural</option><option value="juridica" selected>Persona jurídica</option></select></label>
         <div class="proveedores-form-grid">
-            <label class="proveedores-form-field"><span>Tipo de documento</span><select name="tipo_documento"><option value="ruc" selected>RUC</option><option value="dni">DNI</option></select></label>
-            <label class="proveedores-form-field"><span>Número de documento <b>*</b></span><input name="ruc" required maxlength="20" placeholder="Ingresar documento" value="{{ old('ruc') }}"></label>
+            <label class="proveedores-form-field"><span data-provider-document-type-label>Tipo de documento</span><select name="tipo_documento" data-provider-document-type><option value="ruc" selected>RUC</option><option value="dni">DNI</option></select></label>
+            <label class="proveedores-form-field"><span data-provider-document-label>Número de documento <b>*</b></span><input name="ruc" required maxlength="20" placeholder="Ingresar documento" value="{{ old('ruc') }}" data-provider-document-input></label>
         </div>
-        <label class="proveedores-form-field proveedores-form-field--full"><span>Razón social <b>*</b></span><input name="nombre" required maxlength="160" placeholder="Razón social del proveedor" value="{{ old('nombre') }}"></label>
+        <label class="proveedores-form-field proveedores-form-field--full"><span data-provider-name-label>Razón social <b>*</b></span><input name="nombre" required maxlength="160" placeholder="Razón social del proveedor" value="{{ old('nombre') }}" data-provider-name-input></label>
         <label class="proveedores-form-field proveedores-form-field--full"><span>Nombre comercial <small>(opcional)</small></span><input name="nombre_comercial" maxlength="160" placeholder="Nombre comercial" value="{{ old('nombre_comercial') }}"></label>
     </fieldset>
 

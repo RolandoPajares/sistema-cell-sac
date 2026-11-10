@@ -3,10 +3,10 @@
 use App\Models\Catalogo\Producto;
 use App\Models\Comercio\Pedido;
 use App\Models\User;
-use App\Servicios\ServicioAutorizacion;
-use App\Servicios\ServicioDelegacion;
-use App\Servicios\ServicioInventario;
-use App\Servicios\ServicioMenuDinamico;
+use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
+use App\Servicios\Compartidos\Seguridad\ServicioMenuDinamico;
+use App\Servicios\Gestion\Administracion\Seguridad\ServicioDelegacion;
+use App\Servicios\Gestion\InventarioLogistica\ServicioInventario;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\HttpException;

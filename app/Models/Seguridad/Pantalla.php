@@ -6,6 +6,7 @@ use Database\Factories\Seguridad\PantallaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Define la responsabilidad de la clase Pantalla dentro de su módulo.
@@ -43,5 +44,10 @@ class Pantalla extends Model
     public function modulo(): BelongsTo
     {
         return $this->belongsTo(Modulo::class, 'modulo_id');
+    }
+
+    public function permisos(): HasMany
+    {
+        return $this->hasMany(Permiso::class, 'pantalla_id');
     }
 }

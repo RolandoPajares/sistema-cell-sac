@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Controllers\Paneles\Administrador\DashboardGlobalSedesController;
+use App\Http\Controllers\Gestion\Analitica\DashboardGlobal\DashboardGlobalSedesController;
 use App\Models\User;
-use App\Servicios\ServicioAutorizacion;
+use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

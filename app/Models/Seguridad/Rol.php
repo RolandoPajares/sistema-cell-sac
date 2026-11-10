@@ -2,6 +2,7 @@
 
 namespace App\Models\Seguridad;
 
+use App\Models\Cuenta\PerfilCampo;
 use App\Models\User;
 use Database\Factories\Seguridad\RolFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -69,5 +70,11 @@ class Rol extends Model
     {
         return $this->belongsToMany(User::class, 'usuarios_roles', 'rol_id', 'usuario_id')
             ->withPivot(['asignado_por_usuario_id', 'asignado_en', 'vigente_hasta', 'activo']);
+    }
+
+    public function camposPerfil(): BelongsToMany
+    {
+        return $this->belongsToMany(PerfilCampo::class, 'roles_perfil_campos', 'rol_id', 'perfil_campo_id')
+            ->withPivot(['visible', 'editable', 'requerido']);
     }
 }

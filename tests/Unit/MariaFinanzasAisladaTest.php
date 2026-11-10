@@ -2,8 +2,8 @@
 
 use App\Models\Finanzas\Caja;
 use App\Models\User;
-use App\Servicios\ServicioCajas;
-use App\Servicios\ServicioOperacionesFinancieras;
+use App\Servicios\Gestion\Finanzas\ServicioCajas;
+use App\Servicios\Gestion\Finanzas\ServicioOperacionesFinancieras;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\HttpException;

@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\User;
-use App\Servicios\ServicioAutorizacion;
+use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -32,7 +32,9 @@ final class AsegurarCarritoEcommerce
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-        abort_unless($user instanceof User, 403);
+        if (! $user instanceof User) {
+            return $next($request);
+        }
 
         $esCliente = $this->autorizacion->allows($user, 'gestion.cotizaciones.consultar')
             || $this->autorizacion->allows($user, 'gestion.pedidos.consultar');

@@ -4,11 +4,6 @@
 @section('body_class', 'modulo-soporte-reclamos')
 
 @section('content')
-@php
-    $kpis = $module['kpis'];
-    $tableColumns = ['Ticket', 'Cliente', 'Asunto', 'Prioridad', 'Estado', 'Actualización', 'Acciones'];
-@endphp
-
 <section class="gestion-soporte-page" data-pending-module="soporte-reclamos" data-backend="true">
     <header class="gestion-soporte-header">
         <nav class="gestion-soporte-breadcrumb" aria-label="Ruta de navegación">
@@ -31,7 +26,7 @@
     </header>
 
     <section class="gestion-soporte-kpis" aria-label="Indicadores de soporte">
-        @foreach ($kpis as $kpi)
+        @foreach ($module['kpis'] as $kpi)
             <article class="gestion-soporte-kpi gestion-soporte-kpi--{{ $kpi['tone'] }}">
                 <span class="gestion-soporte-kpi-icon"><i class="bi {{ $kpi['icon'] }}" aria-hidden="true"></i></span>
                 <div><small>{{ $kpi['label'] }}</small><strong>{{ $kpi['value'] }}</strong><span>{{ $kpi['helper'] }}</span></div>
@@ -56,12 +51,12 @@
         </header>
         <div class="gestion-soporte-table-wrap">
             <table class="gestion-soporte-table">
-                <thead><tr>@foreach ($tableColumns as $column)<th>{{ $column }}</th>@endforeach</tr></thead>
+                <thead><tr>@foreach ($module['tableColumns'] as $column)<th>{{ $column }}</th>@endforeach</tr></thead>
                 <tbody>
                 @forelse ($module['rows'] ?? [] as $row)
                     <tr><td>{{ $row['codigo'] }}</td><td>{{ $row['cliente'] }}</td><td>{{ $row['asunto'] }}</td><td>{{ $row['prioridad'] }}</td><td>{{ $row['estado'] }}</td><td>{{ $row['actualizado'] }}</td><td><button type="button" aria-label="Ver caso" data-pending-open="ver" data-pending-record="{{ base64_encode(json_encode($row['record'], JSON_UNESCAPED_UNICODE)) }}"><i class="bi bi-eye" aria-hidden="true"></i></button><button type="button" aria-label="Editar caso" data-pending-open="editar" data-pending-action="{{ $row['edit_url'] }}" data-pending-record="{{ base64_encode(json_encode($row['record'], JSON_UNESCAPED_UNICODE)) }}"><i class="bi bi-pencil" aria-hidden="true"></i></button><button type="button" aria-label="Cerrar caso" data-pending-open="eliminar" data-pending-action="{{ $row['delete_url'] }}" data-pending-method="PATCH" data-pending-record="{{ base64_encode(json_encode($row['record'], JSON_UNESCAPED_UNICODE)) }}"><i class="bi bi-check2-circle" aria-hidden="true"></i></button></td></tr>
                 @empty
-                    <tr><td colspan="{{ count($tableColumns) }}"><div class="gestion-soporte-empty"><span><i class="bi bi-inbox" aria-hidden="true"></i></span><strong>No hay casos para mostrar</strong><p>No existen casos que coincidan con el alcance y filtros actuales.</p></div></td></tr>
+                    <tr><td colspan="{{ count($module['tableColumns']) }}"><div class="gestion-soporte-empty"><span><i class="bi bi-inbox" aria-hidden="true"></i></span><strong>No hay casos para mostrar</strong><p>No existen casos que coincidan con el alcance y filtros actuales.</p></div></td></tr>
                 @endforelse
                 </tbody>
             </table>

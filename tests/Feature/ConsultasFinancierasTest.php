@@ -1,11 +1,11 @@
 <?php
 
-use App\Http\Requests\AnularOperacionFinancieraRequest;
-use App\Http\Requests\AprobarReembolsoRequest;
-use App\Http\Requests\FiltroPagosRequest;
-use App\Http\Requests\FiltroReembolsosRequest;
-use App\Http\Requests\RegistrarPagoRequest;
-use App\Http\Requests\SolicitarReembolsoRequest;
+use App\Http\Requests\Gestion\Finanzas\AnularOperacionFinancieraRequest;
+use App\Http\Requests\Gestion\Finanzas\PagosCobros\FiltroPagosRequest;
+use App\Http\Requests\Gestion\Finanzas\PagosCobros\RegistrarPagoRequest;
+use App\Http\Requests\Gestion\Finanzas\Reembolsos\AprobarReembolsoRequest;
+use App\Http\Requests\Gestion\Finanzas\Reembolsos\FiltroReembolsosRequest;
+use App\Http\Requests\Gestion\Finanzas\Reembolsos\SolicitarReembolsoRequest;
 use Illuminate\Support\Facades\Validator;
 
 test('los filtros financieros validan periodo, estado y rangos de fecha', function (): void {
