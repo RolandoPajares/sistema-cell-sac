@@ -33,7 +33,7 @@ abstract class PanelDashboardController extends Controller
     {
         $user = $request->user();
 
-        abort_unless($user instanceof User && $user->isRole($this->role()), 403);
+        abort_unless($user instanceof User, 403);
 
         return view($this->viewName(), $this->viewData($request, $user));
     }
@@ -43,8 +43,6 @@ abstract class PanelDashboardController extends Controller
      *
      * @return string Resultado de la operación.
      */
-    abstract protected function role(): string;
-
     /**
      * Recupera y presenta el detalle de la información solicitada.
      *
@@ -60,7 +58,6 @@ abstract class PanelDashboardController extends Controller
         return $this->panelService->roleDashboard(
             $user,
             (array) $request->session()->get('cart', []),
-            $this->role(),
         );
     }
 }

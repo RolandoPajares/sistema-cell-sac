@@ -31,6 +31,6 @@ class ComparadorController extends Controller
         $products = Producto::with('features', 'category', 'images', 'intelligenceProfile')->active()->whereIn('id', $ids)->get();
         $availableProducts = Producto::query()->active()->with('category')->orderBy('nombre')->limit(100)->get();
 
-        return view('publico.catalogo.comparar', compact('products', 'availableProducts', 'ids'));
+        return view('inteligente.comprador.comparacion', compact('products', 'availableProducts', 'ids'));
     }
 }

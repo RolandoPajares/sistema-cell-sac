@@ -1,0 +1,37 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import '../../app.css';
+@import '../../base/variables.css';
+@import '../../base/reinicio.css';
+@import '../../base/tipografia.css';
+@import '../tienda.css';
+@import '../../componentes/comunes/botones.css';
+@import '../../componentes/comunes/formularios.css';
+@import '../../componentes/comunes/precios.css';
+@import '../../componentes/comunes/tarjetas.css';
+@import '../../componentes/comunes/alertas.css';
+@import '../../componentes/comunes/badges.css';
+@import '../../componentes/comunes/estados.css';
+@import '../../componentes/comunes/tablas.css';
+@import '../../base/utilidades.css';
+@import './encabezado.css';
+@import './pie-pagina.css';
+@import '../responsive.css';
+@import '../../inteligente/asistente/flotante.css';
+@import '../../componentes/publico/publicidad.css';
+
+/* Page modules are bundled here so Blade only selects a layout. */
+@import '../../publico/paginas/inicio.css';
+@import '../../publico/catalogo/index.css';
+@import '../../publico/catalogo/detalle.css';
+@import '../../publico/comercio/carrito.css';
+@import '../../publico/paginas/contacto.css';
+@import '../../publico/paginas/nosotros.css';
+@import '../../inteligente/cotizador/formulario.css';
+@import '../../inteligente/asistente/chat.css';
+@import '../../inteligente/comprador/comparacion.css';
+@import '../../inteligente/comprador/recomendaciones.css';
+@import '../../publico/cuenta/cuenta.css';
+@import '../../publico/cuenta/barra-lateral-cuenta.css';
+@import '../../inteligente/cotizador/resumen.css';
+@import '../../publico/comercio/pedidos.css';
+@import '../../publico/rediseño-referencias.css';

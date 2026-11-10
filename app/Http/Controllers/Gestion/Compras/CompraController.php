@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Gestion\Compras;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ActualizarCompraRequest;
 use App\Http\Requests\GuardarCompraRequest;
 use App\Http\Requests\ImportarComprasRequest;
 use App\Http\Requests\RegistrarRecepcionParcialCompraRequest;
@@ -25,7 +26,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 /**
- * Define la responsabilidad de la clase CompraController dentro de su módulo.
+ * Define la responsabilidad de la clase CompraController dentro de su mÃ³dulo.
  *
  * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
  */
@@ -34,7 +35,7 @@ class CompraController extends Controller
     /**
      * Inicializa la instancia con las dependencias y el estado requeridos.
      *
-     * @return mixed Resultado de la operación.
+     * @return mixed Resultado de la operaciÃ³n.
      */
     public function __construct(
         private readonly ServicioCompras $purchaseService,
@@ -42,10 +43,10 @@ class CompraController extends Controller
     ) {}
 
     /**
-     * Obtiene y prepara la información solicitada para la operación.
+     * Obtiene y prepara la informaciÃ³n solicitada para la operaciÃ³n.
      *
-     * @param  mixed  $request  Parámetro recibido por la operación.
-     * @return View Resultado de la operación.
+     * @param  mixed  $request  ParÃ¡metro recibido por la operaciÃ³n.
+     * @return View Resultado de la operaciÃ³n.
      */
     public function index(Request $request): View
     {
@@ -188,6 +189,7 @@ class CompraController extends Controller
         $canImport = false;
         $canCreateLocation = false;
         $canCreate = false;
+        $editables = [];
         if (Schema::hasColumn('registros_auditoria', 'identificador_universal_evento') && $canCreatePermission) {
             try {
                 $ubicacion = $this->authorization->operationLocation($request->user());
@@ -207,6 +209,20 @@ class CompraController extends Controller
                 $canCreate = $suppliers->isNotEmpty() && $products->isNotEmpty();
             }
         }
+        $editables = $this->authorization
+            ->scopeRecordsFor(Compra::query()->whereIn('compras.id', $purchases->getCollection()->modelKeys())->where('estado', 'Pendiente'), $request->user(), 'gestion.compras.actualizar')
+            ->pluck('compras.id')
+            ->all();
+        $editables = array_values(array_filter($editables, function (int $purchaseId): bool {
+            if (DB::table('movimientos_inventario')->where('documento_tipo', 'compra')->where('documento_id', (string) $purchaseId)->exists()) {
+                return false;
+            }
+            if (Schema::hasTable('pagos') && DB::table('pagos')->where('compra_id', $purchaseId)->exists()) {
+                return false;
+            }
+
+            return ! Schema::hasTable('cuentas_pagar') || ! DB::table('cuentas_pagar')->where('compra_id', $purchaseId)->exists();
+        }));
         $idsPendientes = array_values(array_unique([...$pendingPurchaseRecords->modelKeys(), ...$purchases->getCollection()->modelKeys()]));
         $aprobables = $this->authorization->scopeRecordsFor(Compra::query()->whereIn('compras.id', $idsPendientes), $request->user(), 'gestion.compras.aprobar')->pluck('compras.id')->all();
         $anulables = $this->authorization->scopeRecordsFor(Compra::query()->whereIn('compras.id', $idsPendientes)->where('estado', 'Pendiente'), $request->user(), 'gestion.compras.anular')->pluck('compras.id')->all();
@@ -224,13 +240,33 @@ class CompraController extends Controller
             }
             $tokensRecepcion[$purchase->id] = $tokenExistente;
         }
+        $purchasePresentation = $purchases->getCollection()
+            ->concat($pendingPurchaseRecords)
+            ->concat($recentPurchases)
+            ->unique('id')
+            ->mapWithKeys(function (Compra $purchase): array {
+                $status = (string) $purchase->estado;
+                $receptionStatus = $purchase->estado === 'Aprobada' && (int) $purchase->cantidad_recibida_total > 0
+                    ? 'Parcial'
+                    : $status;
 
-        return view('gestion.compras.listar', [
+                return [$purchase->id => [
+                    'status_class' => $this->statusClass($status),
+                    'reception_class' => $this->statusClass($receptionStatus),
+                    'reception_label' => $this->receptionLabel($receptionStatus),
+                    'supplier_name' => $purchase->supplier?->nombre ?? 'Proveedor no disponible',
+                    'reference' => 'OC-'.($purchase->fecha_compra?->format('y') ?? now()->format('y')).'-'.str_pad((string) $purchase->id, 5, '0', STR_PAD_LEFT),
+                ]];
+            })
+            ->all();
+
+        return view('gestion.comercial.compras.listar', [
             'purchases' => $purchases,
             'suppliers' => $suppliers,
             'supplierFilters' => $proveedoresVisibles,
             'products' => $products,
             'canCreate' => $canCreate,
+            'editables' => $editables,
             'canCreatePermission' => $canCreatePermission,
             'canCreateLocation' => $canCreateLocation,
             'canImport' => $canImport,
@@ -258,21 +294,44 @@ class CompraController extends Controller
             'recentPurchases' => $recentPurchases,
             'pendingPurchaseRecords' => $pendingPurchaseRecords,
             'mostPurchasedProducts' => $mostPurchasedProducts,
+            'purchasePresentation' => $purchasePresentation,
         ]);
     }
 
+    private function statusClass(string $status): string
+    {
+        return match ($status) {
+            'Pendiente', 'En proceso' => 'pending',
+            'Aprobada' => 'approved',
+            'Recibida', 'Completada' => 'received',
+            'Parcial' => 'partial',
+            'Cancelada', 'Cancelado', 'Rechazada' => 'cancelled',
+            default => 'muted',
+        };
+    }
+
+    private function receptionLabel(string $status): string
+    {
+        return match ($status) {
+            'Recibida', 'Completada' => 'Completa',
+            'Parcial' => 'Parcial',
+            'Pendiente', 'En proceso', 'Aprobada' => 'Sin recibir',
+            default => $status,
+        };
+    }
+
     /**
-     * Genera la salida exportable de la información disponible.
+     * Genera la salida exportable de la informaciÃ³n disponible.
      *
-     * @param  mixed  $request  Parámetro recibido por la operación.
-     * @param  mixed  $format  Parámetro recibido por la operación.
-     * @param  mixed  $exporter  Parámetro recibido por la operación.
-     * @param  mixed  $audit  Parámetro recibido por la operación.
-     * @return Response|StreamedResponse Resultado de la operación.
+     * @param  mixed  $request  ParÃ¡metro recibido por la operaciÃ³n.
+     * @param  mixed  $format  ParÃ¡metro recibido por la operaciÃ³n.
+     * @param  mixed  $exporter  ParÃ¡metro recibido por la operaciÃ³n.
+     * @param  mixed  $audit  ParÃ¡metro recibido por la operaciÃ³n.
+     * @return Response|StreamedResponse Resultado de la operaciÃ³n.
      */
     public function export(Request $request, string $format, ExportadorTabular $exporter, RegistradorAuditoria $audit): Response|StreamedResponse
     {
-        abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
+        abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportaciÃ³n no permitido.');
         $filters = $request->validate([
             'buscar' => ['nullable', 'string', 'max:160'],
             'proveedor' => ['nullable', 'integer'],
@@ -320,7 +379,7 @@ class CompraController extends Controller
                 'filters' => $filters,
                 'generated_by' => (string) $request->user()->nombre,
                 'role' => 'Usuario autorizado',
-                'scope' => 'Empresa, sede, almacén y permisos RBAC vigentes.',
+                'scope' => 'Empresa, sede, almacÃ©n y permisos RBAC vigentes.',
                 'indicators' => [['label' => 'Compras incluidas', 'value' => count($rows)]],
             ]);
         $audit->record($request->user()->getKey(), 'exportar', 'compras', null, null, ['formato' => $format, 'filtros' => $filters, 'cantidad' => count($rows)], $request->ip());
@@ -329,10 +388,10 @@ class CompraController extends Controller
     }
 
     /**
-     * Registra la información recibida y coordina su persistencia.
+     * Registra la informaciÃ³n recibida y coordina su persistencia.
      *
-     * @param  mixed  $request  Parámetro recibido por la operación.
-     * @return RedirectResponse Resultado de la operación.
+     * @param  mixed  $request  ParÃ¡metro recibido por la operaciÃ³n.
+     * @return RedirectResponse Resultado de la operaciÃ³n.
      */
     public function store(GuardarCompraRequest $request): RedirectResponse
     {
@@ -340,15 +399,25 @@ class CompraController extends Controller
         $this->purchaseService->registrar($datos, $request->user(), $datos['compra_token'], $request->ip());
         $request->session()->forget('compra_token');
 
-        return back()->with('status', 'Compra registrada como pendiente; aún no se ha recibido mercadería.');
+        return back()->with('status', 'Compra registrada como pendiente; aÃºn no se ha recibido mercaderÃ­a.');
     }
 
     /**
-     * Procesa e incorpora la información importada.
+     * Procesa e incorpora la informaciÃ³n importada.
      *
-     * @param  mixed  $request  Parámetro recibido por la operación.
-     * @return RedirectResponse Resultado de la operación.
+     * @param  mixed  $request  ParÃ¡metro recibido por la operaciÃ³n.
+     * @return RedirectResponse Resultado de la operaciÃ³n.
      */
+    /**
+     * Actualiza una compra pendiente y conserva su identificador original.
+     */
+    public function update(ActualizarCompraRequest $request, Compra $compra): RedirectResponse
+    {
+        $this->purchaseService->actualizar($compra, $request->validated(), $request->user(), $request->ip());
+
+        return back()->with('status', 'La compra fue actualizada correctamente.');
+    }
+
     public function import(ImportarComprasRequest $request): RedirectResponse
     {
         $expected = ['proveedor_id', 'fecha_compra', 'producto_id', 'variante_id', 'cantidad', 'costo_unitario'];
@@ -367,7 +436,7 @@ class CompraController extends Controller
             }
             if (count($row) !== count($expected)) {
                 fclose($handle);
-                throw ValidationException::withMessages(['archivo' => 'El CSV contiene una fila con columnas inválidas.']);
+                throw ValidationException::withMessages(['archivo' => 'El CSV contiene una fila con columnas invÃ¡lidas.']);
             }
             $data = array_combine($expected, array_map(static fn ($value): string => trim((string) $value), $row));
             $validator = validator($data, [
@@ -377,17 +446,17 @@ class CompraController extends Controller
             ]);
             if ($validator->fails()) {
                 fclose($handle);
-                throw ValidationException::withMessages(['archivo' => 'Fila inválida: '.implode(' ', $validator->errors()->all())]);
+                throw ValidationException::withMessages(['archivo' => 'Fila invÃ¡lida: '.implode(' ', $validator->errors()->all())]);
             }
             $rows[] = $data;
             if (count($rows) > 100) {
                 fclose($handle);
-                throw ValidationException::withMessages(['archivo' => 'El archivo no puede superar 100 líneas.']);
+                throw ValidationException::withMessages(['archivo' => 'El archivo no puede superar 100 lÃ­neas.']);
             }
         }
         fclose($handle);
         if ($rows === []) {
-            throw ValidationException::withMessages(['archivo' => 'El CSV no contiene líneas de compra.']);
+            throw ValidationException::withMessages(['archivo' => 'El CSV no contiene lÃ­neas de compra.']);
         }
 
         DB::transaction(function () use ($rows, $request): void {
@@ -409,53 +478,53 @@ class CompraController extends Controller
     }
 
     /**
-     * Ejecuta la operación approve definida por la clase CompraController.
+     * Ejecuta la operaciÃ³n approve definida por la clase CompraController.
      *
-     * @param  mixed  $request  Parámetro recibido por la operación.
-     * @param  mixed  $compra  Parámetro recibido por la operación.
-     * @return RedirectResponse Resultado de la operación.
+     * @param  mixed  $request  ParÃ¡metro recibido por la operaciÃ³n.
+     * @param  mixed  $compra  ParÃ¡metro recibido por la operaciÃ³n.
+     * @return RedirectResponse Resultado de la operaciÃ³n.
      */
     public function approve(Request $request, Compra $compra): RedirectResponse
     {
         $this->purchaseService->aprobar($compra, $request->user(), $request->ip());
 
-        return back()->with('status', 'La compra está aprobada; aún no se ha recibido mercadería.');
+        return back()->with('status', 'La compra estÃ¡ aprobada; aÃºn no se ha recibido mercaderÃ­a.');
     }
 
     /**
-     * Ejecuta la operación receive definida por la clase CompraController.
+     * Ejecuta la operaciÃ³n receive definida por la clase CompraController.
      *
-     * @param  mixed  $request  Parámetro recibido por la operación.
-     * @param  mixed  $compra  Parámetro recibido por la operación.
-     * @return RedirectResponse Resultado de la operación.
+     * @param  mixed  $request  ParÃ¡metro recibido por la operaciÃ³n.
+     * @param  mixed  $compra  ParÃ¡metro recibido por la operaciÃ³n.
+     * @return RedirectResponse Resultado de la operaciÃ³n.
      */
     public function receive(Request $request, Compra $compra): RedirectResponse
     {
         $this->purchaseService->recibir($compra, $request->user(), $request->ip());
 
-        return back()->with('status', 'La compra está recibida.');
+        return back()->with('status', 'La compra estÃ¡ recibida.');
     }
 
     /**
-     * Modifica el estado o elimina el registro según la operación solicitada.
+     * Modifica el estado o elimina el registro segÃºn la operaciÃ³n solicitada.
      *
-     * @param  mixed  $request  Parámetro recibido por la operación.
-     * @param  mixed  $compra  Parámetro recibido por la operación.
-     * @return RedirectResponse Resultado de la operación.
+     * @param  mixed  $request  ParÃ¡metro recibido por la operaciÃ³n.
+     * @param  mixed  $compra  ParÃ¡metro recibido por la operaciÃ³n.
+     * @return RedirectResponse Resultado de la operaciÃ³n.
      */
     public function cancel(Request $request, Compra $compra): RedirectResponse
     {
         $this->purchaseService->anular($compra, $request->user(), $request->ip());
 
-        return back()->with('status', 'La compra pendiente fue anulada y quedó conservada en auditoría.');
+        return back()->with('status', 'La compra pendiente fue anulada y quedÃ³ conservada en auditorÃ­a.');
     }
 
     /**
-     * Ejecuta la operación recibirParcial definida por la clase CompraController.
+     * Ejecuta la operaciÃ³n recibirParcial definida por la clase CompraController.
      *
-     * @param  mixed  $request  Parámetro recibido por la operación.
-     * @param  mixed  $compra  Parámetro recibido por la operación.
-     * @return RedirectResponse Resultado de la operación.
+     * @param  mixed  $request  ParÃ¡metro recibido por la operaciÃ³n.
+     * @param  mixed  $compra  ParÃ¡metro recibido por la operaciÃ³n.
+     * @return RedirectResponse Resultado de la operaciÃ³n.
      */
     public function recibirParcial(RegistrarRecepcionParcialCompraRequest $request, Compra $compra): RedirectResponse
     {

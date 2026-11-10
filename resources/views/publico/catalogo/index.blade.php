@@ -1,31 +1,26 @@
-@extends('layouts.tienda')
+@extends('layouts.tienda.principal')
 
 @section('body_class', 'modulo-catalog')
-@section('title', 'Catálogo | MD Technology Cell')
+@section('title', 'Cat�logo | MD Technology Cell')
 
 @section('content')
-@php
-$baseFilters = request()->except('page');
-$selectedCategory = request('categoria');
-$selectedBrand = request('marca');
-@endphp
 <section class="catalog-page">
     <div class="catalog-reference-hero">
         <div class="container catalog-reference-hero__inner">
-            <div><span class="eyebrow">TECHNOLOGY CELL</span><h1>Encuentra tu próximo <span>celular ideal</span></h1><p>Las mejores marcas, precios vigentes y garantía real.</p><a class="btn btn-primary" href="#productos">Explorar catálogo <i class="bi bi-arrow-right"></i></a></div>
+            <div><span class="eyebrow">TECHNOLOGY CELL</span><h1>Encuentra tu pr�ximo <span>celular ideal</span></h1><p>Las mejores marcas, precios vigentes y garant�a real.</p><a class="btn btn-primary" href="#productos">Explorar cat�logo <i class="bi bi-arrow-right"></i></a></div>
         </div>
     </div>
     <div class="container">
-        <nav class="catalog-breadcrumbs" aria-label="Ruta de navegación">
-            <a href="{{ route('home') }}">Inicio</a><span aria-hidden="true">›</span><span aria-current="page">Catálogo</span>
+        <nav class="catalog-breadcrumbs" aria-label="Ruta de navegaci�n">
+            <a href="{{ route('home') }}">Inicio</a><span aria-hidden="true">�</span><span aria-current="page">Cat�logo</span>
         </nav>
 
         <div class="catalog-layout">
-            <aside class="catalog-sidebar" aria-label="Filtros del catálogo">
+            <aside class="catalog-sidebar" aria-label="Filtros del cat�logo">
                 <section class="catalog-filter-section">
-                    <h2>Categorías</h2>
-                    <nav class="catalog-filter-list" aria-label="Categorías">
-                        <a class="{{ $selectedCategory ? '' : 'is-active' }}" href="{{ route('catalog.index', collect($baseFilters)->except('categoria')->all()) }}">Todas las categorías</a>
+                    <h2>Categor�as</h2>
+                    <nav class="catalog-filter-list" aria-label="Categor�as">
+                        <a class="{{ $selectedCategory ? '' : 'is-active' }}" href="{{ route('catalog.index', collect($baseFilters)->except('categoria')->all()) }}">Todas las categor�as</a>
                         @foreach($categories as $category)
                         <a class="{{ (string) $selectedCategory === (string) $category->id ? 'is-active' : '' }}" href="{{ route('catalog.index', array_merge($baseFilters, ['categoria' => $category->id])) }}">{{ $category->nombre }}</a>
                         @endforeach
@@ -57,7 +52,7 @@ $selectedBrand = request('marca');
                         type="hidden"
                         name="orden"
                         value="{{ request('orden') }}">
-                    <label for="catalog-min-price">Mínimo</label>
+                    <label for="catalog-min-price">M�nimo</label>
                     <input
                         class="input"
                         id="catalog-min-price"
@@ -66,7 +61,7 @@ $selectedBrand = request('marca');
                         min="0"
                         step="0.01"
                         value="{{ request('min') }}">
-                    <label for="catalog-max-price">Máximo</label>
+                    <label for="catalog-max-price">M�ximo</label>
                     <input
                         class="input"
                         id="catalog-max-price"
@@ -82,7 +77,7 @@ $selectedBrand = request('marca');
             <div class="catalog-content" id="productos">
                 <div class="catalog-toolbar">
                     <div class="catalog-heading">
-                        <h1>{{ $selectedCategory ? $categories->firstWhere('id', (int) $selectedCategory)?->nombre : 'Catálogo' }}</h1>
+                        <h1>{{ $selectedCategory ? $categories->firstWhere('id', (int) $selectedCategory)?->nombre : 'Cat�logo' }}</h1>
                         <p>Encuentra el celular ideal para ti.</p>
                     </div>
                     <form id="catalog-search-form" class="catalog-search" method="get" action="{{ route('catalog.index') }}" role="search">
@@ -99,7 +94,7 @@ $selectedBrand = request('marca');
                         </button>
                         <label class="visually-hidden" for="catalog-sort">Ordenar por</label>
                         <select id="catalog-sort" name="orden" data-catalog-sort>
-                            <option value="nuevo" @selected(request('orden')==='nuevo' )>Más recientes</option>
+                            <option value="nuevo" @selected(request('orden')==='nuevo' )>M�s recientes</option>
                             <option value="precio_asc" @selected(request('orden')==='precio_asc' )>Menor precio</option>
                             <option value="precio_desc" @selected(request('orden')==='precio_desc' )>Mayor precio</option>
                             <option value="nombre" @selected(request('orden')==='nombre' )>Nombre</option>
@@ -109,13 +104,41 @@ $selectedBrand = request('marca');
 
                 <div class="product-grid catalog-product-grid">
                     @forelse($products as $product)
-                    <x-publico.catalogo.tarjeta-producto :product="$product" />
+                    <article class="product-card catalog-product-card">
+                        <div class="product-art catalog-product-art">
+                            @if($product->etiqueta || $product->catalog_discount > 0)<span class="badge">{{ $product->etiqueta ?: 'Oferta' }}</span>@endif
+                            @if($product->url_imagen_principal)<img class="catalog-product-photo" src="{{ $product->url_imagen_principal }}" alt="{{ $product->marca }} {{ $product->nombre }}" loading="lazy">@else<div class="catalog-accessory-shape" role="img" aria-label="Imagen no disponible"><i class="bi bi-box-seam"></i></div>@endif
+                        </div>
+                        <div class="product-body catalog-product-body">
+                            <div class="catalog-product-meta"><span>{{ $product->marca }}</span><span>{{ $product->category?->nombre ?: $product->categoria }}</span></div>
+                            <h2>{{ $product->nombre }}</h2>
+                            <div class="catalog-product-specs">{{ trim(($product->almacenamiento ? $product->almacenamiento.' · ' : '').\Illuminate\Support\Str::limit(strip_tags((string) $product->descripcion), 38)) }}</div>
+                            <div class="catalog-product-pricing">@if($product->catalog_discount > 0)<div><del>S/ {{ number_format($product->catalog_original_price, 2) }}</del><span>-{{ $product->catalog_discount }}%</span></div>@endif</div>
+                            <p class="price catalog-product-sale-price">S/ {{ number_format($product->catalog_sale_price, 2) }}</p>
+                            <div class="stock catalog-product-stock">{{ $product->existencias_disponibles > 0 ? $product->existencias_disponibles.' unidades disponibles' : 'Agotado' }}</div>
+                            <div class="catalog-product-actions">
+                                @auth
+                                <form action="{{ route('cart.add', $product) }}" method="post">
+                                    @csrf
+                                    <input type="hidden" name="cantidad" value="1">
+                                    <button class="btn btn-primary catalog-buy-button" type="submit" @disabled($product->existencias_disponibles <= 0)>
+                                        <i class="bi bi-cart3" aria-hidden="true"></i>
+                                        {{ $product->existencias_disponibles > 0 ? 'Comprar' : 'Agotado' }}
+                                    </button>
+                                </form>
+                                @else
+                                <a class="btn btn-primary catalog-buy-button" href="{{ route('login') }}"><i class="bi bi-cart3" aria-hidden="true"></i> Comprar</a>
+                                @endauth
+                                <a class="btn btn-ghost catalog-details-button" href="{{ route('catalog.show', $product) }}">Ver detalles</a>
+                            </div>
+                        </div>
+                    </article>
                     @empty
                     <div class="empty panel catalog-empty">No encontramos productos con esos filtros.</div>
                     @endforelse
                 </div>
                 <div class="pagination">
-                    {{ $products->onEachSide(1)->links('components.publico.catalogo.paginacion') }}
+                    {{ $products->onEachSide(1)->links('publico.catalogo.paginacion') }}
                 </div>
             </div>
         </div>

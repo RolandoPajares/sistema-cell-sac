@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\GuardarMensajeContactoRequest;
 use App\Servicios\ServicioContacto;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 /**
@@ -38,9 +39,48 @@ class PaginaController extends Controller
      *
      * @return View Resultado de la operación.
      */
-    public function contact(): View
+    public function contact(Request $request): View
     {
-        return view('publico.paginas.contacto');
+        $user = $request->user();
+
+        return view('publico.paginas.contacto', [
+            'contactDefaults' => [
+                'nombre' => $user?->nombre,
+                'contacto' => $user?->correo,
+            ],
+        ]);
+    }
+
+    /**
+     * Muestra el libro de reclamaciones informativo de la tienda.
+     */
+    public function claimsBook(): View
+    {
+        return view('publico.paginas.libro-reclamaciones');
+    }
+
+    /**
+     * Muestra la política de privacidad informativa de la tienda.
+     */
+    public function privacyPolicy(): View
+    {
+        return view('publico.paginas.politicas-privacidad');
+    }
+
+    /**
+     * Muestra los términos y condiciones informativos de la tienda.
+     */
+    public function terms(): View
+    {
+        return view('publico.paginas.terminos-condiciones');
+    }
+
+    /**
+     * Muestra las preguntas frecuentes de la tienda.
+     */
+    public function frequentlyAskedQuestions(): View
+    {
+        return view('publico.paginas.preguntas-frecuentes');
     }
 
     /**

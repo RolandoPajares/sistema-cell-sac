@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 /**
- * Define la responsabilidad de la clase AsistenteController dentro de su m贸dulo.
+ * Define la responsabilidad de la clase AsistenteController dentro de su m骴ulo.
  *
  * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
  */
@@ -24,7 +24,7 @@ class AsistenteController extends Controller
     /**
      * Inicializa la instancia con las dependencias y el estado requeridos.
      *
-     * @return mixed Resultado de la operaci贸n.
+     * @return mixed Resultado de la operaci髇.
      */
     public function __construct(
         private readonly ServicioAutorizacion $autorizacion,
@@ -32,20 +32,20 @@ class AsistenteController extends Controller
     ) {}
 
     /**
-     * Obtiene y prepara la informaci贸n solicitada para la operaci贸n.
+     * Obtiene y prepara la informaci髇 solicitada para la operaci髇.
      *
-     * @return View Resultado de la operaci贸n.
+     * @return View Resultado de la operaci髇.
      */
     public function index(): View
     {
-        return view('publico.asistente.index');
+        return view('inteligente.asistente.panel');
     }
 
     /**
-     * Ejecuta la operaci贸n ask definida por la clase AsistenteController.
+     * Ejecuta la operaci髇 ask definida por la clase AsistenteController.
      *
-     * @param  mixed  $request  Par谩metro recibido por la operaci贸n.
-     * @return JsonResponse|RedirectResponse Resultado de la operaci贸n.
+     * @param  mixed  $request  Par醡etro recibido por la operaci髇.
+     * @return JsonResponse|RedirectResponse Resultado de la operaci髇.
      */
     public function ask(AsistenteRequest $request): JsonResponse|RedirectResponse
     {
@@ -61,7 +61,7 @@ class AsistenteController extends Controller
                     ? 'No hay productos activos con stock igual o menor a cinco unidades.'
                     : 'Productos con stock bajo: '.$items->map(fn (Producto $product): string => $product->nombre.' ('.$product->existencias_alcance.')')->join(', ').'.';
             } else {
-                $answer = 'Consulta la disponibilidad p脙潞blica en el cat脙隆logo; el detalle interno de inventario no est脙隆 habilitado para este perfil.';
+                $answer = 'Consulta la disponibilidad p煤blica en el cat谩logo; el detalle interno de inventario no est谩 habilitado para este perfil.';
             }
         } elseif (str_contains($query, 'pedido')) {
             if ($user === null) {
@@ -84,9 +84,9 @@ class AsistenteController extends Controller
                 $answer = 'Este perfil no tiene habilitado el resumen interno de ventas.';
             }
         } elseif (str_contains($query, 'producto')) {
-            $answer = 'Hay '.Producto::query()->active()->count().' productos activos registrados en el cat脙隆logo.';
+            $answer = 'Hay '.Producto::query()->active()->count().' productos activos registrados en el cat谩logo.';
         } else {
-            $answer = 'Puedo consultar informaci脙鲁n registrada sobre stock, pedidos, ventas por pedidos y productos. No utilizo un servicio externo de inteligencia artificial.';
+            $answer = 'Puedo consultar informaci贸n registrada sobre stock, pedidos, ventas por pedidos y productos. No utilizo un servicio externo de inteligencia artificial.';
         }
 
         if ($request->expectsJson()) {

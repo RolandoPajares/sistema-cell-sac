@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -44,7 +45,7 @@ class PedidoController extends Controller
     {
         $user = $request->user();
 
-        if ($this->authorization->hasRole($user, 'administrador')
+        if ($this->authorization->allowsGlobal($user, 'gestion.seguridad.consultar')
             && $this->authorization->allowsGlobal($user, 'gestion.pedidos.consultar')) {
             return $this->adminIndex($request);
         }
@@ -54,22 +55,36 @@ class PedidoController extends Controller
         $query = $this->authorization->scopeRecordsFor($query, $request->user(), 'gestion.pedidos.consultar', 'usuario_id');
 
         $tiposCliente = [];
-        if ($this->authorization->hasRole($user, 'ventas_minoristas')) {
-            $tiposCliente[] = 'cliente_minorista';
+        if ($this->authorization->allows($user, 'gestion.ventas.consultar')) {
+            $tiposCliente[] = 'minorista';
         }
-        if ($this->authorization->hasRole($user, 'ventas_mayoristas')) {
-            $tiposCliente[] = 'cliente_mayorista';
+        if ($this->authorization->allows($user, 'gestion.cotizaciones.consultar')) {
+            $tiposCliente[] = 'mayorista';
         }
 
         if ($tiposCliente !== []) {
-            $query->whereHas('user.rolesVigentes', fn (Builder $builder): Builder => $builder->whereIn('codigo', $tiposCliente));
-        } elseif ($this->authorization->hasRole($user, 'cliente_minorista') || $this->authorization->hasRole($user, 'cliente_mayorista')) {
+            $rolesCliente = collect($tiposCliente)
+                ->map(static fn (string $tipo): string => 'cliente_'.$tipo)
+                ->all();
+
+            $query
+                ->whereHas('user.customer', fn (Builder $builder): Builder => $builder->whereIn('tipo', $tiposCliente))
+                ->whereHas('user.rolesVigentes', fn (Builder $builder): Builder => $builder->whereIn('roles.codigo', $rolesCliente));
+        } elseif ($this->authorization->allows($user, 'gestion.pedidos.consultar') || $this->authorization->allows($user, 'gestion.cotizaciones.consultar')) {
             $query->whereBelongsTo($request->user(), 'user');
         } else {
             abort(403);
         }
 
-        return view('publico.comercio.pedidos', ['orders' => $query->paginate(20)]);
+        $orders = $query->paginate(20)->withQueryString();
+        $presentationOrders = $orders->getCollection()
+            ->mapWithKeys(fn (Pedido $order): array => [$order->id => $this->orderPresentation($order)])
+            ->all();
+
+        return view('publico.comercio.pedidos-cuenta', [
+            'orders' => $orders,
+            'presentationOrders' => $presentationOrders,
+        ]);
     }
 
     /**
@@ -102,12 +117,28 @@ class PedidoController extends Controller
         $shippingOrders = $this->countStatuses($statusCounts, ['Enviado']);
         $deliveredOrders = $this->countStatuses($statusCounts, ['Entregado']);
         $cancelledOrders = $this->countStatuses($statusCounts, ['Cancelado']);
+        $staleOrders = $this->scopedOrders($request)
+            ->whereNotIn('estado', ['Entregado', 'Cancelado'])
+            ->where('creado_en', '<', now()->subHours(48))
+            ->count();
         $statusSummary = $this->statusSummary($statusCounts, $totalOrders);
         $customerSummary = $this->customerSummary($request, $totalOrders);
+        $recentOrders = $this->scopedOrders($request)
+            ->with(['user:id,nombre,correo', 'details.product:id,nombre,marca,url_imagen'])
+            ->latest('creado_en')
+            ->latest('id')
+            ->limit(5)
+            ->get();
+        $presentationOrders = $orders->getCollection()
+            ->concat($recentOrders)
+            ->unique('id')
+            ->mapWithKeys(fn (Pedido $order): array => [$order->id => $this->orderPresentation($order)])
+            ->all();
 
-        return view('publico.comercio.pedidos', [
+        return view('gestion.comercial.pedidos.listar', [
             'orders' => $orders,
-            'adminView' => true,
+            'layout' => 'layouts.panel.principal',
+            'canAccessAdminOrders' => true,
             'filters' => $filters,
             'totalOrders' => $totalOrders,
             'todayOrders' => $todayOrders,
@@ -119,17 +150,119 @@ class PedidoController extends Controller
             'cancelledOrders' => $cancelledOrders,
             'statusSummary' => $statusSummary,
             'customerSummary' => $customerSummary,
-            'recentOrders' => $this->scopedOrders($request)
-                ->with(['user:id,nombre,correo', 'details.product:id,nombre,marca,url_imagen'])
-                ->latest('creado_en')
-                ->latest('id')
-                ->limit(5)
-                ->get(),
+            'presentationOrders' => $presentationOrders,
+            'donutStyle' => $this->donutStyle($statusSummary),
+            'alerts' => $this->alerts($pendingOrders, $cancelledOrders, $staleOrders),
+            'recentOrders' => $recentOrders,
             'staleOrders' => $this->scopedOrders($request)
                 ->whereNotIn('estado', ['Entregado', 'Cancelado'])
                 ->where('creado_en', '<', now()->subHours(48))
                 ->count(),
         ]);
+    }
+
+    /** @return array{status:array{label:string,class:string},shipping:array{label:string,class:string},payment:array{label:string,class:string},initials:string,image:?string,date:string,activity_icon:string} */
+    private function orderPresentation(Pedido $order): array
+    {
+        $status = $this->statusFor((string) $order->estado);
+        $product = $order->details->first()?->product;
+
+        return [
+            'status' => $status,
+            'shipping' => $this->shippingFor((string) $order->estado),
+            'payment' => ['label' => 'No verificado', 'class' => 'muted'],
+            'initials' => $this->initialsFor($order->user?->nombre),
+            'image' => $this->productImage($product?->url_imagen),
+            'date' => $this->orderDate($order->creado_en),
+            'activity_icon' => match ((string) $order->estado) {
+                'Entregado' => 'check2',
+                'Cancelado' => 'x-lg',
+                'Enviado' => 'truck',
+                'En proceso' => 'box-seam',
+                default => 'cart3',
+            },
+        ];
+    }
+
+    /** @return array{label:string,class:string} */
+    private function statusFor(string $status): array
+    {
+        return match ($status) {
+            'Pendiente' => ['label' => 'Pendiente', 'class' => 'pending'],
+            'En proceso' => ['label' => 'En preparación', 'class' => 'preparing'],
+            'Enviado' => ['label' => 'Enviado', 'class' => 'sent'],
+            'Entregado' => ['label' => 'Entregado', 'class' => 'delivered'],
+            'Cancelado' => ['label' => 'Cancelado', 'class' => 'cancelled'],
+            default => ['label' => $status, 'class' => 'muted'],
+        };
+    }
+
+    /** @return array{label:string,class:string} */
+    private function shippingFor(string $status): array
+    {
+        return match ($status) {
+            'Pendiente' => ['label' => 'Por preparar', 'class' => 'muted'],
+            'En proceso' => ['label' => 'En preparación', 'class' => 'sent'],
+            'Enviado' => ['label' => 'En tránsito', 'class' => 'sent'],
+            'Entregado' => ['label' => 'Entregado', 'class' => 'delivered'],
+            'Cancelado' => ['label' => 'Cancelado', 'class' => 'cancelled'],
+            default => ['label' => 'Sin información', 'class' => 'muted'],
+        };
+    }
+
+    private function initialsFor(?string $name): string
+    {
+        $parts = preg_split('/\s+/', trim((string) $name), -1, PREG_SPLIT_NO_EMPTY);
+
+        return collect(array_slice($parts ?: ['CL'], 0, 2))
+            ->map(static fn (string $part): string => mb_strtoupper(mb_substr($part, 0, 1)))
+            ->implode('');
+    }
+
+    private function productImage(?string $path): ?string
+    {
+        if (! $path) {
+            return null;
+        }
+
+        return str_starts_with($path, 'http') ? $path : asset(ltrim($path, '/'));
+    }
+
+    private function orderDate(?Carbon $date): string
+    {
+        if (! $date) {
+            return 'Sin fecha';
+        }
+
+        $months = [1 => 'ene.', 2 => 'feb.', 3 => 'mar.', 4 => 'abr.', 5 => 'may.', 6 => 'jun.', 7 => 'jul.', 8 => 'ago.', 9 => 'sep.', 10 => 'oct.', 11 => 'nov.', 12 => 'dic.'];
+
+        return $date->format('d').' '.$months[(int) $date->format('n')].' '.$date->format('Y');
+    }
+
+    /** @param array<int, array{label:string,count:int,percent:float,color:string,key:string}> $summary */
+    private function donutStyle(array $summary): string
+    {
+        $palette = ['yellow' => '#f5a900', 'blue' => '#2b8df3', 'purple' => '#7137e8', 'green' => '#08a66b', 'red' => '#ef334f'];
+        $segments = [];
+        $start = 0;
+
+        foreach ($summary as $item) {
+            $end = $start + $item['percent'];
+            $segments[] = $palette[$item['color']].' '.$start.'% '.$end.'%';
+            $start = $end;
+        }
+
+        return 'background: conic-gradient('.implode(', ', $segments ?: ['#dce8f5 0% 100%']).');';
+    }
+
+    /** @return array<int, array{show:bool,icon:string,class:string,title:string,detail:string}> */
+    private function alerts(int $pendingOrders, int $cancelledOrders, int $staleOrders): array
+    {
+        return [
+            ['show' => $pendingOrders > 0, 'icon' => 'exclamation-triangle', 'class' => 'warning', 'title' => number_format($pendingOrders).' pedidos pendientes', 'detail' => 'Requieren atención inmediata.'],
+            ['show' => $cancelledOrders > 0, 'icon' => 'bag-x', 'class' => 'danger', 'title' => number_format($cancelledOrders).' pedidos cancelados', 'detail' => 'Revisa los reembolsos y el stock.'],
+            ['show' => $staleOrders > 0, 'icon' => 'bell', 'class' => 'purple', 'title' => number_format($staleOrders).' pedidos sin movimiento', 'detail' => 'Sin actualización en 48 horas.'],
+        ];
     }
 
     /**
@@ -144,7 +277,7 @@ class PedidoController extends Controller
     public function export(Request $request, string $format, ExportadorTabular $exportador, RegistradorAuditoria $auditoria): Response|StreamedResponse
     {
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
-        abort_unless($this->authorization->hasRole($request->user(), 'administrador'), 403);
+        abort_unless($this->authorization->allowsGlobal($request->user(), 'gestion.seguridad.consultar'), 403);
         $this->authorization->assertAllowed($request->user(), 'gestion.pedidos.exportar');
         $filtros = $this->adminFilters($request);
         $pedidos = $this->adminOrderQuery($request, $filtros)
@@ -184,12 +317,20 @@ class PedidoController extends Controller
      * @param  mixed  $order  Parámetro recibido por la operación.
      * @return View Resultado de la operación.
      */
-    public function show(Pedido $order): View
+    public function show(Request $request, Pedido $order): View
     {
         $order->loadMissing('user');
         $this->authorize('view', $order);
 
-        return view('publico.comercio.pedido', ['order' => $order->load('details.product', 'user')]);
+        $isPanel = $this->authorization->allowsGlobal($request->user(), 'gestion.seguridad.consultar')
+            || $this->authorization->allowsGlobal($request->user(), 'gestion.ventas.consultar')
+            || $this->authorization->allowsGlobal($request->user(), 'gestion.cotizaciones.consultar');
+
+        return view('publico.comercio.confirmacion', [
+            'order' => $order->load('details.product', 'user'),
+            'isPanel' => $isPanel,
+            'statusOptions' => ['Pendiente', 'En proceso', 'Enviado', 'Entregado', 'Cancelado'],
+        ]);
     }
 
     /**

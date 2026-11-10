@@ -38,7 +38,19 @@ final class AsignacionRolesController extends Controller
         $roles = $ready ? Rol::query()->where('activo', true)->orderBy('nombre')->get() : collect();
         $sites = $ready ? Sede::query()->where('activa', true)->orderBy('nombre')->get() : collect();
 
-        return view('gestion.roles-permisos.asignaciones', compact('ready', 'users', 'roles', 'sites'));
+        $assignmentPresentation = [];
+        foreach ($users as $user) {
+            $activeGlobal = $user->roles->filter(static fn (Rol $role): bool => (bool) $role->pivot->activo);
+            $activeSite = $user->rolesPorSede->filter(static fn (Rol $role): bool => (bool) $role->pivot->activo);
+            $assignmentPresentation[$user->getKey()] = [
+                'activeGlobal' => $activeGlobal,
+                'activeSite' => $activeSite,
+                'currentGlobal' => $activeGlobal->pluck('id')->all(),
+                'currentSite' => $activeSite->pluck('id')->all(),
+            ];
+        }
+
+        return view('gestion.administracion.seguridad.asignaciones-delegaciones.listar', compact('ready', 'users', 'roles', 'sites', 'assignmentPresentation'));
     }
 
     /**
@@ -65,7 +77,7 @@ final class AsignacionRolesController extends Controller
         }
 
         if ($data['alcance'] === 'empresa') {
-            abort_unless($role->codigo !== 'administrador' || $autorizacion->hasRole($request->user(), 'administrador'), 403);
+            abort_unless(! $role->es_sistema || $autorizacion->allowsGlobal($request->user(), 'gestion.seguridad.consultar'), 403);
         } else {
             abort_unless(Schema::hasTable('usuarios_sedes_roles'), 503, 'La asignación por sede requiere la migración RBAC.');
             $siteId = app(ServicioAutorizacion::class)->operationSite($request->user())['sede_id'];
@@ -73,7 +85,7 @@ final class AsignacionRolesController extends Controller
             $site = Sede::query()->whereKey($siteId)->where('activa', true)->firstOrFail();
             $data['sede_id'] = (int) $site->getKey();
             abort_unless($autorizacion->allowsRecord($request->user(), 'gestion.seguridad.asignar', (int) $site->empresa_id, (int) $site->id), 403);
-            if (! $autorizacion->hasRole($request->user(), 'administrador')) {
+            if (! $autorizacion->allowsGlobal($request->user(), 'gestion.seguridad.consultar')) {
                 $canManageSite = DB::table('usuarios_sedes_roles')
                     ->join('roles', 'roles.id', '=', 'usuarios_sedes_roles.rol_id')
                     ->where('usuarios_sedes_roles.usuario_id', $request->user()->getKey())
@@ -163,7 +175,7 @@ final class AsignacionRolesController extends Controller
                 if (! in_array((int) $assignment->rol_id, $globalIds, true)) {
                     $role = Rol::query()->findOrFail($assignment->rol_id);
                     abort_unless($delegacion->puedeAsignarRol($request->user(), $role), 403);
-                    if ($role->codigo === 'administrador') {
+                    if ($role->es_sistema) {
                         $delegacion->bloquearAdministradoresGlobales();
                         abort_if($delegacion->esUltimoAdministradorGlobal($user), 422, 'No se puede retirar el último administrador global autorizado.');
                     }
@@ -245,7 +257,7 @@ final class AsignacionRolesController extends Controller
         DB::transaction(function () use ($request, $user, $role, $site, $delegacion, $auditoria): void {
             User::query()->whereKey($user->getKey())->lockForUpdate()->firstOrFail();
             $before = $this->assignmentSnapshot($user);
-            if ($role->codigo === 'administrador' && $site === null) {
+            if ($role->es_sistema && $site === null) {
                 $delegacion->bloquearAdministradoresGlobales();
                 abort_if($delegacion->esUltimoAdministradorGlobal($user), 422, 'No se puede retirar el último administrador global autorizado.');
             }

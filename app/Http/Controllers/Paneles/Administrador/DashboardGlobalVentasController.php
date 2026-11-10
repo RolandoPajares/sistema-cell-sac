@@ -47,8 +47,35 @@ final class DashboardGlobalVentasController extends Controller
         $orders = $this->orders($request->user(), $filters, $authorization);
         $registeredCount = (clone $orders)->count();
         $nonCancelledCount = (clone $orders)->whereNotIn('estado', ['Cancelado', 'Cancelada'])->count();
+        $dailyTotals = collect();
+        $channelTotals = collect();
+        $maxDaily = max(1, (float) $dailyTotals->max());
+        $maxChannel = max(1, (float) $channelTotals->max());
+        $dailyBars = $dailyTotals->map(static fn ($amount, $day): array => [
+            'etiqueta' => Carbon::parse($day)->format('d/m'),
+            'valor' => 'S/ '.number_format($amount, 2),
+            'altura' => max(4, round($amount / $maxDaily * 100)),
+        ])->values();
+        $channelBars = $channelTotals->map(static fn ($amount, $name): array => [
+            'etiqueta' => $name,
+            'valor' => 'S/ '.number_format($amount, 2),
+            'altura' => max(4, round($amount / $maxChannel * 100)),
+        ])->values();
+        $exportParameters = array_filter([
+            'periodo' => $filters['periodo'],
+            'sede' => $filters['sede'],
+            'canal' => $filters['canal'],
+        ]);
+        $metrics = collect([
+            ['titulo' => 'Pedidos registrados', 'icono' => 'bi-cart3', 'valor' => number_format($registeredCount), 'detalle' => 'Pedidos del período'],
+            ['titulo' => 'Pedidos no cancelados', 'icono' => 'bi-coin', 'tono' => 'verde', 'valor' => number_format($nonCancelledCount), 'detalle' => 'Excluye pedidos cancelados'],
+            ['titulo' => 'Ventas confirmadas', 'icono' => 'bi-tag', 'tono' => 'violeta', 'valor' => '—', 'detalle' => 'Pendiente de fuente de ventas confirmadas'],
+            ['titulo' => 'Cobros confirmados', 'icono' => 'bi-percent', 'tono' => 'ambar', 'valor' => '—', 'detalle' => 'Pendiente de conciliación de pagos'],
+            ['titulo' => 'Ingresos netos', 'icono' => 'bi-check-circle', 'valor' => '—', 'detalle' => 'Pendiente de cobros y reembolsos'],
+            ['titulo' => 'Ticket promedio', 'icono' => 'bi-graph-up', 'tono' => 'verde', 'valor' => '—', 'detalle' => 'Pendiente de ventas confirmadas'],
+        ]);
 
-        return view('paneles.administrador.dashboard-global.ventas.listar', [
+        return view('gestion.analitica.dashboard-global.ventas.listar', [
             'filters' => $filters,
             'sites' => $this->availableSites($request->user(), $authorization),
             'channels' => $this->hasChannel() ? (clone $orders)->whereNotNull('canal')->distinct()->orderBy('canal')->pluck('canal') : collect(),
@@ -59,9 +86,22 @@ final class DashboardGlobalVentasController extends Controller
             'income' => null,
             'averageTicket' => null,
             'completedCount' => null,
-            'dailyTotals' => collect(),
-            'channelTotals' => collect(),
-            'canExport' => $authorization->allows($request->user(), 'gestion.reportes.exportar'),
+            'dailyBars' => $dailyBars,
+            'channelBars' => $channelBars,
+            'dailyTotals' => $dailyTotals,
+            'channelTotals' => $channelTotals,
+            'exportParameters' => $exportParameters,
+            'canExport' => $authorization->allows($request->user(), 'gestion.analitica.reportes.exportar'),
+            'titulo' => 'Indicadores de ventas e ingresos',
+            'icono' => 'bi-graph-up-arrow',
+            'descripcion' => 'Analiza el desempeño de ventas e ingresos de tu negocio.',
+            'exportRoute' => $canExport = $authorization->allows($request->user(), 'gestion.analitica.reportes.exportar') ? 'management.reports.dashboard_sales.export' : null,
+            'metrics' => $metrics,
+            'periodOptions' => [7 => 'Últimos 7 días', 30 => 'Últimos 30 días', 90 => 'Últimos 90 días'],
+            'dailyChartDescription' => 'Ingresos diarios reales',
+            'channelChartDescription' => 'Ingresos reales por canal',
+            'dailyChart' => ['descripcion' => 'Ingresos diarios reales', 'barras' => $dailyBars],
+            'channelChart' => ['descripcion' => 'Ingresos reales por canal', 'barras' => $channelBars],
         ]);
     }
 
@@ -78,7 +118,7 @@ final class DashboardGlobalVentasController extends Controller
     public function export(Request $request, string $format, ExportadorTabular $exporter, ServicioAutorizacion $authorization, RegistradorAuditoria $auditor): Response|StreamedResponse
     {
         $this->authorizeDashboard($request->user(), $authorization);
-        $authorization->assertAllowed($request->user(), 'gestion.reportes.exportar');
+        $authorization->assertAllowed($request->user(), 'gestion.analitica.reportes.exportar');
         abort_unless(in_array($format, ['pdf', 'excel', 'csv'], true), 404);
         $filters = $this->filters($request, $authorization);
         $orders = $this->orders($request->user(), $filters, $authorization);
@@ -198,7 +238,7 @@ final class DashboardGlobalVentasController extends Controller
             ->when($filters['canal'], static fn (Builder $query, string $channel): Builder => $query->where('canal', $channel));
 
         if ($authorization->isSeeded()) {
-            $isGlobalAdministrator = $this->hasGlobalAdministratorAssignment($user);
+            $isGlobalAdministrator = $authorization->allowsGlobal($user, 'gestion.seguridad.consultar');
             if ($isGlobalAdministrator) {
                 if (Schema::hasColumn('pedidos', 'empresa_id')) {
                     $companyId = $authorization->activeCompanyId();
@@ -230,7 +270,7 @@ final class DashboardGlobalVentasController extends Controller
      */
     private function authorizeDashboard(User $user, ServicioAutorizacion $authorization): void
     {
-        abort_unless($authorization->hasRole($user, 'administrador'), 403);
+        abort_unless($authorization->allows($user, 'gestion.seguridad.consultar'), 403);
         $authorization->assertAllowed($user, 'gestion.panel.consultar');
     }
 
@@ -248,7 +288,7 @@ final class DashboardGlobalVentasController extends Controller
                 static fn ($query) => $query->join('empresas as dashboard_empresas', 'dashboard_empresas.id', '=', 'sedes.empresa_id')
                     ->where('dashboard_empresas.activo', true),
             )
-            ->when($authorization->isSeeded() && ! $this->hasGlobalAdministratorAssignment($user), fn ($query) => $query->whereIn('sedes.id', $this->assignedSiteIds($user, $authorization)))
+            ->when($authorization->isSeeded() && ! $this->hasGlobalOrganizationAccess($user), fn ($query) => $query->whereIn('sedes.id', $this->assignedSiteIds($user, $authorization)))
             ->orderBy('sedes.nombre');
 
         return $sites->get(['sedes.id', 'sedes.nombre']);
@@ -260,11 +300,14 @@ final class DashboardGlobalVentasController extends Controller
      * @param  mixed  $user  Parámetro recibido por la operación.
      * @return bool Resultado de la operación.
      */
-    private function hasGlobalAdministratorAssignment(User $user): bool
+    private function hasGlobalOrganizationAccess(User $user): bool
     {
         return DB::table('usuarios_roles')->join('roles', 'roles.id', '=', 'usuarios_roles.rol_id')
             ->where('usuarios_roles.usuario_id', $user->getKey())
-            ->where('roles.codigo', 'administrador')
+            ->join('roles_permisos', 'roles_permisos.rol_id', '=', 'roles.id')
+            ->join('permisos', 'permisos.id', '=', 'roles_permisos.permiso_id')
+            ->where('permisos.codigo', 'gestion.organizacion.consultar')
+            ->where('roles_permisos.alcance', 'empresa')
             ->where('roles.activo', true)
             ->where('usuarios_roles.activo', true)
             ->where(static fn ($query) => $query->whereNull('usuarios_roles.vigente_hasta')->orWhere('usuarios_roles.vigente_hasta', '>', now()))
@@ -284,7 +327,10 @@ final class DashboardGlobalVentasController extends Controller
                     ->where('dashboard_empresas.activo', true),
             )
             ->where('usuarios_sedes_roles.usuario_id', $user->getKey())
-            ->where('roles.codigo', 'administrador')
+            ->join('roles_permisos', 'roles_permisos.rol_id', '=', 'roles.id')
+            ->join('permisos', 'permisos.id', '=', 'roles_permisos.permiso_id')
+            ->where('permisos.codigo', 'gestion.organizacion.consultar')
+            ->where('roles_permisos.alcance', 'sede')
             ->where('roles.activo', true)
             ->where('usuarios_sedes_roles.activo', true)
             ->where(static fn ($query) => $query->whereNull('usuarios_sedes_roles.vigente_hasta')->orWhere('usuarios_sedes_roles.vigente_hasta', '>', now()))

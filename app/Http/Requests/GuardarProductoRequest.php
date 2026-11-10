@@ -44,6 +44,7 @@ class GuardarProductoRequest extends FormRequest
             'categoria_id' => ['required', 'integer', Rule::exists('categorias', 'id')->where('empresa_id', $alcance['empresa_id'])],
             'precio' => ['required', 'numeric', 'min:0'],
             'precio_original' => ['nullable', 'numeric', 'min:0'],
+            'existencias' => ['nullable', 'integer', 'min:0', 'max:4294967295'],
             'precio_oferta' => ['nullable', 'numeric', 'min:0', 'lte:precio'],
             'url_imagen' => ['nullable', 'string', 'max:255'],
             'imagen' => ['nullable', 'image', 'max:5120'],

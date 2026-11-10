@@ -8,6 +8,7 @@ use App\Http\Requests\RegistroRequest;
 use App\Models\Clientes\Cliente;
 use App\Models\User;
 use App\Servicios\RegistradorAuditoria;
+use App\Servicios\ServicioAutorizacion;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +22,10 @@ use Illuminate\View\View;
  */
 class AutenticacionController extends Controller
 {
+    public function __construct(
+        private readonly ServicioAutorizacion $authorization,
+    ) {}
+
     /**
      * Ejecuta la operación loginForm definida por la clase AutenticacionController.
      *
@@ -77,7 +82,7 @@ class AutenticacionController extends Controller
         $request->session()->regenerate();
         $audit->record($user->getKey(), 'inicio_sesion', 'autenticacion', $user->getKey(), null, null, $request->ip());
 
-        $destination = $user->isRole('administrador')
+        $destination = $this->authorization->allows($user, 'gestion.panel.consultar')
             ? route('management.dashboard')
             : route('dashboard');
 

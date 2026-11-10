@@ -8,7 +8,7 @@ use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
 #[Signature('cell:user-create')]
-#[Description('Crea una cuenta CELL SAC con uno de los siete roles permitidos.')]
+#[Description('Crea una cuenta CELL SAC con un rol activo del catálogo RBAC.')]
 /**
  * Define la responsabilidad de la clase CrearUsuarioCell dentro de su módulo.
  *
@@ -25,7 +25,7 @@ class CrearUsuarioCell extends Command
     {
         $name = trim((string) $this->ask('Nombre'));
         $email = mb_strtolower(trim((string) $this->ask('Correo')));
-        $role = $this->choice('Rol', User::ROLES, 'cliente_minorista');
+        $role = $this->choice('Rol', User::availableRoleCodes(), 'cliente_minorista');
         $password = (string) $this->secret('Contraseña (mínimo 12 caracteres)');
 
         if ($name === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($password) < 12) {

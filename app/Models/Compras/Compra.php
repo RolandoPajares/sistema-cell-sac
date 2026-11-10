@@ -16,7 +16,7 @@ class Compra extends Model
 {
     protected $table = 'compras';
 
-    protected $fillable = ['proveedor_id', 'creado_por_usuario_id', 'total', 'estado', 'fecha_compra', 'activo', 'creado_en', 'empresa_id', 'sede_id', 'almacen_id'];
+    protected $fillable = ['proveedor_id', 'creado_por_usuario_id', 'total', 'estado', 'fecha_compra', 'activo', 'creado_en', 'actualizado_en', 'empresa_id', 'sede_id', 'almacen_id', 'numero_referencia', 'moneda'];
 
     public $timestamps = false;
 
@@ -27,7 +27,7 @@ class Compra extends Model
      */
     protected function casts(): array
     {
-        return ['total' => 'decimal:2', 'fecha_compra' => 'date', 'activo' => 'boolean', 'creado_en' => 'datetime'];
+        return ['total' => 'decimal:2', 'fecha_compra' => 'date', 'activo' => 'boolean', 'creado_en' => 'datetime', 'actualizado_en' => 'datetime'];
     }
 
     /**

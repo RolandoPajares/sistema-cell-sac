@@ -1,0 +1,163 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import '../../app.css';
+@import '../../base/variables.css';
+@import '../../base/reinicio.css';
+@import '../../base/tipografia.css';
+@import '../../componentes/comunes/botones.css';
+@import '../../componentes/comunes/formularios.css';
+@import '../../componentes/comunes/precios.css';
+@import '../../componentes/comunes/tarjetas.css';
+@import '../../componentes/comunes/alertas.css';
+@import '../../componentes/comunes/confirmacion.css';
+@import '../../componentes/comunes/badges.css';
+@import '../../componentes/comunes/estados.css';
+@import '../../componentes/comunes/tablas.css';
+@import '../../base/utilidades.css';
+@import '../../inteligente/asistente/flotante.css';
+
+@import '../administracion.css';
+@import '../responsive.css';
+@import '../../gestion/reportes/reportes.css';
+@import '../../gestion/comercial/cotizaciones/cotizaciones.css';
+@import '../../gestion/comercial/compras/compras.css';
+@import '../../modulos/pedidos.css';
+@import '../../gestion/inventario-logistica/productos/productos.css';
+@import '../../gestion/inventario/inventario.css';
+@import '../../gestion/comercial/pedidos/pedidos.css';
+@import '../../gestion/comercial/clientes/clientes.css';
+@import '../../gestion/comercial/proveedores/proveedores.css';
+@import '../../gestion/administracion/seguridad/usuarios.css';
+@import '../../modulos/seguridad-delegacion.css';
+@import '../../modulos/seguridad-delegacion-extra.css';
+@import '../../modulos/seguridad-rbac-overrides.css';
+@import '../../gestion/ecommerce-marketing/campanas.css';
+@import '../../gestion/ecommerce-marketing/publicidad-inteligente.css';
+@import '../../cuenta/perfil/perfil.css';
+@import '../../publico/cuenta/cuenta.css';
+@import './menu-lateral-desplegable.css';
+@import '../../gestion/analitica/dashboard-global/dashboard-global.css';
+@import '../../gestion/administracion/organizacion/organizacion.css';
+@import '../../gestion/comercial/ventas/operaciones-ventas.css';
+@import '../../gestion/inventario-logistica/inventario-logistica.css';
+@import '../../gestion/finanzas/finanzas-facturacion/finanzas-facturacion.css';
+@import '../../gestion/ecommerce-marketing/ecommerce-marketing.css';
+@import '../../gestion/analitica/analisis-auditoria/analisis-auditoria.css';
+@import '../../gestion/configuracion/configuracion-sistema.css';
+@import '../../gestion/comercial/ventas/ventas.css';
+@import '../../gestion/modulos-pendientes.css';
+@import '../../gestion/soporte/reclamos/reclamos.css';
+@import '../../gestion/marketing-modulos.css';
+@import '../../gestion/finanzas-modulos.css';
+@import '../../gestion/finanzas/pagos-cobros/pagos-cobros.css';
+@import '../../gestion/finanzas/comprobantes/comprobantes.css';
+@import '../../gestion/finanzas/reembolsos/reembolsos.css';
+@import '../../gestion/administracion-modulos.css';
+@import '../../gestion/administracion/seguridad/roles-permisos.css';
+@import '../../gestion/administracion/notificaciones/notificaciones.css';
+@import '../../gestion/administracion/integraciones/integraciones.css';
+@import '../../gestion/administracion/respaldos-mantenimiento/respaldos-mantenimiento.css';
+@import '../../gestion/configuracion-modulos.css';
+@import '../../gestion/analisis-modulos.css';
+@import '../../gestion/analitica/reportes/reportes.css';
+@import '../../gestion/analitica/reportes-financieros/reportes-financieros.css';
+@import '../../gestion/analitica/clientes/clientes.css';
+@import '../../gestion/analitica/metricas-marketing/metricas-marketing.css';
+@import '../../gestion/configuracion/empresa/empresa.css';
+@import '../../gestion/configuracion/comercial/comercial.css';
+@import '../../gestion/configuracion/seguridad/seguridad.css';
+@import '../../gestion/configuracion/general/general.css';
+@import '../../paneles/dashboard.css';
+
+/* Estilos de módulos y roles del panel. */
+@import './menu-dinamico.css';
+@import './encabezado.css';
+@import './notificaciones.css';
+
+/* Patrón compartido de exportación para Productos, Categorías y Logística. */
+.productos-export-menu {
+    position: relative;
+    z-index: 2;
+}
+
+.productos-export-menu > summary {
+    min-width: 139px;
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: 1px solid #d4e2f2;
+    border-radius: 9px;
+    color: #17376b;
+    background: #fff;
+    font-size: .78rem;
+    font-weight: 800;
+    cursor: pointer;
+    list-style: none;
+}
+
+.productos-export-menu > summary::-webkit-details-marker {
+    display: none;
+}
+
+.productos-export-menu > summary i:last-child {
+    margin-left: 4px;
+    font-size: .68rem;
+}
+
+.productos-export-options {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 50;
+    display: grid;
+    width: 218px;
+    gap: 4px;
+    padding: 7px;
+    border: 1px solid #d8e6f4;
+    border-radius: 11px;
+    background: #fff;
+    box-shadow: 0 15px 35px rgba(12, 57, 120, .18);
+}
+
+.productos-export-options a {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px;
+    border-radius: 8px;
+    color: #17376b;
+    font-size: .74rem;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.productos-export-options a:hover,
+.productos-export-options a:focus-visible {
+    color: #086de8;
+    background: #edf5ff;
+    outline: none;
+}
+
+.productos-export-options a > i {
+    display: grid;
+    flex: 0 0 26px;
+    width: 26px;
+    height: 26px;
+    place-items: center;
+    border-radius: 7px;
+    color: #0873ed;
+    background: #e5f2ff;
+    font-size: 1rem;
+}
+
+.productos-export-options a:nth-child(1) > i { color: #e33449; background: #ffe8e9; }
+.productos-export-options a:nth-child(2) > i { color: #0b9b65; background: #dff8ec; }
+.productos-export-options a span { display: grid; gap: 2px; }
+.productos-export-options small { color: #7588aa; font-size: .61rem; font-weight: 500; }
+
+@media (max-width: 800px) {
+    .productos-export-menu > summary { width: 100%; }
+    .productos-export-options { width: min(218px, calc(100vw - 32px)); }
+}

@@ -1565,7 +1565,7 @@ it('enforces the role matrix for protected module entry points', function (): vo
     ];
 
     foreach ($matrix as $routeName => $allowedRoles) {
-        foreach (User::ROLES as $role) {
+        foreach (User::availableRoleCodes() as $role) {
             $user = SpanishAccessFixture::user($role);
             $response = $this->actingAs($user)->get(route($routeName));
 

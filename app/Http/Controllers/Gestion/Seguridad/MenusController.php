@@ -38,6 +38,7 @@ class MenusController extends Controller
         $menus = $ready
             ? Menu::query()->with(['roles', 'elementos' => fn ($query) => $query->with(['elementosHijos.pantalla', 'elementosHijos.permiso', 'pantalla', 'permiso'])])->orderBy('nombre')->get()
             : collect();
+        $selectedMenu = $menus->first();
         $roles = $ready ? Rol::query()->where('activo', true)->orderBy('nombre')->get() : collect();
         $screens = $ready ? Pantalla::query()->where('habilitada', true)->orderBy('nombre')->get(['id', 'nombre', 'codigo', 'ruta']) : collect();
         $activeMenus = $ready ? Menu::query()->where('habilitado', true)->count() : 0;
@@ -45,7 +46,7 @@ class MenusController extends Controller
         $hiddenElements = $ready ? ElementoMenu::query()->where('habilitado', false)->count() : 0;
         $recentChanges = $ready ? ElementoMenu::query()->where('actualizado_en', '>=', now()->subDays(7))->count() : 0;
 
-        return view('gestion.menus.listar', compact('ready', 'menus', 'roles', 'screens', 'activeMenus', 'activeSubmenus', 'hiddenElements', 'recentChanges'));
+        return view('gestion.administracion.seguridad.menus.listar', compact('ready', 'menus', 'selectedMenu', 'roles', 'screens', 'activeMenus', 'activeSubmenus', 'hiddenElements', 'recentChanges'));
     }
 
     /**
@@ -64,7 +65,6 @@ class MenusController extends Controller
             'nombre' => ['required', 'string', 'max:140'],
             'habilitado' => ['required', 'boolean'],
         ]);
-        abort_if($menu->codigo === 'administrador.sidebar' && ! $validated['habilitado'], 422, 'El menú administrativo esencial no se puede desactivar.');
 
         $before = $menu->only(['nombre', 'habilitado']);
         DB::transaction(function () use ($menu, $validated, $auditoria, $request, $before): void {
@@ -131,10 +131,6 @@ class MenusController extends Controller
             'roles.*' => ['integer', 'distinct', Rule::exists('roles', 'id')->where('activo', true)],
         ]);
         $validated['roles'] ??= [];
-        if ($menu->codigo === 'administrador.sidebar') {
-            $adminRoleId = DB::table('roles')->where('codigo', 'administrador')->value('id');
-            abort_unless(in_array((int) $adminRoleId, array_map('intval', $validated['roles']), true), 422, 'El menú global debe permanecer asignado al rol administrador.');
-        }
         $targetRoles = Rol::query()->whereIn('id', $validated['roles'])->get();
         $menuPermissionIds = DB::table('elementos_menu')->where('menu_id', $menu->getKey())->whereNotNull('permiso_id')->pluck('permiso_id')
             ->map(static fn (mixed $id): int => (int) $id)->unique()->all();
@@ -183,7 +179,7 @@ class MenusController extends Controller
                 })
             : collect();
 
-        return view('gestion.roles-permisos.modulos', compact('ready', 'modules'));
+        return view('gestion.administracion.seguridad.modulos-pantallas.listar', compact('ready', 'modules'));
     }
 
     /**

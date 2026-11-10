@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 
 /**
- * Define la responsabilidad de la clase GuardarConfiguracionTiendaRequest dentro de su módulo.
+ * Define la responsabilidad de la clase GuardarConfiguracionTiendaRequest dentro de su m�dulo.
  *
  * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
  */
@@ -30,9 +30,9 @@ class GuardarConfiguracionTiendaRequest extends FormRequest
     public function rules(): array
     {
         abort_unless(Schema::hasTable('configuraciones_tienda'), 503,
-            'La configuraciÃ³n persistente requiere aplicar primero la estructura SQL aprobada.');
+            'La configuración persistente requiere aplicar primero la estructura SQL aprobada.');
         abort_unless(app(ServicioAutorizacion::class)->activeCompanyId() !== null, 409,
-            'Selecciona una empresa activa para guardar la configuraciÃ³n de tienda.');
+            'Selecciona una empresa activa para guardar la configuración de tienda.');
 
         return [
             'seccion' => ['required', Rule::in(['general', 'apariencia', 'pagos', 'envios', 'notificaciones', 'seo'])],

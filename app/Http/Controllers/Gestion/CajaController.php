@@ -57,7 +57,7 @@ class CajaController extends Controller
                 ->whereColumn('sesiones_caja.caja_id', 'cajas.id')->where('estado', 'abierta')])
             ->orderBy('sede_id')->orderBy('codigo')->orderBy('id')->paginate(20)->withQueryString();
 
-        return view('paneles.administrador.finanzas-facturacion.cajas.operativa', [
+        return view('gestion.finanzas.cajas.operativa', [
             'boxes' => $boxes,
             'sites' => $sites,
             'createSites' => $createSites,

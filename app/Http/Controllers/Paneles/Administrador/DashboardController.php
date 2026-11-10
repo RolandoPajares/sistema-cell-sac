@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Servicios\ConsultaVentas;
 use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioInventario;
+use App\Servicios\ServicioMenuDinamico;
 use App\Servicios\ServicioPaneles;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -37,6 +38,7 @@ final class DashboardController extends PanelDashboardController
         private readonly ServicioAutorizacion $autorizacion,
         private readonly ServicioInventario $servicioInventario,
         private readonly ConsultaVentas $consultaVentas,
+        private readonly ServicioMenuDinamico $menuDinamico,
     ) {
         parent::__construct($panelService);
     }
@@ -46,11 +48,6 @@ final class DashboardController extends PanelDashboardController
      *
      * @return string Resultado de la operación.
      */
-    protected function role(): string
-    {
-        return 'administrador';
-    }
-
     /**
      * Recupera y presenta el detalle de la información solicitada.
      *
@@ -58,7 +55,7 @@ final class DashboardController extends PanelDashboardController
      */
     protected function viewName(): string
     {
-        return 'paneles.administrador.dashboard';
+        return 'paneles.dashboard';
     }
 
     /**
@@ -152,7 +149,7 @@ final class DashboardController extends PanelDashboardController
         $orderStatusChart = $this->statusChart($orderStatuses, $orderStatusTotal);
 
         $recentOrders = $consultaPedidos()
-            ->with('user:id,nombre,correo')
+            ->with(['user:id,nombre,correo', 'details.product:id,nombre'])
             ->latest('creado_en')
             ->latest('id')
             ->limit(5)
@@ -171,6 +168,9 @@ final class DashboardController extends PanelDashboardController
             ->limit(4)
             ->get(['id', 'nombre', 'titulo', 'vistas', 'clics', 'finaliza_en']);
         $campaignMaxViews = max(1, (int) $campaigns->max('vistas'));
+        $campaignProgress = $campaigns->mapWithKeys(static fn (Campania $campaign): array => [
+            $campaign->id => min(100, round(((int) $campaign->vistas / $campaignMaxViews) * 100)),
+        ])->all();
 
         $recentActivity = $consultaAuditoria()
             ->with('user:id,nombre')
@@ -186,9 +186,18 @@ final class DashboardController extends PanelDashboardController
             ->whereBetween('finaliza_en', [$now, $now->copy()->addDays(7)])
             ->count();
         $reminders = $this->reminders($productosSinExistencias, $pendingOrders, $expiringCampaigns);
+        $quickLinks = collect($this->menuDinamico->paraUsuario($user)['grupos'])
+            ->flatMap(static fn (array $group): array => $group['items'] ?? [])
+            ->filter(static fn (array $item): bool => ($item['enabled'] ?? false) && is_string($item['route'] ?? null))
+            ->take(9)
+            ->values()
+            ->all();
 
         return [
-            'role' => $user->rol,
+            'dashboardKind' => 'management',
+            'dashboardTitle' => 'Panel de administración',
+            'dashboardBodyClass' => 'modulo-dashboard modulo-admin-dashboard',
+            'userName' => (string) $user->nombre,
             'dashboardNow' => $now,
             'products' => $activeProducts,
             'orders' => $ordersCount,
@@ -204,18 +213,26 @@ final class DashboardController extends PanelDashboardController
             'newCustomers' => $newCustomers,
             'newCustomersTrendPercent' => $this->trendPercent($newCustomers, $newCustomersPreviousMonth),
             'monthlySales' => $monthlySales,
+            'monthlySalesBarHeights' => collect($monthlySales)->mapWithKeys(fn (array $month): array => [
+                $month['key'] => $salesChartMax > 0 ? max(4, round(($month['value'] / $salesChartMax) * 100, 2)) : 4,
+            ])->all(),
             'maxMonthlySales' => $maxMonthlySales,
             'salesChartMax' => $salesChartMax,
             'orderStatuses' => $orderStatuses,
             'orderStatusTotal' => $orderStatusTotal,
             'orderStatusChart' => $orderStatusChart,
             'recentOrders' => $recentOrders,
+            'recentOrderProducts' => $recentOrders->mapWithKeys(static fn (Pedido $order): array => [
+                $order->id => $order->details->first()?->product?->nombre,
+            ])->all(),
             'lowStockProducts' => $productosSinExistenciasListado,
             'topProducts' => $topProducts,
             'campaigns' => $campaigns,
             'campaignMaxViews' => $campaignMaxViews,
+            'campaignProgress' => $campaignProgress,
             'recentActivity' => $recentActivity,
             'reminders' => $reminders,
+            'quickLinks' => $quickLinks,
         ];
     }
 

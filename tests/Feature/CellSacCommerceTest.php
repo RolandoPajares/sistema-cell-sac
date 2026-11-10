@@ -173,8 +173,10 @@ it('limits customer assistant order summaries to the authenticated customer', fu
 });
 
 it('preserves the seven supported roles', function () {
-    expect(User::ROLES)->toHaveCount(7);
+    SpanishAccessFixture::organization();
+
+    expect(User::availableRoleCodes())->toHaveCount(7);
     foreach (['administrador', 'compras_logistica', 'ventas_mayoristas', 'ventas_minoristas', 'marketing', 'cliente_mayorista', 'cliente_minorista'] as $role) {
-        expect(User::ROLES)->toContain($role);
+        expect(User::availableRoleCodes())->toContain($role);
     }
 });

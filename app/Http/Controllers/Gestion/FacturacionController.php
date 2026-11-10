@@ -74,7 +74,7 @@ class FacturacionController extends Controller
         $resumenEstados = (clone $consulta)->select('documentos.estado')
             ->selectRaw('COUNT(*) AS cantidad')->groupBy('documentos.estado')->orderBy('documentos.estado')->get();
 
-        $modulo = require resource_path('views/gestion/facturacion/datos.php');
+        $modulo = require config_path('gestion/finanzas/facturacion.php');
         $modulo['mode'] = 'consult';
         $modulo['connected'] = true;
         $modulo['area'] = 'Finanzas y Facturación';
@@ -119,7 +119,21 @@ class FacturacionController extends Controller
             ['label' => 'Tipos documentales', 'value' => $cantidadTipos, 'helper' => 'Tipos usados en MariaDB', 'icon' => 'bi-file-earmark-text', 'tone' => 'purple'],
         ];
 
-        return view('gestion.facturacion.listar', ['module' => $modulo]);
+        $moduleKey = (string) $modulo['key'];
+        $filterOptions = $modulo['filter_options'] ?? ['types' => [], 'statuses' => []];
+        $filterValues = $modulo['filters'] ?? [];
+        $exportParameters = array_filter(
+            $filterValues,
+            static fn (mixed $value): bool => $value !== null && $value !== ''
+        );
+
+        return view('gestion.finanzas.comprobantes.listar', [
+            'module' => $modulo,
+            'moduleKey' => $moduleKey,
+            'filterOptions' => $filterOptions,
+            'filterValues' => $filterValues,
+            'exportParameters' => $exportParameters,
+        ]);
     }
 
     /**

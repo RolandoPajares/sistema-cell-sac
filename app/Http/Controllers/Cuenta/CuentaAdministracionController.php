@@ -8,14 +8,17 @@ use App\Http\Requests\ActualizarContrasenaRequest;
 use App\Http\Requests\ActualizarPerfilRequest;
 use App\Http\Requests\ActualizarPreferenciasRequest;
 use App\Models\Auditoria\RegistroAuditoria;
+use App\Models\User;
 use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ServicioNotificaciones;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 /**
@@ -83,7 +86,10 @@ class CuentaAdministracionController extends Controller
             ? DB::table('sesiones_usuarios')->where('usuario_id', $request->user()->getKey())->orderByDesc('ultimo_acceso')->limit(20)->get()
             : collect();
 
-        return view('paneles.administrador.perfil.seguridad', compact('sessions', 'sessionsAvailable'));
+        return view('cuenta.perfil.seguridad', array_merge(
+            compact('sessions', 'sessionsAvailable'),
+            $this->profileNavigation($request->user()),
+        ));
     }
 
     /**
@@ -97,10 +103,22 @@ class CuentaAdministracionController extends Controller
         $available = Schema::hasTable('sesiones_usuarios');
         $currentHash = $request->hasSession() ? hash('sha256', $request->session()->getId()) : null;
         $sessions = $available
-            ? DB::table('sesiones_usuarios')->where('usuario_id', $request->user()->getKey())->orderByDesc('ultimo_acceso')->paginate(20)
+            ? DB::table('sesiones_usuarios')->where('usuario_id', $request->user()->getKey())->orderByDesc('ultimo_acceso')->paginate(20)->through(function (object $session) use ($currentHash): object {
+                $session->dispositivo = Str::limit($session->agente_usuario ?: 'Agente no informado', 100);
+                $session->ultimo_acceso_formateado = Carbon::parse($session->ultimo_acceso)->format('d/m/Y H:i');
+                $session->estado = $session->revocada_en
+                    ? 'Revocada'
+                    : (hash_equals((string) $session->resumen_identificador, (string) $currentHash) ? 'Sesión actual' : 'Activa');
+                $session->puede_revocarse = $session->revocada_en === null;
+
+                return $session;
+            })
             : collect();
 
-        return view('paneles.administrador.perfil.sesiones', compact('sessions', 'available', 'currentHash'));
+        return view('cuenta.perfil.sesiones', array_merge(
+            compact('sessions', 'available', 'currentHash'),
+            $this->profileNavigation($request->user()),
+        ));
     }
 
     /**
@@ -138,11 +156,15 @@ class CuentaAdministracionController extends Controller
      *
      * @return View Resultado de la operación.
      */
-    public function preferences(): View
+    public function preferences(Request $request): View
     {
         $preferencesAvailable = Schema::hasColumn('usuarios', 'preferencias');
+        $preferences = (array) ($request->user()->preferencias ?? []);
 
-        return view('paneles.administrador.perfil.preferencias', compact('preferencesAvailable'));
+        return view('cuenta.perfil.preferencias', array_merge(
+            compact('preferencesAvailable', 'preferences'),
+            $this->profileNavigation($request->user()),
+        ));
     }
 
     /**
@@ -209,7 +231,10 @@ class CuentaAdministracionController extends Controller
             ? RegistroAuditoria::query()->where('usuario_id', $request->user()->getKey())->latest('creado_en')->paginate(25)
             : collect();
 
-        return view('paneles.administrador.perfil.actividad', compact('activity', 'available'));
+        return view('cuenta.perfil.actividad', array_merge(
+            compact('activity', 'available'),
+            $this->profileNavigation($request->user()),
+        ));
     }
 
     /**
@@ -224,7 +249,10 @@ class CuentaAdministracionController extends Controller
         $available = Schema::hasTable('notificaciones');
         $notificaciones = $available ? $servicio->listarDelUsuario($request->user()) : collect();
 
-        return view('paneles.administrador.perfil.notificaciones', compact('notificaciones', 'available'));
+        return view('cuenta.perfil.notificaciones', array_merge(
+            compact('notificaciones', 'available'),
+            $this->profileNavigation($request->user()),
+        ));
     }
 
     /**
@@ -243,5 +271,19 @@ class CuentaAdministracionController extends Controller
         return back()->with('status', $marcadaComoLeida
             ? 'Notificación marcada como leída.'
             : 'La notificación ya estaba leída.');
+    }
+
+    /**
+     * Prepara las rutas de navegaciÃ³n compartidas por las pantallas de cuenta.
+     *
+     * @return array{profileHomeRoute:string}
+     */
+    private function profileNavigation(User $user): array
+    {
+        return [
+            'profileHomeRoute' => $user->can('gestion.seguridad.consultar')
+                ? 'management.account'
+                : 'account.profile.show',
+        ];
     }
 }

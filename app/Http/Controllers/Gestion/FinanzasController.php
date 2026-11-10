@@ -59,8 +59,11 @@ class FinanzasController extends Controller
         $rows = (clone $query)->orderByDesc('fecha_pago')->orderByDesc('id')->paginate(self::PAGE_SIZE)->withQueryString();
         $baseQuery = $financialQueries->pagos($request->user(), []);
         $canCreate = $authorization->allows($request->user(), 'gestion.pagos.crear');
+        $formOptions = $canCreate ? $financialQueries->opcionesPago($request->user()) : [];
+        $canSubmit = ($formOptions['documentos'] ?? collect())->isNotEmpty()
+            && ($formOptions['medios'] ?? collect())->isNotEmpty();
 
-        return view('gestion.pagos.listar', [
+        return view('gestion.finanzas.pagos-cobros.listar', [
             'module' => [
                 'key' => 'pagos',
                 'area' => 'Finanzas',
@@ -74,7 +77,9 @@ class FinanzasController extends Controller
                 'route' => 'management.payments',
                 'export_route' => $authorization->allows($request->user(), 'gestion.pagos.exportar') ? 'management.payments.export' : null,
                 'create_route' => $canCreate ? 'management.payments.store' : null,
-                'form_options' => $canCreate ? $financialQueries->opcionesPago($request->user()) : [],
+                'form_options' => $formOptions,
+                'can_submit' => $canSubmit,
+                'export_parameters' => array_filter($filters, static fn (mixed $value): bool => $value !== null && $value !== ''),
                 'request_token' => (string) Str::uuid(),
                 'export_label' => 'Exportar',
                 'filters' => $filters + ['tipo' => null, 'estado' => null, 'desde' => null, 'hasta' => null, 'buscar' => null],
@@ -126,7 +131,7 @@ class FinanzasController extends Controller
         $baseQuery = $financialQueries->reembolsos($request->user(), []);
         $canCreate = $authorization->allows($request->user(), 'gestion.reembolsos.crear');
 
-        return view('gestion.reembolsos.listar', [
+        return view('gestion.finanzas.reembolsos.listar', [
             'module' => [
                 'key' => 'reembolsos',
                 'area' => 'Finanzas',
@@ -197,14 +202,14 @@ class FinanzasController extends Controller
         $history = RegistroAuditoria::query()->where('entidad', 'pagos')->where('entidad_id', $pago->getKey())
             ->with('user:id,nombre')->orderBy('id')->get();
 
-        return view('gestion.pagos.detalle', [
+        return view('gestion.finanzas.pagos-cobros.detalle', [
             'record' => $pago,
             'history' => $history,
             'canCancel' => $pago->estado === 'pendiente'
                 && $authorization->allowsRecord($request->user(), 'gestion.pagos.anular', (int) $pago->empresa_id, (int) $pago->sede_id),
             'canConfirmCash' => $pago->estado === 'pendiente' && $pago->medioPago?->requiere_caja
                 && $pago->sesionCaja?->estado === 'abierta'
-                && $authorization->hasRole($request->user(), 'administrador')
+                && $authorization->allowsGlobal($request->user(), 'gestion.seguridad.consultar')
                 && $authorization->allowsRecord($request->user(), 'gestion.pagos.actualizar',
                     (int) $pago->empresa_id, (int) $pago->sede_id),
         ]);
@@ -275,7 +280,7 @@ class FinanzasController extends Controller
         $history = RegistroAuditoria::query()->where('entidad', 'reembolsos')->where('entidad_id', $reembolso->getKey())
             ->with('user:id,nombre')->orderBy('id')->get();
 
-        return view('gestion.reembolsos.detalle', [
+        return view('gestion.finanzas.reembolsos.detalle', [
             'record' => $reembolso,
             'history' => $history,
             'canApprove' => $reembolso->estado === 'pendiente'

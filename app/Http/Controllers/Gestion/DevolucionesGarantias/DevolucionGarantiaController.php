@@ -62,7 +62,7 @@ class DevolucionGarantiaController extends Controller
             $request->user(),
             'gestion.devoluciones.consultar',
         );
-        $module = require resource_path('views/gestion/devoluciones-garantias/datos.php');
+        $module = require config_path('gestion/inventario/devoluciones-garantias.php');
         $pedidosFormulario = $this->authorization->scopeRecordsFor(Pedido::query(), $request->user(), 'gestion.pedidos.consultar')
             ->whereNotNull('cliente_id')->with(['user:id,nombre', 'details:pedido_id,producto_id'])
             ->latest('creado_en')->latest('id')->limit(100)
@@ -117,7 +117,7 @@ class DevolucionGarantiaController extends Controller
             : 'No hay casos resueltos registrados.';
         $module['operacion_ui']['rows'] = $returns->getCollection()->map(fn (DevolucionGarantia $return): array => $this->tableRow($return))->all();
 
-        return view('gestion.devoluciones-garantias.listar', compact('module'));
+        return view('gestion.comercial.devoluciones-garantias.listar', compact('module'));
     }
 
     /**

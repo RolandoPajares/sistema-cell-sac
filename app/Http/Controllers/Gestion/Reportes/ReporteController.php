@@ -63,8 +63,45 @@ class ReporteController extends Controller
         $customerReport = $this->customerReport($filters);
         $inventoryReport = $this->inventoryReport();
         $campaignReport = $this->campaignReport($period['from'], $period['to']);
+        $categorySales = $this->categorySales($details);
+        $inventorySummary = $this->inventorySummary();
+        $orderStatusSummary = $this->orderStatusSummary($filters);
+        $customerReport['top'] = $customerReport['top']
+            ->map(static function (Pedido $order): array {
+                $customer = $order->user?->customer;
 
-        return view('gestion.reportes.listar', [
+                return [
+                    'name' => $customer?->razon_social
+                        ?: $customer?->nombre_contacto
+                        ?: $order->user?->nombre
+                        ?: 'Cliente',
+                    'email' => $order->user?->correo,
+                    'type' => ucfirst($customer?->tipo ?: 'cliente'),
+                    'orders' => (int) $order->customer_orders,
+                    'sales' => (float) $order->customer_sales,
+                ];
+            })
+            ->all();
+        $presentation = $this->presentationData(
+            $trend,
+            $categorySales,
+            $inventorySummary,
+            $orderStatusSummary,
+            $campaignReport,
+            $customerReport,
+            $request,
+        );
+        $latestOrders = $this->latestOrders($filters)->map(function (Pedido $order) use ($presentation): Pedido {
+            $customer = $order->user?->customer;
+            $status = $presentation['orderStatuses'][$order->estado] ?? ['label' => $order->estado, 'class' => 'processing'];
+            $order->setAttribute('customer_name', $customer?->razon_social ?: $customer?->nombre_contacto ?: $order->user?->nombre ?: 'Cliente');
+            $order->setAttribute('status_label', $status['label']);
+            $order->setAttribute('status_class', $status['class']);
+
+            return $order;
+        });
+
+        return view('gestion.analitica.reportes.listar', [
             'filters' => $filters,
             'activeView' => $this->activeView($request),
             'periodLabel' => $this->periodLabel($request, $period['from'], $period['to']),
@@ -78,16 +115,146 @@ class ReporteController extends Controller
                 'clicks' => (int) ($campaignMetrics?->clicks ?? 0),
             ],
             'salesTrend' => $trend,
-            'categorySales' => $this->categorySales($details),
+            'categorySales' => $categorySales,
             'topProducts' => $this->topProducts($details),
-            'inventorySummary' => $this->inventorySummary(),
-            'latestOrders' => $this->latestOrders($filters),
-            'orderStatusSummary' => $this->orderStatusSummary($filters),
+            'inventorySummary' => $inventorySummary,
+            'latestOrders' => $latestOrders,
+            'orderStatusSummary' => $orderStatusSummary,
             'productReport' => $productReport,
             'customerReport' => $customerReport,
             'inventoryReport' => $inventoryReport,
             'campaignReport' => $campaignReport,
+            ...$presentation,
         ]);
+    }
+
+    /**
+     * Prepara estructuras exclusivamente visuales para el informe.
+     *
+     * @param  array<int, array{label:string,sales:float,orders:int,sales_height:float,orders_height:float}>  $salesTrend
+     * @param  array<int, array{name:string,revenue:float,percent:float,color:string}>  $categorySales
+     * @param  array<int, array{label:string,count:int,color:string}>  $inventorySummary
+     * @param  array{total:int,items:array<int, array{label:string,count:int,color:string}>}  $orderStatusSummary
+     * @param  array{items:Collection<int, Campania>}  $campaignReport
+     * @return array<string, mixed>
+     */
+    private function presentationData(
+        array $salesTrend,
+        array $categorySales,
+        array $inventorySummary,
+        array $orderStatusSummary,
+        array $campaignReport,
+        array $customerReport,
+        FiltroReporteRequest $request,
+    ): array {
+        $salesMax = max(1, ...array_column($salesTrend, 'sales'));
+        $ordersMax = max(1, ...array_column($salesTrend, 'orders'));
+        $chartPoints = [];
+        $chartCircles = [];
+
+        foreach ($salesTrend as $index => $point) {
+            $x = count($salesTrend) > 1 ? ($index / (count($salesTrend) - 1)) * 100 : 50;
+            $y = 100 - (($point['orders'] / $ordersMax) * 100);
+            $chartPoints[] = round($x, 2).','.round($y, 2);
+            $chartCircles[] = ['x' => round($x, 2), 'y' => round($y, 2)];
+        }
+
+        return [
+            'reportTabs' => ['resumen' => ['label' => 'Reportes globales', 'icon' => 'bi-bar-chart-line']],
+            'chartPoints' => $chartPoints,
+            'chartPointsString' => implode(' ', $chartPoints),
+            'chartCircles' => $chartCircles,
+            'salesMax' => $salesMax,
+            'ordersMax' => $ordersMax,
+            'salesScale' => [
+                $salesMax,
+                $salesMax * .75,
+                $salesMax * .5,
+                $salesMax * .25,
+                0,
+            ],
+            'categoryGradient' => $this->gradientFor($categorySales, 'percent'),
+            'inventoryGradient' => $this->gradientFor($inventorySummary, 'count'),
+            'inventoryTotal' => max(1, array_sum(array_column($inventorySummary, 'count'))),
+            'orderStatusItems' => $this->statusItems($orderStatusSummary),
+            'customerTypes' => $this->customerTypeItems($customerReport),
+            'orderStatuses' => [
+                'Pendiente' => ['label' => 'Pendiente', 'class' => 'pending'],
+                'En proceso' => ['label' => 'En proceso', 'class' => 'processing'],
+                'Enviado' => ['label' => 'Enviado', 'class' => 'processing'],
+                'Entregado' => ['label' => 'Entregado', 'class' => 'completed'],
+                'Cancelado' => ['label' => 'Cancelado', 'class' => 'cancelled'],
+            ],
+            'statusTotal' => max(1, $orderStatusSummary['total']),
+            'campaignViews' => (int) $campaignReport['items']->sum('vistas'),
+            'campaignClicks' => (int) $campaignReport['items']->sum('clics'),
+            'campaignConversion' => $this->campaignConversion($campaignReport['items']),
+            'activeReportView' => $request->string('vista')->toString() ?: 'resumen',
+        ];
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $items
+     */
+    private function gradientFor(array $items, string $valueKey): string
+    {
+        $total = $valueKey === 'count'
+            ? max(1, array_sum(array_column($items, $valueKey)))
+            : 100;
+        $cursor = 0;
+        $segments = [];
+
+        foreach ($items as $item) {
+            $next = $cursor + (($item[$valueKey] / $total) * 100);
+            $segments[] = $item['color'].' '.$cursor.'% '.$next.'%';
+            $cursor = $next;
+        }
+
+        if ($cursor < 100) {
+            $segments[] = '#e8f0fa '.$cursor.'% 100%';
+        }
+
+        return $segments !== [] ? implode(', ', $segments) : '#e8f0fa 0 100%';
+    }
+
+    /**
+     * @param  Collection<int, Campania>  $campaigns
+     */
+    private function campaignConversion(Collection $campaigns): float
+    {
+        $views = (int) $campaigns->sum('vistas');
+
+        return $views > 0 ? ((int) $campaigns->sum('clics') / $views) * 100 : 0;
+    }
+
+    /**
+     * @param  array{total:int,items:array<int, array{label:string,count:int,color:string}>}  $summary
+     * @return array<int, array{label:string,count:int,color:string,percent:float}>
+     */
+    private function statusItems(array $summary): array
+    {
+        $total = max(1, $summary['total']);
+
+        return array_map(static fn (array $item): array => $item + [
+            'percent' => ($item['count'] / $total) * 100,
+        ], $summary['items']);
+    }
+
+    /**
+     * @param  array{active:int,mayoristas:int,minoristas:int}  $report
+     * @return array<int, array{label:string,count:int,color:string,percent:float}>
+     */
+    private function customerTypeItems(array $report): array
+    {
+        $items = [
+            ['label' => 'Mayoristas', 'count' => $report['mayoristas'], 'color' => '#7b55ed'],
+            ['label' => 'Minoristas', 'count' => $report['minoristas'], 'color' => '#18b78d'],
+        ];
+        $total = max(1, $report['active']);
+
+        return array_map(static fn (array $item): array => $item + [
+            'percent' => ($item['count'] / $total) * 100,
+        ], $items);
     }
 
     /**

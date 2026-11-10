@@ -41,7 +41,7 @@ final class EnviosPedidosController extends Controller
     public function mostrar(ListadoEnviosPedidosRequest $solicitud): View
     {
         return view(
-            'paneles.administrador.inventario-logistica.envios.listar',
+            'gestion.inventario-logistica.envios-entregas.envios.listar',
             $this->envios->listar($solicitud->user(), $solicitud->validated()),
         );
     }
@@ -74,7 +74,7 @@ final class EnviosPedidosController extends Controller
 
         $envio->load(['pedido:id,numero_referencia,cliente_id', 'almacen.sede', 'eventos' => static fn ($query) => $query->orderByDesc('ocurrido_en')->orderByDesc('id')]);
 
-        return view('paneles.administrador.inventario-logistica.envios.detalle', compact('envio'));
+        return view('gestion.inventario-logistica.envios-entregas.envios.detalle', compact('envio'));
     }
 
     /**

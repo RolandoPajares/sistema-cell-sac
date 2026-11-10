@@ -37,7 +37,7 @@ final class PanelAnalisisAuditoriaController extends Controller
      */
     public function globales(Request $request, ServicioAutorizacion $autorizacion): View
     {
-        $autorizacion->assertAllowed($request->user(), 'gestion.reportes.consultar');
+        $autorizacion->assertAllowed($request->user(), 'gestion.analitica.reportes.consultar');
 
         return $this->mostrar($request, 'globales', $autorizacion);
     }
@@ -97,7 +97,12 @@ final class PanelAnalisisAuditoriaController extends Controller
             'pagina' => $pagina,
             'tipo' => $tipo,
             'filtros' => $filtros,
-            'puedeExportar' => $tipo === 'globales' && $autorizacion->allows($usuario, 'gestion.reportes.exportar'),
+            'aaConfig' => base64_encode(json_encode([
+                'columnas' => $pagina['columnas'],
+                'filas' => $pagina['filas'],
+            ], JSON_THROW_ON_ERROR)),
+            'auditConfig' => base64_encode(json_encode($pagina['detalles'], JSON_THROW_ON_ERROR)),
+            'puedeExportar' => $tipo === 'globales' && $autorizacion->allows($usuario, 'gestion.analitica.reportes.exportar'),
             'puedeExportarAuditoria' => $tipo === 'operaciones' && $autorizacion->allows($usuario, 'gestion.auditoria.exportar'),
         ]);
     }
@@ -117,7 +122,7 @@ final class PanelAnalisisAuditoriaController extends Controller
     {
         abort_unless(in_array($tipo, ['globales', 'operaciones'], true), 404);
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
-        $autorizacion->assertAllowed($request->user(), $tipo === 'globales' ? 'gestion.reportes.exportar' : 'gestion.auditoria.exportar');
+        $autorizacion->assertAllowed($request->user(), $tipo === 'globales' ? 'gestion.analitica.reportes.exportar' : 'gestion.auditoria.exportar');
         $filtros = $request->validate([
             'desde' => ['nullable', 'date'],
             'hasta' => ['nullable', 'date', 'after_or_equal:desde'],
@@ -402,7 +407,7 @@ final class PanelAnalisisAuditoriaController extends Controller
      */
     private function vista(string $tipo): string
     {
-        return 'paneles.administrador.analisis-auditoria.'.$this->directorio($tipo).'.listar';
+        return 'gestion.analitica.'.$this->directorio($tipo).'.listar';
     }
 
     /**

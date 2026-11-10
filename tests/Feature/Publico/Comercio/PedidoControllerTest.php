@@ -170,6 +170,18 @@ beforeEach(function (): void {
         $table->unsignedInteger('cantidad');
         $table->decimal('precio_unitario', 10, 2);
     });
+    Schema::create('clientes', function (Blueprint $table): void {
+        $table->increments('id');
+        $table->foreignId('usuario_id')->nullable();
+        $table->string('tipo', 20)->default('minorista');
+        $table->string('documento', 20)->nullable();
+        $table->string('razon_social', 160)->nullable();
+        $table->string('nombre_contacto', 160);
+        $table->string('correo', 160);
+        $table->string('telefono', 30)->nullable();
+        $table->boolean('activo')->default(true);
+        $table->timestamp('creado_en')->nullable();
+    });
     Schema::create('productos', function (Blueprint $table): void {
         $table->id();
         $table->foreignId('empresa_id')->nullable();
@@ -208,6 +220,17 @@ function crearUsuarioParaPedidos(string $codigoRol, ?string $nombre = null): Use
         DB::table('usuarios_sedes_roles')->insert(['usuario_id' => $usuario->id, 'sede_id' => 1, 'rol_id' => $rol->id, 'activo' => true]);
     } else {
         DB::table('usuarios_roles')->insert(['usuario_id' => $usuario->id, 'rol_id' => $rol->id, 'activo' => true]);
+    }
+
+    if (str_starts_with($codigoRol, 'cliente_')) {
+        DB::table('clientes')->insert([
+            'usuario_id' => $usuario->id,
+            'tipo' => $codigoRol === 'cliente_mayorista' ? 'mayorista' : 'minorista',
+            'documento' => 'TEST-'.$usuario->id,
+            'nombre_contacto' => $usuario->nombre,
+            'correo' => $usuario->correo,
+            'activo' => true,
+        ]);
     }
 
     return $usuario;

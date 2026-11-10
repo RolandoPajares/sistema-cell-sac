@@ -15,6 +15,11 @@ use Illuminate\Support\Facades\Schema;
  */
 final class ServicioMenuDinamico
 {
+    /** @var array<int, string> Rutas administrativas retiradas de la navegación visible. */
+    private const RUTAS_NO_VISIBLES = [
+        'management.company_settings.sites',
+    ];
+
     /**
      * Inicializa la instancia con las dependencias y el estado requeridos.
      *
@@ -203,6 +208,10 @@ final class ServicioMenuDinamico
     /** @return array<string,mixed>|null */
     private function makeItem(object $row, User $user): ?array
     {
+        if (is_string($row->ruta) && in_array($row->ruta, self::RUTAS_NO_VISIBLES, true)) {
+            return null;
+        }
+
         if (is_string($row->ruta)
             && $row->ruta !== 'dashboard'
             && ! str_starts_with($row->ruta, 'management.account')

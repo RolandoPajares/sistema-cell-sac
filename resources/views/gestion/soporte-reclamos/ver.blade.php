@@ -1,6 +1,0 @@
-<div class="gestion-pendiente-modal-shell">
-    <header class="gestion-pendiente-modal-header"><div><span class="gestion-pendiente-modal-icon"><i class="bi bi-eye" aria-hidden="true"></i></span><div><span class="gestion-pendiente-eyebrow">{{ $module['area'] }}</span><h2 id="soporte-reclamos-ver-title">Detalle del ticket</h2><p>Consulta el caso seleccionado desde MariaDB.</p></div></div><button type="button" class="gestion-pendiente-close" data-pending-close aria-label="Cerrar ventana"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
-    <div class="gestion-pendiente-modal-body"><div class="gestion-pendiente-detail-grid"><div><small>Código</small><strong data-pending-detail="codigo">—</strong></div><div><small>Cliente</small><strong data-pending-detail="cliente_nombre">—</strong></div><div><small>Asunto</small><strong data-pending-detail="asunto">—</strong></div><div><small>Prioridad</small><strong data-pending-detail="prioridad">—</strong></div><div><small>Estado</small><strong data-pending-detail="estado">—</strong></div><div><small>Cliente ID</small><strong data-pending-detail="cliente_id">—</strong></div></div></div>
-    <footer class="gestion-pendiente-modal-footer"><button type="button" class="gestion-pendiente-secondary" data-pending-close>Cerrar</button></footer>
-</div>
-

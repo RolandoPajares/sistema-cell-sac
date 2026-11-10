@@ -40,9 +40,9 @@ final class ServicioPaneles
 
     /**
      * @param  array<int|string, int|string>  $cart
-     * @return array{role:string, links:array<int, array{label:string, route:string, icon:string, module:?string}>, orders:Collection<int, Pedido>, orderCount:int, pendingCount:int, cartUnits:int|float}
+     * @return array{dashboardKind:string, dashboardTitle:string, dashboardBodyClass:string, userName:string, links:array<int, array{label:string, route:string, icon:string, module:?string}>, orders:Collection<int, Pedido>, orderCount:int, pendingCount:int, cartUnits:int|float}
      */
-    public function roleDashboard(User $user, array $cart, string $role): array
+    public function roleDashboard(User $user, array $cart): array
     {
         $orders = $this->customerOrders($user);
         $menu = $this->menus->paraUsuario($user);
@@ -52,7 +52,10 @@ final class ServicioPaneles
             ->values()->all();
 
         return [
-            'role' => $role,
+            'dashboardKind' => 'account',
+            'dashboardTitle' => 'Panel de cuenta',
+            'dashboardBodyClass' => 'modulo-cuenta',
+            'userName' => (string) $user->nombre,
             'links' => $links,
             'orders' => $orders,
             'orderCount' => $orders->count(),
@@ -66,8 +69,7 @@ final class ServicioPaneles
      */
     private function customerOrders(User $user): Collection
     {
-        if (! $this->autorizacion->hasRole($user, 'cliente_minorista')
-            && ! $this->autorizacion->hasRole($user, 'cliente_mayorista')) {
+        if (! $this->autorizacion->allows($user, 'gestion.pedidos.consultar')) {
             return collect();
         }
 

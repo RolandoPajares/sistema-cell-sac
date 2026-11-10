@@ -94,7 +94,7 @@ final class PersonalSedeController extends Controller
         $personalPorRol = $this->personalPorRol($consultaBase, $ahora);
         $sedesAutorizadas = Sede::query()->whereIn('id', $idsSede)->orderBy('nombre')->get(['id', 'codigo', 'nombre']);
 
-        return view('paneles.administrador.organizacion.personal.listar', [
+        return view('gestion.administracion.seguridad.personal.listar', [
             'asignaciones' => $asignaciones,
             'filtros' => $filtros,
             'sedesAutorizadas' => $sedesAutorizadas,

@@ -1,4 +1,4 @@
-@extends('layouts.tienda')
+@extends('layouts.tienda.principal')
 @section('title', 'Página no encontrada')
 @section('content')
 <section class="container form-page">
@@ -10,3 +10,4 @@
     </div>
 </section>
 @endsection
+

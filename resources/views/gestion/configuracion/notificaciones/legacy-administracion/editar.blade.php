@@ -1,0 +1,33 @@
+{{-- Encabezado del formulario para editar una notificación. --}}
+<div class="gestion-pendiente-modal-shell">
+    <header class="gestion-pendiente-modal-header">
+        <div><span class="gestion-pendiente-modal-icon"><i class="bi {{ $module['icon'] }}" aria-hidden="true"></i></span><div><span class="gestion-pendiente-eyebrow">{{ $module['area'] }}</span><h2 id="{{ $module['key'] }}-editar-title">Editar {{ $module['record_singular'] ?? 'notificación' }}</h2><p>Actualiza la información de la notificación seleccionada.</p></div></div>
+        <button type="button" class="gestion-pendiente-close" data-pending-close aria-label="Cerrar ventana"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+    </header>
+
+    {{-- Aviso del estado de integración con el backend. --}}
+    <div class="gestion-pendiente-modal-body">
+        <div class="gestion-pendiente-modal-notice"><i class="bi bi-database-exclamation" aria-hidden="true"></i><div><strong>Formulario frontend</strong><p>Los campos están preparados visualmente. La actualización requiere una ruta y un endpoint autorizados.</p></div></div>
+
+        {{-- Campos completos de edición. --}}
+        <form data-pending-form>
+            <div class="gestion-pendiente-form-fields">
+                @foreach (($module['fields'] ?? []) as $field)
+                    <label class="gestion-pendiente-field{{ ($field['wide'] ?? false) ? ' gestion-pendiente-field--wide' : '' }}" for="{{ $module['key'] }}-editar-{{ $loop->index }}">
+                        <span>{{ $field['label'] }} @if ($field['required'] ?? false)<b>*</b>@endif</span>
+                        @if (($field['type'] ?? 'text') === 'textarea')
+                            <textarea id="{{ $module['key'] }}-editar-{{ $loop->index }}" rows="3" placeholder="{{ $field['placeholder'] ?? '' }}"></textarea>
+                        @elseif (($field['type'] ?? 'text') === 'select')
+                            <select id="{{ $module['key'] }}-editar-{{ $loop->index }}"><option value="">{{ $field['placeholder'] ?? 'Seleccionar' }}</option>@foreach (($field['options'] ?? []) as $option)<option value="{{ $option }}">{{ $option }}</option>@endforeach</select>
+                        @else
+                            <input id="{{ $module['key'] }}-editar-{{ $loop->index }}" type="{{ $field['type'] ?? 'text' }}" placeholder="{{ $field['placeholder'] ?? '' }}">
+                        @endif
+                    </label>
+                @endforeach
+            </div>
+        </form>
+    </div>
+
+    {{-- Acciones visuales del formulario de edición. --}}
+    <footer class="gestion-pendiente-modal-footer"><button type="button" class="gestion-pendiente-secondary" data-pending-close>Cancelar</button><button type="button" class="gestion-pendiente-primary" data-pending-notice="La actualización requiere la integración del backend."><i class="bi bi-save" aria-hidden="true"></i> Guardar cuando se integre</button></footer>
+</div>

@@ -52,8 +52,8 @@ class ServicioCotizaciones
 
             $customer = Cliente::findOrFail($customerId);
             $isOwner = (int) $customer->usuario_id === (int) $user->id
-                && $this->authorization->hasRole($user, 'cliente_mayorista');
-            $isAuthorizedEmployee = ($this->authorization->hasRole($user, 'administrador') || $this->authorization->hasRole($user, 'ventas_mayoristas'))
+                && $this->authorization->allows($user, 'gestion.cotizaciones.consultar');
+            $isAuthorizedEmployee = ($this->authorization->allowsGlobal($user, 'gestion.seguridad.consultar') || $this->authorization->allows($user, 'gestion.cotizaciones.consultar'))
                 && $this->authorization->allowsRecord(
                     $user,
                     'gestion.cotizaciones.crear',

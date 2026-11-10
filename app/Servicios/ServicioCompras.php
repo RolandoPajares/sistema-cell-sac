@@ -89,16 +89,27 @@ class ServicioCompras
                     abort_unless($varianteId === null, 422, 'El producto seleccionado no tiene variantes activas.');
                 }
                 $costo = $this->centimos((string) $item['costo_unitario']);
-                $importe = $costo * $cantidad;
+                $descuento = $this->centimos(number_format((float) ($item['descuento'] ?? 0), 2, '.', ''));
+                $impuesto = $this->centimos(number_format((float) ($item['impuesto'] ?? 0), 2, '.', ''));
+                $importe = ($costo * $cantidad) - $descuento + $impuesto;
+                abort_if($importe < 0, 422, 'El descuento no puede superar el importe de la línea.');
                 abort_if($importe > self::MAX_CENTIMOS - $total, 422, 'La compra supera el importe permitido.');
                 $total += $importe;
-                $lineas[] = ['producto_id' => $producto->id, 'variante_id' => $varianteId, 'cantidad' => $cantidad, 'costo_unitario' => $this->importe($costo)];
+                $linea = ['producto_id' => $producto->id, 'variante_id' => $varianteId, 'cantidad' => $cantidad, 'costo_unitario' => $this->importe($costo)];
+                if (Schema::hasColumn('compra_detalles', 'descuento')) {
+                    $linea['descuento'] = $this->importe($descuento);
+                    $linea['impuesto'] = $this->importe($impuesto);
+                    $linea['total_linea'] = $this->importe($importe);
+                }
+                $lineas[] = $linea;
             }
-            $compra = Compra::create([
-                ...$ubicacion, 'proveedor_id' => $proveedor->id, 'creado_por_usuario_id' => $actor->id,
-                'total' => $this->importe($total), 'estado' => 'Pendiente', 'fecha_compra' => $datos['fecha_compra'],
-                'activo' => true, 'creado_en' => now(),
-            ]);
+            $compraDatos = [...$ubicacion, 'proveedor_id' => $proveedor->id, 'creado_por_usuario_id' => $actor->id,
+                'total' => $this->importe($total), 'estado' => 'Pendiente', 'fecha_compra' => $datos['fecha_compra'], 'activo' => true, 'creado_en' => now()];
+            if (Schema::hasColumn('compras', 'numero_referencia')) {
+                $compraDatos['numero_referencia'] = $datos['numero_referencia'] ?? null;
+                $compraDatos['moneda'] = $datos['moneda'] ?? 'PEN';
+            }
+            $compra = Compra::create($compraDatos);
             foreach ($lineas as $linea) {
                 $compra->details()->create($linea);
             }
@@ -118,6 +129,84 @@ class ServicioCompras
      * @param  mixed  $ip  Parámetro recibido por la operación.
      * @return Compra Resultado de la operación.
      */
+    /**
+     * Actualiza una compra pendiente sin crear un nuevo encabezado ni afectar inventario.
+     *
+     * @param  array<string, mixed>  $datos
+     */
+    public function actualizar(Compra $compra, array $datos, User $actor, ?string $ip): Compra
+    {
+        $this->autorizacion->assertAllowed($actor, 'gestion.compras.actualizar');
+
+        return DB::transaction(function () use ($compra, $datos, $actor, $ip): Compra {
+            $bloqueada = Compra::query()->whereKey($compra->getKey())->lockForUpdate()->firstOrFail();
+            abort_unless($this->autorizacion->allowsRecord($actor, 'gestion.compras.actualizar', (int) $bloqueada->empresa_id, (int) $bloqueada->sede_id), 403);
+            abort_unless($bloqueada->activo && $bloqueada->estado === 'Pendiente', 409, 'Solo se pueden editar compras pendientes.');
+            abort_if(DB::table('movimientos_inventario')->where('documento_tipo', 'compra')->where('documento_id', (string) $bloqueada->id)->exists(), 409, 'La compra ya afectó inventario y requiere un procedimiento de ajuste.');
+            if (Schema::hasTable('pagos')) {
+                abort_if(DB::table('pagos')->where('compra_id', $bloqueada->id)->exists(), 409, 'La compra tiene pagos asociados y no puede editarse directamente.');
+            }
+            if (Schema::hasTable('cuentas_pagar')) {
+                abort_if(DB::table('cuentas_pagar')->where('compra_id', $bloqueada->id)->exists(), 409, 'La compra tiene una cuenta por pagar asociada y requiere conciliación.');
+            }
+
+            $proveedor = Proveedor::query()->whereKey($datos['proveedor_id'])->where('empresa_id', $bloqueada->empresa_id)->where('activo', true)->first();
+            abort_unless($proveedor !== null, 422, 'El proveedor no está activo en la empresa de la compra.');
+            $items = collect($datos['items'])->sortBy('producto_id')->values();
+            abort_if($items->isEmpty() || $items->count() > 100 || $items->pluck('producto_id')->unique()->count() !== $items->count(), 422, 'Los productos de la compra no son válidos.');
+            $productos = Producto::query()->whereIn('id', $items->pluck('producto_id'))->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            $lineas = [];
+            $total = 0;
+            foreach ($items as $item) {
+                $producto = $productos->get((int) $item['producto_id']);
+                $cantidad = filter_var($item['cantidad'], FILTER_VALIDATE_INT);
+                abort_unless($producto instanceof Producto && $producto->activo && (int) $producto->empresa_id === (int) $bloqueada->empresa_id, 422, 'Un producto no está activo en la empresa de la compra.');
+                abort_if($cantidad === false || $cantidad < 1 || $cantidad > 1000, 422, 'La cantidad no es válida.');
+                $variantesProducto = DB::table('variantes_productos')->where('producto_id', $producto->id);
+                $varianteId = isset($item['variante_id']) && $item['variante_id'] !== '' ? (int) $item['variante_id'] : null;
+                if ((clone $variantesProducto)->exists()) {
+                    abort_unless($varianteId !== null && (clone $variantesProducto)->where('id', $varianteId)->where('estado', 'activo')->exists(), 422, 'La variante seleccionada no es válida.');
+                } else {
+                    abort_unless($varianteId === null, 422, 'El producto seleccionado no tiene variantes activas.');
+                }
+                $costo = $this->centimos((string) $item['costo_unitario']);
+                $descuento = $this->centimos(number_format((float) ($item['descuento'] ?? 0), 2, '.', ''));
+                $impuesto = $this->centimos(number_format((float) ($item['impuesto'] ?? 0), 2, '.', ''));
+                $importe = ($costo * $cantidad) - $descuento + $impuesto;
+                abort_if($importe < 0, 422, 'El descuento no puede superar el importe de la línea.');
+                abort_if($importe > self::MAX_CENTIMOS - $total, 422, 'La compra supera el importe permitido.');
+                $total += $importe;
+                $linea = ['producto_id' => $producto->id, 'variante_id' => $varianteId, 'cantidad' => $cantidad, 'costo_unitario' => $this->importe($costo)];
+                if (Schema::hasColumn('compra_detalles', 'descuento')) {
+                    $linea['descuento'] = $this->importe($descuento);
+                    $linea['impuesto'] = $this->importe($impuesto);
+                    $linea['total_linea'] = $this->importe($importe);
+                }
+                $lineas[] = $linea;
+            }
+
+            $anteriores = ['proveedor_id' => $bloqueada->proveedor_id, 'fecha_compra' => $bloqueada->fecha_compra?->toDateString(), 'total' => $bloqueada->total, 'items' => $bloqueada->details()->orderBy('id')->get()->map(fn ($item): array => $item->only(['producto_id', 'variante_id', 'cantidad', 'costo_unitario', 'descuento', 'impuesto', 'total_linea']))->all()];
+            $actualizacion = ['proveedor_id' => $proveedor->id, 'fecha_compra' => $datos['fecha_compra'], 'total' => $this->importe($total)];
+            if (Schema::hasColumn('compras', 'numero_referencia')) {
+                $actualizacion['numero_referencia'] = $datos['numero_referencia'] ?? null;
+                $actualizacion['moneda'] = $datos['moneda'] ?? 'PEN';
+            }
+            if (Schema::hasColumn('compras', 'actualizado_en')) {
+                $actualizacion['actualizado_en'] = now();
+            }
+            $bloqueada->update($actualizacion);
+            $bloqueada->details()->delete();
+            foreach ($lineas as $linea) {
+                $bloqueada->details()->create($linea);
+            }
+            $nuevos = ['proveedor_id' => $proveedor->id, 'fecha_compra' => $datos['fecha_compra'], 'total' => $bloqueada->total, 'items' => $lineas];
+            $this->auditoria->record($actor->id, 'compra.actualizada', 'compras', $bloqueada->id, $anteriores, $nuevos, $ip,
+                scope: ['empresa_id' => (int) $bloqueada->empresa_id, 'sede_id' => (int) $bloqueada->sede_id]);
+
+            return $bloqueada->fresh(['supplier', 'details.product', 'details.variante']);
+        }, 3);
+    }
+
     public function aprobar(Compra $compra, User $actor, ?string $ip): Compra
     {
         return $this->cambiarEstado($compra, $actor, $ip, false);

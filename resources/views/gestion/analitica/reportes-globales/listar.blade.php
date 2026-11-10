@@ -1,0 +1,77 @@
+{{-- Analitica: analisis-auditoria\reportes-globales\listar.blade.php. Presenta datos preparados por el controlador. --}}
+{{-- Bloque principal: presenta filtros, métricas y resultados del análisis global. --}}
+@extends('layouts.panel.principal')
+@section('title', 'Reportes globales')
+@section('body_class', 'modulo-analisis-auditoria')
+@section('content')
+<section class="tc-aa tc-aa--globales" data-analisis-auditoria data-aa-config="{{ $aaConfig }}">
+    <nav class="tc-aa__breadcrumb" aria-label="Ruta de navegación"><i class="bi bi-house"></i><span>Análisis y Auditoría</span><i class="bi bi-chevron-right"></i><strong>{{ $pagina['titulo'] }}</strong></nav>
+    <header class="tc-aa__header">
+        <div class="tc-aa__heading"><span class="tc-aa__heading-icon"><i class="bi {{ $pagina['icono'] }}"></i></span>
+            <div>@if ('globales' === 'globales')<span class="tc-aa__eyebrow">Analítica y reportes</span>@endif<h1>{{ $pagina['titulo'] }}</h1>
+                <p>{{ $pagina['descripcion'] }}</p>
+            </div>
+        </div>
+        <div class="tc-aa__actions">@foreach ($pagina['acciones'] as $accion)@if ($accion[2] === 'exportar' && $puedeExportar)<details class="tc-aa__export-menu">
+                <summary class="tc-aa__button {{ $loop->last ? 'tc-aa__button--primary' : '' }}"><i class="bi {{ $accion[1] }}"></i>{{ $accion[0] }} <i class="bi bi-chevron-down"></i></summary>
+                <div class="tc-aa__export-options"><a href="{{ route('management.reports.preview.export', ['tipo' => 'globales', 'format' => 'excel'] + request()->query()) }}">Excel (.xlsx)</a><a href="{{ route('management.reports.preview.export', ['tipo' => 'globales', 'format' => 'pdf'] + request()->query()) }}">PDF (.pdf)</a><a href="{{ route('management.reports.preview.export', ['tipo' => 'globales', 'format' => 'csv'] + request()->query()) }}">CSV (.csv)</a></div>
+            </details>@else<button type="button" disabled title="La operación requiere una entidad y un permiso autorizados" class="tc-aa__button {{ $loop->last ? 'tc-aa__button--primary' : '' }}"><i class="bi {{ $accion[1] }}"></i>{{ $accion[0] }}</button>@endif @endforeach</div>
+    </header>
+    <div class="tc-aa__notice"><i class="bi bi-database-check"></i><strong>Consulta de MariaDB</strong><span>Datos filtrados por las autorizaciones vigentes del usuario.</span></div>
+    <div class="tc-aa__metrics">@foreach ($pagina['metricas'] as $metrica)<article class="tc-aa__metric tc-aa__metric--{{ $metrica[3] }}"><span class="tc-aa__metric-icon"><i class="bi {{ $metrica[2] }}"></i></span>
+            <div><span>{{ $metrica[0] }}</span><strong>{{ $metrica[1] }}</strong><small>Fuente: MariaDB</small></div>
+        </article>@endforeach</div>
+    <form method="GET" class="tc-aa__card tc-aa__filters" aria-label="Filtros de consulta">
+        <h2><i class="bi bi-funnel"></i> Filtros de consulta</h2>
+        <div class="tc-aa__filter-grid">@foreach ($pagina['filtros'] as [$etiqueta, $nombreCampo, $marcador])<label>{{ $etiqueta }}@if ($marcador === 'fecha')<input type="date" name="{{ $nombreCampo }}" value="{{ $filtros[$nombreCampo] ?? '' }}">@elseif ($marcador === 'text')<input type="search" name="{{ $nombreCampo }}" value="{{ $filtros[$nombreCampo] ?? '' }}" maxlength="120">@else<select name="{{ $nombreCampo }}" @disabled(in_array($nombreCampo, $pagina['filtrosBloqueados'], true))>
+                    <option value="">{{ $marcador }}</option>@foreach (($nombreCampo === 'reporte' ? $pagina['opcionesReportes'] : ($pagina['opcionesFiltros'][$nombreCampo] ?? [])) as $valor => $texto)<option value="{{ $valor }}" @selected((string) ($filtros[$nombreCampo] ?? '' )===(string) $valor)>{{ $texto }}</option>@endforeach
+                </select>@endif</label>@endforeach<button type="submit" class="tc-aa__button tc-aa__button--primary"><i class="bi bi-search"></i> Aplicar filtros</button><a class="tc-aa__button" href="{{ route(request()->route()->getName()) }}">Restablecer</a></div>
+    </form>
+    <section class="tc-aa__card tc-aa__records">
+        <div class="tc-aa__card-heading">
+            <div>
+                <h2>{{ $pagina['tabla'] }}</h2><small>Total: <span data-aa-count>{{ $pagina['paginacion']?->total() ?? count($pagina['filas']) }}</span> registros reales</small>
+            </div><span>Consulta de solo lectura</span>
+        </div>
+        <div class="tc-aa__table-wrap">
+            <table>
+                <thead>
+                    <tr>@foreach ($pagina['columnas'] as $columna)<th>{{ $columna }}</th>@endforeach<th>Detalle</th>
+                    </tr>
+                </thead>
+                <tbody>@foreach ($pagina['filas'] as $fila)<tr data-aa-row>@foreach ($fila as $celda)<td>@if ($loop->last && in_array(mb_strtolower((string) $celda), ['exito', 'exitoso', 'fallo', 'fallido', 'denegado', 'revertido', 'pendiente'], true))<span class="tc-aa__badge {{ in_array(mb_strtolower((string) $celda), ['fallo', 'fallido', 'denegado'], true) ? 'tc-aa__badge--red' : (in_array(mb_strtolower((string) $celda), ['revertido', 'pendiente'], true) ? 'tc-aa__badge--amber' : '') }}">{{ $celda }}</span>@else{{ $celda }}@endif</td>@endforeach<td><button type="button" data-aa-detail="{{ $loop->index }}" aria-label="Ver detalle del registro"><i class="bi bi-eye"></i> Ver detalle</button></td>
+                    </tr>@endforeach</tbody>
+            </table>
+        </div>
+        <p class="tc-aa__empty" data-aa-empty @if (count($pagina['filas'])> 0) hidden @endif>No hay registros para los filtros aplicados.</p>
+        @if ($pagina['paginacion'])<footer class="tc-aa__card-heading"><span>Página {{ $pagina['paginacion']->currentPage() }} de {{ $pagina['paginacion']->lastPage() }}</span>
+            <nav aria-label="Paginación">@if ($pagina['paginacion']->previousPageUrl())<a href="{{ $pagina['paginacion']->previousPageUrl() }}">Anterior</a>@endif @if ($pagina['paginacion']->nextPageUrl())<a href="{{ $pagina['paginacion']->nextPageUrl() }}">Siguiente</a>@endif</nav>
+        </footer>@endif
+    </section>
+    <div class="tc-aa__bottom">
+        <section class="tc-aa__card">
+            <h2>{{ $pagina['grafico'] }}</h2>
+            <div class="tc-aa__chart">@forelse ($pagina['barras'] as $barra)<div class="tc-aa__bar"><strong>{{ $barra[2] }}</strong><span style="--altura: {{ $barra[1] }}%"></span><small>{{ $barra[0] }}</small></div>@empty<p class="tc-aa__empty">Sin datos para graficar.</p>@endforelse</div>
+        </section>
+        <section class="tc-aa__card">
+            <h2>{{ $pagina['resumen'] }}</h2>
+            <ul class="tc-aa__summary">@forelse ($pagina['resumen_filas'] as $fila)<li><span><i></i>{{ $fila[0] }}</span><strong>{{ $fila[1] }}</strong></li>@empty<li><span>Sin registros</span><strong>0</strong></li>@endforelse</ul>
+        </section>
+    </div>
+    <dialog class="tc-aa__dialog" data-aa-dialog aria-labelledby="tc-aa-dialog-title">
+        <div class="tc-aa__dialog-card">
+            <header><span class="tc-aa__heading-icon"><i class="bi {{ $pagina['icono'] }}"></i></span>
+                <div><span>{{ $pagina['titulo'] }}</span>
+                    <h2 id="tc-aa-dialog-title">Detalle del registro</h2>
+                    <p>Información real de solo lectura.</p>
+                </div><button type="button" data-aa-close aria-label="Cerrar"><i class="bi bi-x-lg"></i></button>
+            </header>
+            <div class="tc-aa__dialog-body">
+                <div class="tc-aa__dialog-fields" data-aa-detail-data></div>
+                <p class="tc-aa__dialog-note">Los registros de auditoría no se modifican desde esta consulta.</p>
+            </div>
+            <footer><button type="button" class="tc-aa__button" data-aa-close>Cancelar</button><button type="button" data-aa-previous hidden>Anterior</button><button type="button" data-aa-next hidden>Siguiente</button><button type="button" class="tc-aa__button tc-aa__button--primary" hidden>Confirmar</button></footer>
+        </div>
+    </dialog>
+</section>
+@endsection

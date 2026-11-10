@@ -30,8 +30,15 @@ class RecomendacionController extends Controller
      */
     public function index(RecomendacionRequest $request): View
     {
-        return view('publico.catalogo.recomendaciones', [
-            'products' => $this->recommendationService->recommend($request->validated()),
+        $products = $this->recommendationService->recommend($request->validated());
+        $products->each(function ($product): void {
+            $path = $product->images->first()?->ruta_imagen ?: $product->url_imagen;
+            $path = ltrim((string) preg_replace('~^assets/~', '', $path ?: 'img/marca/logo.jpeg'), '/');
+            $product->recommendation_image_url = asset('assets/cell-legacy/'.$path);
+        });
+
+        return view('inteligente.comprador.recomendaciones', [
+            'products' => $products,
         ]);
     }
 }

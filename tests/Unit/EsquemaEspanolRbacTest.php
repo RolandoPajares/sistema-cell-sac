@@ -351,8 +351,46 @@ it('selects the dashboard from assigned roles instead of the legacy role field',
     DB::table('permisos')->insert(['id' => 1, 'modulo_id' => 1, 'codigo' => 'gestion.pedidos.consultar']);
     DB::table('roles')->insert(['id' => 1, 'codigo' => 'cliente_minorista', 'nombre' => 'Cliente', 'alcance_permitido' => 'propio']);
     DB::table('usuarios_roles')->insert(['usuario_id' => $user->id, 'rol_id' => 1]);
+    DB::table('roles_permisos')->insert(['rol_id' => 1, 'permiso_id' => 1, 'alcance' => 'propio']);
 
     expect(app(ResolutorDashboard::class)->for($user))->toBeInstanceOf(DashboardClienteMinorista::class);
+});
+
+it('resolves a newly persisted role without a hardcoded dashboard role map', function (): void {
+    $user = User::create(['nombre' => 'Operador', 'correo' => 'operador@example.test', 'password' => 'ClaveSegura123']);
+    DB::table('modulos')->insert(['id' => 1]);
+    DB::table('permisos')->insert(['id' => 1, 'modulo_id' => 1, 'codigo' => 'gestion.productos.consultar']);
+    DB::table('roles')->insert(['id' => 1, 'codigo' => 'operador_catalogo', 'nombre' => 'Operador de catálogo', 'alcance_permitido' => 'propio']);
+    DB::table('usuarios_roles')->insert(['usuario_id' => $user->id, 'rol_id' => 1]);
+    DB::table('roles_permisos')->insert(['rol_id' => 1, 'permiso_id' => 1, 'alcance' => 'propio']);
+
+    expect(app(ResolutorDashboard::class)->for($user))->toBeInstanceOf(DashboardClienteMinorista::class);
+});
+
+it('forbids the administrative dashboard URL for a user with only own-order permission', function (): void {
+    $user = User::create(['nombre' => 'Cliente', 'correo' => 'cliente-dashboard@example.test', 'password' => 'ClaveSegura123']);
+    DB::table('modulos')->insert(['id' => 1, 'codigo' => 'pedidos']);
+    DB::table('permisos')->insert(['id' => 1, 'modulo_id' => 1, 'codigo' => 'gestion.pedidos.consultar']);
+    DB::table('roles')->insert(['id' => 1, 'codigo' => 'cliente_pedidos', 'nombre' => 'Cliente pedidos', 'alcance_permitido' => 'propio']);
+    DB::table('usuarios_roles')->insert(['usuario_id' => $user->id, 'rol_id' => 1]);
+    DB::table('roles_permisos')->insert(['rol_id' => 1, 'permiso_id' => 1, 'alcance' => 'propio']);
+
+    expect(app(ServicioAutorizacion::class)->hasAnyPermission($user))->toBeTrue();
+
+    $this->actingAs($user)->get(route('management.dashboard'))->assertForbidden();
+});
+
+it('denies the dashboard when the effective permissions were revoked', function (): void {
+    $user = User::create(['nombre' => 'Revocado', 'correo' => 'revocado@example.test', 'password' => 'ClaveSegura123']);
+    DB::table('modulos')->insert(['id' => 1]);
+    DB::table('permisos')->insert(['id' => 1, 'modulo_id' => 1, 'codigo' => 'gestion.productos.consultar']);
+    DB::table('roles')->insert(['id' => 1, 'codigo' => 'rol_revocado', 'nombre' => 'Rol revocado', 'alcance_permitido' => 'propio']);
+    DB::table('usuarios_roles')->insert(['usuario_id' => $user->id, 'rol_id' => 1]);
+    DB::table('roles_permisos')->insert(['rol_id' => 1, 'permiso_id' => 1, 'alcance' => 'propio']);
+    DB::table('roles_permisos')->where('rol_id', 1)->delete();
+
+    expect(fn (): mixed => app(ResolutorDashboard::class)->for($user))
+        ->toThrow(HttpException::class);
 });
 
 it('initializes RBAC idempotently without assigning any roles to existing users', function (): void {
@@ -362,8 +400,10 @@ it('initializes RBAC idempotently without assigning any roles to existing users'
     app(RbacInicialSeeder::class)->run();
     $permissionCount = DB::table('permisos')->count();
     app(RbacInicialSeeder::class)->run();
+    DB::table('roles')->insert(['codigo' => 'operador_catalogo', 'nombre' => 'Operador de catálogo', 'alcance_permitido' => 'sede', 'es_sistema' => false, 'activo' => true]);
+    app(RbacInicialSeeder::class)->run();
 
-    expect(DB::table('roles')->count())->toBe(7)
+    expect(DB::table('roles')->count())->toBe(8)
         ->and($permissionCount)->toBeGreaterThan(0)
         ->and(DB::table('permisos')->count())->toBe($permissionCount)
         ->and(DB::table('usuarios_roles')->count())->toBe(0)
@@ -391,7 +431,7 @@ it('previsualizes and initializes RBAC with existing roles and an assigned admin
     ];
     $identificadoresRoles = [];
 
-    foreach (User::ROLES as $codigoRol) {
+    foreach (array_keys($alcancesPorRol) as $codigoRol) {
         $identificadoresRoles[$codigoRol] = DB::table('roles')->insertGetId([
             'codigo' => $codigoRol,
             'nombre' => $codigoRol,
@@ -736,7 +776,9 @@ it('limits a site role to its active assignment and never treats it as global', 
     DB::table('modulos')->insert(['id' => 1]);
     DB::table('roles')->insert(['id' => 1, 'codigo' => 'ventas_minoristas', 'nombre' => 'Ventas', 'alcance_permitido' => 'sede']);
     DB::table('permisos')->insert(['id' => 1, 'modulo_id' => 1, 'codigo' => 'gestion.pedidos.consultar']);
-    DB::table('roles_permisos')->insert(['rol_id' => 1, 'permiso_id' => 1, 'alcance' => 'sede']);
+    DB::table('roles_permisos')->insert([
+        ['rol_id' => 1, 'permiso_id' => 1, 'alcance' => 'sede'],
+    ]);
     DB::table('usuarios_sedes_roles')->insert(['usuario_id' => $user->id, 'sede_id' => 1, 'rol_id' => 1]);
     $authorization = app(ServicioAutorizacion::class);
 
@@ -753,15 +795,22 @@ it('limits a site role to its active assignment and never treats it as global', 
 it('excludes buyers with revoked RBAC roles from sales order access despite their legacy role', function (): void {
     $vendedor = User::create(['nombre' => 'Vendedor', 'correo' => 'vendedor@example.test', 'password' => 'ClaveSegura123', 'rol' => 'ventas_minoristas']);
     $cliente = User::create(['nombre' => 'Cliente', 'correo' => 'cliente@example.test', 'password' => 'ClaveSegura123', 'rol' => 'cliente_minorista']);
-    DB::table('empresas')->insert(['id' => 1, 'codigo' => 'principal']);
-    DB::table('sedes')->insert(['id' => 1, 'empresa_id' => 1]);
-    DB::table('modulos')->insert(['id' => 1]);
+    DB::table('empresas')->insert(['id' => 1, 'codigo' => 'principal', 'activo' => true]);
+    DB::table('sedes')->insert(['id' => 1, 'empresa_id' => 1, 'activa' => true]);
+    DB::table('modulos')->insert(['id' => 1, 'habilitado' => true]);
     DB::table('roles')->insert([
-        ['id' => 1, 'codigo' => 'ventas_minoristas', 'nombre' => 'Ventas', 'alcance_permitido' => 'sede'],
-        ['id' => 2, 'codigo' => 'cliente_minorista', 'nombre' => 'Cliente', 'alcance_permitido' => 'propio'],
+        ['id' => 1, 'codigo' => 'ventas_minoristas', 'nombre' => 'Ventas', 'alcance_permitido' => 'sede', 'activo' => true],
+        ['id' => 2, 'codigo' => 'cliente_minorista', 'nombre' => 'Cliente', 'alcance_permitido' => 'propio', 'activo' => true],
     ]);
-    DB::table('permisos')->insert(['id' => 1, 'modulo_id' => 1, 'codigo' => 'gestion.pedidos.consultar']);
-    DB::table('roles_permisos')->insert(['rol_id' => 1, 'permiso_id' => 1, 'alcance' => 'sede']);
+    DB::table('permisos')->insert([
+        ['id' => 1, 'modulo_id' => 1, 'codigo' => 'gestion.pedidos.consultar', 'activo' => true],
+        ['id' => 2, 'modulo_id' => 1, 'codigo' => 'gestion.ventas.consultar', 'activo' => true],
+    ]);
+    DB::table('roles_permisos')->insert([
+        ['rol_id' => 1, 'permiso_id' => 1, 'alcance' => 'sede'],
+        ['rol_id' => 1, 'permiso_id' => 2, 'alcance' => 'sede'],
+        ['rol_id' => 2, 'permiso_id' => 1, 'alcance' => 'propio'],
+    ]);
     DB::table('usuarios_sedes_roles')->insert(['usuario_id' => $vendedor->id, 'sede_id' => 1, 'rol_id' => 1]);
     DB::table('usuarios_roles')->insert(['usuario_id' => $cliente->id, 'rol_id' => 2]);
     DB::table('pedidos')->insert(['id' => 1, 'usuario_id' => $cliente->id, 'empresa_id' => 1, 'sede_id' => 1]);

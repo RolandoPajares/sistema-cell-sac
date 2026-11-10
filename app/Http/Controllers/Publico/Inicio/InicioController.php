@@ -6,24 +6,25 @@ use App\Http\Controllers\Controller;
 use App\Models\Catalogo\Categoria;
 use App\Models\Catalogo\Producto;
 use App\Servicios\ServicioCatalogo;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 /**
- * Define la responsabilidad de la clase InicioController dentro de su m贸dulo.
+ * Define la responsabilidad de la clase InicioController dentro de su m骴ulo.
  *
  * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
  */
 class InicioController extends Controller
 {
     /**
-     * Ejecuta la operaci贸n __invoke definida por la clase InicioController.
+     * Ejecuta la operaci髇 __invoke definida por la clase InicioController.
      *
-     * @param  mixed  $catalogo  Par谩metro recibido por la operaci贸n.
-     * @return View Resultado de la operaci贸n.
+     * @param  mixed  $catalogo  Par醡etro recibido por la operaci髇.
+     * @return View Resultado de la operaci髇.
      */
-    public function __invoke(ServicioCatalogo $catalogo): View
+    public function __invoke(Request $request, ServicioCatalogo $catalogo): View
     {
         $featuredProducts = $catalogo->conExistenciasPotenciales(Producto::query()
             ->with(['category', 'images'])
@@ -43,26 +44,27 @@ class InicioController extends Controller
 
                 $product->setAttribute('display_original_price', $originalPrice);
                 $product->setAttribute('display_discount', $originalPrice > 0 ? round((1 - ($salePrice / $originalPrice)) * 100) : 0);
-                $product->setAttribute('display_specifications', trim(($product->almacenamiento ? $product->almacenamiento.' 脗路 ' : '').Str::limit(strip_tags((string) $product->descripcion), 38)));
+                $product->setAttribute('display_specifications', trim(($product->almacenamiento ? $product->almacenamiento.' 路 ' : '').Str::limit(strip_tags((string) $product->descripcion), 38)));
 
                 return $product;
             });
 
         $categories = Categoria::query()->where('activo', true)->get();
 
-        return view('publico.inicio.index', [
+        return view('publico.paginas.inicio', [
             'featuredProducts' => $featuredProducts,
             'cellCategoryId' => $this->categoryId($categories, 'celular'),
             'accessoryCategoryId' => $this->categoryId($categories, 'accesorio'),
+            'canAddToCart' => $request->user() !== null,
         ]);
     }
 
     /**
-     * Ejecuta la operaci贸n categoryId definida por la clase InicioController.
+     * Ejecuta la operaci髇 categoryId definida por la clase InicioController.
      *
-     * @param  mixed  $categories  Par谩metro recibido por la operaci贸n.
-     * @param  mixed  $needle  Par谩metro recibido por la operaci贸n.
-     * @return mixed Resultado de la operaci贸n.
+     * @param  mixed  $categories  Par醡etro recibido por la operaci髇.
+     * @param  mixed  $needle  Par醡etro recibido por la operaci髇.
+     * @return mixed Resultado de la operaci髇.
      */
     private function categoryId(Collection $categories, string $needle): ?int
     {

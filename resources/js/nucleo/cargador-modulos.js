@@ -1,4 +1,5 @@
-const modulos = import.meta.glob('../modulos/**/*.js');
+const modulosPublicos = import.meta.glob('../publico/catalogo/*.js');
+const modulosInteligencia = import.meta.glob('../inteligente/**/*.js');
 
 /**
  * Solicita o carga la información necesaria para la interacción.
@@ -8,8 +9,10 @@ const modulos = import.meta.glob('../modulos/**/*.js');
  * @returns {*} Resultado de la operación.
  */
 export async function cargarModulo(ruta) {
-    const clave = `../modulos/${ruta.replace(/^\/+|\/+$/g, '')}.js`;
-    const modulo = modulos[clave];
+    const rutaNormalizada = ruta.replace(/^\/+|\/+$/g, '');
+    const esInteligencia = rutaNormalizada.startsWith('inteligente/');
+    const clave = `../${rutaNormalizada}.js`;
+    const modulo = (esInteligencia ? modulosInteligencia : modulosPublicos)[clave];
 
     return modulo ? modulo() : null;
 }

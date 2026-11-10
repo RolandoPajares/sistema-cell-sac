@@ -33,6 +33,8 @@ class GuardarCompraRequest extends FormRequest
         return [
             'proveedor_id' => ['required', 'integer', 'exists:proveedores,id'],
             'fecha_compra' => ['required', 'date_format:Y-m-d'],
+            'numero_referencia' => ['nullable', 'string', 'max:100'],
+            'moneda' => ['nullable', 'string', 'size:3', 'in:PEN,USD'],
             'compra_token' => ['required', 'string', 'size:64', 'regex:/\A[a-f0-9]{64}\z/', function (string $attribute, mixed $value, Closure $fail): void {
                 $token = $this->session()->get('compra_token');
                 if (! is_string($value) || ! is_string($token) || ! hash_equals($token, $value)) {
@@ -44,6 +46,8 @@ class GuardarCompraRequest extends FormRequest
             'items.*.variante_id' => ['nullable', 'integer', 'exists:variantes_productos,id'],
             'items.*.cantidad' => ['required', 'integer', 'min:1', 'max:1000'],
             'items.*.costo_unitario' => ['required', 'string', 'regex:/\A\d{1,8}(?:\.\d{1,2})?\z/'],
+            'items.*.descuento' => ['nullable', 'numeric', 'min:0', 'max:9999999999.99'],
+            'items.*.impuesto' => ['nullable', 'numeric', 'min:0', 'max:9999999999.99'],
         ];
     }
 }

@@ -41,7 +41,7 @@ final class ResponsableOrganizacionalController extends Controller
             ->where(fn ($consulta) => $consulta->whereNull('asignacion.vigente_hasta')->orWhere('asignacion.vigente_hasta', '>', now()))
             ->select('usuarios.id', 'usuarios.nombre', 'asignacion.sede_id')->distinct()->orderBy('usuarios.nombre')->get();
 
-        return view('paneles.administrador.organizacion.responsables.listar', [
+        return view('gestion.administracion.seguridad.responsables.listar', [
             'responsables' => $responsables,
             'sedes' => $sedes,
             'almacenes' => $almacenes,

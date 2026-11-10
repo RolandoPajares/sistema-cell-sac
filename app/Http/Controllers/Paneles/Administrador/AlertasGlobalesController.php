@@ -56,13 +56,41 @@ final class AlertasGlobalesController extends Controller
             $notificacionSeleccionada = $notificaciones->first();
         }
 
-        return view('paneles.administrador.dashboard-global.alertas.listar', [
+        $exportParameters = array_filter([
+            'estado' => $estado,
+            'buscar' => $busqueda,
+        ], static fn ($value): bool => $value !== null && $value !== '');
+
+        $header = [
+            'titulo' => 'Alertas y notificaciones',
+            'icono' => 'bi-bell',
+            'descripcion' => 'Consulta las notificaciones persistidas para la cuenta administrativa actual.',
+            'exportRoute' => $disponible ? 'management.reports.dashboard_alerts.export' : null,
+            'exportParameters' => $exportParameters,
+        ];
+        $metrics = $resumen === null ? [] : [
+            ['titulo' => 'Notificaciones', 'icono' => 'bi-bell', 'valor' => number_format($resumen['total']), 'detalle' => 'Registros asociados a esta cuenta'],
+            ['titulo' => 'No leídas', 'icono' => 'bi-envelope-exclamation', 'tono' => 'rojo', 'valor' => number_format($resumen['no_leidas']), 'detalle' => 'Según leido_en en MariaDB'],
+            ['titulo' => 'Leídas', 'icono' => 'bi-envelope-open', 'tono' => 'verde', 'valor' => number_format($resumen['leidas']), 'detalle' => 'Según leido_en en MariaDB'],
+            ['titulo' => 'Tipos registrados', 'icono' => 'bi-tags', 'tono' => 'violeta', 'valor' => number_format($resumen['tipos']), 'detalle' => 'Tipos distintos almacenados'],
+        ];
+        $chart = $resumen === null ? [] : [
+            'centro' => number_format($resumen['total']),
+            'etiqueta' => 'Notificaciones',
+            'gradiente' => $resumen['gradiente'],
+            'leyenda' => $resumen['distribucion'],
+        ];
+
+        return view('gestion.analitica.dashboard-global.alertas.listar', [
             'disponible' => $disponible,
             'estado' => $estado,
             'busqueda' => $busqueda,
             'notificaciones' => $notificaciones,
             'resumen' => $resumen,
             'notificacionSeleccionada' => $notificacionSeleccionada,
+            'header' => $header,
+            'metrics' => $metrics,
+            'chart' => $chart,
         ]);
     }
 

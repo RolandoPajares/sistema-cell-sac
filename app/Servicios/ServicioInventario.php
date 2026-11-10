@@ -268,7 +268,7 @@ class ServicioInventario
      */
     public function disponibilidadParaOperacion(User $usuario, array $identificadores): array
     {
-        if (! $usuario->isRole('cliente_mayorista') && ! $usuario->isRole('cliente_minorista')) {
+        if (! $usuario->can('gestion.cotizaciones.consultar') && ! $usuario->can('gestion.pedidos.consultar')) {
             $this->authorization->assertAllowed($usuario, 'gestion.pedidos.crear');
         }
         $ubicacion = $this->authorization->operationLocation($usuario);

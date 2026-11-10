@@ -342,7 +342,7 @@ class ServicioCajas
      */
     private function assertAdministrator(User $actor, string $permission): void
     {
-        abort_unless($this->authorization->hasRole($actor, 'administrador'), 403);
+        abort_unless($this->authorization->allowsGlobal($actor, 'gestion.seguridad.consultar'), 403);
         $this->authorization->assertAllowed($actor, $permission);
     }
 

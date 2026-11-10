@@ -10,9 +10,14 @@ use Closure;
 interface ProductoDao
 {
     /**
+     * Devuelve una vista del DAO limitada a una empresa concreta.
+     */
+    public function conEmpresa(int $empresaId): self;
+
+    /**
      * Ejecuta una operación del DAO dentro de una transacción controlada.
      *
-     * @param Closure(self): mixed $operacion Callback que recibe la implementación del DAO.
+     * @param  Closure(self): mixed  $operacion  Callback que recibe la implementación del DAO.
      * @return mixed Resultado producido por el callback.
      */
     public function enTransaccion(Closure $operacion): mixed;
@@ -20,16 +25,24 @@ interface ProductoDao
     /**
      * Busca un producto y opcionalmente carga sus variantes asociadas.
      *
-     * @param int $id Identificador del producto.
-     * @param bool $incluirVariantes Indica si deben incluirse las variantes.
+     * @param  int  $id  Identificador del producto.
+     * @param  bool  $incluirVariantes  Indica si deben incluirse las variantes.
      * @return ProductoEntidad|null Entidad encontrada o null si no existe.
      */
     public function buscarPorId(int $id, bool $incluirVariantes = true): ?ProductoEntidad;
 
     /**
+     * Lista productos con filtros de valores y orden controlados por el DAO.
+     *
+     * @param  array{buscar?: string, activo?: bool|null, empresa_id?: int|null}  $filtros
+     * @return ResultadoPaginado<ProductoEntidad>
+     */
+    public function listar(array $filtros = [], int $pagina = 1, int $porPagina = 20): ResultadoPaginado;
+
+    /**
      * Inserta un producto validado en el almacenamiento.
      *
-     * @param ProductoEntidad $producto Datos del producto.
+     * @param  ProductoEntidad  $producto  Datos del producto.
      * @return ProductoEntidad Producto persistido.
      */
     public function crear(ProductoEntidad $producto): ProductoEntidad;
@@ -37,7 +50,7 @@ interface ProductoDao
     /**
      * Actualiza un producto identificado y devuelve su representación persistida.
      *
-     * @param ProductoEntidad $producto Producto con nuevos datos.
+     * @param  ProductoEntidad  $producto  Producto con nuevos datos.
      * @return ProductoEntidad Producto actualizado.
      */
     public function actualizar(ProductoEntidad $producto): ProductoEntidad;
@@ -45,7 +58,7 @@ interface ProductoDao
     /**
      * Inserta una variante vinculada a un producto existente.
      *
-     * @param VarianteProductoEntidad $variante Datos de la variante.
+     * @param  VarianteProductoEntidad  $variante  Datos de la variante.
      * @return VarianteProductoEntidad Variante persistida.
      */
     public function crearVariante(VarianteProductoEntidad $variante): VarianteProductoEntidad;
@@ -53,7 +66,7 @@ interface ProductoDao
     /**
      * Actualiza los datos persistibles de una variante existente.
      *
-     * @param VarianteProductoEntidad $variante Variante con identificador.
+     * @param  VarianteProductoEntidad  $variante  Variante con identificador.
      * @return VarianteProductoEntidad Variante actualizada.
      */
     public function actualizarVariante(VarianteProductoEntidad $variante): VarianteProductoEntidad;
@@ -61,22 +74,22 @@ interface ProductoDao
     /**
      * Elimina una variante por identificador dentro de una transacción.
      *
-     * @param int $id Identificador de la variante.
+     * @param  int  $id  Identificador de la variante.
      */
     public function eliminarVariante(int $id): void;
 
     /**
      * Elimina un producto por identificador dentro de una transacción.
      *
-     * @param int $id Identificador del producto.
+     * @param  int  $id  Identificador del producto.
      */
     public function eliminar(int $id): void;
 
     /**
      * Sincroniza una ruta de imagen y la posiciona como portada cuando corresponde.
      *
-     * @param int $productoId Identificador del producto.
-     * @param string $rutaImagen Ruta de la imagen.
+     * @param  int  $productoId  Identificador del producto.
+     * @param  string  $rutaImagen  Ruta de la imagen.
      */
     public function sincronizarImagenPortada(int $productoId, string $rutaImagen): void;
 }

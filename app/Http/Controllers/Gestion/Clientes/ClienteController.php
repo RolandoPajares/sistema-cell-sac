@@ -74,8 +74,27 @@ class ClienteController extends Controller
         $recentCustomers = $consultaClientes()->latest('creado_en')->limit(3)
             ->get(['id', 'nombre_contacto', 'correo', 'creado_en']);
         $recentActivity = $this->recentActivity($recentOrders, $recentCustomers);
+        $totalCustomers = $consultaClientes()->count();
+        $activeCustomers = $consultaClientes()->where('activo', true)->count();
+        $wholesaleCustomers = $consultaClientes()->where('tipo', 'mayorista')->count();
+        $retailCustomers = $consultaClientes()->where('tipo', 'minorista')->count();
+        $activeAccounts = $consultaClientes()->where('activo', true)->whereNotNull('usuario_id')->count();
+        $customerPresentation = $customers->getCollection()->mapWithKeys(function (Cliente $customer) use ($lastPurchases): array {
+            $lastPurchaseForCustomer = $lastPurchases->get($customer->usuario_id);
+            $parts = preg_split('/\s+/', trim((string) $customer->nombre_contacto), -1, PREG_SPLIT_NO_EMPTY);
 
-        return view('gestion.clientes.listar', [
+            return [$customer->id => [
+                'type' => $customer->tipo === 'mayorista'
+                    ? ['label' => 'Mayorista', 'class' => 'wholesale']
+                    : ['label' => 'Minorista', 'class' => 'retail'],
+                'initials' => collect(array_slice($parts ?: ['CL'], 0, 2))
+                    ->map(static fn (string $part): string => mb_strtoupper(mb_substr($part, 0, 1)))
+                    ->implode(''),
+                'last_purchase_label' => $this->purchaseDateLabel($lastPurchaseForCustomer?->creado_en),
+            ]];
+        })->all();
+
+        return view('gestion.comercial.clientes.listar', [
             'customers' => $customers,
             'filters' => $filters,
             'cities' => $consultaClientes()->whereNotNull('ciudad')->where('ciudad', '<>', '')->distinct()->orderBy('ciudad')->pluck('ciudad'),
@@ -88,7 +107,26 @@ class ClienteController extends Controller
             'lastPurchase' => $lastPurchase,
             'lastPurchases' => $lastPurchases,
             'recentActivity' => $recentActivity,
+            'customerPresentation' => $customerPresentation,
+            'wholesalePercent' => $this->percentage($wholesaleCustomers, $totalCustomers),
+            'retailPercent' => $this->percentage($retailCustomers, $totalCustomers),
+            'commercialLevel' => $totalPurchases > 0 ? 'Activo' : 'Sin compras',
+            'lastPurchaseLabel' => $this->purchaseDateLabel($lastPurchase?->creado_en),
         ]);
+    }
+
+    private function percentage(int $value, int $total): float
+    {
+        return $total > 0 ? round(($value / $total) * 100, 1) : 0.0;
+    }
+
+    private function purchaseDateLabel(mixed $date): string
+    {
+        if ($date === null) {
+            return 'Sin compras';
+        }
+
+        return $date->format('d M Y');
     }
 
     /**
@@ -150,12 +188,14 @@ class ClienteController extends Controller
     {
         $usuario = $request->user();
         abort_unless($usuario instanceof User, 403);
-        $customer = Cliente::create($request->validated() + [
-            'activo' => true,
-            'creado_en' => now(),
-            ...$this->autorizacion->operationScopeAttributes($usuario, 'clientes'),
-        ]);
-        $audit->record($usuario->id, 'customer.created', 'clientes', $customer->id, null, $customer->only(['tipo', 'documento', 'nombre_contacto', 'correo']), $request->ip());
+        DB::transaction(function () use ($request, $usuario, $audit): void {
+            $customer = Cliente::create($request->validated() + [
+                'activo' => true,
+                'creado_en' => now(),
+                ...$this->autorizacion->operationScopeAttributes($usuario, 'clientes'),
+            ]);
+            $audit->record($usuario->id, 'customer.created', 'clientes', $customer->id, null, $customer->only(['tipo', 'tipo_documento', 'documento', 'nombre_contacto', 'correo']), $request->ip());
+        });
 
         return back()->with('status', 'Cliente registrado.');
     }
@@ -238,9 +278,11 @@ class ClienteController extends Controller
         abort_unless($usuario instanceof User, 403);
         $this->verificarAccesoCliente($customer, $usuario, 'gestion.clientes.actualizar');
 
-        $before = $customer->only(['tipo', 'documento', 'nombre_contacto', 'correo', 'activo']);
-        $customer->update($request->validated());
-        $audit->record($usuario->id, 'customer.updated', 'clientes', $customer->id, $before, $customer->only(array_keys($before)), $request->ip());
+        DB::transaction(function () use ($request, $customer, $usuario, $audit): void {
+            $before = $customer->only(['tipo', 'tipo_documento', 'documento', 'nombre_contacto', 'correo', 'activo']);
+            $customer->update($request->validated());
+            $audit->record($usuario->id, 'customer.updated', 'clientes', $customer->id, $before, $customer->only(array_keys($before)), $request->ip());
+        });
 
         return back()->with('status', 'Cliente actualizado.');
     }

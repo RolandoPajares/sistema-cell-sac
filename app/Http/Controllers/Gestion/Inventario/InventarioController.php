@@ -11,6 +11,7 @@ use App\Models\Inventario\MovimientoInventario;
 use App\Models\User;
 use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioInventario;
+use App\Servicios\ServicioPresentacionInventario;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -78,7 +79,20 @@ class InventarioController extends Controller
             ? $consultaMovimientos->paginate(25)->withQueryString()
             : $consultaMovimientos->limit(5)->get();
 
-        return view('gestion.inventario.listar', [
+        $productosSinExistencias = $this->inventoryService->productosParaConsulta($alcance, ['estado' => 'sin_existencias'], true)
+            ->with(['suppliers:id,nombre'])
+            ->orderBy('existencias_alcance')
+            ->orderBy('nombre')
+            ->limit(4)
+            ->get();
+        $presentacion = app(ServicioPresentacionInventario::class);
+        $todayLabel = $presentacion->todayLabel();
+        $productPresentation = $products->getCollection()->mapWithKeys(fn (Producto $product): array => [$product->id => $presentacion->product($product, $latestMovements->get($product->id))])->all();
+        $alertPresentation = $productosSinExistencias->mapWithKeys(fn (Producto $product): array => [$product->id => $presentacion->stockStatus((int) $product->existencias_alcance)])->all();
+        $recentMovementCollection = $verHistorialMovimientos ? $movimientosRecientes->getCollection() : $movimientosRecientes;
+        $movementPresentation = $recentMovementCollection->mapWithKeys(fn (MovimientoInventario $movement): array => [$movement->id => $presentacion->movementRow($movement)])->all();
+
+        return view('gestion.inventario-logistica.existencias-movimientos.listar-existencias', [
             'products' => $products,
             'categories' => Categoria::query()->where('empresa_id', $alcance['empresa_id'])->where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
             'suppliers' => Proveedor::query()->where('empresa_id', $alcance['empresa_id'])->where('activo', true)->orderBy('nombre')->get(['id', 'nombre']),
@@ -88,12 +102,14 @@ class InventarioController extends Controller
                 ->orderBy('nombre')
                 ->get(),
             'latestMovements' => $latestMovements,
-            'productosSinExistencias' => $this->inventoryService->productosParaConsulta($alcance, ['estado' => 'sin_existencias'], true)
-                ->with(['suppliers:id,nombre'])
-                ->orderBy('existencias_alcance')
-                ->orderBy('nombre')
-                ->limit(4)
-                ->get(),
+            'productosSinExistencias' => $productosSinExistencias,
+            'productPresentation' => $productPresentation,
+            'alertPresentation' => $alertPresentation,
+            'movementPresentation' => $movementPresentation,
+            'inventoryQueryParameters' => $request->except(['page', 'por_pagina']),
+            'todayLabel' => $todayLabel,
+            'perPageOptions' => [7, 8, 10, 20, 50],
+
             'recentMovements' => $movimientosRecientes,
             'verHistorialMovimientos' => $verHistorialMovimientos,
             'filtrosMovimientos' => $filtrosMovimientos,

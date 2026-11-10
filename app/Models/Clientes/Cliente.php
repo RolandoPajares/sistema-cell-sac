@@ -3,6 +3,7 @@
 namespace App\Models\Clientes;
 
 use App\Models\Comercio\Cotizacion;
+use App\Models\Organizacion\Empresa;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,8 +19,8 @@ class Cliente extends Model
     protected $table = 'clientes';
 
     protected $fillable = [
-        'usuario_id', 'tipo', 'tipo_documento', 'documento', 'razon_social', 'nombre_contacto',
-        'correo', 'telefono', 'ciudad', 'activo', 'creado_en', 'empresa_id',
+        'usuario_id', 'empresa_id', 'tipo', 'tipo_documento', 'documento', 'razon_social', 'nombre_contacto',
+        'correo', 'telefono', 'ciudad', 'activo', 'creado_en',
     ];
 
     public $timestamps = false;
@@ -42,6 +43,11 @@ class Cliente extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'usuario_id');
+    }
+
+    public function empresa(): BelongsTo
+    {
+        return $this->belongsTo(Empresa::class, 'empresa_id');
     }
 
     /**

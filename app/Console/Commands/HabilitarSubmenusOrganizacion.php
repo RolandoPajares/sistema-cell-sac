@@ -31,12 +31,6 @@ final class HabilitarSubmenusOrganizacion extends Command
             'ruta' => 'management.company_settings.data',
             'icono' => 'bi-building',
         ],
-        'admin.sites' => [
-            'modulo' => 'organizacion',
-            'nombre' => 'Sedes',
-            'ruta' => 'management.company_settings.sites',
-            'icono' => 'bi-buildings',
-        ],
         'admin.warehouses' => [
             'modulo' => 'organizacion',
             'nombre' => 'Almacenes',

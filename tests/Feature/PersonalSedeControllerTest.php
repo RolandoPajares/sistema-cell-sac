@@ -13,7 +13,7 @@ it('muestra un estado vacío real cuando no hay personal asignado a sedes', func
     $this->actingAs($administrador)
         ->get(route('management.company_settings.staff'))
         ->assertOk()
-        ->assertViewIs('paneles.administrador.organizacion.personal.listar')
+        ->assertViewIs('gestion.administracion.seguridad.personal.listar')
         ->assertViewHas('asignaciones', fn ($asignaciones): bool => $asignaciones->total() === 0)
         ->assertSee('No hay asignaciones de personal que coincidan con los filtros')
         ->assertSee('Usuarios asignados')

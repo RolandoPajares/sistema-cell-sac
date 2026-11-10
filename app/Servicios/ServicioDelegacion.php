@@ -49,8 +49,8 @@ final class ServicioDelegacion
      */
     public function puedeAsignarRol(User $actor, Rol $role): bool
     {
-        if (($role->codigo === 'administrador' || $role->alcance_permitido === 'empresa')
-            && ! $this->autorizacion->hasRole($actor, 'administrador')) {
+        if (($role->es_sistema || $role->alcance_permitido === 'empresa')
+            && ! $this->autorizacion->allowsGlobal($actor, 'gestion.seguridad.consultar')) {
             return false;
         }
 
@@ -160,15 +160,21 @@ final class ServicioDelegacion
      */
     public function esUltimoAdministradorGlobal(User $user): bool
     {
-        $adminRoleId = DB::table('roles')->where('codigo', 'administrador')->value('id');
+        $globalRoleIds = DB::table('roles_permisos')
+            ->join('permisos', 'permisos.id', '=', 'roles_permisos.permiso_id')
+            ->join('roles', 'roles.id', '=', 'roles_permisos.rol_id')
+            ->where('permisos.codigo', 'gestion.seguridad.actualizar')
+            ->where('roles_permisos.alcance', 'empresa')
+            ->where('roles.activo', true)
+            ->pluck('roles.id');
 
-        if ($adminRoleId === null) {
+        if ($globalRoleIds->isEmpty()) {
             return true;
         }
 
         $query = DB::table('usuarios_roles')
             ->join('usuarios', 'usuarios.id', '=', 'usuarios_roles.usuario_id')
-            ->where('usuarios_roles.rol_id', $adminRoleId)
+            ->whereIn('usuarios_roles.rol_id', $globalRoleIds)
             ->where('usuarios_roles.activo', true)
             ->where(function ($query): void {
                 $query->whereNull('vigente_hasta')->orWhere('vigente_hasta', '>', now());
@@ -194,7 +200,14 @@ final class ServicioDelegacion
     public function bloquearAdministradoresGlobales(): void
     {
         $adminRole = Schema::hasTable('roles')
-            ? DB::table('roles')->where('codigo', 'administrador')->lockForUpdate()->first(['id'])
+            ? DB::table('roles')
+                ->join('roles_permisos', 'roles_permisos.rol_id', '=', 'roles.id')
+                ->join('permisos', 'permisos.id', '=', 'roles_permisos.permiso_id')
+                ->where('permisos.codigo', 'gestion.seguridad.actualizar')
+                ->where('roles_permisos.alcance', 'empresa')
+                ->where('roles.activo', true)
+                ->lockForUpdate()
+                ->first(['roles.id'])
             : null;
 
         if ($adminRole !== null) {

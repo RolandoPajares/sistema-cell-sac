@@ -21,7 +21,7 @@ class ConfirmarPagoEfectivoRequest extends FormRequest
     public function authorize(): bool
     {
         return $this->user() instanceof User
-            && app(ServicioAutorizacion::class)->hasRole($this->user(), 'administrador')
+            && app(ServicioAutorizacion::class)->allowsGlobal($this->user(), 'gestion.seguridad.consultar')
             && app(ServicioAutorizacion::class)->allowsRoute($this);
     }
 

@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Cuenta;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\Paneles\ResolutorDashboard;
 use App\Models\User;
+use App\Servicios\ServicioPaneles;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 /**
@@ -21,7 +22,7 @@ class CuentaController extends Controller
      * @param  mixed  $dashboardResolver  Parámetro recibido por la operación.
      * @return mixed Resultado de la operación.
      */
-    public function __construct(private readonly ResolutorDashboard $dashboardResolver) {}
+    public function __construct(private readonly ServicioPaneles $panelService) {}
 
     /**
      * Ejecuta la operación dashboard definida por la clase CuentaController.
@@ -35,15 +36,10 @@ class CuentaController extends Controller
 
         abort_unless($user instanceof User, 403);
 
-        if ($user->isRole('administrador')) {
-            $user->loadMissing('customer');
-
-            return view('paneles.administrador.perfil.editar', [
-                'role' => 'administrador',
-            ]);
-        }
-
-        return ($this->dashboardResolver->for($user))($request);
+        return view('paneles.dashboard', $this->panelService->roleDashboard(
+            $user,
+            (array) $request->session()->get('cart', []),
+        ));
     }
 
     /**
@@ -61,18 +57,29 @@ class CuentaController extends Controller
         abort_unless($user instanceof User, 403);
         $user->loadMissing('customer');
 
-        $profileViews = [
-            'administrador' => 'paneles.administrador.perfil.mostrar',
-            'compras_logistica' => 'paneles.compras-logistica.perfil.mostrar',
-            'ventas_mayoristas' => 'paneles.ventas-mayoristas.perfil.mostrar',
-            'ventas_minoristas' => 'paneles.ventas-minoristas.perfil.mostrar',
-            'marketing' => 'paneles.marketing.perfil.mostrar',
-            'cliente_mayorista' => 'paneles.cliente-mayorista.perfil.mostrar',
-            'cliente_minorista' => 'paneles.cliente-minorista.perfil.mostrar',
-        ];
+        $isAdministrator = $user->can('gestion.seguridad.consultar');
+        $preferences = (array) ($user->preferencias ?? []);
+        $customer = $user->customer;
+        $profileValues = [$user->nombre, $user->correo, $user->foto_perfil, $preferences['idioma'] ?? null];
+        $initials = mb_strtoupper(collect(preg_split('/\s+/', trim((string) $user->nombre)) ?: [])
+            ->map(static fn (string $part): string => mb_substr($part, 0, 1))
+            ->take(2)
+            ->implode(''));
 
-        return view($profileViews[$user->rol] ?? $profileViews['cliente_minorista'], [
-            'role' => $user->rol,
+        return view('cuenta.perfil.mostrar', [
+            'userName' => (string) $user->nombre,
+            'user' => $user,
+            'roleLabel' => 'Usuario autorizado',
+            'isAdministrator' => $isAdministrator,
+            'profileRoute' => $isAdministrator ? 'management.account.profile' : 'account.profile',
+            'passwordRoute' => $isAdministrator ? 'management.account.password' : 'account.password',
+            'accountHomeRoute' => $isAdministrator ? 'management.account' : 'dashboard',
+            'preferences' => $preferences,
+            'phone' => $customer?->telefono ?: 'No registrado',
+            'document' => $customer?->documento ?: 'No registrado',
+            'photoUrl' => $user->foto_perfil ? Storage::disk('public')->url($user->foto_perfil) : null,
+            'profileCompletion' => (int) round((count(array_filter($profileValues, static fn (mixed $value): bool => filled($value))) / count($profileValues)) * 100),
+            'initials' => $initials,
         ]);
     }
 }

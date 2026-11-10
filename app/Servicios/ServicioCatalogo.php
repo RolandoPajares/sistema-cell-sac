@@ -89,7 +89,7 @@ class ServicioCatalogo
      */
     public function relacionados(Producto $producto): Collection
     {
-        return Producto::query()
+        $query = Producto::query()
             ->with(['category', 'images', 'variants'])
             ->active()
             ->where('id', '<>', $producto->getKey())
@@ -99,6 +99,20 @@ class ServicioCatalogo
             })
             ->orderByRaw('CASE WHEN marca = ? THEN 0 ELSE 1 END', [$producto->marca])
             ->orderByDesc('precio_oferta')
+            ->orderByDesc('id')
+            ->limit(4);
+
+        $relatedProducts = $query->get();
+
+        if ($relatedProducts->isNotEmpty()) {
+            return $relatedProducts;
+        }
+
+        return Producto::query()
+            ->with(['category', 'images', 'variants'])
+            ->active()
+            ->where('id', '<>', $producto->getKey())
+            ->orderByDesc('creado_en')
             ->orderByDesc('id')
             ->limit(4)
             ->get();
@@ -138,7 +152,11 @@ class ServicioCatalogo
         string $nombreColor,
         int $existencias,
     ): ProductoEntidad {
-        return $this->productoDao->enTransaccion(function (ProductoDao $dao) use ($producto, $codigoSku, $nombreColor, $existencias): ProductoEntidad {
+        $dao = $producto->empresaId === null
+            ? $this->productoDao
+            : $this->productoDao->conEmpresa($producto->empresaId);
+
+        return $dao->enTransaccion(function (ProductoDao $dao) use ($producto, $codigoSku, $nombreColor, $existencias): ProductoEntidad {
             $creado = $dao->crear($producto);
             $dao->crearVariante(new VarianteProductoEntidad(
                 id: null,
@@ -207,7 +225,7 @@ class ServicioCatalogo
         }
 
         $disponibles = array_fill_keys($ids, 0);
-        if ($usuario !== null && (($usuario->isRole('cliente_mayorista') || $usuario->isRole('cliente_minorista')) || $this->autorizacion->allows($usuario, 'gestion.pedidos.crear'))) {
+        if ($usuario !== null && (($usuario->can('gestion.cotizaciones.consultar') || $usuario->can('gestion.pedidos.consultar')) || $this->autorizacion->allows($usuario, 'gestion.pedidos.crear'))) {
             try {
                 $disponibles = array_replace($disponibles, $this->inventario->disponibilidadParaOperacion($usuario, $ids));
             } catch (HttpExceptionInterface) {
