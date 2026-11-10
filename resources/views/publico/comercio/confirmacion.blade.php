@@ -1,9 +1,9 @@
-@extends((auth()->user()->can('gestion.seguridad.consultar') || auth()->user()->can('gestion.ventas.consultar') || auth()->user()->can('gestion.cotizaciones.consultar')) ? 'layouts.panel.principal' : 'layouts.tienda.principal')
+@extends(($isPanel ?? false) ? 'layouts.panel.principal' : 'layouts.tienda.principal')
 @section('title', 'Pedido #'.$order->id)
 @section('content')
-<section class="{{ (auth()->user()->can('gestion.seguridad.consultar') || auth()->user()->can('gestion.ventas.consultar') || auth()->user()->can('gestion.cotizaciones.consultar')) ? 'admin-page' : 'container content-page' }}">
+<section class="{{ ($isPanel ?? false) ? 'admin-page' : 'container content-page' }}">
     <div class="admin-page-head"><div><span class="product-category">Pedido #{{ $order->id }}</span><h1>{{ $order->user->nombre }}</h1><p>Estado actual: <strong>{{ $order->estado }}</strong></p></div></div>
-    @if (auth()->user()->can('gestion.seguridad.consultar') || auth()->user()->can('gestion.ventas.consultar') || auth()->user()->can('gestion.cotizaciones.consultar'))
+    @if ($isPanel ?? false)
         <form
             method="post"
             action="{{ route('orders.status', $order) }}"

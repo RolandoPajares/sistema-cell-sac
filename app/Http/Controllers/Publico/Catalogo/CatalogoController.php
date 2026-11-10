@@ -99,8 +99,21 @@ class CatalogoController extends Controller
         $imageItems = $imageItems->map(static fn (string $route): array => [
             'url' => Producto::urlPublicaDeImagen($route),
         ])->values();
+        $firstVariant = $product->variants->first();
         $salePrice = (float) ($product->precio_oferta ?? $product->precio);
         $originalPrice = (float) ($product->precio_original ?? $product->precio);
+        $isAuthenticated = $request->user() !== null;
+        $hasStock = (int) $product->existencias_disponibles > 0;
+        $userRating = (int) ($request->user()
+            ? ResenaProducto::query()->where('producto_id', $product->getKey())->where('usuario_id', $request->user()->getKey())->value('valoracion')
+            : 0);
+        $isFavorite = $request->user()
+            ? $product->favorites()->where('usuario_id', $request->user()->getKey())->exists()
+            : false;
+        $ratingOptions = collect(range(1, 5))->map(static fn (int $rating): array => [
+            'value' => $rating,
+            'selected' => $rating === $userRating,
+        ]);
         $variantData = $product->variants->map(static fn ($variant): array => [
             'id' => (int) $variant->id,
             'name' => $variant->nombre_color,
@@ -110,6 +123,17 @@ class CatalogoController extends Controller
                 ? Producto::urlPublicaDeImagen($variant->images->first()->ruta_imagen)
                 : null,
         ])->values();
+        $variantOptions = $product->variants->values()->map(static function ($variant, int $index): array {
+            $stock = (int) ($variant->existencias_disponibles ?? $variant->existencias);
+
+            return [
+                'id' => (int) $variant->id,
+                'name' => $variant->nombre_color,
+                'selected' => $index === 0,
+                'disabled' => $stock <= 0,
+                'class' => $stock <= 0 ? 'is-disabled' : '',
+            ];
+        });
 
         return view('publico.catalogo.detalle', [
             'product' => $product,
@@ -122,19 +146,30 @@ class CatalogoController extends Controller
             'discount' => $originalPrice > $salePrice && $originalPrice > 0
                 ? round((1 - ($salePrice / $originalPrice)) * 100)
                 : 0,
+            'firstVariant' => $firstVariant,
+            'primarySku' => $firstVariant?->codigo_sku ?: 'No registrado',
+            'productColor' => $product->color ?: ($firstVariant?->nombre_color ?: 'No registrado'),
+            'hasStock' => $hasStock,
+            'stockClass' => $hasStock ? 'is-available' : 'is-unavailable',
+            'stockIcon' => $hasStock ? 'bi-check-circle' : 'bi-x-circle',
+            'stockLabel' => $hasStock ? $product->existencias_disponibles.' unidades disponibles' : 'Sin stock',
+            'isAuthenticated' => $isAuthenticated,
+            'favoriteIcon' => $isFavorite ? 'bi-heart-fill' : 'bi-heart',
+            'favoriteLabel' => $isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos',
+            'favoriteStatus' => $isAuthenticated ? 'Se guarda en tu cuenta' : 'Inicia sesión para guardar',
+            'reviewMessage' => $isAuthenticated
+                ? ($userRating ? 'Tu valoración actual se guarda en tu cuenta.' : 'Selecciona una estrella para guardar tu valoración.')
+                : 'Inicia sesión para guardar tu valoración en la base de datos.',
+            'ratingOptions' => $ratingOptions,
             'visualType' => str_contains(mb_strtolower((string) $categoryName), 'audio')
                 ? 'audio'
                 : (str_contains(mb_strtolower((string) $categoryName), 'celular') ? 'celular' : 'accesorio'),
             'variantData' => $variantData,
+            'variantOptions' => $variantOptions,
             'averageRating' => round((float) ($product->reviews->avg('valoracion') ?? 0), 1),
             'reviewCount' => $product->reviews->count(),
-            'userRating' => (int) ($request->user()
-                ? ResenaProducto::query()->where('producto_id', $product->getKey())->where('usuario_id', $request->user()->getKey())->value('valoracion')
-                : 0),
-            'isFavorite' => $request->user()
-                ? $product->favorites()->where('usuario_id', $request->user()->getKey())->exists()
-                : false,
-            'isAuthenticated' => $request->user() !== null,
+            'userRating' => $userRating,
+            'isFavorite' => $isFavorite,
         ]);
     }
 

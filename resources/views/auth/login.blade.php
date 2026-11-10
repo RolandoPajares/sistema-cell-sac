@@ -71,7 +71,7 @@
                 </div>
 
                 {{-- Botón de envío del formulario --}}
-                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <button type="submit" class="btn btn-primary auth-submit">
                     <i class="bi bi-box-arrow-in-right"></i> Ingresar
                 </button>
             </form>

@@ -2,6 +2,7 @@
 
 namespace App\Servicios;
 
+use App\Models\ConfiguracionSistema;
 use App\Models\Organizacion\Empresa;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -17,6 +18,83 @@ use Illuminate\Support\Facades\Schema;
  */
 final class ServicioConfiguracionSistema
 {
+    /** @var array<string, list<string>> */
+    private const CLAVES_CONFIGURABLES = [
+        'general' => ['nombre_sistema', 'nombre_corto', 'idioma', 'zona_horaria', 'formato_fecha', 'formato_hora', 'separador_decimal', 'registros_por_pagina', 'moneda'],
+        'parametros-comerciales' => ['vigencia_cotizacion', 'descuento_maximo', 'plazo_pedido'],
+        'inventario' => ['stock_minimo_alerta', 'permitir_stock_negativo', 'requiere_aprobacion_ajuste'],
+        'finanzas' => ['moneda', 'redondeo_monetario', 'tolerancia_arqueo', 'tolerancia_pago'],
+    ];
+
+    /** @return array<string, mixed> */
+    public function consultarConfiguracion(string $grupo, int $empresaId, ?int $sedeId = null): array
+    {
+        if (! Schema::hasTable('configuraciones_sistema')) {
+            return [];
+        }
+
+        return ConfiguracionSistema::query()
+            ->where('empresa_id', $empresaId)
+            ->where('grupo', $grupo)
+            ->where(function ($consulta) use ($sedeId): void {
+                $consulta->whereNull('sede_id');
+                if ($sedeId !== null) {
+                    $consulta->orWhere('sede_id', $sedeId);
+                }
+            })
+            ->orderByRaw('sede_id IS NULL ASC')
+            ->get(['sede_id', 'clave', 'valor_json'])
+            ->unique('clave')
+            ->mapWithKeys(static fn (ConfiguracionSistema $registro): array => [$registro->clave => $registro->valor_json['valor'] ?? null])
+            ->all();
+    }
+
+    public function sedesConfigurables(int $empresaId): Collection
+    {
+        return DB::table('sedes')
+            ->where('empresa_id', $empresaId)
+            ->where('activa', true)
+            ->orderBy('nombre')
+            ->get(['id', 'nombre']);
+    }
+
+    /**
+     * @param  array<string, mixed>  $datos
+     * @param  array{empresa_id:?int,sede_id:?int}  $ubicacion
+     */
+    public function guardarConfiguracion(string $grupo, string $alcance, ?int $sedeId, array $datos, User $usuario, array $ubicacion, ?string $ip): void
+    {
+        abort_unless(Schema::hasTable('configuraciones_sistema'), 503,
+            'La persistencia de configuración requiere aplicar la migración aprobada.');
+        abort_unless(isset(self::CLAVES_CONFIGURABLES[$grupo]), 422, 'El grupo de configuración no es válido.');
+        abort_unless($ubicacion['empresa_id'] !== null, 409, 'No existe una empresa autorizada.');
+
+        $sedeId = $alcance === 'sede' ? $sedeId : null;
+        if ($sedeId !== null) {
+            abort_unless(DB::table('sedes')->where('id', $sedeId)->where('empresa_id', $ubicacion['empresa_id'])->exists(), 422,
+                'La sede no pertenece a la empresa autorizada.');
+        }
+
+        $permitidas = array_flip(self::CLAVES_CONFIGURABLES[$grupo]);
+        $configuracion = array_intersect_key($datos, $permitidas);
+
+        DB::transaction(function () use ($grupo, $sedeId, $configuracion, $usuario, $ubicacion, $ip): void {
+            $anteriores = $this->consultarConfiguracion($grupo, (int) $ubicacion['empresa_id'], $sedeId);
+            foreach ($configuracion as $clave => $valor) {
+                ConfiguracionSistema::query()->updateOrCreate(
+                    ['empresa_id' => $ubicacion['empresa_id'], 'sede_id' => $sedeId, 'grupo' => $grupo, 'clave' => $clave],
+                    ['valor_json' => ['valor' => $valor], 'actualizado_por_usuario_id' => $usuario->getKey()],
+                );
+            }
+
+            app(RegistradorAuditoria::class)->record(
+                (int) $usuario->getKey(), 'configuracion_sistema.actualizada', 'configuraciones_sistema', null,
+                $anteriores, $configuracion, $ip,
+                scope: ['empresa_id' => (int) $ubicacion['empresa_id'], 'sede_id' => $sedeId],
+            );
+        }, 3);
+    }
+
     /** @param array{empresa_id:?int,sede_id:?int} $ubicacion
      * @return array{empresa:?Empresa,sedes:Collection,usuariosVinculados:int,integracionesActivas:int,series:Collection,cambios:Collection}
      */

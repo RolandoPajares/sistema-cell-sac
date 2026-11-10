@@ -13,6 +13,9 @@ use App\Servicios\AdaptadorAlcanceProductos;
 use App\Servicios\AdaptadorAuditoriaProductos;
 use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioMenuDinamico;
+use App\Servicios\ServicioPresentacionCampanias;
+use App\Servicios\ServicioPresentacionFinanzasFacturacion;
+use App\Servicios\ServicioPresentacionReembolsos;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -149,11 +152,37 @@ class AppServiceProvider extends ServiceProvider
                 : 'account.profile.show');
         });
 
+        View::composer('gestion.finanzas.finanzas-facturacion.pagina', function ($view): void {
+            $pagina = $view->getData()['pagina'] ?? [];
+
+            if (is_array($pagina)) {
+                $view->with('pagina', app(ServicioPresentacionFinanzasFacturacion::class)->preparar($pagina));
+            }
+        });
+
+        View::composer('gestion.finanzas.reembolsos.listar', function ($view): void {
+            $module = $view->getData()['module'] ?? [];
+
+            if (is_array($module)) {
+                $view->with('module', app(ServicioPresentacionReembolsos::class)->preparar($module));
+            }
+        });
+
+        View::composer('gestion.ecommerce-marketing.campanas.listar', function ($view): void {
+            $data = $view->getData();
+
+            if (isset($data['campaigns'])) {
+                $view->with(app(ServicioPresentacionCampanias::class)->preparar($data));
+            }
+        });
+
         View::composer([
             'gestion.*',
             'inteligente.cotizador.resumen',
             'layouts.tienda.encabezado',
             'publico.comercio.pedidos*',
+            'publico.comercio.pedido',
+            'publico.comercio.confirmacion',
             'publico.comercio.seguimiento',
         ], function ($view): void {
             $user = request()->user();
@@ -171,6 +200,11 @@ class AppServiceProvider extends ServiceProvider
                 'isAuthenticated' => $user instanceof User,
                 'currentUserName' => (string) ($user?->nombre ?? ''),
                 'currentUserEmail' => (string) ($user?->correo ?? ''),
+                'isAdminPanel' => (bool) ($view->getData()['adminView'] ?? false),
+                'isAdmin' => (bool) ($view->getData()['adminView'] ?? false)
+                    || $canManageSecurity
+                    || $canManageSales
+                    || $canManageQuotes,
             ]);
         });
     }

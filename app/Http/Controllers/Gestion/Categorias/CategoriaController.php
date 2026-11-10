@@ -12,6 +12,7 @@ use App\Servicios\ExportadorTabular;
 use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioInventario;
+use App\Servicios\ServicioPresentacionCategorias;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,14 +34,18 @@ class CategoriaController extends Controller
      * @param  mixed  $inventario  Parámetro recibido por la operación.
      * @return View Resultado de la operación.
      */
-    public function index(Request $request, ServicioInventario $inventario): View
+    public function index(Request $request, ServicioInventario $inventario, ServicioPresentacionCategorias $presentacion): View
     {
         $alcance = $this->alcanceActual($request, $inventario);
         $filtros = $this->filtros($request);
         $resumen = $this->resumenCategorias($alcance['empresa_id']);
 
-        return view('gestion.inventario.categorias.listar', [
-            'categories' => $this->consultaCategorias($filtros, $alcance['empresa_id'])->paginate(7)->withQueryString(),
+        $categories = $this->consultaCategorias($filtros, $alcance['empresa_id'])->paginate(7)->withQueryString();
+
+        return view('gestion.inventario-logistica.categorias.listar', [
+            'categories' => $categories,
+            'categoryIcons' => $categories->getCollection()->mapWithKeys(fn (Categoria $category): array => [$category->id => $presentacion->icono($category)])->all(),
+            'categoryQuery' => $request->query(),
             'filters' => $filtros,
             'totalCategories' => $resumen['total'],
             'activeCategories' => $resumen['activas'],

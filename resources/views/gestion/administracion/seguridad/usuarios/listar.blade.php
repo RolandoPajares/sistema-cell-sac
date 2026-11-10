@@ -193,5 +193,5 @@
 @endsection
 {{-- Carga el comportamiento interactivo desde un archivo JavaScript externo. --}}
 @push('scripts')
-@vite('resources/js/gestion/usuarios/listar.js')
+@vite('resources/js/gestion/administracion/seguridad/usuarios/listar.js')
 @endpush

@@ -4,21 +4,7 @@
 @section('body_class', 'modulo-proveedores')
 
 @section('content')
-    @php
-        $supplierCategories = static function ($supplier) {
-            return $supplier->products
-                ->map(static fn ($product) => $product->category?->nombre)
-                ->filter()
-                ->unique()
-                ->values();
-        };
-        $selectedCategories = $selectedSupplier ? $supplierCategories($selectedSupplier) : collect();
-        $purchaseCount = $selectedSupplier?->purchases_count ?? 0;
-        $receivedPurchases = (int) ($purchaseStatusCounts->firstWhere('estado', 'Recibida')?->total ?? 0);
-        $receivedPercent = $purchaseCount > 0 ? min(100, round(($receivedPurchases / $purchaseCount) * 100)) : 0;
-    @endphp
-
-    <section class="proveedores-page" data-proveedores-page>
+    <section class="proveedores-page" data-proveedores-page data-open-dialog-on-load="{{ $errors->any() ? 'nuevo-proveedor' : '' }}">
         <header class="proveedores-hero">
             <div>
                 <span class="proveedores-eyebrow">Compras y logística</span>
@@ -109,24 +95,19 @@
                         </thead>
                         <tbody>
                             @forelse ($suppliers as $supplier)
-                                @php
-                                    $categoriesForSupplier = $supplierCategories($supplier);
-                                    $supplierInitial = mb_strtoupper(mb_substr($supplier->nombre, 0, 1));
-                                    $isSelected = $selectedSupplier?->id === $supplier->id;
-                                @endphp
-                                <tr class="{{ $isSelected ? 'is-selected' : '' }}">
+                                <tr class="{{ $supplierPresentation[$supplier->id]['is_selected'] ? 'is-selected' : '' }}">
                                     <td><span class="proveedores-checkbox" aria-hidden="true"></span></td>
                                     <td class="proveedores-index">{{ $suppliers->firstItem() + $loop->index }}</td>
                                     <td>
                                         <a class="proveedores-identity" href="{{ request()->fullUrlWithQuery(['proveedor' => $supplier->id]) }}">
-                                            <span class="proveedores-avatar">{{ $supplierInitial }}</span>
+                                            <span class="proveedores-avatar">{{ $supplierPresentation[$supplier->id]['initial'] }}</span>
                                             <span><strong>{{ $supplier->nombre }}</strong><small>{{ $supplier->correo }}</small></span>
                                         </a>
                                     </td>
                                     <td class="proveedores-muted">{{ $supplier->ruc }}</td>
                                     <td>
                                         <span class="proveedores-category-list">
-                                            @forelse ($categoriesForSupplier->take(2) as $categoryName)
+                                            @forelse (array_slice($supplierPresentation[$supplier->id]['categories'], 0, 2) as $categoryName)
                                                 <b>{{ $categoryName }}</b>
                                             @empty
                                                 <span>Sin categoría</span>
@@ -179,9 +160,8 @@
                         <h2>Detalle del proveedor <i class="bi bi-chevron-up" aria-hidden="true"></i></h2>
                     </header>
                     @if ($selectedSupplier)
-                        @php($selectedInitial = mb_strtoupper(mb_substr($selectedSupplier->nombre, 0, 1)))
                         <div class="proveedores-detail-identity">
-                            <span class="proveedores-detail-avatar">{{ $selectedInitial }}</span>
+                            <span class="proveedores-detail-avatar">{{ $selectedSupplierPresentation['initial'] }}</span>
                             <div><strong>{{ $selectedSupplier->nombre }}</strong><span>RUC: {{ $selectedSupplier->ruc }}</span><small>Proveedor vinculado al catálogo.</small></div>
                             <span class="proveedores-status proveedores-status--{{ $selectedSupplier->activo ? 'active' : 'inactive' }}">{{ $selectedSupplier->activo ? 'Activo' : 'Inactivo' }}</span>
                         </div>
@@ -197,17 +177,17 @@
                                 <div><dt><i class="bi bi-envelope" aria-hidden="true"></i> Correo</dt><dd>{{ $selectedSupplier->correo }}</dd></div>
                                 <div><dt><i class="bi bi-telephone" aria-hidden="true"></i> Teléfono</dt><dd>{{ $selectedSupplier->telefono ?: 'No registrado' }}</dd></div>
                                 <div><dt><i class="bi bi-geo-alt" aria-hidden="true"></i> Ciudad</dt><dd>{{ $selectedSupplier->ciudad ?: 'No registrada' }}</dd></div>
-                                <div><dt><i class="bi bi-box-seam" aria-hidden="true"></i> Categorías</dt><dd class="proveedores-detail-tags">@forelse ($selectedCategories->take(3) as $categoryName)<span>{{ $categoryName }}</span>@empty<span>Sin categorías</span>@endforelse</dd></div>
+                                <div><dt><i class="bi bi-box-seam" aria-hidden="true"></i> Categorías</dt><dd class="proveedores-detail-tags">@forelse (array_slice($selectedSupplierPresentation['categories'], 0, 3) as $categoryName)<span>{{ $categoryName }}</span>@empty<span>Sin categorías</span>@endforelse</dd></div>
                             </dl>
                         </div>
                         <div class="proveedores-performance">
                             <header><h3>Rendimiento de compras</h3><small>Datos registrados</small></header>
                             <div class="proveedores-performance-grid">
-                                <div class="proveedores-progress-ring" style="--proveedores-progress: {{ $receivedPercent }}%"><strong>{{ $receivedPercent }}%</strong><span>Recibidas</span></div>
+                                <div class="proveedores-progress-ring" style="--proveedores-progress: {{ $selectedSupplierPresentation['received_percent'] }}%"><strong>{{ $selectedSupplierPresentation['received_percent'] }}%</strong><span>Recibidas</span></div>
                                 <div class="proveedores-performance-stats">
-                                    <div><span><i class="bi bi-file-earmark-check-fill is-blue" aria-hidden="true"></i> Órdenes totales</span><b>{{ number_format($purchaseCount) }}</b></div>
+                                    <div><span><i class="bi bi-file-earmark-check-fill is-blue" aria-hidden="true"></i> Órdenes totales</span><b>{{ number_format($selectedSupplierPresentation['purchase_count']) }}</b></div>
                                     <div><span><i class="bi bi-cash-coin is-green" aria-hidden="true"></i> Total comprado</span><b>S/ {{ number_format((float) ($selectedSupplier->purchases_total ?? 0), 2) }}</b></div>
-                                    <div><span><i class="bi bi-calendar3 is-purple" aria-hidden="true"></i> Última orden</span><b>{{ $selectedSupplier->latest_purchase_date ? \Illuminate\Support\Carbon::parse($selectedSupplier->latest_purchase_date)->format('d/m/Y') : 'Sin compras' }}</b></div>
+                                    <div><span><i class="bi bi-calendar3 is-purple" aria-hidden="true"></i> Última orden</span><b>{{ $selectedSupplierPresentation['latest_purchase_date_label'] }}</b></div>
                                 </div>
                             </div>
                         </div>
@@ -261,30 +241,7 @@
 @endsection
 
 @push('scripts')
-    <script>
-        (() => {
-            const page = document.querySelector('[data-proveedores-page]');
-            const openDialog = (dialog) => {
-                if (dialog && !dialog.open && typeof dialog.showModal === 'function') dialog.showModal();
-            };
-            page.querySelectorAll('[data-open-supplier-create]').forEach((button) => {
-                button.addEventListener('click', () => openDialog(document.querySelector('#nuevo-proveedor')));
-            });
-            page.querySelectorAll('[data-open-supplier-edit]').forEach((button) => {
-                button.addEventListener('click', () => openDialog(document.querySelector(`#editar-proveedor-${button.dataset.openSupplierEdit}`)));
-            });
-            document.querySelectorAll('[data-close-supplier-dialog]').forEach((button) => button.addEventListener('click', () => button.closest('dialog')?.close()));
-            document.querySelectorAll('.proveedores-dialog').forEach((dialog) => dialog.addEventListener('click', (event) => {
-                if (event.target === dialog) {
-                    dialog.close();
-                }
-            }));
-
-            @if ($errors->any())
-                openDialog(document.querySelector('#nuevo-proveedor'));
-            @endif
-        })();
-    </script>
+    @vite('resources/js/gestion/comercial/proveedores/index.js')
 @endpush
 
 

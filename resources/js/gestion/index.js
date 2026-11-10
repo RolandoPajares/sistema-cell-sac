@@ -7,4 +7,5 @@
 import '../modulos/gestion/index.js';
 import './analitica/index.js';
 import './analitica/analisis-auditoria/analisis-auditoria.js';
+import './ecommerce-marketing/campanas.js';
 

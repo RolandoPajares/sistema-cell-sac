@@ -36,17 +36,22 @@ class EmpresaController extends Controller
             ->withCount(['sedes as sedes_activas_count' => static function (Builder $consulta): void {
                 $consulta->where('activa', true);
             }])
-            ->withCount(['sedes as sedes_inactivas_count' => static function (Builder $consulta): void {
-                $consulta->where('activa', false);
-            }])
             ->find($empresaId);
         $almacenes = $empresaId === null ? 0 : DB::table('almacenes')
             ->join('sedes', 'sedes.id', '=', 'almacenes.sede_id')
             ->where('sedes.empresa_id', $empresaId)->count();
+        $sedesActivas = (int) ($empresa?->sedes_activas_count ?? 0);
 
         return view('gestion.administracion.organizacion.datos-empresa', [
             'empresa' => $empresa,
             'almacenes' => $almacenes,
+            'sedesActivas' => $sedesActivas > 0 ? '1' : '0',
+            'metricas' => $empresa === null ? [] : [
+                ['titulo' => 'Estado de la empresa', 'valor' => $empresa->activo ? 'Activa' : 'Inactiva', 'icono' => 'bi-buildings', 'detalle' => 'Estado almacenado en MariaDB'],
+                ['titulo' => 'Sede interna', 'valor' => $sedesActivas > 0 ? 'Activa' : 'Revisar', 'icono' => 'bi-geo-alt', 'tono' => 'verde', 'detalle' => 'Contexto operativo autorizado'],
+                ['titulo' => 'Almacenes asociados', 'valor' => $almacenes, 'icono' => 'bi-box-seam', 'tono' => 'violeta', 'detalle' => 'Relacionados mediante las sedes'],
+                ['titulo' => 'Moneda base', 'valor' => $empresa->moneda_base, 'icono' => 'bi-currency-exchange', 'detalle' => 'CÃ³digo registrado para la empresa'],
+            ],
             'puedeEditar' => $request->user() instanceof User
                 && $autorizacion->allows($request->user(), 'gestion.organizacion.actualizar'),
         ]);

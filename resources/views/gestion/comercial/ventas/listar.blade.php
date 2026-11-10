@@ -4,37 +4,6 @@
 @section('body_class', 'modulo-ventas')
 
 @section('content')
-@php
-$formatCurrency = static fn (float|int|string|null $value): string => $value === null ? 'Monedas múltiples' : ($monedaReporte === 'PEN' ? 'S/ ' : $monedaReporte.' ').number_format((float) $value, 2);
-$initialsFor = static function (?string $name): string {
-$parts = preg_split('/\s+/', trim((string) $name), -1, PREG_SPLIT_NO_EMPTY);
-
-return collect(array_slice($parts ?: ['CL'], 0, 2))
-->map(static fn (string $part): string => mb_strtoupper(mb_substr($part, 0, 1)))
-->implode('');
-};
-$imageUrl = static function (?string $path): ?string {
-if (! $path) {
-return null;
-}
-
-return str_starts_with($path, 'http') ? $path : asset(ltrim($path, '/'));
-};
-$statusFor = static function (string $status): array {
-return ['label' => $status ?: 'Sin estado', 'class' => 'muted'];
-};
-$chartMax = max(1, ...array_column($salesTrend, 'sales'));
-$channelSegments = [];
-$channelStart = 0;
-foreach ($channelSummary as $channel) {
-$channelEnd = $channelStart + $channel['percent'];
-$channelSegments[] = $channel['color'].' '.$channelStart.'% '.$channelEnd.'%';
-$channelStart = $channelEnd;
-}
-$channelDonut = 'background: conic-gradient('.implode(', ', $channelSegments ?: ['#d9e7f6 0% 100%']).');';
-$queryWithoutPage = request()->except(['page']);
-@endphp
-
 <section class="ventas-page" data-sales-page>
     <header class="ventas-hero">
         <div>
@@ -55,7 +24,7 @@ $queryWithoutPage = request()->except(['page']);
     <section class="ventas-kpi-grid" aria-label="Resumen de ventas">
         <article class="ventas-kpi ventas-kpi--blue">
             <span class="ventas-kpi-icon"><i class="bi bi-currency-dollar" aria-hidden="true"></i></span>
-            <div><small>Importe registrado</small><strong>{{ $formatCurrency($totalSales) }}</strong><span>Todos los estados; no implica cobro</span></div>
+            <div><small>Importe registrado</small><strong>{{ $totalSalesLabel }}</strong><span>Todos los estados; no implica cobro</span></div>
         </article>
         <article class="ventas-kpi ventas-kpi--green">
             <span class="ventas-kpi-icon"><i class="bi bi-cart-check" aria-hidden="true"></i></span>
@@ -67,7 +36,7 @@ $queryWithoutPage = request()->except(['page']);
         </article>
         <article class="ventas-kpi ventas-kpi--orange">
             <span class="ventas-kpi-icon"><i class="bi bi-receipt" aria-hidden="true"></i></span>
-            <div><small>Importe promedio</small><strong>{{ $formatCurrency($averageTicket) }}</strong><span>Promedio de registros</span></div>
+            <div><small>Importe promedio</small><strong>{{ $averageTicketLabel }}</strong><span>Promedio de registros</span></div>
         </article>
     </section>
 
@@ -78,22 +47,22 @@ $queryWithoutPage = request()->except(['page']);
                     <h2><i class="bi bi-bar-chart-line" aria-hidden="true"></i> Ventas y tickets</h2>
                     <p>Comportamiento de ventas del periodo filtrado.</p>
                 </div>
-                <span class="ventas-period-label">{{ \Carbon\CarbonImmutable::parse($filters['desde'])->format('d/m/Y') }} - {{ \Carbon\CarbonImmutable::parse($filters['hasta'])->format('d/m/Y') }}</span>
+                <span class="ventas-period-label">{{ $periodStartLabel }} - {{ $periodEndLabel }}</span>
             </header>
             @if ($monedasMultiples)
             <p>La gráfica de importes no está disponible para ventas en monedas diferentes.</p>
             @else
-            <div class="ventas-chart-legend"><span><i class="ventas-dot ventas-dot--blue" aria-hidden="true"></i> Importes registrados</span><span><i class="ventas-dot ventas-dot--green" aria-hidden="true"></i> N.º ventas</span><strong data-sales-chart-value>{{ $formatCurrency($totalSales) }}</strong></div>
+            <div class="ventas-chart-legend"><span><i class="ventas-dot ventas-dot--blue" aria-hidden="true"></i> Importes registrados</span><span><i class="ventas-dot ventas-dot--green" aria-hidden="true"></i> N.º ventas</span><strong data-sales-chart-value>{{ $totalSalesLabel }}</strong></div>
             <div class="ventas-chart" aria-label="Gráfico de ventas y número de ventas">
-                <div class="ventas-chart-y-axis"><span>{{ $formatCurrency($chartMax) }}</span><span>{{ $formatCurrency($chartMax / 2) }}</span><span>{{ $formatCurrency(0) }}</span></div>
+                <div class="ventas-chart-y-axis"><span>{{ $chartMaxLabel }}</span><span>{{ $chartMidLabel }}</span><span>{{ $chartZeroLabel }}</span></div>
                 <div class="ventas-chart-plot">
                     <div class="ventas-chart-grid-lines" aria-hidden="true"><span></span><span></span><span></span></div>
                     <div class="ventas-chart-bars">
                         @foreach ($salesTrend as $point)
                         <div class="ventas-chart-point">
-                            <div class="ventas-bar-group" title="{{ $point['label'] }}: {{ $formatCurrency($point['sales']) }} · {{ $point['orders'] }} ventas">
-                                <span class="ventas-bar ventas-bar--sales" style="height: {{ $point['sales_height'] }}%" data-sales-bar data-sales-value="{{ $formatCurrency($point['sales']) }}"></span>
-                                <span class="ventas-bar ventas-bar--orders" style="height: {{ $point['orders_height'] }}%"></span>
+                            <div class="ventas-bar-group" title="{{ $point['label'] }}: {{ $point['sales_label'] }} · {{ $point['orders'] }} ventas">
+                                <span class="ventas-bar ventas-bar--sales" data-sales-bar data-sales-height="{{ $point['sales_height'] }}" data-sales-value="{{ $point['sales_label'] }}"></span>
+                                <span class="ventas-bar ventas-bar--orders" data-orders-bar data-orders-height="{{ $point['orders_height'] }}"></span>
                             </div>
                             <small>{{ $point['label'] }}</small>
                         </div>
@@ -112,10 +81,10 @@ $queryWithoutPage = request()->except(['page']);
                 </div><span class="ventas-period-label">Periodo actual</span>
             </header>
             <div class="ventas-channel-content">
-                <div class="ventas-donut" style="{{ $channelDonut }}"><span><strong>{{ $formatCurrency($totalSales) }}</strong><small>Total</small></span></div>
+                <div class="ventas-donut" data-sales-donut="{{ $channelDonut }}"><span><strong>{{ $totalSalesLabel }}</strong><small>Total</small></span></div>
                 <div class="ventas-channel-list">
                     @foreach ($channelSummary as $channel)
-                    <div><span><i class="ventas-dot" style="background: {{ $channel['color'] }}" aria-hidden="true"></i>{{ $channel['label'] }}</span><strong>{{ number_format($channel['percent'], 1) }}%</strong><small>{{ number_format($channel['count']) }}</small></div>
+                    <div><span><i class="ventas-dot" data-channel-color="{{ $channel['color'] }}" aria-hidden="true"></i>{{ $channel['label'] }}</span><strong>{{ number_format($channel['percent'], 1) }}%</strong><small>{{ number_format($channel['count']) }}</small></div>
                     @endforeach
                 </div>
             </div>
@@ -144,7 +113,7 @@ $queryWithoutPage = request()->except(['page']);
                     </select></label>
                 <button class="ventas-filter-button" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i> Filtros</button>
                 <button class="ventas-primary-button ventas-filter-submit" type="submit"><i class="bi bi-search" aria-hidden="true"></i> Buscar</button>
-                @if (($filters['buscar'] ?? null) || ($filters['estado'] ?? null) || ($filters['canal'] ?? null) || ($filters['cliente_id'] ?? null) || ($filters['sede_id'] ?? null) || $filters['desde'] !== now()->subDays(29)->toDateString() || $filters['hasta'] !== now()->toDateString())
+                @if ($hasActiveFilters)
                 <a class="ventas-clear-link" href="{{ route('management.sales') }}">Limpiar</a>
                 @endif
             </form>
@@ -173,15 +142,14 @@ $queryWithoutPage = request()->except(['page']);
                         </thead>
                         <tbody>
                             @forelse ($orders as $order)
-                            @php($status = $statusFor($order->estado))
                             <tr>
                                 <td><strong class="ventas-order-number">{{ $order->codigo }}</strong></td>
                                 <td class="ventas-date">{{ $order->fecha_venta?->format('d/m/Y') }}<small>{{ $order->fecha_venta?->format('H:i') }}</small></td>
-                                <td><span class="ventas-customer"><b>{{ $initialsFor($order->cliente?->razon_social ?: $order->cliente?->nombre_contacto) }}</b><span><strong>{{ $order->cliente?->razon_social ?: $order->cliente?->nombre_contacto ?: 'Sin cliente asociado' }}</strong><small>{{ $order->cliente?->correo ?: 'Sin correo' }}</small></span></span></td>
+                                <td><span class="ventas-customer"><b>{{ $salesPresentation[$order->id]['initials'] }}</b><span><strong>{{ $order->cliente?->razon_social ?: $order->cliente?->nombre_contacto ?: 'Sin cliente asociado' }}</strong><small>{{ $order->cliente?->correo ?: 'Sin correo' }}</small></span></span></td>
                                 <td>{{ number_format((int) $order->detalles_count) }} productos</td>
                                 <td><strong class="ventas-total">{{ $order->moneda }} {{ number_format((float) $order->total, 2) }}</strong></td>
                                 <td><span class="ventas-channel"><i class="bi bi-shop" aria-hidden="true"></i> {{ $order->canal ?: $order->pedido?->canal ?: 'Sin canal registrado' }}</span></td>
-                                <td><span class="ventas-status ventas-status--{{ $status['class'] }}"><i class="bi bi-circle-fill" aria-hidden="true"></i>{{ $status['label'] }}</span></td>
+                                <td><span class="ventas-status ventas-status--{{ $salesPresentation[$order->id]['status']['class'] }}"><i class="bi bi-circle-fill" aria-hidden="true"></i>{{ $salesPresentation[$order->id]['status']['label'] }}</span></td>
                                 <td><span class="ventas-receipt">No consultado</span></td>
                                 <td><span class="ventas-row-actions"><button class="ventas-action-button" type="button" data-sales-details="{{ $order->id }}" title="Ver detalle" aria-label="Ver detalle de venta {{ $order->codigo }}"><i class="bi bi-eye" aria-hidden="true"></i></button>@if (in_array($order->id, $editables, true))<a class="ventas-action-button" href="{{ route('management.sales', ['editar' => $order->id]) }}" title="Editar borrador" aria-label="Editar venta {{ $order->codigo }}"><i class="bi bi-pencil" aria-hidden="true"></i></a>@else<button class="ventas-action-button" type="button" disabled title="Solo se editan borradores autorizados sin movimientos asociados" aria-label="Editar venta no disponible"><i class="bi bi-pencil" aria-hidden="true"></i></button>@endif
                                         @if (in_array($order->id, $confirmables, true) && $order->estado === 'borrador' && $order->pedido_id !== null)
@@ -214,22 +182,21 @@ $queryWithoutPage = request()->except(['page']);
                             <section class="ventas-modal-section">
                                 <div class="ventas-modal-section-header"><i class="bi bi-phone" aria-hidden="true"></i><h3>IMEI y números de serie</h3></div>
                             @foreach ($order->detalles as $detalle)
-                                @php($configuracionDispositivos = $dispositivosPorDetalle->get($detalle->getKey(), ['requiere' => false, 'dispositivos' => collect()]))
-                                @if ($configuracionDispositivos['requiere'])
+                                @if (($dispositivosPorDetalle->get($detalle->getKey())['requiere'] ?? false))
                                 <label class="ventas-modal-field"><span>{{ $detalle->descripcion_historica }} — {{ number_format((float) $detalle->cantidad, 0) }} unidad(es) serializadas</span>
                                     <select name="dispositivos[{{ $detalle->getKey() }}][]" multiple required size="{{ min(5, max(2, (int) $detalle->cantidad)) }}">
-                                        @foreach ($configuracionDispositivos['dispositivos'] as $dispositivo)
+                                        @foreach (($dispositivosPorDetalle->get($detalle->getKey())['dispositivos'] ?? collect()) as $dispositivo)
                                             <option value="{{ $dispositivo->id }}">{{ $dispositivo->imei ?: $dispositivo->numero_serie ?: 'Dispositivo '.$dispositivo->id }}</option>
                                         @endforeach
                                     </select>
                                 </label>
                                 @endif
                             @endforeach
-                                @if ($order->detalles->contains(fn ($detalle) => ($dispositivosPorDetalle->get($detalle->getKey())['requiere'] ?? false) && $dispositivosPorDetalle->get($detalle->getKey())['dispositivos']->count() < (int) $detalle->cantidad))
+                                @if ($devicesUnavailable->get($order->id, false))
                                     <p role="status">No hay suficientes IMEI o series disponibles en el almacén asociado. Registra o recibe las unidades antes de confirmar.</p>
                                 @endif
                             </section>
-                            <footer class="ventas-modal-footer"><button class="ventas-modal-cancel" type="button" data-close-sales-dialog>Cancelar</button><span></span><button class="ventas-primary-button" type="submit" @disabled($order->detalles->contains(fn ($detalle) => ($dispositivosPorDetalle->get($detalle->getKey())['requiere'] ?? false) && $dispositivosPorDetalle->get($detalle->getKey())['dispositivos']->count() < (int) $detalle->cantidad))>Confirmar y descontar existencias</button></footer>
+                            <footer class="ventas-modal-footer"><button class="ventas-modal-cancel" type="button" data-close-sales-dialog>Cancelar</button><span></span><button class="ventas-primary-button" type="submit" @disabled($devicesUnavailable->get($order->id, false))>Confirmar y descontar existencias</button></footer>
                         </form>
                     </div>
                 </dialog>
@@ -315,7 +282,7 @@ $queryWithoutPage = request()->except(['page']);
                 </header>
                 <div class="ventas-product-list">
                     @forelse ($monedasMultiples ? [] : $topProducts as $index => $product)
-                    <div class="ventas-product-row"><span class="ventas-product-rank">{{ $index + 1 }}</span><span class="ventas-product-image">@if ($imageUrl($product['image']))<img src="{{ $imageUrl($product['image']) }}" alt="">@else<i class="bi bi-box-seam" aria-hidden="true"></i>@endif</span><span><strong>{{ $product['name'] }}</strong><small>{{ rtrim(rtrim(number_format($product['units'], 6, '.', ''), '0'), '.') }} unidades</small></span><b>{{ $formatCurrency($product['revenue']) }}</b></div>
+                    <div class="ventas-product-row"><span class="ventas-product-rank">{{ $index + 1 }}</span><span class="ventas-product-image">@if ($product['image'])<img src="{{ $product['image'] }}" alt="">@else<i class="bi bi-box-seam" aria-hidden="true"></i>@endif</span><span><strong>{{ $product['name'] }}</strong><small>{{ rtrim(rtrim(number_format($product['units'], 6, '.', ''), '0'), '.') }} unidades</small></span><b>{{ $product['revenue_label'] }}</b></div>
                     @empty
                     <p class="ventas-side-empty">{{ $monedasMultiples ? 'No se suman importes de monedas diferentes.' : 'Aún no hay productos registrados en ventas.' }}</p>
                     @endforelse

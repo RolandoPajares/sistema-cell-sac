@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Gestion;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ActualizarIntegracionRequest;
+use App\Http\Requests\GuardarConfiguracionSistemaRequest;
 use App\Http\Requests\GuardarIntegracionRequest;
 use App\Servicios\RegistradorAuditoria;
 use App\Servicios\ServicioAutorizacion;
 use App\Servicios\ServicioConfiguracionSistema;
 use App\Servicios\ServicioNotificaciones;
+use App\Servicios\ServicioPresentacionConfiguracion;
 use App\Servicios\ServicioRespaldos;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,6 +26,8 @@ use Illuminate\View\View;
  */
 final class ConfiguracionSistemaController extends Controller
 {
+    public function __construct(private ServicioPresentacionConfiguracion $presentacion) {}
+
     /**
      * Ejecuta la operación general definida por la clase ConfiguracionSistemaController.
      *
@@ -34,9 +38,57 @@ final class ConfiguracionSistemaController extends Controller
      */
     public function general(Request $request, ServicioAutorizacion $autorizacion, ServicioConfiguracionSistema $servicio): View
     {
-        $datos = $servicio->obtenerDatosGenerales($request->user(), $autorizacion->operationSite($request->user()));
+        $ubicacion = $autorizacion->operationSite($request->user());
+        $datos = $servicio->obtenerDatosGenerales($request->user(), $ubicacion);
+        $datos['configuracion'] = $ubicacion['empresa_id'] === null
+            ? []
+            : $servicio->consultarConfiguracion('general', (int) $ubicacion['empresa_id'], $ubicacion['sede_id']);
+        $datos['ubicacion'] = $ubicacion;
+        $datos['canUpdateConfiguration'] = $autorizacion->allowsGlobal($request->user(), 'gestion.configuracion.actualizar');
 
         return $this->pagina('general', $datos);
+    }
+
+    public function configuracionGrupo(string $grupo, Request $request, ServicioAutorizacion $autorizacion, ServicioConfiguracionSistema $servicio): View
+    {
+        abort_unless(in_array($grupo, ['parametros-comerciales', 'inventario', 'finanzas'], true), 404);
+        $ubicacion = $autorizacion->operationSite($request->user());
+
+        return view('gestion.configuracion.'.$grupo.'.configurar', [
+            'grupo' => $grupo,
+            'configuracion' => $ubicacion['empresa_id'] === null
+                ? []
+                : $servicio->consultarConfiguracion($grupo, (int) $ubicacion['empresa_id'], $ubicacion['sede_id']),
+            'sedes' => $ubicacion['empresa_id'] === null ? collect() : $servicio->sedesConfigurables((int) $ubicacion['empresa_id']),
+            'sedeId' => $ubicacion['sede_id'],
+            'canUpdateConfiguration' => $autorizacion->allowsGlobal($request->user(), 'gestion.configuracion.actualizar'),
+        ]);
+    }
+
+    public function actualizarConfiguracion(
+        GuardarConfiguracionSistemaRequest $request,
+        ServicioAutorizacion $autorizacion,
+        ServicioConfiguracionSistema $servicio,
+    ): RedirectResponse {
+        $datos = $request->validated();
+        $usuario = $request->user();
+        $ubicacion = $autorizacion->operationSite($usuario);
+        $servicio->guardarConfiguracion(
+            $datos['grupo'],
+            $datos['alcance'],
+            $datos['sede_id'] ?? null,
+            $datos['configuracion'],
+            $usuario,
+            $ubicacion,
+            $request->ip(),
+        );
+
+        return redirect()->route(match ($datos['grupo']) {
+            'general' => 'management.general_settings',
+            'parametros-comerciales' => 'management.commercial_parameters',
+            'inventario' => 'management.inventory_settings',
+            default => 'management.finance_settings',
+        })->with('status', 'La configuración se actualizó correctamente.');
     }
 
     /**
@@ -58,6 +110,7 @@ final class ConfiguracionSistemaController extends Controller
             $filtros['buscar'] ?? null,
             $filtros['estado'] ?? null,
         );
+        $datos['filtros'] = $filtros;
 
         return $this->pagina('integraciones', $datos);
     }
@@ -200,6 +253,7 @@ final class ConfiguracionSistemaController extends Controller
         return $this->pagina('notificaciones', [
             'notificaciones' => $paginador,
             'resumen' => $resumen,
+            'filtros' => $filtros,
             'canales' => collect(),
             'reglas' => collect(),
             'plantillas' => collect(),
@@ -280,6 +334,12 @@ final class ConfiguracionSistemaController extends Controller
      */
     private function pagina(string $tipo, array $datos): View
     {
-        return view('gestion.configuracion.configuracion-sistema.'.$tipo.'.listar', $datos + ['tipo' => $tipo]);
+        $vista = match ($tipo) {
+            'integraciones' => 'integraciones.listar',
+            'respaldos' => 'respaldos.listar',
+            default => $tipo.'.configurar',
+        };
+
+        return view('gestion.configuracion.'.$vista, $this->presentacion->preparar($tipo, $datos));
     }
 }

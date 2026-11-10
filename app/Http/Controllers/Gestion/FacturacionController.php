@@ -127,7 +127,7 @@ class FacturacionController extends Controller
             static fn (mixed $value): bool => $value !== null && $value !== ''
         );
 
-        return view('gestion.finanzas.facturacion.listar', [
+        return view('gestion.finanzas.comprobantes.listar', [
             'module' => $modulo,
             'moduleKey' => $moduleKey,
             'filterOptions' => $filterOptions,

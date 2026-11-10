@@ -47,6 +47,6 @@
 </section>
 @endsection
 @push('scripts')
-    @vite('resources/js/gestion/menus.js')
+    @vite('resources/js/gestion/administracion/seguridad/menus.js')
 @endpush
 

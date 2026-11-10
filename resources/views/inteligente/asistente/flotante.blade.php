@@ -18,7 +18,9 @@
 
         <div class="assistant-float-context"><i class="bi bi-layers" aria-hidden="true"></i> Disponible para todos los roles</div>
         <div class="assistant-float-messages" data-admin-assistant-messages aria-live="polite">
-            <article><span><i class="bi bi-stars" aria-hidden="true"></i></span><p>El Asistente IA se encuentra en mantenimiento. La conexión con la API estará disponible próximamente.</p></article>
+            <article><span><i class="bi bi-stars" aria-hidden="true"></i></span>
+                <p>El Asistente IA se encuentra en mantenimiento. La conexión con la API estará disponible próximamente.</p>
+            </article>
         </div>
         <div class="assistant-float-prompts">
             <button type="button" data-admin-assistant-prompt="¿Qué funciones tiene el asistente?"><i class="bi bi-question-circle" aria-hidden="true"></i> ¿Qué puedes hacer?</button>

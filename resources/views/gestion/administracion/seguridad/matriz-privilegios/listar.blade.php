@@ -110,5 +110,5 @@
 @endsection
 
 @push('scripts')
-@vite('resources/js/gestion/roles-permisos/matriz.js')
+@vite('resources/js/gestion/administracion/seguridad/roles-permisos/matriz.js')
 @endpush

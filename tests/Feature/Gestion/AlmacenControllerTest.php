@@ -16,7 +16,7 @@ it('muestra el estado vacío y métricas en cero sin inventar almacenes', functi
     $this->actingAs($administrador)
         ->get(route('management.company_settings.warehouses'))
         ->assertOk()
-        ->assertViewIs('gestion.organizacion.almacenes.listar')
+        ->assertViewIs('gestion.inventario-logistica.almacenes.listar')
         ->assertViewHas('almacenes', fn ($almacenes): bool => $almacenes->total() === 0)
         ->assertViewHas('resumen', fn (array $resumen): bool => $resumen['total'] === 0
             && $resumen['activos'] === 0

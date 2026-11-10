@@ -1,5 +1,5 @@
-import { initializeFacturacion } from './facturacion/index.js';
-import { initializePagos } from './pagos/index.js';
+import { initializeFacturacion } from './comprobantes/index.js';
+import { initializePagos } from './pagos-cobros/index.js';
 import { initializeReembolsos } from './reembolsos/index.js';
 
 const initializers = {

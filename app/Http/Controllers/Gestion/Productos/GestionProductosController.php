@@ -23,6 +23,7 @@ use App\Servicios\ServicioConfiguracionTienda;
 use App\Servicios\ServicioGestionProductos;
 use App\Servicios\ServicioInventario;
 use App\Servicios\ServicioPreciosMayoristas;
+use App\Servicios\ServicioPresentacionInventario;
 use App\Servicios\ServicioVariantesProducto;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -130,7 +131,7 @@ class GestionProductosController extends Controller
                 ->selectRaw('COUNT(*) AS cantidad, COALESCE(AVG(precio_actual.precio), 0) AS promedio')->first();
         }
 
-        return view('gestion.marketing.ecommerce-marketing.precios.listar', [
+        return view('gestion.ecommerce-marketing.precios-venta.listar', [
             'productos' => $productos,
             'paginacion' => $paginacion,
             'filtros' => $filtros,
@@ -254,7 +255,7 @@ class GestionProductosController extends Controller
         }
         unset($seccion);
 
-        return view('gestion.marketing.ecommerce-marketing.tienda.listar', [
+        return view('gestion.ecommerce-marketing.catalogo-publico.listar', [
             'empresa' => $empresa,
             'mediosPago' => $mediosPago,
             'configuracionTienda' => $configuracionTienda,
@@ -289,7 +290,7 @@ class GestionProductosController extends Controller
      * @param  mixed  $inventario  Parámetro recibido por la operación.
      * @return View Resultado de la operación.
      */
-    public function index(Request $request, ServicioInventario $inventario): View
+    public function index(Request $request, ServicioInventario $inventario, ServicioPresentacionInventario $presentacion): View
     {
         $filters = $this->filters($request);
         $alcance = $inventario->alcanceConsulta($request->user(), 'gestion.productos.consultar');
@@ -342,8 +343,16 @@ class GestionProductosController extends Controller
             }
         }
 
-        return view('gestion.inventario.productos.listar', [
+        $productPresentation = $paginaProductos->getCollection()
+            ->mapWithKeys(fn (Producto $producto): array => [
+                $producto->id => $presentacion->catalogProduct($producto),
+            ])
+            ->all();
+
+        return view('gestion.inventario-logistica.productos.listar', [
             'products' => $paginaProductos,
+            'exportParameters' => $request->query(),
+            'productPresentation' => $productPresentation,
             'categories' => Categoria::query()->where('empresa_id', $alcance['empresa_id'])->where('activo', true)->orderBy('nombre')->get(),
             'brands' => Producto::query()
                 ->where('empresa_id', $alcance['empresa_id'])
@@ -424,7 +433,9 @@ class GestionProductosController extends Controller
         }
 
         return back()
-            ->with('status', 'Producto guardado. Registra las existencias desde el módulo Inventario.')
+            ->with('status', (int) ($validated['existencias'] ?? 0) > 0
+                ? 'Producto guardado con sus existencias iniciales.'
+                : 'Producto guardado. Registra las existencias desde el módulo Inventario.')
             ->with('open_product_modal', $request->boolean('continue'));
     }
 
@@ -440,7 +451,7 @@ class GestionProductosController extends Controller
     {
         $this->authorize('update', $product);
         $validated = $request->validated();
-        $before = $product->only(['marca', 'nombre', 'categoria_id', 'precio', 'precio_oferta', 'url_imagen']);
+        $before = $product->only(['marca', 'nombre', 'categoria_id', 'precio', 'precio_oferta', 'existencias', 'url_imagen']);
         $data = $this->attributes($validated);
         $rutaImagenGuardada = null;
 

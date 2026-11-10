@@ -118,5 +118,5 @@
 
 {{-- Carga el comportamiento interactivo desde un archivo JavaScript externo. --}}
 @push('scripts')
-@vite('resources/js/gestion/roles-permisos/listar.js')
+@vite('resources/js/gestion/administracion/seguridad/roles-permisos/listar.js')
 @endpush

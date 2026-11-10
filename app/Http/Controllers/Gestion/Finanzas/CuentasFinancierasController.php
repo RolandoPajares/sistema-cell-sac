@@ -106,7 +106,7 @@ class CuentasFinancierasController extends Controller
         $pagina['aside']['descripcion'] = 'Registra obligaciones desde compras recibidas y aplica pagos o cobros locales previamente registrados.';
         $pagina['aviso'] = 'Los saldos se calculan con documentos, compras y aplicaciones registrados en MariaDB.';
 
-        return view('gestion.finanzas.cuentas.listar', ['paginaReal' => $pagina]);
+        return view('gestion.finanzas.cuentas-cobrar-pagar.listar', ['paginaReal' => $pagina]);
     }
 
     /**

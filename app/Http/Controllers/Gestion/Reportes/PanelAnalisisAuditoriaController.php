@@ -407,7 +407,7 @@ final class PanelAnalisisAuditoriaController extends Controller
      */
     private function vista(string $tipo): string
     {
-        return 'gestion.analitica.analisis-auditoria.'.$this->directorio($tipo).'.listar';
+        return 'gestion.analitica.'.$this->directorio($tipo).'.listar';
     }
 
     /**

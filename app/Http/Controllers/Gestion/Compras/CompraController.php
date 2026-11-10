@@ -541,7 +541,7 @@ class CompraController extends Controller
         $compraActualizada = $compra->fresh();
 
         return back()->with('status', $compraActualizada?->estado === 'Recibida'
-            ? 'La recepciÃ³n completÃ³ la compra y actualizÃ³ las existencias.'
-            : 'La recepciÃ³n parcial quedÃ³ registrada y la discrepancia se agregÃ³ a la auditorÃ­a.');
+            ? 'La recepción completó la compra y actualizó las existencias.'
+            : 'La recepción parcial quedó registrada y la discrepancia se agregó a la auditoría.');
     }
 }

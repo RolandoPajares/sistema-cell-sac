@@ -18,10 +18,9 @@
                     <thead><tr><th>Producto</th><th>Precio</th><th>Cantidad</th><th>Subtotal</th><th></th></tr></thead>
                     <tbody>
                         @foreach($lines as $line)
-                            @php($urlImagenPrincipal = $line['product']->url_imagen_principal)
                             <tr>
                                 <td class="cart-product-cell">
-                                    @if($urlImagenPrincipal)<img src="{{ $urlImagenPrincipal }}" alt="" loading="lazy">@else<span class="cart-product-placeholder" aria-hidden="true"><i class="bi bi-box-seam"></i></span>@endif
+                                    @if($line['product']->url_imagen_principal)<img src="{{ $line['product']->url_imagen_principal }}" alt="" loading="lazy">@else<span class="cart-product-placeholder" aria-hidden="true"><i class="bi bi-box-seam"></i></span>@endif
                                     <div><b>{{ $line['product']->marca }} {{ $line['product']->nombre }}</b>@if($line['variant'])<small>Variante: {{ $line['variant']->nombre_color }}{{ $line['variant']->codigo_sku ? ' · SKU '.$line['variant']->codigo_sku : '' }}</small>@endif</div>
                                 </td>
                                 <td>S/ {{ number_format((float) $line['product']->effective_price, 2) }}</td>

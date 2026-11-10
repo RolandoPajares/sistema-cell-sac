@@ -1,5 +1,3 @@
-@php($userPreferences = (array) (auth()->user()?->preferencias ?? []))
-@php($panelUser = auth()->user())
 <!doctype html>
 <html lang="es">
     <head>
@@ -7,12 +5,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>@yield('title', 'Panel CELL SAC')</title>
-        @vite(['resources/css/layouts/panel/principal.css', 'resources/js/layouts/panel/principal.js'])
+        @vite(['resources/css/layouts/panel/principal.css', 'resources/css/paneles/dashboard.css', 'resources/js/layouts/panel/principal.js', 'resources/js/gestion/comercial/pedidos/index.js'])
         <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.min.css') }}">
         @stack('styles')
     </head>
     <body class="admin-body admin-theme @yield('body_class')">
-        <div class="admin-layout admin-app" data-admin-app data-user-compact-menu="{{ array_key_exists('menu_compacto', $userPreferences) ? ($userPreferences['menu_compacto'] ? '1' : '0') : '' }}">
+        <div class="admin-layout admin-app" data-admin-app data-user-compact-menu="{{ array_key_exists('menu_compacto', $panelUserPreferences) ? ($panelUserPreferences['menu_compacto'] ? '1' : '0') : '' }}">
             @include('layouts.panel.menu-dinamico', ['links' => $sidebarLinks ?? []])
             <div class="admin-shell admin-content-shell">
                 @include('layouts.panel.encabezado')

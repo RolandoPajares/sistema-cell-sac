@@ -35,10 +35,10 @@
                 <i class="bi bi-cart3" aria-hidden="true"></i>
                 <sup>{{ collect((array) session('cart', []))->sum(fn (mixed $linea): int => is_array($linea) ? (int) ($linea['cantidad'] ?? 0) : (int) $linea) }}</sup>
             </a>
-            @auth
+            @if ($headerAuthenticated)
                 <a class="header-account" href="{{ route('dashboard') }}">
                     <i class="bi bi-person-circle" aria-hidden="true"></i>
-                    <span><b>Mi cuenta</b><small>{{ auth()->user()->nombre }}</small></span>
+                    <span><b>Mi cuenta</b><small>{{ $headerUser->nombre }}</small></span>
                 </a>
                 <form method="post" action="{{ route('logout') }}">
                     @csrf
@@ -54,7 +54,7 @@
             @else
                 <a class="btn btn-ghost" href="{{ route('login') }}">Ingresar</a>
                 <a class="btn btn-primary" href="{{ route('register') }}">Registrarme</a>
-            @endauth
+            @endif
         </div>
     </nav>
 </header>

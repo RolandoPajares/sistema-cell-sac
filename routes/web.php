@@ -439,6 +439,14 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
     Route::get('/configuracion-empresa', static fn (): RedirectResponse => redirect()->route('management.company_settings.data'))->name('company_settings');
     Route::get('/configuracion-seguridad', [ConfiguracionSistemaController::class, 'seguridad'])->name('security_settings');
     Route::get('/configuracion-general', [ConfiguracionSistemaController::class, 'general'])->name('general_settings');
+    Route::get('/configuracion/parametros-comerciales', [ConfiguracionSistemaController::class, 'configuracionGrupo'])
+        ->defaults('grupo', 'parametros-comerciales')->name('commercial_parameters');
+    Route::get('/configuracion/inventario', [ConfiguracionSistemaController::class, 'configuracionGrupo'])
+        ->defaults('grupo', 'inventario')->name('inventory_settings');
+    Route::get('/configuracion/finanzas', [ConfiguracionSistemaController::class, 'configuracionGrupo'])
+        ->defaults('grupo', 'finanzas')->name('finance_settings');
+    Route::put('/configuracion/parametros', [ConfiguracionSistemaController::class, 'actualizarConfiguracion'])
+        ->middleware('permiso:gestion.configuracion.actualizar')->name('configuration.update');
     Route::get('/configuracion/diseno/general', [ConfiguracionSistemaController::class, 'general'])
         ->middleware('permiso:ruta')->name('general_settings.preview');
     Route::get('/configuracion/diseno/integraciones', [ConfiguracionSistemaController::class, 'integraciones'])

@@ -28,6 +28,6 @@ class PublicidadInteligenteController extends Controller
      */
     public function ads(): View
     {
-        return view('gestion.marketing.campanias.publicidad-inteligente', $this->commerce->advertisingSummary());
+        return view('gestion.ecommerce-marketing.campanas.publicidad-inteligente', $this->commerce->advertisingSummary());
     }
 }

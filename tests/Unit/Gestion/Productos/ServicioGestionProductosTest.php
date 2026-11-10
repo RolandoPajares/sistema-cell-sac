@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Servicios\ServicioCatalogo;
 use App\Servicios\ServicioGestionProductos;
 use App\Servicios\ServicioInventario;
+use App\Servicios\ServicioStockProducto;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -33,10 +34,23 @@ beforeEach(function (): void {
         $table->unsignedInteger('producto_id');
         $table->unsignedInteger('proveedor_id');
     });
+    Schema::create('existencias_almacen', function (Blueprint $table): void {
+        $table->increments('id');
+        $table->unsignedBigInteger('empresa_id')->nullable();
+        $table->unsignedInteger('producto_id');
+        $table->unsignedInteger('variante_id')->nullable();
+        $table->decimal('cantidad_fisica', 12, 3)->default(0);
+    });
+    Schema::create('variantes_productos', function (Blueprint $table): void {
+        $table->increments('id');
+        $table->unsignedInteger('producto_id');
+    });
 });
 
 afterEach(function (): void {
     Schema::dropIfExists('productos_proveedores');
+    Schema::dropIfExists('existencias_almacen');
+    Schema::dropIfExists('variantes_productos');
     Schema::dropIfExists('productos');
 });
 
@@ -58,6 +72,7 @@ it('centraliza el alta y revierte la transacción cuando falla la auditoría', f
     $authorization->shouldReceive('atributosDeAlcance')->twice()->andReturn(['empresa_id' => 4]);
     $inventory = Mockery::mock(ServicioInventario::class);
     $inventory->shouldReceive('registerNewProduct')->twice();
+    $stock = new ServicioStockProducto($inventory);
     $catalog = Mockery::mock(ServicioCatalogo::class);
     $catalog->shouldReceive('sincronizarImagenPortada')->times(3);
     $audit = Mockery::mock(AuditoriaProductos::class);
@@ -69,7 +84,7 @@ it('centraliza el alta y revierte la transacción cuando falla la auditoría', f
         }
     });
 
-    $service = new ServicioGestionProductos($authorization, $inventory, $catalog, $audit);
+    $service = new ServicioGestionProductos($authorization, $inventory, $catalog, $audit, $stock);
     $product = $service->crear([
         'marca' => 'Marca QA', 'nombre' => 'Producto QA', 'categoria_id' => 1,
         'categoria' => 'Móviles', 'precio' => '100.00', 'url_imagen' => 'storage/producto.jpg',

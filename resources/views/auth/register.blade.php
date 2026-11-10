@@ -81,11 +81,11 @@
             </div>
 
             {{-- Botón para enviar el formulario de registro --}}
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Registrarme</button>
+            <button type="submit" class="btn btn-primary auth-submit">Registrarme</button>
         </form>
 
         {{-- Enlace de redirección si el usuario ya posee una cuenta --}}
-        <p>¿Ya tienes cuenta? <a style="color: var(--primary)" href="{{ route('login') }}">Inicia sesión</a>.</p>
+        <p>¿Ya tienes cuenta? <a class="auth-register-link" href="{{ route('login') }}">Inicia sesión</a>.</p>
         
     </div>
 </div>

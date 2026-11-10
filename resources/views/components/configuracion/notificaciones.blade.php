@@ -1,0 +1,40 @@
+<div class="tc-cs__grid tc-cs__grid--notify">
+    <div>
+        <article class="tc-cs__card">
+            <h2><i class="bi bi-sliders" aria-hidden="true"></i> Canales de notificación</h2>
+            <p class="tc-cs__hint">No existe catálogo persistente de canales en el esquema actual.</p>
+            <div class="tc-cs__empty"><i class="bi bi-bell" aria-hidden="true"></i><p>No hay canales configurados en MariaDB.</p></div>
+        </article>
+
+        <article class="tc-cs__card tc-cs__section">
+            <h2><i class="bi bi-lightning" aria-hidden="true"></i> Reglas de alerta</h2>
+            <div class="tc-cs__table-wrap"><table><thead><tr><th>Regla</th><th>Condición / Disparador</th><th>Canales</th><th>Acción</th></tr></thead><tbody><tr><td colspan="4">No hay reglas de notificación registradas.</td></tr></tbody></table></div>
+        </article>
+
+        <article class="tc-cs__card tc-cs__section">
+            <h2><i class="bi bi-list-ul" aria-hidden="true"></i> Eventos de notificaciones recientes</h2>
+            <form method="GET" class="tc-cs__toolbar">
+                <label><i class="bi bi-search" aria-hidden="true"></i><input type="search" name="buscar" value="{{ $filtros['buscar'] ?? '' }}" placeholder="Buscar en tus notificaciones…"></label>
+                <select name="estado" aria-label="Estado de notificaciones">
+                    <option value="todas" @selected(($filtros['estado'] ?? 'todas') === 'todas')>Todas</option>
+                    <option value="no_leidas" @selected(($filtros['estado'] ?? '') === 'no_leidas')>No leídas</option>
+                    <option value="leidas" @selected(($filtros['estado'] ?? '') === 'leidas')>Leídas</option>
+                </select>
+                <button type="submit" class="tc-cs__button">Buscar</button>
+            </form>
+            <div class="tc-cs__table-wrap"><table><thead><tr><th>Tipo</th><th>Contenido</th><th>Estado</th><th>Fecha</th><th>Acción</th></tr></thead><tbody>
+                @forelse ($notificaciones as $notificacion)
+                    <tr><td>{{ $notificacion->nombreTipo() }}</td><td>{{ $notificacion->datosLegibles() }}</td><td>{{ $notificacion->leido_en ? 'Leída' : 'No leída' }}</td><td>{{ $notificacion->creado_en }}</td><td>@if (! $notificacion->leido_en)<form method="post" action="{{ route('management.account.notifications.read', $notificacion->getKey()) }}">@csrf @method('PATCH')<button type="submit" class="tc-cs__text-button">Marcar como leída</button></form>@else<span>—</span>@endif</td></tr>
+                @empty
+                    <tr><td colspan="5">No tienes notificaciones que coincidan con la búsqueda.</td></tr>
+                @endforelse
+            </tbody></table></div>
+            {{ $notificaciones->links() }}
+        </article>
+    </div>
+
+    <aside>
+        <article class="tc-cs__card"><h2><i class="bi bi-layers" aria-hidden="true"></i> Plantillas de notificación</h2><div class="tc-cs__empty"><i class="bi bi-envelope" aria-hidden="true"></i><p>No hay plantillas persistidas; el esquema no incluye una tabla de plantillas.</p></div><button type="button" class="tc-cs__text-button" data-cs-action="plantilla" disabled title="Falta persistencia para plantillas.">Nueva plantilla <i class="bi bi-plus-lg" aria-hidden="true"></i></button></article>
+        <article class="tc-cs__card tc-cs__section"><h2><i class="bi bi-gear" aria-hidden="true"></i> Preferencias</h2><div class="tc-cs__empty"><i class="bi bi-gear" aria-hidden="true"></i><p>No hay preferencias de canales registradas.</p></div><button type="button" class="tc-cs__text-button" data-cs-action="preferencias" disabled title="Falta persistencia para preferencias.">Configurar preferencias <i class="bi bi-arrow-right" aria-hidden="true"></i></button></article>
+    </aside>
+</div>

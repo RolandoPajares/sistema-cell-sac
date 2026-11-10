@@ -15,13 +15,6 @@
         @include('layouts.tienda.encabezado')
 
         @unless(request()->routeIs('home'))
-            @php
-    $campaigns = collect($publicCampaigns ?? []);
-    $principalCampaign = $campaigns->firstWhere('ubicacion', 'emergente') ?? $campaigns->first();
-    $contextualCampaign = $campaigns->first(fn ($campaign): bool => $principalCampaign && $campaign->id !== $principalCampaign->id);
-    $advertisingContext = request()->routeIs('home') ? 'inicio' : 'general';
-@endphp
-
 @if($principalCampaign)
     <div class="publicidad-dinamica publicidad-{{ $advertisingContext }}" id="publicidadDinamica" data-contexto="{{ $advertisingContext }}" data-perfil="visitante" data-limite="4" data-espera="12000">
         <div class="publicidad-modal-fondo js-publicidad-modal" hidden>

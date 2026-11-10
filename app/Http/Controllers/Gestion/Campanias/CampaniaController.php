@@ -58,7 +58,7 @@ class CampaniaController extends Controller
         $currentClicks = (int) EventoCampania::query()->whereHas('campaign', static fn (Builder $consulta): Builder => $consulta->where('empresa_id', $empresaId))->where('tipo', 'clic')->whereBetween('creado_en', $currentMonth)->count();
         $previousClicks = (int) EventoCampania::query()->whereHas('campaign', static fn (Builder $consulta): Builder => $consulta->where('empresa_id', $empresaId))->where('tipo', 'clic')->whereBetween('creado_en', $previousMonth)->count();
 
-        return view('gestion.marketing.campanias.listar', [
+        return view('gestion.ecommerce-marketing.campanas.listar', [
             'campaigns' => $campaigns,
             'segments' => SegmentoCliente::query()->where('activo', true)->orderBy('nombre')->get(),
             'filters' => $filters,

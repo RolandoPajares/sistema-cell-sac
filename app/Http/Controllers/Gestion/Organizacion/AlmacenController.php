@@ -128,7 +128,7 @@ class AlmacenController extends Controller
             ->where('activa', true)
             ->orderBy('nombre')->orderBy('id')->get(['id', 'codigo', 'nombre']);
 
-        return view('gestion.administracion.organizacion.almacenes.listar', [
+        return view('gestion.inventario-logistica.almacenes.listar', [
             'almacenes' => $almacenes,
             'filtros' => $filtros,
             'sedes' => $sedes,

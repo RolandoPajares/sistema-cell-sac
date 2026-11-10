@@ -11,32 +11,7 @@
         </div>
         <div class="tc-ff__header-actions">
             @foreach ($pagina['acciones'] as $accion)
-                @php
-                    $actionIndex = $loop->index;
-                    $routeFlow = ($pagina['datosReales'] ?? false) ? null : match (($pagina['clave'] ?? '').'-'.$actionIndex) {
-                        'pagos-0' => 'pago',
-                        'pagos-1' => 'cobro',
-                        'reembolsos-0' => 'reembolso',
-                        default => null,
-                    };
-                    $modalName = ($pagina['datosReales'] ?? false) ? null : match (($pagina['clave'] ?? '').'-'.$actionIndex) {
-                        'cajas-0' => 'arqueos',
-                        'cajas-1' => 'nueva-caja',
-                        'aperturas-0' => 'apertura',
-                        'aperturas-1' => 'cierre',
-                        'cuentas-0' => 'obligacion',
-                        'cuentas-1' => 'abono',
-                        'reembolsos-1' => 'politicas',
-                        'notas-0' => 'nota',
-                        'notas-1' => 'validacion-documento',
-                        'series-0' => 'nueva-serie',
-                        'series-1' => 'correlativo',
-                        'sunat-0' => 'sunat-reenviar',
-                        'sunat-1' => 'sunat-cdr',
-                        default => null,
-                    };
-                @endphp
-                <button class="tc-ff__button {{ ($accion['primaria'] ?? false) ? 'tc-ff__button--primary' : '' }}" type="button" @if ($routeFlow && !empty($pagina['rutaReal'])) data-ff-navigate="{{ route($pagina['rutaReal'], ['financeAction' => $routeFlow]) }}" @elseif ($modalName) data-ff-open="{{ $modalName }}" @else disabled title="Disponible al conectar la operación real" @endif><i class="bi {{ $accion['icono'] }}" aria-hidden="true"></i>{{ $accion['texto'] }}</button>
+                <button class="tc-ff__button {{ ($accion['primaria'] ?? false) ? 'tc-ff__button--primary' : '' }}" type="button" @if ($accion['ruta_real'] && !empty($pagina['rutaReal'])) data-ff-navigate="{{ route($pagina['rutaReal'], ['financeAction' => $accion['ruta_real']]) }}" @elseif ($accion['modal']) data-ff-open="{{ $accion['modal'] }}" @else disabled title="Disponible al conectar la operación real" @endif><i class="bi {{ $accion['icono'] }}" aria-hidden="true"></i>{{ $accion['texto'] }}</button>
             @endforeach
         </div>
     </header>
@@ -64,20 +39,7 @@
             <div class="tc-ff__card-heading"><h2><i class="bi {{ $pagina['tablaIcono'] ?? 'bi-list-ul' }}" aria-hidden="true"></i>{{ $pagina['tablaTitulo'] }}</h2><small>{{ count($pagina['filas']) }} registros {{ ($pagina['datosReales'] ?? false) ? 'consultados' : 'de ejemplo' }}</small></div>
             <div class="tc-ff__table-wrap"><table><thead><tr>@foreach ($pagina['columnas'] as $columna)<th>{{ $columna }}</th>@endforeach<th>Acciones</th></tr></thead><tbody>
                 @foreach ($pagina['filas'] as $fila)
-                    @php
-                        $rowStatus = $fila['filtros']['estado'] ?? '';
-                        $rowAction = match ($pagina['clave'] ?? '') {
-                            'cajas' => 'editar-caja',
-                            'aperturas' => $rowStatus === 'Abierto' ? 'cierre-caja' : 'arqueo',
-                            'cuentas' => 'abono',
-                            'reembolsos' => match ($rowStatus) { 'Pendiente' => 'revisar-reembolso', 'Aprobado' => 'ejecutar-reembolso', default => '' },
-                            'notas' => in_array($rowStatus, ['Pendiente', 'Observada'], true) ? 'validacion-documento' : '',
-                            'series' => $rowStatus === 'Activa' ? 'cambio-serie' : '',
-                            'sunat' => match ($rowStatus) { 'Aceptado' => 'sunat-cdr', 'Rechazado', 'Observado' => 'sunat-reenviar', default => '' },
-                            default => '',
-                        };
-                    @endphp
-                    <tr data-ff-row data-ff-code="{{ $fila['celdas'][0] ?? '' }}" data-ff-row-action="{{ ($pagina['datosReales'] ?? false) ? '' : $rowAction }}" @foreach (($fila['filtros'] ?? []) as $campo => $valor) data-ff-{{ $campo }}="{{ $valor }}" @endforeach>@foreach ($fila['celdas'] as $celda)<td>@if (is_array($celda))<span class="tc-ff__pill tc-ff__pill--{{ $celda['tono'] ?? 'azul' }}">{{ $celda['texto'] }}</span>@else{{ $celda }}@endif</td>@endforeach<td><div class="tc-ff__row-actions"><button type="button" data-ff-detail @disabled(!($pagina['datosReales'] ?? false)) title="{{ ($pagina['datosReales'] ?? false) ? 'Consultar detalle real' : 'Consultar detalle de ejemplo' }}" aria-label="{{ ($pagina['datosReales'] ?? false) ? 'Consultar detalle real' : 'Consultar detalle de ejemplo' }}"><i class="bi bi-eye" aria-hidden="true"></i></button><button type="button" data-ff-row-action @disabled(($pagina['datosReales'] ?? false) || $rowAction === '') title="{{ ($pagina['datosReales'] ?? false) ? 'Operación no conectada' : ($rowAction === '' ? 'No hay acción demostrativa disponible' : 'Abrir advertencia de ' . $rowAction) }}" aria-label="Operación no conectada"><i class="bi bi-three-dots-vertical" aria-hidden="true"></i></button></div></td></tr>
+                    <tr data-ff-row data-ff-code="{{ $fila['celdas'][0] ?? '' }}" data-ff-row-action="{{ ($pagina['datosReales'] ?? false) ? '' : $fila['accion'] }}" @foreach (($fila['filtros'] ?? []) as $campo => $valor) data-ff-{{ $campo }}="{{ $valor }}" @endforeach>@foreach ($fila['celdas'] as $celda)<td>@if (is_array($celda))<span class="tc-ff__pill tc-ff__pill--{{ $celda['tono'] ?? 'azul' }}">{{ $celda['texto'] }}</span>@else{{ $celda }}@endif</td>@endforeach<td><div class="tc-ff__row-actions"><button type="button" data-ff-detail @disabled(!($pagina['datosReales'] ?? false)) title="{{ ($pagina['datosReales'] ?? false) ? 'Consultar detalle real' : 'Consultar detalle de ejemplo' }}" aria-label="{{ ($pagina['datosReales'] ?? false) ? 'Consultar detalle real' : 'Consultar detalle de ejemplo' }}"><i class="bi bi-eye" aria-hidden="true"></i></button><button type="button" data-ff-row-action @disabled(($pagina['datosReales'] ?? false) || $fila['accion'] === '') title="{{ ($pagina['datosReales'] ?? false) ? 'Operación no conectada' : ($fila['accion'] === '' ? 'No hay acción demostrativa disponible' : 'Abrir advertencia de ' . $fila['accion']) }}" aria-label="Operación no conectada"><i class="bi bi-three-dots-vertical" aria-hidden="true"></i></button></div></td></tr>
                 @endforeach
             </tbody></table></div><p class="tc-ff__empty" data-ff-empty hidden>{{ ($pagina['datosReales'] ?? false) ? 'No hay cuentas registradas que coincidan con los filtros.' : 'No hay registros de ejemplo que coincidan con los filtros.' }}</p>
         </article>
@@ -90,26 +52,26 @@
                     <button class="tc-ff__button tc-ff__button--primary tc-ff__submit tc-ff__form-full" type="submit" @disabled($pagina['comprasRecibidas']->isEmpty())>Crear cuenta por pagar</button>
                     @if ($pagina['comprasRecibidas']->isEmpty())<small class="tc-ff__form-full">No hay compras recibidas sin cuenta dentro de las sedes autorizadas.</small>@endif
                 </form>
-                @php($cuentasPorPagar = collect($pagina['filas'])->where('tipo_cuenta', 'Por pagar'))
-                @php($cuentasPorCobrar = collect($pagina['filas'])->where('tipo_cuenta', 'Por cobrar'))
-                @if ($cuentasPorPagar->isNotEmpty())
+
+
+                @if ($pagina['cuentasPorPagar']->isNotEmpty())
                     <form class="tc-ff__form-grid" method="post" action="{{ route('management.payments.accounts.payables.update') }}" data-account-application>
                         @csrf
-                        <label class="tc-ff__form-full">Cuenta por pagar <em>*</em><select name="cuenta_pagar_id" required data-account-select><option value="">Selecciona la cuenta</option>@foreach ($cuentasPorPagar as $cuenta)<option value="{{ $cuenta['cuenta_id'] }}">{{ $cuenta['celdas'][0] }} · {{ $cuenta['celdas'][1] }} · saldo {{ $cuenta['celdas'][5] }}</option>@endforeach</select></label>
+                        <label class="tc-ff__form-full">Cuenta por pagar <em>*</em><select name="cuenta_pagar_id" required data-account-select><option value="">Selecciona la cuenta</option>@foreach ($pagina['cuentasPorPagar'] as $cuenta)<option value="{{ $cuenta['cuenta_id'] }}">{{ $cuenta['celdas'][0] }} · {{ $cuenta['celdas'][1] }} · saldo {{ $cuenta['celdas'][5] }}</option>@endforeach</select></label>
                         <label class="tc-ff__form-full">Pago ya registrado <em>*</em><select name="pago_id" required data-registered-payment-select><option value="">Selecciona un pago registrado</option>@foreach ($pagina['pagosPorCuenta'] as $cuentaId => $pagos)<optgroup label="Cuenta {{ $cuentaId }}">@foreach ($pagos as $pago)<option value="{{ $pago->id }}" data-cuenta="{{ $cuentaId }}">{{ $pago->codigo }} · {{ $pago->moneda }} {{ number_format((float) $pago->importe, 2) }}</option>@endforeach</optgroup>@endforeach</select></label>
                         <label class="tc-ff__form-full">Importe a aplicar <em>*</em><input type="number" name="importe" min="0.01" step="0.01" required></label>
-                        <button class="tc-ff__button tc-ff__button--primary tc-ff__submit tc-ff__form-full" type="submit" @disabled(collect($pagina['pagosPorCuenta'])->flatten(1)->isEmpty())>Aplicar pago registrado</button>
-                        @if (collect($pagina['pagosPorCuenta'])->flatten(1)->isEmpty())<small class="tc-ff__form-full">No hay pagos registrados sin aplicar a las cuentas visibles.</small>@endif
+                        <button class="tc-ff__button tc-ff__button--primary tc-ff__submit tc-ff__form-full" type="submit" @disabled(! $pagina['tienePagosPorCuenta'])>Aplicar pago registrado</button>
+                        @if (! $pagina['tienePagosPorCuenta'])<small class="tc-ff__form-full">No hay pagos registrados sin aplicar a las cuentas visibles.</small>@endif
                     </form>
                 @endif
-                @if ($cuentasPorCobrar->isNotEmpty())
+                @if ($pagina['cuentasPorCobrar']->isNotEmpty())
                     <form class="tc-ff__form-grid" method="post" action="{{ route('management.payments.accounts.receivables.update') }}" data-account-application>
                         @csrf
-                        <label class="tc-ff__form-full">Cuenta por cobrar <em>*</em><select name="cuenta_cobrar_id" required data-account-select><option value="">Selecciona la cuenta</option>@foreach ($cuentasPorCobrar as $cuenta)<option value="{{ $cuenta['cuenta_id'] }}">{{ $cuenta['celdas'][0] }} · {{ $cuenta['celdas'][1] }} · saldo {{ $cuenta['celdas'][5] }}</option>@endforeach</select></label>
+                        <label class="tc-ff__form-full">Cuenta por cobrar <em>*</em><select name="cuenta_cobrar_id" required data-account-select><option value="">Selecciona la cuenta</option>@foreach ($pagina['cuentasPorCobrar'] as $cuenta)<option value="{{ $cuenta['cuenta_id'] }}">{{ $cuenta['celdas'][0] }} · {{ $cuenta['celdas'][1] }} · saldo {{ $cuenta['celdas'][5] }}</option>@endforeach</select></label>
                         <label class="tc-ff__form-full">Cobro ya registrado <em>*</em><select name="pago_id" required data-registered-payment-select><option value="">Selecciona un cobro registrado</option>@foreach ($pagina['pagosCobroPorCuenta'] as $cuentaId => $pagos)<optgroup label="Cuenta {{ $cuentaId }}">@foreach ($pagos as $pago)<option value="{{ $pago->id }}" data-cuenta="{{ $cuentaId }}">{{ $pago->codigo }} · {{ $pago->moneda }} {{ number_format((float) $pago->importe, 2) }}</option>@endforeach</optgroup>@endforeach</select></label>
                         <label class="tc-ff__form-full">Importe a aplicar <em>*</em><input type="number" name="importe" min="0.01" step="0.01" required></label>
-                        <button class="tc-ff__button tc-ff__button--primary tc-ff__submit tc-ff__form-full" type="submit" @disabled(collect($pagina['pagosCobroPorCuenta'])->flatten(1)->isEmpty())>Aplicar cobro registrado</button>
-                        @if (collect($pagina['pagosCobroPorCuenta'])->flatten(1)->isEmpty())<small class="tc-ff__form-full">No hay cobros registrados sin aplicar a las cuentas visibles.</small>@endif
+                        <button class="tc-ff__button tc-ff__button--primary tc-ff__submit tc-ff__form-full" type="submit" @disabled(! $pagina['tienePagosCobroPorCuenta'])>Aplicar cobro registrado</button>
+                        @if (! $pagina['tienePagosCobroPorCuenta'])<small class="tc-ff__form-full">No hay cobros registrados sin aplicar a las cuentas visibles.</small>@endif
                     </form>
                 @endif
             @elseif (($pagina['aside']['tipo'] ?? 'formulario') === 'resumen')

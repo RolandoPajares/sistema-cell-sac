@@ -5,7 +5,7 @@
 
 @section('content')
 <section class="tc-org" data-organizacion="sedes" data-org-create-route="{{ route('management.company_settings.sites.store') }}">
-    @include('gestion.organizacion.componentes.cabecera', [
+    @include('gestion.administracion.organizacion.componentes.cabecera', [
         'titulo' => 'Administración de sedes',
         'icono' => 'bi-shop',
         'descripcion' => 'Consulta y administra las sedes registradas para '.($empresa?->nombre_comercial ?: $empresa?->razon_social ?: 'la empresa activa').'.',
@@ -28,10 +28,10 @@
     @endif
 
     <div class="tc-org__metrics">
-        @include('gestion.organizacion.componentes.metrica', ['titulo' => 'Total de sedes', 'valor' => $resumen['total'], 'icono' => 'bi-shop', 'detalle' => 'Empresa activa autorizada'])
-        @include('gestion.organizacion.componentes.metrica', ['titulo' => 'Sedes activas', 'valor' => $resumen['activas'], 'icono' => 'bi-shield-check', 'tono' => 'verde', 'detalle' => 'Disponibles para operaciones'])
-        @include('gestion.organizacion.componentes.metrica', ['titulo' => 'Sedes inactivas', 'valor' => $resumen['inactivas'], 'icono' => 'bi-shop-window', 'tono' => 'violeta', 'detalle' => 'Conservadas en MariaDB'])
-        @include('gestion.organizacion.componentes.metrica', ['titulo' => 'Almacenes asociados', 'valor' => $totalAlmacenes, 'icono' => 'bi-box-seam', 'detalle' => 'Conteo en las sedes de la empresa'])
+        @include('gestion.administracion.organizacion.componentes.metrica', ['titulo' => 'Total de sedes', 'valor' => $resumen['total'], 'icono' => 'bi-shop', 'detalle' => 'Empresa activa autorizada'])
+        @include('gestion.administracion.organizacion.componentes.metrica', ['titulo' => 'Sedes activas', 'valor' => $resumen['activas'], 'icono' => 'bi-shield-check', 'tono' => 'verde', 'detalle' => 'Disponibles para operaciones'])
+        @include('gestion.administracion.organizacion.componentes.metrica', ['titulo' => 'Sedes inactivas', 'valor' => $resumen['inactivas'], 'icono' => 'bi-shop-window', 'tono' => 'violeta', 'detalle' => 'Conservadas en MariaDB'])
+        @include('gestion.administracion.organizacion.componentes.metrica', ['titulo' => 'Almacenes asociados', 'valor' => $totalAlmacenes, 'icono' => 'bi-box-seam', 'detalle' => 'Conteo en las sedes de la empresa'])
     </div>
 
     <form class="tc-org__filters" method="get" action="{{ route('management.company_settings.sites') }}">
@@ -96,6 +96,6 @@
         <article class="tc-org__card"><h2 class="tc-org__section-heading"><i class="bi bi-info-circle" aria-hidden="true"></i> Datos disponibles</h2><p class="tc-org__section-copy">Cada sede utiliza los campos definidos por el esquema vigente.</p><p>Código, nombre, dirección, teléfono, zona horaria y estado operativo.</p></article>
     </div>
 
-    @include('gestion.organizacion.componentes.modales', ['tipo' => 'sedes'])
+    @include('gestion.administracion.organizacion.componentes.modales', ['tipo' => 'sedes'])
 </section>
 @endsection

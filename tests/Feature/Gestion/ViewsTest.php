@@ -13,20 +13,20 @@ use Tests\SpanishAccessFixture;
 it('renders each management module with its canonical list view', function () {
     $admin = SpanishAccessFixture::user('administrador');
     $viewsByRoute = [
-        'management.audit' => 'gestion.analitica.analisis-auditoria.auditoria-operaciones.listar',
-        'management.campaigns' => 'gestion.marketing.campanias.listar',
-        'management.categories' => 'gestion.inventario.categorias.listar',
+        'management.audit' => 'gestion.analitica.auditoria-operaciones.listar',
+        'management.campaigns' => 'gestion.ecommerce-marketing.campanas.listar',
+        'management.categories' => 'gestion.inventario-logistica.categorias.listar',
         'management.customers' => 'gestion.comercial.clientes.listar',
         'management.purchases' => 'gestion.comercial.compras.listar',
         'quotations.index' => 'gestion.comercial.cotizaciones.listar',
         'management.quotations' => 'gestion.comercial.cotizaciones.listar',
-        'management.coupons' => 'gestion.marketing.cupones.listar',
-        'management.inventory' => 'gestion.inventario.existencias.listar',
-        'management.products' => 'gestion.inventario.productos.listar',
+        'management.coupons' => 'gestion.ecommerce-marketing.promociones-cupones.listar',
+        'management.inventory' => 'gestion.inventario-logistica.existencias-movimientos.listar-existencias',
+        'management.products' => 'gestion.inventario-logistica.productos.listar',
         'management.suppliers' => 'gestion.comercial.proveedores.listar',
         'management.reports' => 'gestion.analitica.reportes.listar',
-        'management.segments' => 'gestion.marketing.segmentos.listar',
-        'management.users' => 'gestion.administracion.usuarios.listar',
+        'management.segments' => 'gestion.ecommerce-marketing.segmentos.listar',
+        'management.users' => 'gestion.administracion.seguridad.usuarios.listar',
     ];
 
     foreach ($viewsByRoute as $routeName => $viewName) {
@@ -327,7 +327,7 @@ it('opens the independent inventory movement history within RBAC scope', functio
     $this->withoutVite()->actingAs($admin)
         ->get(route('management.inventory.movements'))
         ->assertOk()
-        ->assertViewIs('gestion.inventario.existencias.listar')
+        ->assertViewIs('gestion.inventario-logistica.existencias-movimientos.listar-existencias')
         ->assertViewHas('verHistorialMovimientos', true)
         ->assertViewHas('recentMovements', fn ($movimientos): bool => $movimientos->total() === 1)
         ->assertSee('Historial de movimientos')

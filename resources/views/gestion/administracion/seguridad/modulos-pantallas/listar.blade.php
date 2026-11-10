@@ -88,5 +88,5 @@
 @endsection
 
 @push('scripts')
-@vite('resources/js/gestion/roles-permisos/modulos.js')
+@vite('resources/js/gestion/administracion/seguridad/roles-permisos/modulos.js')
 @endpush

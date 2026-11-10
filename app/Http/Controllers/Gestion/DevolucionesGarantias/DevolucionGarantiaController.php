@@ -117,7 +117,7 @@ class DevolucionGarantiaController extends Controller
             : 'No hay casos resueltos registrados.';
         $module['operacion_ui']['rows'] = $returns->getCollection()->map(fn (DevolucionGarantia $return): array => $this->tableRow($return))->all();
 
-        return view('gestion.inventario.devoluciones-garantias.listar', compact('module'));
+        return view('gestion.comercial.devoluciones-garantias.listar', compact('module'));
     }
 
     /**

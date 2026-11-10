@@ -73,5 +73,5 @@
 @endforeach
 @endsection
 @push('scripts')
-@vite('resources/js/gestion/roles-permisos/asignaciones.js')
+@vite('resources/js/gestion/administracion/seguridad/roles-permisos/asignaciones.js')
 @endpush

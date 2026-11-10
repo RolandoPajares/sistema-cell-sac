@@ -151,6 +151,24 @@ class VentaController extends Controller
                 }
             }
         }
+        $salesPresentation = $orders->getCollection()->mapWithKeys(function (Venta $order): array {
+            $customerName = $order->cliente?->razon_social ?: $order->cliente?->nombre_contacto;
+
+            return [$order->id => [
+                'initials' => $this->initialsFor($customerName),
+                'status' => $this->statusFor($order->estado),
+            ]];
+        });
+        $devicesUnavailable = $orders->getCollection()->mapWithKeys(function (Venta $order) use ($dispositivosPorDetalle): array {
+            $unavailable = $order->detalles->contains(function ($detail) use ($dispositivosPorDetalle): bool {
+                $configuration = $dispositivosPorDetalle->get($detail->getKey());
+
+                return ($configuration['requiere'] ?? false)
+                    && $configuration['dispositivos']->count() < (int) $detail->cantidad;
+            });
+
+            return [$order->id => $unavailable];
+        });
         $filtrosDisponibles = array_replace($filtros, ['cliente_id' => null, 'sede_id' => null]);
         $clientesDisponibles = Cliente::query()->whereIn('id', $this->ventas->query($request->user(), $filtrosDisponibles)->select('ventas.cliente_id'))
             ->orderBy('razon_social')->orderBy('id')->get(['id', 'razon_social', 'nombre_contacto']);
@@ -166,6 +184,12 @@ class VentaController extends Controller
             'editables' => $editables,
             'confirmables' => $confirmables,
             'dispositivosPorDetalle' => $dispositivosPorDetalle,
+            'devicesUnavailable' => $devicesUnavailable,
+            'salesPresentation' => $salesPresentation,
+            'queryWithoutPage' => $request->except(['page']),
+            'periodStartLabel' => CarbonImmutable::parse($filtros['desde'])->format('d/m/Y'),
+            'periodEndLabel' => CarbonImmutable::parse($filtros['hasta'])->format('d/m/Y'),
+            'hasActiveFilters' => $this->hasActiveFilters($filtros),
             'clientesDisponibles' => $clientesDisponibles,
             'sedesDisponibles' => $sedesDisponibles,
             'latestSales' => (clone $query)->with('cliente')->orderByDesc('ventas.fecha_venta')->orderByDesc('ventas.id')->limit(5)->get(),
@@ -176,6 +200,32 @@ class VentaController extends Controller
             'canCreate' => $canCreate,
             'editOrder' => $editOrder,
         ]);
+    }
+
+    private function initialsFor(?string $name): string
+    {
+        $parts = preg_split('/\s+/', trim((string) $name), -1, PREG_SPLIT_NO_EMPTY);
+
+        return collect(array_slice($parts ?: ['CL'], 0, 2))
+            ->map(static fn (string $part): string => mb_strtoupper(mb_substr($part, 0, 1)))
+            ->implode('');
+    }
+
+    /** @return array{label: string, class: string} */
+    private function statusFor(?string $status): array
+    {
+        return ['label' => $status ?: 'Sin estado', 'class' => 'muted'];
+    }
+
+    private function hasActiveFilters(array $filters): bool
+    {
+        return (bool) (($filters['buscar'] ?? null)
+            || ($filters['estado'] ?? null)
+            || ($filters['canal'] ?? null)
+            || ($filters['cliente_id'] ?? null)
+            || ($filters['sede_id'] ?? null)
+            || $filters['desde'] !== now()->subDays(29)->toDateString()
+            || $filters['hasta'] !== now()->toDateString());
     }
 
     /**
