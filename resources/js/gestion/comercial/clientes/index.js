@@ -7,6 +7,8 @@
         document.querySelectorAll("[data-client-form]").forEach((form) => {
             const options = [...form.querySelectorAll("[data-client-person]")];
             const legalFields = [...form.querySelectorAll("[data-legal-only]")];
+            const naturalFields = [...form.querySelectorAll("[data-client-natural-fields]")];
+            const juridicaFields = [...form.querySelectorAll("[data-client-juridica-fields]")];
             const naturalLabels = [
                 ...form.querySelectorAll("[data-natural-label]"),
             ];
@@ -19,6 +21,27 @@
             const contactInput = form.querySelector(
                 "[data-contact-name] input",
             );
+            const hiddenContactInput = form.querySelector("[data-client-contact-input]");
+            const firstName = form.querySelector("[data-client-first-name]");
+            const lastName = form.querySelector("[data-client-last-name]");
+            const legalName = form.querySelector("[data-client-legal-name]");
+            const companyDocument = form.querySelector("[data-client-company-document]");
+            const documentInput = form.querySelector('input[name="documento"]');
+            const hiddenDocumentType = form.querySelector("[data-client-document-hidden]");
+            const companyDocumentType = form.querySelector("[data-client-document-type-company]");
+
+            const syncContactName = () => {
+                if (!hiddenContactInput) return;
+                hiddenContactInput.value = personType === "juridica"
+                    ? (legalName?.value || "")
+                    : `${firstName?.value || ""} ${lastName?.value || ""}`.trim();
+            };
+
+            const syncDocument = () => {
+                if (!documentInput || !companyDocument) return;
+                if (form.dataset.personType === "juridica") documentInput.value = companyDocument.value;
+                else companyDocument.value = documentInput.value;
+            };
 
             const updateForm = (personType) => {
                 form.dataset.personType = personType;
@@ -33,6 +56,8 @@
                 legalFields.forEach((field) => {
                     field.hidden = personType !== "juridica";
                 });
+                naturalFields.forEach((field) => { field.hidden = personType !== "natural"; });
+                juridicaFields.forEach((field) => { field.hidden = personType !== "juridica"; });
                 naturalLabels.forEach((label) => {
                     label.hidden = personType !== "natural";
                 });
@@ -49,6 +74,12 @@
                     documentType.value =
                         personType === "juridica" ? "ruc" : "dni";
                 }
+                if (companyDocumentType) companyDocumentType.value = "ruc";
+                if (companyDocument && documentInput && personType === "juridica" && !companyDocument.value) companyDocument.value = documentInput.value;
+                if (hiddenDocumentType) hiddenDocumentType.value = personType === "juridica" ? "ruc" : "dni";
+                [firstName, lastName, legalName].filter(Boolean).forEach((field) => field.addEventListener("input", syncContactName));
+                syncContactName();
+                syncDocument();
             };
 
             options.forEach((option) =>
@@ -56,6 +87,7 @@
                     updateForm(option.dataset.clientPerson),
                 ),
             );
+            companyDocument?.addEventListener("input", syncDocument);
             updateForm(form.dataset.personType || "natural");
         });
     };

@@ -56,14 +56,18 @@ class RolesPermisosController extends Controller
     public function storeProfileField(CrearCampoPerfilRequest $request, RegistradorAuditoria $auditoria): RedirectResponse
     {
         $data = $request->validated();
-        $field = DB::transaction(fn (): PerfilCampo => PerfilCampo::query()->create([
-            ...$data,
-            'opciones' => $data['tipo'] === 'select' ? ($data['opciones'] ?? []) : null,
-            'orden' => $data['orden'] ?? 0,
-            'activo' => $data['activo'] ?? true,
-        ]));
+        $field = DB::transaction(function () use ($data, $request, $auditoria): PerfilCampo {
+            $field = PerfilCampo::query()->create([
+                ...$data,
+                'opciones' => $data['tipo'] === 'select' ? ($data['opciones'] ?? []) : null,
+                'orden' => $data['orden'] ?? 0,
+                'activo' => $data['activo'] ?? true,
+            ]);
 
-        $auditoria->record($request->user()->getKey(), 'crear_campo_perfil', 'perfil_campos', $field->getKey(), null, $field->only(['codigo', 'tipo']), $request->ip());
+            $auditoria->record($request->user()->getKey(), 'crear_campo_perfil', 'perfil_campos', $field->getKey(), null, $field->only(['codigo', 'tipo']), $request->ip());
+
+            return $field;
+        });
 
         return back()->with('status', 'Campo adicional de perfil creado.');
     }
@@ -293,13 +297,17 @@ class RolesPermisosController extends Controller
             abort_unless($request->user()->can('gestion.seguridad.consultar'), 403);
         }
 
-        $role = DB::transaction(fn (): Rol => Rol::query()->create([
-            ...$data,
-            'es_sistema' => false,
-            'activo' => true,
-        ]));
+        $role = DB::transaction(function () use ($data, $request, $auditoria): Rol {
+            $role = Rol::query()->create([
+                ...$data,
+                'es_sistema' => false,
+                'activo' => true,
+            ]);
 
-        $auditoria->record($request->user()->getKey(), 'crear_rol', 'roles', $role->getKey(), null, ['codigo' => $role->codigo, 'alcance' => $role->alcance_permitido], $request->ip());
+            $auditoria->record($request->user()->getKey(), 'crear_rol', 'roles', $role->getKey(), null, ['codigo' => $role->codigo, 'alcance' => $role->alcance_permitido], $request->ip());
+
+            return $role;
+        });
 
         return back()->with('status', 'El rol '.$role->nombre.' fue creado sin privilegios iniciales.');
     }
@@ -354,7 +362,7 @@ class RolesPermisosController extends Controller
             ->all();
 
         abort_if(
-            $this->isGlobalSecurityRole($role) && $delegacion->esUltimoAdministradorGlobal($request->user()),
+            $this->esRolSeguridadGlobal($role) && $delegacion->esUltimoAdministradorGlobal($request->user()),
             422,
             'No se puede modificar el último acceso administrativo global.'
         );
@@ -446,7 +454,7 @@ class RolesPermisosController extends Controller
             ->map(static fn (mixed $id): int => (int) $id);
         abort_unless(collect($permissionIds)->intersect($protectedPermissionIds)->diff($currentProtectedPermissionIds)->isEmpty(), 422, 'El módulo Seguridad y Delegación está protegido.');
         $permissionIds = collect($permissionIds)->diff($protectedPermissionIds)->merge($currentProtectedPermissionIds)->unique()->values()->all();
-        abort_if($this->isGlobalSecurityRole($role) && $delegacion->esUltimoAdministradorGlobal($request->user()), 422, 'No se puede modificar el último acceso administrativo global.');
+        abort_if($this->esRolSeguridadGlobal($role) && $delegacion->esUltimoAdministradorGlobal($request->user()), 422, 'No se puede modificar el último acceso administrativo global.');
 
         DB::transaction(function () use ($role, $screen, $screenPermissionIds, $permissionIds, $scope, $request, $auditoria): void {
             $lockedRole = Rol::query()->whereKey($role->getKey())->lockForUpdate()->firstOrFail();
@@ -483,7 +491,7 @@ class RolesPermisosController extends Controller
     public function update(ActualizarRolRequest $request, Rol $role, ServicioDelegacion $delegacion, RegistradorAuditoria $auditoria): RedirectResponse
     {
         abort_if(
-            $this->isGlobalSecurityRole($role) && $delegacion->esUltimoAdministradorGlobal($request->user()),
+            $this->esRolSeguridadGlobal($role) && $delegacion->esUltimoAdministradorGlobal($request->user()),
             422,
             'No se puede editar el último acceso administrativo global.'
         );
@@ -520,7 +528,7 @@ class RolesPermisosController extends Controller
     public function updateStatus(Request $request, Rol $role, ServicioDelegacion $delegacion, RegistradorAuditoria $auditoria): RedirectResponse
     {
         abort_if(
-            $this->isGlobalSecurityRole($role) && $delegacion->esUltimoAdministradorGlobal($request->user()),
+            $this->esRolSeguridadGlobal($role) && $delegacion->esUltimoAdministradorGlobal($request->user()),
             422,
             'No se puede desactivar el último acceso administrativo global.'
         );
@@ -542,7 +550,7 @@ class RolesPermisosController extends Controller
         return back()->with('status', $activo ? 'El rol fue reactivado.' : 'El rol fue desactivado.');
     }
 
-    private function isGlobalSecurityRole(Rol $role): bool
+    private function esRolSeguridadGlobal(Rol $role): bool
     {
         return $role->permisos()
             ->where('permisos.codigo', 'gestion.seguridad.actualizar')

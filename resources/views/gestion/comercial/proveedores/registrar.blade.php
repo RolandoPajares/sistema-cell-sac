@@ -1,47 +1,33 @@
-<form method="post" class="form-card proveedores-form" action="{{ route('management.suppliers.store') }}">
+<form method="post" class="form-card proveedores-form proveedores-form-redisenado" action="{{ route('management.suppliers.store') }}">
     @csrf
-
-    {{-- Encabezado y contexto del formulario de alta. --}}
-    <header class="proveedores-form-heading">
-        <div><span>Compras y logística</span><h2>Registrar proveedor</h2><p>Completa la información comercial y de contacto.</p></div>
-        <small>Propuesta de interfaz</small>
+    <header class="proveedores-form-heading proveedores-form-heading-modern">
+        <div><span>Compras y logística</span><h2>Nuevo proveedor</h2><p>Completa la información del proveedor para registrarlo en el sistema.</p></div>
     </header>
 
-    {{-- Identificación legal y comercial del proveedor. --}}
-    <fieldset class="proveedores-form-section">
-        <legend>1. Identificación</legend>
-        <label class="proveedores-form-field proveedores-form-field--full"><span>Tipo de persona</span><select name="tipo_persona" data-provider-person-type><option value="natural">Persona natural</option><option value="juridica" selected>Persona jurídica</option></select></label>
-        <div class="proveedores-form-grid">
-            <label class="proveedores-form-field"><span data-provider-document-type-label>Tipo de documento</span><select name="tipo_documento" data-provider-document-type><option value="ruc" selected>RUC</option><option value="dni">DNI</option></select></label>
-            <label class="proveedores-form-field"><span data-provider-document-label>Número de documento <b>*</b></span><input name="ruc" required maxlength="20" placeholder="Ingresar documento" value="{{ old('ruc') }}" data-provider-document-input></label>
-        </div>
-        <label class="proveedores-form-field proveedores-form-field--full"><span data-provider-name-label>Razón social <b>*</b></span><input name="nombre" required maxlength="160" placeholder="Razón social del proveedor" value="{{ old('nombre') }}" data-provider-name-input></label>
-        <label class="proveedores-form-field proveedores-form-field--full"><span>Nombre comercial <small>(opcional)</small></span><input name="nombre_comercial" maxlength="160" placeholder="Nombre comercial" value="{{ old('nombre_comercial') }}"></label>
+    <section class="proveedores-modern-type"><i class="bi bi-people" aria-hidden="true"></i><div><strong>Tipo de proveedor</strong><small>Selecciona la naturaleza del proveedor.</small></div><select name="tipo_persona" data-provider-person-type><option value="natural" @selected(old('tipo_persona', 'natural') === 'natural')>Persona natural</option><option value="juridica" @selected(old('tipo_persona') === 'juridica')>Persona jurídica</option></select></section>
+
+    <fieldset class="proveedores-modern-section" data-provider-natural-fields hidden>
+        <legend><i class="bi bi-person" aria-hidden="true"></i> Datos del proveedor</legend>
+        <div class="proveedores-modern-grid"><label>Nombres <b>*</b><input data-provider-first-name placeholder="Ingresa los nombres" autocomplete="given-name"></label><label>Apellidos <b>*</b><input data-provider-last-name placeholder="Ingresa los apellidos" autocomplete="family-name"></label></div>
     </fieldset>
 
-    {{-- Datos de contacto que se muestran y validan en el registro. --}}
-    <fieldset class="proveedores-form-section">
-        <legend>2. Contacto</legend>
-        <div class="proveedores-form-grid">
-            <label class="proveedores-form-field"><span>Teléfono</span><input name="telefono" maxlength="30" placeholder="Número" value="{{ old('telefono') }}"></label>
-            <label class="proveedores-form-field"><span>Correo electrónico <b>*</b></span><input type="email" name="correo" required maxlength="160" placeholder="proveedor@correo.com" value="{{ old('correo') }}"></label>
-        </div>
-        <label class="proveedores-form-field proveedores-form-field--full"><span>Dirección</span><input name="ciudad" maxlength="80" placeholder="Dirección del proveedor" value="{{ old('ciudad') }}"></label>
+    <fieldset class="proveedores-modern-section" data-provider-juridica-fields hidden>
+        <legend><i class="bi bi-building" aria-hidden="true"></i> Información empresarial</legend>
+        <div class="proveedores-modern-grid"><label>Razón social <b>*</b><input data-provider-legal-name placeholder="Ej. Tecnología Cell S.A.C."></label><label>Nombre comercial <small>(opcional)</small><input name="nombre_comercial" placeholder="Ej. Technology Cell"></label></div>
     </fieldset>
 
-    {{-- Condiciones comerciales informativas del proveedor. --}}
-    <fieldset class="proveedores-form-section">
-        <legend>3. Condiciones comerciales</legend>
-        <label class="proveedores-form-field proveedores-form-field--full"><span>Tipo de suministro</span><select name="tipo_suministro"><option value="productos" selected>Productos</option><option value="servicios">Servicios</option><option value="mixto">Productos y servicios</option></select></label>
-        <div class="proveedores-form-grid">
-            <label class="proveedores-form-field"><span>Moneda habitual</span><select name="moneda"><option value="pen" selected>Soles (PEN)</option><option value="usd">Dólares (USD)</option></select></label>
-            <label class="proveedores-form-field"><span>Condición de pago</span><select name="condicion_pago"><option value="contado" selected>Contado</option><option value="credito">Crédito</option></select></label>
-        </div>
-        <label class="proveedores-form-check"><input type="checkbox" name="informacion_bancaria" value="1"><span>Agregar información bancaria ahora</span></label>
+    <fieldset class="proveedores-modern-section">
+        <legend><i class="bi bi-card-text" aria-hidden="true"></i> Identificación</legend>
+        <div class="proveedores-modern-grid"><label>Tipo de documento <b>*</b><select name="tipo_documento" data-provider-document-type><option value="dni" @selected(old('tipo_documento', 'dni') === 'dni')>DNI</option><option value="ruc" @selected(old('tipo_documento') === 'ruc')>RUC</option></select></label><label><span data-provider-document-type-label>Número de documento</span> <b>*</b><input name="ruc" required maxlength="8" placeholder="Ingresa el número de documento" value="{{ old('ruc') }}" data-provider-document-input></label></div>
     </fieldset>
 
-    {{-- Observaciones adicionales y acción de persistencia. --}}
-    <label class="proveedores-form-field proveedores-form-field--full"><span>Observaciones</span><textarea name="observaciones" rows="3" maxlength="5000" placeholder="Información adicional del proveedor">{{ old('observaciones') }}</textarea></label>
-    <p class="proveedores-form-note">Los datos identificatorios y de contacto se guardan con el registro del proveedor.</p>
-    <button class="btn btn-primary proveedores-form-submit" type="submit">Guardar proveedor</button>
+    <fieldset class="proveedores-modern-section">
+        <legend><i class="bi bi-telephone" aria-hidden="true"></i> Información de contacto</legend>
+        <div class="proveedores-modern-grid"><label>Teléfono<input name="telefono" maxlength="30" placeholder="Ingresa el teléfono" value="{{ old('telefono') }}"></label><label>Correo electrónico <b>*</b><input type="email" name="correo" required maxlength="160" placeholder="Ingresa el correo electrónico" value="{{ old('correo') }}"></label></div>
+        <label>Dirección <b>*</b><input name="ciudad" maxlength="80" placeholder="Ingresa la dirección del proveedor" value="{{ old('ciudad') }}"></label>
+    </fieldset>
+
+    <input type="hidden" name="nombre" data-provider-name-input value="{{ old('nombre') }}" required>
+    <p class="proveedores-modern-note"><i class="bi bi-info-circle" aria-hidden="true"></i> Los datos identificatorios y de contacto se validan antes de guardar el proveedor.</p>
+    <footer class="proveedores-modern-actions"><button type="button" class="proveedores-modern-cancel" data-close-supplier-dialog>Cancelar</button><button class="proveedores-modern-submit" type="submit"><i class="bi bi-save" aria-hidden="true"></i> Guardar proveedor</button></footer>
 </form>

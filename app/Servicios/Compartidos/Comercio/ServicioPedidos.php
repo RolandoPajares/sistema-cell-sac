@@ -101,7 +101,7 @@ class ServicioPedidos
                 $items[] = [$product, $varianteId, $quantity, $priceCents];
             }
 
-            $descuentoCupon = $this->discountFor($couponCode, $subtotalCents, (int) $location['empresa_id']);
+            $descuentoCupon = $this->descuentoPara($couponCode, $subtotalCents, (int) $location['empresa_id']);
             $order = Pedido::create([
                 'usuario_id' => $user->id,
                 'canal' => 'ecommerce',
@@ -114,10 +114,10 @@ class ServicioPedidos
                 'creado_en' => now(),
                 ...$this->authorization->operationScopeAttributes($user, 'pedidos'),
             ]);
-            $this->ensureShipment($order, $location, $user->getKey());
+            $this->asegurarEnvio($order, $location, $user->getKey());
 
             foreach ($items as [$product, $varianteId, $quantity, $priceCents]) {
-                $movimiento = $this->inventoryService->changeLockedProductInWarehouse(
+                $movimiento = $this->inventoryService->cambiarProductoBloqueadoEnAlmacen(
                     $product,
                     $varianteId,
                     'salida',
@@ -151,7 +151,7 @@ class ServicioPedidos
     }
 
     /**
-     * Registra un pedido de visitante con la misma validaci�n transaccional del checkout autenticado.
+     * Registra un pedido de visitante con la misma validación transaccional del checkout autenticado.
      *
      * @param  array{nombre:string,correo:string,telefono?:string|null,direccion:string,referencia?:string|null}  $guest
      */
@@ -159,17 +159,17 @@ class ServicioPedidos
     {
         $cart = $this->cartService->normalizar($cart);
         $checkoutToken = (string) request()->session()->get('checkout_token');
-        abort_if($cart === [] || preg_match('/^[a-f0-9]{64}$/', $checkoutToken) !== 1, 422, 'La solicitud de compra no es v�lida.');
+        abort_if($cart === [] || preg_match('/^[a-f0-9]{64}$/', $checkoutToken) !== 1, 422, 'La solicitud de compra no es válida.');
 
         return DB::transaction(function () use ($cart, $couponCode, $ip, $guest, $checkoutToken): Pedido {
-            $location = $this->inventoryService->publicLocation();
+            $location = $this->inventoryService->ubicacionPublica();
             $tokenHash = hash('sha256', 'guest:'.$checkoutToken);
             DB::table('carritos')->upsert([[
                 'empresa_id' => $location['empresa_id'], 'sede_id' => $location['sede_id'],
                 'usuario_id' => null, 'resumen_token' => $tokenHash, 'estado' => 'activo',
             ]], ['resumen_token'], ['resumen_token']);
             $checkout = DB::table('carritos')->where('resumen_token', $tokenHash)->lockForUpdate()->first();
-            abort_unless($checkout !== null, 409, 'La sesi�n de compra no es v�lida.');
+            abort_unless($checkout !== null, 409, 'La sesión de compra no es válida.');
             if ($checkout->pedido_id !== null) {
                 return Pedido::query()->findOrFail($checkout->pedido_id);
             }
@@ -179,15 +179,15 @@ class ServicioPedidos
             $subtotalCents = 0;
             foreach ($cart as $id => $linea) {
                 $product = $products->get((int) $id);
-                abort_unless($product instanceof Producto && $product->activo, 422, 'Un producto dej� de estar disponible.');
+                abort_unless($product instanceof Producto && $product->activo, 422, 'Un producto dejó de estar disponible.');
                 $variantId = $linea['variante_id'];
-                abort_unless($variantId === null ? ! $product->variants()->exists() : $product->variants()->whereKey($variantId)->where('estado', 'activo')->exists(), 422, 'La variante no est� disponible.');
+                abort_unless($variantId === null ? ! $product->variants()->exists() : $product->variants()->whereKey($variantId)->where('estado', 'activo')->exists(), 422, 'La variante no está disponible.');
                 abort_if($linea['cantidad'] > $this->inventoryService->disponibilidadPublica($product, $variantId), 422, 'Stock insuficiente.');
                 $priceCents = (int) round((float) $product->effective_price * 100, 0, PHP_ROUND_HALF_UP);
                 $subtotalCents += $priceCents * $linea['cantidad'];
                 $items[] = [$product, $variantId, $linea['cantidad'], $priceCents];
             }
-            $discount = $this->discountFor($couponCode, $subtotalCents, $location['empresa_id']);
+            $discount = $this->descuentoPara($couponCode, $subtotalCents, $location['empresa_id']);
             $order = Pedido::create([
                 'usuario_id' => null, 'cliente_invitado_nombre' => $guest['nombre'], 'cliente_invitado_correo' => $guest['correo'],
                 'cliente_invitado_telefono' => $guest['telefono'] ?? null, 'token_acceso_publico' => $tokenHash,
@@ -196,7 +196,7 @@ class ServicioPedidos
                 'cupon_id' => $discount['cupon_id'], 'cupon_codigo' => $couponCode,
                 'total' => ($subtotalCents - $discount['descuento_centimos']) / 100, 'estado' => 'Pendiente', 'creado_en' => now(), ...$location,
             ]);
-            $this->ensureShipment($order, $location, null);
+            $this->asegurarEnvio($order, $location, null);
             foreach ($items as [$product, $variantId, $quantity, $priceCents]) {
                 $movement = $this->inventoryService->changeLockedProductInPublicWarehouse($product, $variantId, 'salida', $quantity, 'Salida por pedido #'.$order->id, 'pedido', (string) $order->id);
                 $order->details()->create(['producto_id' => $product->id, 'variante_id' => $movement->variante_id, 'cantidad' => $quantity, 'precio_unitario' => $priceCents / 100]);
@@ -250,7 +250,7 @@ class ServicioPedidos
                     abort_unless($claveSalida !== false, 409, 'El detalle del pedido no coincide con su salida de inventario.');
                     $salidas->forget($claveSalida);
                     $product = Producto::whereKey($line->producto_id)->lockForUpdate()->firstOrFail();
-                    $entrada = $this->inventoryService->changeLockedProduct($product, 'entrada', (int) $line->cantidad, 'Reingreso por cancelación del pedido #'.$lockedOrder->id, $user);
+                    $entrada = $this->inventoryService->cambiarProductoBloqueado($product, 'entrada', (int) $line->cantidad, 'Reingreso por cancelación del pedido #'.$lockedOrder->id, $user);
                     abort_unless($entrada->variante_id == $line->variante_id, 409, 'La variante del pedido no coincide con el saldo a reponer.');
                     $entrada->update(['documento_tipo' => 'pedido_cancelacion', 'documento_id' => (string) $lockedOrder->id]);
                 }
@@ -274,7 +274,7 @@ class ServicioPedidos
         }
 
         $methodExists = DB::table('medios_pago')->where('id', $paymentMethodId)->where('activo', true)->exists();
-        abort_unless($methodExists, 422, 'El medio de pago no est� disponible.');
+        abort_unless($methodExists, 422, 'El medio de pago no está disponible.');
         DB::table('pagos')->insert([
             'empresa_id' => $order->empresa_id, 'sede_id' => $order->sede_id,
             'codigo' => 'PED-'.$order->id.'-'.strtoupper(bin2hex(random_bytes(4))), 'tipo' => 'cobro', 'estado' => 'pendiente',
@@ -284,7 +284,7 @@ class ServicioPedidos
     }
 
     /** @param array{empresa_id:int,sede_id:int,almacen_id:int} $location */
-    private function ensureShipment(Pedido $order, array $location, ?int $createdBy): void
+    private function asegurarEnvio(Pedido $order, array $location, ?int $createdBy): void
     {
         if (! Schema::hasTable('envios_pedidos')) {
             return;
@@ -301,7 +301,7 @@ class ServicioPedidos
     }
 
     /** @return array{descuento_centimos:int,cupon_id:?int} */
-    private function discountFor(?string $couponCode, int $subtotalCents, int $empresaId): array
+    private function descuentoPara(?string $couponCode, int $subtotalCents, int $empresaId): array
     {
         if ($couponCode === null || $couponCode === '') {
             return ['descuento_centimos' => 0, 'cupon_id' => null];

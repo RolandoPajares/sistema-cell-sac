@@ -27,14 +27,14 @@ class ServicioInteligenciaComercial
      *
      * @return array{items:array<int, array{product:Producto, quantity:int, subtotal:float}, investment:float, balance:float, estimated_margin:float}
      */
-    public function optimize(float $budget, string $goal): array
+    public function optimizar(float $budget, string $goal): array
     {
-        $products = $this->cellPhones()->sortBy(fn (Producto $product): float => (float) $product->effective_price)->values();
+        $products = $this->celulares()->sortBy(fn (Producto $product): float => (float) $product->effective_price)->values();
 
         if ($goal === 'premium') {
             $products = $products->sortByDesc(fn (Producto $product): float => (float) $product->effective_price)->values();
         } elseif ($goal === 'margin') {
-            $products = $products->sortByDesc(fn (Producto $product): float => (float) ($product->intelligenceProfile?->puntuacion_valor ?? 70))->values();
+            $products = $products->sortByDesc(fn (Producto $product): float => (float) ($product->perfilInteligencia?->puntuacion_valor ?? 70))->values();
         }
 
         $items = [];
@@ -90,9 +90,9 @@ class ServicioInteligenciaComercial
     }
 
     /** @return Collection<int, Producto> */
-    public function wholesaleProducts(): Collection
+    public function productosMayoristas(): Collection
     {
-        return $this->cellPhones()->take(6)->map(function (Producto $product): Producto {
+        return $this->celulares()->take(6)->map(function (Producto $product): Producto {
             $price = (float) $product->effective_price;
             $product->wholesale_price_10 = round($price * .95, 2);
             $product->wholesale_price_50 = round($price * .90, 2);
@@ -103,7 +103,7 @@ class ServicioInteligenciaComercial
     }
 
     /** @return array{active:int, views:int, clicks:int, ctr:float, campaigns:Collection} */
-    public function advertisingSummary(): array
+    public function resumenPublicidad(): array
     {
         $campaigns = Campania::query()->latest('creado_en')->get();
         $views = (int) $campaigns->sum('vistas');
@@ -119,10 +119,10 @@ class ServicioInteligenciaComercial
     }
 
     /** @return Collection<int, Producto> */
-    private function cellPhones(): Collection
+    private function celulares(): Collection
     {
         return Producto::query()
-            ->with(['category', 'features', 'intelligenceProfile', 'images'])
+            ->with(['category', 'features', 'perfilInteligencia', 'images'])
             ->active()
             ->where(function ($query): void {
                 $query->where('categoria', 'like', '%cel%')

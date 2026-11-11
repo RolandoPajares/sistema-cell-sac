@@ -140,7 +140,7 @@ class AppServiceProvider extends ServiceProvider
                 'panelUserInitials' => $panelUserInitials,
                 'panelIsAdministrator' => $canManage,
                 'panelBrandRoute' => $canManage ? 'management.dashboard' : 'dashboard',
-                'panelAccountRoute' => $canManage ? 'management.account' : 'account.profile.show',
+                'panelAccountRoute' => $canManage ? 'management.account.profile.show' : 'account.profile.show',
             ]);
         });
 
@@ -150,7 +150,7 @@ class AppServiceProvider extends ServiceProvider
                 && app(ServicioAutorizacion::class)->allows($user, 'gestion.seguridad.consultar');
 
             $view->with('profileNavigationRoute', $canManageSecurity
-                ? 'management.account'
+                ? 'management.account.profile.show'
                 : 'account.profile.show');
         });
 

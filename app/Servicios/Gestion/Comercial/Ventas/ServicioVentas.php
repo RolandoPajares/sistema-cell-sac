@@ -6,6 +6,8 @@ use App\Models\Catalogo\Producto;
 use App\Models\Clientes\Cliente;
 use App\Models\Comercio\DetalleVenta;
 use App\Models\Comercio\Venta;
+use App\Models\Finanzas\MedioPago;
+use App\Models\Finanzas\Pago;
 use App\Models\User;
 use App\Servicios\Compartidos\Auditoria\RegistradorAuditoria;
 use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
@@ -24,6 +26,8 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 class ServicioVentas
 {
     private const MAX_CENTIMOS = 999999999999999;
+
+    private const TASA_IGV = 18;
 
     /**
      * Inicializa la instancia con las dependencias y el estado requeridos.
@@ -85,7 +89,8 @@ class ServicioVentas
             abort_if($items->isEmpty() || $items->count() > 100 || $items->pluck('producto_id')->unique()->count() !== $items->count(), 422, 'Los productos de la venta no son válidos.');
             $productos = Producto::query()->whereIn('id', $items->pluck('producto_id'))->orderBy('id')->lockForUpdate()->get()->keyBy('id');
             $lineas = [];
-            $totalCentimos = 0;
+            $subtotalCentimos = 0;
+            $impuestosCentimos = 0;
             foreach ($items as $item) {
                 $cantidad = filter_var($item['cantidad'], FILTER_VALIDATE_INT);
                 $producto = $productos->get((int) $item['producto_id']);
@@ -94,28 +99,60 @@ class ServicioVentas
                 abort_if(Schema::hasTable('dispositivos') && DB::table('dispositivos')->where('producto_id', $producto->id)->exists(), 409, 'La venta de equipos serializados requiere seleccionar sus identificadores.');
                 $precio = $this->centimos($producto->effective_price);
                 $importe = $precio * $cantidad;
-                abort_if($importe > self::MAX_CENTIMOS - $totalCentimos, 422, 'La venta supera el importe permitido.');
-                $totalCentimos += $importe;
-                $lineas[] = [$producto, $cantidad, $precio, $importe];
+                $impuesto = (int) round($importe * self::TASA_IGV / 100, 0, PHP_ROUND_HALF_UP);
+                abort_if($importe > self::MAX_CENTIMOS - $subtotalCentimos || $impuesto > self::MAX_CENTIMOS - $impuestosCentimos, 422, 'La venta supera el importe permitido.');
+                $subtotalCentimos += $importe;
+                $impuestosCentimos += $impuesto;
+                $lineas[] = [$producto, $cantidad, $precio, $importe, $impuesto];
             }
+            $totalCentimos = $subtotalCentimos + $impuestosCentimos;
+            abort_if($totalCentimos > self::MAX_CENTIMOS, 422, 'La venta supera el importe permitido.');
 
-            $venta = Venta::create([
+            $ventaDatos = [
                 ...$ubicacion, 'cliente_id' => $cliente->id, 'usuario_id' => $actor->id, 'codigo' => $codigo,
                 'estado' => 'confirmada', 'moneda' => 'PEN', 'canal' => 'presencial',
                 'observaciones' => $datos['observaciones'] ?? null,
-                'subtotal' => $this->importe($totalCentimos), 'total' => $this->importe($totalCentimos),
+                'subtotal' => $this->importe($subtotalCentimos),
+                'total' => $this->importe($totalCentimos),
                 'fecha_venta' => CarbonImmutable::parse($datos['fecha_venta'])->setTimeFrom(now()),
-            ]);
-            foreach ($lineas as [$producto, $cantidad, $precio, $importe]) {
-                $movimiento = $this->inventario->changeLockedProduct($producto, 'salida', $cantidad, 'Salida por venta #'.$venta->id, $actor);
+            ];
+            if (Schema::hasColumn('ventas', 'impuestos')) {
+                $ventaDatos['impuestos'] = $this->importe($impuestosCentimos);
+            }
+            $venta = Venta::create($ventaDatos);
+            foreach ($lineas as [$producto, $cantidad, $precio, $importe, $impuesto]) {
+                $movimiento = $this->inventario->cambiarProductoBloqueado($producto, 'salida', $cantidad, 'Salida por venta #'.$venta->id, $actor);
                 $movimiento->update(['documento_tipo' => 'venta', 'documento_id' => (string) $venta->id]);
                 $variante = $movimiento->variante_id === null ? null : DB::table('variantes_productos')->where('id', $movimiento->variante_id)->first(['codigo_sku', 'controla_serie']);
                 abort_if($variante !== null && $variante->controla_serie, 409, 'La venta de equipos serializados requiere seleccionar sus identificadores.');
                 $sku = $variante?->codigo_sku;
-                $venta->detalles()->create([
+                $detalleVentaDatos = [
                     'producto_id' => $producto->id, 'variante_id' => $movimiento->variante_id,
                     'descripcion_historica' => $producto->nombre, 'sku_historico' => $sku,
-                    'cantidad' => $cantidad, 'precio_unitario' => $this->importe($precio), 'total_linea' => $this->importe($importe),
+                    'cantidad' => $cantidad, 'precio_unitario' => $this->importe($precio),
+                    'total_linea' => $this->importe($importe + $impuesto),
+                ];
+                if (Schema::hasColumn('detalles_ventas', 'tasa_impuesto')) {
+                    $detalleVentaDatos['tasa_impuesto'] = self::TASA_IGV;
+                }
+                if (Schema::hasColumn('detalles_ventas', 'impuesto')) {
+                    $detalleVentaDatos['impuesto'] = $this->importe($impuesto);
+                }
+                $venta->detalles()->create($detalleVentaDatos);
+            }
+            if (isset($datos['medio_pago_id'])) {
+                $medioPago = MedioPago::query()->whereKey((int) $datos['medio_pago_id'])->where('activo', true)->first();
+                abort_unless($medioPago !== null, 422, 'El medio de pago seleccionado no está activo.');
+                if ($medioPago->codigo === 'efectivo') {
+                    $importeRecibido = isset($datos['importe_pago']) ? $this->centimos($datos['importe_pago']) : 0;
+                    abort_unless($importeRecibido >= $totalCentimos, 422, 'El monto recibido en efectivo debe cubrir el total de la venta.');
+                }
+                Pago::query()->create([
+                    'empresa_id' => $ubicacion['empresa_id'], 'sede_id' => $ubicacion['sede_id'],
+                    'codigo' => 'PAG-'.$venta->codigo, 'tipo' => 'cobro', 'estado' => 'registrado',
+                    'medio_pago_id' => $medioPago->getKey(), 'usuario_id' => $actor->getKey(),
+                    'venta_id' => $venta->getKey(), 'moneda' => 'PEN', 'importe' => $venta->total,
+                    'fecha_pago' => now(), 'creado_en' => now(),
                 ]);
             }
             $this->auditoria->record($actor->id, 'venta.confirmada', 'ventas', $venta->id, null,
@@ -185,7 +222,7 @@ class ServicioVentas
                 $saldos = DB::table('existencias_almacen')->where('empresa_id', $bloqueada->empresa_id)->where('sede_id', $bloqueada->sede_id)
                     ->where('almacen_id', $bloqueada->almacen_id)->where('producto_id', $producto->id)->lockForUpdate()->get();
                 abort_unless($saldos->count() === 1 && (string) ($saldos->first()->variante_id ?? '') === (string) ($linea->variante_id ?? ''), 409, 'El saldo del almacén requiere conciliación.');
-                $movimiento = $this->inventario->changeLockedProduct($producto, 'entrada', (int) $cantidad, 'Reposición por anulación de venta #'.$bloqueada->id, $actor);
+                $movimiento = $this->inventario->cambiarProductoBloqueado($producto, 'entrada', (int) $cantidad, 'Reposición por anulación de venta #'.$bloqueada->id, $actor);
                 $movimiento->update(['documento_tipo' => 'anulacion_venta', 'documento_id' => (string) $bloqueada->id]);
             }
             $bloqueada->update(['estado' => 'anulada']);
@@ -355,7 +392,7 @@ class ServicioVentas
                     abort_if($dispositivos !== [], 422, 'El detalle no requiere IMEI ni numero de serie.');
                 }
 
-                $movimiento = $this->inventario->changeLockedProductInWarehouse(
+                $movimiento = $this->inventario->cambiarProductoBloqueadoEnAlmacen(
                     $producto,
                     $varianteId,
                     'salida',

@@ -1,4 +1,5 @@
 import { initializeFacturacion } from './comprobantes/index.js';
+import './finanzas-facturacion/finanzas-facturacion.js';
 import { initializePagos } from './pagos-cobros/index.js';
 import { initializeReembolsos } from './reembolsos/index.js';
 

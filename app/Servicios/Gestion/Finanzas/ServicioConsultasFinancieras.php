@@ -103,7 +103,7 @@ class ServicioConsultasFinancieras
     public function opcionesPago(User $actor): array
     {
         $permission = 'gestion.pagos.crear';
-        $location = $this->siteForForm($actor);
+        $location = $this->sedeParaFormulario($actor);
         if ($location['empresa_id'] === null || $location['sede_id'] === null
             || ! $this->authorization->allowsRecord($actor, $permission, $location['empresa_id'], $location['sede_id'])) {
             return ['medios' => collect(), 'documentos' => collect(), 'sesiones' => collect(), 'cuentas' => collect()];
@@ -148,7 +148,7 @@ class ServicioConsultasFinancieras
     public function opcionesReembolso(User $actor): array
     {
         $permission = 'gestion.reembolsos.crear';
-        $location = $this->siteForForm($actor);
+        $location = $this->sedeParaFormulario($actor);
         if ($location['empresa_id'] === null || $location['sede_id'] === null
             || ! $this->authorization->allowsRecord($actor, $permission, $location['empresa_id'], $location['sede_id'])) {
             return ['devoluciones' => collect(), 'cobros' => collect()];
@@ -167,7 +167,7 @@ class ServicioConsultasFinancieras
     }
 
     /** @return array{empresa_id:?int,sede_id:?int} */
-    private function siteForForm(User $actor): array
+    private function sedeParaFormulario(User $actor): array
     {
         try {
             return $this->authorization->operationSite($actor);

@@ -35,16 +35,16 @@ class ReporteController extends Controller
      */
     public function index(FiltroReporteRequest $request): View
     {
-        $filters = $this->reportFilters($request->validated());
-        $period = $this->period($filters);
-        $salesQuery = $this->salesQuery($filters);
+        $filters = $this->filtrosReporte($request->validated());
+        $period = $this->periodo($filters);
+        $salesQuery = $this->consultaVentas($filters);
         $summary = (clone $salesQuery)
             ->selectRaw('COALESCE(SUM(total), 0) as total_sales, COUNT(*) as total_orders')
             ->first();
-        $details = $this->detailQuery($filters)
+        $details = $this->consultaDetalles($filters)
             ->with(['product:id,nombre,categoria,categoria_id,precio,url_imagen', 'product.category:id,nombre'])
             ->get();
-        $trend = $this->salesTrend($filters, $period['from'], $period['to']);
+        $trend = $this->tendenciaVentas($filters, $period['from'], $period['to']);
         $campaignMetrics = Campania::query()
             ->whereBetween('creado_en', [$period['from'], $period['to']])
             ->selectRaw('COALESCE(SUM(vistas), 0) as views, COALESCE(SUM(clics), 0) as clicks')
@@ -60,12 +60,12 @@ class ReporteController extends Controller
                 ->limit(8)
                 ->get(['id', 'nombre', 'marca', 'categoria', 'categoria_id', 'precio', 'existencias', 'activo']),
         ];
-        $customerReport = $this->customerReport($filters);
-        $inventoryReport = $this->inventoryReport();
-        $campaignReport = $this->campaignReport($period['from'], $period['to']);
-        $categorySales = $this->categorySales($details);
-        $inventorySummary = $this->inventorySummary();
-        $orderStatusSummary = $this->orderStatusSummary($filters);
+        $customerReport = $this->reporteClientes($filters);
+        $inventoryReport = $this->reporteInventario();
+        $campaignReport = $this->reporteCampanias($period['from'], $period['to']);
+        $categorySales = $this->ventasPorCategoria($details);
+        $inventorySummary = $this->resumenInventario();
+        $orderStatusSummary = $this->resumenEstadosPedidos($filters);
         $customerReport['top'] = $customerReport['top']
             ->map(static function (Pedido $order): array {
                 $customer = $order->user?->customer;
@@ -82,7 +82,7 @@ class ReporteController extends Controller
                 ];
             })
             ->all();
-        $presentation = $this->presentationData(
+        $presentation = $this->datosPresentacion(
             $trend,
             $categorySales,
             $inventorySummary,
@@ -91,7 +91,7 @@ class ReporteController extends Controller
             $customerReport,
             $request,
         );
-        $latestOrders = $this->latestOrders($filters)->map(function (Pedido $order) use ($presentation): Pedido {
+        $latestOrders = $this->pedidosRecientes($filters)->map(function (Pedido $order) use ($presentation): Pedido {
             $customer = $order->user?->customer;
             $status = $presentation['orderStatuses'][$order->estado] ?? ['label' => $order->estado, 'class' => 'processing'];
             $order->setAttribute('customer_name', $customer?->razon_social ?: $customer?->nombre_contacto ?: $order->user?->nombre ?: 'Cliente');
@@ -103,8 +103,8 @@ class ReporteController extends Controller
 
         return view('gestion.analitica.reportes.listar', [
             'filters' => $filters,
-            'activeView' => $this->activeView($request),
-            'periodLabel' => $this->periodLabel($request, $period['from'], $period['to']),
+            'activeView' => $this->vistaActiva($request),
+            'periodLabel' => $this->etiquetaPeriodo($request, $period['from'], $period['to']),
             'sales' => (float) ($summary?->total_sales ?? 0),
             'orders' => (int) ($summary?->total_orders ?? 0),
             'productsSold' => (int) $details->sum(static fn (DetallePedido $detail): int => (int) $detail->cantidad),
@@ -116,7 +116,7 @@ class ReporteController extends Controller
             ],
             'salesTrend' => $trend,
             'categorySales' => $categorySales,
-            'topProducts' => $this->topProducts($details),
+            'topProducts' => $this->productosDestacados($details),
             'inventorySummary' => $inventorySummary,
             'latestOrders' => $latestOrders,
             'orderStatusSummary' => $orderStatusSummary,
@@ -138,7 +138,7 @@ class ReporteController extends Controller
      * @param  array{items:Collection<int, Campania>}  $campaignReport
      * @return array<string, mixed>
      */
-    private function presentationData(
+    private function datosPresentacion(
         array $salesTrend,
         array $categorySales,
         array $inventorySummary,
@@ -173,11 +173,11 @@ class ReporteController extends Controller
                 $salesMax * .25,
                 0,
             ],
-            'categoryGradient' => $this->gradientFor($categorySales, 'percent'),
-            'inventoryGradient' => $this->gradientFor($inventorySummary, 'count'),
+            'categoryGradient' => $this->degradadoPara($categorySales, 'percent'),
+            'inventoryGradient' => $this->degradadoPara($inventorySummary, 'count'),
             'inventoryTotal' => max(1, array_sum(array_column($inventorySummary, 'count'))),
-            'orderStatusItems' => $this->statusItems($orderStatusSummary),
-            'customerTypes' => $this->customerTypeItems($customerReport),
+            'orderStatusItems' => $this->elementosEstado($orderStatusSummary),
+            'customerTypes' => $this->elementosTipoCliente($customerReport),
             'orderStatuses' => [
                 'Pendiente' => ['label' => 'Pendiente', 'class' => 'pending'],
                 'En proceso' => ['label' => 'En proceso', 'class' => 'processing'],
@@ -188,7 +188,7 @@ class ReporteController extends Controller
             'statusTotal' => max(1, $orderStatusSummary['total']),
             'campaignViews' => (int) $campaignReport['items']->sum('vistas'),
             'campaignClicks' => (int) $campaignReport['items']->sum('clics'),
-            'campaignConversion' => $this->campaignConversion($campaignReport['items']),
+            'campaignConversion' => $this->conversionCampanias($campaignReport['items']),
             'activeReportView' => $request->string('vista')->toString() ?: 'resumen',
         ];
     }
@@ -196,7 +196,7 @@ class ReporteController extends Controller
     /**
      * @param  array<int, array<string, mixed>>  $items
      */
-    private function gradientFor(array $items, string $valueKey): string
+    private function degradadoPara(array $items, string $valueKey): string
     {
         $total = $valueKey === 'count'
             ? max(1, array_sum(array_column($items, $valueKey)))
@@ -220,7 +220,7 @@ class ReporteController extends Controller
     /**
      * @param  Collection<int, Campania>  $campaigns
      */
-    private function campaignConversion(Collection $campaigns): float
+    private function conversionCampanias(Collection $campaigns): float
     {
         $views = (int) $campaigns->sum('vistas');
 
@@ -231,7 +231,7 @@ class ReporteController extends Controller
      * @param  array{total:int,items:array<int, array{label:string,count:int,color:string}>}  $summary
      * @return array<int, array{label:string,count:int,color:string,percent:float}>
      */
-    private function statusItems(array $summary): array
+    private function elementosEstado(array $summary): array
     {
         $total = max(1, $summary['total']);
 
@@ -244,7 +244,7 @@ class ReporteController extends Controller
      * @param  array{active:int,mayoristas:int,minoristas:int}  $report
      * @return array<int, array{label:string,count:int,color:string,percent:float}>
      */
-    private function customerTypeItems(array $report): array
+    private function elementosTipoCliente(array $report): array
     {
         $items = [
             ['label' => 'Mayoristas', 'count' => $report['mayoristas'], 'color' => '#7b55ed'],
@@ -269,8 +269,8 @@ class ReporteController extends Controller
     public function export(FiltroReporteRequest $request, ExportadorTabular $exporter, RegistradorAuditoria $audit, string $format = 'csv'): Response|StreamedResponse
     {
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
-        $filters = $this->reportFilters($request->validated());
-        $orders = $this->salesQuery($request->validated())
+        $filters = $this->filtrosReporte($request->validated());
+        $orders = $this->consultaVentas($request->validated())
             ->select(['id', 'usuario_id', 'subtotal', 'descuento', 'total', 'estado', 'creado_en'])
             ->orderBy('creado_en')
             ->orderBy('id')
@@ -309,9 +309,9 @@ class ReporteController extends Controller
      * @param  array<string, mixed>  $filters
      * @return Builder<Pedido>
      */
-    private function salesQuery(array $filters): Builder
+    private function consultaVentas(array $filters): Builder
     {
-        return $this->applyDateFilters(
+        return $this->aplicarFiltrosFecha(
             Pedido::query()->whereNotIn('estado', ['Cancelado', 'Cancelada']),
             $filters,
         );
@@ -321,10 +321,10 @@ class ReporteController extends Controller
      * @param  array<string, mixed>  $filters
      * @return Builder<DetallePedido>
      */
-    private function detailQuery(array $filters): Builder
+    private function consultaDetalles(array $filters): Builder
     {
         return DetallePedido::query()->whereHas('order', function (Builder $query) use ($filters): void {
-            $this->applyDateFilters($query->whereNotIn('estado', ['Cancelado', 'Cancelada']), $filters);
+            $this->aplicarFiltrosFecha($query->whereNotIn('estado', ['Cancelado', 'Cancelada']), $filters);
         });
     }
 
@@ -332,7 +332,7 @@ class ReporteController extends Controller
      * @param  array<string, mixed>  $filters
      * @return array{from:CarbonImmutable,to:CarbonImmutable}
      */
-    private function period(array $filters): array
+    private function periodo(array $filters): array
     {
         $from = isset($filters['desde'])
             ? CarbonImmutable::parse((string) $filters['desde'])->startOfDay()
@@ -348,9 +348,9 @@ class ReporteController extends Controller
      * @param  array<string, mixed>  $filters
      * @return array<string, string>
      */
-    private function reportFilters(array $filters): array
+    private function filtrosReporte(array $filters): array
     {
-        $period = $this->period($filters);
+        $period = $this->periodo($filters);
 
         return [
             'desde' => $period['from']->toDateString(),
@@ -362,9 +362,9 @@ class ReporteController extends Controller
      * @param  array<string, mixed>  $filters
      * @return array<int, array{label:string,sales:float,orders:int,sales_height:float,orders_height:float}>
      */
-    private function salesTrend(array $filters, CarbonImmutable $from, CarbonImmutable $to): array
+    private function tendenciaVentas(array $filters, CarbonImmutable $from, CarbonImmutable $to): array
     {
-        $rows = $this->salesQuery($filters)
+        $rows = $this->consultaVentas($filters)
             ->selectRaw('DATE(creado_en) as day, COALESCE(SUM(total), 0) as sales, COUNT(*) as orders')
             ->groupByRaw('DATE(creado_en)')
             ->orderBy('day')
@@ -412,7 +412,7 @@ class ReporteController extends Controller
      * @param  Collection<int, DetallePedido>  $details
      * @return array<int, array{name:string,revenue:float,percent:float,color:string}>
      */
-    private function categorySales(Collection $details): array
+    private function ventasPorCategoria(Collection $details): array
     {
         $total = (float) $details->sum(static fn (DetallePedido $detail): float => (float) $detail->cantidad * (float) $detail->precio_unitario);
         $colors = ['#2583f7', '#18b78d', '#139bc3', '#f35b3e', '#fb9a17', '#7b7cf6'];
@@ -439,7 +439,7 @@ class ReporteController extends Controller
      * @param  Collection<int, DetallePedido>  $details
      * @return array<int, array{name:string,units:int,revenue:float,image:?string}>
      */
-    private function topProducts(Collection $details): array
+    private function productosDestacados(Collection $details): array
     {
         return $details
             ->groupBy('producto_id')
@@ -462,7 +462,7 @@ class ReporteController extends Controller
     /**
      * @return array<int, array{label:string,count:int,color:string}>
      */
-    private function inventorySummary(): array
+    private function resumenInventario(): array
     {
         return [
             ['label' => 'En stock', 'count' => Producto::query()->where('activo', true)->where('existencias', '>', 10)->count(), 'color' => '#18b78d'],
@@ -475,9 +475,9 @@ class ReporteController extends Controller
     /**
      * @param  array<string, mixed>  $filters
      */
-    private function latestOrders(array $filters): Collection
+    private function pedidosRecientes(array $filters): Collection
     {
-        return $this->applyDateFilters(Pedido::query(), $filters)
+        return $this->aplicarFiltrosFecha(Pedido::query(), $filters)
             ->with([
                 'user:id,nombre,correo',
                 'user.customer:id,usuario_id,razon_social,nombre_contacto',
@@ -493,9 +493,9 @@ class ReporteController extends Controller
      * @param  array<string, mixed>  $filters
      * @return array{total:int,items:array<int,array{key:string,label:string,count:int,color:string}>}
      */
-    private function orderStatusSummary(array $filters): array
+    private function resumenEstadosPedidos(array $filters): array
     {
-        $counts = $this->applyDateFilters(
+        $counts = $this->aplicarFiltrosFecha(
             Pedido::query()->selectRaw('estado, COUNT(*) as total'),
             $filters,
         )
@@ -522,14 +522,14 @@ class ReporteController extends Controller
      * @param  array<string, mixed>  $filters
      * @return array{total:int,active:int,mayoristas:int,minoristas:int,top:Collection<int,Pedido>}
      */
-    private function customerReport(array $filters): array
+    private function reporteClientes(array $filters): array
     {
         $typeCounts = Cliente::query()
             ->where('activo', true)
             ->selectRaw('tipo, COUNT(*) as total')
             ->groupBy('tipo')
             ->pluck('total', 'tipo');
-        $topCustomers = $this->applyDateFilters(
+        $topCustomers = $this->aplicarFiltrosFecha(
             Pedido::query()
                 ->whereNotIn('estado', ['Cancelado', 'Cancelada'])
                 ->selectRaw('usuario_id, COALESCE(SUM(total), 0) as customer_sales, COUNT(*) as customer_orders'),
@@ -556,7 +556,7 @@ class ReporteController extends Controller
     /**
      * @return array{value:float,movements:int,lowStock:Collection<int,Producto>,recentMovements:Collection<int,MovimientoInventario>}
      */
-    private function inventoryReport(): array
+    private function reporteInventario(): array
     {
         return [
             'value' => (float) Producto::query()
@@ -583,7 +583,7 @@ class ReporteController extends Controller
     /**
      * @return array{active:int,total:int,locations:Collection<int,Campania>,items:Collection<int,Campania>}
      */
-    private function campaignReport(CarbonImmutable $from, CarbonImmutable $to): array
+    private function reporteCampanias(CarbonImmutable $from, CarbonImmutable $to): array
     {
         $periodQuery = Campania::query()->whereBetween('creado_en', [$from, $to]);
         $locationRows = (clone $periodQuery)
@@ -609,7 +609,7 @@ class ReporteController extends Controller
      * @param  mixed  $request  Parámetro recibido por la operación.
      * @return string Resultado de la operación.
      */
-    private function activeView(FiltroReporteRequest $request): string
+    private function vistaActiva(FiltroReporteRequest $request): string
     {
         $view = $request->string('vista')->toString();
 
@@ -621,7 +621,7 @@ class ReporteController extends Controller
     /**
      * @param  array<string, mixed>  $filters
      */
-    private function periodLabel(FiltroReporteRequest $request, CarbonImmutable $from, CarbonImmutable $to): string
+    private function etiquetaPeriodo(FiltroReporteRequest $request, CarbonImmutable $from, CarbonImmutable $to): string
     {
         if (! $request->filled('desde') && ! $request->filled('hasta')) {
             return 'Últimos 30 días';
@@ -633,7 +633,7 @@ class ReporteController extends Controller
     /**
      * @param  array<string, mixed>  $filters
      */
-    private function applyDateFilters(Builder $query, array $filters): Builder
+    private function aplicarFiltrosFecha(Builder $query, array $filters): Builder
     {
         foreach (['desde' => '>=', 'hasta' => '<='] as $field => $operator) {
             if (! isset($filters[$field])) {

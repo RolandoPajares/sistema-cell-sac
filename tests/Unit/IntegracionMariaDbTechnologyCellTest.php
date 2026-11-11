@@ -120,7 +120,7 @@ it('refuses a second site to unassigned employees and preserves single-site stoc
         'cantidad_fisica' => 2, 'cantidad_reservada' => 0,
     ]);
     try {
-        app(ServicioInventario::class)->adjust($product, 'salida', 1, 'Prueba temporal de sede', $buyer);
+        app(ServicioInventario::class)->ajustar($product, 'salida', 1, 'Prueba temporal de sede', $buyer);
         $this->fail('El inventario no debe operar con dos sedes activas.');
     } catch (HttpException $exception) {
         expect($exception->getStatusCode())->toBeIn([403, 503]);

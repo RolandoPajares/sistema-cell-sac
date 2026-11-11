@@ -1247,6 +1247,35 @@
   cursor: pointer;
 }
 
+.proveedores-dialog:has(.proveedores-form-redisenado) { width: min(100% - 24px, 820px); max-height: calc(100vh - 24px); }
+.proveedores-form-redisenado { display: grid; gap: 14px; padding: 24px 32px 28px; }
+.proveedores-form-heading-modern { margin: -24px -32px 0; padding: 22px 32px; border-bottom: 1px solid #e0ebf6; }
+.proveedores-form-heading-modern h2 { font-size: 1.45rem; }
+.proveedores-form-heading-modern p { font-size: .78rem; }
+.proveedores-modern-type { display: grid; grid-template-columns: 38px 1fr minmax(240px, 1fr); align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid #c9e1ff; border-radius: 13px; background: #eaf4ff; }
+.proveedores-modern-type > i { color: #0874ed; font-size: 1.5rem; text-align: center; }
+.proveedores-modern-type strong, .proveedores-modern-type small { display: block; }
+.proveedores-modern-type strong { color: #152f68; font-size: .84rem; }
+.proveedores-modern-type small { margin-top: 3px; color: #5e77a0; font-size: .67rem; }
+.proveedores-modern-type select { min-height: 40px; padding: 8px 12px; border: 1px solid #1684ff; border-radius: 9px; color: #122c62; background: #fff; font: inherit; font-weight: 800; }
+.proveedores-modern-section { display: grid; gap: 11px; padding: 14px 0 0; border: 0; border-top: 1px solid #dce8f5; }
+.proveedores-modern-section legend { display: flex; align-items: center; gap: 8px; padding: 0; color: #112a5d; font-size: .9rem; font-weight: 850; }
+.proveedores-modern-section legend i { color: #0874ed; }
+.proveedores-modern-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.proveedores-modern-section label { display: grid; gap: 5px; color: #1e3d72; font-size: .7rem; font-weight: 800; }
+.proveedores-modern-section label b, .proveedores-modern-section label > b { color: #e4435a; }
+.proveedores-modern-section label small { color: #7890b1; font-weight: 500; }
+.proveedores-modern-section input, .proveedores-modern-section select { width: 100%; min-height: 40px; padding: 9px 12px; border: 1px solid #cbdff3; border-radius: 9px; color: #163568; background: #fff; font: inherit; font-size: .76rem; }
+.proveedores-modern-section input:focus, .proveedores-modern-section select:focus { border-color: #1684ff; outline: 0; box-shadow: 0 0 0 3px rgba(22,132,255,.13); }
+.proveedores-modern-section[hidden] { display: none; }
+.proveedores-modern-note { display: flex; align-items: center; gap: 9px; margin: 0; padding: 11px 13px; border-radius: 10px; color: #2c5589; background: #edf6ff; font-size: .72rem; }
+.proveedores-modern-note i { color: #0874ed; }
+.proveedores-modern-actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 12px; border-top: 1px solid #dce8f5; }
+.proveedores-modern-cancel, .proveedores-modern-submit { min-height: 42px; padding: 0 20px; border-radius: 10px; font: inherit; font-weight: 800; cursor: pointer; }
+.proveedores-modern-cancel { border: 1px solid #c4d8ef; color: #274a7e; background: #fff; }
+.proveedores-modern-submit { border: 0; color: #fff; background: linear-gradient(110deg, #087cf2, #0749b9); box-shadow: 0 8px 18px rgba(8,107,230,.2); }
+@media (max-width: 650px) { .proveedores-form-redisenado { padding: 20px; } .proveedores-form-heading-modern { margin: -20px -20px 0; padding: 20px; } .proveedores-modern-type, .proveedores-modern-grid { grid-template-columns: 1fr; } .proveedores-modern-type > i { display: none; } .proveedores-modern-actions { flex-direction: column-reverse; } .proveedores-modern-cancel, .proveedores-modern-submit { width: 100%; } }
+
 /* Formulario de proveedor: estructura visual por identificación, contacto y condiciones. */
 .proveedores-form {
   display: grid;

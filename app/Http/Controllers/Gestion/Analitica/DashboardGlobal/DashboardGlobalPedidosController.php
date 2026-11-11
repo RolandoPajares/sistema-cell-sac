@@ -38,21 +38,21 @@ final class DashboardGlobalPedidosController extends Controller
      */
     public function index(Request $request, ServicioAutorizacion $authorization): View
     {
-        $this->authorizeDashboard($request->user(), $authorization);
-        $filters = $this->filters($request, $authorization);
-        $orders = $this->orders($request->user(), $filters, $authorization)
+        $this->autorizarPanel($request->user(), $authorization);
+        $filters = $this->filtros($request, $authorization);
+        $orders = $this->pedidos($request->user(), $filters, $authorization)
             ->with('user:id,nombre')
             ->get();
         $byStatus = $orders->groupBy(static fn (Pedido $order): string => $order->estado)
             ->map(static fn (Collection $group): int => $group->count());
-        $byChannel = $this->hasChannel()
+        $byChannel = $this->tieneCanal()
             ? $orders->groupBy(static fn (Pedido $order): string => $order->canal ?: 'Sin canal')
                 ->map(static fn (Collection $group): int => $group->count())
             : collect();
         $activity = Schema::hasTable('registros_auditoria')
             ? RegistroAuditoria::query()->latest('creado_en')->limit(5)->get(['accion', 'entidad', 'entidad_id', 'creado_en'])
             : collect();
-        $availableOrders = $this->orders($request->user(), $filters, $authorization, false);
+        $availableOrders = $this->pedidos($request->user(), $filters, $authorization, false);
         $statusColors = ['#0767f5', '#0bc4ee', '#38d5a1', '#ff6575', '#9b82f6'];
         $statusLegend = [];
         $gradientStops = [];
@@ -86,11 +86,11 @@ final class DashboardGlobalPedidosController extends Controller
 
         return view('gestion.analitica.dashboard-global.pedidos.listar', [
             'filters' => $filters,
-            'sites' => $this->availableSites($request->user(), $authorization),
-            'channels' => $this->hasChannel() ? (clone $availableOrders)->whereNotNull('canal')->distinct()->orderBy('canal')->pluck('canal') : collect(),
+            'sites' => $this->sedesDisponibles($request->user(), $authorization),
+            'channels' => $this->tieneCanal() ? (clone $availableOrders)->whereNotNull('canal')->distinct()->orderBy('canal')->pluck('canal') : collect(),
             'statuses' => (clone $availableOrders)->distinct()->orderBy('estado')->pluck('estado'),
-            'hasSite' => $this->hasSite(),
-            'hasChannel' => $this->hasChannel(),
+            'hasSite' => $this->tieneSede(),
+            'hasChannel' => $this->tieneCanal(),
             'orders' => $orders,
             'byStatus' => $byStatus,
             'byChannel' => $byChannel,
@@ -127,15 +127,15 @@ final class DashboardGlobalPedidosController extends Controller
      */
     public function export(Request $request, string $format, ExportadorTabular $exporter, ServicioAutorizacion $authorization, RegistradorAuditoria $auditor): Response|StreamedResponse
     {
-        $this->authorizeDashboard($request->user(), $authorization);
+        $this->autorizarPanel($request->user(), $authorization);
         $authorization->assertAllowed($request->user(), 'gestion.analitica.reportes.exportar');
         abort_unless(in_array($format, ['pdf', 'excel', 'csv'], true), 404);
-        $filters = $this->filters($request, $authorization);
-        $orders = $this->orders($request->user(), $filters, $authorization);
+        $filters = $this->filtros($request, $authorization);
+        $orders = $this->pedidos($request->user(), $filters, $authorization);
         abort_if((clone $orders)->limit(self::MAX_EXPORT_ROWS + 1)->pluck('id')->count() > self::MAX_EXPORT_ROWS, 422, 'El período supera el límite de exportación. Reduce los filtros.');
 
-        $hasChannel = $this->hasChannel();
-        $hasSite = $this->hasSite();
+        $hasChannel = $this->tieneCanal();
+        $hasSite = $this->tieneSede();
         $columns = ['Pedido', 'Fecha', 'Estado'];
         if ($hasChannel) {
             $columns[] = 'Canal';
@@ -156,10 +156,10 @@ final class DashboardGlobalPedidosController extends Controller
             $row = [
                 $order->id,
                 $order->creado_en?->format('Y-m-d H:i') ?? '',
-                self::safeExportText((string) $order->estado, $format),
+                self::textoExportacionSeguro((string) $order->estado, $format),
             ];
             if ($hasChannel) {
-                $row[] = self::safeExportText((string) ($order->canal ?? ''), $format);
+                $row[] = self::textoExportacionSeguro((string) ($order->canal ?? ''), $format);
             }
             if ($hasSite) {
                 $row[] = $order->sede_id ?? '';
@@ -208,7 +208,7 @@ final class DashboardGlobalPedidosController extends Controller
     }
 
     /** @return array{periodo:int,estado:?string,canal:?string,sede:?int} */
-    private function filters(Request $request, ServicioAutorizacion $authorization): array
+    private function filtros(Request $request, ServicioAutorizacion $authorization): array
     {
         $data = $request->validate([
             'periodo' => ['nullable', 'integer', Rule::in([7, 30, 90])],
@@ -226,15 +226,15 @@ final class DashboardGlobalPedidosController extends Controller
             'canal' => $data['canal'] ?? null,
             'sede' => isset($data['sede']) ? (int) $data['sede'] : null,
         ];
-        abort_if($filters['sede'] !== null && ! $this->hasSite(), 422, 'El filtro de sede no está disponible.');
-        abort_if($filters['canal'] !== null && ! $this->hasChannel(), 422, 'El filtro de canal no está disponible.');
+        abort_if($filters['sede'] !== null && ! $this->tieneSede(), 422, 'El filtro de sede no está disponible.');
+        abort_if($filters['canal'] !== null && ! $this->tieneCanal(), 422, 'El filtro de canal no está disponible.');
 
-        $availableSites = $this->availableSites($request->user(), $authorization);
+        $availableSites = $this->sedesDisponibles($request->user(), $authorization);
         if ($filters['sede'] !== null) {
             abort_unless($availableSites->contains('id', $filters['sede']), 403);
         }
 
-        $availableOrders = $this->orders($request->user(), $filters, $authorization, false);
+        $availableOrders = $this->pedidos($request->user(), $filters, $authorization, false);
         if ($filters['estado'] !== null) {
             abort_unless((clone $availableOrders)->where('estado', $filters['estado'])->exists(), 422, 'El estado seleccionado no existe en el período autorizado.');
         }
@@ -246,7 +246,7 @@ final class DashboardGlobalPedidosController extends Controller
     }
 
     /** @param array{periodo:int,estado:?string,canal:?string,sede:?int} $filters */
-    private function orders(User $user, array $filters, ServicioAutorizacion $authorization, bool $applySelectedFilters = true): Builder
+    private function pedidos(User $user, array $filters, ServicioAutorizacion $authorization, bool $applySelectedFilters = true): Builder
     {
         $query = Pedido::query()
             ->where('creado_en', '>=', Carbon::now()->subDays($filters['periodo'])->startOfDay())
@@ -264,8 +264,8 @@ final class DashboardGlobalPedidosController extends Controller
                     $companyId === null ? $query->whereRaw('1 = 0') : $query->where('empresa_id', $companyId);
                 }
             } else {
-                abort_unless($this->hasSite(), 403);
-                $query->whereIn('sede_id', $this->assignedSiteIds($user, $authorization));
+                abort_unless($this->tieneSede(), 403);
+                $query->whereIn('sede_id', $this->idsSedesAsignadas($user, $authorization));
             }
             if (! $isGlobalAdministrator && Schema::hasColumn('pedidos', 'empresa_id') && Schema::hasTable('sedes') && Schema::hasColumn('sedes', 'empresa_id')) {
                 $query->whereExists(static function ($siteQuery): void {
@@ -286,16 +286,16 @@ final class DashboardGlobalPedidosController extends Controller
      * @param  mixed  $authorization  Parámetro recibido por la operación.
      * @return void Resultado de la operación.
      */
-    private function authorizeDashboard(User $user, ServicioAutorizacion $authorization): void
+    private function autorizarPanel(User $user, ServicioAutorizacion $authorization): void
     {
         abort_unless($authorization->allows($user, 'gestion.seguridad.consultar'), 403);
         $authorization->assertAllowed($user, 'gestion.panel.consultar');
     }
 
     /** @return Collection<int, object> */
-    private function availableSites(User $user, ServicioAutorizacion $authorization): Collection
+    private function sedesDisponibles(User $user, ServicioAutorizacion $authorization): Collection
     {
-        if (! $this->hasSite()) {
+        if (! $this->tieneSede()) {
             return collect();
         }
 
@@ -306,7 +306,7 @@ final class DashboardGlobalPedidosController extends Controller
                 static fn ($query) => $query->join('empresas as dashboard_empresas', 'dashboard_empresas.id', '=', 'sedes.empresa_id')
                     ->where('dashboard_empresas.activo', true),
             )
-            ->when($authorization->isSeeded() && ! $this->hasGlobalOrganizationAccess($user), fn ($query) => $query->whereIn('sedes.id', $this->assignedSiteIds($user, $authorization)))
+            ->when($authorization->isSeeded() && ! $this->tieneAccesoOrganizacionGlobal($user), fn ($query) => $query->whereIn('sedes.id', $this->idsSedesAsignadas($user, $authorization)))
             ->orderBy('sedes.nombre')
             ->get(['sedes.id', 'sedes.nombre']);
     }
@@ -317,7 +317,7 @@ final class DashboardGlobalPedidosController extends Controller
      * @param  mixed  $user  Parámetro recibido por la operación.
      * @return bool Resultado de la operación.
      */
-    private function hasGlobalOrganizationAccess(User $user): bool
+    private function tieneAccesoOrganizacionGlobal(User $user): bool
     {
         return DB::table('usuarios_roles')->join('roles', 'roles.id', '=', 'usuarios_roles.rol_id')
             ->where('usuarios_roles.usuario_id', $user->getKey())
@@ -332,7 +332,7 @@ final class DashboardGlobalPedidosController extends Controller
     }
 
     /** @return array<int, int> */
-    private function assignedSiteIds(User $user, ServicioAutorizacion $authorization): array
+    private function idsSedesAsignadas(User $user, ServicioAutorizacion $authorization): array
     {
         $siteAssignments = DB::table('usuarios_sedes_roles')
             ->join('roles', 'roles.id', '=', 'usuarios_sedes_roles.rol_id')
@@ -353,9 +353,9 @@ final class DashboardGlobalPedidosController extends Controller
             ->where(static fn ($query) => $query->whereNull('usuarios_sedes_roles.vigente_hasta')->orWhere('usuarios_sedes_roles.vigente_hasta', '>', now()))
             ->distinct();
         $siteIds = $siteAssignments->pluck('usuarios_sedes_roles.sede_id')->map(static fn ($id): int => (int) $id)->all();
-        $activeSiteId = $authorization->activeSiteIdFor($user);
+        $idSedeActiva = $authorization->activeSiteIdFor($user);
 
-        return $activeSiteId === null ? $siteIds : array_values(array_intersect($siteIds, [$activeSiteId]));
+        return $idSedeActiva === null ? $siteIds : array_values(array_intersect($siteIds, [$idSedeActiva]));
     }
 
     /**
@@ -363,7 +363,7 @@ final class DashboardGlobalPedidosController extends Controller
      *
      * @return bool Resultado de la operación.
      */
-    private function hasSite(): bool
+    private function tieneSede(): bool
     {
         return Schema::hasTable('sedes') && Schema::hasColumn('pedidos', 'sede_id');
     }
@@ -373,7 +373,7 @@ final class DashboardGlobalPedidosController extends Controller
      *
      * @return bool Resultado de la operación.
      */
-    private function hasChannel(): bool
+    private function tieneCanal(): bool
     {
         return Schema::hasColumn('pedidos', 'canal');
     }
@@ -385,7 +385,7 @@ final class DashboardGlobalPedidosController extends Controller
      * @param  mixed  $format  Parámetro recibido por la operación.
      * @return string Resultado de la operación.
      */
-    private static function safeExportText(string $value, string $format): string
+    private static function textoExportacionSeguro(string $value, string $format): string
     {
         $clean = trim(preg_replace('/[\p{C}\p{Z}]+/u', ' ', $value) ?? '');
         if ($format === 'pdf') {

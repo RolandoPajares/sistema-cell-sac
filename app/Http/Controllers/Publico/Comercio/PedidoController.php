@@ -47,7 +47,7 @@ class PedidoController extends Controller
 
         if ($this->authorization->allowsGlobal($user, 'gestion.seguridad.consultar')
             && $this->authorization->allowsGlobal($user, 'gestion.pedidos.consultar')) {
-            return $this->adminIndex($request);
+            return $this->indiceAdministracion($request);
         }
 
         $query = Pedido::with('details.product', 'user')->latest('creado_en')->latest('id');
@@ -78,7 +78,7 @@ class PedidoController extends Controller
 
         $orders = $query->paginate(20)->withQueryString();
         $presentationOrders = $orders->getCollection()
-            ->mapWithKeys(fn (Pedido $order): array => [$order->id => $this->orderPresentation($order)])
+            ->mapWithKeys(fn (Pedido $order): array => [$order->id => $this->presentacionPedido($order)])
             ->all();
 
         return view('publico.comercio.pedidos-cuenta', [
@@ -88,15 +88,15 @@ class PedidoController extends Controller
     }
 
     /**
-     * Ejecuta la operación adminIndex definida por la clase PedidoController.
+     * Presenta el índice administrativo de pedidos.
      *
      * @param  mixed  $request  Parámetro recibido por la operación.
      * @return View Resultado de la operación.
      */
-    private function adminIndex(Request $request): View
+    private function indiceAdministracion(Request $request): View
     {
-        $filters = $this->adminFilters($request);
-        $orders = $this->adminOrderQuery($request, $filters)
+        $filters = $this->filtrosAdministracion($request);
+        $orders = $this->consultaPedidosAdministracion($request, $filters)
             ->with([
                 'user:id,nombre,correo,rol',
                 'details.product:id,nombre,marca,url_imagen',
@@ -113,16 +113,16 @@ class PedidoController extends Controller
         $todayOrders = $this->scopedOrders($request)->whereDate('creado_en', today())->count();
         $yesterdayOrders = $this->scopedOrders($request)->whereDate('creado_en', today()->subDay())->count();
         $paidOrders = null;
-        $pendingOrders = $this->countStatuses($statusCounts, ['Pendiente']);
-        $shippingOrders = $this->countStatuses($statusCounts, ['Enviado']);
-        $deliveredOrders = $this->countStatuses($statusCounts, ['Entregado']);
-        $cancelledOrders = $this->countStatuses($statusCounts, ['Cancelado']);
+        $pendingOrders = $this->contarEstados($statusCounts, ['Pendiente']);
+        $shippingOrders = $this->contarEstados($statusCounts, ['Enviado']);
+        $deliveredOrders = $this->contarEstados($statusCounts, ['Entregado']);
+        $cancelledOrders = $this->contarEstados($statusCounts, ['Cancelado']);
         $staleOrders = $this->scopedOrders($request)
             ->whereNotIn('estado', ['Entregado', 'Cancelado'])
             ->where('creado_en', '<', now()->subHours(48))
             ->count();
-        $statusSummary = $this->statusSummary($statusCounts, $totalOrders);
-        $customerSummary = $this->customerSummary($request, $totalOrders);
+        $statusSummary = $this->resumenEstados($statusCounts, $totalOrders);
+        $resumenCliente = $this->resumenCliente($request, $totalOrders);
         $recentOrders = $this->scopedOrders($request)
             ->with(['user:id,nombre,correo', 'details.product:id,nombre,marca,url_imagen'])
             ->latest('creado_en')
@@ -132,7 +132,7 @@ class PedidoController extends Controller
         $presentationOrders = $orders->getCollection()
             ->concat($recentOrders)
             ->unique('id')
-            ->mapWithKeys(fn (Pedido $order): array => [$order->id => $this->orderPresentation($order)])
+            ->mapWithKeys(fn (Pedido $order): array => [$order->id => $this->presentacionPedido($order)])
             ->all();
 
         return view('gestion.comercial.pedidos.listar', [
@@ -142,14 +142,14 @@ class PedidoController extends Controller
             'filters' => $filters,
             'totalOrders' => $totalOrders,
             'todayOrders' => $todayOrders,
-            'todayOrdersTrend' => $this->trendPercent($todayOrders, $yesterdayOrders),
+            'todayOrdersTrend' => $this->porcentajeTendencia($todayOrders, $yesterdayOrders),
             'pendingOrders' => $pendingOrders,
             'paidOrders' => $paidOrders,
             'shippingOrders' => $shippingOrders,
             'deliveredOrders' => $deliveredOrders,
             'cancelledOrders' => $cancelledOrders,
             'statusSummary' => $statusSummary,
-            'customerSummary' => $customerSummary,
+            'customerSummary' => $resumenCliente,
             'presentationOrders' => $presentationOrders,
             'donutStyle' => $this->donutStyle($statusSummary),
             'alerts' => $this->alerts($pendingOrders, $cancelledOrders, $staleOrders),
@@ -162,18 +162,18 @@ class PedidoController extends Controller
     }
 
     /** @return array{status:array{label:string,class:string},shipping:array{label:string,class:string},payment:array{label:string,class:string},initials:string,image:?string,date:string,activity_icon:string} */
-    private function orderPresentation(Pedido $order): array
+    private function presentacionPedido(Pedido $order): array
     {
-        $status = $this->statusFor((string) $order->estado);
+        $status = $this->estadoPresentacion((string) $order->estado);
         $product = $order->details->first()?->product;
 
         return [
             'status' => $status,
-            'shipping' => $this->shippingFor((string) $order->estado),
+            'shipping' => $this->envioPara((string) $order->estado),
             'payment' => ['label' => 'No verificado', 'class' => 'muted'],
-            'initials' => $this->initialsFor($order->user?->nombre),
-            'image' => $this->productImage($product?->url_imagen),
-            'date' => $this->orderDate($order->creado_en),
+            'initials' => $this->inicialesPara($order->user?->nombre),
+            'image' => $this->imagenProducto($product?->url_imagen),
+            'date' => $this->fechaPedido($order->creado_en),
             'activity_icon' => match ((string) $order->estado) {
                 'Entregado' => 'check2',
                 'Cancelado' => 'x-lg',
@@ -185,7 +185,7 @@ class PedidoController extends Controller
     }
 
     /** @return array{label:string,class:string} */
-    private function statusFor(string $status): array
+    private function estadoPresentacion(string $status): array
     {
         return match ($status) {
             'Pendiente' => ['label' => 'Pendiente', 'class' => 'pending'],
@@ -198,7 +198,7 @@ class PedidoController extends Controller
     }
 
     /** @return array{label:string,class:string} */
-    private function shippingFor(string $status): array
+    private function envioPara(string $status): array
     {
         return match ($status) {
             'Pendiente' => ['label' => 'Por preparar', 'class' => 'muted'],
@@ -210,7 +210,7 @@ class PedidoController extends Controller
         };
     }
 
-    private function initialsFor(?string $name): string
+    private function inicialesPara(?string $name): string
     {
         $parts = preg_split('/\s+/', trim((string) $name), -1, PREG_SPLIT_NO_EMPTY);
 
@@ -219,7 +219,7 @@ class PedidoController extends Controller
             ->implode('');
     }
 
-    private function productImage(?string $path): ?string
+    private function imagenProducto(?string $path): ?string
     {
         if (! $path) {
             return null;
@@ -228,7 +228,7 @@ class PedidoController extends Controller
         return str_starts_with($path, 'http') ? $path : asset(ltrim($path, '/'));
     }
 
-    private function orderDate(?Carbon $date): string
+    private function fechaPedido(?Carbon $date): string
     {
         if (! $date) {
             return 'Sin fecha';
@@ -279,8 +279,8 @@ class PedidoController extends Controller
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
         abort_unless($this->authorization->allowsGlobal($request->user(), 'gestion.seguridad.consultar'), 403);
         $this->authorization->assertAllowed($request->user(), 'gestion.pedidos.exportar');
-        $filtros = $this->adminFilters($request);
-        $pedidos = $this->adminOrderQuery($request, $filtros)
+        $filtros = $this->filtrosAdministracion($request);
+        $pedidos = $this->consultaPedidosAdministracion($request, $filtros)
             ->with('user:id,nombre,correo')
             ->orderBy('creado_en')->orderBy('id')->get();
         $filas = $pedidos->map(static fn (Pedido $pedido): array => [
@@ -353,7 +353,7 @@ class PedidoController extends Controller
      * @param  array{buscar:?string,estado:?string,periodo:string,canal:?string,por_pagina:int}  $filters
      * @return Builder<Pedido>
      */
-    private function adminOrderQuery(Request $request, array $filters): Builder
+    private function consultaPedidosAdministracion(Request $request, array $filters): Builder
     {
         return $this->scopedOrders($request)
             ->when($filters['buscar'], function (Builder $query, string $search): void {
@@ -373,7 +373,7 @@ class PedidoController extends Controller
     /**
      * @return array{buscar:?string,estado:?string,periodo:string,canal:?string,por_pagina:int}
      */
-    private function adminFilters(Request $request): array
+    private function filtrosAdministracion(Request $request): array
     {
         $validatedChannel = $request->validate([
             'canal' => ['nullable', 'string', 'max:30'],
@@ -403,7 +403,7 @@ class PedidoController extends Controller
      * @param  Collection<string, int|string>  $statusCounts
      * @param  array<int, string>  $statuses
      */
-    private function countStatuses(Collection $statusCounts, array $statuses): int
+    private function contarEstados(Collection $statusCounts, array $statuses): int
     {
         return array_sum(array_map(static fn (string $status): int => (int) $statusCounts->get($status, 0), $statuses));
     }
@@ -412,7 +412,7 @@ class PedidoController extends Controller
      * @param  Collection<string, int|string>  $statusCounts
      * @return array<int, array{label:string,count:int,percent:float,color:string,key:string}>
      */
-    private function statusSummary(Collection $statusCounts, int $totalOrders): array
+    private function resumenEstados(Collection $statusCounts, int $totalOrders): array
     {
         $statuses = [
             ['key' => 'Pendiente', 'label' => 'Pendientes', 'color' => 'yellow'],
@@ -435,7 +435,7 @@ class PedidoController extends Controller
     /**
      * @return array<int, array{label:string,count:int,percent:float,color:string}>
      */
-    private function customerSummary(Request $request, int $totalOrders): array
+    private function resumenCliente(Request $request, int $totalOrders): array
     {
         $minoristOrders = $this->scopedOrders($request)->whereHas('user.rolesVigentes', fn (Builder $query): Builder => $query->where('codigo', 'cliente_minorista'))->count();
         $mayoristOrders = $this->scopedOrders($request)->whereHas('user.rolesVigentes', fn (Builder $query): Builder => $query->where('codigo', 'cliente_mayorista'))->count();
@@ -466,7 +466,7 @@ class PedidoController extends Controller
      * @param  mixed  $previous  Parámetro recibido por la operación.
      * @return mixed Resultado de la operación.
      */
-    private function trendPercent(int $current, int $previous): ?float
+    private function porcentajeTendencia(int $current, int $previous): ?float
     {
         if ($previous === 0) {
             return null;

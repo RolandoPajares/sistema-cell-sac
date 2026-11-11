@@ -182,7 +182,7 @@ it('filters persisted coupons using code, discount type and current validity', f
 });
 
 it('registers a normalized coupon and writes one audit event', function (): void {
-    $coupon = app(ServicioCupones::class)->register([
+    $coupon = app(ServicioCupones::class)->registrar([
         'codigo' => 'verano-15', 'tipo_descuento' => 'porcentaje', 'valor' => '15.00', 'minimo_compra' => '50.00',
         'limite_usos' => 25, 'inicia_en' => now(), 'finaliza_en' => now()->addDays(10),
     ], couponTestActor(), '127.0.0.1');
@@ -193,7 +193,7 @@ it('registers a normalized coupon and writes one audit event', function (): void
 
 it('rejects invalid percentage values and usage limits below existing redemptions', function (): void {
     $service = app(ServicioCupones::class);
-    expect(fn () => $service->register([
+    expect(fn () => $service->registrar([
         'codigo' => 'PORCENTAJE-INVALIDO', 'tipo_descuento' => 'porcentaje', 'valor' => 100.01,
         'minimo_compra' => 0, 'limite_usos' => null, 'inicia_en' => now(), 'finaliza_en' => now()->addDays(2),
     ], couponTestActor(), null))->toThrow(HttpException::class);

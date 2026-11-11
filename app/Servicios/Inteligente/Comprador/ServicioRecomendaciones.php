@@ -15,7 +15,7 @@ class ServicioRecomendaciones
     /**
      * @param  array{presupuesto?:numeric-string|float|int|null, uso?:string|null, prioridad?:string|null}  $filters
      */
-    public function recommend(array $filters): Collection
+    public function recomendar(array $filters): Collection
     {
         $weights = match ($filters['uso'] ?? 'general') {
             'gaming' => ['rendimiento' => 1.7, 'bateria' => 1.1, 'camara' => .4, 'valor' => 1.2],
@@ -30,13 +30,13 @@ class ServicioRecomendaciones
             $weights[$filters['prioridad']] += .9;
         }
 
-        return Producto::with('features', 'intelligenceProfile', 'category', 'images')
+        return Producto::with('features', 'perfilInteligencia', 'category', 'images')
             ->active()
             ->get()
             ->filter(fn (Producto $product): bool => ! isset($filters['presupuesto']) || (float) $product->effective_price <= (float) $filters['presupuesto'])
             ->map(function (Producto $product) use ($weights): Producto {
                 $features = $product->features->pluck('valor', 'nombre')->map(fn (string $value): float => (float) $value);
-                $profile = $product->intelligenceProfile;
+                $profile = $product->perfilInteligencia;
                 $scores = [
                     'rendimiento' => $profile?->puntuacion_rendimiento ?? $features['rendimiento'] ?? 70,
                     'camara' => $profile?->puntuacion_camara ?? $features['camara'] ?? 70,

@@ -33,7 +33,7 @@ final class ServicioGestionProductos
                 ...$this->alcance->atributosDeAlcance($usuario, 'productos'),
             ]);
             $producto->suppliers()->sync($proveedorId !== null ? [$proveedorId] : []);
-            $this->inventario->registerNewProduct($producto, $usuario);
+            $this->inventario->registrarProductoNuevo($producto, $usuario);
             $this->stock->sincronizar($producto, $stockInicial, $usuario, 'Stock inicial registrado desde el formulario de producto.');
             $this->catalogo->sincronizarImagenPortada($producto);
             $this->auditoria->registrar($usuario->id, 'product.created', 'productos', $producto->id, null, $producto->only([

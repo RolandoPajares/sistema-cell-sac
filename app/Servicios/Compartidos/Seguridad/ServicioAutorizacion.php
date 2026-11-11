@@ -45,7 +45,9 @@ final class ServicioAutorizacion
         'deactivate' => 'eliminar', 'destroy' => 'eliminar', 'delete' => 'eliminar',
         'export' => 'exportar', 'adjust' => 'ajustar', 'approve' => 'aprobar', 'cancel' => 'anular',
         'assign' => 'asignar', 'revoke' => 'revocar', 'activate' => 'activar',
-        'receive' => 'recibir', 'emit' => 'emitir', 'restore' => 'restaurar',
+        'receive' => 'recibir', 'receive_partial' => 'recibir', 'transfer_approve' => 'aprobar',
+        'transfer_dispatch' => 'transferir',
+        'emit' => 'emitir', 'restore' => 'restaurar',
         'confirm' => 'crear', 'convert_quotation' => 'crear', 'import' => 'crear',
     ];
 
@@ -113,7 +115,7 @@ final class ServicioAutorizacion
             return true;
         }
 
-        $siteId = $this->activeSiteId($user);
+        $siteId = $this->idSedeActivaInterna($user);
         $siteAssignment = $role->alcance_permitido === 'sede' && $siteId !== null && DB::table('usuarios_sedes_roles')
             ->where('usuario_id', $user->getKey())
             ->where('sede_id', $siteId)
@@ -147,7 +149,7 @@ final class ServicioAutorizacion
             return false;
         }
 
-        return in_array($permissionCode, $this->permissionCodes($user), true);
+        return in_array($permissionCode, $this->codigosPermisos($user), true);
     }
 
     /**
@@ -155,7 +157,7 @@ final class ServicioAutorizacion
      */
     public function hasAnyPermission(User $user): bool
     {
-        return $this->isSeeded() && $this->permissionCodes($user) !== [];
+        return $this->isSeeded() && $this->codigosPermisos($user) !== [];
     }
 
     /**
@@ -207,12 +209,12 @@ final class ServicioAutorizacion
             return $siteLocation;
         }
 
-        $siteId = $this->activeSiteId($user);
+        $siteId = $this->idSedeActivaInterna($user);
         if ($siteId === null && $this->allowsGlobal($user, 'gestion.organizacion.consultar')) {
-            $siteId = $this->singleActiveSiteId();
+            $siteId = $this->idSedeActivaUnica();
         }
         if ($siteId === null && $this->allows($user, 'gestion.pedidos.consultar')) {
-            $siteId = $this->singleActiveSiteId();
+            $siteId = $this->idSedeActivaUnica();
         }
 
         if ($siteId === null) {
@@ -241,7 +243,7 @@ final class ServicioAutorizacion
      */
     public function activeSiteIdFor(User $user): ?int
     {
-        return $this->activeSiteId($user);
+        return $this->idSedeActivaInterna($user);
     }
 
     /**
@@ -251,7 +253,7 @@ final class ServicioAutorizacion
      */
     public function activeCompanyId(): ?int
     {
-        return $this->singleActiveCompanyId();
+        return $this->idEmpresaActivaUnica();
     }
 
     /** @return array<string, int|null> */
@@ -304,10 +306,10 @@ final class ServicioAutorizacion
         }
 
         if ($this->allowsGlobal($user, $permissionCode)) {
-            return $companyId !== null && $companyId === $this->singleActiveCompanyId();
+            return $companyId !== null && $companyId === $this->idEmpresaActivaUnica();
         }
 
-        if ($ownerId === (int) $user->getKey() && $this->hasPermissionAtScope($user, $permissionCode, 'propio')) {
+        if ($ownerId === (int) $user->getKey() && $this->tienePermisoEnAlcance($user, $permissionCode, 'propio')) {
             return true;
         }
 
@@ -321,7 +323,7 @@ final class ServicioAutorizacion
             return false;
         }
 
-        return in_array($siteId, $this->siteIdsWithPermission($user, $permissionCode), true);
+        return in_array($siteId, $this->idsSedesConPermiso($user, $permissionCode), true);
     }
 
     /** @return array<int, int> */
@@ -332,13 +334,13 @@ final class ServicioAutorizacion
         }
 
         if ($this->allowsGlobal($user, $permissionCode)) {
-            $companyId = $this->singleActiveCompanyId();
+            $companyId = $this->idEmpresaActivaUnica();
 
             $siteIds = $companyId === null ? [] : DB::table('sedes')
                 ->where('empresa_id', $companyId)->where('activa', true)
                 ->pluck('id')->map(static fn (mixed $id): int => (int) $id)->all();
         } else {
-            $siteIds = $this->siteIdsWithPermission($user, $permissionCode);
+            $siteIds = $this->idsSedesConPermiso($user, $permissionCode);
         }
 
         $selectedSiteId = request()->hasSession() ? request()->session()->get('sede_actual_id') : null;
@@ -365,7 +367,7 @@ final class ServicioAutorizacion
         $table = $query->getModel()->getTable();
 
         if ($this->allowsGlobal($user, $permissionCode)) {
-            $companyId = $this->singleActiveCompanyId();
+            $companyId = $this->idEmpresaActivaUnica();
             if ($companyId === null || ! Schema::hasColumn($table, 'empresa_id')) {
                 return $query->whereRaw('1 = 0');
             }
@@ -389,10 +391,10 @@ final class ServicioAutorizacion
             return $query->whereRaw('1 = 0');
         }
 
-        $siteIds = $this->siteIdsWithPermission($user, $permissionCode);
+        $siteIds = $this->idsSedesConPermiso($user, $permissionCode);
         $hasOwnScope = $ownerColumn !== null
             && Schema::hasColumn($table, $ownerColumn)
-            && $this->hasPermissionAtScope($user, $permissionCode, 'propio');
+            && $this->tienePermisoEnAlcance($user, $permissionCode, 'propio');
 
         if ($siteIds === [] && ! $hasOwnScope) {
             return $query->whereRaw('1 = 0');
@@ -440,7 +442,7 @@ final class ServicioAutorizacion
      */
     public function allowsGlobal(User $user, string $permissionCode): bool
     {
-        if (! $this->isSeeded() || ! $this->allows($user, $permissionCode) || $this->singleActiveCompanyId() === null) {
+        if (! $this->isSeeded() || ! $this->allows($user, $permissionCode) || $this->idEmpresaActivaUnica() === null) {
             return false;
         }
 
@@ -572,6 +574,24 @@ final class ServicioAutorizacion
             }
         }
 
+        $transferActions = [
+            'inventory.transfer_request' => 'transferir',
+            'inventory.transfer_approve' => 'aprobar',
+            'inventory.transfer_dispatch' => 'transferir',
+            'inventory.transfer_receive' => 'transferir',
+            'inventory.transfer_return' => 'transferir',
+            'inventory.transfer_reconcile' => 'transferir',
+            'inventory.transfer_reject' => 'aprobar',
+            'inventory.transfer_cancel' => 'transferir',
+            'inventory.transfer_close' => 'transferir',
+        ];
+
+        $action = $transferActions[$routeName] ?? $action;
+
+        if ($routeName === 'purchases.receive_partial') {
+            $action = 'recibir';
+        }
+
         if ($routeModule === 'company_settings'
             && (str_starts_with($routeName, 'company_settings.warehouses.') || str_starts_with($routeName, 'company_settings.sites.'))
             && in_array($request->method(), ['POST', 'PUT', 'PATCH'], true)) {
@@ -629,7 +649,7 @@ final class ServicioAutorizacion
             return [];
         }
 
-        $permissionCodes = $this->permissionCodes($user);
+        $permissionCodes = $this->codigosPermisos($user);
 
         if ($permissionCodes === []) {
             return [];
@@ -660,18 +680,18 @@ final class ServicioAutorizacion
      * @param  User  $user  Usuario cuya sede se valida.
      * @return int|null Sede activa autorizada o null cuando hay cero o varias opciones.
      */
-    private function activeSiteId(User $user): ?int
+    private function idSedeActivaInterna(User $user): ?int
     {
         $sessionSiteId = request()->hasSession() ? request()->session()->get('sede_actual_id') : null;
 
         if (is_numeric($sessionSiteId)) {
             $siteId = (int) $sessionSiteId;
 
-            if (! $this->isActiveSite($siteId)) {
+            if (! $this->sedeActiva($siteId)) {
                 return null;
             }
 
-            $hasGlobalAdministrator = $this->hasPermissionAtScope(
+            $hasGlobalAdministrator = $this->tienePermisoEnAlcance(
                 $user,
                 'gestion.organizacion.consultar',
                 'empresa',
@@ -724,7 +744,7 @@ final class ServicioAutorizacion
      * @param  int  $siteId  Identificador de la sede.
      * @return bool Verdadero cuando ambas entidades existen y están habilitadas.
      */
-    private function isActiveSite(int $siteId): bool
+    private function sedeActiva(int $siteId): bool
     {
         return Schema::hasTable('sedes')
             && Schema::hasTable('empresas')
@@ -744,7 +764,7 @@ final class ServicioAutorizacion
      * @param  string  $scope  Alcance RBAC que debe coincidir.
      * @return bool Verdadero si existe una asignación activa y vigente.
      */
-    private function hasPermissionAtScope(User $user, string $permissionCode, string $scope): bool
+    private function tienePermisoEnAlcance(User $user, string $permissionCode, string $scope): bool
     {
         $permissionId = DB::table('permisos')
             ->where('codigo', $permissionCode)
@@ -791,7 +811,7 @@ final class ServicioAutorizacion
     }
 
     /** @return array<int, int> */
-    private function siteIdsWithPermission(User $user, string $permissionCode): array
+    private function idsSedesConPermiso(User $user, string $permissionCode): array
     {
         return DB::table('usuarios_sedes_roles')
             ->join('roles', 'roles.id', '=', 'usuarios_sedes_roles.rol_id')
@@ -828,7 +848,7 @@ final class ServicioAutorizacion
      *
      * @return int|null Identificador único o null si hay cero o varias sedes.
      */
-    private function singleActiveSiteId(): ?int
+    private function idSedeActivaUnica(): ?int
     {
         if (! Schema::hasTable('sedes')) {
             return null;
@@ -850,7 +870,7 @@ final class ServicioAutorizacion
      *
      * @return int|null Identificador único o null si hay cero o varias empresas.
      */
-    private function singleActiveCompanyId(): ?int
+    private function idEmpresaActivaUnica(): ?int
     {
         if (! Schema::hasTable('empresas')) {
             return null;
@@ -862,16 +882,16 @@ final class ServicioAutorizacion
     }
 
     /** @return array<int, string> */
-    private function permissionCodes(User $user): array
+    private function codigosPermisos(User $user): array
     {
-        $siteId = $this->activeSiteId($user);
+        $siteId = $this->idSedeActivaInterna($user);
 
         $globalRoleIds = DB::table('usuarios_roles')
             ->join('roles', 'roles.id', '=', 'usuarios_roles.rol_id')
             ->where('usuarios_roles.usuario_id', $user->getKey())
             ->where('usuarios_roles.activo', true)
             ->where('roles.activo', true)
-            ->when($this->singleActiveCompanyId() === null, fn ($query) => $query->where('roles.alcance_permitido', '!=', 'empresa'))
+            ->when($this->idEmpresaActivaUnica() === null, fn ($query) => $query->where('roles.alcance_permitido', '!=', 'empresa'))
             ->where(function ($query): void {
                 $query->whereNull('usuarios_roles.vigente_hasta')->orWhere('usuarios_roles.vigente_hasta', '>', now());
             })

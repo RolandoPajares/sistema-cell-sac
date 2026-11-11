@@ -67,7 +67,7 @@
                     <label class="productos-create-field productos-create-field--compact">
                         <span>Stock inicial <b>*</b></span>
                         <input class="productos-create-input" name="existencias" type="number" min="0" step="1" value="{{ old('existencias', 0) }}" required aria-describedby="stock-inicial-ayuda">
-                        <small id="stock-inicial-ayuda">Se registrar· en el almacÈn autorizado y quedar· auditado como movimiento inicial.</small>
+                        <small id="stock-inicial-ayuda">Se registrar√° en el almac√©n autorizado y quedar√° auditado como movimiento inicial.</small>
                     </label>
 
                     <label class="productos-create-field productos-create-field--status">

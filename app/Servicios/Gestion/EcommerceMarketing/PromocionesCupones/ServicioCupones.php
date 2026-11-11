@@ -77,13 +77,13 @@ class ServicioCupones
     }
 
     /** @param array<string, mixed> $attributes */
-    public function register(array $attributes, User $actor, ?string $ip): Cupon
+    public function registrar(array $attributes, User $actor, ?string $ip): Cupon
     {
-        $this->authorization()->assertAllowed($actor, 'gestion.cupones.crear');
+        $this->autorizacion()->assertAllowed($actor, 'gestion.cupones.crear');
         $empresaId = $this->empresaActual();
         $attributes['empresa_id'] = $empresaId;
         $attributes['codigo'] = mb_strtoupper((string) $attributes['codigo']);
-        $this->assertCouponRules($attributes, 0);
+        $this->comprobarReglasCupon($attributes, 0);
 
         return DB::transaction(function () use ($attributes, $actor, $ip, $empresaId): Cupon {
             $coupon = Cupon::query()->create($attributes + ['activo' => true, 'usos' => 0]);
@@ -100,12 +100,12 @@ class ServicioCupones
     /** @param array<string, mixed> $attributes */
     public function update(Cupon $coupon, array $attributes, User $actor, ?string $ip): Cupon
     {
-        $this->authorization()->assertAllowed($actor, 'gestion.cupones.actualizar');
+        $this->autorizacion()->assertAllowed($actor, 'gestion.cupones.actualizar');
         $empresaId = $this->empresaActual();
 
         return DB::transaction(function () use ($coupon, $attributes, $actor, $ip, $empresaId): Cupon {
             $lockedCoupon = Cupon::query()->where('empresa_id', $empresaId)->whereKey($coupon->getKey())->lockForUpdate()->firstOrFail();
-            $this->assertCouponRules($attributes, (int) $lockedCoupon->usos);
+            $this->comprobarReglasCupon($attributes, (int) $lockedCoupon->usos);
             $before = $lockedCoupon->only(['tipo_descuento', 'valor', 'minimo_compra', 'limite_usos', 'inicia_en', 'finaliza_en']);
             $lockedCoupon->update($attributes + ['actualizado_en' => now()]);
             app(RegistradorAuditoria::class)->record(
@@ -127,7 +127,7 @@ class ServicioCupones
      */
     public function deactivate(Cupon $coupon, User $actor, ?string $ip): Cupon
     {
-        $this->authorization()->assertAllowed($actor, 'gestion.cupones.eliminar');
+        $this->autorizacion()->assertAllowed($actor, 'gestion.cupones.eliminar');
         $empresaId = $this->empresaActual();
 
         return DB::transaction(function () use ($coupon, $actor, $ip, $empresaId): Cupon {
@@ -163,7 +163,7 @@ class ServicioCupones
     }
 
     /** @param array<string, mixed> $attributes */
-    private function assertCouponRules(array $attributes, int $registeredUses): void
+    private function comprobarReglasCupon(array $attributes, int $registeredUses): void
     {
         abort_if(($attributes['tipo_descuento'] ?? null) === 'porcentaje' && (float) ($attributes['valor'] ?? 0) > 100, 422, 'El descuento porcentual no puede superar el 100 %.');
         if (isset($attributes['limite_usos'])) {
@@ -176,7 +176,7 @@ class ServicioCupones
      *
      * @return ServicioAutorizacion Resultado de la operación.
      */
-    private function authorization(): ServicioAutorizacion
+    private function autorizacion(): ServicioAutorizacion
     {
         return app(ServicioAutorizacion::class);
     }
@@ -188,7 +188,7 @@ class ServicioCupones
      */
     public function empresaDisponible(): bool
     {
-        return Schema::hasColumn('cupones', 'empresa_id') && $this->authorization()->activeCompanyId() !== null;
+        return Schema::hasColumn('cupones', 'empresa_id') && $this->autorizacion()->activeCompanyId() !== null;
     }
 
     /**
@@ -200,7 +200,7 @@ class ServicioCupones
     {
         abort_unless(Schema::hasColumn('cupones', 'empresa_id'), 503,
             'Los cupones están deshabilitados hasta aplicar la estructura de propiedad por empresa.');
-        $empresaId = $this->authorization()->activeCompanyId();
+        $empresaId = $this->autorizacion()->activeCompanyId();
         abort_unless($empresaId !== null, 409, 'Selecciona una empresa activa para gestionar cupones.');
 
         return $empresaId;

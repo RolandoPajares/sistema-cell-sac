@@ -1,26 +1,26 @@
 @extends('layouts.tienda.principal')
 
 @section('body_class', 'modulo-catalog')
-@section('title', 'Cat�logo | MD Technology Cell')
+@section('title', 'Catálogo | MD Technology Cell')
 
 @section('content')
 <section class="catalog-page">
     <div class="catalog-reference-hero">
         <div class="container catalog-reference-hero__inner">
-            <div><span class="eyebrow">TECHNOLOGY CELL</span><h1>Encuentra tu pr�ximo <span>celular ideal</span></h1><p>Las mejores marcas, precios vigentes y garant�a real.</p><a class="btn btn-primary" href="#productos">Explorar cat�logo <i class="bi bi-arrow-right"></i></a></div>
+            <div><span class="eyebrow">TECHNOLOGY CELL</span><h1>Encuentra tu próximo <span>celular ideal</span></h1><p>Las mejores marcas, precios vigentes y garantía real.</p><a class="btn btn-primary" href="#productos">Explorar catálogo <i class="bi bi-arrow-right"></i></a></div>
         </div>
     </div>
     <div class="container">
-        <nav class="catalog-breadcrumbs" aria-label="Ruta de navegaci�n">
-            <a href="{{ route('home') }}">Inicio</a><span aria-hidden="true">�</span><span aria-current="page">Cat�logo</span>
+        <nav class="catalog-breadcrumbs" aria-label="Ruta de navegación">
+            <a href="{{ route('home') }}">Inicio</a><span aria-hidden="true">›</span><span aria-current="page">Catálogo</span>
         </nav>
 
         <div class="catalog-layout">
-            <aside class="catalog-sidebar" aria-label="Filtros del cat�logo">
+            <aside class="catalog-sidebar" aria-label="Filtros del catálogo">
                 <section class="catalog-filter-section">
-                    <h2>Categor�as</h2>
-                    <nav class="catalog-filter-list" aria-label="Categor�as">
-                        <a class="{{ $selectedCategory ? '' : 'is-active' }}" href="{{ route('catalog.index', collect($baseFilters)->except('categoria')->all()) }}">Todas las categor�as</a>
+                    <h2>Categorías</h2>
+                    <nav class="catalog-filter-list" aria-label="Categorías">
+                        <a class="{{ $selectedCategory ? '' : 'is-active' }}" href="{{ route('catalog.index', collect($baseFilters)->except('categoria')->all()) }}">Todas las categorías</a>
                         @foreach($categories as $category)
                         <a class="{{ (string) $selectedCategory === (string) $category->id ? 'is-active' : '' }}" href="{{ route('catalog.index', array_merge($baseFilters, ['categoria' => $category->id])) }}">{{ $category->nombre }}</a>
                         @endforeach
@@ -52,7 +52,7 @@
                         type="hidden"
                         name="orden"
                         value="{{ request('orden') }}">
-                    <label for="catalog-min-price">M�nimo</label>
+                    <label for="catalog-min-price">Mínimo</label>
                     <input
                         class="input"
                         id="catalog-min-price"
@@ -61,7 +61,7 @@
                         min="0"
                         step="0.01"
                         value="{{ request('min') }}">
-                    <label for="catalog-max-price">M�ximo</label>
+                    <label for="catalog-max-price">Máximo</label>
                     <input
                         class="input"
                         id="catalog-max-price"
@@ -77,7 +77,7 @@
             <div class="catalog-content" id="productos">
                 <div class="catalog-toolbar">
                     <div class="catalog-heading">
-                        <h1>{{ $selectedCategory ? $categories->firstWhere('id', (int) $selectedCategory)?->nombre : 'Cat�logo' }}</h1>
+                        <h1>{{ $selectedCategory ? $categories->firstWhere('id', (int) $selectedCategory)?->nombre : 'Catálogo' }}</h1>
                         <p>Encuentra el celular ideal para ti.</p>
                     </div>
                     <form id="catalog-search-form" class="catalog-search" method="get" action="{{ route('catalog.index') }}" role="search">
@@ -94,7 +94,7 @@
                         </button>
                         <label class="visually-hidden" for="catalog-sort">Ordenar por</label>
                         <select id="catalog-sort" name="orden" data-catalog-sort>
-                            <option value="nuevo" @selected(request('orden')==='nuevo' )>M�s recientes</option>
+                            <option value="nuevo" @selected(request('orden')==='nuevo' )>Más recientes</option>
                             <option value="precio_asc" @selected(request('orden')==='precio_asc' )>Menor precio</option>
                             <option value="precio_desc" @selected(request('orden')==='precio_desc' )>Mayor precio</option>
                             <option value="nombre" @selected(request('orden')==='nombre' )>Nombre</option>

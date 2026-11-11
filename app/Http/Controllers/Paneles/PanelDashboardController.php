@@ -129,7 +129,7 @@ final class PanelDashboardController extends Controller
             ->whereBetween('creado_en', [$previousMonthStart, $previousMonthEnd])
             ->count();
 
-        $monthlySales = $this->monthlySales($totalesVentasMensuales, $now);
+        $monthlySales = $this->ventasMensuales($totalesVentasMensuales, $now);
         $maxMonthlySales = max(1.0, (float) max(array_column($monthlySales, 'value')));
         $salesChartMax = max(5000.0, ceil($maxMonthlySales / 5000) * 5000);
 
@@ -152,7 +152,7 @@ final class PanelDashboardController extends Controller
             ])
             ->values();
         $orderStatusTotal = (int) $orderStatuses->sum('total');
-        $orderStatusChart = $this->statusChart($orderStatuses, $orderStatusTotal);
+        $orderStatusChart = $this->graficoEstados($orderStatuses, $orderStatusTotal);
 
         $recentOrders = $consultaPedidos()
             ->with(['user:id,nombre,correo', 'details.product:id,nombre'])
@@ -191,7 +191,7 @@ final class PanelDashboardController extends Controller
             ->where('activo', true)
             ->whereBetween('finaliza_en', [$now, $now->copy()->addDays(7)])
             ->count();
-        $reminders = $this->reminders($productosSinExistencias, $pendingOrders, $expiringCampaigns);
+        $reminders = $this->recordatorios($productosSinExistencias, $pendingOrders, $expiringCampaigns);
         $quickLinks = collect($this->menuDinamico->paraUsuario($user)['grupos'])
             ->flatMap(static fn (array $group): array => $group['items'] ?? [])
             ->filter(static fn (array $item): bool => ($item['enabled'] ?? false) && is_string($item['route'] ?? null))
@@ -209,15 +209,15 @@ final class PanelDashboardController extends Controller
             'orders' => $ordersCount,
             'suppliers' => $suppliersCount,
             'salesThisMonth' => $salesThisMonth,
-            'salesTrendPercent' => $this->trendPercent($salesThisMonth, $salesPreviousMonth),
+            'salesTrendPercent' => $this->porcentajeTendencia($salesThisMonth, $salesPreviousMonth),
             'ordersCount' => $ordersCount,
             'ordersThisMonth' => $ordersThisMonth,
-            'ordersTrendPercent' => $this->trendPercent($ordersThisMonth, $ordersPreviousMonth),
+            'ordersTrendPercent' => $this->porcentajeTendencia($ordersThisMonth, $ordersPreviousMonth),
             'activeProducts' => $activeProducts,
             'productsAddedThisMonth' => $productsAddedThisMonth,
             'lowStock' => $productosSinExistencias,
             'newCustomers' => $newCustomers,
-            'newCustomersTrendPercent' => $this->trendPercent($newCustomers, $newCustomersPreviousMonth),
+            'newCustomersTrendPercent' => $this->porcentajeTendencia($newCustomers, $newCustomersPreviousMonth),
             'monthlySales' => $monthlySales,
             'monthlySalesBarHeights' => collect($monthlySales)->mapWithKeys(fn (array $month): array => [
                 $month['key'] => $salesChartMax > 0 ? max(4, round(($month['value'] / $salesChartMax) * 100, 2)) : 4,
@@ -245,7 +245,7 @@ final class PanelDashboardController extends Controller
     /**
      * @return array<int, array{key:string, label:string, value:float}>
      */
-    private function monthlySales(Collection $totales, Carbon $now): array
+    private function ventasMensuales(Collection $totales, Carbon $now): array
     {
         $start = $now->copy()->startOfMonth()->subMonths(11);
 
@@ -276,7 +276,7 @@ final class PanelDashboardController extends Controller
      * @param  mixed  $previous  Parámetro recibido por la operación.
      * @return mixed Resultado de la operación.
      */
-    private function trendPercent(float|int $current, float|int $previous): ?float
+    private function porcentajeTendencia(float|int $current, float|int $previous): ?float
     {
         if ((float) $previous === 0.0) {
             return null;
@@ -288,7 +288,7 @@ final class PanelDashboardController extends Controller
     /**
      * @param  Collection<int, array{label:string, total:int, color:string}>  $statuses
      */
-    private function statusChart(Collection $statuses, int $total): string
+    private function graficoEstados(Collection $statuses, int $total): string
     {
         if ($total === 0) {
             return 'conic-gradient(#dce9f6 0 100%)';
@@ -309,7 +309,7 @@ final class PanelDashboardController extends Controller
     /**
      * @return Collection<int, array{icon:string, title:string, detail:string, tone:string}>
      */
-    private function reminders(int $lowStock, int $pendingOrders, int $expiringCampaigns): Collection
+    private function recordatorios(int $lowStock, int $pendingOrders, int $expiringCampaigns): Collection
     {
         $items = collect();
 

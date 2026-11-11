@@ -90,7 +90,7 @@ class SoporteReclamoController extends Controller
     {
         $location = app(ServicioAutorizacion::class)->operationSite($request->user());
         abort_unless($location['empresa_id'] !== null && $location['sede_id'] !== null, 403, 'Selecciona una sede autorizada.');
-        $this->assertCustomerInScope($request, $request->filled('cliente_id') ? $request->integer('cliente_id') : null, (int) $location['empresa_id']);
+        $this->comprobarClienteEnAlcance($request, $request->filled('cliente_id') ? $request->integer('cliente_id') : null, (int) $location['empresa_id']);
         $case = DB::transaction(function () use ($request, $location, $audit): CasoSoporte {
             $case = CasoSoporte::create($request->validated() + ['empresa_id' => $location['empresa_id'], 'sede_id' => $location['sede_id'], 'estado' => 'abierto']);
             $audit->record($request->user()->getKey(), 'support.created', 'casos_soporte', $case->getKey(), null, $case->only(['codigo', 'asunto', 'prioridad', 'estado']), $request->ip());
@@ -111,8 +111,8 @@ class SoporteReclamoController extends Controller
      */
     public function update(ActualizarCasoSoporteRequest $request, CasoSoporte $casoSoporte, RegistradorAuditoria $audit): RedirectResponse
     {
-        $this->assertCaseInScope($request, $casoSoporte, 'gestion.soporte.actualizar');
-        $this->assertCustomerInScope($request, $request->filled('cliente_id') ? $request->integer('cliente_id') : null, (int) $casoSoporte->empresa_id);
+        $this->comprobarCasoEnAlcance($request, $casoSoporte, 'gestion.soporte.actualizar');
+        $this->comprobarClienteEnAlcance($request, $request->filled('cliente_id') ? $request->integer('cliente_id') : null, (int) $casoSoporte->empresa_id);
         $before = $casoSoporte->only(['asunto', 'prioridad', 'estado', 'cliente_id']);
         DB::transaction(function () use ($request, $casoSoporte, $audit, $before): void {
             $casoSoporte->update($request->validated());
@@ -132,7 +132,7 @@ class SoporteReclamoController extends Controller
      */
     public function deactivate(Request $request, CasoSoporte $casoSoporte, RegistradorAuditoria $audit): RedirectResponse
     {
-        $this->assertCaseInScope($request, $casoSoporte, 'gestion.soporte.anular');
+        $this->comprobarCasoEnAlcance($request, $casoSoporte, 'gestion.soporte.anular');
         abort_unless($casoSoporte->estado !== 'cerrado', 409, 'El caso ya está cerrado.');
         $before = ['estado' => $casoSoporte->estado];
         DB::transaction(function () use ($request, $casoSoporte, $audit, $before): void {
@@ -151,7 +151,7 @@ class SoporteReclamoController extends Controller
      * @param  mixed  $permission  Parámetro recibido por la operación.
      * @return void Resultado de la operación.
      */
-    private function assertCaseInScope(Request $request, CasoSoporte $case, string $permission): void
+    private function comprobarCasoEnAlcance(Request $request, CasoSoporte $case, string $permission): void
     {
         abort_unless(app(ServicioAutorizacion::class)->allowsRecord($request->user(), $permission, (int) $case->empresa_id, (int) $case->sede_id), 403);
     }
@@ -164,7 +164,7 @@ class SoporteReclamoController extends Controller
      * @param  mixed  $companyId  Parámetro recibido por la operación.
      * @return void Resultado de la operación.
      */
-    private function assertCustomerInScope(Request $request, ?int $customerId, int $companyId): void
+    private function comprobarClienteEnAlcance(Request $request, ?int $customerId, int $companyId): void
     {
         if ($customerId === null) {
             return;

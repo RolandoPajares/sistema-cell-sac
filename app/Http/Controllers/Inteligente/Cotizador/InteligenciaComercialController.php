@@ -8,7 +8,7 @@ use App\Servicios\Inteligente\ServicioInteligenciaComercial;
 use Illuminate\View\View;
 
 /**
- * Define la responsabilidad de la clase InteligenciaComercialController dentro de su m骴ulo.
+ * Define la responsabilidad de la clase InteligenciaComercialController dentro de su m贸dulo.
  *
  * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
  */
@@ -17,16 +17,16 @@ class InteligenciaComercialController extends Controller
     /**
      * Inicializa la instancia con las dependencias y el estado requeridos.
      *
-     * @param  mixed  $commerce  Par醡etro recibido por la operaci髇.
-     * @return mixed Resultado de la operaci髇.
+     * @param  mixed  $servicioInteligencia  Par谩metro recibido por la operaci贸n.
+     * @return mixed Resultado de la operaci贸n.
      */
-    public function __construct(private readonly ServicioInteligenciaComercial $commerce) {}
+    public function __construct(private readonly ServicioInteligenciaComercial $servicioInteligencia) {}
 
     /**
-     * Ejecuta la operaci髇 optimizer definida por la clase InteligenciaComercialController.
+     * Ejecuta la operaci贸n optimizer definida por la clase InteligenciaComercialController.
      *
-     * @param  mixed  $request  Par醡etro recibido por la operaci髇.
-     * @return View Resultado de la operaci髇.
+     * @param  mixed  $request  Par谩metro recibido por la operaci贸n.
+     * @return View Resultado de la operaci贸n.
      */
     public function optimizer(OptimizadorInteligenteRequest $request): View
     {
@@ -36,19 +36,19 @@ class InteligenciaComercialController extends Controller
         return view('inteligente.cotizador.formulario', [
             'budget' => $budget,
             'goal' => $goal,
-            'proposal' => $budget > 0 ? $this->commerce->optimize($budget, $goal) : null,
+            'proposal' => $budget > 0 ? $this->servicioInteligencia->optimizar($budget, $goal) : null,
         ]);
     }
 
     /**
-     * Ejecuta la operaci髇 wholesale definida por la clase InteligenciaComercialController.
+     * Ejecuta la operaci贸n wholesale definida por la clase InteligenciaComercialController.
      *
-     * @return View Resultado de la operaci髇.
+     * @return View Resultado de la operaci贸n.
      */
     public function wholesale(): View
     {
         return view('inteligente.cotizador.resumen', [
-            'products' => $this->commerce->wholesaleProducts(),
+            'products' => $this->servicioInteligencia->productosMayoristas(),
             'brands' => ['SAMSUNG', 'Apple', 'oppo', 'XIAOMI', 'HONOR', 'JBL', 'Beats'],
             'benefits' => [
                 ['icon' => 'bi-cash-stack', 'label' => 'Precios por volumen'],

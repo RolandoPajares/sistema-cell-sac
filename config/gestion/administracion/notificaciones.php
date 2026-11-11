@@ -28,5 +28,5 @@ return [
         ['label' => 'Estado', 'type' => 'select', 'placeholder' => 'Seleccionar estado', 'required' => true, 'wide' => false, 'options' => ['Pendiente', 'Enviada', 'Leída', 'Fallida']],
         ['label' => 'Mensaje', 'type' => 'textarea', 'placeholder' => 'Contenido de la notificación', 'required' => false, 'wide' => true],
     ],
-    'content' => ['title' => 'Gesti�n de notificaciones', 'description' => 'Organiza avisos, plantillas y comunicaciones del sistema desde un solo panel.', 'action' => 'Gestionar plantillas', 'primary' => 'Nueva notificaci�n', 'summary' => ['Canales de comunicaci�n', 'Alertas de entrega', 'Actividad reciente']],
+    'content' => ['title' => 'Gestión de notificaciones', 'description' => 'Organiza avisos, plantillas y comunicaciones del sistema desde un solo panel.', 'action' => 'Gestionar plantillas', 'primary' => 'Nueva notificación', 'summary' => ['Canales de comunicación', 'Alertas de entrega', 'Actividad reciente']],
 ];

@@ -368,6 +368,29 @@ CREATE TABLE `configuraciones_tienda` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `configuraciones_sistema` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `empresa_id` bigint(20) unsigned NOT NULL,
+  `sede_id` bigint(20) unsigned DEFAULT NULL,
+  `grupo` varchar(60) NOT NULL,
+  `clave` varchar(100) NOT NULL,
+  `valor_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `actualizado_por_usuario_id` bigint(20) unsigned DEFAULT NULL,
+  `creado_en` datetime NOT NULL DEFAULT current_timestamp(),
+  `actualizado_en` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_config_sistema_scope` (`empresa_id`,`sede_id`,`grupo`,`clave`),
+  KEY `configuraciones_sistema_empresa_id_grupo_index` (`empresa_id`,`grupo`),
+  KEY `configuraciones_sistema_sede_id_grupo_index` (`sede_id`,`grupo`),
+  KEY `cf_configuraciones_sistema_usuario` (`actualizado_por_usuario_id`),
+  CONSTRAINT `cf_configuraciones_sistema_empresa` FOREIGN KEY (`empresa_id`) REFERENCES `empresas` (`id`),
+  CONSTRAINT `cf_configuraciones_sistema_sede` FOREIGN KEY (`sede_id`) REFERENCES `sedes` (`id`),
+  CONSTRAINT `cf_configuraciones_sistema_usuario` FOREIGN KEY (`actualizado_por_usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `ck_configuraciones_sistema_json` CHECK (json_valid(`valor_json`))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `contratos` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `empresa_id` bigint(20) unsigned NOT NULL,
@@ -2631,6 +2654,14 @@ CREATE TABLE `ventas` (
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `versiones_inicializacion_control_acceso` (
+  `codigo` varchar(80) NOT NULL,
+  `aplicado_en` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`codigo`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `rbac_seed_versions` (
   `codigo` varchar(80) NOT NULL,
   `aplicado_en` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`codigo`)

@@ -1,40 +1,6 @@
 /** Comportamientos migrados desde vistas PHP. */
 /*  */
 
-        (() => {
-            const dialog = document.querySelector('[data-profile-photo-dialog]');
-            const openButton = document.querySelector('[data-profile-photo-open]');
-            if (!dialog || !openButton) return;
-
-            openButton.addEventListener('click', () => dialog.showModal());
-            dialog.querySelectorAll('[data-profile-photo-close]').forEach((button) => {
-                button.addEventListener('click', () => dialog.close());
-            });
-            dialog.addEventListener('click', (event) => {
-                if (event.target === dialog) dialog.close();
-            });
-        })();
-    
-
-/*  */
-
-        (() => {
-            const dialog = document.querySelector('[data-profile-photo-dialog]');
-            const openButton = document.querySelector('[data-profile-photo-open]');
-            if (!dialog || !openButton) return;
-
-            openButton.addEventListener('click', () => dialog.showModal());
-            dialog.querySelectorAll('[data-profile-photo-close]').forEach((button) => {
-                button.addEventListener('click', () => dialog.close());
-            });
-            dialog.addEventListener('click', (event) => {
-                if (event.target === dialog) dialog.close();
-            });
-        })();
-    
-
-/*  */
-
 (() => {
     const page = document.querySelector('[data-menu-page]');
     if (!page) return;
@@ -448,6 +414,6 @@
             })();
         
 
-// Env�o de filtros sin eventos inline.
+// Envío de filtros sin eventos inline.
 document.querySelectorAll('[data-submit-on-change]').forEach((control) => { control.addEventListener('change', () => control.form?.submit()); });
 

@@ -10,18 +10,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Define la responsabilidad de la clase CampaniaPublicaController dentro de su m骴ulo.
+ * Define la responsabilidad de la clase CampaniaPublicaController dentro de su m贸dulo.
  *
  * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
  */
 class CampaniaPublicaController extends Controller
 {
     /**
-     * Ejecuta la operaci髇 track definida por la clase CampaniaPublicaController.
+     * Ejecuta la operaci贸n track definida por la clase CampaniaPublicaController.
      *
-     * @param  mixed  $request  Par醡etro recibido por la operaci髇.
-     * @param  mixed  $campaign  Par醡etro recibido por la operaci髇.
-     * @return RedirectResponse Resultado de la operaci髇.
+     * @param  mixed  $request  Par谩metro recibido por la operaci贸n.
+     * @param  mixed  $campaign  Par谩metro recibido por la operaci贸n.
+     * @return RedirectResponse Resultado de la operaci贸n.
      */
     public function track(Request $request, Campania $campaign): RedirectResponse
     {

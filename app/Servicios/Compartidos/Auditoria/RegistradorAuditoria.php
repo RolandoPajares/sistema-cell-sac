@@ -44,10 +44,10 @@ final class RegistradorAuditoria
         };
         $sessionSiteId = $request->hasSession() ? $request->session()->get('sede_actual_id') : null;
         $payloadSiteId = $scope['sede_id'] ?? $after['sede_id'] ?? null;
-        $siteId = $this->entityLocation($entity, $entityId, 'sede_id')
+        $siteId = $this->ubicacionEntidad($entity, $entityId, 'sede_id')
             ?? (is_numeric($payloadSiteId) ? (int) $payloadSiteId : null)
             ?? (is_numeric($sessionSiteId) ? (int) $sessionSiteId : null);
-        $companyId = $scope['empresa_id'] ?? $this->entityLocation($entity, $entityId, 'empresa_id');
+        $companyId = $scope['empresa_id'] ?? $this->ubicacionEntidad($entity, $entityId, 'empresa_id');
         if ($companyId === null && $siteId !== null && Schema::hasTable('sedes')) {
             $siteCompanyId = DB::table('sedes')->where('id', $siteId)->value('empresa_id');
             $companyId = is_numeric($siteCompanyId) ? (int) $siteCompanyId : null;
@@ -60,66 +60,66 @@ final class RegistradorAuditoria
             'accion' => Str::limit($action, 80, ''),
             'entidad' => Str::limit($entity, 80, ''),
             'entidad_id' => $entityId,
-            'valores_anteriores' => $this->safePayload($before),
-            'valores_nuevos' => $this->safePayload($after),
+            'valores_anteriores' => $this->datosSeguros($before),
+            'valores_nuevos' => $this->datosSeguros($after),
             'direccion_ip' => $ip,
             'creado_en' => now(),
         ];
 
-        if ($this->hasColumn('identificador_universal_evento')) {
+        if ($this->tieneColumna('identificador_universal_evento')) {
             $context['identificador_universal_evento'] = $eventId ?? (string) Str::uuid();
-        } elseif ($this->hasColumn('evento_uuid')) {
+        } elseif ($this->tieneColumna('evento_uuid')) {
             $context['evento_uuid'] = (string) Str::uuid();
         }
-        if ($this->hasColumn('rol_codigo')) {
+        if ($this->tieneColumna('rol_codigo')) {
             $context['rol_codigo'] = Str::limit((string) ($request->attributes->get('rol_contexto') ?: $request->user()?->rol), 40, '') ?: null;
-        } elseif ($this->hasColumn('rol_contexto')) {
+        } elseif ($this->tieneColumna('rol_contexto')) {
             $context['rol_contexto'] = Str::limit((string) ($request->attributes->get('rol_contexto') ?: $request->user()?->rol), 64, '') ?: null;
         }
-        if ($this->hasColumn('empresa_id')) {
+        if ($this->tieneColumna('empresa_id')) {
             $context['empresa_id'] = $companyId;
         }
-        if ($this->hasColumn('sede_id')) {
+        if ($this->tieneColumna('sede_id')) {
             $context['sede_id'] = $siteId;
         }
         $permission = $request->attributes->get('permiso_contexto');
         $moduleCode = is_string($permission) && preg_match('/^gestion\.([a-z0-9_]+)/', $permission, $matches) === 1
                 ? $matches[1]
-                : $this->moduleForEntity($entity);
-        if ($this->hasColumn('modulo')) {
+                : $this->moduloParaEntidad($entity);
+        if ($this->tieneColumna('modulo')) {
             $context['modulo'] = $moduleCode;
-        } elseif ($this->hasColumn('modulo_codigo')) {
+        } elseif ($this->tieneColumna('modulo_codigo')) {
             $context['modulo_codigo'] = $moduleCode;
         }
-        if ($this->hasColumn('resultado')) {
+        if ($this->tieneColumna('resultado')) {
             $context['resultado'] = $result;
         }
-        if ($this->hasColumn('origen')) {
+        if ($this->tieneColumna('origen')) {
             $context['origen'] = 'laravel';
         }
-        if ($this->hasColumn('agente_usuario')) {
+        if ($this->tieneColumna('agente_usuario')) {
             $context['agente_usuario'] = Str::limit((string) $request->userAgent(), 500, '');
         }
-        if ($this->hasColumn('correlacion_id')) {
+        if ($this->tieneColumna('correlacion_id')) {
             $correlationId = (string) $request->header('X-Request-ID', '');
             $context['correlacion_id'] = preg_match('/^[A-Za-z0-9._-]{1,64}$/', $correlationId) === 1 ? $correlationId : null;
         }
-        if ($this->hasColumn('observaciones')) {
+        if ($this->tieneColumna('observaciones')) {
             $context['observaciones'] = $observations === null ? null : Str::limit($observations, 1000, '');
-        } elseif ($this->hasColumn('observacion')) {
+        } elseif ($this->tieneColumna('observacion')) {
             $context['observacion'] = $observations === null ? null : Str::limit($observations, 1000, '');
         }
-        if ($this->hasColumn('tabla_afectada')) {
+        if ($this->tieneColumna('tabla_afectada')) {
             $context['tabla_afectada'] = Str::limit($entity, 100, '');
         }
-        if ($this->hasColumn('identificador_entidad')) {
+        if ($this->tieneColumna('identificador_entidad')) {
             $context['identificador_entidad'] = $entityId === null ? null : (string) $entityId;
         }
-        if ($this->hasColumn('ocurrido_en')) {
+        if ($this->tieneColumna('ocurrido_en')) {
             $context['ocurrido_en'] = now();
         }
-        if ($this->hasColumn('cambios')) {
-            $context['cambios'] = $this->changes($this->safePayload($before), $this->safePayload($after));
+        if ($this->tieneColumna('cambios')) {
+            $context['cambios'] = $this->cambios($this->datosSeguros($before), $this->datosSeguros($after));
         }
 
         RegistroAuditoria::query()->create($context);
@@ -131,7 +131,7 @@ final class RegistradorAuditoria
      * @param  mixed  $column  Parámetro recibido por la operación.
      * @return bool Resultado de la operación.
      */
-    private function hasColumn(string $column): bool
+    private function tieneColumna(string $column): bool
     {
         return $this->columnCache[$column] ??= Schema::hasColumn('registros_auditoria', $column);
     }
@@ -139,7 +139,7 @@ final class RegistradorAuditoria
     /** @param array<string,mixed>|null $payload
      * @return array<string,mixed>|null
      */
-    private function safePayload(?array $payload): ?array
+    private function datosSeguros(?array $payload): ?array
     {
         if ($payload === null) {
             return null;
@@ -152,7 +152,7 @@ final class RegistradorAuditoria
             }
 
             if (is_array($value)) {
-                $safe[$key] = $this->safePayload($value);
+                $safe[$key] = $this->datosSeguros($value);
             } elseif (is_scalar($value) || $value === null) {
                 $safe[$key] = $value;
             }
@@ -167,7 +167,7 @@ final class RegistradorAuditoria
      * @param  mixed  $entity  Parámetro recibido por la operación.
      * @return mixed Resultado de la operación.
      */
-    private function moduleForEntity(string $entity): ?string
+    private function moduloParaEntidad(string $entity): ?string
     {
         return match ($entity) {
             'users', 'roles', 'permisos', 'menus', 'elementos_menu', 'pantallas' => 'seguridad',
@@ -181,14 +181,14 @@ final class RegistradorAuditoria
     }
 
     /**
-     * Ejecuta la operación entityLocation definida por la clase RegistradorAuditoria.
+     * Obtiene la ubicación empresarial de la entidad auditada.
      *
      * @param  mixed  $entity  Parámetro recibido por la operación.
      * @param  mixed  $entityId  Parámetro recibido por la operación.
      * @param  mixed  $column  Parámetro recibido por la operación.
      * @return mixed Resultado de la operación.
      */
-    private function entityLocation(string $entity, ?int $entityId, string $column): ?int
+    private function ubicacionEntidad(string $entity, ?int $entityId, string $column): ?int
     {
         $auditableTables = [
             'pedidos', 'compras', 'cotizaciones', 'movimientos_inventario',
@@ -208,7 +208,7 @@ final class RegistradorAuditoria
      * @param  array<string,mixed>|null  $after
      * @return array<string,array{anterior:mixed,nuevo:mixed}>|null
      */
-    private function changes(?array $before, ?array $after): ?array
+    private function cambios(?array $before, ?array $after): ?array
     {
         if ($before === null && $after === null) {
             return null;

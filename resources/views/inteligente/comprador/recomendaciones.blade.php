@@ -9,7 +9,7 @@
             <div class="smartmatch-hero-copy">
                 <span class="smartmatch-etiqueta"><i class="bi bi-stars"></i> MD SmartCommerce</span>
                 <h1>Encuentra tu <span>celular ideal</span> con SmartMatch</h1>
-                <p>Indica tu presupuesto, para quÈ usar·s el equipo y quÈ es lo m·s importante para ti. SmartMatch revisa el cat·logo y te muestra los celulares que mejor encajan contigo.</p>
+                <p>Indica tu presupuesto, para qu√© usar√°s el equipo y qu√© es lo m√°s importante para ti. SmartMatch revisa el cat√°logo y te muestra los celulares que mejor encajan contigo.</p>
                 <div class="smartmatch-pasos-mini">
                     <span><b>1</b> Presupuesto</span>
                     <span><b>2</b> Uso</span>
@@ -27,13 +27,13 @@
             <div class="smartmatch-form-titulo">
                 <i class="bi bi-sliders"></i>
                 <div>
-                    <h2>CuÈntanos quÈ buscas</h2>
-                    <p>Completa los tres datos y presiona el botÛn.</p>
+                    <h2>Cu√©ntanos qu√© buscas</h2>
+                    <p>Completa los tres datos y presiona el bot√≥n.</p>
                 </div>
             </div>
             <div class="smartmatch-campos">
                 <label>
-                    <span><i class="bi bi-cash-coin"></i> Presupuesto m·ximo (S/)</span>
+                    <span><i class="bi bi-cash-coin"></i> Presupuesto m√°ximo (S/)</span>
                     <input
                         class="input"
                         type="number"
@@ -51,7 +51,7 @@
                         <option value="">General</option>
                         <option value="study" @selected(request('uso') === 'study')>Estudio</option>
                         <option value="gaming" @selected(request('uso') === 'gaming')>Gaming</option>
-                        <option value="camera" @selected(request('uso') === 'camera')>FotografÌa</option>
+                        <option value="camera" @selected(request('uso') === 'camera')>Fotograf√≠a</option>
                         <option value="work" @selected(request('uso') === 'work')>Trabajo</option>
                         <option value="social" @selected(request('uso') === 'social')>Redes sociales</option>
                     </select>
@@ -63,8 +63,8 @@
                         <option value="">Equilibrada</option>
                         <option value="valor" @selected(request('prioridad') === 'valor')>Calidad/precio</option>
                         <option value="rendimiento" @selected(request('prioridad') === 'rendimiento')>Rendimiento</option>
-                        <option value="bateria" @selected(request('prioridad') === 'bateria')>BaterÌa</option>
-                        <option value="camara" @selected(request('prioridad') === 'camara')>C·mara</option>
+                        <option value="bateria" @selected(request('prioridad') === 'bateria')>Bater√≠a</option>
+                        <option value="camara" @selected(request('prioridad') === 'camara')>C√°mara</option>
                     </select>
                 </label>
                 <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Encontrar mi celular</button>
@@ -117,9 +117,9 @@
         @else
             <div class="smartmatch-vacio">
                 <i class="bi bi-emoji-neutral"></i>
-                <h2>No encontramos equipos para esa b˙squeda</h2>
-                <p>Prueba con un presupuesto un poco m·s alto o cambia la prioridad. TambiÈn puedes revisar todo el cat·logo.</p>
-                <a class="btn btn-primary" href="{{ route('catalog.index') }}">Ver cat·logo</a>
+                <h2>No encontramos equipos para esa b√∫squeda</h2>
+                <p>Prueba con un presupuesto un poco m√°s alto o cambia la prioridad. Tambi√©n puedes revisar todo el cat√°logo.</p>
+                <a class="btn btn-primary" href="{{ route('catalog.index') }}">Ver cat√°logo</a>
             </div>
         @endif
     </section>

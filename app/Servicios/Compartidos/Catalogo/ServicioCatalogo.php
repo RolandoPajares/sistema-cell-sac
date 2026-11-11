@@ -131,7 +131,7 @@ class ServicioCatalogo
     {
         return $products->map(static function (Producto $product): Producto {
             $product->setAttribute('comparison_image', $product->url_imagen_principal ?: asset('assets/cell-legacy/img/marca/logo.jpeg'));
-            $product->setAttribute('comparison_score', (int) ($product->intelligenceProfile?->puntuacion_valor ?? 70));
+            $product->setAttribute('comparison_score', (int) ($product->perfilInteligencia?->puntuacion_valor ?? 70));
 
             return $product;
         });

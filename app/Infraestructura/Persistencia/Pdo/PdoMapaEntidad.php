@@ -30,6 +30,10 @@ final readonly class PdoMapaEntidad
         }
 
         foreach ($this->camposPersistibles as $propiedad => $columna) {
+            if (! preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $propiedad)) {
+                throw new InvalidArgumentException("Propiedad no permitida en el mapa PDO: {$propiedad}.");
+            }
+
             if (! isset($this->tipos[$propiedad])) {
                 throw new InvalidArgumentException("Falta el tipo PDO para {$propiedad}.");
             }

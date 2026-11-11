@@ -20,5 +20,5 @@ return [
         ['title' => 'Estado de respaldos', 'icon' => 'bi-pie-chart', 'description' => 'Resumen de disponibilidad de respaldos.', 'type' => 'donut', 'legend' => ['Correctos', 'Pendientes', 'Revisar', 'No disponible']],
     ],
     'columns' => ['Tarea', 'Última ejecución', 'Responsable', 'Estado', 'Próxima acción'],
-    'content' => ['title' => 'Respaldos y mantenimiento', 'description' => 'Prepara copias de seguridad, controla tareas preventivas y revisa la recuperaci�n del sistema.', 'action' => 'Ver bit�cora', 'primary' => 'Crear plan de respaldo', 'summary' => ['Planes de respaldo', 'Tareas de mantenimiento', 'Seguridad y recuperaci�n']],
+    'content' => ['title' => 'Respaldos y mantenimiento', 'description' => 'Prepara copias de seguridad, controla tareas preventivas y revisa la recuperación del sistema.', 'action' => 'Ver bitácora', 'primary' => 'Crear plan de respaldo', 'summary' => ['Planes de respaldo', 'Tareas de mantenimiento', 'Seguridad y recuperación']],
 ];

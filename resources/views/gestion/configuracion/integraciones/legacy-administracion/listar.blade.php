@@ -4,10 +4,10 @@
 @section('body_class', 'modulo-integraciones')
 
 @section('content')
-{{-- Presentaci�n del m�dulo usando la configuraci�n preparada fuera de Blade. --}}
+{{-- Presentación del módulo usando la configuración preparada fuera de Blade. --}}
 @php($module = config('gestion.administracion.integraciones'))
 
-{{-- Este permiso controla la visibilidad; la autorizaci�n real permanece en el backend. --}}
+{{-- Este permiso controla la visibilidad; la autorización real permanece en el backend. --}}
 @can('gestion.seguridad.consultar')
     <section class="admin-system-module admin-system-module--{{ $module['key'] }}" data-pending-module="{{ $module['key'] }}" data-admin-system-module="{{ $module['key'] }}">
     <header class="admin-system-header">
@@ -18,7 +18,7 @@
         </div>
     </header>
 
-    {{-- Indicadores resumidos preparados por la capa de datos del m�dulo. --}}
+    {{-- Indicadores resumidos preparados por la capa de datos del módulo. --}}
     <section class="admin-system-kpis" aria-label="Indicadores de {{ $module['content']['title'] }}">
         @foreach ($module['kpis'] ?? [] as $kpi)
             <article class="admin-system-kpi admin-system-kpi--{{ $kpi['tone'] ?? 'blue' }}"><span class="admin-system-kpi-icon"><i class="bi {{ $kpi['icon'] }}" aria-hidden="true"></i></span><div><small>{{ $kpi['label'] }}</small><strong>{{ $kpi['value'] ?? '—' }}</strong><span>{{ $kpi['helper'] ?? 'Sin datos integrados' }}</span></div><i class="admin-system-kpi-spark" aria-hidden="true"></i></article>
@@ -29,10 +29,10 @@
     <form class="admin-system-filters" data-pending-form><label class="admin-system-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar {{ $module['record_plural'] ?? 'registros' }}</span><input type="search" placeholder="Buscar {{ $module['record_singular'] ?? 'registro' }}, módulo o permiso..." data-pending-search></label><label><span class="visually-hidden">Tipo</span><select data-pending-filter><option>Tipo: Todos</option><option>Interno</option><option>Cliente</option><option>Operativo</option></select></label><label><span class="visually-hidden">Estado</span><select data-pending-filter><option>Estado: Todos</option><option>Activo</option><option>Pendiente</option><option>Revisar</option></select></label><label><span class="visually-hidden">Fecha</span><select data-pending-filter><option>Registro: Este mes</option><option>Últimos 30 días</option><option>Histórico</option></select></label><button class="admin-system-filter-button" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i> Filtrar</button><button class="admin-system-clear-button" type="button" data-pending-notice="Los filtros se limpiarán cuando se conecte este módulo.">Limpiar</button></form>
     <span class="admin-system-filter-status" data-admin-system-filter-status role="status" aria-live="polite"></span>
 
-    {{-- Tabla principal con columnas, estado vac�o y paginaci�n visual. --}}
+    {{-- Tabla principal con columnas, estado vacío y paginación visual. --}}
     <section class="admin-system-table-card"><header class="admin-system-card-header"><div><span class="admin-system-card-icon"><i class="bi {{ $module['icon'] }}" aria-hidden="true"></i></span><div><h2>Listado de {{ $module['record_plural'] ?? 'registros' }}</h2><p>La información aparecerá cuando se conecte este módulo al backend.</p></div></div><span class="admin-system-count">Sin registros</span></header><div class="admin-system-table-wrap"><table class="admin-system-table"><thead><tr>@foreach ($module['columns'] ?? [] as $column)<th>{{ $column }}</th>@endforeach @if (($module['mode'] ?? 'consult') === 'crud')<th>Acciones</th>@endif</tr></thead><tbody><tr><td colspan="{{ max(1, count($module['columns'] ?? []) + (($module['mode'] ?? 'consult') === 'crud' ? 1 : 0)) }}"><div class="admin-system-empty"><span><i class="bi bi-inbox" aria-hidden="true"></i></span><strong>No hay {{ $module['record_plural'] ?? 'registros' }} para mostrar</strong><p>El diseño está listo; los datos aparecerán cuando exista la integración autorizada del sistema.</p>@if (($module['mode'] ?? 'consult') === 'crud')<button class="admin-system-empty-button" type="button" data-pending-open="crear"><i class="bi bi-plus-lg" aria-hidden="true"></i> {{ $module['content']['primary'] }}</button>@endif</div></td></tr></tbody></table></div><footer class="admin-system-table-footer"><span>Sin resultados para mostrar</span><nav class="admin-system-pagination" aria-label="Paginación deshabilitada"><button type="button" disabled aria-label="Anterior"><i class="bi bi-chevron-left" aria-hidden="true"></i></button><button type="button" class="is-active" disabled>1</button><button type="button" disabled aria-label="Siguiente"><i class="bi bi-chevron-right" aria-hidden="true"></i></button></nav></footer></section>
 
-    {{-- Res�menes secundarios del m�dulo, sin c�lculos ni persistencia en la vista. --}}
+    {{-- Resúmenes secundarios del módulo, sin cálculos ni persistencia en la vista. --}}
     <section class="admin-system-summary-grid" aria-label="Resumen de {{ $module['content']['title'] }}">@foreach ($module['content']['summary'] as $summary)<article class="admin-system-summary-card"><header><div><span class="admin-system-summary-icon"><i class="bi bi-stars" aria-hidden="true"></i></span><h2>{{ $summary }}</h2></div><button type="button" aria-label="Ver resumen: {{ $summary }}" data-pending-notice="Este resumen se habilitará al integrar datos reales."><i class="bi bi-arrow-right" aria-hidden="true"></i></button></header><div class="admin-system-summary-empty"><i class="bi bi-bar-chart-line" aria-hidden="true"></i><strong>Sin datos integrados</strong><span>La información aparecerá aquí.</span></div></article>@endforeach</section>
 
     @if (($module['mode'] ?? 'consult') === 'crud')
@@ -70,7 +70,7 @@
 </section>
 
 @else
-    {{-- Estado alternativo para m�dulos pendientes de integraci�n con datos reales. --}}
+    {{-- Estado alternativo para módulos pendientes de integración con datos reales. --}}
     <section class="gestion-pendiente-page gestion-pendiente-page--{{ $module['key'] }}" data-pending-module="{{ $module['key'] }}">
     <header class="gestion-pendiente-hero">
         <div class="gestion-pendiente-heading">
@@ -107,7 +107,7 @@
         @endforeach
     </div>
 
-    {{-- Bloque anal�tico �nicamente visual; no consulta ni modifica datos. --}}
+    {{-- Bloque analítico únicamente visual; no consulta ni modifica datos. --}}
     @if ($module['analytics'] ?? [] !== [])
         <section class="gestion-pendiente-analytics" aria-label="Análisis visual de {{ $module['title'] }}">
             @foreach ($module['analytics'] ?? [] as $module['analytics'] ?? []Card)

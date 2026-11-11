@@ -19,6 +19,12 @@ document.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', () => importDialog.close());
     });
 
+    importDialog?.querySelector('input[type="file"]')?.addEventListener('change', (event) => {
+        const selected = event.currentTarget.files?.[0];
+        const label = importDialog.querySelector('[data-product-import-file-name]');
+        if (label) label.textContent = selected?.name || 'Ningún archivo seleccionado';
+    });
+
     importDialog?.addEventListener('click', (event) => {
         if (event.target === importDialog) {
             importDialog.close();

@@ -31,6 +31,37 @@ trait RefreshSpanishTestDatabase
             return;
         }
 
+        if (! Schema::hasTable('pedidos')) {
+            Schema::create('pedidos', function (Blueprint $table): void {
+                $table->increments('id');
+                $table->unsignedBigInteger('usuario_id')->nullable();
+                $table->string('cliente_invitado_nombre', 160)->nullable();
+                $table->string('cliente_invitado_correo', 160)->nullable();
+                $table->string('cliente_invitado_telefono', 30)->nullable();
+                $table->char('token_acceso_publico', 64)->nullable();
+                $table->text('direccion_entrega_snapshot')->nullable();
+                $table->decimal('total', 10, 2)->default(0);
+                $table->decimal('subtotal', 10, 2)->default(0);
+                $table->decimal('descuento', 10, 2)->default(0);
+                $table->string('cupon_codigo', 50)->nullable();
+                $table->string('estado', 40)->default('Pendiente');
+                $table->timestamp('creado_en')->useCurrent();
+                $table->unsignedInteger('cliente_id')->nullable();
+                $table->unsignedInteger('cotizacion_id')->nullable();
+                $table->string('canal', 30)->nullable();
+                $table->string('tipo_venta', 30)->nullable();
+                $table->string('observaciones', 500)->nullable();
+                $table->unsignedBigInteger('cupon_id')->nullable();
+                $table->unsignedBigInteger('direccion_entrega_id')->nullable();
+                $table->unsignedBigInteger('direccion_facturacion_id')->nullable();
+                $table->text('direccion_entrega_historica')->nullable();
+                $table->text('direccion_facturacion_historica')->nullable();
+                $table->unsignedBigInteger('empresa_id')->nullable();
+                $table->unsignedBigInteger('sede_id')->nullable();
+                $table->unsignedBigInteger('almacen_id')->nullable();
+            });
+        }
+
         if (! Schema::hasColumn('pedidos', 'tipo_venta')) {
             Schema::table('pedidos', function (Blueprint $table): void {
                 $table->string('tipo_venta', 30)->nullable();
@@ -57,6 +88,161 @@ trait RefreshSpanishTestDatabase
                 $table->boolean('acceso_controlado')->default(true);
                 $table->timestamp('creado_en')->nullable();
                 $table->timestamp('actualizado_en')->nullable();
+            });
+        }
+
+        if (! Schema::hasTable('empresas')) {
+            Schema::create('empresas', function (Blueprint $table): void {
+                $table->bigIncrements('id');
+                $table->string('codigo', 30)->unique();
+                $table->string('razon_social', 180);
+                $table->string('nombre_comercial', 180)->nullable();
+                $table->char('ruc', 11)->nullable()->unique();
+                $table->char('moneda_base', 3)->default('PEN');
+                $table->boolean('activo')->default(true);
+                $table->timestamp('creado_en')->nullable();
+                $table->timestamp('actualizado_en')->nullable();
+            });
+        }
+
+        if (! Schema::hasTable('sedes')) {
+            Schema::create('sedes', function (Blueprint $table): void {
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('empresa_id');
+                $table->string('codigo', 30);
+                $table->string('nombre', 140);
+                $table->string('direccion', 255)->nullable();
+                $table->string('telefono', 30)->nullable();
+                $table->string('zona_horaria', 64)->default('America/Lima');
+                $table->boolean('activa')->default(true);
+                $table->timestamp('creado_en')->nullable();
+                $table->timestamp('actualizado_en')->nullable();
+                $table->unique(['empresa_id', 'codigo']);
+            });
+        }
+
+        if (! Schema::hasTable('almacenes')) {
+            Schema::create('almacenes', function (Blueprint $table): void {
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('sede_id');
+                $table->string('codigo', 30);
+                $table->string('nombre', 140);
+                $table->string('tipo', 30)->default('general');
+                $table->boolean('permite_venta')->default(true);
+                $table->boolean('activo')->default(true);
+                $table->timestamp('creado_en')->nullable();
+                $table->timestamp('actualizado_en')->nullable();
+                $table->unique(['sede_id', 'codigo']);
+            });
+        }
+
+        if (! Schema::hasTable('categorias')) {
+            Schema::create('categorias', function (Blueprint $table): void {
+                $table->increments('id');
+                $table->string('nombre', 120)->unique();
+                $table->string('descripcion', 500)->nullable();
+                $table->boolean('activo')->default(true);
+                $table->timestamp('creado_en')->useCurrent();
+                $table->unsignedBigInteger('empresa_id')->nullable();
+                $table->index('empresa_id');
+            });
+        }
+
+        if (! Schema::hasTable('clientes')) {
+            Schema::create('clientes', function (Blueprint $table): void {
+                $table->increments('id');
+                $table->unsignedBigInteger('usuario_id')->nullable();
+                $table->string('tipo', 20)->default('minorista');
+                $table->string('tipo_documento', 3)->nullable();
+                $table->string('documento', 20)->unique();
+                $table->string('razon_social', 160)->nullable();
+                $table->string('nombre_contacto', 160);
+                $table->string('correo', 160);
+                $table->string('telefono', 30)->nullable();
+                $table->string('ciudad', 80)->nullable();
+                $table->boolean('activo')->default(true);
+                $table->timestamp('creado_en')->useCurrent();
+                $table->unsignedBigInteger('empresa_id')->nullable();
+                $table->index('empresa_id');
+            });
+        }
+
+        if (! Schema::hasTable('proveedores')) {
+            Schema::create('proveedores', function (Blueprint $table): void {
+                $table->increments('id');
+                $table->string('nombre', 160);
+                $table->string('ruc', 20)->unique();
+                $table->string('correo', 160);
+                $table->string('telefono', 30)->nullable();
+                $table->string('ciudad', 80)->nullable();
+                $table->boolean('activo')->default(true);
+                $table->timestamp('creado_en')->useCurrent();
+                $table->unsignedBigInteger('empresa_id')->nullable();
+                $table->index('empresa_id');
+            });
+        }
+
+        if (! Schema::hasTable('productos')) {
+            Schema::create('productos', function (Blueprint $table): void {
+                $table->increments('id');
+                $table->string('marca', 80);
+                $table->string('nombre', 160);
+                $table->unsignedInteger('categoria_id');
+                $table->string('categoria', 120);
+                $table->decimal('precio', 10, 2)->default(0);
+                $table->decimal('precio_original', 10, 2)->nullable();
+                $table->string('descuento', 20)->nullable();
+                $table->decimal('precio_oferta', 10, 2)->nullable();
+                $table->string('url_imagen', 255)->nullable();
+                $table->unsignedInteger('existencias')->default(0);
+                $table->string('almacenamiento', 80)->nullable();
+                $table->string('color', 80)->nullable();
+                $table->string('etiqueta', 80)->nullable();
+                $table->text('descripcion')->nullable();
+                $table->boolean('activo')->default(true);
+                $table->timestamp('creado_en')->useCurrent();
+                $table->unsignedBigInteger('empresa_id')->nullable();
+                $table->index(['categoria_id', 'empresa_id']);
+                $table->index('empresa_id');
+            });
+        }
+
+        if (! Schema::hasTable('compras')) {
+            Schema::create('compras', function (Blueprint $table): void {
+                $table->increments('id');
+                $table->unsignedInteger('proveedor_id');
+                $table->unsignedBigInteger('creado_por_usuario_id')->nullable();
+                $table->decimal('total', 12, 2)->default(0);
+                $table->string('estado', 30)->default('Pendiente');
+                $table->date('fecha_compra');
+                $table->boolean('activo')->default(true);
+                $table->timestamp('creado_en')->useCurrent();
+                $table->string('numero_referencia', 100)->nullable();
+                $table->char('moneda', 3)->default('PEN');
+                $table->dateTime('actualizado_en')->nullable();
+                $table->unsignedBigInteger('empresa_id')->nullable();
+                $table->unsignedBigInteger('sede_id')->nullable();
+                $table->unsignedBigInteger('almacen_id')->nullable();
+                $table->index(['empresa_id', 'fecha_compra']);
+                $table->index(['sede_id', 'fecha_compra']);
+            });
+        }
+
+        if (! Schema::hasTable('cotizaciones')) {
+            Schema::create('cotizaciones', function (Blueprint $table): void {
+                $table->increments('id');
+                $table->unsignedInteger('cliente_id')->nullable();
+                $table->unsignedBigInteger('creado_por_usuario_id')->nullable();
+                $table->decimal('total', 12, 2)->default(0);
+                $table->string('estado', 30)->default('Borrador');
+                $table->string('notas', 500)->nullable();
+                $table->boolean('activo')->default(true);
+                $table->timestamp('creado_en')->useCurrent();
+                $table->char('moneda', 3)->default('PEN');
+                $table->unsignedBigInteger('empresa_id')->nullable();
+                $table->unsignedBigInteger('sede_id')->nullable();
+                $table->index(['empresa_id', 'creado_en']);
+                $table->index(['cliente_id', 'empresa_id']);
             });
         }
 

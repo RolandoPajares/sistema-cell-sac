@@ -1331,3 +1331,32 @@
   .clientes-import-footer { align-items: stretch; flex-direction: column-reverse; }
   .clientes-import-footer button { width: 100%; }
 }
+
+.clientes-dialog:has(.cliente-registro-form) { width: min(100% - 32px, 760px); max-height: calc(100vh - 28px); border-radius: 24px; }
+.clientes-dialog:has(.cliente-registro-form) .clientes-dialog-card { border: 0; border-radius: 24px; }
+.cliente-registro-form { gap: 0 !important; padding: 0 !important; background: #fff; }
+.cliente-registro-heading { display: grid; grid-template-columns: 72px minmax(0, 1fr) 42px; align-items: center; gap: 16px; padding: 22px 28px; border-bottom: 1px solid #e3edf8; }
+.cliente-registro-heading h2 { margin: 0; color: #102b62; font-size: clamp(1.25rem, 2.4vw, 1.8rem); }
+.cliente-registro-heading p { margin: 4px 0 0; color: #5f769e; font-size: .88rem; }
+.cliente-registro-icon { display: grid; width: 72px; height: 62px; place-items: center; border-radius: 17px; color: #0874ed; background: #e6f2ff; font-size: 2rem; }
+.cliente-registro-close { display: grid; width: 42px; height: 42px; place-items: center; border: 1px solid #c9dcef; border-radius: 11px; color: #102f64; background: #fff; font-size: 1.2rem; cursor: pointer; }
+.cliente-registro-form > .cliente-person-switcher { padding: 20px 28px 8px; }
+.cliente-person-switcher legend { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; color: #102b62; font-size: 1rem; font-weight: 900; }
+.cliente-person-options { gap: 12px; padding: 0; border: 0; background: transparent; }
+.cliente-person-option { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 58px; border: 1px solid #bfd4ec; border-radius: 13px; color: #15346a; background: #fff; font-size: .95rem; }
+.cliente-person-option.is-active { color: #fff; background: linear-gradient(110deg, #087cf2, #0758d7); }
+.cliente-person-option .cliente-person-check { display: none; margin-left: auto; font-size: 1.25rem; }
+.cliente-person-option.is-active .cliente-person-check { display: inline-block; }
+.cliente-registro-section { margin: 14px 28px 0; padding: 18px 24px 20px; border: 1px solid #dce8f6; border-radius: 17px; background: linear-gradient(180deg, #fff, #fbfdff); }
+.cliente-registro-section h3 { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; color: #102b62; font-size: 1rem; }
+.cliente-registro-section h3 i { color: #0874ed; }
+.cliente-registro-section h3 small { color: #59739f; font-size: .78rem; font-weight: 500; }
+.cliente-registro-form label { color: #102b62; font-size: .78rem; }
+.cliente-registro-form label b { color: #e52333; }
+.cliente-registro-form label small { color: #60789f; font-weight: 500; }
+.cliente-registro-form input, .cliente-registro-form select { min-height: 48px; padding: 12px 14px; border-radius: 11px; font-size: .88rem; }
+.cliente-registro-actions { display: flex; justify-content: flex-end; gap: 14px; padding: 22px 28px 26px; margin-top: 20px; border-top: 1px solid #e3edf8; }
+.cliente-registro-actions .clientes-cancel-button, .cliente-registro-actions .cliente-registro-submit { width: auto; min-width: 170px; min-height: 50px; margin: 0; padding: 0 24px; border-radius: 12px; font-size: .88rem; }
+.cliente-registro-actions .cliente-registro-submit { width: min(320px, 48%); }
+.cliente-registro-form [data-client-natural-fields][hidden], .cliente-registro-form [data-client-juridica-fields][hidden] { display: none; }
+@media (max-width: 620px) { .cliente-registro-heading, .cliente-registro-form > .cliente-person-switcher { padding-right: 18px; padding-left: 18px; } .cliente-registro-heading { grid-template-columns: 48px minmax(0,1fr) 36px; gap: 10px; } .cliente-registro-icon { width: 48px; height: 48px; font-size: 1.45rem; } .cliente-registro-close { width: 36px; height: 36px; } .cliente-registro-section { margin-right: 14px; margin-left: 14px; padding: 16px; } .cliente-registro-actions { padding-right: 14px; padding-left: 14px; flex-direction: column-reverse; } .cliente-registro-actions .clientes-cancel-button, .cliente-registro-actions .cliente-registro-submit { width: 100%; } }

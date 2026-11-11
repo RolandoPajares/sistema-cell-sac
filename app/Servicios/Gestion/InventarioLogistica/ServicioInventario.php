@@ -96,11 +96,11 @@ class ServicioInventario
     }
 
     /**
-     * Resuelve disponibilidad para visitantes usando la �nica ubicaci�n p�blica activa.
+     * Resuelve disponibilidad para visitantes usando la única ubicación pública activa.
      */
     public function disponibilidadPublica(Producto $producto, ?int $varianteId = null): int
     {
-        $location = $this->publicLocation();
+        $location = $this->ubicacionPublica();
         abort_unless((int) $producto->empresa_id === $location['empresa_id'], 404);
         $query = DB::table('existencias_almacen')->where($location)->where('producto_id', $producto->id);
         $varianteId === null ? $query->whereNull('variante_id') : $query->where('variante_id', $varianteId);
@@ -110,19 +110,19 @@ class ServicioInventario
     }
 
     /** @return array{empresa_id:int,sede_id:int,almacen_id:int} */
-    public function publicLocation(): array
+    public function ubicacionPublica(): array
     {
         $company = DB::table('empresas')->where('activo', true)->orderBy('id')->first(['id']);
         abort_unless($company !== null, 503, 'La tienda no tiene una empresa activa configurada.');
         $site = DB::table('sedes')->where('empresa_id', $company->id)->where('activa', true)->orderBy('id')->first(['id']);
         abort_unless($site !== null, 503, 'La tienda no tiene una sede activa configurada.');
         $warehouse = DB::table('almacenes')->where('sede_id', $site->id)->where('activo', true)->orderBy('id')->first(['id']);
-        abort_unless($warehouse !== null, 503, 'La tienda no tiene un almac�n activo configurado.');
+        abort_unless($warehouse !== null, 503, 'La tienda no tiene un almacén activo configurado.');
 
         return ['empresa_id' => (int) $company->id, 'sede_id' => (int) $site->id, 'almacen_id' => (int) $warehouse->id];
     }
 
-    public function changeLockedProductInPublicWarehouse(
+    public function cambiarProductoBloqueadoEnAlmacenPublico(
         Producto $product,
         ?int $variantId,
         string $movementType,
@@ -131,14 +131,14 @@ class ServicioInventario
         ?string $documentType = null,
         ?string $documentId = null,
     ): ?MovimientoInventario {
-        $location = $this->publicLocation();
+        $location = $this->ubicacionPublica();
         $balanceQuery = DB::table('existencias_almacen')->where($location)->where('producto_id', $product->id);
         $variantId === null ? $balanceQuery->whereNull('variante_id') : $balanceQuery->where('variante_id', $variantId);
         $balance = $balanceQuery->lockForUpdate()->first(['id', 'cantidad_fisica', 'cantidad_reservada']);
         abort_unless($balance !== null, 409, 'No existe saldo para el producto o variante.');
         $next = (int) $balance->cantidad_fisica - $quantity;
         abort_unless($movementType === 'salida' && $quantity > 0 && $next >= 0, 422, 'La salida supera el stock disponible.');
-        abort_if((float) $balance->cantidad_reservada > $next, 422, 'El movimiento dejar�a reservas sin respaldo.');
+        abort_if((float) $balance->cantidad_reservada > $next, 422, 'El movimiento dejaría reservas sin respaldo.');
         DB::table('existencias_almacen')->where('id', $balance->id)->update(['cantidad_fisica' => $next]);
         $total = (int) DB::table('existencias_almacen')->where('producto_id', $product->id)->where('empresa_id', $location['empresa_id'])->sum('cantidad_fisica');
         $product->update(['existencias' => $total]);
@@ -385,7 +385,7 @@ class ServicioInventario
      *
      * @throws HttpException Si falta la transacción, el esquema o el alcance.
      */
-    public function registerNewProduct(Producto $product, User $user): void
+    public function registrarProductoNuevo(Producto $product, User $user): void
     {
         abort_unless(DB::transactionLevel() > 0 && Schema::hasTable('existencias_almacen'), 503, 'El inventario requiere una transacción y un almacén configurado.');
         $location = $this->authorization->operationLocation($user);
@@ -420,13 +420,13 @@ class ServicioInventario
      *
      * @throws HttpException Si falla autorización o validación.
      */
-    public function adjust(Producto $product, string $movementType, int $quantity, string $notes, User $user): ?MovimientoInventario
+    public function ajustar(Producto $product, string $movementType, int $quantity, string $notes, User $user): ?MovimientoInventario
     {
         $this->authorization->assertAllowed($user, 'gestion.inventario.ajustar');
 
         return DB::transaction(function () use ($product, $movementType, $quantity, $notes, $user): ?MovimientoInventario {
             $lockedProduct = Producto::whereKey($product->getKey())->lockForUpdate()->firstOrFail();
-            $movement = $this->changeLockedProduct($lockedProduct, $movementType, $quantity, $notes, $user);
+            $movement = $this->cambiarProductoBloqueado($lockedProduct, $movementType, $quantity, $notes, $user);
             if ($movement === null) {
                 return null;
             }
@@ -499,7 +499,7 @@ class ServicioInventario
                 abort_if($tipoMovimiento === 'entrada' && $variante->estado !== 'activo', 422, 'No se pueden ingresar existencias a una variante inactiva.');
             }
 
-            $movimiento = $this->changeLockedProductInWarehouse(
+            $movimiento = $this->cambiarProductoBloqueadoEnAlmacen(
                 $productoBloqueado,
                 $varianteId,
                 $tipoMovimiento,
@@ -543,7 +543,7 @@ class ServicioInventario
      * @param  User  $user  Usuario autorizado.
      * @return MovimientoInventario|null Movimiento creado o null si no hubo cambio.
      */
-    public function changeLockedProduct(Producto $product, string $movementType, int $quantity, string $notes, User $user): ?MovimientoInventario
+    public function cambiarProductoBloqueado(Producto $product, string $movementType, int $quantity, string $notes, User $user): ?MovimientoInventario
     {
         abort_unless(DB::transactionLevel() > 0, 503, 'El movimiento de inventario requiere una transacción.');
         abort_if($quantity < 0 || ($movementType !== 'ajuste' && $quantity === 0), 422, 'La cantidad del movimiento no es válida.');
@@ -623,7 +623,7 @@ class ServicioInventario
      * @param  bool  $createMissingBalance  Indica si puede crear balance inexistente.
      * @return MovimientoInventario|null Movimiento creado o null cuando no hay cambio.
      */
-    public function changeLockedProductInWarehouse(
+    public function cambiarProductoBloqueadoEnAlmacen(
         Producto $product,
         ?int $variantId,
         string $movementType,

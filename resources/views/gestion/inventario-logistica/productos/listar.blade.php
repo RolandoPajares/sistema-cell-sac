@@ -213,26 +213,14 @@
 
 <dialog class="productos-dialog" id="importar-productos" aria-labelledby="productos-importar-titulo">
     <div class="productos-dialog-card">
-        <header class="productos-dialog-header">
-            <div class="productos-dialog-title">
-                <span class="productos-dialog-icon"><i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i></span>
-                <div>
-                    <h2 id="productos-importar-titulo">Importar productos desde Excel</h2>
-                    <p>Descarga la plantilla, completa hasta 2,000 filas y vuelve a cargarla.</p>
-                </div>
-            </div>
-            <button type="button" class="productos-dialog-close" data-close-product-import aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
-        </header>
-        <form class="productos-create-form" method="post" action="{{ route('management.products.import') }}" enctype="multipart/form-data">
+        <header class="productos-import-header"><div class="productos-import-brand"><i class="bi bi-file-earmark-excel" aria-hidden="true"></i></div><div><h2 id="productos-importar-titulo">Importar productos desde Excel</h2><p>Carga masiva de productos de forma rápida y segura.</p></div><button type="button" class="productos-dialog-close" data-close-product-import aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
+        <form class="productos-import-form" method="post" action="{{ route('management.products.import') }}" enctype="multipart/form-data">
             @csrf
-            <div class="productos-create-fields">
-                <p class="productos-form-note productos-create-field--wide">La plantilla usa los campos importables de productos. La empresa y las relaciones se validan contra esta base de datos.</p>
-                <a class="productos-filter-reset productos-create-field--wide" href="{{ route('management.products.import_template') }}"><i class="bi bi-download" aria-hidden="true"></i> Descargar plantilla Excel</a>
-                <label class="productos-create-field productos-create-field--wide"><span>Archivo Excel o CSV <b>*</b></span><input class="productos-create-input" type="file" name="archivo" accept=".xlsx,.csv,.txt,text/csv" required></label>
-            </div>
+            <section class="productos-import-step"><div class="productos-import-step-heading"><span><i class="bi bi-download" aria-hidden="true"></i></span><div><h3>1. Descarga la plantilla</h3><p>Utiliza la plantilla oficial con la estructura correcta y los campos compatibles con el sistema.</p></div></div><a href="{{ route('management.products.import_template') }}" class="productos-import-template"><i class="bi bi-file-earmark-excel" aria-hidden="true"></i><span><strong>Descargar plantilla de productos.xlsx</strong><small>Estructura oficial del sistema</small></span><i class="bi bi-download" aria-hidden="true"></i></a></section>
+            <section class="productos-import-step"><div class="productos-import-step-heading"><span><i class="bi bi-upload" aria-hidden="true"></i></span><div><h3>2. Sube tu archivo</h3><p>Selecciona el archivo completado (formato .xlsx o .csv).</p></div></div><label class="productos-import-drop"><input type="file" name="archivo" accept=".xlsx,.csv,.txt,text/csv" required><i class="bi bi-file-earmark-excel" aria-hidden="true"></i><strong>Arrastra y suelta tu archivo aquí</strong><em>o</em><span><i class="bi bi-folder2-open" aria-hidden="true"></i> Seleccionar archivo</span><small data-product-import-file-name>Ningún archivo seleccionado</small></label><div class="productos-import-meta"><span><i class="bi bi-file-earmark" aria-hidden="true"></i> Formatos permitidos: .xlsx, .csv</span><span><i class="bi bi-database" aria-hidden="true"></i> Tamaño máximo: 50 MB</span><strong><i class="bi bi-layers" aria-hidden="true"></i> Máximo: 10,000 productos</strong></div></section>
             @error('archivo')<small class="form-error">{{ $message }}</small>@enderror
-            <p class="productos-form-note">Columnas: marca, nombre, categoria_id, precio, precio_original, descuento, precio_oferta, url_imagen, existencias, almacenamiento, color, etiqueta, descripcion, activo, proveedor_id.</p>
-            <footer class="productos-create-footer"><button class="productos-create-cancel" type="button" data-close-product-import>Cancelar</button><button class="productos-create-submit" type="submit"><i class="bi bi-upload" aria-hidden="true"></i> Importar productos</button></footer>
+            <p class="productos-import-note"><i class="bi bi-info-circle" aria-hidden="true"></i> Se validarán marcas, categorías, proveedores y formatos antes de importar.</p>
+            <footer class="productos-import-footer"><button class="productos-create-cancel" type="button" data-close-product-import>Cancelar</button><button class="productos-create-submit" type="submit"><i class="bi bi-upload" aria-hidden="true"></i> Importar productos</button></footer>
         </form>
     </div>
 </dialog>

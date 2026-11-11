@@ -23,7 +23,7 @@ export const initializeFacturacion = (root) => {
  * @returns {*} Resultado de la operación.
  */
 const initializeInvoiceDemo = (root) => {
-    const dialog = root.querySelector('[data-pending-modal="crear"]');
+    const dialog = root.querySelector('[data-finance-dialog="crear"], [data-pending-modal="crear"]');
     const wizard = dialog?.querySelector('[data-invoice-wizard]');
     if (!dialog || !wizard) {
         return;

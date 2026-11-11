@@ -2,7 +2,7 @@
 use Illuminate\Support\Str;
 
 $__env->startSection('body_class', 'modulo-catalog'); ?>
-<?php $__env->startSection('title', 'Cat·logo | MD Technology Cell'); ?>
+<?php $__env->startSection('title', 'Cat√°logo | MD Technology Cell'); ?>
 
 <?php $__env->startSection('content'); ?>
 <?php
@@ -13,20 +13,20 @@ $selectedBrand = request('marca');
 <section class="catalog-page">
     <div class="catalog-reference-hero">
         <div class="container catalog-reference-hero__inner">
-            <div><span class="eyebrow">TECHNOLOGY CELL</span><h1>Encuentra tu prÛximo <span>celular ideal</span></h1><p>Las mejores marcas, precios vigentes y garantÌa real.</p><a class="btn btn-primary" href="#productos">Explorar cat·logo <i class="bi bi-arrow-right"></i></a></div>
+            <div><span class="eyebrow">TECHNOLOGY CELL</span><h1>Encuentra tu pr√≥ximo <span>celular ideal</span></h1><p>Las mejores marcas, precios vigentes y garant√≠a real.</p><a class="btn btn-primary" href="#productos">Explorar cat√°logo <i class="bi bi-arrow-right"></i></a></div>
         </div>
     </div>
     <div class="container">
-        <nav class="catalog-breadcrumbs" aria-label="Ruta de navegaciÛn">
-            <a href="<?php echo e(route('home')); ?>">Inicio</a><span aria-hidden="true">õ</span><span aria-current="page">Cat·logo</span>
+        <nav class="catalog-breadcrumbs" aria-label="Ruta de navegaci√≥n">
+            <a href="<?php echo e(route('home')); ?>">Inicio</a><span aria-hidden="true">‚Ä∫</span><span aria-current="page">Cat√°logo</span>
         </nav>
 
         <div class="catalog-layout">
-            <aside class="catalog-sidebar" aria-label="Filtros del cat·logo">
+            <aside class="catalog-sidebar" aria-label="Filtros del cat√°logo">
                 <section class="catalog-filter-section">
-                    <h2>CategorÌas</h2>
-                    <nav class="catalog-filter-list" aria-label="CategorÌas">
-                        <a class="<?php echo e($selectedCategory ? '' : 'is-active'); ?>" href="<?php echo e(route('catalog.index', collect($baseFilters)->except('categoria')->all())); ?>">Todas las categorÌas</a>
+                    <h2>Categor√≠as</h2>
+                    <nav class="catalog-filter-list" aria-label="Categor√≠as">
+                        <a class="<?php echo e($selectedCategory ? '' : 'is-active'); ?>" href="<?php echo e(route('catalog.index', collect($baseFilters)->except('categoria')->all())); ?>">Todas las categor√≠as</a>
                         <?php $__currentLoopData = $categories;
 $__env->addLoop($__currentLoopData);
 foreach ($__currentLoopData as $category) {
@@ -68,7 +68,7 @@ $loop = $__env->getLastLoop(); ?>
                         type="hidden"
                         name="orden"
                         value="<?php echo e(request('orden')); ?>">
-                    <label for="catalog-min-price">MÌnimo</label>
+                    <label for="catalog-min-price">M√≠nimo</label>
                     <input
                         class="input"
                         id="catalog-min-price"
@@ -77,7 +77,7 @@ $loop = $__env->getLastLoop(); ?>
                         min="0"
                         step="0.01"
                         value="<?php echo e(request('min')); ?>">
-                    <label for="catalog-max-price">M·ximo</label>
+                    <label for="catalog-max-price">M√°ximo</label>
                     <input
                         class="input"
                         id="catalog-max-price"
@@ -93,7 +93,7 @@ $loop = $__env->getLastLoop(); ?>
             <div class="catalog-content" id="productos">
                 <div class="catalog-toolbar">
                     <div class="catalog-heading">
-                        <h1><?php echo e($selectedCategory ? $categories->firstWhere('id', (int) $selectedCategory)?->nombre : 'Cat·logo'); ?></h1>
+                        <h1><?php echo e($selectedCategory ? $categories->firstWhere('id', (int) $selectedCategory)?->nombre : 'Cat√°logo'); ?></h1>
                         <p>Encuentra el celular ideal para ti.</p>
                     </div>
                     <form id="catalog-search-form" class="catalog-search" method="get" action="<?php echo e(route('catalog.index')); ?>" role="search">
@@ -112,7 +112,7 @@ $loop = $__env->getLastLoop(); ?>
                         <select id="catalog-sort" name="orden" data-catalog-sort>
                             <option value="nuevo" <?php if (request('orden') === 'nuevo') {
                                 echo 'selected';
-                            } ?>>M·s recientes</option>
+                            } ?>>M√°s recientes</option>
                             <option value="precio_asc" <?php if (request('orden') === 'precio_asc') {
                                 echo 'selected';
                             } ?>>Menor precio</option>

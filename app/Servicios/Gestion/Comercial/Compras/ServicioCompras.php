@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Define la responsabilidad de la clase ServicioCompras dentro de su m�dulo.
+ * Define la responsabilidad de la clase ServicioCompras dentro de su módulo.
  *
  * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
  */
@@ -26,7 +26,7 @@ class ServicioCompras
     /**
      * Inicializa la instancia con las dependencias y el estado requeridos.
      *
-     * @return mixed Resultado de la operaci�n.
+     * @return mixed Resultado de la operación.
      */
     public function __construct(
         private readonly ServicioInventario $inventario,
@@ -35,21 +35,21 @@ class ServicioCompras
     ) {}
 
     /**
-     * Registra la informaci�n recibida y coordina su persistencia.
+     * Registra la información recibida y coordina su persistencia.
      *
-     * @param  mixed  $datos  Par�metro recibido por la operaci�n.
-     * @param  mixed  $actor  Par�metro recibido por la operaci�n.
-     * @param  mixed  $token  Par�metro recibido por la operaci�n.
-     * @param  mixed  $ip  Par�metro recibido por la operaci�n.
-     * @return Compra Resultado de la operaci�n.
+     * @param  mixed  $datos  Parámetro recibido por la operación.
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $token  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return Compra Resultado de la operación.
      */
     public function registrar(array $datos, User $actor, string $token, ?string $ip): Compra
     {
         $this->autorizacion->assertAllowed($actor, 'gestion.compras.crear');
-        abort_unless(Schema::hasColumn('registros_auditoria', 'identificador_universal_evento'), 503, 'No est� disponible la protecci�n contra compras duplicadas.');
-        abort_unless(preg_match('/\A[a-f0-9]{64}\z/', $token) === 1, 422, 'La solicitud de compra no es v�lida.');
+        abort_unless(Schema::hasColumn('registros_auditoria', 'identificador_universal_evento'), 503, 'No está disponible la protección contra compras duplicadas.');
+        abort_unless(preg_match('/\A[a-f0-9]{64}\z/', $token) === 1, 422, 'La solicitud de compra no es válida.');
         $ubicacion = $this->autorizacion->operationLocation($actor);
-        abort_unless($ubicacion['empresa_id'] !== null && $ubicacion['sede_id'] !== null && $ubicacion['almacen_id'] !== null, 503, 'No hay un almac�n autorizado disponible.');
+        abort_unless($ubicacion['empresa_id'] !== null && $ubicacion['sede_id'] !== null && $ubicacion['almacen_id'] !== null, 503, 'No hay un almacén autorizado disponible.');
         abort_unless($this->autorizacion->allowsRecord($actor, 'gestion.compras.crear', $ubicacion['empresa_id'], $ubicacion['sede_id']), 403);
         $hash = hash('sha256', 'compra:'.$actor->getKey().':'.$token);
         $evento = substr($hash, 0, 8).'-'.substr($hash, 8, 4).'-4'.substr($hash, 13, 3).'-a'.substr($hash, 17, 3).'-'.substr($hash, 20, 12);
@@ -71,17 +71,17 @@ class ServicioCompras
             }
 
             $proveedor = Proveedor::query()->whereKey($datos['proveedor_id'])->where('empresa_id', $ubicacion['empresa_id'])->where('activo', true)->first();
-            abort_unless($proveedor !== null, 422, 'El proveedor no est� activo en la empresa autorizada.');
+            abort_unless($proveedor !== null, 422, 'El proveedor no está activo en la empresa autorizada.');
             $items = collect($datos['items'])->sortBy('producto_id')->values();
-            abort_if($items->isEmpty() || $items->count() > 100 || $items->pluck('producto_id')->unique()->count() !== $items->count(), 422, 'Los productos de la compra no son v�lidos.');
+            abort_if($items->isEmpty() || $items->count() > 100 || $items->pluck('producto_id')->unique()->count() !== $items->count(), 422, 'Los productos de la compra no son válidos.');
             $productos = Producto::query()->whereIn('id', $items->pluck('producto_id'))->orderBy('id')->lockForUpdate()->get()->keyBy('id');
             $lineas = [];
             $total = 0;
             foreach ($items as $item) {
                 $producto = $productos->get((int) $item['producto_id']);
                 $cantidad = filter_var($item['cantidad'], FILTER_VALIDATE_INT);
-                abort_unless($producto instanceof Producto && $producto->activo && (int) $producto->empresa_id === $ubicacion['empresa_id'], 422, 'Un producto no est� activo en la empresa autorizada.');
-                abort_if($cantidad === false || $cantidad < 1 || $cantidad > 1000, 422, 'La cantidad no es v�lida.');
+                abort_unless($producto instanceof Producto && $producto->activo && (int) $producto->empresa_id === $ubicacion['empresa_id'], 422, 'Un producto no está activo en la empresa autorizada.');
+                abort_if($cantidad === false || $cantidad < 1 || $cantidad > 1000, 422, 'La cantidad no es válida.');
                 $variantesProducto = DB::table('variantes_productos')->where('producto_id', $producto->id);
                 $varianteId = isset($item['variante_id']) && $item['variante_id'] !== '' ? (int) $item['variante_id'] : null;
                 if ((clone $variantesProducto)->exists()) {
@@ -95,19 +95,27 @@ class ServicioCompras
                 $descuento = $this->centimos(number_format((float) ($item['descuento'] ?? 0), 2, '.', ''));
                 $impuesto = $this->centimos(number_format((float) ($item['impuesto'] ?? 0), 2, '.', ''));
                 $importe = ($costo * $cantidad) - $descuento + $impuesto;
-                abort_if($importe < 0, 422, 'El descuento no puede superar el importe de la l�nea.');
+                abort_if($importe < 0, 422, 'El descuento no puede superar el importe de la línea.');
                 abort_if($importe > self::MAX_CENTIMOS - $total, 422, 'La compra supera el importe permitido.');
                 $total += $importe;
                 $linea = ['producto_id' => $producto->id, 'variante_id' => $varianteId, 'cantidad' => $cantidad, 'costo_unitario' => $this->importe($costo)];
-                if (Schema::hasColumn('compra_detalles', 'descuento')) {
+                if (Schema::hasColumn('detalles_compras', 'descuento')) {
                     $linea['descuento'] = $this->importe($descuento);
                     $linea['impuesto'] = $this->importe($impuesto);
                     $linea['total_linea'] = $this->importe($importe);
                 }
                 $lineas[] = $linea;
             }
-            $compraDatos = [...$ubicacion, 'proveedor_id' => $proveedor->id, 'creado_por_usuario_id' => $actor->id,
-                'total' => $this->importe($total), 'estado' => 'Pendiente', 'fecha_compra' => $datos['fecha_compra'], 'activo' => true, 'creado_en' => now()];
+            $compraDatos = [
+                ...$ubicacion,
+                'proveedor_id' => $proveedor->id,
+                'creado_por_usuario_id' => $actor->id,
+                'total' => $this->importe($total),
+                'estado' => 'Pendiente',
+                'fecha_compra' => $datos['fecha_compra'],
+                'activo' => true,
+                'creado_en' => now(),
+            ];
             if (Schema::hasColumn('compras', 'numero_referencia')) {
                 $compraDatos['numero_referencia'] = $datos['numero_referencia'] ?? null;
                 $compraDatos['moneda'] = $datos['moneda'] ?? 'PEN';
@@ -116,21 +124,29 @@ class ServicioCompras
             foreach ($lineas as $linea) {
                 $compra->details()->create($linea);
             }
-            $this->auditoria->record($actor->id, 'compra.registrada', 'compras', $compra->id, null,
-                ['proveedor_id' => $proveedor->id, 'total' => $compra->total, 'items' => count($lineas)], $ip,
-                scope: ['empresa_id' => $ubicacion['empresa_id'], 'sede_id' => $ubicacion['sede_id']], eventId: $evento);
+            $this->auditoria->record(
+                $actor->id,
+                'compra.registrada',
+                'compras',
+                $compra->id,
+                null,
+                ['proveedor_id' => $proveedor->id, 'total' => $compra->total, 'items' => count($lineas)],
+                $ip,
+                scope: ['empresa_id' => $ubicacion['empresa_id'], 'sede_id' => $ubicacion['sede_id']],
+                eventId: $evento
+            );
 
             return $compra;
         }, 3);
     }
 
     /**
-     * Ejecuta la operaci�n aprobar definida por la clase ServicioCompras.
+     * Ejecuta la operación aprobar definida por la clase ServicioCompras.
      *
-     * @param  mixed  $compra  Par�metro recibido por la operaci�n.
-     * @param  mixed  $actor  Par�metro recibido por la operaci�n.
-     * @param  mixed  $ip  Par�metro recibido por la operaci�n.
-     * @return Compra Resultado de la operaci�n.
+     * @param  mixed  $compra  Parámetro recibido por la operación.
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return Compra Resultado de la operación.
      */
     /**
      * Actualiza una compra pendiente sin crear un nuevo encabezado ni afectar inventario.
@@ -145,30 +161,30 @@ class ServicioCompras
             $bloqueada = Compra::query()->whereKey($compra->getKey())->lockForUpdate()->firstOrFail();
             abort_unless($this->autorizacion->allowsRecord($actor, 'gestion.compras.actualizar', (int) $bloqueada->empresa_id, (int) $bloqueada->sede_id), 403);
             abort_unless($bloqueada->activo && $bloqueada->estado === 'Pendiente', 409, 'Solo se pueden editar compras pendientes.');
-            abort_if(DB::table('movimientos_inventario')->where('documento_tipo', 'compra')->where('documento_id', (string) $bloqueada->id)->exists(), 409, 'La compra ya afect� inventario y requiere un procedimiento de ajuste.');
+            abort_if(DB::table('movimientos_inventario')->where('documento_tipo', 'compra')->where('documento_id', (string) $bloqueada->id)->exists(), 409, 'La compra ya afect— inventario y requiere un procedimiento de ajuste.');
             if (Schema::hasTable('pagos')) {
                 abort_if(DB::table('pagos')->where('compra_id', $bloqueada->id)->exists(), 409, 'La compra tiene pagos asociados y no puede editarse directamente.');
             }
             if (Schema::hasTable('cuentas_pagar')) {
-                abort_if(DB::table('cuentas_pagar')->where('compra_id', $bloqueada->id)->exists(), 409, 'La compra tiene una cuenta por pagar asociada y requiere conciliaci�n.');
+                abort_if(DB::table('cuentas_pagar')->where('compra_id', $bloqueada->id)->exists(), 409, 'La compra tiene una cuenta por pagar asociada y requiere conciliación.');
             }
 
             $proveedor = Proveedor::query()->whereKey($datos['proveedor_id'])->where('empresa_id', $bloqueada->empresa_id)->where('activo', true)->first();
-            abort_unless($proveedor !== null, 422, 'El proveedor no est� activo en la empresa de la compra.');
+            abort_unless($proveedor !== null, 422, 'El proveedor no está activo en la empresa de la compra.');
             $items = collect($datos['items'])->sortBy('producto_id')->values();
-            abort_if($items->isEmpty() || $items->count() > 100 || $items->pluck('producto_id')->unique()->count() !== $items->count(), 422, 'Los productos de la compra no son v�lidos.');
+            abort_if($items->isEmpty() || $items->count() > 100 || $items->pluck('producto_id')->unique()->count() !== $items->count(), 422, 'Los productos de la compra no son válidos.');
             $productos = Producto::query()->whereIn('id', $items->pluck('producto_id'))->orderBy('id')->lockForUpdate()->get()->keyBy('id');
             $lineas = [];
             $total = 0;
             foreach ($items as $item) {
                 $producto = $productos->get((int) $item['producto_id']);
                 $cantidad = filter_var($item['cantidad'], FILTER_VALIDATE_INT);
-                abort_unless($producto instanceof Producto && $producto->activo && (int) $producto->empresa_id === (int) $bloqueada->empresa_id, 422, 'Un producto no est� activo en la empresa de la compra.');
-                abort_if($cantidad === false || $cantidad < 1 || $cantidad > 1000, 422, 'La cantidad no es v�lida.');
+                abort_unless($producto instanceof Producto && $producto->activo && (int) $producto->empresa_id === (int) $bloqueada->empresa_id, 422, 'Un producto no está activo en la empresa de la compra.');
+                abort_if($cantidad === false || $cantidad < 1 || $cantidad > 1000, 422, 'La cantidad no es válida.');
                 $variantesProducto = DB::table('variantes_productos')->where('producto_id', $producto->id);
                 $varianteId = isset($item['variante_id']) && $item['variante_id'] !== '' ? (int) $item['variante_id'] : null;
                 if ((clone $variantesProducto)->exists()) {
-                    abort_unless($varianteId !== null && (clone $variantesProducto)->where('id', $varianteId)->where('estado', 'activo')->exists(), 422, 'La variante seleccionada no es v�lida.');
+                    abort_unless($varianteId !== null && (clone $variantesProducto)->where('id', $varianteId)->where('estado', 'activo')->exists(), 422, 'La variante seleccionada no es válida.');
                 } else {
                     abort_unless($varianteId === null, 422, 'El producto seleccionado no tiene variantes activas.');
                 }
@@ -176,11 +192,11 @@ class ServicioCompras
                 $descuento = $this->centimos(number_format((float) ($item['descuento'] ?? 0), 2, '.', ''));
                 $impuesto = $this->centimos(number_format((float) ($item['impuesto'] ?? 0), 2, '.', ''));
                 $importe = ($costo * $cantidad) - $descuento + $impuesto;
-                abort_if($importe < 0, 422, 'El descuento no puede superar el importe de la l�nea.');
+                abort_if($importe < 0, 422, 'El descuento no puede superar el importe de la línea.');
                 abort_if($importe > self::MAX_CENTIMOS - $total, 422, 'La compra supera el importe permitido.');
                 $total += $importe;
                 $linea = ['producto_id' => $producto->id, 'variante_id' => $varianteId, 'cantidad' => $cantidad, 'costo_unitario' => $this->importe($costo)];
-                if (Schema::hasColumn('compra_detalles', 'descuento')) {
+                if (Schema::hasColumn('detalles_compras', 'descuento')) {
                     $linea['descuento'] = $this->importe($descuento);
                     $linea['impuesto'] = $this->importe($impuesto);
                     $linea['total_linea'] = $this->importe($importe);
@@ -203,8 +219,16 @@ class ServicioCompras
                 $bloqueada->details()->create($linea);
             }
             $nuevos = ['proveedor_id' => $proveedor->id, 'fecha_compra' => $datos['fecha_compra'], 'total' => $bloqueada->total, 'items' => $lineas];
-            $this->auditoria->record($actor->id, 'compra.actualizada', 'compras', $bloqueada->id, $anteriores, $nuevos, $ip,
-                scope: ['empresa_id' => (int) $bloqueada->empresa_id, 'sede_id' => (int) $bloqueada->sede_id]);
+            $this->auditoria->record(
+                $actor->id,
+                'compra.actualizada',
+                'compras',
+                $bloqueada->id,
+                $anteriores,
+                $nuevos,
+                $ip,
+                scope: ['empresa_id' => (int) $bloqueada->empresa_id, 'sede_id' => (int) $bloqueada->sede_id]
+            );
 
             return $bloqueada->fresh(['supplier', 'details.product', 'details.variante']);
         }, 3);
@@ -216,12 +240,12 @@ class ServicioCompras
     }
 
     /**
-     * Ejecuta la operaci�n recibir definida por la clase ServicioCompras.
+     * Ejecuta la operación recibir definida por la clase ServicioCompras.
      *
-     * @param  mixed  $compra  Par�metro recibido por la operaci�n.
-     * @param  mixed  $actor  Par�metro recibido por la operaci�n.
-     * @param  mixed  $ip  Par�metro recibido por la operaci�n.
-     * @return Compra Resultado de la operaci�n.
+     * @param  mixed  $compra  Parámetro recibido por la operación.
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return Compra Resultado de la operación.
      */
     public function recibir(Compra $compra, User $actor, ?string $ip): Compra
     {
@@ -229,12 +253,12 @@ class ServicioCompras
     }
 
     /**
-     * Ejecuta la operaci�n anular definida por la clase ServicioCompras.
+     * Ejecuta la operación anular definida por la clase ServicioCompras.
      *
-     * @param  mixed  $compra  Par�metro recibido por la operaci�n.
-     * @param  mixed  $actor  Par�metro recibido por la operaci�n.
-     * @param  mixed  $ip  Par�metro recibido por la operaci�n.
-     * @return Compra Resultado de la operaci�n.
+     * @param  mixed  $compra  Parámetro recibido por la operación.
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @return Compra Resultado de la operación.
      */
     public function anular(Compra $compra, User $actor, ?string $ip): Compra
     {
@@ -243,12 +267,19 @@ class ServicioCompras
         return DB::transaction(function () use ($compra, $actor, $ip): Compra {
             $bloqueada = Compra::query()->whereKey($compra->getKey())->lockForUpdate()->firstOrFail();
             abort_unless($this->autorizacion->allowsRecord($actor, 'gestion.compras.anular', (int) $bloqueada->empresa_id, (int) $bloqueada->sede_id), 403);
-            abort_unless($bloqueada->activo && $bloqueada->estado === 'Pendiente', 409, 'Solo se pueden anular compras pendientes que a�n no hayan sido aprobadas o recibidas.');
-            abort_if(DB::table('movimientos_inventario')->where('documento_tipo', 'compra')->where('documento_id', (string) $bloqueada->id)->exists(), 409, 'La compra ya tiene movimientos de inventario y requiere conciliaci�n.');
+            abort_unless($bloqueada->activo && $bloqueada->estado === 'Pendiente', 409, 'Solo se pueden anular compras pendientes que aún no hayan sido aprobadas o recibidas.');
+            abort_if(DB::table('movimientos_inventario')->where('documento_tipo', 'compra')->where('documento_id', (string) $bloqueada->id)->exists(), 409, 'La compra ya tiene movimientos de inventario y requiere conciliación.');
             $bloqueada->update(['activo' => false, 'estado' => 'Cancelada']);
-            $this->auditoria->record($actor->id, 'compra.anulada', 'compras', $bloqueada->id,
-                ['activo' => true, 'estado' => 'Pendiente'], ['activo' => false, 'estado' => 'Cancelada'], $ip,
-                scope: ['empresa_id' => (int) $bloqueada->empresa_id, 'sede_id' => (int) $bloqueada->sede_id]);
+            $this->auditoria->record(
+                $actor->id,
+                'compra.anulada',
+                'compras',
+                $bloqueada->id,
+                ['activo' => true, 'estado' => 'Pendiente'],
+                ['activo' => false, 'estado' => 'Cancelada'],
+                $ip,
+                scope: ['empresa_id' => (int) $bloqueada->empresa_id, 'sede_id' => (int) $bloqueada->sede_id]
+            );
 
             return $bloqueada;
         }, 3);
@@ -365,18 +396,18 @@ class ServicioCompras
                 return $bloqueada;
             }, 3);
         } catch (UniqueConstraintViolationException $excepcion) {
-            abort(409, 'Uno de los IMEI o n�meros de serie ya est� registrado. No se guard� la recepci�n.');
+            abort(409, 'Uno de los IMEI o números de serie ya está registrado. No se guard— la recepción.');
         }
     }
 
     /**
-     * Ejecuta la operaci�n cambiarEstado definida por la clase ServicioCompras.
+     * Ejecuta la operación cambiarEstado definida por la clase ServicioCompras.
      *
-     * @param  mixed  $compra  Par�metro recibido por la operaci�n.
-     * @param  mixed  $actor  Par�metro recibido por la operaci�n.
-     * @param  mixed  $ip  Par�metro recibido por la operaci�n.
-     * @param  mixed  $recibir  Par�metro recibido por la operaci�n.
-     * @return Compra Resultado de la operaci�n.
+     * @param  mixed  $compra  Parámetro recibido por la operación.
+     * @param  mixed  $actor  Parámetro recibido por la operación.
+     * @param  mixed  $ip  Parámetro recibido por la operación.
+     * @param  mixed  $recibir  Parámetro recibido por la operación.
+     * @return Compra Resultado de la operación.
      */
     private function cambiarEstado(Compra $compra, User $actor, ?string $ip, bool $recibir): Compra
     {
@@ -388,7 +419,7 @@ class ServicioCompras
             abort_unless($this->autorizacion->allowsRecord($actor, $permiso, (int) $bloqueada->empresa_id, (int) $bloqueada->sede_id), 403);
             $ubicacion = $this->autorizacion->operationLocation($actor);
             abort_unless((int) $bloqueada->empresa_id === $ubicacion['empresa_id'] && (int) $bloqueada->sede_id === $ubicacion['sede_id']
-                && (int) $bloqueada->almacen_id === $ubicacion['almacen_id'], 409, 'La operaci�n requiere el almac�n original de la compra.');
+                && (int) $bloqueada->almacen_id === $ubicacion['almacen_id'], 409, 'La operación requiere el almacén original de la compra.');
             $destino = $recibir ? 'Recibida' : 'Aprobada';
             if ($bloqueada->estado === $destino) {
                 if ($recibir) {
@@ -397,16 +428,16 @@ class ServicioCompras
 
                 return $bloqueada;
             }
-            abort_unless($bloqueada->activo && $bloqueada->estado === ($recibir ? 'Aprobada' : 'Pendiente'), 409, 'El estado de la compra no permite esta operaci�n.');
-            abort_unless(DB::table('registros_auditoria')->where('accion', 'compra.registrada')->where('entidad', 'compras')->where('entidad_id', $bloqueada->id)->exists(), 409, 'La compra requiere conciliaci�n antes de continuar.');
+            abort_unless($bloqueada->activo && $bloqueada->estado === ($recibir ? 'Aprobada' : 'Pendiente'), 409, 'El estado de la compra no permite esta operación.');
+            abort_unless(DB::table('registros_auditoria')->where('accion', 'compra.registrada')->where('entidad', 'compras')->where('entidad_id', $bloqueada->id)->exists(), 409, 'La compra requiere conciliación antes de continuar.');
             if ($recibir) {
                 $lineas = $bloqueada->details()->orderBy('id')->lockForUpdate()->get();
-                abort_if($lineas->isEmpty() || $lineas->pluck('producto_id')->unique()->count() !== $lineas->count(), 409, 'Los detalles de compra requieren conciliaci�n.');
+                abort_if($lineas->isEmpty() || $lineas->pluck('producto_id')->unique()->count() !== $lineas->count(), 409, 'Los detalles de compra requieren conciliación.');
                 $recibidas = $this->cantidadesRecibidasPorDetalle($bloqueada, $lineas);
                 $productos = Producto::query()->whereIn('id', $lineas->pluck('producto_id'))->orderBy('id')->lockForUpdate()->get()->keyBy('id');
                 foreach ($lineas as $linea) {
                     $producto = $productos->get((int) $linea->producto_id);
-                    abort_unless($producto instanceof Producto && (int) $producto->empresa_id === $ubicacion['empresa_id'] && (int) $linea->cantidad > 0, 409, 'Un producto de la compra requiere conciliaci�n.');
+                    abort_unless($producto instanceof Producto && (int) $producto->empresa_id === $ubicacion['empresa_id'] && (int) $linea->cantidad > 0, 409, 'Un producto de la compra requiere conciliación.');
                     $cantidadPendiente = (int) $linea->cantidad - (int) ($recibidas[$linea->id] ?? 0);
                     if ($cantidadPendiente > 0) {
                         $this->registrarEntradaDeCompra($bloqueada, $linea, $producto, $cantidadPendiente, null, $actor, []);
@@ -416,20 +447,27 @@ class ServicioCompras
             }
             $anterior = $bloqueada->estado;
             $bloqueada->update(['estado' => $destino]);
-            $this->auditoria->record($actor->id, $recibir ? 'compra.recibida' : 'compra.aprobada', 'compras', $bloqueada->id,
-                ['estado' => $anterior], ['estado' => $destino], $ip,
-                scope: ['empresa_id' => $ubicacion['empresa_id'], 'sede_id' => $ubicacion['sede_id']]);
+            $this->auditoria->record(
+                $actor->id,
+                $recibir ? 'compra.recibida' : 'compra.aprobada',
+                'compras',
+                $bloqueada->id,
+                ['estado' => $anterior],
+                ['estado' => $destino],
+                $ip,
+                scope: ['empresa_id' => $ubicacion['empresa_id'], 'sede_id' => $ubicacion['sede_id']]
+            );
 
             return $bloqueada;
         }, 3);
     }
 
     /**
-     * Ejecuta la operaci�n comprobarRecepcion definida por la clase ServicioCompras.
+     * Ejecuta la operación comprobarRecepcion definida por la clase ServicioCompras.
      *
-     * @param  mixed  $compra  Par�metro recibido por la operaci�n.
-     * @param  mixed  $completa  Par�metro recibido por la operaci�n.
-     * @return void Resultado de la operaci�n.
+     * @param  mixed  $compra  Parámetro recibido por la operación.
+     * @param  mixed  $completa  Parámetro recibido por la operación.
+     * @return void Resultado de la operación.
      */
     private function comprobarRecepcion(Compra $compra, bool $completa): void
     {
@@ -441,7 +479,7 @@ class ServicioCompras
             $cantidadRecibida = (int) ($recibidas[$linea->id] ?? 0);
             abort_if($cantidadRecibida > (int) $linea->cantidad, 409, 'El inventario excede la cantidad comprada.');
             if ($completa) {
-                abort_unless($cantidadRecibida === (int) $linea->cantidad, 409, 'La recepci�n no coincide con las cantidades compradas.');
+                abort_unless($cantidadRecibida === (int) $linea->cantidad, 409, 'La recepción no coincide con las cantidades compradas.');
             }
         }
     }
@@ -468,7 +506,7 @@ class ServicioCompras
             $clave = (int) $movimiento->producto_id.':'.($movimiento->variante_id === null ? 'base' : (int) $movimiento->variante_id);
             $linea = $lineasPorClave->get($clave);
             abort_unless($linea !== null, 409, 'Existe una entrada de inventario que no corresponde a un detalle de esta compra.');
-            abort_if((float) $movimiento->cantidad <= 0 || (float) $movimiento->cantidad !== floor((float) $movimiento->cantidad), 409, 'Una entrada de compra requiere conciliaci�n.');
+            abort_if((float) $movimiento->cantidad <= 0 || (float) $movimiento->cantidad !== floor((float) $movimiento->cantidad), 409, 'Una entrada de compra requiere conciliación.');
             $cantidadesPorDetalle[$linea->id] = ($cantidadesPorDetalle[$linea->id] ?? 0) + (int) $movimiento->cantidad;
         }
 
@@ -492,22 +530,28 @@ class ServicioCompras
         if ((clone $variantes)->exists()) {
             abort_unless($varianteId !== null, 409, 'La compra requiere conciliar la variante del producto antes de recibir.');
             $variante = (clone $variantes)->where('id', $varianteId)->where('estado', 'activo')->first(['controla_serie']);
-            abort_unless($variante !== null, 409, 'La variante de compra no existe, no pertenece al producto o est� inactiva.');
+            abort_unless($variante !== null, 409, 'La variante de compra no existe, no pertenece al producto o está inactiva.');
             $controlaSerie = (bool) $variante->controla_serie;
         } else {
             abort_unless($varianteId === null, 409, 'La compra referencia una variante que ya no existe.');
         }
 
         if ($controlaSerie) {
-            abort_unless(count($identificadores) === $cantidad, 422, 'Registra un IMEI o n�mero de serie por cada unidad serializada recibida.');
-            abort_unless(Schema::hasColumns('dispositivos', ['producto_id', 'variante_id', 'imei', 'numero_serie', 'detalle_compra_id', 'almacen_actual_id', 'estado', 'fecha_ingreso'])
-                && Schema::hasColumns('movimientos_dispositivos', ['dispositivo_id', 'movimiento_inventario_id', 'estado_anterior', 'estado_nuevo', 'creado_en'])
-                && Schema::hasColumns('detalles_compras_dispositivos', ['detalle_compra_id', 'dispositivo_id']),
-                503, 'El esquema de trazabilidad de IMEI no est� disponible.');
+            abort_unless(count($identificadores) === $cantidad, 422, 'Registra un IMEI o número de serie por cada unidad serializada recibida.');
+            abort_unless(
+                Schema::hasColumns('dispositivos', ['producto_id', 'variante_id', 'imei', 'numero_serie', 'detalle_compra_id', 'almacen_actual_id', 'estado', 'fecha_ingreso'])
+                    && Schema::hasColumns('movimientos_dispositivos', ['dispositivo_id', 'movimiento_inventario_id', 'estado_anterior', 'estado_nuevo', 'creado_en'])
+                    && Schema::hasColumns('detalles_compras_dispositivos', ['detalle_compra_id', 'dispositivo_id']),
+                503,
+                'El esquema de trazabilidad de IMEI no está disponible.'
+            );
         } else {
-            abort_if($identificadores !== [], 422, 'Este producto no requiere IMEI ni n�mero de serie.');
-            abort_if(Schema::hasTable('dispositivos') && DB::table('dispositivos')->where('producto_id', $producto->id)->where('variante_id', $varianteId)->exists(), 409,
-                'La variante ya tiene equipos serializados; revisa la configuraci�n de control de serie antes de recibir.');
+            abort_if($identificadores !== [], 422, 'Este producto no requiere IMEI ni número de serie.');
+            abort_if(
+                Schema::hasTable('dispositivos') && DB::table('dispositivos')->where('producto_id', $producto->id)->where('variante_id', $varianteId)->exists(),
+                409,
+                'La variante ya tiene equipos serializados; revisa la configuración de control de serie antes de recibir.'
+            );
         }
 
         $notas = 'Ingreso por compra #'.$compra->id.'; detalle #'.$linea->id;
@@ -515,7 +559,7 @@ class ServicioCompras
             $notas .= '. '.$observaciones;
         }
 
-        $movimiento = $this->inventario->changeLockedProductInWarehouse(
+        $movimiento = $this->inventario->cambiarProductoBloqueadoEnAlmacen(
             $producto,
             $varianteId,
             'entrada',
@@ -549,7 +593,7 @@ class ServicioCompras
                     'fecha_ingreso' => now(),
                 ]);
             } catch (UniqueConstraintViolationException $excepcion) {
-                abort(409, 'Uno de los IMEI o n�meros de serie ya est� registrado.');
+                abort(409, 'Uno de los IMEI o números de serie ya está registrado.');
             }
 
             DB::table('detalles_compras_dispositivos')->insert([
@@ -581,22 +625,22 @@ class ServicioCompras
                 $parte = trim($parte);
                 if (preg_match('/\AIMEI:([0-9]{15})\z/i', $parte, $coincidencia) === 1 && $imei === null) {
                     $imei = $coincidencia[1];
-                    abort_unless($this->esImeiValido($imei), 422, 'El IMEI debe tener 15 d�gitos y un d�gito de control v�lido.');
+                    abort_unless($this->esImeiValido($imei), 422, 'El IMEI debe tener 15 dígitos y un dígito de control válido.');
                 } elseif (preg_match('/\ASERIE:(.{1,100})\z/iu', $parte, $coincidencia) === 1 && $numeroSerie === null) {
                     $numeroSerie = trim($coincidencia[1]);
-                    abort_if($numeroSerie === '', 422, 'El n�mero de serie no puede estar vac�o.');
+                    abort_if($numeroSerie === '', 422, 'El nmero de serie no puede estar vacío.');
                 } else {
-                    abort(422, 'Usa una l�nea por unidad con formato IMEI:15d�gitos, SERIE:valor o IMEI:15d�gitos|SERIE:valor.');
+                    abort(422, 'Usa una linea por unidad con formato IMEI:15dígitos, SERIE:valor o IMEI:15dígitos|SERIE:valor.');
                 }
             }
 
-            abort_if($imei === null && $numeroSerie === null, 422, 'Cada unidad requiere un IMEI o n�mero de serie.');
+            abort_if($imei === null && $numeroSerie === null, 422, 'Cada unidad requiere un IMEI o número de serie.');
             foreach ([['imei', $imei], ['serie', $numeroSerie]] as [$tipo, $valor]) {
                 if ($valor === null) {
                     continue;
                 }
                 $clave = $tipo.':'.mb_strtolower($valor);
-                abort_if(isset($vistos[$clave]), 422, 'No repitas un IMEI o n�mero de serie en la recepci�n.');
+                abort_if(isset($vistos[$clave]), 422, 'No repitas un IMEI o número de serie en la recepción.');
                 $vistos[$clave] = true;
             }
             $identificadores[] = ['imei' => $imei, 'numero_serie' => $numeroSerie];
@@ -606,10 +650,10 @@ class ServicioCompras
     }
 
     /**
-     * Ejecuta la operaci�n esImeiValido definida por la clase ServicioCompras.
+     * Ejecuta la operación esImeiValido definida por la clase ServicioCompras.
      *
-     * @param  mixed  $imei  Par�metro recibido por la operaci�n.
-     * @return bool Resultado de la operaci�n.
+     * @param  mixed  $imei  Parámetro recibido por la operación.
+     * @return bool Resultado de la operación.
      */
     private function esImeiValido(string $imei): bool
     {
@@ -633,24 +677,24 @@ class ServicioCompras
     }
 
     /**
-     * Ejecuta la operaci�n centimos definida por la clase ServicioCompras.
+     * Ejecuta la operación centimos definida por la clase ServicioCompras.
      *
-     * @param  mixed  $valor  Par�metro recibido por la operaci�n.
-     * @return int Resultado de la operaci�n.
+     * @param  mixed  $valor  Parámetro recibido por la operación.
+     * @return int Resultado de la operación.
      */
     private function centimos(string $valor): int
     {
-        abort_unless(preg_match('/\A\d{1,8}(?:\.\d{1,2})?\z/', $valor) === 1, 422, 'El costo unitario no es v�lido.');
+        abort_unless(preg_match('/\A\d{1,8}(?:\.\d{1,2})?\z/', $valor) === 1, 422, 'El costo unitario no es válido.');
         [$entero, $decimal] = array_pad(explode('.', $valor, 2), 2, '');
 
         return (int) $entero * 100 + (int) str_pad($decimal, 2, '0');
     }
 
     /**
-     * Procesa e incorpora la informaci�n importada.
+     * Procesa e incorpora la información importada.
      *
-     * @param  mixed  $centimos  Par�metro recibido por la operaci�n.
-     * @return string Resultado de la operaci�n.
+     * @param  mixed  $centimos  Parámetro recibido por la operación.
+     * @return string Resultado de la operación.
      */
     private function importe(int $centimos): string
     {

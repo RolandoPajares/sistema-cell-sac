@@ -737,3 +737,52 @@
         grid-column: auto;
     }
 }
+
+/* Presentación de perfil de referencia: contenido dinámico, estructura fija y adaptable. */
+.perfil-referencia { display: grid; gap: 15px; color: #10234c; }
+.perfil-referencia-breadcrumb { display: flex; align-items: center; gap: 9px; color: #607aa2; font-size: .76rem; font-weight: 700; }
+.perfil-referencia-breadcrumb a { color: #31598d; text-decoration: none; }
+.perfil-referencia-heading { display: flex; align-items: center; gap: 14px; }
+.perfil-referencia-heading > i { color: #0874ed; font-size: 2rem; }
+.perfil-referencia-heading h1 { margin: 0; color: #0b2457; font-size: clamp(1.75rem, 3vw, 2.3rem); letter-spacing: -.04em; }
+.perfil-referencia-heading p { margin: 2px 0 0; color: #58729e; font-size: .8rem; }
+.perfil-referencia-layout { display: grid; grid-template-columns: 205px minmax(0, 1fr) 245px; gap: 12px; align-items: start; }
+.perfil-referencia-layout > .tc-profile-summary { display: flex; min-width: 0; flex-direction: column; gap: 12px; align-items: stretch; padding: 0 12px 15px; overflow: hidden; border-radius: 12px; }
+.perfil-referencia-layout > .tc-profile-summary::before { display: block; height: 112px; margin: 0 -12px 0; background: linear-gradient(145deg, #087cf2 0%, #1687ff 55%, #0b55c7 56%, #0b55c7 100%); content: ""; }
+.perfil-referencia-layout > .tc-profile-summary .tc-profile-identity { display: grid; justify-items: center; gap: 7px; margin-top: -55px; text-align: center; }
+.perfil-referencia-layout > .tc-profile-summary .tc-profile-avatar-button { width: 92px; height: 92px; }
+.perfil-referencia-layout > .tc-profile-summary .tc-profile-avatar { width: 92px; height: 92px; border: 4px solid #fff; box-shadow: 0 5px 13px rgba(10, 51, 112, .25); }
+.perfil-referencia-layout > .tc-profile-summary .tc-profile-avatar-status { left: calc(50% + 27px); bottom: 38px; }
+.perfil-referencia-layout > .tc-profile-summary .tc-profile-identity-copy h2 { font-size: 1rem; }
+.perfil-referencia-layout > .tc-profile-summary .tc-profile-identity-copy p { justify-content: center; font-size: .68rem; }
+.perfil-referencia-layout > .tc-profile-summary .tc-profile-badges { justify-content: center; }
+.perfil-referencia-layout > .tc-profile-summary .tc-profile-active { color: #19883f; background: #e2f8e8; }
+.perfil-referencia-layout > .tc-profile-summary .tc-profile-last-access { padding: 9px 0 0; border-top: 1px solid #e2ebf5; border-left: 0; }
+.perfil-referencia-layout > .tc-profile-summary .tc-profile-completion { display: none; }
+.perfil-referencia-layout > .tc-profile-summary .tc-profile-photo-actions { display: grid; gap: 7px; }
+.perfil-referencia-layout > .tc-profile-summary .tc-profile-photo-button { width: 100%; min-height: 34px; padding: 7px; font-size: .66rem; }
+.perfil-referencia-main { display: grid; gap: 10px; min-width: 0; }
+.perfil-referencia-tabs { display: flex; gap: 4px; padding: 5px; border: 1px solid #d7e5f4; border-radius: 10px; background: #fff; }
+.perfil-referencia-tabs button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 34px; padding: 7px 10px; border: 0; border-radius: 8px; color: #274976; background: transparent; font-size: .68rem; font-weight: 800; cursor: pointer; }
+.perfil-referencia-tabs button.is-active { color: #fff; background: linear-gradient(120deg, #087cf2, #0755cb); box-shadow: 0 5px 12px rgba(8, 124, 242, .2); }
+.perfil-referencia-panel { display: grid; gap: 10px; min-width: 0; }
+.perfil-referencia-panel[hidden] { display: none; }
+.perfil-referencia-panel > .tc-profile-card, .perfil-referencia-panel > .tc-profile-password { box-shadow: none; }
+.perfil-referencia-aside { display: grid; gap: 10px; min-width: 0; }
+.perfil-rol-card, .perfil-permisos-card, .perfil-cambio-rol { padding: 14px; border: 1px solid #cfe0f2; border-radius: 12px; background: #fff; box-shadow: 0 7px 18px rgba(30, 86, 150, .06); }
+.perfil-rol-card header, .perfil-permisos-card header, .perfil-cambio-rol header { display: flex; align-items: center; gap: 8px; }
+.perfil-rol-card header i, .perfil-permisos-card header i, .perfil-cambio-rol header i { color: #0874ed; font-size: 1.1rem; }
+.perfil-rol-card h2, .perfil-permisos-card h2, .perfil-cambio-rol h2 { margin: 0; color: #132a5b; font-size: .85rem; }
+.perfil-rol-actual { display: inline-flex; margin-top: 9px; padding: 5px 10px; border-radius: 999px; color: #0870dc; background: #e4f0ff; font-size: .7rem; font-weight: 800; }
+.perfil-rol-card p, .perfil-cambio-rol p { margin: 9px 0 0; color: #60789d; font-size: .68rem; line-height: 1.45; }
+.perfil-permisos-card ul { display: grid; gap: 7px; margin: 11px 0 0; padding: 0; list-style: none; }
+.perfil-permisos-card li { display: flex; gap: 7px; align-items: flex-start; color: #38527c; font-size: .68rem; line-height: 1.3; }
+.perfil-permisos-card li i { color: #2ab45c; }
+.perfil-permisos-card li.is-empty { color: #7186a6; }
+.perfil-cambio-rol h2 small { color: #60789d; font-size: .62rem; font-weight: 500; }
+.perfil-cambio-rol select { width: 100%; min-height: 36px; margin-top: 10px; padding: 7px 9px; border: 1px solid #8dbaf0; border-radius: 8px; color: #173c72; background: #f8fbff; font: inherit; font-size: .7rem; font-weight: 700; }
+.perfil-referencia-aside .tc-profile-role-functions { padding: 12px; box-shadow: none; }
+.perfil-referencia-aside .tc-profile-role-functions .tc-profile-card-heading { margin-bottom: 9px; }
+.perfil-referencia-aside .tc-profile-role-functions .tc-profile-function-list { max-height: 160px; overflow: auto; }
+@media (max-width: 1050px) { .perfil-referencia-layout { grid-template-columns: 190px minmax(0, 1fr); } .perfil-referencia-aside { grid-column: 1 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); } .perfil-referencia-aside .tc-profile-role-functions { grid-column: 1 / -1; } }
+@media (max-width: 700px) { .perfil-referencia-layout { grid-template-columns: 1fr; } .perfil-referencia-aside { grid-column: auto; grid-template-columns: 1fr; } .perfil-referencia-tabs { overflow-x: auto; } .perfil-referencia-tabs button { flex: 0 0 auto; } }

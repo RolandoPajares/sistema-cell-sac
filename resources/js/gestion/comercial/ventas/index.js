@@ -48,7 +48,7 @@ if (salesPage && salesPage.dataset.salesInitialized !== "true") {
      * @returns {*} Resultado de la operación.
      */
     const renderTotals = (form) => {
-        let total = 0;
+        let subtotal = 0;
 
         linesFor(form).forEach((line, index) => {
             const price = Number(line.dataset.price ?? 0);
@@ -74,15 +74,43 @@ if (salesPage && salesPage.dataset.salesInitialized !== "true") {
                 lineNumber.textContent = String(index + 1);
             }
 
-            total += lineTotal;
+            subtotal += lineTotal;
         });
 
+        const tax = Math.round(subtotal * 0.18 * 100) / 100;
+        const total = subtotal + tax;
+
         form.querySelector("[data-sales-subtotal]")?.replaceChildren(
-            document.createTextNode(currency(total)),
+            document.createTextNode(currency(subtotal)),
+        );
+        form.querySelector("[data-sales-tax]")?.replaceChildren(
+            document.createTextNode(currency(tax)),
         );
         form.querySelector("[data-sales-total]")?.replaceChildren(
             document.createTextNode(currency(total)),
         );
+        updateCashPayment(form, total);
+    };
+
+    const updateCashPayment = (form, total = null) => {
+        const payment = form.querySelector('[name="medio_pago_id"]');
+        const cashField = form.querySelector("[data-cash-payment]");
+        const amountInput = form.querySelector("[data-cash-amount]");
+        const change = form.querySelector("[data-cash-change]");
+        const isCash = payment?.selectedOptions?.[0]?.dataset.paymentCode === "efectivo";
+        if (!cashField || !amountInput) {
+            return;
+        }
+        cashField.hidden = !isCash;
+        amountInput.required = isCash;
+        if (!isCash) {
+            amountInput.value = "";
+            if (change) change.textContent = "Vuelto: S/ 0.00";
+            return;
+        }
+        const saleTotal = total ?? Number(form.querySelector("[data-sales-total]")?.textContent.replace(/[^0-9,.-]/g, "").replace(",", ".") || 0);
+        const received = Number(amountInput.value || 0);
+        if (change) change.textContent = `Vuelto: ${currency(Math.max(0, received - saleTotal))}`;
     };
 
     /**
@@ -217,6 +245,8 @@ if (salesPage && salesPage.dataset.salesInitialized !== "true") {
                 renderTotals(form);
             },
         );
+        form.querySelector('[name="medio_pago_id"]')?.addEventListener("change", () => updateCashPayment(form));
+        form.querySelector('[name="importe_pago"]')?.addEventListener("input", () => updateCashPayment(form));
         form.addEventListener("click", (event) => {
             const quantityButton = event.target.closest(
                 "[data-sales-quantity]",

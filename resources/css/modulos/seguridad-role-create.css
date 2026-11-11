@@ -1,0 +1,25 @@
+.tc-rbac-role-create-card { width: min(1100px, calc(100vw - 24px)); display: grid; grid-template-columns: 300px minmax(0, 1fr); overflow: hidden; background: #fff; }
+.tc-rbac-role-create-aside { display: flex; flex-direction: column; justify-content: flex-end; gap: 14px; padding: 48px 34px; color: #fff; background: linear-gradient(155deg, #0648bd, #087cf2); }
+.tc-rbac-role-create-logo { display: grid; width: 94px; height: 94px; place-items: center; border-radius: 28px; color: #fff; background: #ffffff24; font-size: 3.2rem; box-shadow: 0 14px 30px #052d8044; }
+.tc-rbac-role-create-aside h2 { margin: 8px 0 0; font-size: 1.75rem; }
+.tc-rbac-role-create-aside p { margin: 0 0 12px; color: #e6f2ff; line-height: 1.45; }
+.tc-rbac-role-create-aside > span { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 999px; color: #fff; background: #ffffff1c; font-size: .78rem; font-weight: 800; }
+.tc-rbac-role-create-main { display: flex; min-width: 0; min-height: 0; flex-direction: column; }
+.tc-rbac-role-create-header { display: flex; align-items: center; justify-content: space-between; padding: 24px 28px; border-bottom: 1px solid #e5eef8; background: #fbfdff; }
+.tc-rbac-role-create-header > div { display: flex; align-items: center; gap: 14px; }
+.tc-rbac-role-create-header h2 { color: #102b62; font-size: 1.55rem; }
+.tc-rbac-role-create-header p { margin: 4px 0 0; color: #62789d; font-size: .85rem; }
+.tc-rbac-role-create-header > button { width: 40px; height: 40px; border: 0; border-radius: 50%; color: #173b78; background: #e7f2ff; font-size: 1.5rem; cursor: pointer; }
+.tc-rbac-role-create-main .tc-rbac-dialog-body { min-height: 0; overflow: auto; padding: 25px 30px; }
+.tc-rbac-role-create-main .tc-rbac-dialog-body label { font-size: .82rem; }
+.tc-rbac-role-create-main .tc-rbac-dialog-body label > b { color: #e4435a; }
+.tc-rbac-role-create-main .tc-rbac-dialog-body input, .tc-rbac-role-create-main .tc-rbac-dialog-body select, .tc-rbac-role-create-main .tc-rbac-dialog-body textarea { min-height: 48px; padding: 12px 14px; border-radius: 11px; font-size: .9rem; }
+.tc-rbac-role-create-main .tc-rbac-dialog-body textarea { min-height: 115px; }
+.tc-rbac-role-create-info { display: flex; align-items: center; gap: 10px; margin: 0; padding: 12px 14px; border-radius: 10px; color: #204f92; background: #eaf4ff; font-size: .75rem; }
+.tc-rbac-role-create-info i { color: #0874ed; font-size: 1.1rem; }
+.tc-rbac-role-create-main .tc-rbac-dialog-body footer { padding-top: 18px; }
+.tc-rbac-role-create-main .tc-rbac-dialog-body footer button { min-height: 44px; padding: 0 20px; border: 1px solid #cbdcf0; border-radius: 10px; color: #274a7e; background: #fff; font: inherit; font-weight: 800; cursor: pointer; }
+.tc-rbac-role-create-main .tc-rbac-dialog-body footer .tc-rbac-primary { border: 0; color: #fff; background: linear-gradient(110deg, #087cf2, #0749b9); }
+.tc-rbac-dialog:has(.tc-rbac-role-create-card) { width: min(1100px, calc(100vw - 24px)); max-width: none; max-height: calc(100vh - 24px); overflow: hidden; border-radius: 24px; }
+.tc-rbac-dialog:has(.tc-rbac-role-create-card) .tc-rbac-role-create-card { width: 100%; min-height: min(700px, calc(100vh - 24px)); max-height: calc(100vh - 24px); }
+@media (max-width: 700px) { .tc-rbac-dialog:has(.tc-rbac-role-create-card) { width: calc(100vw - 16px); } .tc-rbac-dialog:has(.tc-rbac-role-create-card) .tc-rbac-role-create-card { min-height: 0; max-height: calc(100vh - 16px); grid-template-columns: 1fr; } .tc-rbac-role-create-aside { display: none; } .tc-rbac-role-create-header, .tc-rbac-role-create-main .tc-rbac-dialog-body { padding: 18px; } .tc-rbac-role-create-main .tc-rbac-dialog-body footer { flex-direction: column; } .tc-rbac-role-create-main .tc-rbac-dialog-body footer button { width: 100%; } }

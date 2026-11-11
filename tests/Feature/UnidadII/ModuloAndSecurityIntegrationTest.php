@@ -445,7 +445,7 @@ it('completa desde los formularios el flujo de categoría, producto, inventario 
         'id' => $venta->id,
         'estado' => 'confirmada',
         'canal' => 'presencial',
-        'total' => 200,
+        'total' => 236,
     ]);
     expect((float) DB::table('existencias_almacen')->where('producto_id', $producto->id)->sum('cantidad_fisica'))->toBe(3.0)
         ->and(DB::table('movimientos_inventario')->where('producto_id', $producto->id)->count())->toBe(2)
@@ -461,7 +461,7 @@ it('completa desde los formularios el flujo de categoría, producto, inventario 
     $this->actingAs($administrador)
         ->get(route('management.dashboard'))
         ->assertOk()
-        ->assertViewHas('salesThisMonth', 200.0);
+        ->assertViewHas('salesThisMonth', 236.0);
 
     $this->actingAs($administrador)
         ->post(route('management.sales.cancel', ['venta' => $venta->id]), ['motivo' => 'La operación fue capturada por error.'])

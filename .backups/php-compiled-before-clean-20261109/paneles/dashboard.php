@@ -11,9 +11,9 @@
                 <div>
                     <span class="cuenta-banner-etiqueta"><i class="bi bi-stars"></i> Mi cuenta</span>
                     <h1>Tu espacio en CELL SAC</h1>
-                    <p>Gestiona tus pedidos, consulta el catÃ¡logo y encuentra tu prÃ³ximo equipo.</p>
+                    <p>Gestiona tus pedidos, consulta el catálogo y encuentra tu próximo equipo.</p>
                     <div class="cuenta-banner-botones">
-                        <a class="cuenta-btn-blanco" href="<?php echo e(route('catalog.index')); ?>"><i class="bi bi-grid"></i> Ver catÃ¡logo</a>
+                        <a class="cuenta-btn-blanco" href="<?php echo e(route('catalog.index')); ?>"><i class="bi bi-grid"></i> Ver catálogo</a>
                         <a class="cuenta-btn-borde" href="<?php echo e(route('recommendations')); ?>"><i class="bi bi-stars"></i> Probar SmartMatch</a>
                     </div>
                 </div>
@@ -54,7 +54,7 @@
                     </article>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <div class="cuenta-vacio"><i class="bi bi-receipt"></i>
-                        <p>AÃºn no tienes pedidos registrados.</p><a class="btn btn-primary" href="<?php echo e(route('catalog.index')); ?>">Explorar catÃ¡logo</a>
+                        <p>Aún no tienes pedidos registrados.</p><a class="btn btn-primary" href="<?php echo e(route('catalog.index')); ?>">Explorar catálogo</a>
                     </div>
                     <?php endif; ?>
                 </div>
@@ -63,7 +63,7 @@
             <div class="cuenta-dos-columnas">
                 <section class="cuenta-panel">
                     <div class="cuenta-panel-titulo">
-                        <h2>Accesos rÃ¡pidos</h2>
+                        <h2>Accesos rápidos</h2>
                     </div>
                     <div class="cuenta-accesos">
                         <a href="<?php echo e(route('orders.index')); ?>"><i class="bi bi-box-seam"></i> Mis pedidos</a>
@@ -76,7 +76,7 @@
                     <i class="bi bi-stars"></i>
                     <div>
                         <h2>Recomendado para ti</h2>
-                        <p>Encuentra equipos segÃºn tus necesidades y presupuesto.</p><a class="btn btn-primary" href="<?php echo e(route('recommendations')); ?>">Probar SmartMatch</a>
+                        <p>Encuentra equipos según tus necesidades y presupuesto.</p><a class="btn btn-primary" href="<?php echo e(route('recommendations')); ?>">Probar SmartMatch</a>
                     </div>
                 </section>
             </div>

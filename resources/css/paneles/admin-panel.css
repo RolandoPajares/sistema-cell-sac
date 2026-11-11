@@ -2378,7 +2378,7 @@
   }
 }
 
-/* GestiÃ³n de categorÃ­as: vista administrativa exclusiva. */
+/* Gestión de categorías: vista administrativa exclusiva. */
 .modulo-categorias .admin-main {
   max-width: none;
   min-height: calc(100vh - var(--reference-header-height));

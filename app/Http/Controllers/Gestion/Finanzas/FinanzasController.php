@@ -88,15 +88,15 @@ class FinanzasController extends Controller
                     'statuses' => (clone $baseQuery)->distinct()->orderBy('estado')->pluck('estado')->all(),
                 ],
                 'kpis' => [
-                    $this->metric('Registros filtrados', (int) ($stats->cantidad ?? 0), 'bi-receipt', 'blue', 'Según los filtros aplicados'),
-                    $this->metric('Importes registrados', $this->moneyTotals($amountsByCurrency), 'bi-cash-coin', 'green', 'Separados por moneda; no equivale a conciliación bancaria'),
-                    $this->metric('Cobros', (int) ($stats->cobros ?? 0), 'bi-arrow-down-circle', 'blue', 'Tipo registrado en pagos'),
-                    $this->metric('Pagos', (int) ($stats->pagos ?? 0), 'bi-arrow-up-circle', 'orange', 'Tipo registrado en pagos'),
+                    $this->metrica('Registros filtrados', (int) ($stats->cantidad ?? 0), 'bi-receipt', 'blue', 'Según los filtros aplicados'),
+                    $this->metrica('Importes registrados', $this->totalesMonetarios($amountsByCurrency), 'bi-cash-coin', 'green', 'Separados por moneda; no equivale a conciliación bancaria'),
+                    $this->metrica('Cobros', (int) ($stats->cobros ?? 0), 'bi-arrow-down-circle', 'blue', 'Tipo registrado en pagos'),
+                    $this->metrica('Pagos', (int) ($stats->pagos ?? 0), 'bi-arrow-up-circle', 'orange', 'Tipo registrado en pagos'),
                 ],
-                'summary' => $this->stateSummary((clone $baseQuery)->select('estado')->selectRaw('COUNT(*) AS cantidad')->groupBy('estado')->orderBy('estado')->get()),
+                'summary' => $this->resumenEstados((clone $baseQuery)->select('estado')->selectRaw('COUNT(*) AS cantidad')->groupBy('estado')->orderBy('estado')->get()),
                 'columns' => ['Código', 'Tercero asociado', 'Origen', 'Tipo', 'Medio de pago', 'Importe', 'Estado', 'Fecha del registro'],
                 'records' => $rows->getCollection()->map(fn (Pago $payment): array => [
-                    'cells' => $this->paymentCells($payment),
+                    'cells' => $this->celdasPago($payment),
                     'detail_url' => route('management.payments.show', $payment),
                 ])->all(),
                 'pagination' => $rows,
@@ -153,15 +153,15 @@ class FinanzasController extends Controller
                     'statuses' => (clone $baseQuery)->distinct()->orderBy('estado')->pluck('estado')->all(),
                 ],
                 'kpis' => [
-                    $this->metric('Reembolsos filtrados', (int) ($stats->cantidad ?? 0), 'bi-inbox', 'blue', 'Según los filtros aplicados'),
-                    $this->metric('Importes registrados', $this->moneyTotals($amountsByCurrency), 'bi-cash-coin', 'orange', 'Separados por moneda; no confirma la ejecución del pago'),
-                    $this->metric('Pendientes', (int) ($stats->pendientes ?? 0), 'bi-hourglass-split', 'orange', 'Estado pendiente registrado'),
-                    $this->metric('Estados distintos', (clone $baseQuery)->distinct('estado')->count('estado'), 'bi-list-check', 'purple', 'Estados presentes en la tabla'),
+                    $this->metrica('Reembolsos filtrados', (int) ($stats->cantidad ?? 0), 'bi-inbox', 'blue', 'Según los filtros aplicados'),
+                    $this->metrica('Importes registrados', $this->totalesMonetarios($amountsByCurrency), 'bi-cash-coin', 'orange', 'Separados por moneda; no confirma la ejecución del pago'),
+                    $this->metrica('Pendientes', (int) ($stats->pendientes ?? 0), 'bi-hourglass-split', 'orange', 'Estado pendiente registrado'),
+                    $this->metrica('Estados distintos', (clone $baseQuery)->distinct('estado')->count('estado'), 'bi-list-check', 'purple', 'Estados presentes en la tabla'),
                 ],
-                'summary' => $this->stateSummary((clone $baseQuery)->select('estado')->selectRaw('COUNT(*) AS cantidad')->groupBy('estado')->orderBy('estado')->get()),
+                'summary' => $this->resumenEstados((clone $baseQuery)->select('estado')->selectRaw('COUNT(*) AS cantidad')->groupBy('estado')->orderBy('estado')->get()),
                 'columns' => ['ID', 'Devolución', 'Cliente', 'Pago asociado', 'Importe', 'Estado', 'Fecha de registro'],
                 'records' => $rows->getCollection()->map(fn (Reembolso $refund): array => [
-                    'cells' => $this->refundCells($refund),
+                    'cells' => $this->celdasReembolso($refund),
                     'detail_url' => route('management.refunds.show', $refund),
                 ])->all(),
                 'pagination' => $rows,
@@ -337,11 +337,11 @@ class FinanzasController extends Controller
         $authorization->assertAllowed($request->user(), 'gestion.pagos.exportar');
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
 
-        return $this->export(
+        return $this->exportarRegistros(
             $request->user(), $request->validated(), 'pagos',
             $financialQueries->pagos($request->user(), $request->validated()),
             ['Código', 'Tercero asociado', 'Origen', 'Tipo', 'Medio de pago', 'Importe', 'Moneda', 'Estado', 'Fecha de pago'],
-            fn (Pago $payment): array => $this->paymentExportCells($payment, $format),
+            fn (Pago $payment): array => $this->celdasExportacionPago($payment, $format),
             $format, $exporter, $auditor, $request->ip(),
         );
     }
@@ -362,11 +362,11 @@ class FinanzasController extends Controller
         $authorization->assertAllowed($request->user(), 'gestion.reembolsos.exportar');
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
 
-        return $this->export(
+        return $this->exportarRegistros(
             $request->user(), $request->validated(), 'reembolsos',
             $financialQueries->reembolsos($request->user(), $request->validated()),
             ['ID', 'Devolución', 'Cliente', 'Pago asociado', 'Importe', 'Moneda', 'Estado', 'Fecha de registro'],
-            fn (Reembolso $refund): array => $this->refundExportCells($refund, $format),
+            fn (Reembolso $refund): array => $this->celdasExportacionReembolso($refund, $format),
             $format, $exporter, $auditor, $request->ip(),
         );
     }
@@ -375,7 +375,7 @@ class FinanzasController extends Controller
      * @param  array<string, mixed>  $filters
      * @param  array<int, string>  $columns
      */
-    private function export(User $actor, array $filters, string $entity, Builder $query, array $columns, callable $map, string $format, ExportadorTabular $exporter, RegistradorAuditoria $auditor, ?string $ip): Response|StreamedResponse
+    private function exportarRegistros(User $actor, array $filters, string $entity, Builder $query, array $columns, callable $map, string $format, ExportadorTabular $exporter, RegistradorAuditoria $auditor, ?string $ip): Response|StreamedResponse
     {
         abort_if((clone $query)->limit(self::MAX_EXPORT_ROWS + 1)->pluck('id')->count() > self::MAX_EXPORT_ROWS, 422, 'El conjunto supera el límite de exportación. Reduce los filtros.');
         $rows = $query->orderBy('id')->get()->map($map)->all();
@@ -403,43 +403,43 @@ class FinanzasController extends Controller
     }
 
     /** @return array<int, string|int> */
-    private function paymentCells(Pago $payment): array
+    private function celdasPago(Pago $payment): array
     {
         return [
             $payment->codigo,
-            $this->paymentCounterparty($payment),
-            $this->paymentOrigin($payment),
+            $this->contrapartePago($payment),
+            $this->origenPago($payment),
             $payment->tipo,
             $payment->medioPago?->nombre ?? 'Sin medio asociado',
-            $this->money((float) $payment->importe, $payment->moneda),
+            $this->formatearDinero((float) $payment->importe, $payment->moneda),
             $payment->estado,
             $payment->fecha_pago?->format('d/m/Y H:i') ?? '',
         ];
     }
 
     /** @return array<int, string|int> */
-    private function paymentExportCells(Pago $payment, string $format): array
+    private function celdasExportacionPago(Pago $payment, string $format): array
     {
         return [
-            self::safeExportText((string) $payment->codigo, $format),
-            self::safeExportText($this->paymentCounterparty($payment), $format),
-            self::safeExportText($this->paymentOrigin($payment), $format),
+            self::textoExportacionSeguro((string) $payment->codigo, $format),
+            self::textoExportacionSeguro($this->contrapartePago($payment), $format),
+            self::textoExportacionSeguro($this->origenPago($payment), $format),
             $payment->tipo,
-            self::safeExportText((string) ($payment->medioPago?->nombre ?? ''), $format),
+            self::textoExportacionSeguro((string) ($payment->medioPago?->nombre ?? ''), $format),
             number_format((float) $payment->importe, 2, '.', ''),
             $payment->moneda,
-            self::safeExportText((string) $payment->estado, $format),
+            self::textoExportacionSeguro((string) $payment->estado, $format),
             $payment->fecha_pago?->format('Y-m-d H:i') ?? '',
         ];
     }
 
     /**
-     * Ejecuta la operación paymentCounterparty definida por la clase FinanzasController.
+     * Ejecuta la operación contrapartePago definida por la clase FinanzasController.
      *
      * @param  mixed  $payment  Parámetro recibido por la operación.
      * @return string Resultado de la operación.
      */
-    private function paymentCounterparty(Pago $payment): string
+    private function contrapartePago(Pago $payment): string
     {
         if ($payment->tipo === 'pago') {
             return (string) ($payment->compra?->supplier?->nombre ?? 'Proveedor no asociado');
@@ -452,12 +452,12 @@ class FinanzasController extends Controller
     }
 
     /**
-     * Ejecuta la operación paymentOrigin definida por la clase FinanzasController.
+     * Ejecuta la operación origenPago definida por la clase FinanzasController.
      *
      * @param  mixed  $payment  Parámetro recibido por la operación.
      * @return string Resultado de la operación.
      */
-    private function paymentOrigin(Pago $payment): string
+    private function origenPago(Pago $payment): string
     {
         return match (true) {
             $payment->venta !== null => (string) $payment->venta->codigo,
@@ -468,42 +468,42 @@ class FinanzasController extends Controller
     }
 
     /** @return array<int, string|int> */
-    private function refundCells(Reembolso $refund): array
+    private function celdasReembolso(Reembolso $refund): array
     {
         return [
             (int) $refund->getKey(),
             $refund->devolucion?->codigo ?? 'Devolución no asociada',
             $refund->devolucion?->customer?->nombre_contacto ?? $refund->devolucion?->customer?->razon_social ?? 'Sin cliente asociado',
             $refund->pago?->codigo ?? 'Pago no asociado',
-            $this->money((float) $refund->importe, $refund->pago?->moneda ?? 'PEN'),
+            $this->formatearDinero((float) $refund->importe, $refund->pago?->moneda ?? 'PEN'),
             $refund->estado,
             $refund->creado_en?->format('d/m/Y H:i') ?? '',
         ];
     }
 
     /** @return array<int, string|int> */
-    private function refundExportCells(Reembolso $refund, string $format): array
+    private function celdasExportacionReembolso(Reembolso $refund, string $format): array
     {
         return [
             (int) $refund->getKey(),
-            self::safeExportText((string) ($refund->devolucion?->codigo ?? ''), $format),
-            self::safeExportText((string) ($refund->devolucion?->customer?->nombre_contacto ?? $refund->devolucion?->customer?->razon_social ?? ''), $format),
-            self::safeExportText((string) ($refund->pago?->codigo ?? ''), $format),
+            self::textoExportacionSeguro((string) ($refund->devolucion?->codigo ?? ''), $format),
+            self::textoExportacionSeguro((string) ($refund->devolucion?->customer?->nombre_contacto ?? $refund->devolucion?->customer?->razon_social ?? ''), $format),
+            self::textoExportacionSeguro((string) ($refund->pago?->codigo ?? ''), $format),
             number_format((float) $refund->importe, 2, '.', ''),
             $refund->pago?->moneda ?? 'PEN',
-            self::safeExportText((string) $refund->estado, $format),
+            self::textoExportacionSeguro((string) $refund->estado, $format),
             $refund->creado_en?->format('Y-m-d H:i') ?? '',
         ];
     }
 
     /** @return array{label:string,value:string|int,icon:string,tone:string,helper:string} */
-    private function metric(string $label, string|int $value, string $icon, string $tone, string $helper): array
+    private function metrica(string $label, string|int $value, string $icon, string $tone, string $helper): array
     {
         return compact('label', 'value', 'icon', 'tone', 'helper');
     }
 
     /** @return array<int, array{title:string,icon:string,tone:string,text:string}> */
-    private function stateSummary(Collection $states): array
+    private function resumenEstados(Collection $states): array
     {
         return $states->map(static fn (object $state): array => [
             'title' => (string) $state->estado,
@@ -520,24 +520,24 @@ class FinanzasController extends Controller
      * @param  mixed  $currency  Parámetro recibido por la operación.
      * @return string Resultado de la operación.
      */
-    private function money(float $amount, string $currency): string
+    private function formatearDinero(float $amount, string $currency): string
     {
         return $currency.' '.number_format($amount, 2, '.', ',');
     }
 
     /**
-     * Ejecuta la operación moneyTotals definida por la clase FinanzasController.
+     * Ejecuta la operación totalesMonetarios definida por la clase FinanzasController.
      *
      * @param  mixed  $totals  Parámetro recibido por la operación.
      * @return string Resultado de la operación.
      */
-    private function moneyTotals(Collection $totals): string
+    private function totalesMonetarios(Collection $totals): string
     {
         if ($totals->isEmpty()) {
             return '—';
         }
 
-        return $totals->map(fn (object $total): string => $this->money((float) $total->importe_total, (string) $total->moneda))
+        return $totals->map(fn (object $total): string => $this->formatearDinero((float) $total->importe_total, (string) $total->moneda))
             ->implode(' · ');
     }
 
@@ -548,7 +548,7 @@ class FinanzasController extends Controller
      * @param  mixed  $format  Parámetro recibido por la operación.
      * @return string Resultado de la operación.
      */
-    private static function safeExportText(string $value, string $format): string
+    private static function textoExportacionSeguro(string $value, string $format): string
     {
         $clean = trim(preg_replace('/[\p{C}\p{Z}]+/u', ' ', $value) ?? '');
         if ($format === 'pdf') {

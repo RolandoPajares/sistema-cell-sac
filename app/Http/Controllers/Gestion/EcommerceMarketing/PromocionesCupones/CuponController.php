@@ -34,7 +34,7 @@ class CuponController extends Controller
      */
     public function index(Request $request, ServicioCupones $coupons, ServicioAutorizacion $autorizacion): View
     {
-        $filters = $this->filters($request);
+        $filters = $this->filtros($request);
         $empresaId = $autorizacion->activeCompanyId();
         $couponList = $coupons->query($filters, $empresaId)->orderByDesc('id')->paginate(10)->withQueryString();
         $couponList->setCollection($couponList->getCollection()->map(function (Cupon $coupon) use ($coupons): Cupon {
@@ -66,7 +66,7 @@ class CuponController extends Controller
      */
     public function store(GuardarCuponRequest $request, ServicioCupones $coupons): RedirectResponse
     {
-        $coupons->register($request->validated(), $request->user(), $request->ip());
+        $coupons->registrar($request->validated(), $request->user(), $request->ip());
 
         return back()->with('status', 'Cupón registrado.');
     }
@@ -115,11 +115,11 @@ class CuponController extends Controller
     {
         $format = (string) ($request->route('format') ?: 'csv');
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
-        $filters = $this->filters($request);
+        $filters = $this->filtros($request);
         $records = $coupons->query($filters, $autorizacion->activeCompanyId())->orderBy('id')->limit(5000)->get();
         $rows = $records->map(fn (Cupon $coupon): array => [
-            $this->safeCsvValue($coupon->codigo),
-            $this->safeCsvValue($coupon->tipo_descuento),
+            $this->valorCsvSeguro($coupon->codigo),
+            $this->valorCsvSeguro($coupon->tipo_descuento),
             $coupon->valor,
             $coupon->minimo_compra,
             $coupon->usos,
@@ -148,7 +148,7 @@ class CuponController extends Controller
     }
 
     /** @return array{buscar:?string,tipo:?string,estado:?string,vigencia:?string} */
-    private function filters(Request $request): array
+    private function filtros(Request $request): array
     {
         $validated = $request->validate([
             'buscar' => ['nullable', 'string', 'max:100'],
@@ -172,7 +172,7 @@ class CuponController extends Controller
      * @param  mixed  $value  Parámetro recibido por la operación.
      * @return string Resultado de la operación.
      */
-    private function safeCsvValue(string $value): string
+    private function valorCsvSeguro(string $value): string
     {
         return preg_match('/^[\s\x00-\x1f]*[=+\-@]/u', $value) === 1 ? "'".$value : $value;
     }

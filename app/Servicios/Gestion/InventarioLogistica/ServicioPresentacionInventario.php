@@ -11,13 +11,13 @@ final class ServicioPresentacionInventario
     /**
      * @return array{image:?string,status:array{label:string,class:string},sku:string,movement:array{label:string,class:string,icon:string}}
      */
-    public function product(Producto $product, ?MovimientoInventario $movement): array
+    public function producto(Producto $product, ?MovimientoInventario $movement): array
     {
         return [
-            'image' => $this->image($product->url_imagen),
-            'status' => $this->stockStatus((int) $product->existencias_alcance),
+            'image' => $this->imagen($product->url_imagen),
+            'status' => $this->estadoStock((int) $product->existencias_alcance),
             'sku' => $product->variants->pluck('codigo_sku')->filter()->unique()->values()->implode(', ') ?: 'Sin SKU registrado',
-            'movement' => $this->movement($movement),
+            'movement' => $this->movimiento($movement),
         ];
     }
 
@@ -26,7 +26,7 @@ final class ServicioPresentacionInventario
      *
      * @return array{image:?string,images:array<int,?string>,stock:float,sku:string,status:string,status_class:string,stock_class:string}
      */
-    public function catalogProduct(Producto $product): array
+    public function productoCatalogo(Producto $product): array
     {
         $stock = (float) $product->existencias_alcance;
         $status = ! $product->activo
@@ -34,9 +34,9 @@ final class ServicioPresentacionInventario
             : ($stock <= 0 ? 'Sin stock' : ($product->precio_oferta ? 'Oferta' : 'Activo'));
 
         return [
-            'image' => $this->image($product->url_imagen),
+            'image' => $this->imagen($product->url_imagen),
             'images' => $product->variants
-                ->flatMap(fn ($variant) => $variant->images->mapWithKeys(fn ($image): array => [$image->id => $this->image($image->ruta_imagen)]))
+                ->flatMap(fn ($variant) => $variant->images->mapWithKeys(fn ($image): array => [$image->id => $this->imagen($image->ruta_imagen)]))
                 ->all(),
             'stock' => $stock,
             'sku' => $product->variants->pluck('codigo_sku')->filter()->unique()->values()->implode(', ') ?: 'Sin SKU registrado',
@@ -54,7 +54,7 @@ final class ServicioPresentacionInventario
     /**
      * @return array{label:string,class:string}
      */
-    public function stockStatus(int $stock): array
+    public function estadoStock(int $stock): array
     {
         return $stock > 0
             ? ['label' => 'Con existencias', 'class' => 'optimal']
@@ -64,7 +64,7 @@ final class ServicioPresentacionInventario
     /**
      * @return array{label:string,class:string,icon:string}
      */
-    public function movement(?MovimientoInventario $movement): array
+    public function movimiento(?MovimientoInventario $movement): array
     {
         return match ($movement?->tipo_movimiento) {
             'entrada' => ['label' => 'Entrada', 'class' => 'entry', 'icon' => 'down'],
@@ -77,7 +77,7 @@ final class ServicioPresentacionInventario
     /**
      * @return array{class:string,quantity:string,sign:string}
      */
-    public function movementRow(MovimientoInventario $movement): array
+    public function filaMovimiento(MovimientoInventario $movement): array
     {
         $quantity = $movement->tipo_movimiento === 'salida'
             ? -abs((float) $movement->cantidad)
@@ -90,7 +90,7 @@ final class ServicioPresentacionInventario
         ];
     }
 
-    public function image(?string $path): ?string
+    public function imagen(?string $path): ?string
     {
         if (! $path) {
             return null;
@@ -99,7 +99,7 @@ final class ServicioPresentacionInventario
         return Str::startsWith($path, ['http://', 'https://']) ? $path : asset(ltrim($path, '/'));
     }
 
-    public function todayLabel(): string
+    public function etiquetaHoy(): string
     {
         $months = [1 => 'Ene', 2 => 'Feb', 3 => 'Mar', 4 => 'Abr', 5 => 'May', 6 => 'Jun', 7 => 'Jul', 8 => 'Ago', 9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dic'];
         $today = now();

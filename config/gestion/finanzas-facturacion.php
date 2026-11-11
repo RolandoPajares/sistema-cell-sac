@@ -75,7 +75,7 @@ $datos['aperturas'] = [
 
 $datos['cuentas'] = [
     'titulo' => 'Cuentas por cobrar y pagar', 'icono' => 'bi-coin', 'descripcion' => 'Seguimiento y control de obligaciones de clientes y proveedores.',
-    'acciones' => [['texto' => 'Nuevo documento', 'icono' => 'bi-plus-lg', 'primaria' => true], ['texto' => 'Registrar abono', 'icono' => 'bi-coin']],
+    'acciones' => [['texto' => 'Nueva cuenta por pagar', 'icono' => 'bi-plus-lg', 'primaria' => true, 'ancla' => 'cuenta-por-pagar-form'], ['texto' => 'Registrar abono', 'icono' => 'bi-coin', 'ancla' => 'aplicar-pago-cuenta-form']],
     'metricas' => [$metrica('Por cobrar vigente', 'S/ 156 480,00', 'bi-person-check', 'azul', '36 documentos'), $metrica('Por cobrar vencido', 'S/ 42 350,00', 'bi-exclamation-triangle', 'rojo', '12 documentos'), $metrica('Por pagar próximo', 'S/ 98 760,00', 'bi-calendar3', 'verde', '28 documentos'), $metrica('Por pagar vencido', 'S/ 26 900,00', 'bi-exclamation-circle', 'ambar', '7 documentos')],
     'buscar' => 'Buscar documento o cliente / proveedor…', 'filtros' => [$filtro('Tipo', 'tipo', ['Por cobrar', 'Por pagar']), $filtro('Estado', 'estado', ['Vigente', 'Vencido', 'Parcial']), $filtro('Moneda', 'moneda', ['PEN', 'USD'])],
     'tablaTitulo' => 'Documentos', 'tablaIcono' => 'bi-list-ul', 'columnas' => ['Documento', 'Tercero', 'Tipo', 'Emisión', 'Vencimiento', 'Saldo', 'Moneda', 'Estado'],

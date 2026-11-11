@@ -43,7 +43,7 @@ class InventarioController extends Controller
      */
     public function index(Request $request): View
     {
-        $filters = $this->filters($request);
+        $filters = $this->filtros($request);
         $alcance = $this->inventoryService->alcanceConsulta($request->user());
         $movementQuery = fn (): Builder => $this->authorization->scopeRecordsFor(
             MovimientoInventario::query(),
@@ -86,11 +86,11 @@ class InventarioController extends Controller
             ->limit(4)
             ->get();
         $presentacion = app(ServicioPresentacionInventario::class);
-        $todayLabel = $presentacion->todayLabel();
-        $productPresentation = $products->getCollection()->mapWithKeys(fn (Producto $product): array => [$product->id => $presentacion->product($product, $latestMovements->get($product->id))])->all();
-        $alertPresentation = $productosSinExistencias->mapWithKeys(fn (Producto $product): array => [$product->id => $presentacion->stockStatus((int) $product->existencias_alcance)])->all();
+        $todayLabel = $presentacion->etiquetaHoy();
+        $productPresentation = $products->getCollection()->mapWithKeys(fn (Producto $product): array => [$product->id => $presentacion->producto($product, $latestMovements->get($product->id))])->all();
+        $alertPresentation = $productosSinExistencias->mapWithKeys(fn (Producto $product): array => [$product->id => $presentacion->estadoStock((int) $product->existencias_alcance)])->all();
         $recentMovementCollection = $verHistorialMovimientos ? $movimientosRecientes->getCollection() : $movimientosRecientes;
-        $movementPresentation = $recentMovementCollection->mapWithKeys(fn (MovimientoInventario $movement): array => [$movement->id => $presentacion->movementRow($movement)])->all();
+        $movementPresentation = $recentMovementCollection->mapWithKeys(fn (MovimientoInventario $movement): array => [$movement->id => $presentacion->filaMovimiento($movement)])->all();
 
         return view('gestion.inventario-logistica.existencias-movimientos.listar-existencias', [
             'products' => $products,
@@ -122,7 +122,7 @@ class InventarioController extends Controller
             'activeProducts' => $resumen['productos'],
             'sinExistencias' => $resumen['sin_existencias'],
             'movementsToday' => $movementsToday,
-            'movementsTrend' => $this->trendPercent($movementsToday, $movementsYesterday),
+            'movementsTrend' => $this->porcentajeTendencia($movementsToday, $movementsYesterday),
             'inventoryValue' => $resumen['valor_catalogo'],
         ]);
     }
@@ -147,7 +147,7 @@ class InventarioController extends Controller
                 $data['notas'],
                 $request->user(),
             )
-            : $this->inventoryService->adjust($product, $data['tipo_movimiento'], (int) $data['cantidad'], $data['notas'], $request->user());
+            : $this->inventoryService->ajustar($product, $data['tipo_movimiento'], (int) $data['cantidad'], $data['notas'], $request->user());
 
         return back()->with('status', $movimiento === null
             ? 'El conteo coincide con las existencias registradas; no se generó un movimiento.'
@@ -170,7 +170,7 @@ class InventarioController extends Controller
     /**
      * @return array{buscar:?string,categoria:?int,estado:?string,proveedor:?int,por_pagina:int}
      */
-    private function filters(Request $request): array
+    private function filtros(Request $request): array
     {
         $search = trim($request->string('buscar')->toString());
         $status = trim($request->string('estado')->toString());
@@ -266,7 +266,7 @@ class InventarioController extends Controller
      * @param  mixed  $previous  Parámetro recibido por la operación.
      * @return mixed Resultado de la operación.
      */
-    private function trendPercent(int $current, int $previous): ?float
+    private function porcentajeTendencia(int $current, int $previous): ?float
     {
         if ($previous === 0) {
             return null;

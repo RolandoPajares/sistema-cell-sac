@@ -27,5 +27,5 @@ return [
         ['label' => 'Estado', 'type' => 'select', 'placeholder' => 'Seleccionar estado', 'required' => true, 'wide' => false, 'options' => ['Conectada', 'Pendiente', 'Con error']],
         ['label' => 'Notas técnicas', 'type' => 'textarea', 'placeholder' => 'Información de configuración', 'required' => false, 'wide' => true],
     ],
-    'content' => ['title' => 'Gesti�n de integraciones', 'description' => 'Organiza servicios externos y prepara conexiones seguras para el sistema.', 'action' => 'Ver documentaci�n', 'primary' => 'Nueva integraci�n', 'summary' => ['Seguridad de integraciones', 'Pendientes de configuraci�n', 'Historial de conexiones']],
+    'content' => ['title' => 'Gestión de integraciones', 'description' => 'Organiza servicios externos y prepara conexiones seguras para el sistema.', 'action' => 'Ver documentación', 'primary' => 'Nueva integración', 'summary' => ['Seguridad de integraciones', 'Pendientes de configuración', 'Historial de conexiones']],
 ];

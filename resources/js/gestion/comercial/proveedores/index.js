@@ -53,9 +53,25 @@ if (paginaProveedores) {
         const tipoPersona = formulario.querySelector('[data-provider-person-type]')?.value;
         const juridica = tipoPersona !== 'natural';
         const tipoDocumento = formulario.querySelector('[data-provider-document-type]');
-        const documentoLabel = formulario.querySelector('[data-provider-document-label], [data-provider-document-type-label]');
-        const nombreLabel = formulario.querySelector('[data-provider-name-label]');
+        const documentoLabel = formulario.querySelector('[data-provider-document-type-label]');
         const documento = formulario.querySelector('[data-provider-document-input]');
+        const naturalFields = formulario.querySelector('[data-provider-natural-fields]');
+        const juridicaFields = formulario.querySelector('[data-provider-juridica-fields]');
+        const nombre = formulario.querySelector('[data-provider-name-input]');
+        const nombres = formulario.querySelector('[data-provider-first-name]');
+        const apellidos = formulario.querySelector('[data-provider-last-name]');
+        const razonSocial = formulario.querySelector('[data-provider-legal-name]');
+
+        if (naturalFields) naturalFields.hidden = juridica;
+        if (juridicaFields) juridicaFields.hidden = !juridica;
+        if (nombres) nombres.required = !juridica;
+        if (apellidos) apellidos.required = !juridica;
+        if (razonSocial) razonSocial.required = juridica;
+
+        const sincronizarNombre = () => {
+            if (!nombres && !apellidos && !razonSocial) return;
+            if (nombre) nombre.value = juridica ? (razonSocial?.value || '') : `${nombres?.value || ''} ${apellidos?.value || ''}`.trim();
+        };
 
         if (tipoDocumento) {
             tipoDocumento.value = juridica ? 'ruc' : 'dni';
@@ -64,17 +80,22 @@ if (paginaProveedores) {
                 option.disabled = option.hidden;
             });
         }
-        if (documentoLabel) documentoLabel.innerHTML = `${juridica ? 'RUC' : 'DNI'} <b>*</b>`;
-        if (nombreLabel) nombreLabel.innerHTML = `${juridica ? 'Razón social' : 'Nombres y apellidos'} <b>*</b>`;
+        if (documentoLabel) documentoLabel.textContent = juridica ? 'Número de identificación fiscal' : 'Número de documento';
         if (documento) {
             documento.placeholder = juridica ? 'Ingresar RUC' : 'Ingresar DNI';
             documento.maxLength = juridica ? 11 : 8;
         }
+        [nombres, apellidos, razonSocial].filter(Boolean).forEach((campo) => { campo.oninput = sincronizarNombre; });
+        sincronizarNombre();
     };
 
     paginaProveedores.querySelectorAll('.proveedores-form').forEach((formulario) => {
+        const tipoPersona = formulario.querySelector('[data-provider-person-type]');
+        if (formulario.closest('#nuevo-proveedor') && tipoPersona) {
+            tipoPersona.value = 'natural';
+        }
         actualizarCamposIdentificacion(formulario);
-        formulario.querySelector('[data-provider-person-type]')?.addEventListener('change', () => actualizarCamposIdentificacion(formulario));
+        tipoPersona?.addEventListener('change', () => actualizarCamposIdentificacion(formulario));
     });
 
     const abrirDialogo = (dialogo) => {

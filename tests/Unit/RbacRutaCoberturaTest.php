@@ -14,6 +14,7 @@ it('protege cada interfaz operativa de gestión con autenticación, sesión y pe
         'management.account.notifications.read',
         'management.account.password',
         'management.account.profile',
+        'management.account.profile.show',
         'management.account.preferences',
         'management.account.preferences.update',
         'management.account.security',

@@ -40,7 +40,7 @@ class ServicioTransferenciasExistencias
     public function pageData(User $actor, array $filters): array
     {
         $this->authorization->assertAllowed($actor, 'gestion.inventario.consultar');
-        $location = $this->currentCompany($actor);
+        $location = $this->empresaActual($actor);
         $warehouses = Almacen::query()->join('sedes', 'sedes.id', '=', 'almacenes.sede_id')
             ->where('sedes.empresa_id', $location['empresa_id'])->where('sedes.activa', true)->where('almacenes.activo', true)
             ->orderBy('sedes.nombre')->orderBy('almacenes.nombre')
@@ -114,18 +114,18 @@ class ServicioTransferenciasExistencias
     public function exportQuery(User $actor, array $filters): Builder
     {
         $this->authorization->assertAllowed($actor, 'gestion.inventario.exportar');
-        $location = $this->currentCompany($actor);
+        $location = $this->empresaActual($actor);
 
-        return $this->transferQuery($location, $filters)->orderBy('id');
+        return $this->consultaTransferencias($location, $filters)->orderBy('id');
     }
 
     /** @param array<string, mixed> $data */
     public function request(array $data, User $actor, ?string $ip): TransferenciaExistencia
     {
         $this->authorization->assertAllowed($actor, 'gestion.inventario.transferir');
-        $requestEventId = $this->eventId(0, $actor->getKey(), 'request', $data['clave_idempotencia']);
-        $source = $this->warehouseContext($actor, (int) $data['almacen_origen_id'], 'gestion.inventario.transferir');
-        $destination = $this->warehouseContext($actor, (int) $data['almacen_destino_id'], null, $source['empresa_id']);
+        $requestEventId = $this->idEvento(0, $actor->getKey(), 'request', $data['clave_idempotencia']);
+        $source = $this->contextoAlmacen($actor, (int) $data['almacen_origen_id'], 'gestion.inventario.transferir');
+        $destination = $this->contextoAlmacen($actor, (int) $data['almacen_destino_id'], null, $source['empresa_id']);
         abort_if($source['almacen_id'] === $destination['almacen_id'], 422, 'Los almacenes de origen y destino deben ser distintos.');
 
         return DB::transaction(function () use ($data, $actor, $ip, $source, $destination, $requestEventId): TransferenciaExistencia {
@@ -136,14 +136,14 @@ class ServicioTransferenciasExistencias
             $transfer = TransferenciaExistencia::query()->create([
                 'empresa_id' => $source['empresa_id'], 'sede_origen_id' => $source['sede_id'], 'almacen_origen_id' => $source['almacen_id'],
                 'sede_destino_id' => $destination['sede_id'], 'almacen_destino_id' => $destination['almacen_id'],
-                'codigo' => $this->newCode($source['empresa_id']), 'estado' => 'solicitada',
+                'codigo' => $this->nuevoCodigo($source['empresa_id']), 'estado' => 'solicitada',
                 'solicitado_por_usuario_id' => $actor->getKey(), 'creado_en' => now(),
             ]);
             foreach ($data['items'] as $item) {
                 $product = Producto::query()->whereKey($item['producto_id'])->where('empresa_id', $source['empresa_id'])->where('activo', true)->first();
                 abort_unless($product !== null, 422, 'El producto no pertenece a la empresa o no esta activo.');
                 $variantId = isset($item['variante_id']) && $item['variante_id'] !== '' ? (int) $item['variante_id'] : null;
-                $this->assertProductVariant($product->getKey(), $variantId);
+                $this->comprobarProductoVariante($product->getKey(), $variantId);
                 DetalleTransferenciaExistencia::query()->create([
                     'transferencia_id' => $transfer->getKey(), 'producto_id' => $product->getKey(), 'variante_id' => $variantId,
                     'cantidad_solicitada' => (int) $item['cantidad'], 'cantidad_enviada' => 0, 'cantidad_recibida' => 0,
@@ -176,17 +176,17 @@ class ServicioTransferenciasExistencias
     {
         $this->authorization->assertAllowed($actor, 'gestion.inventario.aprobar');
 
-        return $this->transition($transfer, $actor, 'approve', $key, $ip, function (TransferenciaExistencia $locked) use ($actor): array {
+        return $this->transicionar($transfer, $actor, 'approve', $key, $ip, function (TransferenciaExistencia $locked) use ($actor): array {
             abort_unless($locked->estado === 'solicitada', 409, 'Solo se pueden aprobar transferencias solicitadas.');
-            $this->authorizeTransferSite($actor, $locked, 'sede_origen_id', 'gestion.inventario.aprobar');
-            $this->assertWarehouseStillActive($locked);
+            $this->autorizarSedeTransferencia($actor, $locked, 'sede_origen_id', 'gestion.inventario.aprobar');
+            $this->comprobarAlmacenActivo($locked);
             foreach ($locked->detalles()->orderBy('producto_id')->orderBy('variante_clave')->lockForUpdate()->get() as $detail) {
                 Producto::query()->whereKey($detail->producto_id)->lockForUpdate()->firstOrFail();
-                $balance = $this->balance($locked, $detail, (int) $locked->almacen_origen_id, true);
+                $balance = $this->saldoExistencia($locked, $detail, (int) $locked->almacen_origen_id, true);
                 $available = (int) floor((float) $balance->cantidad_fisica - (float) $balance->cantidad_reservada);
                 abort_if($available < (int) $detail->cantidad_solicitada, 409, 'No hay existencias disponibles para aprobar todos los productos solicitados.');
-                if ($this->isSerialized($detail)) {
-                    abort_if($this->availableDeviceQuery($detail, (int) $locked->almacen_origen_id)->count() < (int) $detail->cantidad_solicitada, 409, 'Faltan IMEI o numeros de serie disponibles en el almacen de origen.');
+                if ($this->esSerializado($detail)) {
+                    abort_if($this->consultaDispositivosDisponibles($detail, (int) $locked->almacen_origen_id)->count() < (int) $detail->cantidad_solicitada, 409, 'Faltan IMEI o numeros de serie disponibles en el almacen de origen.');
                 }
             }
             $before = ['estado' => $locked->estado];
@@ -203,24 +203,24 @@ class ServicioTransferenciasExistencias
     {
         $this->authorization->assertAllowed($actor, 'gestion.inventario.transferir');
 
-        return $this->transition($transfer, $actor, 'dispatch', $data['clave_idempotencia'], $ip, function (TransferenciaExistencia $locked) use ($data, $actor, $ip): array {
+        return $this->transicionar($transfer, $actor, 'dispatch', $data['clave_idempotencia'], $ip, function (TransferenciaExistencia $locked) use ($data, $actor, $ip): array {
             abort_unless(in_array($locked->estado, ['aprobada', 'en tránsito', 'recibida parcialmente'], true), 409, 'La transferencia no esta disponible para despacho.');
-            $this->authorizeTransferSite($actor, $locked, 'sede_origen_id', 'gestion.inventario.transferir');
-            $this->assertWarehouseStillActive($locked);
-            $details = $this->requestedDetails($locked, $data['items'] ?? []);
+            $this->autorizarSedeTransferencia($actor, $locked, 'sede_origen_id', 'gestion.inventario.transferir');
+            $this->comprobarAlmacenActivo($locked);
+            $details = $this->detallesSolicitados($locked, $data['items'] ?? []);
             $before = ['estado' => $locked->estado];
             foreach ($details as [$detail, $operation]) {
                 $product = Producto::query()->whereKey($detail->producto_id)->lockForUpdate()->firstOrFail();
                 $quantity = $operation['cantidad'];
                 abort_if((int) $detail->cantidad_enviada + $quantity > (int) $detail->cantidad_solicitada, 422, 'El despacho supera la cantidad autorizada.');
-                $movement = $this->inventory->changeLockedProductInWarehouse($product, $detail->variante_id === null ? null : (int) $detail->variante_id,
+                $movement = $this->inventory->cambiarProductoBloqueadoEnAlmacen($product, $detail->variante_id === null ? null : (int) $detail->variante_id,
                     'salida', $quantity, 'Despacho de transferencia '.$locked->codigo, $actor, (int) $locked->empresa_id,
                     (int) $locked->sede_origen_id, (int) $locked->almacen_origen_id, 'transferencia_despacho', (string) $locked->getKey());
-                if ($this->isSerialized($detail)) {
-                    $devices = $this->findAvailableDevices($detail, (int) $locked->almacen_origen_id, $operation['series']);
+                if ($this->esSerializado($detail)) {
+                    $devices = $this->buscarDispositivosDisponibles($detail, (int) $locked->almacen_origen_id, $operation['series']);
                     abort_unless($devices->count() === $quantity, 422, 'Identifica un IMEI o numero de serie distinto por cada unidad despachada.');
                     foreach ($devices as $device) {
-                        $this->changeDevice($device, $movement, 'disponible', 'en_transito', null);
+                        $this->actualizarDispositivo($device, $movement, 'disponible', 'en_transito', null);
                     }
                 } else {
                     abort_if($operation['series'] !== [], 422, 'El detalle no requiere IMEI o numero de serie.');
@@ -236,7 +236,7 @@ class ServicioTransferenciasExistencias
                 ['estado' => 'despachada', 'enviado_en' => $locked->enviado_en?->toISOString(), 'empresa_id' => $locked->empresa_id,
                     'sede_origen_id' => $locked->sede_origen_id, 'almacen_origen_id' => $locked->almacen_origen_id], $ip,
                 scope: ['empresa_id' => (int) $locked->empresa_id, 'sede_id' => (int) $locked->sede_origen_id],
-                eventId: $this->eventId($locked->getKey(), $actor->getKey(), 'dispatch_stage', $data['clave_idempotencia']));
+                eventId: $this->idEvento($locked->getKey(), $actor->getKey(), 'dispatch_stage', $data['clave_idempotencia']));
             $locked->estado = 'en tránsito';
             $locked->save();
 
@@ -255,26 +255,26 @@ class ServicioTransferenciasExistencias
     {
         $this->authorization->assertAllowed($actor, 'gestion.inventario.transferir');
 
-        return $this->transition($transfer, $actor, 'receive', $data['clave_idempotencia'], $ip, function (TransferenciaExistencia $locked) use ($data, $actor): array {
+        return $this->transicionar($transfer, $actor, 'receive', $data['clave_idempotencia'], $ip, function (TransferenciaExistencia $locked) use ($data, $actor): array {
             abort_unless(in_array($locked->estado, ['en tránsito', 'recibida parcialmente'], true), 409, 'La transferencia no tiene unidades disponibles para recepcion.');
-            $this->authorizeTransferSite($actor, $locked, 'sede_destino_id', 'gestion.inventario.transferir');
-            $this->assertWarehouseStillActive($locked);
-            $details = $this->requestedDetails($locked, $data['items'] ?? []);
+            $this->autorizarSedeTransferencia($actor, $locked, 'sede_destino_id', 'gestion.inventario.transferir');
+            $this->comprobarAlmacenActivo($locked);
+            $details = $this->detallesSolicitados($locked, $data['items'] ?? []);
             $before = ['estado' => $locked->estado];
             foreach ($details as [$detail, $operation]) {
                 $product = Producto::query()->whereKey($detail->producto_id)->lockForUpdate()->firstOrFail();
                 $quantity = $operation['cantidad'];
                 $remaining = (int) $detail->cantidad_enviada - (int) $detail->cantidad_recibida
-                    - $this->returnedQuantity($detail) - $this->reconciledQuantity($detail);
+                    - $this->cantidadDevuelta($detail) - $this->cantidadConciliada($detail);
                 abort_if($quantity > $remaining, 422, 'La recepcion supera las unidades que siguen en transito.');
-                $movement = $this->inventory->changeLockedProductInWarehouse($product, $detail->variante_id === null ? null : (int) $detail->variante_id,
+                $movement = $this->inventory->cambiarProductoBloqueadoEnAlmacen($product, $detail->variante_id === null ? null : (int) $detail->variante_id,
                     'entrada', $quantity, 'Recepcion de transferencia '.$locked->codigo, $actor, (int) $locked->empresa_id,
                     (int) $locked->sede_destino_id, (int) $locked->almacen_destino_id, 'transferencia_recepcion', (string) $locked->getKey(), true);
-                if ($this->isSerialized($detail)) {
-                    $devices = $this->findTransitDevices($locked, $detail, $operation['series']);
+                if ($this->esSerializado($detail)) {
+                    $devices = $this->buscarDispositivosEnTransito($locked, $detail, $operation['series']);
                     abort_unless($devices->count() === $quantity, 422, 'Identifica cada IMEI o numero de serie recibido.');
                     foreach ($devices as $device) {
-                        $this->changeDevice($device, $movement, 'en_transito', 'disponible', (int) $locked->almacen_destino_id);
+                        $this->actualizarDispositivo($device, $movement, 'en_transito', 'disponible', (int) $locked->almacen_destino_id);
                     }
                 } else {
                     abort_if($operation['series'] !== [], 422, 'El detalle no requiere IMEI o numero de serie.');
@@ -313,28 +313,28 @@ class ServicioTransferenciasExistencias
         $this->authorization->assertAllowed($actor, 'gestion.inventario.transferir');
         abort_unless(Schema::hasColumn('detalles_transferencias_existencias', 'cantidad_devuelta'), 503, 'La conciliacion requiere autorizar y ejecutar la migracion independiente de transferencias.');
 
-        return $this->transition($transfer, $actor, 'return', $data['clave_idempotencia'], $ip, function (TransferenciaExistencia $locked) use ($data, $actor): array {
+        return $this->transicionar($transfer, $actor, 'return', $data['clave_idempotencia'], $ip, function (TransferenciaExistencia $locked) use ($data, $actor): array {
             abort_unless(in_array($locked->estado, ['en tránsito', 'recibida parcialmente'], true), 409, 'No hay unidades pendientes para devolver al origen.');
-            $this->authorizeTransferSite($actor, $locked, 'sede_origen_id', 'gestion.inventario.transferir');
-            $this->assertWarehouseStillActive($locked);
-            $details = $this->requestedDetails($locked, $data['items'] ?? []);
+            $this->autorizarSedeTransferencia($actor, $locked, 'sede_origen_id', 'gestion.inventario.transferir');
+            $this->comprobarAlmacenActivo($locked);
+            $details = $this->detallesSolicitados($locked, $data['items'] ?? []);
             $reason = trim((string) ($data['motivo'] ?? ''));
             abort_if($reason === '', 422, 'Documenta el motivo de la devolucion al origen.');
             $before = ['estado' => $locked->estado];
             foreach ($details as [$detail, $operation]) {
                 $quantity = $operation['cantidad'];
                 $remaining = (int) $detail->cantidad_enviada - (int) $detail->cantidad_recibida
-                    - (int) $detail->cantidad_devuelta - $this->reconciledQuantity($detail);
+                    - (int) $detail->cantidad_devuelta - $this->cantidadConciliada($detail);
                 abort_if($quantity > $remaining, 422, 'La cantidad devuelta supera las unidades pendientes en transito.');
                 $product = Producto::query()->whereKey($detail->producto_id)->lockForUpdate()->firstOrFail();
-                $movement = $this->inventory->changeLockedProductInWarehouse($product, $detail->variante_id === null ? null : (int) $detail->variante_id,
+                $movement = $this->inventory->cambiarProductoBloqueadoEnAlmacen($product, $detail->variante_id === null ? null : (int) $detail->variante_id,
                     'entrada', $quantity, 'Reversion de transferencia '.$locked->codigo.': '.$reason, $actor, (int) $locked->empresa_id,
                     (int) $locked->sede_origen_id, (int) $locked->almacen_origen_id, 'transferencia_retorno', (string) $locked->getKey());
-                if ($this->isSerialized($detail)) {
-                    $devices = $this->findTransitDevices($locked, $detail, $operation['series']);
+                if ($this->esSerializado($detail)) {
+                    $devices = $this->buscarDispositivosEnTransito($locked, $detail, $operation['series']);
                     abort_unless($devices->count() === $quantity, 422, 'Identifica cada IMEI o numero de serie devuelto.');
                     foreach ($devices as $device) {
-                        $this->changeDevice($device, $movement, 'en_transito', 'disponible', (int) $locked->almacen_origen_id);
+                        $this->actualizarDispositivo($device, $movement, 'en_transito', 'disponible', (int) $locked->almacen_origen_id);
                     }
                 } else {
                     abort_if($operation['series'] !== [], 422, 'El detalle no requiere IMEI o numero de serie.');
@@ -358,7 +358,7 @@ class ServicioTransferenciasExistencias
     {
         $this->authorization->assertAllowed($actor, 'gestion.inventario.aprobar');
 
-        return $this->finishBeforeDispatch($transfer, $data, $actor, $ip, 'rechazada');
+        return $this->finalizarAntesDespacho($transfer, $data, $actor, $ip, 'rechazada');
     }
 
     /** @param array<string, mixed> $data */
@@ -369,10 +369,10 @@ class ServicioTransferenciasExistencias
             && Schema::hasColumn('detalles_transferencias_existencias', 'cantidad_conciliada'), 503,
             'La conciliacion cuantificada requiere autorizar y ejecutar la migracion independiente de transferencias.');
 
-        return $this->transition($transfer, $actor, 'reconcile', $data['clave_idempotencia'], $ip, function (TransferenciaExistencia $locked) use ($data, $actor): array {
+        return $this->transicionar($transfer, $actor, 'reconcile', $data['clave_idempotencia'], $ip, function (TransferenciaExistencia $locked) use ($data, $actor): array {
             abort_unless(in_array($locked->estado, ['en tránsito', 'recibida parcialmente'], true), 409, 'No hay diferencias de despacho pendientes para conciliar.');
-            $this->authorizeTransferSite($actor, $locked, 'sede_destino_id', 'gestion.inventario.transferir');
-            $details = $this->requestedDetails($locked, $data['items'] ?? []);
+            $this->autorizarSedeTransferencia($actor, $locked, 'sede_destino_id', 'gestion.inventario.transferir');
+            $details = $this->detallesSolicitados($locked, $data['items'] ?? []);
             $reason = trim((string) ($data['motivo'] ?? ''));
             abort_unless(mb_strlen($reason) >= 5 && mb_strlen($reason) <= 500, 422, 'Documenta la causa de la diferencia con al menos cinco caracteres.');
             $before = ['estado' => $locked->estado];
@@ -381,8 +381,8 @@ class ServicioTransferenciasExistencias
                 $remaining = (int) $detail->cantidad_enviada - (int) $detail->cantidad_recibida
                     - (int) $detail->cantidad_devuelta - (int) $detail->cantidad_conciliada;
                 abort_if($quantity > $remaining, 422, 'La cantidad conciliada supera las unidades que siguen sin recibirse ni devolverse.');
-                if ($this->isSerialized($detail)) {
-                    $devices = $this->findTransitDevices($locked, $detail, $operation['series']);
+                if ($this->esSerializado($detail)) {
+                    $devices = $this->buscarDispositivosEnTransito($locked, $detail, $operation['series']);
                     abort_unless($devices->count() === $quantity, 422, 'Identifica cada IMEI o numero de serie de la diferencia.');
                     foreach ($devices as $device) {
                         $movementId = DB::table('movimientos_dispositivos')
@@ -420,7 +420,7 @@ class ServicioTransferenciasExistencias
     {
         $this->authorization->assertAllowed($actor, 'gestion.inventario.transferir');
 
-        return $this->finishBeforeDispatch($transfer, $data, $actor, $ip, 'cancelada');
+        return $this->finalizarAntesDespacho($transfer, $data, $actor, $ip, 'cancelada');
     }
 
     /** @param array<string, mixed> $data */
@@ -428,16 +428,16 @@ class ServicioTransferenciasExistencias
     {
         $this->authorization->assertAllowed($actor, 'gestion.inventario.transferir');
 
-        return $this->transition($transfer, $actor, 'close', $data['clave_idempotencia'], $ip, function (TransferenciaExistencia $locked) use ($actor, $data): array {
+        return $this->transicionar($transfer, $actor, 'close', $data['clave_idempotencia'], $ip, function (TransferenciaExistencia $locked) use ($actor, $data): array {
             abort_unless(in_array($locked->estado, ['en tránsito', 'recibida totalmente', 'recibida parcialmente'], true), 409, 'La transferencia no esta lista para cierre.');
-            $this->authorizeTransferSite($actor, $locked, 'sede_destino_id', 'gestion.inventario.transferir');
+            $this->autorizarSedeTransferencia($actor, $locked, 'sede_destino_id', 'gestion.inventario.transferir');
             $locked->load('detalles');
             $unresolvedTransit = $locked->detalles->contains(fn (DetalleTransferenciaExistencia $detail): bool => (int) $detail->cantidad_enviada !== (int) $detail->cantidad_recibida
-                    + $this->returnedQuantity($detail) + $this->reconciledQuantity($detail));
+                    + $this->cantidadDevuelta($detail) + $this->cantidadConciliada($detail));
             abort_unless(! $unresolvedTransit, 409, 'Hay unidades enviadas que siguen en transito; recibe, devuelve o concilia cada diferencia.');
             $notDispatched = (int) $locked->detalles->sum(fn (DetalleTransferenciaExistencia $detail): int => max(0, (int) $detail->cantidad_solicitada - (int) $detail->cantidad_enviada));
-            $returned = (int) $locked->detalles->sum(fn (DetalleTransferenciaExistencia $detail): int => $this->returnedQuantity($detail));
-            $reconciled = (int) $locked->detalles->sum(fn (DetalleTransferenciaExistencia $detail): int => $this->reconciledQuantity($detail));
+            $returned = (int) $locked->detalles->sum(fn (DetalleTransferenciaExistencia $detail): int => $this->cantidadDevuelta($detail));
+            $reconciled = (int) $locked->detalles->sum(fn (DetalleTransferenciaExistencia $detail): int => $this->cantidadConciliada($detail));
             $reason = trim((string) ($data['motivo'] ?? ''));
             if ($notDispatched > 0 || $returned > 0 || $reconciled > 0) {
                 abort_unless(mb_strlen($reason) >= 5 && mb_strlen($reason) <= 500, 422, 'Documenta las diferencias antes de cerrar la transferencia.');
@@ -448,8 +448,8 @@ class ServicioTransferenciasExistencias
             $lines = $locked->detalles->map(fn (DetalleTransferenciaExistencia $detail): array => [
                 'detalle_id' => $detail->getKey(), 'producto_id' => (int) $detail->producto_id,
                 'cantidad_solicitada' => (int) $detail->cantidad_solicitada, 'cantidad_enviada' => (int) $detail->cantidad_enviada,
-                'cantidad_recibida' => (int) $detail->cantidad_recibida, 'cantidad_devuelta' => $this->returnedQuantity($detail),
-                'cantidad_conciliada' => $this->reconciledQuantity($detail),
+                'cantidad_recibida' => (int) $detail->cantidad_recibida, 'cantidad_devuelta' => $this->cantidadDevuelta($detail),
+                'cantidad_conciliada' => $this->cantidadConciliada($detail),
             ])->values()->all();
 
             return [$before, [
@@ -461,14 +461,14 @@ class ServicioTransferenciasExistencias
     }
 
     /** @param array<string, mixed> $data */
-    private function finishBeforeDispatch(TransferenciaExistencia $transfer, array $data, User $actor, ?string $ip, string $targetStatus): TransferenciaExistencia
+    private function finalizarAntesDespacho(TransferenciaExistencia $transfer, array $data, User $actor, ?string $ip, string $targetStatus): TransferenciaExistencia
     {
         $event = $targetStatus === 'rechazada' ? 'reject' : 'cancel';
 
-        return $this->transition($transfer, $actor, $event, $data['clave_idempotencia'], $ip, function (TransferenciaExistencia $locked) use ($actor, $data, $targetStatus): array {
+        return $this->transicionar($transfer, $actor, $event, $data['clave_idempotencia'], $ip, function (TransferenciaExistencia $locked) use ($actor, $data, $targetStatus): array {
             abort_unless(in_array($locked->estado, ['solicitada', 'aprobada'], true), 409, 'La transferencia no puede rechazarse ni cancelarse despues del despacho.');
             $permission = $targetStatus === 'rechazada' ? 'gestion.inventario.aprobar' : 'gestion.inventario.transferir';
-            $this->authorizeTransferSite($actor, $locked, 'sede_origen_id', $permission);
+            $this->autorizarSedeTransferencia($actor, $locked, 'sede_origen_id', $permission);
             $reason = trim((string) ($data['motivo'] ?? ''));
             abort_if($reason === '', 422, 'Indica el motivo del rechazo o cancelacion.');
             $before = ['estado' => $locked->estado];
@@ -480,10 +480,10 @@ class ServicioTransferenciasExistencias
     }
 
     /** @param callable(TransferenciaExistencia):array{0:array<string,mixed>,1:array<string,mixed>,2:?string} $operation */
-    private function transition(TransferenciaExistencia $transfer, User $actor, string $action, string $key, ?string $ip, callable $operation): TransferenciaExistencia
+    private function transicionar(TransferenciaExistencia $transfer, User $actor, string $action, string $key, ?string $ip, callable $operation): TransferenciaExistencia
     {
         return DB::transaction(function () use ($transfer, $actor, $action, $key, $ip, $operation): TransferenciaExistencia {
-            $eventId = $this->eventId($transfer->getKey(), $actor->getKey(), $action, $key);
+            $eventId = $this->idEvento($transfer->getKey(), $actor->getKey(), $action, $key);
             if (DB::table('registros_auditoria')->where('identificador_universal_evento', $eventId)->exists()) {
                 return TransferenciaExistencia::query()->with('detalles')->findOrFail($transfer->getKey());
             }
@@ -493,7 +493,7 @@ class ServicioTransferenciasExistencias
             }
             $siteColumn = in_array($action, ['receive', 'reconcile', 'close'], true) ? 'sede_destino_id' : 'sede_origen_id';
             $permission = in_array($action, ['approve', 'reject'], true) ? 'gestion.inventario.aprobar' : 'gestion.inventario.transferir';
-            $this->authorizeTransferSite($actor, $locked, $siteColumn, $permission);
+            $this->autorizarSedeTransferencia($actor, $locked, $siteColumn, $permission);
             [$before, $after, $observations] = $operation($locked);
             $this->audit->record($actor->getKey(), 'transfer.'.$action, 'transferencias_existencias', $locked->getKey(), $before,
                 $after + ['empresa_id' => $locked->empresa_id, 'sede_origen_id' => $locked->sede_origen_id,
@@ -506,7 +506,7 @@ class ServicioTransferenciasExistencias
     }
 
     /** @return array{empresa_id:int,sede_id:int,almacen_id:int} */
-    private function warehouseContext(User $actor, int $warehouseId, ?string $permission, ?int $companyId = null): array
+    private function contextoAlmacen(User $actor, int $warehouseId, ?string $permission, ?int $companyId = null): array
     {
         $warehouse = DB::table('almacenes')->join('sedes', 'sedes.id', '=', 'almacenes.sede_id')
             ->join('empresas', 'empresas.id', '=', 'sedes.empresa_id')->where('almacenes.id', $warehouseId)
@@ -523,7 +523,7 @@ class ServicioTransferenciasExistencias
     }
 
     /** @return array{empresa_id:int,sede_id:?int} */
-    private function currentCompany(User $actor): array
+    private function empresaActual(User $actor): array
     {
         $permission = 'gestion.inventario.consultar';
         if ($this->authorization->allowsGlobal($actor, $permission)) {
@@ -544,7 +544,7 @@ class ServicioTransferenciasExistencias
      * @param  array<string, mixed>  $filters
      * @return Builder<TransferenciaExistencia>
      */
-    private function transferQuery(array $location, array $filters): Builder
+    private function consultaTransferencias(array $location, array $filters): Builder
     {
         return TransferenciaExistencia::query()->with([
             'sedeOrigen:id,nombre', 'sedeDestino:id,nombre', 'almacenOrigen:id,nombre', 'almacenDestino:id,nombre',
@@ -570,7 +570,7 @@ class ServicioTransferenciasExistencias
      * @param  mixed  $permission  Parámetro recibido por la operación.
      * @return void Resultado de la operación.
      */
-    private function authorizeTransferSite(User $actor, TransferenciaExistencia $transfer, string $siteColumn, string $permission): void
+    private function autorizarSedeTransferencia(User $actor, TransferenciaExistencia $transfer, string $siteColumn, string $permission): void
     {
         abort_unless($this->authorization->allowsRecord($actor, $permission, (int) $transfer->empresa_id, (int) $transfer->{$siteColumn}), 403, 'No tienes permiso para operar transferencias en esta sede.');
     }
@@ -581,7 +581,7 @@ class ServicioTransferenciasExistencias
      * @param  mixed  $transfer  Parámetro recibido por la operación.
      * @return void Resultado de la operación.
      */
-    private function assertWarehouseStillActive(TransferenciaExistencia $transfer): void
+    private function comprobarAlmacenActivo(TransferenciaExistencia $transfer): void
     {
         foreach ([['almacen_origen_id', 'sede_origen_id'], ['almacen_destino_id', 'sede_destino_id']] as [$warehouseColumn, $siteColumn]) {
             $valid = DB::table('almacenes')->join('sedes', 'sedes.id', '=', 'almacenes.sede_id')
@@ -600,7 +600,7 @@ class ServicioTransferenciasExistencias
      * @param  mixed  $lock  Parámetro recibido por la operación.
      * @return object Resultado de la operación.
      */
-    private function balance(TransferenciaExistencia $transfer, DetalleTransferenciaExistencia $detail, int $warehouseId, bool $lock): object
+    private function saldoExistencia(TransferenciaExistencia $transfer, DetalleTransferenciaExistencia $detail, int $warehouseId, bool $lock): object
     {
         $siteId = $warehouseId === (int) $transfer->almacen_origen_id ? $transfer->sede_origen_id : $transfer->sede_destino_id;
         $query = DB::table('existencias_almacen')->where('empresa_id', $transfer->empresa_id)->where('sede_id', $siteId)
@@ -626,7 +626,7 @@ class ServicioTransferenciasExistencias
      * @param  mixed  $variantId  Parámetro recibido por la operación.
      * @return void Resultado de la operación.
      */
-    private function assertProductVariant(int $productId, ?int $variantId): void
+    private function comprobarProductoVariante(int $productId, ?int $variantId): void
     {
         if ($variantId !== null) {
             abort_unless(DB::table('variantes_productos')->where('id', $variantId)->where('producto_id', $productId)->exists(), 422, 'La variante no pertenece al producto seleccionado.');
@@ -639,7 +639,7 @@ class ServicioTransferenciasExistencias
      * @param  mixed  $detail  Parámetro recibido por la operación.
      * @return bool Resultado de la operación.
      */
-    private function isSerialized(DetalleTransferenciaExistencia $detail): bool
+    private function esSerializado(DetalleTransferenciaExistencia $detail): bool
     {
         if ($detail->variante_id !== null && (bool) DB::table('variantes_productos')->where('id', $detail->variante_id)->value('controla_serie')) {
             return true;
@@ -656,7 +656,7 @@ class ServicioTransferenciasExistencias
      * @param  mixed  $warehouseId  Parámetro recibido por la operación.
      * @return QueryBuilder Resultado de la operación.
      */
-    private function availableDeviceQuery(DetalleTransferenciaExistencia $detail, int $warehouseId): QueryBuilder
+    private function consultaDispositivosDisponibles(DetalleTransferenciaExistencia $detail, int $warehouseId): QueryBuilder
     {
         return DB::table('dispositivos')->where('producto_id', $detail->producto_id)
             ->when($detail->variante_id === null, fn ($query) => $query->whereNull('variante_id'), fn ($query) => $query->where('variante_id', $detail->variante_id))
@@ -664,21 +664,21 @@ class ServicioTransferenciasExistencias
     }
 
     /** @return Collection<int, object> */
-    private function findAvailableDevices(DetalleTransferenciaExistencia $detail, int $warehouseId, array $serials): Collection
+    private function buscarDispositivosDisponibles(DetalleTransferenciaExistencia $detail, int $warehouseId, array $serials): Collection
     {
-        $this->assertUniqueSerials($serials);
+        $this->comprobarSeriesUnicas($serials);
         abort_unless($serials !== [], 422, 'Indica los IMEI o numeros de serie que se despacharan.');
 
-        return $this->availableDeviceQuery($detail, $warehouseId)->lockForUpdate()
+        return $this->consultaDispositivosDisponibles($detail, $warehouseId)->lockForUpdate()
             ->where(function (QueryBuilder $query) use ($serials): void {
                 $query->whereIn('imei', $serials)->orWhereIn('numero_serie', $serials);
             })->get();
     }
 
     /** @return Collection<int, object> */
-    private function findTransitDevices(TransferenciaExistencia $transfer, DetalleTransferenciaExistencia $detail, array $serials): Collection
+    private function buscarDispositivosEnTransito(TransferenciaExistencia $transfer, DetalleTransferenciaExistencia $detail, array $serials): Collection
     {
-        $this->assertUniqueSerials($serials);
+        $this->comprobarSeriesUnicas($serials);
         abort_unless($serials !== [], 422, 'Indica los IMEI o numeros de serie que se procesaran.');
 
         return DB::table('dispositivos')->join('movimientos_dispositivos', 'movimientos_dispositivos.dispositivo_id', '=', 'dispositivos.id')
@@ -702,7 +702,7 @@ class ServicioTransferenciasExistencias
      * @param  mixed  $warehouseId  Parámetro recibido por la operación.
      * @return void Resultado de la operación.
      */
-    private function changeDevice(object $device, MovimientoInventario $movement, string $oldStatus, string $newStatus, ?int $warehouseId): void
+    private function actualizarDispositivo(object $device, MovimientoInventario $movement, string $oldStatus, string $newStatus, ?int $warehouseId): void
     {
         abort_unless($device->estado === $oldStatus, 409, 'El IMEI o numero de serie ya fue procesado por otra operacion.');
         DB::table('dispositivos')->where('id', $device->id)->update([
@@ -715,7 +715,7 @@ class ServicioTransferenciasExistencias
     }
 
     /** @return array<int, array{0:DetalleTransferenciaExistencia,1:array{cantidad:int,series:array<int,string>}}> */
-    private function requestedDetails(TransferenciaExistencia $transfer, array $items): array
+    private function detallesSolicitados(TransferenciaExistencia $transfer, array $items): array
     {
         abort_if($items === [], 422, 'Selecciona al menos un producto para procesar.');
         $details = $transfer->detalles()->whereIn('id', collect($items)->pluck('detalle_id'))->lockForUpdate()->get()->keyBy('id');
@@ -732,7 +732,7 @@ class ServicioTransferenciasExistencias
     }
 
     /** @param array<int, string> $serials */
-    private function assertUniqueSerials(array $serials): void
+    private function comprobarSeriesUnicas(array $serials): void
     {
         $serials = array_values(array_filter(array_map('trim', $serials), static fn (string $serial): bool => $serial !== ''));
         abort_if(count($serials) !== count(array_unique($serials)), 422, 'No repitas IMEI o numeros de serie.');
@@ -744,7 +744,7 @@ class ServicioTransferenciasExistencias
      * @param  mixed  $detail  Parámetro recibido por la operación.
      * @return int Resultado de la operación.
      */
-    private function returnedQuantity(DetalleTransferenciaExistencia $detail): int
+    private function cantidadDevuelta(DetalleTransferenciaExistencia $detail): int
     {
         return Schema::hasColumn('detalles_transferencias_existencias', 'cantidad_devuelta') ? (int) $detail->cantidad_devuelta : 0;
     }
@@ -755,7 +755,7 @@ class ServicioTransferenciasExistencias
      * @param  mixed  $detail  Parámetro recibido por la operación.
      * @return int Resultado de la operación.
      */
-    private function reconciledQuantity(DetalleTransferenciaExistencia $detail): int
+    private function cantidadConciliada(DetalleTransferenciaExistencia $detail): int
     {
         return Schema::hasColumn('detalles_transferencias_existencias', 'cantidad_conciliada') ? (int) $detail->cantidad_conciliada : 0;
     }
@@ -766,7 +766,7 @@ class ServicioTransferenciasExistencias
      * @param  mixed  $companyId  Parámetro recibido por la operación.
      * @return string Resultado de la operación.
      */
-    private function newCode(int $companyId): string
+    private function nuevoCodigo(int $companyId): string
     {
         do {
             $code = 'TRF-'.now()->format('Ymd').'-'.Str::upper(Str::random(8));
@@ -784,7 +784,7 @@ class ServicioTransferenciasExistencias
      * @param  mixed  $key  Parámetro recibido por la operación.
      * @return string Resultado de la operación.
      */
-    private function eventId(int $transferId, int $actorId, string $action, string $key): string
+    private function idEvento(int $transferId, int $actorId, string $action, string $key): string
     {
         $hash = substr(hash('sha256', implode('|', [$transferId, $actorId, $action, Str::lower($key)])), 0, 32);
         $hash[12] = '5';

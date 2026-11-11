@@ -49,7 +49,7 @@ class ServicioOperacionesFinancieras
         abort_unless(preg_match('/\A(pedido|venta|compra):([1-9][0-9]*)\z/', $data['origen'], $matches) === 1, 422, 'El documento seleccionado no es válido.');
         $kind = $matches[1];
         $documentId = (int) $matches[2];
-        $amountCents = $this->cents((string) $data['importe']);
+        $amountCents = $this->centimos((string) $data['importe']);
         abort_unless($amountCents > 0, 422, 'El importe debe ser mayor que cero.');
         $location = $this->authorization->operationSite($actor);
         $companyId = $location['empresa_id'];
@@ -73,13 +73,13 @@ class ServicioOperacionesFinancieras
                     && (int) $existing->medio_pago_id === (int) $data['medio_pago_id']
                     && ($existing->sesion_caja_id === null ? null : (int) $existing->sesion_caja_id) === $cashSessionId
                     && ($existing->cuenta_bancaria_id === null ? null : (int) $existing->cuenta_bancaria_id) === $bankAccountId
-                    && $this->cents((string) $existing->importe) === $amountCents
+                    && $this->centimos((string) $existing->importe) === $amountCents
                     && $existing->referencia === $reference, 409, 'El identificador ya corresponde a otra solicitud.');
 
                 return $existing;
             }
 
-            $document = $this->document($kind, $documentId);
+            $document = $this->documento($kind, $documentId);
             abort_unless((int) $document->empresa_id === $companyId && (int) $document->sede_id === $siteId, 403);
             abort_unless(! in_array(mb_strtolower((string) $document->estado), ['anulado', 'anulada', 'cancelado', 'cancelada', 'rechazada'], true),
                 409, 'El estado del documento no permite registrar pagos.');
@@ -91,7 +91,7 @@ class ServicioOperacionesFinancieras
                     409, 'El pedido ya tiene una venta asociada. Registra el cobro en la venta.');
             }
             $currency = $document instanceof Pedido ? 'PEN' : (string) $document->moneda;
-            $documentTotal = $this->cents((string) $document->total);
+            $documentTotal = $this->centimos((string) $document->total);
             abort_unless($documentTotal > 0, 409, 'El documento no tiene un importe válido.');
 
             $method = MedioPago::query()->whereKey($data['medio_pago_id'])->lockForUpdate()->first();
@@ -130,7 +130,7 @@ class ServicioOperacionesFinancieras
                 $sameReference = (clone $prior)->where('referencia', $reference)->lockForUpdate()->first();
                 abort_if($sameReference !== null, 409, 'Ya existe una solicitud para esa referencia y documento.');
             }
-            abort_unless($amountCents <= $documentTotal - $this->cents((string) $prior->sum('importe')),
+            abort_unless($amountCents <= $documentTotal - $this->centimos((string) $prior->sum('importe')),
                 422, 'El importe supera el saldo disponible del documento.');
 
             $payment = Pago::query()->create([
@@ -145,7 +145,7 @@ class ServicioOperacionesFinancieras
                 'usuario_id' => $actor->getKey(),
                 $kind.'_id' => $documentId,
                 'moneda' => $currency,
-                'importe' => $this->money($amountCents),
+                'importe' => $this->importe($amountCents),
                 'referencia' => $reference,
                 'fecha_pago' => now(),
                 'creado_en' => now(),
@@ -173,7 +173,7 @@ class ServicioOperacionesFinancieras
         $permission = 'gestion.pagos.actualizar';
         abort_unless($this->authorization->allowsGlobal($actor, 'gestion.seguridad.consultar'), 403);
         $this->authorization->assertAllowed($actor, $permission);
-        $countedCents = $this->cents($countedAmount);
+        $countedCents = $this->centimos($countedAmount);
         $observation = trim($observation);
         abort_unless($countedCents > 0 && $observation !== '' && mb_strlen($observation) <= 500, 422,
             'Declara el importe contado y documenta la verificación.');
@@ -186,7 +186,7 @@ class ServicioOperacionesFinancieras
             $method = MedioPago::query()->whereKey($locked->medio_pago_id)->firstOrFail();
             abort_unless($method->requiere_caja && ! $method->requiere_banco && $locked->sesion_caja_id !== null,
                 409, 'Este pago no corresponde a efectivo en caja.');
-            abort_unless($countedCents === $this->cents($locked->importe), 422,
+            abort_unless($countedCents === $this->centimos($locked->importe), 422,
                 'El efectivo contado no coincide con el importe del pago.');
             $direction = $locked->tipo === 'cobro' ? 'entrada' : 'salida';
             if ($locked->estado === 'registrado') {
@@ -206,7 +206,7 @@ class ServicioOperacionesFinancieras
             abort_if(MovimientoCaja::query()->where('pago_id', $locked->id)->exists(), 409,
                 'El pago ya tiene un movimiento de caja.');
             if ($direction === 'salida') {
-                abort_if($this->cents($this->boxes->arqueo($session)['saldo_esperado']) < $countedCents,
+                abort_if($this->centimos($this->boxes->arqueo($session)['saldo_esperado']) < $countedCents,
                     409, 'La caja no tiene efectivo suficiente para este pago.');
             }
             $movement = MovimientoCaja::query()->create([
@@ -263,7 +263,7 @@ class ServicioOperacionesFinancieras
     {
         $permission = 'gestion.reembolsos.crear';
         $this->authorization->assertAllowed($actor, $permission);
-        $amountCents = $this->cents((string) $data['importe']);
+        $amountCents = $this->centimos((string) $data['importe']);
         abort_unless($amountCents > 0, 422, 'El importe debe ser mayor que cero.');
 
         return DB::transaction(function () use ($data, $actor, $ip, $permission, $amountCents): Reembolso {
@@ -272,20 +272,20 @@ class ServicioOperacionesFinancieras
             $existing = Reembolso::query()->where('pago_id', $payment->getKey())->lockForUpdate()->first();
             if ($existing !== null) {
                 abort_unless((int) $existing->devolucion_id === (int) $data['devolucion_id']
-                    && $this->cents((string) $existing->importe) === $amountCents, 409,
+                    && $this->centimos((string) $existing->importe) === $amountCents, 409,
                     'El cobro ya tiene otra solicitud de reembolso.');
 
                 return $existing;
             }
             $return = DevolucionGarantia::query()->whereKey($data['devolucion_id'])->lockForUpdate()->firstOrFail();
-            $this->assertRefundOrigin($payment, $return);
-            abort_unless($amountCents <= $this->cents((string) $payment->importe), 422,
+            $this->verificarOrigenReembolso($payment, $return);
+            abort_unless($amountCents <= $this->centimos((string) $payment->importe), 422,
                 'El reembolso supera el importe del cobro original.');
 
             $refund = Reembolso::query()->create([
                 'devolucion_id' => $return->getKey(),
                 'pago_id' => $payment->getKey(),
-                'importe' => $this->money($amountCents),
+                'importe' => $this->importe($amountCents),
                 'estado' => 'pendiente',
                 'creado_en' => now(),
             ]);
@@ -320,8 +320,8 @@ class ServicioOperacionesFinancieras
             }
             abort_unless($locked->estado === 'pendiente', 409, 'El reembolso ya no está pendiente.');
             $return = DevolucionGarantia::query()->whereKey($locked->devolucion_id)->lockForUpdate()->firstOrFail();
-            $this->assertRefundOrigin($payment, $return);
-            abort_unless($this->hasPaymentEvidence($payment), 409,
+            $this->verificarOrigenReembolso($payment, $return);
+            abort_unless($this->tieneEvidenciaPago($payment), 409,
                 'El cobro original requiere un ingreso de caja documentado antes de aprobar.');
             $locked->update(['estado' => 'aprobado', 'autorizado_por_usuario_id' => $actor->getKey()]);
             $this->audit->record((int) $actor->getKey(), 'reembolso.aprobado', 'reembolsos', (int) $locked->getKey(),
@@ -370,7 +370,7 @@ class ServicioOperacionesFinancieras
      * @param  mixed  $id  Parámetro recibido por la operación.
      * @return Pedido|Venta|Compra Resultado de la operación.
      */
-    private function document(string $kind, int $id): Pedido|Venta|Compra
+    private function documento(string $kind, int $id): Pedido|Venta|Compra
     {
         return match ($kind) {
             'pedido' => Pedido::query()->whereKey($id)->lockForUpdate()->firstOrFail(),
@@ -380,13 +380,13 @@ class ServicioOperacionesFinancieras
     }
 
     /**
-     * Ejecuta la operación assertRefundOrigin definida por la clase ServicioOperacionesFinancieras.
+     * Ejecuta la operación verificarOrigenReembolso definida por la clase ServicioOperacionesFinancieras.
      *
      * @param  mixed  $payment  Parámetro recibido por la operación.
      * @param  mixed  $return  Parámetro recibido por la operación.
      * @return void Resultado de la operación.
      */
-    private function assertRefundOrigin(Pago $payment, DevolucionGarantia $return): void
+    private function verificarOrigenReembolso(Pago $payment, DevolucionGarantia $return): void
     {
         abort_unless($payment->tipo === 'cobro' && ! in_array($payment->estado, ['pendiente', 'anulado'], true),
             409, 'El pago original no es un cobro registrado.');
@@ -409,7 +409,7 @@ class ServicioOperacionesFinancieras
      * @param  mixed  $payment  Parámetro recibido por la operación.
      * @return bool Resultado de la operación.
      */
-    private function hasPaymentEvidence(Pago $payment): bool
+    private function tieneEvidenciaPago(Pago $payment): bool
     {
         if ($payment->sesion_caja_id === null) {
             return false;
@@ -423,7 +423,7 @@ class ServicioOperacionesFinancieras
             ->where('movimiento.direccion', 'entrada')
             ->sum('movimiento.importe');
 
-        return $this->cents((string) $cashIncome) >= $this->cents((string) $payment->importe);
+        return $this->centimos((string) $cashIncome) >= $this->centimos((string) $payment->importe);
     }
 
     /**
@@ -432,7 +432,7 @@ class ServicioOperacionesFinancieras
      * @param  mixed  $amount  Parámetro recibido por la operación.
      * @return int Resultado de la operación.
      */
-    private function cents(string $amount): int
+    private function centimos(string $amount): int
     {
         abort_unless(preg_match('/\A(?:0|[1-9][0-9]{0,12})(?:\.[0-9]{1,2})?\z/', $amount) === 1,
             422, 'El importe no tiene un formato válido.');
@@ -447,7 +447,7 @@ class ServicioOperacionesFinancieras
      * @param  mixed  $cents  Parámetro recibido por la operación.
      * @return string Resultado de la operación.
      */
-    private function money(int $cents): string
+    private function importe(int $cents): string
     {
         return intdiv($cents, 100).'.'.str_pad((string) ($cents % 100), 2, '0', STR_PAD_LEFT);
     }

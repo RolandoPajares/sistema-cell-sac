@@ -29,7 +29,7 @@ final class ServicioStockProducto
             return;
         }
 
-        $this->inventario->changeLockedProduct(
+        $this->inventario->cambiarProductoBloqueado(
             $producto,
             $diferencia > 0 ? 'entrada' : 'salida',
             abs($diferencia),

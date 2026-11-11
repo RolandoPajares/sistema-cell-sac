@@ -26,7 +26,6 @@
             <a href="{{ route('pages.faq') }}"><i class="bi bi-question-circle" aria-hidden="true"></i> Preguntas frecuentes</a>
             <a href="{{ route('pages.privacy') }}"><i class="bi bi-shield-check" aria-hidden="true"></i> Políticas de privacidad</a>
             <a href="{{ route('pages.terms') }}"><i class="bi bi-file-earmark-text" aria-hidden="true"></i> Términos y condiciones</a>
-            <a href="{{ route('assistant') }}"><i class="bi bi-robot" aria-hidden="true"></i> Asistente IA</a>
             <a href="{{ route('smart.wholesale') }}"><i class="bi bi-truck" aria-hidden="true"></i> Compras mayoristas</a>
         </nav>
         <section class="footer-column footer-visit">
