@@ -1,76 +1,15 @@
-<form method="post" action="{{ route('management.customers.store') }}" class="form-card cliente-registro-form" data-client-form data-person-type="natural">
+<form method="post" action="{{ route('management.customers.store') }}" class="form-card cliente-registro-form" data-client-form data-person-type="{{ old('tipo_documento') === 'ruc' ? 'juridica' : 'natural' }}">
     @csrf
-
-    {{-- Encabezado: presenta el propósito del formulario y la información que se registrará. --}}
-    <div class="cliente-registro-heading">
-        <span class="clientes-eyebrow">CRM</span>
-        <h2>Registro de clientes</h2>
-        <p>Completa la información comercial y de contacto del cliente.</p>
-    </div>
-
-    {{-- Selector visual: cambia los campos de presentación sin enviar un dato que no existe en clientes. --}}
-    <fieldset class="cliente-person-switcher">
-        <legend>Tipo de persona</legend>
-        <div class="cliente-person-options" role="group" aria-label="Tipo de persona">
-            <button type="button" class="cliente-person-option is-active" data-client-person="natural" aria-pressed="true">Persona natural</button>
-            <button type="button" class="cliente-person-option" data-client-person="juridica" aria-pressed="false">Persona jurídica</button>
-        </div>
-    </fieldset>
-
-    {{-- Identificación: sus valores se validan y guardan mediante el controlador de clientes. --}}
-    <div class="cliente-registro-section">
-        <h3>Identificación</h3>
-        <div class="cliente-field-grid cliente-field-grid--two">
-            <label>Tipo de documento
-                <select name="tipo_documento" data-client-document-type>
-                    <option value="">Seleccionar</option>
-                    <option value="dni" @selected(old('tipo_documento') === 'dni')>DNI</option>
-                    <option value="ruc" @selected(old('tipo_documento') === 'ruc')>RUC</option>
-                </select>
-            </label>
-            <label>Documento de identificación
-                <input name="documento" value="{{ old('documento') }}" maxlength="20" required>
-            </label>
-        </div>
-        <label data-legal-only>Razón social
-            <input name="razon_social" value="{{ old('razon_social') }}" maxlength="160" placeholder="Razón social de la empresa">
-        </label>
-        <label data-contact-name>
-            <span data-natural-label>Nombre completo</span>
-            <span data-legal-label>Persona de contacto o representante</span>
-            <input name="nombre_contacto" value="{{ old('nombre_contacto') }}" maxlength="160" required placeholder="Ingresa nombres y apellidos">
-        </label>
-    </div>
-
-    {{-- Segmento comercial: conserva el catálogo minorista o mayorista usado por el módulo. --}}
-    <div class="cliente-registro-section">
-        <h3>Información comercial</h3>
-        <label>Segmento del cliente
-            <select name="tipo" required>
-                <option value="minorista" @selected(old('tipo', 'minorista') === 'minorista')>Minorista</option>
-                <option value="mayorista" @selected(old('tipo') === 'mayorista')>Mayorista</option>
-            </select>
-        </label>
-    </div>
-
-    {{-- Contacto: se almacena en las columnas existentes de la entidad Cliente. --}}
-    <div class="cliente-registro-section">
-        <h3>Información de contacto</h3>
-        <div class="cliente-field-grid cliente-field-grid--two">
-            <label>Teléfono
-                <input name="telefono" value="{{ old('telefono') }}" maxlength="30" placeholder="Número de contacto">
-            </label>
-            <label>Correo electrónico
-                <input type="email" name="correo" value="{{ old('correo') }}" maxlength="160" required placeholder="Correo electrónico">
-            </label>
-        </div>
-        <label>Ciudad
-            <input name="ciudad" value="{{ old('ciudad') }}" maxlength="80" placeholder="Ciudad del cliente">
-        </label>
-    </div>
-
-    {{-- Acción principal: envía los datos a store con protección CSRF. --}}
-    <button class="cliente-registro-submit" type="submit">Registrar cliente</button>
+    <header class="cliente-registro-heading">
+        <span class="cliente-registro-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
+        <div><h2>Registrar nuevo cliente</h2><p>Completa la información comercial y de contacto.</p></div>
+        <button type="button" class="cliente-registro-close" data-close-client-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+    </header>
+    <fieldset class="cliente-person-switcher"><legend><i class="bi bi-people" aria-hidden="true"></i> Tipo de persona</legend><div class="cliente-person-options" role="group" aria-label="Tipo de persona"><button type="button" class="cliente-person-option" data-client-person="natural" aria-pressed="false"><i class="bi bi-person" aria-hidden="true"></i> Persona natural <i class="bi bi-check-circle-fill cliente-person-check" aria-hidden="true"></i></button><button type="button" class="cliente-person-option" data-client-person="juridica" aria-pressed="false"><i class="bi bi-building" aria-hidden="true"></i> Persona jurídica <i class="bi bi-check-circle-fill cliente-person-check" aria-hidden="true"></i></button></div></fieldset>
+    <section class="cliente-registro-section cliente-section-personal" data-client-natural-fields hidden><h3><i class="bi bi-person" aria-hidden="true"></i> Datos del cliente <small>(Persona natural)</small></h3><div class="cliente-field-grid cliente-field-grid--two"><label>Tipo de documento <b>*</b><select data-client-document-type><option value="dni">DNI</option><option value="ruc">RUC</option></select></label><label>Número de documento <b>*</b><input name="documento" value="{{ old('documento') }}" maxlength="20" placeholder="Ingrese el número" required></label><label>Nombres <b>*</b><input data-client-first-name placeholder="Ingrese los nombres" autocomplete="given-name"></label><label>Apellidos <b>*</b><input data-client-last-name placeholder="Ingrese los apellidos" autocomplete="family-name"></label></div></section>
+    <section class="cliente-registro-section cliente-section-company" data-client-juridica-fields hidden><h3><i class="bi bi-building" aria-hidden="true"></i> Datos de la empresa <small>(Persona jurídica)</small></h3><div class="cliente-field-grid cliente-field-grid--two"><label>Tipo de documento <b>*</b><select data-client-document-type-company><option value="ruc">RUC</option><option value="dni">DNI</option></select></label><label>Número de RUC <b>*</b><input data-client-company-document maxlength="11" placeholder="Ingrese el RUC"></label></div><label>Razón social <b>*</b><input name="razon_social" data-client-legal-name value="{{ old('razon_social') }}" maxlength="160" placeholder="Ingrese la razón social"></label><label>Nombre comercial <small>(opcional)</small><input name="nombre_comercial" value="{{ old('nombre_comercial') }}" maxlength="160" placeholder="Ingrese el nombre comercial"></label></section>
+    <section class="cliente-registro-section"><h3><i class="bi bi-telephone" aria-hidden="true"></i> Información de contacto</h3><div class="cliente-field-grid cliente-field-grid--two"><label>Teléfono<input name="telefono" value="{{ old('telefono') }}" maxlength="30" placeholder="Ingrese el teléfono"></label><label>Correo electrónico<input type="email" name="correo" value="{{ old('correo') }}" maxlength="160" required inputmode="email" placeholder="Ingrese el correo electrónico"></label></div></section>
+    <section class="cliente-registro-section"><h3><i class="bi bi-geo-alt" aria-hidden="true"></i> Ubicación</h3><label>Dirección <b>*</b><input name="ciudad" value="{{ old('ciudad') }}" maxlength="80" required placeholder="Ingrese la dirección del cliente"></label></section>
+    <input type="hidden" name="tipo" value="{{ old('tipo', 'minorista') }}"><input type="hidden" name="nombre_contacto" data-client-contact-input value="{{ old('nombre_contacto') }}"><input type="hidden" name="tipo_documento" data-client-document-hidden value="{{ old('tipo_documento', 'dni') }}">
+    <footer class="cliente-registro-actions"><button type="button" class="clientes-cancel-button" data-close-client-dialog><i class="bi bi-x-lg" aria-hidden="true"></i> Cancelar</button><button class="cliente-registro-submit" type="submit"><i class="bi bi-save" aria-hidden="true"></i> Registrar cliente</button></footer>
 </form>
-
-

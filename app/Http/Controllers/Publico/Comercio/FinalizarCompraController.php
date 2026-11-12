@@ -17,7 +17,7 @@ use Illuminate\View\View;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
- * Define la responsabilidad de la clase FinalizarCompraController dentro de su m�dulo.
+ * Define la responsabilidad de la clase FinalizarCompraController dentro de su módulo.
  *
  * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
  */
@@ -26,7 +26,7 @@ class FinalizarCompraController extends Controller
     /**
      * Inicializa la instancia con las dependencias y el estado requeridos.
      *
-     * @return mixed Resultado de la operaci�n.
+     * @return mixed Resultado de la operación.
      */
     public function __construct(
         private readonly ServicioPedidos $orderService,
@@ -35,13 +35,13 @@ class FinalizarCompraController extends Controller
     ) {}
 
     /**
-     * Prepara la pantalla de checkout a partir del carrito normalizado de la sesi�n.
+     * Prepara la pantalla de checkout a partir del carrito normalizado de la sesión.
      *
      * Genera un token de checkout si falta, carga productos activos, calcula disponibilidad
-     * y subtotales, y marca si todas las l�neas pueden confirmarse sin modificar la base de datos.
+     * y subtotales, y marca si todas las líneas pueden confirmarse sin modificar la base de datos.
      *
-     * @param  Request  $request  Solicitud que contiene la sesi�n y el usuario comprador.
-     * @return View Vista de checkout con l�neas, total, token y condici�n de confirmaci�n.
+     * @param  Request  $request  Solicitud que contiene la sesión y el usuario comprador.
+     * @return View Vista de checkout con líneas, total, token y condición de confirmación.
      */
     public function index(Request $request): View
     {
@@ -83,14 +83,14 @@ class FinalizarCompraController extends Controller
     /**
      * Convierte el carrito validado en un pedido mediante el servicio de pedidos.
      *
-     * Rechaza un carrito vac�o, delega la operaci�n transaccional al servicio de checkout
-     * con usuario, cup�n, IP y token, y limpia las claves de sesi�n solo despu�s de recibir
+     * Rechaza un carrito vacío, delega la operación transaccional al servicio de checkout
+     * con usuario, cupón, IP y token, y limpia las claves de sesión solo después de recibir
      * el pedido creado.
      *
      * @param  FinalizarCompraRequest  $request  Datos validados del checkout.
-     * @return RedirectResponse Redirecci�n al detalle del pedido registrado.
+     * @return RedirectResponse Redirección al detalle del pedido registrado.
      *
-     * @throws HttpException Si la sesi�n no contiene l�neas de carrito.
+     * @throws HttpException Si la sesión no contiene líneas de carrito.
      */
     public function store(FinalizarCompraRequest $request): RedirectResponse
     {
@@ -98,11 +98,11 @@ class FinalizarCompraController extends Controller
         abort_if($cart === [], 422, 'El carrito está vacío.');
 
         $order = $request->user() !== null
-            ? $this->orderService->checkout($request->user(), $cart, $request->session()->get('coupon_code'), $request->ip(), $request->validated('checkout_token'))
-            : $this->orderService->checkoutGuest($cart, $request->session()->get('coupon_code'), $request->ip(), $request->validated());
+            ? $this->orderService->finalizarCompra($request->user(), $cart, $request->session()->get('coupon_code'), $request->ip(), $request->validated('checkout_token'))
+            : $this->orderService->finalizarCompraInvitado($cart, $request->session()->get('coupon_code'), $request->ip(), $request->validated());
 
         $request->session()->forget(['cart', 'coupon_code', 'checkout_token']);
-        $this->orderService->registerPendingPayment($order, $request->validated('medio_pago_id'), $request->user()?->getKey());
+        $this->orderService->registrarPagoPendiente($order, $request->validated('medio_pago_id'), $request->user()?->getKey());
 
         if ($request->user() === null) {
             return redirect()->route('orders.tracking', [$order, 'token' => $request->validated('checkout_token')])

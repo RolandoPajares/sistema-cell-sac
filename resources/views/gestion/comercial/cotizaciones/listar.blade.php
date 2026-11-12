@@ -290,8 +290,8 @@
     @forelse ($quotations as $quotation)
         <article class="data-row">
             <div>
-                <strong>Cotizaci�n #{{ $quotation->id }} � {{ $quotation->customer->nombre_contacto }}</strong>
-                <small>{{ $quotation->estado }} � {{ $quotation->creado_en }}</small>
+                <strong>Cotización #{{ $quotation->id }} — {{ $quotation->customer->nombre_contacto }}</strong>
+                <small>{{ $quotation->estado }} — {{ $quotation->creado_en }}</small>
             </div>
             <strong>S/ {{ number_format((float) $quotation->total, 2) }}</strong>
         </article>

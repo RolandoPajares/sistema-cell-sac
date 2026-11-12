@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 /**
- * Define la responsabilidad de la clase AsistenteController dentro de su m�dulo.
+ * Define la responsabilidad de la clase AsistenteController dentro de su módulo.
  *
  * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
  */
@@ -24,7 +24,7 @@ class AsistenteController extends Controller
     /**
      * Inicializa la instancia con las dependencias y el estado requeridos.
      *
-     * @return mixed Resultado de la operaci�n.
+     * @return mixed Resultado de la operación.
      */
     public function __construct(
         private readonly ServicioAutorizacion $autorizacion,
@@ -32,9 +32,9 @@ class AsistenteController extends Controller
     ) {}
 
     /**
-     * Obtiene y prepara la informaci�n solicitada para la operaci�n.
+     * Obtiene y prepara la información solicitada para la operación.
      *
-     * @return View Resultado de la operaci�n.
+     * @return View Resultado de la operación.
      */
     public function index(): View
     {

@@ -31,9 +31,9 @@ final class ServicioDelegacion
         }
 
         foreach (array_unique($permissionIds) as $permissionId) {
-            $scopes = $this->actorScopesForPermission($actor, (int) $permissionId);
+            $scopes = $this->alcancesActorPermiso($actor, (int) $permissionId);
 
-            if (! $this->canCoverScope($scopes, $requestedScope)) {
+            if (! $this->puedeCubrirAlcance($scopes, $requestedScope)) {
                 return false;
             }
         }
@@ -99,7 +99,7 @@ final class ServicioDelegacion
     }
 
     /** @return array<int, string> */
-    private function actorScopesForPermission(User $actor, int $permissionId): array
+    private function alcancesActorPermiso(User $actor, int $permissionId): array
     {
         $permissionCode = DB::table('permisos')->where('id', $permissionId)->where('activo', true)->value('codigo');
         if (! is_string($permissionCode) || ! $this->autorizacion->allows($actor, $permissionCode)) {
@@ -141,7 +141,7 @@ final class ServicioDelegacion
     }
 
     /** @param array<int, string> $actorScopes */
-    private function canCoverScope(array $actorScopes, string $requestedScope): bool
+    private function puedeCubrirAlcance(array $actorScopes, string $requestedScope): bool
     {
         return match ($requestedScope) {
             'empresa' => in_array('empresa', $actorScopes, true),

@@ -82,6 +82,17 @@ it('permite carrito invitado y rechaza operadores sin permiso', function (): voi
         ->assertForbidden();
 });
 
+it('muestra a los invitados el formulario publico de compra y no un redireccionamiento al login', function (): void {
+    $product = productoParaCarritoEcommerce();
+
+    $this->get(route('catalog.index'))
+        ->assertOk()
+        ->assertSee('action="'.route('cart.add', $product).'"', false)
+        ->assertSee('name="cantidad"', false)
+        ->assertSee('Iniciar sesión')
+        ->assertSee('Continuar como invitado');
+});
+
 it('returns 422 for insufficient stock without writing the session', function (): void {
     $customer = SpanishAccessFixture::user('cliente_minorista');
     $product = productoParaCarritoEcommerce(['existencias' => 0]);

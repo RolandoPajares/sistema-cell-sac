@@ -81,12 +81,12 @@ class ProveedorController extends Controller
             : collect();
         $supplierPresentation = $proveedores->getCollection()
             ->mapWithKeys(fn (Proveedor $supplier): array => [$supplier->id => [
-                'categories' => $this->supplierCategories($supplier)->all(),
+                'categories' => $this->categoriasProveedor($supplier)->all(),
                 'initial' => mb_strtoupper(mb_substr($supplier->nombre, 0, 1)),
                 'is_selected' => $proveedorSeleccionado?->id === $supplier->id,
             ]])
             ->all();
-        $selectedSupplierPresentation = $this->selectedSupplierPresentation($proveedorSeleccionado, $estadosCompra);
+        $selectedSupplierPresentation = $this->presentacionProveedorSeleccionado($proveedorSeleccionado, $estadosCompra);
         $productosSinExistencias = $inventario->productosParaConsulta($alcanceProductos, ['stock' => 'sin_stock'], true)
             ->whereHas('suppliers', fn (Builder $consulta): Builder => $consulta->where('proveedores.empresa_id', $empresaId))
             ->with(['suppliers' => fn (Relation $consulta): mixed => $consulta->where('proveedores.empresa_id', $empresaId)->orderBy('proveedores.nombre')])
@@ -301,7 +301,7 @@ class ProveedorController extends Controller
     /**
      * Prepara las categorías visibles de un proveedor para la presentación.
      */
-    private function supplierCategories(Proveedor $supplier): Collection
+    private function categoriasProveedor(Proveedor $supplier): Collection
     {
         return $supplier->products
             ->map(static fn (mixed $product): ?string => $product->category?->nombre)
@@ -316,7 +316,7 @@ class ProveedorController extends Controller
      * @param  Collection<int, object>  $purchaseStatusCounts
      * @return array{categories:array<int, string>,initial:?string,purchase_count:int,received_percent:int,latest_purchase_date_label:string}
      */
-    private function selectedSupplierPresentation(?Proveedor $supplier, Collection $purchaseStatusCounts): array
+    private function presentacionProveedorSeleccionado(?Proveedor $supplier, Collection $purchaseStatusCounts): array
     {
         if (! $supplier) {
             return [
@@ -332,7 +332,7 @@ class ProveedorController extends Controller
         $receivedPurchases = (int) ($purchaseStatusCounts->firstWhere('estado', 'Recibida')?->total ?? 0);
 
         return [
-            'categories' => $this->supplierCategories($supplier)->all(),
+            'categories' => $this->categoriasProveedor($supplier)->all(),
             'initial' => mb_strtoupper(mb_substr($supplier->nombre, 0, 1)),
             'purchase_count' => $purchaseCount,
             'received_percent' => $purchaseCount > 0 ? min(100, (int) round(($receivedPurchases / $purchaseCount) * 100)) : 0,

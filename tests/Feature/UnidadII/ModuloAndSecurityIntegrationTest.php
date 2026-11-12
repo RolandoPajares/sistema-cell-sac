@@ -445,7 +445,7 @@ it('completa desde los formularios el flujo de categoría, producto, inventario 
         'id' => $venta->id,
         'estado' => 'confirmada',
         'canal' => 'presencial',
-        'total' => 200,
+        'total' => 236,
     ]);
     expect((float) DB::table('existencias_almacen')->where('producto_id', $producto->id)->sum('cantidad_fisica'))->toBe(3.0)
         ->and(DB::table('movimientos_inventario')->where('producto_id', $producto->id)->count())->toBe(2)
@@ -461,7 +461,7 @@ it('completa desde los formularios el flujo de categoría, producto, inventario 
     $this->actingAs($administrador)
         ->get(route('management.dashboard'))
         ->assertOk()
-        ->assertViewHas('salesThisMonth', 200.0);
+        ->assertViewHas('salesThisMonth', 236.0);
 
     $this->actingAs($administrador)
         ->post(route('management.sales.cancel', ['venta' => $venta->id]), ['motivo' => 'La operación fue capturada por error.'])
@@ -932,20 +932,24 @@ it('completes the supplier lifecycle for purchasing roles', function (): void {
 
     $this->actingAs($purchasing)
         ->post(route('management.suppliers.store'), [
-            'nombre' => 'Proveedor Integración',
-            'ruc' => 'RUC-30001',
+            'tipo_persona' => 'juridica',
+            'tipo_documento' => 'ruc',
+            'razon_social' => 'Proveedor Integración S.A.C.',
+            'ruc' => '20123456789',
             'correo' => 'proveedor.integracion@example.test',
             'telefono' => '999777888',
             'ciudad' => 'Lima',
         ])
         ->assertRedirect();
 
-    $supplier = Proveedor::query()->where('ruc', 'RUC-30001')->firstOrFail();
+    $supplier = Proveedor::query()->where('ruc', '20123456789')->firstOrFail();
 
     $this->actingAs($purchasing)
         ->put(route('management.suppliers.update', $supplier), [
             'nombre' => 'Proveedor Actualizado',
-            'ruc' => 'RUC-30001',
+            'tipo_persona' => 'juridica',
+            'tipo_documento' => 'ruc',
+            'ruc' => '20123456789',
             'correo' => 'proveedor.actualizado@example.test',
             'telefono' => '999777999',
             'ciudad' => 'Cusco',
@@ -965,6 +969,29 @@ it('completes the supplier lifecycle for purchasing roles', function (): void {
         'id' => $supplier->id,
         'nombre' => 'Proveedor Actualizado',
         'activo' => 0,
+    ]);
+});
+
+it('registers a natural supplier from the visible form fields', function (): void {
+    $purchasing = SpanishAccessFixture::user('compras_logistica');
+
+    $this->actingAs($purchasing)
+        ->post(route('management.suppliers.store'), [
+            'tipo_persona' => 'natural',
+            'tipo_documento' => 'dni',
+            'nombres' => 'Ana',
+            'apellidos' => 'Proveedor',
+            'ruc' => '12345678',
+            'correo' => 'ana.proveedor@example.test',
+            'telefono' => '999111222',
+            'ciudad' => 'Lima',
+        ])
+        ->assertRedirect();
+
+    $this->assertDatabaseHas('proveedores', [
+        'nombre' => 'Ana Proveedor',
+        'ruc' => '12345678',
+        'correo' => 'ana.proveedor@example.test',
     ]);
 });
 

@@ -18,6 +18,6 @@ if (dialog && openButton) {
 
 photoInput?.addEventListener('change', () => {
     if (photoInput.files?.length > 0) {
-        photoInput.form?.submit();
+        photoInput.form?.requestSubmit();
     }
 });

@@ -40,18 +40,18 @@ class GestionUsuariosController extends Controller
     public function index(Request $request): View
     {
         abort_unless(app(ServicioAutorizacion::class)->allowsGlobal($request->user(), 'gestion.seguridad.consultar'), 403);
-        $filters = $this->filters($request);
+        $filters = $this->filtros($request);
         $hasAccountStatus = Schema::hasColumn('usuarios', 'activo');
-        $users = $this->userQuery($filters)
+        $users = $this->consultaUsuarios($filters)
             ->with(['customer:id,usuario_id,documento,razon_social,tipo,ciudad,activo', 'rolesVigentes', 'rolesPorSedeVigentes'])
             ->orderByDesc('creado_en')
             ->orderByDesc('id')
             ->paginate($filters['por_pagina'])
             ->withQueryString();
-        $roleCodes = $this->roleCodes();
+        $codigosRoles = $this->codigosRoles();
         $totalUsers = User::query()->count();
-        $roleLabels = $this->roleLabels($roleCodes);
-        $roleDistribution = $this->roleDistribution();
+        $roleLabels = $this->roleLabels($codigosRoles);
+        $distribucionRoles = $this->distribucionRoles();
         $recentUsers = User::query()
             ->with(['customer:id,usuario_id,ciudad', 'rolesVigentes', 'rolesPorSedeVigentes'])
             ->latest('creado_en')
@@ -61,15 +61,15 @@ class GestionUsuariosController extends Controller
 
         return view('gestion.administracion.seguridad.usuarios.listar', [
             'users' => $users,
-            'roles' => $roleCodes,
+            'roles' => $codigosRoles,
             'roleLabels' => $roleLabels,
-            'roleScopes' => $this->roleScopes($roleCodes),
-            'roleDistribution' => $this->prepareRoleDistribution($roleDistribution),
+            'roleScopes' => $this->roleScopes($codigosRoles),
+            'roleDistribution' => $this->prepararDistribucionRoles($distribucionRoles),
             'recentUsers' => $recentUsers,
             'filters' => $filters,
-            'hasFilters' => $this->hasFilters($filters),
-            'userPresentation' => $this->prepareUserPresentation($users->getCollection()),
-            'recentUserPresentation' => $this->prepareUserPresentation($recentUsers),
+            'hasFilters' => $this->tieneFiltros($filters),
+            'userPresentation' => $this->prepararPresentacionUsuarios($users->getCollection()),
+            'recentUserPresentation' => $this->prepararPresentacionUsuarios($recentUsers),
             'exportUrls' => [
                 'pdf' => route('management.users.export', array_merge($request->query(), ['format' => 'pdf'])),
                 'csv' => route('management.users.export', array_merge($request->query(), ['format' => 'csv'])),
@@ -83,7 +83,7 @@ class GestionUsuariosController extends Controller
             'activeUsers' => $hasAccountStatus ? User::query()->where('activo', true)->count() : null,
             'inactiveUsers' => $hasAccountStatus ? User::query()->where('activo', false)->count() : null,
             'accountStatusAvailable' => $hasAccountStatus,
-            'rolesConfigured' => count($roleCodes),
+            'rolesConfigured' => count($codigosRoles),
             'currentMonthUsers' => User::query()->whereBetween('creado_en', [now()->startOfMonth(), now()->endOfMonth()])->count(),
         ]);
     }
@@ -102,8 +102,8 @@ class GestionUsuariosController extends Controller
         abort_unless(app(ServicioAutorizacion::class)->allowsGlobal($request->user(), 'gestion.seguridad.consultar'), 403);
 
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
-        $filters = $this->filters($request);
-        $users = $this->userQuery($filters)
+        $filters = $this->filtros($request);
+        $users = $this->consultaUsuarios($filters)
             ->with(['customer:id,usuario_id,documento,razon_social,tipo,ciudad', 'rolesVigentes', 'rolesPorSedeVigentes'])
             ->orderByDesc('creado_en')->orderByDesc('id')->limit(5000)->get();
         $rows = $users->map(function (User $user): array {
@@ -289,7 +289,7 @@ class GestionUsuariosController extends Controller
     /** @param array{buscar:?string,rol:?string,estado:?string,ciudad:?string,fecha:?string,por_pagina:int} $filters
      * @return Builder<User>
      */
-    private function userQuery(array $filters): Builder
+    private function consultaUsuarios(array $filters): Builder
     {
         return User::query()
             ->when($filters['buscar'], function (Builder $query, string $search): void {
@@ -308,11 +308,11 @@ class GestionUsuariosController extends Controller
     }
 
     /**
-     * Ejecuta la operación roleDistribution definida por la clase GestionUsuariosController.
+     * Obtiene la distribución de usuarios por rol.
      *
      * @return Collection Resultado de la operación.
      */
-    private function roleDistribution(): Collection
+    private function distribucionRoles(): Collection
     {
         $global = DB::table('usuarios_roles as asignacion')
             ->join('roles', 'roles.id', '=', 'asignacion.rol_id')
@@ -344,14 +344,14 @@ class GestionUsuariosController extends Controller
      * @param  Collection<int, User>  $accounts
      * @return array<int, array{initials:string, roles:string, avatarIndex:int, roleIndex:int}>
      */
-    private function prepareUserPresentation(Collection $accounts): array
+    private function prepararPresentacionUsuarios(Collection $accounts): array
     {
         $presentation = [];
 
         foreach ($accounts->values() as $index => $account) {
             $presentation[$account->getKey()] = [
-                'initials' => $this->initialsFor($account->nombre),
-                'roles' => $this->formatRoles($account),
+                'initials' => $this->inicialesPara($account->nombre),
+                'roles' => $this->formatearRoles($account),
                 'avatarIndex' => $index % 5,
                 'roleIndex' => $index % 7,
             ];
@@ -366,7 +366,7 @@ class GestionUsuariosController extends Controller
      * @param  Collection<int, object>  $distribution
      * @return array<int, object{rol:string, total:int}>
      */
-    private function prepareRoleDistribution(Collection $distribution): array
+    private function prepararDistribucionRoles(Collection $distribution): array
     {
         return $distribution->values()->map(function (object $item): object {
             $total = (int) $item->total;
@@ -379,7 +379,7 @@ class GestionUsuariosController extends Controller
     }
 
     /** @param array{buscar:?string,rol:?string,estado:?string,ciudad:?string,fecha:?string,por_pagina:int} $filters */
-    private function hasFilters(array $filters): bool
+    private function tieneFiltros(array $filters): bool
     {
         return filled($filters['buscar'])
             || filled($filters['rol'])
@@ -388,7 +388,7 @@ class GestionUsuariosController extends Controller
             || filled($filters['fecha']);
     }
 
-    private function formatRoles(User $account): string
+    private function formatearRoles(User $account): string
     {
         return $account->rolesVigentes
             ->concat($account->rolesPorSedeVigentes)
@@ -397,13 +397,13 @@ class GestionUsuariosController extends Controller
             ->join(', ') ?: 'Sin rol vigente';
     }
 
-    private function initialsFor(?string $name): string
+    private function inicialesPara(?string $name): string
     {
         return mb_strtoupper(mb_substr(trim((string) $name), 0, 1));
     }
 
     /** @return array{buscar:?string,rol:?string,estado:?string,ciudad:?string,fecha:?string,por_pagina:int} */
-    private function filters(Request $request): array
+    private function filtros(Request $request): array
     {
         $search = trim($request->string('buscar')->toString());
         $role = trim($request->string('rol')->toString());
@@ -414,7 +414,7 @@ class GestionUsuariosController extends Controller
 
         return [
             'buscar' => $search !== '' ? $search : null,
-            'rol' => in_array($role, $this->roleCodes(), true) ? $role : null,
+            'rol' => in_array($role, $this->codigosRoles(), true) ? $role : null,
             'estado' => in_array($status, ['activo', 'inactivo'], true) ? $status : null,
             'ciudad' => $city !== '' ? $city : null,
             'fecha' => in_array($date, ['hoy', 'ultimos_30', 'ultimos_90'], true) ? $date : null,
@@ -423,7 +423,7 @@ class GestionUsuariosController extends Controller
     }
 
     /** @return array<int,string> */
-    private function roleCodes(): array
+    private function codigosRoles(): array
     {
         if (Schema::hasTable('roles')) {
             $configuredRoles = DB::table('roles')->where('activo', true)->orderBy('codigo')->pluck('codigo')->all();
@@ -434,23 +434,23 @@ class GestionUsuariosController extends Controller
         return [];
     }
 
-    /** @param array<int,string> $roleCodes
+    /** @param array<int,string> $codigosRoles
      * @return array<string,string>
      */
-    private function roleLabels(array $roleCodes): array
+    private function roleLabels(array $codigosRoles): array
     {
         return Schema::hasTable('roles')
-            ? DB::table('roles')->whereIn('codigo', $roleCodes)->pluck('nombre', 'codigo')->all()
+            ? DB::table('roles')->whereIn('codigo', $codigosRoles)->pluck('nombre', 'codigo')->all()
             : [];
     }
 
-    /** @param array<int,string> $roleCodes
+    /** @param array<int,string> $codigosRoles
      * @return array<string,string>
      */
-    private function roleScopes(array $roleCodes): array
+    private function roleScopes(array $codigosRoles): array
     {
         return Schema::hasTable('roles')
-            ? DB::table('roles')->whereIn('codigo', $roleCodes)->pluck('alcance_permitido', 'codigo')->all()
+            ? DB::table('roles')->whereIn('codigo', $codigosRoles)->pluck('alcance_permitido', 'codigo')->all()
             : [];
     }
 }

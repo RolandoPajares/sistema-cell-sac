@@ -45,8 +45,8 @@ class DevolucionGarantiaController extends Controller
      */
     public function index(Request $request): View
     {
-        $filters = $this->filters($request);
-        $returnsQuery = $this->applyFilters($this->authorization->scopeRecordsFor(
+        $filters = $this->filtros($request);
+        $returnsQuery = $this->aplicarFiltros($this->authorization->scopeRecordsFor(
             DevolucionGarantia::query()->where('activo', true),
             $request->user(),
             'gestion.devoluciones.consultar',
@@ -115,7 +115,7 @@ class DevolucionGarantiaController extends Controller
         $module['operacion_ui']['panels'][2]['empty'] = $resolvedCount > 0
             ? $resolvedCount.' caso(s) resuelto(s) registrados en MariaDB.'
             : 'No hay casos resueltos registrados.';
-        $module['operacion_ui']['rows'] = $returns->getCollection()->map(fn (DevolucionGarantia $return): array => $this->tableRow($return))->all();
+        $module['operacion_ui']['rows'] = $returns->getCollection()->map(fn (DevolucionGarantia $return): array => $this->filaTabla($return))->all();
 
         return view('gestion.comercial.devoluciones-garantias.listar', compact('module'));
     }
@@ -130,7 +130,7 @@ class DevolucionGarantiaController extends Controller
     public function store(GuardarDevolucionGarantiaRequest $request, RegistradorAuditoria $audit): RedirectResponse
     {
         $order = Pedido::query()->findOrFail($request->integer('pedido_id'));
-        $this->assertOrderInScope($request, $order, 'gestion.devoluciones.crear');
+        $this->comprobarPedidoEnAlcance($request, $order, 'gestion.devoluciones.crear');
 
         DB::transaction(function () use ($request, $order, $audit): void {
             $returnRequest = DevolucionGarantia::create($request->validated() + [
@@ -162,7 +162,7 @@ class DevolucionGarantiaController extends Controller
             is_numeric($devolucionGarantia->sede_id) ? (int) $devolucionGarantia->sede_id : null,
         ), 403);
         $order = Pedido::query()->findOrFail($request->integer('pedido_id'));
-        $this->assertOrderInScope($request, $order, 'gestion.devoluciones.actualizar');
+        $this->comprobarPedidoEnAlcance($request, $order, 'gestion.devoluciones.actualizar');
 
         abort_unless($devolucionGarantia->activo, 404);
         DB::transaction(function () use ($request, $order, $devolucionGarantia, $audit): void {
@@ -213,14 +213,14 @@ class DevolucionGarantiaController extends Controller
     public function export(Request $request, ExportadorTabular $exporter, RegistradorAuditoria $audit, string $format = 'csv'): Response|StreamedResponse
     {
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
-        $returns = $this->applyFilters($this->authorization->scopeRecordsFor(
+        $returns = $this->aplicarFiltros($this->authorization->scopeRecordsFor(
             DevolucionGarantia::query()->where('activo', true),
             $request->user(),
             'gestion.devoluciones.exportar',
-        ), $this->filters($request))
+        ), $this->filtros($request))
             ->with(['customer:id,nombre_contacto,razon_social', 'product:id,nombre', 'sale:id,codigo'])
-            ->when($this->filters($request)['orden'] === 'antiguos', fn (Builder $query): Builder => $query->orderBy('fecha_solicitud')->orderBy('id'))
-            ->when($this->filters($request)['orden'] !== 'antiguos', fn (Builder $query): Builder => $query->latest('fecha_solicitud')->latest('id'))
+            ->when($this->filtros($request)['orden'] === 'antiguos', fn (Builder $query): Builder => $query->orderBy('fecha_solicitud')->orderBy('id'))
+            ->when($this->filtros($request)['orden'] !== 'antiguos', fn (Builder $query): Builder => $query->latest('fecha_solicitud')->latest('id'))
             ->get();
         $rows = $returns->map(static fn (DevolucionGarantia $returnRequest): array => [
             $returnRequest->codigo,
@@ -250,7 +250,7 @@ class DevolucionGarantiaController extends Controller
      * @param  mixed  $permission  Parámetro recibido por la operación.
      * @return void Resultado de la operación.
      */
-    private function assertOrderInScope(Request $request, Pedido $order, string $permission): void
+    private function comprobarPedidoEnAlcance(Request $request, Pedido $order, string $permission): void
     {
         abort_unless($this->authorization->allowsRecord(
             $request->user(),
@@ -269,7 +269,7 @@ class DevolucionGarantiaController extends Controller
     /**
      * @return array{buscar:?string,periodo:string,tipo:?string,estado:?string,desde:CarbonImmutable,hasta:CarbonImmutable}
      */
-    private function filters(Request $request): array
+    private function filtros(Request $request): array
     {
         $period = $request->string('periodo')->toString();
         $today = CarbonImmutable::today();
@@ -298,7 +298,7 @@ class DevolucionGarantiaController extends Controller
      * @param  array{buscar:?string,periodo:string,tipo:?string,estado:?string,desde:CarbonImmutable,hasta:CarbonImmutable}  $filters
      * @return Builder<DevolucionGarantia>
      */
-    private function applyFilters(Builder $query, array $filters): Builder
+    private function aplicarFiltros(Builder $query, array $filters): Builder
     {
         return $query
             ->when($filters['buscar'], function (Builder $query, string $search): void {
@@ -323,7 +323,7 @@ class DevolucionGarantiaController extends Controller
     /**
      * @return array{id:int,cells:array<int,string|array{value:string,tone:string}>,record:array<string,mixed>,edit_url:string,delete_url:string}
      */
-    private function tableRow(DevolucionGarantia $returnRequest): array
+    private function filaTabla(DevolucionGarantia $returnRequest): array
     {
         $record = [
             'id' => $returnRequest->id,
@@ -355,7 +355,7 @@ class DevolucionGarantiaController extends Controller
                 ['value' => $returnRequest->tipo, 'tone' => 'blue'],
                 Str::limit($returnRequest->motivo, 36),
                 $returnRequest->fecha_solicitud?->format('d/m/Y') ?: '—',
-                ['value' => $returnRequest->estado, 'tone' => $this->statusTone($returnRequest->estado)],
+                ['value' => $returnRequest->estado, 'tone' => $this->tonoEstado($returnRequest->estado)],
             ],
             'record' => $record,
             'edit_url' => route('management.returns.update', $returnRequest),
@@ -369,7 +369,7 @@ class DevolucionGarantiaController extends Controller
      * @param  mixed  $status  Parámetro recibido por la operación.
      * @return string Resultado de la operación.
      */
-    private function statusTone(string $status): string
+    private function tonoEstado(string $status): string
     {
         return match ($status) {
             'Aprobada', 'Resuelta' => 'green',

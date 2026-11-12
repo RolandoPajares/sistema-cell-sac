@@ -17,7 +17,7 @@
                 <div class="tc-em__form-grid" data-em-store-fields="general">
                     <label>Nombre de la tienda <em>*</em><input type="text" name="configuracion[general][nombre_tienda]" value="{{ data_get($configuracionTienda, 'general.nombre_tienda', $empresa->nombre_comercial ?: $empresa->razon_social) }}" required maxlength="180"></label>
                     <label>Dominio / URL<input type="url" name="configuracion[general][dominio]" value="{{ data_get($configuracionTienda, 'general.dominio') }}" placeholder="Dominio no registrado en MariaDB"></label>
-                    <label>Correo de contacto<input type="email" name="configuracion[general][correo]" value="{{ data_get($configuracionTienda, 'general.correo') }}" placeholder="Correo no registrado"></label>
+                    <label>Correo de contacto<input type="email" name="configuracion[general][correo]" value="{{ data_get($configuracionTienda, 'general.correo') }}" inputmode="email" placeholder="Correo no registrado"></label>
                     <label>Teléfono de contacto<input type="tel" name="configuracion[general][telefono]" value="{{ data_get($configuracionTienda, 'general.telefono') }}" placeholder="Teléfono no registrado"></label>
                     <label class="tc-em__form-full">Descripción de la tienda<textarea name="configuracion[general][descripcion]" placeholder="Descripción no registrada en MariaDB">{{ data_get($configuracionTienda, 'general.descripcion') }}</textarea></label>
                 </div>
@@ -67,7 +67,7 @@
                             <option value="pendiente" @selected(data_get($configuracionTienda, 'notificaciones.cambio_estado' )==='pendiente' )>Pendiente de integración</option>
                             <option value="correo" @selected(data_get($configuracionTienda, 'notificaciones.cambio_estado' )==='correo' )>Correo electrónico</option>
                         </select></label>
-                    <label class="tc-em__form-full">Correo remitente<input type="email" name="configuracion[notificaciones][correo_remitente]" value="{{ data_get($configuracionTienda, 'notificaciones.correo_remitente') }}" placeholder="notificaciones@ejemplo.pe"></label>
+                            <label class="tc-em__form-full">Correo remitente<input type="email" name="configuracion[notificaciones][correo_remitente]" value="{{ data_get($configuracionTienda, 'notificaciones.correo_remitente') }}" inputmode="email" placeholder="notificaciones@ejemplo.pe"></label>
                 </div>
                 <div class="tc-em__form-grid" data-em-store-fields="seo" hidden>
                     <label class="tc-em__form-full">Título SEO<input type="text" name="configuracion[seo][titulo]" value="{{ data_get($configuracionTienda, 'seo.titulo') }}" placeholder="{{ $empresa->nombre_comercial ?: $empresa->razon_social }}"></label>

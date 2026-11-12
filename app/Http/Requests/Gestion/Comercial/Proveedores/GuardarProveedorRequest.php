@@ -14,6 +14,25 @@ use Illuminate\Validation\Rule;
 class GuardarProveedorRequest extends FormRequest
 {
     /**
+     * Completa el nombre persistible a partir de los campos visibles del formulario.
+     */
+    protected function prepareForValidation(): void
+    {
+        if (trim((string) $this->input('nombre')) !== '') {
+            return;
+        }
+
+        $nombre = $this->input('tipo_persona') === 'juridica'
+            ? trim((string) $this->input('razon_social'))
+            : trim(implode(' ', array_filter([
+                trim((string) $this->input('nombres')),
+                trim((string) $this->input('apellidos')),
+            ])));
+
+        $this->merge(['nombre' => $nombre]);
+    }
+
+    /**
      * Determina si la operación cumple las condiciones de autorización o validación.
      *
      * @return bool Resultado de la operación.

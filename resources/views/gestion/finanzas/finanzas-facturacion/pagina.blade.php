@@ -11,7 +11,11 @@
         </div>
         <div class="tc-ff__header-actions">
             @foreach ($pagina['acciones'] as $accion)
-                <button class="tc-ff__button {{ ($accion['primaria'] ?? false) ? 'tc-ff__button--primary' : '' }}" type="button" @if ($accion['ruta_real'] && !empty($pagina['rutaReal'])) data-ff-navigate="{{ route($pagina['rutaReal'], ['financeAction' => $accion['ruta_real']]) }}" @elseif ($accion['modal']) data-ff-open="{{ $accion['modal'] }}" @else disabled title="Disponible al conectar la operación real" @endif><i class="bi {{ $accion['icono'] }}" aria-hidden="true"></i>{{ $accion['texto'] }}</button>
+                @if (! empty($accion['ancla']))
+                    <button class="tc-ff__button {{ ($accion['primaria'] ?? false) ? 'tc-ff__button--primary' : '' }}" type="button" data-ff-focus="{{ $accion['ancla'] }}"><i class="bi {{ $accion['icono'] }}" aria-hidden="true"></i>{{ $accion['texto'] }}</button>
+                    @continue
+                @endif
+                <button class="tc-ff__button {{ ($accion['primaria'] ?? false) ? 'tc-ff__button--primary' : '' }}" type="button" @if (! empty($accion['ruta_real']) && ! empty($pagina['rutaReal'])) data-ff-navigate="{{ route($pagina['rutaReal'], ['financeAction' => $accion['ruta_real']]) }}" @elseif (! empty($accion['modal'])) data-ff-open="{{ $accion['modal'] }}" @else disabled title="Operación no disponible para este módulo" @endif><i class="bi {{ $accion['icono'] }}" aria-hidden="true"></i>{{ $accion['texto'] }}</button>
             @endforeach
         </div>
     </header>
@@ -43,9 +47,9 @@
                 @endforeach
             </tbody></table></div><p class="tc-ff__empty" data-ff-empty hidden>{{ ($pagina['datosReales'] ?? false) ? 'No hay cuentas registradas que coincidan con los filtros.' : 'No hay registros de ejemplo que coincidan con los filtros.' }}</p>
         </article>
-        <aside class="tc-ff__card tc-ff__aside"><h2><i class="bi {{ $pagina['aside']['icono'] }}" aria-hidden="true"></i>{{ $pagina['aside']['titulo'] }}</h2><p>{{ $pagina['aside']['descripcion'] ?? 'Panel ilustrativo.' }}</p>
+        <aside id="cuentas-financieras-aside" class="tc-ff__card tc-ff__aside"><h2><i class="bi {{ $pagina['aside']['icono'] }}" aria-hidden="true"></i>{{ $pagina['aside']['titulo'] }}</h2><p>{{ $pagina['aside']['descripcion'] ?? 'Panel ilustrativo.' }}</p>
             @if (($pagina['clave'] ?? '') === 'cuentas' && ($pagina['datosReales'] ?? false))
-                <form class="tc-ff__form-grid" method="post" action="{{ route('management.payments.accounts.payables.store') }}">
+                <form id="cuenta-por-pagar-form" class="tc-ff__form-grid" method="post" action="{{ route('management.payments.accounts.payables.store') }}">
                     @csrf
                     <label class="tc-ff__form-full">Compra recibida <em>*</em><select name="compra_id" required><option value="">Selecciona una compra recibida</option>@foreach ($pagina['comprasRecibidas'] as $compra)<option value="{{ $compra->id }}">{{ $compra->numero_referencia ?: 'Compra #'.$compra->id }} · {{ $compra->nombre }} · {{ $compra->moneda }} {{ number_format((float) $compra->total, 2) }}</option>@endforeach</select></label>
                     <label class="tc-ff__form-full">Fecha de vencimiento <em>*</em><input type="date" name="vence_en" min="{{ now()->toDateString() }}" required></label>
@@ -55,7 +59,7 @@
 
 
                 @if ($pagina['cuentasPorPagar']->isNotEmpty())
-                    <form class="tc-ff__form-grid" method="post" action="{{ route('management.payments.accounts.payables.update') }}" data-account-application>
+                    <form id="aplicar-pago-cuenta-form" class="tc-ff__form-grid" method="post" action="{{ route('management.payments.accounts.payables.update') }}" data-account-application>
                         @csrf
                         <label class="tc-ff__form-full">Cuenta por pagar <em>*</em><select name="cuenta_pagar_id" required data-account-select><option value="">Selecciona la cuenta</option>@foreach ($pagina['cuentasPorPagar'] as $cuenta)<option value="{{ $cuenta['cuenta_id'] }}">{{ $cuenta['celdas'][0] }} · {{ $cuenta['celdas'][1] }} · saldo {{ $cuenta['celdas'][5] }}</option>@endforeach</select></label>
                         <label class="tc-ff__form-full">Pago ya registrado <em>*</em><select name="pago_id" required data-registered-payment-select><option value="">Selecciona un pago registrado</option>@foreach ($pagina['pagosPorCuenta'] as $cuentaId => $pagos)<optgroup label="Cuenta {{ $cuentaId }}">@foreach ($pagos as $pago)<option value="{{ $pago->id }}" data-cuenta="{{ $cuentaId }}">{{ $pago->codigo }} · {{ $pago->moneda }} {{ number_format((float) $pago->importe, 2) }}</option>@endforeach</optgroup>@endforeach</select></label>
@@ -65,7 +69,7 @@
                     </form>
                 @endif
                 @if ($pagina['cuentasPorCobrar']->isNotEmpty())
-                    <form class="tc-ff__form-grid" method="post" action="{{ route('management.payments.accounts.receivables.update') }}" data-account-application>
+                    <form id="aplicar-cobro-cuenta-form" class="tc-ff__form-grid" method="post" action="{{ route('management.payments.accounts.receivables.update') }}" data-account-application>
                         @csrf
                         <label class="tc-ff__form-full">Cuenta por cobrar <em>*</em><select name="cuenta_cobrar_id" required data-account-select><option value="">Selecciona la cuenta</option>@foreach ($pagina['cuentasPorCobrar'] as $cuenta)<option value="{{ $cuenta['cuenta_id'] }}">{{ $cuenta['celdas'][0] }} · {{ $cuenta['celdas'][1] }} · saldo {{ $cuenta['celdas'][5] }}</option>@endforeach</select></label>
                         <label class="tc-ff__form-full">Cobro ya registrado <em>*</em><select name="pago_id" required data-registered-payment-select><option value="">Selecciona un cobro registrado</option>@foreach ($pagina['pagosCobroPorCuenta'] as $cuentaId => $pagos)<optgroup label="Cuenta {{ $cuentaId }}">@foreach ($pagos as $pago)<option value="{{ $pago->id }}" data-cuenta="{{ $cuentaId }}">{{ $pago->codigo }} · {{ $pago->moneda }} {{ number_format((float) $pago->importe, 2) }}</option>@endforeach</optgroup>@endforeach</select></label>

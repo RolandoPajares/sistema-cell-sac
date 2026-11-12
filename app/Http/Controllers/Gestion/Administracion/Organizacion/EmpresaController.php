@@ -15,18 +15,18 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 /**
- * Define la responsabilidad de la clase EmpresaController dentro de su m�dulo.
+ * Define la responsabilidad de la clase EmpresaController dentro de su módulo.
  *
  * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
  */
 class EmpresaController extends Controller
 {
     /**
-     * Obtiene y prepara la informaci�n solicitada para la operaci�n.
+     * Obtiene y prepara la información solicitada para la operación.
      *
-     * @param  mixed  $request  Par�metro recibido por la operaci�n.
-     * @param  mixed  $autorizacion  Par�metro recibido por la operaci�n.
-     * @return View Resultado de la operaci�n.
+     * @param  mixed  $request  Parámetro recibido por la operación.
+     * @param  mixed  $autorizacion  Parámetro recibido por la operación.
+     * @return View Resultado de la operación.
      */
     public function index(Request $request, ServicioAutorizacion $autorizacion): View
     {
@@ -58,9 +58,9 @@ class EmpresaController extends Controller
     }
 
     /**
-     * Actualiza la informaci�n existente con los datos recibidos.
+     * Actualiza la información existente con los datos recibidos.
      *
-     * @return mixed Resultado de la operaci�n.
+     * @return mixed Resultado de la operación.
      */
     public function update(
         ActualizarEmpresaRequest $request,
@@ -94,7 +94,7 @@ class EmpresaController extends Controller
                     'nombre_comercial' => $empresa->nombre_comercial,
                     'ruc' => $empresa->ruc,
                     'moneda_base' => $empresa->moneda_base,
-                ], $request->ip(), observations: 'Datos de empresa actualizados desde el panel de organizaci�n.',
+                ], $request->ip(), observations: 'Datos de empresa actualizados desde el panel de organización.',
                 scope: ['empresa_id' => (int) $empresa->getKey()],
             );
         }, 3);

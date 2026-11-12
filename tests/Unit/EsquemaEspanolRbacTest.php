@@ -341,7 +341,7 @@ it('denies a legacy administrator when RBAC is not initialized', function (): vo
         ->and($authorization->allowsGlobal($user, 'gestion.pedidos.consultar'))->toBeFalse();
 
     $this->actingAs($user)->get(route('orders.index'))->assertForbidden();
-    expect(fn () => app(ServicioPedidos::class)->checkout($user, [1 => 1], null, null, str_repeat('a', 64)))
+    expect(fn () => app(ServicioPedidos::class)->finalizarCompra($user, [1 => 1], null, null, str_repeat('a', 64)))
         ->toThrow(HttpException::class);
 });
 
@@ -1034,7 +1034,7 @@ it('adjusts the warehouse balance to zero atomically without fabricating variant
     DB::table('productos')->insert(['id' => 1, 'nombre' => 'Producto de prueba', 'empresa_id' => 1, 'existencias' => 99]);
     DB::table('existencias_almacen')->insert(['id' => 1, 'almacen_id' => 1, 'producto_id' => 1, 'empresa_id' => 1, 'sede_id' => 1, 'cantidad_fisica' => 5, 'cantidad_reservada' => 0]);
 
-    $movement = app(ServicioInventario::class)->adjust(Producto::findOrFail(1), 'ajuste', 0, 'Conteo', $user);
+    $movement = app(ServicioInventario::class)->ajustar(Producto::findOrFail(1), 'ajuste', 0, 'Conteo', $user);
 
     expect((float) $movement->cantidad)->toBe(-5.0)
         ->and((int) DB::table('existencias_almacen')->where('id', 1)->value('cantidad_fisica'))->toBe(0)
@@ -1042,25 +1042,25 @@ it('adjusts the warehouse balance to zero atomically without fabricating variant
         ->and(DB::table('registros_auditoria')->where('accion', 'inventory.adjusted')->count())->toBe(1)
         ->and(DB::table('variantes_productos')->count())->toBe(0);
 
-    $ajusteSinDiferencia = app(ServicioInventario::class)->adjust(Producto::findOrFail(1), 'ajuste', 0, 'Conteo repetido', $user);
+    $ajusteSinDiferencia = app(ServicioInventario::class)->ajustar(Producto::findOrFail(1), 'ajuste', 0, 'Conteo repetido', $user);
     expect($ajusteSinDiferencia)->toBeNull()
         ->and(DB::table('movimientos_inventario')->count())->toBe(1)
         ->and(DB::table('registros_auditoria')->count())->toBe(1);
 
     DB::table('existencias_almacen')->where('id', 1)->update(['cantidad_fisica' => 2, 'cantidad_reservada' => 1]);
-    expect(fn () => app(ServicioInventario::class)->adjust(Producto::findOrFail(1), 'ajuste', 0, 'Conteo', $user))
+    expect(fn () => app(ServicioInventario::class)->ajustar(Producto::findOrFail(1), 'ajuste', 0, 'Conteo', $user))
         ->toThrow(HttpException::class);
     expect((int) DB::table('existencias_almacen')->where('id', 1)->value('cantidad_fisica'))->toBe(2)
         ->and(DB::table('movimientos_inventario')->count())->toBe(1)
         ->and(DB::table('registros_auditoria')->count())->toBe(1);
 
     DB::table('productos')->insert(['id' => 2, 'nombre' => 'Producto nuevo', 'empresa_id' => 1, 'existencias' => 3]);
-    DB::transaction(fn () => app(ServicioInventario::class)->registerNewProduct(Producto::findOrFail(2), $user));
+    DB::transaction(fn () => app(ServicioInventario::class)->registrarProductoNuevo(Producto::findOrFail(2), $user));
     expect((int) DB::table('existencias_almacen')->where('producto_id', 2)->value('cantidad_fisica'))->toBe(0)
         ->and((int) DB::table('productos')->where('id', 2)->value('existencias'))->toBe(0)
         ->and(DB::table('movimientos_inventario')->count())->toBe(1)
         ->and(DB::table('variantes_productos')->count())->toBe(0);
-    app(ServicioInventario::class)->adjust(Producto::findOrFail(2), 'entrada', 3, 'Ingreso desde inventario', $user);
+    app(ServicioInventario::class)->ajustar(Producto::findOrFail(2), 'entrada', 3, 'Ingreso desde inventario', $user);
     expect((int) DB::table('existencias_almacen')->where('producto_id', 2)->value('cantidad_fisica'))->toBe(3)
         ->and(DB::table('movimientos_inventario')->count())->toBe(2);
 
@@ -1100,24 +1100,24 @@ it('adjusts the warehouse balance to zero atomically without fabricating variant
         ['rol_id' => 1, 'permiso_id' => 2, 'alcance' => 'sede'],
         ['rol_id' => 1, 'permiso_id' => 3, 'alcance' => 'sede'],
     ]);
-    $order = app(ServicioPedidos::class)->checkout($user, [2 => 1], null, null, str_repeat('a', 64));
+    $order = app(ServicioPedidos::class)->finalizarCompra($user, [2 => 1], null, null, str_repeat('a', 64));
     expect($order->canal)->toBe('ecommerce')
         ->and($order->estado)->toBe('Pendiente')
         ->and((int) DB::table('existencias_almacen')->where('producto_id', 2)->value('cantidad_fisica'))->toBe(2);
 
-    $replayedOrder = app(ServicioPedidos::class)->checkout($user, [2 => 1], null, null, str_repeat('a', 64));
+    $replayedOrder = app(ServicioPedidos::class)->finalizarCompra($user, [2 => 1], null, null, str_repeat('a', 64));
     expect($replayedOrder->id)->toBe($order->id)
         ->and(DB::table('pedidos')->count())->toBe(1)
         ->and((int) DB::table('existencias_almacen')->where('producto_id', 2)->value('cantidad_fisica'))->toBe(2);
 
-    app(ServicioPedidos::class)->updateStatus($order, $user, 'Cancelado', null);
-    app(ServicioPedidos::class)->updateStatus($order, $user, 'Cancelado', null);
+    app(ServicioPedidos::class)->actualizarEstado($order, $user, 'Cancelado', null);
+    app(ServicioPedidos::class)->actualizarEstado($order, $user, 'Cancelado', null);
     expect((int) DB::table('existencias_almacen')->where('producto_id', 2)->value('cantidad_fisica'))->toBe(3)
         ->and(DB::table('movimientos_inventario')->count())->toBe(4);
 
     DB::table('existencias_almacen')->where('producto_id', 2)->update(['cantidad_fisica' => 1]);
     expect((int) DB::table('productos')->where('id', 2)->value('existencias'))->toBe(3)
-        ->and(fn () => app(ServicioPedidos::class)->checkout($user, [2 => 2], null, null, str_repeat('f', 64)))
+        ->and(fn () => app(ServicioPedidos::class)->finalizarCompra($user, [2 => 2], null, null, str_repeat('f', 64)))
         ->toThrow(HttpException::class);
     $this->actingAs($user)->postJson(route('cart.add', 2), ['cantidad' => 2])->assertStatus(422);
     Schema::create('campanas_publicitarias', function (Blueprint $table): void {
@@ -1154,7 +1154,7 @@ it('adjusts the warehouse balance to zero atomically without fabricating variant
     expect(DB::table('pedidos')->count())->toBe(1);
     $this->post(route('checkout'), ['checkout_token' => $token])->assertRedirect();
     $this->postJson(route('checkout'), ['checkout_token' => $token])->assertStatus(422);
-    app(ServicioPedidos::class)->checkout($user, [2 => 1], 'PRUEBA', null, $token);
+    app(ServicioPedidos::class)->finalizarCompra($user, [2 => 1], 'PRUEBA', null, $token);
     expect(DB::table('pedidos')->count())->toBe(2)
         ->and((int) DB::table('existencias_almacen')->where('producto_id', 2)->value('cantidad_fisica'))->toBe(2)
         ->and((int) DB::table('cupones')->where('codigo', 'PRUEBA')->value('usos'))->toBe(1);
@@ -1164,12 +1164,12 @@ it('adjusts the warehouse balance to zero atomically without fabricating variant
         $table->unsignedBigInteger('pedido_id');
     });
     DB::table('pagos')->insert(['pedido_id' => 2]);
-    expect(fn () => app(ServicioPedidos::class)->updateStatus(Pedido::findOrFail(2), $user, 'Cancelado', null))
+    expect(fn () => app(ServicioPedidos::class)->actualizarEstado(Pedido::findOrFail(2), $user, 'Cancelado', null))
         ->toThrow(HttpException::class);
     expect((int) DB::table('existencias_almacen')->where('producto_id', 2)->value('cantidad_fisica'))->toBe(2);
     DB::table('pagos')->where('pedido_id', 2)->delete();
     DB::table('movimientos_inventario')->where('documento_tipo', 'pedido')->where('documento_id', '2')->update(['documento_tipo' => 'historico']);
-    expect(fn () => app(ServicioPedidos::class)->updateStatus(Pedido::findOrFail(2), $user, 'Cancelado', null))
+    expect(fn () => app(ServicioPedidos::class)->actualizarEstado(Pedido::findOrFail(2), $user, 'Cancelado', null))
         ->toThrow(HttpException::class);
     expect((int) DB::table('existencias_almacen')->where('producto_id', 2)->value('cantidad_fisica'))->toBe(2);
     DB::table('movimientos_inventario')->where('documento_tipo', 'historico')->where('documento_id', '2')->update(['documento_tipo' => 'pedido']);
@@ -1177,7 +1177,7 @@ it('adjusts the warehouse balance to zero atomically without fabricating variant
     Schema::table('variantes_productos', fn (Blueprint $table) => $table->boolean('controla_serie')->default(false));
     DB::table('variantes_productos')->insert(['id' => 2, 'producto_id' => 2, 'controla_serie' => true]);
     DB::table('existencias_almacen')->where('producto_id', 2)->update(['variante_id' => 2]);
-    expect(fn () => app(ServicioPedidos::class)->checkout($user, [2 => 1], null, null, str_repeat('e', 64)))
+    expect(fn () => app(ServicioPedidos::class)->finalizarCompra($user, [2 => 1], null, null, str_repeat('e', 64)))
         ->toThrow(HttpException::class);
     $this->postJson(route('cart.add', 2), ['cantidad' => 1])->assertStatus(422);
     $this->withSession(['cart' => [2 => 1]])->get(route('checkout.form'))
@@ -1189,7 +1189,7 @@ it('adjusts the warehouse balance to zero atomically without fabricating variant
     $this->postJson(route('cart.add', 2), ['cantidad' => 1])->assertForbidden();
 
     Schema::drop('registros_auditoria');
-    expect(fn () => app(ServicioInventario::class)->adjust(Producto::findOrFail(1), 'ajuste', 1, 'Conteo', $user))
+    expect(fn () => app(ServicioInventario::class)->ajustar(Producto::findOrFail(1), 'ajuste', 1, 'Conteo', $user))
         ->toThrow(QueryException::class);
     expect((int) DB::table('existencias_almacen')->where('id', 1)->value('cantidad_fisica'))->toBe(2)
         ->and(DB::table('movimientos_inventario')->count())->toBe(5);
@@ -1198,7 +1198,7 @@ it('adjusts the warehouse balance to zero atomically without fabricating variant
     DB::table('almacenes')->insert(['id' => 2, 'sede_id' => 2]);
     DB::table('variantes_productos')->insert(['id' => 1, 'producto_id' => 1, 'existencias' => 2]);
     DB::table('existencias_almacen')->insert(['almacen_id' => 2, 'producto_id' => 1, 'variante_id' => 1, 'empresa_id' => 1, 'sede_id' => 2, 'cantidad_fisica' => 2, 'cantidad_reservada' => 0]);
-    expect(fn () => app(ServicioInventario::class)->adjust(Producto::findOrFail(1), 'entrada', 1, 'Conteo', $user))
+    expect(fn () => app(ServicioInventario::class)->ajustar(Producto::findOrFail(1), 'entrada', 1, 'Conteo', $user))
         ->toThrow(HttpException::class);
     expect((int) DB::table('existencias_almacen')->where('id', 1)->value('cantidad_fisica'))->toBe(2);
 });
@@ -1712,7 +1712,7 @@ it('confirms a physical sale once, deducts stock, and does not create an order o
     $this->post(route('management.sales.store'), $datos)->assertRedirect(route('management.sales'));
     $venta = DB::table('ventas')->first();
     expect($venta->canal)->toBe('presencial')->and($venta->estado)->toBe('confirmada')
-        ->and((float) $venta->total)->toBe(24.70)->and($venta->observaciones)->toBe('Entrega directa')
+        ->and((float) $venta->total)->toBe(29.15)->and($venta->observaciones)->toBe('Entrega directa')
         ->and(DB::table('pedidos')->count())->toBe(0)->and(DB::table('pagos')->count())->toBe(0)
         ->and((int) DB::table('existencias_almacen')->value('cantidad_fisica'))->toBe(3)
         ->and(DB::table('movimientos_inventario')->where('documento_tipo', 'venta')->count())->toBe(1)

@@ -1883,6 +1883,42 @@
   }
 }
 
+.productos-dialog:has(.productos-import-form) { width: min(100% - 18px, 920px); max-height: calc(100vh - 18px); border-radius: 22px; }
+.productos-dialog:has(.productos-import-form) .productos-dialog-card { max-height: calc(100vh - 18px); border-radius: 22px; }
+.productos-import-header { display: flex; align-items: center; gap: 18px; padding: 24px 30px; color: #fff; background: linear-gradient(130deg, #0644b6, #087cf2); }
+.productos-import-brand { display: grid; width: 62px; height: 62px; place-items: center; border-right: 2px solid #ffffff80; color: #fff; font-size: 2.5rem; }
+.productos-import-header > div:nth-child(2) { flex: 1; }
+.productos-import-header h2 { margin: 0; color: #fff; font-size: clamp(1.35rem, 3.5vw, 2.1rem); }
+.productos-import-header p { margin: 3px 0 0; color: #e1efff; font-size: .95rem; }
+.productos-import-form { display: grid; gap: 20px; padding: 26px 32px 30px; }
+.productos-import-step { padding: 20px 24px; border: 1px solid #d5e5f8; border-radius: 18px; background: linear-gradient(180deg, #fff, #f7fbff); }
+.productos-import-step-heading { display: flex; align-items: flex-start; gap: 18px; }
+.productos-import-step-heading > span { display: grid; flex: 0 0 58px; width: 58px; height: 58px; place-items: center; border-radius: 16px; color: #0874ed; background: #e0efff; font-size: 1.9rem; }
+.productos-import-step-heading h3 { margin: 0; color: #102b62; font-size: clamp(1.15rem, 3vw, 1.7rem); }
+.productos-import-step-heading p { margin: 5px 0 0; color: #536c98; font-size: .98rem; line-height: 1.45; }
+.productos-import-template { display: flex; align-items: center; gap: 16px; margin: 22px 0 0 76px; padding: 17px 22px; border: 2px solid #2f8dff; border-radius: 17px; color: #102b62; background: #f5faff; text-decoration: none; }
+.productos-import-template > i:first-child { color: #079145; font-size: 2.3rem; }
+.productos-import-template span { display: grid; flex: 1; gap: 3px; }
+.productos-import-template strong { font-size: 1rem; }
+.productos-import-template small { color: #5c739b; font-size: .82rem; }
+.productos-import-template > i:last-child { display: grid; width: 48px; height: 48px; place-items: center; border-radius: 14px; color: #0874ed; background: #e8f3ff; font-size: 1.4rem; }
+.productos-import-drop { display: grid; min-height: 265px; place-items: center; align-content: center; gap: 8px; margin: 22px 0 0 0; padding: 25px; border: 2px dashed #167cff; border-radius: 18px; color: #102b62; background: #f3f8ff; text-align: center; cursor: pointer; }
+.productos-import-drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.productos-import-drop > i { color: #079145; font-size: 4rem; }
+.productos-import-drop strong { color: #1457d7; font-size: clamp(1.2rem, 3vw, 1.7rem); }
+.productos-import-drop em { color: #405b8a; font-style: normal; }
+.productos-import-drop span { display: inline-flex; align-items: center; gap: 9px; padding: 11px 24px; border: 2px solid #77b5ff; border-radius: 12px; color: #1457d7; background: #fff; font-size: 1rem; font-weight: 800; }
+.productos-import-drop small { color: #526d99; font-size: .82rem; }
+.productos-import-meta { display: flex; align-items: center; gap: 18px; margin-top: 16px; color: #213c70; font-size: .8rem; }
+.productos-import-meta span, .productos-import-meta strong { display: flex; align-items: center; gap: 7px; }
+.productos-import-meta i { color: #2460c9; }
+.productos-import-meta strong { margin-left: auto; padding: 10px 14px; border-radius: 999px; color: #1457d7; background: #e7f1ff; }
+.productos-import-note { display: flex; align-items: center; gap: 10px; margin: 0; padding: 13px 15px; border-radius: 12px; color: #274b83; background: #edf5ff; font-size: .85rem; }
+.productos-import-note i { color: #0874ed; font-size: 1.25rem; }
+.productos-import-footer { display: flex; justify-content: flex-end; gap: 14px; padding-top: 16px; border-top: 1px solid #e0eaf5; }
+.productos-import-footer button { min-width: 170px; min-height: 50px; border-radius: 12px; font-size: .9rem; }
+@media (max-width: 650px) { .productos-import-header, .productos-import-form { padding-right: 16px; padding-left: 16px; } .productos-import-step { padding: 16px; } .productos-import-template { margin-left: 0; } .productos-import-meta { align-items: flex-start; flex-direction: column; gap: 8px; } .productos-import-meta strong { margin-left: 0; } .productos-import-footer { flex-direction: column-reverse; } .productos-import-footer button { width: 100%; } }
+
 .productos-dialog [hidden] { display: none !important; }
 .productos-import-dialog, .productos-label-dialog { width: min(100% - 24px, 820px); max-height: 92vh; overflow: auto; }
 .productos-import-body, .productos-label-body { display: grid; gap: 15px; max-height: calc(92vh - 150px); padding: 19px 22px; overflow-y: auto; }

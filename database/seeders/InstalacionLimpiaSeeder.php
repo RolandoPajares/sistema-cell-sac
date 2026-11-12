@@ -68,6 +68,13 @@ class InstalacionLimpiaSeeder extends Seeder
                     'actualizado_en' => now(),
                 ]);
             }
+
+            DB::table('medios_pago')->insertOrIgnore([
+                ['codigo' => 'efectivo', 'nombre' => 'Efectivo', 'requiere_caja' => true, 'requiere_banco' => false, 'activo' => true],
+                ['codigo' => 'tarjeta', 'nombre' => 'Tarjeta', 'requiere_caja' => false, 'requiere_banco' => false, 'activo' => true],
+                ['codigo' => 'transferencia', 'nombre' => 'Transferencia bancaria', 'requiere_caja' => false, 'requiere_banco' => true, 'activo' => true],
+                ['codigo' => 'yape_plin', 'nombre' => 'Yape / Plin', 'requiere_caja' => false, 'requiere_banco' => false, 'activo' => true],
+            ]);
         });
 
         $this->call(RbacInicialSeeder::class);

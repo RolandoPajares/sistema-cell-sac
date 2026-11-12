@@ -35,11 +35,11 @@ final class ServicioMenuDinamico
             return ['dinamico' => false, 'grupos' => []];
         }
 
-        if (! $this->schemaAvailable() || ! $this->autorizacion->isSeeded()) {
+        if (! $this->esquemaDisponible() || ! $this->autorizacion->isSeeded()) {
             return ['dinamico' => true, 'grupos' => []];
         }
 
-        $roleIds = $this->roleIdsFor($user);
+        $roleIds = $this->idsRolesPara($user);
 
         if ($roleIds === []) {
             return ['dinamico' => true, 'grupos' => []];
@@ -86,9 +86,9 @@ final class ServicioMenuDinamico
 
             foreach ($children->get(null, collect()) as $root) {
                 if ($root->tipo === 'grupo') {
-                    $groups[] = $this->makeGroup($root, $children, $user);
+                    $groups[] = $this->crearGrupo($root, $children, $user);
                 } else {
-                    $item = $this->makeItem($root, $user);
+                    $item = $this->crearElemento($root, $user);
                     if ($item !== null) {
                         $groups[] = [
                             'id' => 'item-'.$root->id,
@@ -102,7 +102,7 @@ final class ServicioMenuDinamico
             }
         }
 
-        $groups = $this->mergeGroups($groups);
+        $groups = $this->fusionarGrupos($groups);
 
         return ['dinamico' => true, 'grupos' => $groups];
     }
@@ -112,7 +112,7 @@ final class ServicioMenuDinamico
      *
      * @return bool Resultado de la operación.
      */
-    private function schemaAvailable(): bool
+    private function esquemaDisponible(): bool
     {
         foreach (['roles', 'usuarios_roles', 'usuarios_sedes_roles', 'roles_menus', 'menus', 'elementos_menu', 'pantallas', 'permisos'] as $table) {
             if (! Schema::hasTable($table)) {
@@ -124,7 +124,7 @@ final class ServicioMenuDinamico
     }
 
     /** @return array<int,int> */
-    private function roleIdsFor(User $user): array
+    private function idsRolesPara(User $user): array
     {
         $globalIds = DB::table('usuarios_roles')
             ->join('roles', 'roles.id', '=', 'usuarios_roles.rol_id')
@@ -156,7 +156,7 @@ final class ServicioMenuDinamico
     /** @param array<int,array<string,mixed>> $groups
      * @return array<int,array<string,mixed>>
      */
-    private function mergeGroups(array $groups): array
+    private function fusionarGrupos(array $groups): array
     {
         $merged = [];
 
@@ -187,11 +187,11 @@ final class ServicioMenuDinamico
      * @param  Collection<int,object>  $rows
      * @return array<string,mixed>
      */
-    private function makeGroup(object $root, $children, User $user): array
+    private function crearGrupo(object $root, $children, User $user): array
     {
         $items = [];
         foreach ($children->get($root->id, collect()) as $child) {
-            $item = $this->makeItem($child, $user);
+            $item = $this->crearElemento($child, $user);
             if ($item !== null) {
                 $items[] = $item;
             }
@@ -206,7 +206,7 @@ final class ServicioMenuDinamico
     }
 
     /** @return array<string,mixed>|null */
-    private function makeItem(object $row, User $user): ?array
+    private function crearElemento(object $row, User $user): ?array
     {
         if (is_string($row->ruta) && in_array($row->ruta, self::RUTAS_NO_VISIBLES, true)) {
             return null;
@@ -248,7 +248,7 @@ final class ServicioMenuDinamico
             'route' => $enabled ? $route : null,
             'enabled' => $enabled,
             'pending' => ! $enabled,
-            'active' => $enabled && $this->activeRoute($route),
+            'active' => $enabled && $this->rutaActiva($route),
         ];
     }
 
@@ -258,7 +258,7 @@ final class ServicioMenuDinamico
      * @param  mixed  $route  Parámetro recibido por la operación.
      * @return bool Resultado de la operación.
      */
-    private function activeRoute(string $route): bool
+    private function rutaActiva(string $route): bool
     {
         if ($route === 'management.inventory') {
             return request()->routeIs('management.inventory', 'management.inventory.movements');

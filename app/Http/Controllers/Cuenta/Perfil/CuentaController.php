@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Servicios\Compartidos\Paneles\ServicioPaneles;
 use App\Servicios\Cuenta\Perfil\ServicioPerfil;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
@@ -57,16 +58,17 @@ class CuentaController extends Controller
         $user = $request->user();
         abort_unless($user instanceof User, 403);
         $user->loadMissing('customer');
-        $roles = $perfil->rolesFor($user);
-        $dynamicFields = $perfil->fieldsFor($user);
-        $dynamicValues = $perfil->valuesFor($user, $dynamicFields);
+        $roles = $perfil->rolesPara($user);
+        $dynamicFields = $perfil->camposPara($user);
+        $dynamicValues = $perfil->valoresPara($user, $dynamicFields);
         $roleLabel = $roles->pluck('nombre')->filter()->unique()->implode(' · ') ?: 'Usuario autorizado';
-        $functions = $perfil->functionsFor($user);
+        $functions = $perfil->funcionesPara($user);
 
         $isAdministrator = $user->can('gestion.seguridad.consultar');
         $preferences = (array) ($user->preferencias ?? []);
+        $profile = Schema::hasTable('usuarios_perfiles') ? $user->perfil : null;
         $customer = $user->customer;
-        $profileValues = [$user->nombre, $user->correo, $user->foto_perfil, $preferences['idioma'] ?? null, ...array_values($dynamicValues)];
+        $profileValues = [$user->nombre, $user->correo, $profile?->telefono, $profile?->documento, $user->foto_perfil, $preferences['idioma'] ?? null, ...array_values($dynamicValues)];
         $initials = mb_strtoupper(collect(preg_split('/\s+/', trim((string) $user->nombre)) ?: [])
             ->map(static fn (string $part): string => mb_substr($part, 0, 1))
             ->take(2)
@@ -85,9 +87,9 @@ class CuentaController extends Controller
             'passwordRoute' => $isAdministrator ? 'management.account.password' : 'account.password',
             'accountHomeRoute' => $isAdministrator ? 'management.account' : 'dashboard',
             'preferences' => $preferences,
-            'phone' => $customer?->telefono ?: 'No registrado',
-            'document' => $customer?->documento ?: 'No registrado',
-            'primarySite' => $perfil->primarySiteFor($user) ?: 'No registrada',
+            'phone' => $profile?->telefono ?: 'No registrado',
+            'document' => $profile?->documento ?: 'No registrado',
+            'primarySite' => $perfil->sedePrincipalPara($user) ?: 'No registrada',
             'photoUrl' => $user->foto_perfil ? Storage::disk('public')->url($user->foto_perfil) : null,
             'avatarRoute' => 'management.account.avatar',
             'avatarDeleteRoute' => 'management.account.avatar.delete',

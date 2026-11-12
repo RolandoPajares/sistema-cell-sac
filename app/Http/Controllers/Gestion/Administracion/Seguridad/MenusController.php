@@ -101,7 +101,7 @@ class MenusController extends Controller
                 : DB::table('permisos')->where('pantalla_id', $screenId)->where('accion', 'consultar')->where('activo', true)->value('id');
         }
         if ($validated['habilitado']) {
-            abort_unless($element->tipo === 'grupo' || ($element->pantalla !== null && $element->pantalla->habilitada && is_string($element->pantalla->ruta) && $this->isActionableRoute($element->pantalla->ruta)), 422, 'La opción solo puede habilitarse cuando su pantalla existe, está activa y tiene una ruta funcional.');
+            abort_unless($element->tipo === 'grupo' || ($element->pantalla !== null && $element->pantalla->habilitada && is_string($element->pantalla->ruta) && $this->esRutaAccionable($element->pantalla->ruta)), 422, 'La opción solo puede habilitarse cuando su pantalla existe, está activa y tiene una ruta funcional.');
         }
 
         $before = $element->only(['etiqueta', 'icono', 'pantalla_id', 'permiso_id', 'orden', 'habilitado']);
@@ -172,7 +172,7 @@ class MenusController extends Controller
             ? DB::table('modulos')->orderBy('orden')->orderBy('nombre')->get()
                 ->map(function ($module): object {
                     $module->screens = DB::table('pantallas')->where('modulo_id', $module->id)->orderBy('nombre')->get()->each(function (object $screen): void {
-                        $screen->ruta_funcional = is_string($screen->ruta) && $this->isActionableRoute($screen->ruta);
+                        $screen->ruta_funcional = is_string($screen->ruta) && $this->esRutaAccionable($screen->ruta);
                     });
 
                     return $module;
@@ -199,8 +199,8 @@ class MenusController extends Controller
             'icono' => ['sometimes', 'nullable', 'string', 'max:100'],
             'habilitada' => ['required', 'boolean'],
         ]);
-        abort_if(! $validated['habilitada'] && $this->isIndispensableScreen($screen), 422, 'La pantalla indispensable de seguridad no se puede desactivar.');
-        if ($validated['habilitada'] && (! is_string($screen->ruta) || ! $this->isActionableRoute($screen->ruta))) {
+        abort_if(! $validated['habilitada'] && $this->esPantallaIndispensable($screen), 422, 'La pantalla indispensable de seguridad no se puede desactivar.');
+        if ($validated['habilitada'] && (! is_string($screen->ruta) || ! $this->esRutaAccionable($screen->ruta))) {
             abort(422, 'No se puede activar una pantalla sin una ruta de controlador implementada.');
         }
 
@@ -249,7 +249,7 @@ class MenusController extends Controller
      * @param  mixed  $routeName  Parámetro recibido por la operación.
      * @return bool Resultado de la operación.
      */
-    private function isActionableRoute(string $routeName): bool
+    private function esRutaAccionable(string $routeName): bool
     {
         $route = Route::getRoutes()->getByName($routeName);
 
@@ -262,7 +262,7 @@ class MenusController extends Controller
      * @param  mixed  $screen  Parámetro recibido por la operación.
      * @return bool Resultado de la operación.
      */
-    private function isIndispensableScreen(Pantalla $screen): bool
+    private function esPantallaIndispensable(Pantalla $screen): bool
     {
         return in_array($screen->codigo, [
             'admin.dashboard',

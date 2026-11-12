@@ -34,13 +34,13 @@ class GuardarUsuarioRequest extends FormRequest
      */
     public function rules(): array
     {
-        $customerRole = $this->isCustomerRole();
+        $customerRole = $this->esRolCliente();
         $documentType = $this->string('tipo_documento')->lower()->toString();
 
         return [
             'nombre' => ['required', 'string', 'max:120'],
             'correo' => ['required', 'email', 'max:160', Rule::unique('usuarios', 'correo')],
-            'rol' => ['required', Rule::in($this->availableRoles())],
+            'rol' => ['required', Rule::in($this->rolesDisponibles())],
             'sede_id' => ['nullable', 'integer', Rule::exists('sedes', 'id')->where('activa', true)],
             'password' => ['required', Password::min(12)->letters()->numbers()],
             'password_confirmation' => ['required', 'same:password'],
@@ -111,7 +111,7 @@ class GuardarUsuarioRequest extends FormRequest
     }
 
     /** @return array<int,string> */
-    private function availableRoles(): array
+    private function rolesDisponibles(): array
     {
         if (Schema::hasTable('roles')) {
             $configuredRoles = DB::table('roles')->where('activo', true)->orderBy('codigo')->pluck('codigo')->all();
@@ -127,7 +127,7 @@ class GuardarUsuarioRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
-    private function isCustomerRole(): bool
+    private function esRolCliente(): bool
     {
         return in_array($this->string('rol')->toString(), ['cliente_mayorista', 'cliente_minorista'], true);
     }

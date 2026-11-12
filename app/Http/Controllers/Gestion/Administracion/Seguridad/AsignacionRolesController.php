@@ -100,7 +100,7 @@ final class AsignacionRolesController extends Controller
 
         DB::transaction(function () use ($data, $role, $user, $request, $auditoria): void {
             User::query()->whereKey($user->getKey())->lockForUpdate()->firstOrFail();
-            $before = $this->assignmentSnapshot($user);
+            $before = $this->instantaneaAsignacion($user);
             $assignment = [
                 'asignado_por_usuario_id' => $request->user()->getKey(),
                 'asignado_en' => now(),
@@ -120,7 +120,7 @@ final class AsignacionRolesController extends Controller
                 );
             }
 
-            $auditoria->record($request->user()->getKey(), 'asignar_rol_usuario', 'usuarios', $user->getKey(), ['asignaciones' => $before], ['asignaciones' => $this->assignmentSnapshot($user)], $request->ip());
+            $auditoria->record($request->user()->getKey(), 'asignar_rol_usuario', 'usuarios', $user->getKey(), ['asignaciones' => $before], ['asignaciones' => $this->instantaneaAsignacion($user)], $request->ip());
         });
 
         return back()->with('status', 'El rol fue asignado al usuario.');
@@ -154,7 +154,7 @@ final class AsignacionRolesController extends Controller
 
         DB::transaction(function () use ($request, $user, $selectedRoles, $delegacion, $auditoria): void {
             User::query()->whereKey($user->getKey())->lockForUpdate()->firstOrFail();
-            $before = $this->assignmentSnapshot($user);
+            $before = $this->instantaneaAsignacion($user);
             $siteId = null;
             $site = null;
 
@@ -197,7 +197,7 @@ final class AsignacionRolesController extends Controller
                 }
             }
 
-            $auditoria->record($request->user()->getKey(), 'sincronizar_roles_usuario', 'usuarios', $user->getKey(), ['asignaciones' => $before], ['asignaciones' => $this->assignmentSnapshot($user)], $request->ip());
+            $auditoria->record($request->user()->getKey(), 'sincronizar_roles_usuario', 'usuarios', $user->getKey(), ['asignaciones' => $before], ['asignaciones' => $this->instantaneaAsignacion($user)], $request->ip());
         });
 
         return back()->with('status', 'Los roles del usuario fueron actualizados.');
@@ -215,7 +215,7 @@ final class AsignacionRolesController extends Controller
         ServicioDelegacion $delegacion,
         RegistradorAuditoria $auditoria,
     ): RedirectResponse {
-        return $this->revokeAssignment($request, $user, $role, null, $delegacion, $auditoria);
+        return $this->revocarAsignacion($request, $user, $role, null, $delegacion, $auditoria);
     }
 
     /**
@@ -231,15 +231,15 @@ final class AsignacionRolesController extends Controller
         ServicioDelegacion $delegacion,
         RegistradorAuditoria $auditoria,
     ): RedirectResponse {
-        return $this->revokeAssignment($request, $user, $role, $site, $delegacion, $auditoria);
+        return $this->revocarAsignacion($request, $user, $role, $site, $delegacion, $auditoria);
     }
 
     /**
-     * Ejecuta la operación revokeAssignment definida por la clase AsignacionRolesController.
+     * Revoca una asignación de rol respetando su alcance.
      *
      * @return mixed Resultado de la operación.
      */
-    private function revokeAssignment(
+    private function revocarAsignacion(
         Request $request,
         User $user,
         Rol $role,
@@ -256,7 +256,7 @@ final class AsignacionRolesController extends Controller
 
         DB::transaction(function () use ($request, $user, $role, $site, $delegacion, $auditoria): void {
             User::query()->whereKey($user->getKey())->lockForUpdate()->firstOrFail();
-            $before = $this->assignmentSnapshot($user);
+            $before = $this->instantaneaAsignacion($user);
             if ($role->es_sistema && $site === null) {
                 $delegacion->bloquearAdministradoresGlobales();
                 abort_if($delegacion->esUltimoAdministradorGlobal($user), 422, 'No se puede retirar el último administrador global autorizado.');
@@ -269,14 +269,14 @@ final class AsignacionRolesController extends Controller
             }
             abort_if($updated !== 1, 422, 'La asignación no existe o ya está revocada.');
 
-            $auditoria->record($request->user()->getKey(), 'revocar_rol_usuario', 'usuarios', $user->getKey(), ['asignaciones' => $before], ['asignaciones' => $this->assignmentSnapshot($user)], $request->ip());
+            $auditoria->record($request->user()->getKey(), 'revocar_rol_usuario', 'usuarios', $user->getKey(), ['asignaciones' => $before], ['asignaciones' => $this->instantaneaAsignacion($user)], $request->ip());
         });
 
         return back()->with('status', 'La asignación fue revocada y conservada para auditoría.');
     }
 
     /** @return array<int,array<string,mixed>> */
-    private function assignmentSnapshot(User $user): array
+    private function instantaneaAsignacion(User $user): array
     {
         $global = DB::table('usuarios_roles')->join('roles', 'roles.id', '=', 'usuarios_roles.rol_id')
             ->where('usuarios_roles.usuario_id', $user->getKey())

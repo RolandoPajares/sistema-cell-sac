@@ -11,10 +11,10 @@ use App\Models\Comunicacion\MensajeContacto;
  */
 class ServicioContacto
 {
-    /** @param array{nombre:string, contacto:string, mensaje:string} $data */
-    public function register(array $data): MensajeContacto
+    /** @param array{nombre:string, contacto:string, mensaje:string} $datos */
+    public function registrar(array $datos): MensajeContacto
     {
-        return MensajeContacto::create($data + [
+        return MensajeContacto::create($datos + [
             'estado' => 'Nuevo',
             'creado_en' => now(),
         ]);

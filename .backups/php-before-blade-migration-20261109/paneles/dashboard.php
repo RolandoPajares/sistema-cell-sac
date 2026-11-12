@@ -100,9 +100,9 @@ $__env->startSection('title', $dashboardTitle ?? 'Panel'); ?>
 <section class="dashboard-page" data-admin-dashboard>
     <header class="dashboard-hero">
         <div>
-            <span class="dashboard-eyebrow">Administración</span>
-            <h1>Panel de administración <span aria-hidden="true"></span></h1>
-            <p>Control total de tu operación comercial, inventario y marketing en un solo lugar.</p>
+            <span class="dashboard-eyebrow">AdministraciÃ³n</span>
+            <h1>Panel de administraciÃ³n <span aria-hidden="true"></span></h1>
+            <p>Control total de tu operaciÃ³n comercial, inventario y marketing en un solo lugar.</p>
         </div>
         <time class="dashboard-date-card" datetime="<?php echo e($dashboardNow->toDateString()); ?>">
             <span class="dashboard-date-icon"><i class="bi bi-calendar3" aria-hidden="true"></i></span>
@@ -155,7 +155,7 @@ $__env->startSection('title', $dashboardTitle ?? 'Panel'); ?>
             <div>
                 <small>Productos sin existencias</small>
                 <strong><?php echo e(number_format($lowStock)); ?></strong>
-                <span class="dashboard-trend <?php echo e($activeProducts === 0 ? 'is-neutral' : ($lowStock > 0 ? 'is-negative' : 'is-positive')); ?>"><i class="bi bi-<?php echo e($activeProducts === 0 ? 'inbox' : ($lowStock > 0 ? 'exclamation-triangle' : 'check-circle')); ?>" aria-hidden="true"></i> <?php echo e($activeProducts === 0 ? 'Sin productos registrados' : ($lowStock > 0 ? 'Requiere reposición' : 'Existencias disponibles')); ?></span>
+                <span class="dashboard-trend <?php echo e($activeProducts === 0 ? 'is-neutral' : ($lowStock > 0 ? 'is-negative' : 'is-positive')); ?>"><i class="bi bi-<?php echo e($activeProducts === 0 ? 'inbox' : ($lowStock > 0 ? 'exclamation-triangle' : 'check-circle')); ?>" aria-hidden="true"></i> <?php echo e($activeProducts === 0 ? 'Sin productos registrados' : ($lowStock > 0 ? 'Requiere reposiciÃ³n' : 'Existencias disponibles')); ?></span>
             </div>
         </article>
 
@@ -178,15 +178,15 @@ $__env->startSection('title', $dashboardTitle ?? 'Panel'); ?>
             <header class="dashboard-card-header">
                 <div class="dashboard-card-title"><i class="bi bi-bar-chart-line-fill" aria-hidden="true"></i>
                     <div>
-                        <h2>Ventas de los últimos 12 meses</h2>
+                        <h2>Ventas de los Ãºltimos 12 meses</h2>
                         <p>Ventas confirmadas en MariaDB.</p>
                     </div>
                 </div>
                 <label class="dashboard-select-wrap">
                     <span class="visually-hidden">Periodo de ventas</span>
                     <select data-dashboard-range>
-                        <option value="12">Últimos 12 meses</option>
-                        <option value="6">Últimos 6 meses</option>
+                        <option value="12">Ãšltimos 12 meses</option>
+                        <option value="6">Ãšltimos 6 meses</option>
                     </select>
                 </label>
             </header>
@@ -229,7 +229,7 @@ $__env->startSection('title', $dashboardTitle ?? 'Panel'); ?>
                 <div class="dashboard-card-title"><i class="bi bi-clock-history" aria-hidden="true"></i>
                     <div>
                         <h2>Estado de pedidos</h2>
-                        <p>Distribución de todos los pedidos registrados.</p>
+                        <p>DistribuciÃ³n de todos los pedidos registrados.</p>
                     </div>
                 </div>
                 <span class="dashboard-period-label">Todos</span>
@@ -250,7 +250,7 @@ $__env->startSection('title', $dashboardTitle ?? 'Panel'); ?>
                     <?php } $__env->popLoop();
     $loop = $__env->getLastLoop();
     if ($__empty_1) { ?>
-                    <li class="dashboard-list-empty"><i class="bi bi-inbox" aria-hidden="true"></i><span>Aún no hay pedidos registrados.</span></li>
+                    <li class="dashboard-list-empty"><i class="bi bi-inbox" aria-hidden="true"></i><span>AÃºn no hay pedidos registrados.</span></li>
                     <?php } ?>
                 </ul>
             </div>
@@ -260,8 +260,8 @@ $__env->startSection('title', $dashboardTitle ?? 'Panel'); ?>
             <header class="dashboard-card-header">
                 <div class="dashboard-card-title"><i class="bi bi-grid-3x3-gap-fill" aria-hidden="true"></i>
                     <div>
-                        <h2>Accesos rápidos</h2>
-                        <p>Atajos de administración.</p>
+                        <h2>Accesos rÃ¡pidos</h2>
+                        <p>Atajos de administraciÃ³n.</p>
                     </div>
                 </div>
             </header>
@@ -284,7 +284,7 @@ $__env->startSection('title', $dashboardTitle ?? 'Panel'); ?>
                 <div class="dashboard-card-title"><i class="bi bi-clipboard2-check" aria-hidden="true"></i>
                     <div>
                         <h2>Pedidos recientes</h2>
-                        <p>Últimas operaciones comerciales.</p>
+                        <p>Ãšltimas operaciones comerciales.</p>
                     </div>
                 </div><a href="<?php echo e(route('management.orders')); ?>">Ver todos</a>
             </header>
@@ -333,7 +333,7 @@ $__env->startSection('title', $dashboardTitle ?? 'Panel'); ?>
                 <div class="dashboard-card-title"><i class="bi bi-exclamation-triangle-fill is-danger" aria-hidden="true"></i>
                     <div>
                         <h2>Alertas de inventario</h2>
-                        <p>Productos sin saldo físico en almacén.</p>
+                        <p>Productos sin saldo fÃ­sico en almacÃ©n.</p>
                     </div>
                 </div><a href="<?php echo e(route('management.inventory')); ?>">Ver todos</a>
             </header>
@@ -357,7 +357,7 @@ $__env->startSection('title', $dashboardTitle ?? 'Panel'); ?>
                 <?php } $__env->popLoop();
     $loop = $__env->getLastLoop();
     if ($__empty_1) { ?>
-                <div class="dashboard-empty-state"><i class="bi bi-<?php echo e($activeProducts === 0 ? 'inbox' : 'shield-check'); ?>" aria-hidden="true"></i><strong><?php echo e($activeProducts === 0 ? 'No hay productos registrados' : 'Sin alertas de inventario'); ?></strong><span><?php echo e($activeProducts === 0 ? 'Registra productos para consultar sus existencias por almacén.' : 'Todos los productos activos tienen existencias disponibles.'); ?></span></div>
+                <div class="dashboard-empty-state"><i class="bi bi-<?php echo e($activeProducts === 0 ? 'inbox' : 'shield-check'); ?>" aria-hidden="true"></i><strong><?php echo e($activeProducts === 0 ? 'No hay productos registrados' : 'Sin alertas de inventario'); ?></strong><span><?php echo e($activeProducts === 0 ? 'Registra productos para consultar sus existencias por almacÃ©n.' : 'Todos los productos activos tienen existencias disponibles.'); ?></span></div>
                 <?php } ?>
             </div>
         </section>
@@ -366,7 +366,7 @@ $__env->startSection('title', $dashboardTitle ?? 'Panel'); ?>
             <header class="dashboard-card-header">
                 <div class="dashboard-card-title"><i class="bi bi-trophy-fill is-warning" aria-hidden="true"></i>
                     <div>
-                        <h2>Productos más vendidos</h2>
+                        <h2>Productos mÃ¡s vendidos</h2>
                         <p>Ranking basado en ventas confirmadas.</p>
                     </div>
                 </div><a href="<?php echo e(route('management.reports')); ?>">Ver todos</a>
@@ -390,7 +390,7 @@ $__env->startSection('title', $dashboardTitle ?? 'Panel'); ?>
                 <?php } $__env->popLoop();
     $loop = $__env->getLastLoop();
     if ($__empty_1) { ?>
-                <li class="dashboard-empty-state"><i class="bi bi-bar-chart" aria-hidden="true"></i><strong>Aún no hay ventas</strong><span>El ranking aparecerá cuando existan ventas confirmadas.</span></li>
+                <li class="dashboard-empty-state"><i class="bi bi-bar-chart" aria-hidden="true"></i><strong>AÃºn no hay ventas</strong><span>El ranking aparecerÃ¡ cuando existan ventas confirmadas.</span></li>
                 <?php } ?>
             </ol>
         </section>
@@ -401,7 +401,7 @@ $__env->startSection('title', $dashboardTitle ?? 'Panel'); ?>
             <header class="dashboard-card-header">
                 <div class="dashboard-card-title"><i class="bi bi-megaphone-fill" aria-hidden="true"></i>
                     <div>
-                        <h2>Rendimiento de campañas</h2>
+                        <h2>Rendimiento de campaÃ±as</h2>
                         <p>Vistas y clics registrados en publicidad.</p>
                     </div>
                 </div><a href="<?php echo e(route('management.campaigns')); ?>">Ver todas</a>
@@ -415,13 +415,13 @@ $__env->startSection('title', $dashboardTitle ?? 'Panel'); ?>
         $loop = $__env->getLastLoop();
         $__empty_1 = false; ?>
                 <?php ($campaignProgress = min(100, round(((int) $campaign->vistas / $campaignMaxViews) * 100))); ?>
-                <div class="dashboard-campaign-row"><span><b><?php echo e($campaign->nombre); ?></b><small><?php echo e(number_format((int) $campaign->vistas)); ?> vistas · <?php echo e(number_format((int) $campaign->clics)); ?> clics</small></span>
+                <div class="dashboard-campaign-row"><span><b><?php echo e($campaign->nombre); ?></b><small><?php echo e(number_format((int) $campaign->vistas)); ?> vistas Â· <?php echo e(number_format((int) $campaign->clics)); ?> clics</small></span>
                     <div class="dashboard-progress"><span data-dashboard-progress style="--progress: <?php echo e($campaignProgress); ?>%"></span></div><strong><?php echo e($campaign->vistas > 0 ? number_format(($campaign->clics / $campaign->vistas) * 100, 1) : '0.0'); ?>%</strong>
                 </div>
                 <?php } $__env->popLoop();
     $loop = $__env->getLastLoop();
     if ($__empty_1) { ?>
-                <div class="dashboard-empty-state"><i class="bi bi-megaphone" aria-hidden="true"></i><strong>No hay campañas activas</strong><span>Las campañas registradas aparecerán aquí.</span></div>
+                <div class="dashboard-empty-state"><i class="bi bi-megaphone" aria-hidden="true"></i><strong>No hay campaÃ±as activas</strong><span>Las campaÃ±as registradas aparecerÃ¡n aquÃ­.</span></div>
                 <?php } ?>
             </div>
         </section>
@@ -431,7 +431,7 @@ $__env->startSection('title', $dashboardTitle ?? 'Panel'); ?>
                 <div class="dashboard-card-title"><i class="bi bi-clock-history" aria-hidden="true"></i>
                     <div>
                         <h2>Actividad reciente</h2>
-                        <p>Últimos movimientos auditados.</p>
+                        <p>Ãšltimos movimientos auditados.</p>
                     </div>
                 </div><a href="<?php echo e(route('management.audit')); ?>">Ver todas</a>
             </header>
@@ -444,12 +444,12 @@ $__env->startSection('title', $dashboardTitle ?? 'Panel'); ?>
         $loop = $__env->getLastLoop();
         $__empty_1 = false; ?>
                 <article><span class="dashboard-activity-dot"><i class="bi bi-<?php echo e($activity->entidad === 'pedidos' ? 'cart-check' : ($activity->entidad === 'productos' ? 'box-seam' : 'person')); ?>" aria-hidden="true"></i></span>
-                    <div><b><?php echo e($activity->accion); ?></b><small><?php echo e($activity->user?->nombre ?? 'Sistema'); ?> · <?php echo e($activity->entidad); ?><?php echo e($activity->entidad_id ? ' #'.$activity->entidad_id : ''); ?></small></div><time datetime="<?php echo e($activity->creado_en?->toIso8601String()); ?>"><?php echo e($activity->creado_en?->diffForHumans()); ?></time>
+                    <div><b><?php echo e($activity->accion); ?></b><small><?php echo e($activity->user?->nombre ?? 'Sistema'); ?> Â· <?php echo e($activity->entidad); ?><?php echo e($activity->entidad_id ? ' #'.$activity->entidad_id : ''); ?></small></div><time datetime="<?php echo e($activity->creado_en?->toIso8601String()); ?>"><?php echo e($activity->creado_en?->diffForHumans()); ?></time>
                 </article>
                 <?php } $__env->popLoop();
     $loop = $__env->getLastLoop();
     if ($__empty_1) { ?>
-                <div class="dashboard-empty-state"><i class="bi bi-clock-history" aria-hidden="true"></i><strong>Sin actividad reciente</strong><span>Las acciones auditadas aparecerán aquí.</span></div>
+                <div class="dashboard-empty-state"><i class="bi bi-clock-history" aria-hidden="true"></i><strong>Sin actividad reciente</strong><span>Las acciones auditadas aparecerÃ¡n aquÃ­.</span></div>
                 <?php } ?>
             </div>
         </section>
@@ -477,7 +477,7 @@ $__env->startSection('title', $dashboardTitle ?? 'Panel'); ?>
                 <?php } $__env->popLoop();
     $loop = $__env->getLastLoop();
     if ($__empty_1) { ?>
-                <li class="dashboard-task-empty"><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span><b>No hay tareas pendientes</b><small>Tu operación está al día.</small></span></li>
+                <li class="dashboard-task-empty"><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span><b>No hay tareas pendientes</b><small>Tu operaciÃ³n estÃ¡ al dÃ­a.</small></span></li>
                 <?php } ?>
             </ul>
         </section>

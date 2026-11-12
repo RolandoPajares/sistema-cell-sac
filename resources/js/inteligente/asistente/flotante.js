@@ -1,3 +1,27 @@
+const normalizarTextoCodificado = () => {
+    const secuencia = (...bytes) => String.fromCharCode(...bytes);
+    const reemplazos = {
+        [secuencia(0xc3, 0xa1)]: 'á', [secuencia(0xc3, 0xa9)]: 'é', [secuencia(0xc3, 0xad)]: 'í',
+        [secuencia(0xc3, 0xb3)]: 'ó', [secuencia(0xc3, 0xba)]: 'ú', [secuencia(0xc3, 0xb1)]: 'ñ',
+        [secuencia(0xc3, 0x81)]: 'Á', [secuencia(0xc3, 0x89)]: 'É', [secuencia(0xc3, 0x8d)]: 'Í',
+        [secuencia(0xc3, 0x93)]: 'Ó', [secuencia(0xc3, 0x9a)]: 'Ú', [secuencia(0xc3, 0x91)]: 'Ñ',
+        [secuencia(0xc2, 0xbf)]: '¿', [secuencia(0xc2, 0xa1)]: '¡', [secuencia(0xc2, 0xb7)]: '·',
+        [secuencia(0xe2, 0x80, 0x93)]: '–', [secuencia(0xe2, 0x80, 0x94)]: '—', [secuencia(0xe2, 0x86, 0x92)]: '→',
+    };
+    const corregir = (valor) => Object.entries(reemplazos).reduce((texto, [incorrecto, correcto]) => texto.replaceAll(incorrecto, correcto), valor);
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const textos = [];
+    while (walker.nextNode()) textos.push(walker.currentNode);
+    textos.forEach((texto) => { texto.nodeValue = corregir(texto.nodeValue); });
+    document.querySelectorAll('[title], [aria-label], [placeholder], [alt]').forEach((elemento) => {
+        ['title', 'aria-label', 'placeholder', 'alt'].forEach((atributo) => {
+            if (elemento.hasAttribute(atributo)) elemento.setAttribute(atributo, corregir(elemento.getAttribute(atributo)));
+        });
+    });
+};
+
+normalizarTextoCodificado();
+
 /**
  * Asistente reutilizable dentro de los paneles administrativos.
  */
@@ -60,10 +84,18 @@ if (asistente) {
     };
 
     document.querySelectorAll("[data-admin-assistant-toggle]").forEach((boton) => {
-        boton.addEventListener("click", () => {
+        boton.addEventListener("click", (evento) => {
             // El botón del encabezado también vuelve a mostrar el asistente después de cerrarlo con X.
             asistente.hidden = false;
-            cambiarEstadoPanel(panel.hidden);
+            cambiarEstadoPanel(true);
+            if (evento.currentTarget?.tagName === "A") evento.preventDefault();
+        });
+    });
+    document.querySelectorAll('a[href$="/asistente"], a[href*="/asistente?"]').forEach((boton) => {
+        boton.addEventListener("click", (evento) => {
+            evento.preventDefault();
+            asistente.hidden = false;
+            cambiarEstadoPanel(true);
         });
     });
 

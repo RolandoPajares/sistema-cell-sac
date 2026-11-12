@@ -100,17 +100,14 @@
 @if ($ready)
 {{-- Diálogo de creación: contiene únicamente los campos necesarios para registrar un rol. --}}
 <dialog class="tc-rbac-dialog" id="nuevo-rol">
-    <div class="tc-rbac-dialog-card">
-        <header>
-            <h2>Nuevo rol</h2><button type="button" data-close-dialog aria-label="Cerrar">×</button>
-        </header>
-        <form method="post" action="{{ route('management.roles_permissions.store') }}" class="tc-rbac-dialog-body">@csrf<label>Código interno<input name="codigo" pattern="[a-z][a-z0-9_]*" maxlength="40" required></label><label>Nombre<input name="nombre" maxlength="120" required></label><label>Descripción<textarea name="descripcion" maxlength="255"></textarea></label><label>Alcance<select name="alcance_permitido" required>
-                    <option value="sede">Sede</option>
-                    <option value="propio">Propio</option>
-                    <option value="empresa">Empresa</option>
+    <div class="tc-rbac-dialog-card tc-rbac-role-create-card">
+        <aside class="tc-rbac-role-create-aside"><div class="tc-rbac-role-create-logo"><i class="bi bi-shield-plus" aria-hidden="true"></i></div><h2>Nuevo rol</h2><p>Crea un rol para organizar y controlar los permisos de acceso en el sistema.</p><span><i class="bi bi-shield-check" aria-hidden="true"></i> Control de accesos</span><span><i class="bi bi-gear" aria-hidden="true"></i> Permisos por módulos</span><span><i class="bi bi-layers" aria-hidden="true"></i> Gestión empresarial</span></aside>
+        <div class="tc-rbac-role-create-main"><header class="tc-rbac-role-create-header"><div><span class="tc-rbac-dialog-icon"><i class="bi bi-people" aria-hidden="true"></i></span><div><h2>Crear nuevo rol</h2><p>Define el nombre y la descripción del rol.</p></div></div><button type="button" data-close-dialog aria-label="Cerrar">×</button></header>
+        <form method="post" action="{{ route('management.roles_permissions.store') }}" class="tc-rbac-dialog-body">@csrf<label>Nombre del rol <b>*</b><input name="nombre" data-role-name maxlength="120" placeholder="Ej. Supervisor de ventas" required></label><label>Descripción<textarea name="descripcion" maxlength="255" placeholder="Describe brevemente las responsabilidades y funciones de este rol..."></textarea></label><label>Alcance<select name="alcance_permitido" required>
+                    <option value="empresa" selected>Empresa</option>
                 </select></label>
-            <footer><button type="button" data-close-dialog>Cancelar</button><button class="tc-rbac-primary" type="submit">Guardar rol</button></footer>
-        </form>
+            <input type="hidden" name="codigo" data-role-code required><p class="tc-rbac-role-create-info"><i class="bi bi-info-circle" aria-hidden="true"></i> Luego de crear el rol, podrás asignar sus permisos desde la Matriz de privilegios.</p><footer><button type="button" data-close-dialog>Cancelar</button><button class="tc-rbac-primary" type="submit"><i class="bi bi-save" aria-hidden="true"></i> Guardar rol</button></footer>
+        </form></div>
     </div>
 </dialog>
 @endif
@@ -150,6 +147,10 @@
 @endif
 @endforeach
 @endsection
+
+@push('styles')
+@vite('resources/css/modulos/seguridad-role-create.css')
+@endpush
 
 {{-- Carga el comportamiento interactivo desde un archivo JavaScript externo. --}}
 @push('scripts')

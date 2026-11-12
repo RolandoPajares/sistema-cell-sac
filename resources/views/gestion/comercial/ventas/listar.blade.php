@@ -296,11 +296,11 @@
             <header class="ventas-dialog-header">
                 <div><span class="ventas-dialog-icon"><i class="bi bi-cart-plus" aria-hidden="true"></i></span><span><small>Ventas</small>
                         <h2 id="nueva-venta-titulo">Nueva venta</h2>
-                        <p>Confirma la venta y descuenta existencias. El pago y comprobante se registran por separado.</p>
+                        <p>Selecciona el producto y el medio de pago; el IGV se calcula automáticamente.</p>
                     </span></div>
                 <button class="ventas-dialog-close" type="button" data-close-sales-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
             </header>
-            @include('gestion.comercial.ventas.registrar', ['customers' => $customers, 'products' => $products])
+            @include('gestion.comercial.ventas.registrar', ['customers' => $customers, 'products' => $products, 'paymentMethods' => $paymentMethods])
         </div>
     </dialog>
 
@@ -320,6 +320,10 @@
     @endif
 </section>
 @endsection
+
+@push('scripts')
+@vite('resources/js/gestion/comercial/ventas/index.js')
+@endpush
 
 
 

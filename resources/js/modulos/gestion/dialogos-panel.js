@@ -22,6 +22,9 @@ document.addEventListener("click", (evento) => {
     const abrir = evento.target.closest("[data-admin-dialog-open]");
     const cerrar = evento.target.closest("[data-admin-dialog-close]");
     const recepcionCompra = evento.target.closest("[data-purchase-reception-open]");
+    const abrirProveedor = evento.target.closest("[data-open-supplier-create]");
+    const editarProveedor = evento.target.closest("[data-open-supplier-edit]");
+    const cerrarProveedor = evento.target.closest("[data-close-supplier-dialog]");
 
     if (recepcionCompra) {
         const compraId = recepcionCompra.dataset.purchaseReceptionOpen;
@@ -34,8 +37,22 @@ document.addEventListener("click", (evento) => {
         abrirDialogo(abrir.dataset.adminDialogOpen);
     }
 
+    if (abrirProveedor && !abrirProveedor.disabled) {
+        evento.preventDefault();
+        abrirDialogo("nuevo-proveedor");
+    }
+
+    if (editarProveedor && !editarProveedor.disabled) {
+        evento.preventDefault();
+        abrirDialogo(`editar-proveedor-${editarProveedor.dataset.openSupplierEdit}`);
+    }
+
     if (cerrar) {
         cerrar.closest("dialog")?.close();
+    }
+
+    if (cerrarProveedor) {
+        cerrarProveedor.closest("dialog")?.close();
     }
 });
 

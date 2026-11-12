@@ -122,7 +122,7 @@ $selectedBrand = request('marca');
                         <div class="product-body catalog-product-body">
                             <div class="catalog-product-meta"><span><?php echo e($product->marca); ?></span><span><?php echo e($product->category?->nombre ?: $product->categoria); ?></span></div>
                             <h2><?php echo e($product->nombre); ?></h2>
-                            <div class="catalog-product-specs"><?php echo e(trim(($product->almacenamiento ? $product->almacenamiento.' Â· ' : '').\Illuminate\Support\Str::limit(strip_tags((string) $product->descripcion), 38))); ?></div>
+                            <div class="catalog-product-specs"><?php echo e(trim(($product->almacenamiento ? $product->almacenamiento.' · ' : '').\Illuminate\Support\Str::limit(strip_tags((string) $product->descripcion), 38))); ?></div>
                             <div class="catalog-product-pricing"><?php if($discount > 0): ?><div><del>S/ <?php echo e(number_format($originalPrice, 2)); ?></del><span>-<?php echo e($discount); ?>%</span></div><?php endif; ?></div>
                             <p class="price catalog-product-sale-price">S/ <?php echo e(number_format($salePrice, 2)); ?></p>
                             <div class="stock catalog-product-stock"><?php echo e($product->existencias_disponibles > 0 ? $product->existencias_disponibles.' unidades disponibles' : 'Agotado'); ?></div>

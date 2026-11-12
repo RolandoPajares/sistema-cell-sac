@@ -17,10 +17,10 @@ class RecomendacionController extends Controller
     /**
      * Inicializa la instancia con las dependencias y el estado requeridos.
      *
-     * @param  mixed  $recommendationService  Parámetro recibido por la operación.
+     * @param  mixed  $servicioRecomendaciones  Parámetro recibido por la operación.
      * @return mixed Resultado de la operación.
      */
-    public function __construct(private readonly ServicioRecomendaciones $recommendationService) {}
+    public function __construct(private readonly ServicioRecomendaciones $servicioRecomendaciones) {}
 
     /**
      * Obtiene y prepara la información solicitada para la operación.
@@ -30,7 +30,7 @@ class RecomendacionController extends Controller
      */
     public function index(RecomendacionRequest $request): View
     {
-        $products = $this->recommendationService->recommend($request->validated());
+        $products = $this->servicioRecomendaciones->recomendar($request->validated());
         $products->each(function ($product): void {
             $path = $product->images->first()?->ruta_imagen ?: $product->url_imagen;
             $path = ltrim((string) preg_replace('~^assets/~', '', $path ?: 'img/marca/logo.jpeg'), '/');

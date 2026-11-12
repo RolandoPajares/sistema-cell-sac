@@ -57,7 +57,7 @@
                     <label class="productos-create-field productos-create-field--compact">
                         <span>Stock actual <b>*</b></span>
                         <input class="productos-create-input" name="existencias" type="number" min="0" step="1" value="{{ old('existencias', (int) $product->existencias_alcance) }}" required aria-describedby="stock-actual-ayuda">
-                        <small id="stock-actual-ayuda">La diferencia se registrar· como movimiento en el almacÈn autorizado.</small>
+                        <small id="stock-actual-ayuda">La diferencia se registrar√° como movimiento en el almac√©n autorizado.</small>
                     </label>
 
                     <label class="productos-create-field productos-create-field--status">

@@ -19,10 +19,10 @@ class PaginaController extends Controller
     /**
      * Inicializa la instancia con las dependencias y el estado requeridos.
      *
-     * @param  mixed  $contactService  Parámetro recibido por la operación.
+     * @param  mixed  $servicioContacto  Parámetro recibido por la operación.
      * @return mixed Resultado de la operación.
      */
-    public function __construct(private readonly ServicioContacto $contactService) {}
+    public function __construct(private readonly ServicioContacto $servicioContacto) {}
 
     /**
      * Ejecuta la operación about definida por la clase PaginaController.
@@ -91,7 +91,7 @@ class PaginaController extends Controller
      */
     public function sendContact(GuardarMensajeContactoRequest $request): RedirectResponse
     {
-        $this->contactService->register($request->validated());
+        $this->servicioContacto->registrar($request->validated());
 
         return back()->with('status', 'Mensaje recibido. Nos pondremos en contacto contigo.');
     }

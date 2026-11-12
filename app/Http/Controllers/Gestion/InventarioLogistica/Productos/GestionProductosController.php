@@ -298,7 +298,7 @@ class GestionProductosController extends Controller
      */
     public function index(Request $request, ServicioInventario $inventario, ServicioPresentacionInventario $presentacion): View
     {
-        $filters = $this->filters($request);
+        $filters = $this->filtros($request);
         $alcance = $inventario->alcanceConsulta($request->user(), 'gestion.productos.consultar');
         $resumen = $inventario->resumenProductos($alcance);
         $now = now();
@@ -317,7 +317,7 @@ class GestionProductosController extends Controller
             ->count();
         $categoryCount = Categoria::query()->where('empresa_id', $alcance['empresa_id'])->where('activo', true)->count();
         $idProductoEditar = $request->integer('editar');
-        $consultaProductos = $this->productQuery($filters, $alcance, $inventario);
+        $consultaProductos = $this->consultaProductos($filters, $alcance, $inventario);
         if ($idProductoEditar > 0) {
             $consultaProductos->where('productos.id', $idProductoEditar);
         }
@@ -351,7 +351,7 @@ class GestionProductosController extends Controller
 
         $productPresentation = $paginaProductos->getCollection()
             ->mapWithKeys(fn (Producto $producto): array => [
-                $producto->id => $presentacion->catalogProduct($producto),
+                $producto->id => $presentacion->productoCatalogo($producto),
             ])
             ->all();
 
@@ -367,7 +367,7 @@ class GestionProductosController extends Controller
             'filters' => $filters,
             'idProductoEditar' => $idProductoEditar,
             'activeProducts' => $resumen['productos_activos'],
-            'productsTrendPercent' => $this->trendPercent($productosAgregadosEsteMes, $productosAgregadosMesAnterior),
+            'productsTrendPercent' => $this->porcentajeTendencia($productosAgregadosEsteMes, $productosAgregadosMesAnterior),
             'productsWithStock' => $resumen['productos_con_existencias'],
             'outOfStock' => $resumen['productos_sin_existencias'],
             'categoryCount' => $categoryCount,
@@ -387,18 +387,18 @@ class GestionProductosController extends Controller
      */
     public function export(Request $request, string $format, ServicioInventario $inventario, ?ExportadorTabular $exporter = null): Response|StreamedResponse
     {
-        $filters = $this->filters($request);
+        $filters = $this->filtros($request);
         $filtrosExportacion = $request->validate(['marca' => ['nullable', 'string', 'max:80']]);
         $alcance = $inventario->alcanceConsulta($request->user(), 'gestion.productos.exportar');
-        $products = $this->productQuery($filters, $alcance, $inventario)->orderBy('productos.id');
+        $products = $this->consultaProductos($filters, $alcance, $inventario)->orderBy('productos.id');
         if (($filtrosExportacion['marca'] ?? null) !== null) {
             $products->where('productos.marca', $filtrosExportacion['marca']);
         }
 
         return match ($format) {
-            'csv' => $this->downloadCsv($products),
-            'excel' => $this->downloadCorporateReport($products->get(), 'excel', $filters, $alcance, $request, $exporter ?? new ExportadorTabular),
-            'pdf' => $this->downloadCorporateReport($products->get(), 'pdf', $filters, $alcance, $request, $exporter ?? new ExportadorTabular),
+            'csv' => $this->descargarCsv($products),
+            'excel' => $this->descargarReporteCorporativo($products->get(), 'excel', $filters, $alcance, $request, $exporter ?? new ExportadorTabular),
+            'pdf' => $this->descargarReporteCorporativo($products->get(), 'pdf', $filters, $alcance, $request, $exporter ?? new ExportadorTabular),
             default => abort(404),
         };
     }
@@ -438,7 +438,7 @@ class GestionProductosController extends Controller
             $output = fopen($temporaryCsv, 'wb');
             abort_if($output === false, 422, 'No se pudo preparar el archivo Excel.');
             fputcsv($output, $columns);
-            foreach ($this->readXlsxRows($file) as $row) {
+            foreach ($this->leerFilasXlsx($file) as $row) {
                 fputcsv($output, $row);
             }
             fclose($output);
@@ -450,7 +450,7 @@ class GestionProductosController extends Controller
         $header = fgetcsv($handle);
         if ($header !== $columns) {
             fclose($handle);
-            $this->deleteTemporaryFile($temporaryCsv);
+            $this->eliminarArchivoTemporal($temporaryCsv);
             throw ValidationException::withMessages(['archivo' => 'El archivo debe contener exactamente la plantilla de productos.']);
         }
 
@@ -461,13 +461,13 @@ class GestionProductosController extends Controller
             }
             if (count($row) !== count($columns)) {
                 fclose($handle);
-                $this->deleteTemporaryFile($temporaryCsv);
+                $this->eliminarArchivoTemporal($temporaryCsv);
                 throw ValidationException::withMessages(['archivo' => 'Todas las filas deben tener las columnas de la plantilla.']);
             }
             $rows[] = array_combine($columns, array_map(static fn (mixed $value): string => trim((string) $value), $row));
         }
         fclose($handle);
-        $this->deleteTemporaryFile($temporaryCsv);
+        $this->eliminarArchivoTemporal($temporaryCsv);
 
         if ($rows === []) {
             throw ValidationException::withMessages(['archivo' => 'El archivo no contiene productos para importar.']);
@@ -503,7 +503,7 @@ class GestionProductosController extends Controller
                 $supplierId = isset($validated['proveedor_id']) && $validated['proveedor_id'] !== ''
                     ? (int) $validated['proveedor_id']
                     : null;
-                $productos->crear($this->attributes($validated), $supplierId, $request->user(), (string) $request->ip());
+                $productos->crear($this->atributos($validated), $supplierId, $request->user(), (string) $request->ip());
             }
         }, 3);
 
@@ -521,7 +521,7 @@ class GestionProductosController extends Controller
     ): RedirectResponse {
         $validated = $request->validated();
         $supplierId = $validated['proveedor_id'] ?? null;
-        $data = $this->attributes($validated);
+        $data = $this->atributos($validated);
         $rutaImagenGuardada = null;
 
         if ($request->hasFile('imagen')) {
@@ -560,7 +560,7 @@ class GestionProductosController extends Controller
         $this->authorize('update', $product);
         $validated = $request->validated();
         $before = $product->only(['marca', 'nombre', 'categoria_id', 'precio', 'precio_oferta', 'existencias', 'url_imagen']);
-        $data = $this->attributes($validated);
+        $data = $this->atributos($validated);
         $rutaImagenGuardada = null;
 
         if ($request->hasFile('imagen')) {
@@ -592,8 +592,10 @@ class GestionProductosController extends Controller
     public function deactivate(Producto $product, RegistradorAuditoria $audit): RedirectResponse
     {
         $this->authorize('delete', $product);
-        $product->update(['activo' => false]);
-        $audit->record(request()->user()->id, 'product.deactivated', 'productos', $product->id, ['activo' => true], ['activo' => false], request()->ip());
+        DB::transaction(function () use ($product, $audit): void {
+            $product->update(['activo' => false]);
+            $audit->record(request()->user()->id, 'product.deactivated', 'productos', $product->id, ['activo' => true], ['activo' => false], request()->ip());
+        });
 
         return back()->with('status', 'Producto desactivado; su historial comercial se conserva.');
     }
@@ -710,7 +712,7 @@ class GestionProductosController extends Controller
     }
 
     /** @param array<string, mixed> $data */
-    private function attributes(array $data): array
+    private function atributos(array $data): array
     {
         $category = Categoria::findOrFail($data['categoria_id']);
         $data['categoria'] = $category->nombre;
@@ -720,7 +722,7 @@ class GestionProductosController extends Controller
     }
 
     /** @return array<int, array<int, string>> */
-    private function readXlsxRows(UploadedFile $file): array
+    private function leerFilasXlsx(UploadedFile $file): array
     {
         abort_unless(class_exists(ZipArchive::class), 422, 'El servidor no tiene habilitada la lectura de archivos Excel.');
         $zip = new ZipArchive;
@@ -752,7 +754,7 @@ class GestionProductosController extends Controller
         return array_slice($rows, 1);
     }
 
-    private function deleteTemporaryFile(?string $path): void
+    private function eliminarArchivoTemporal(?string $path): void
     {
         if ($path !== null && file_exists($path)) {
             unlink($path);
@@ -786,7 +788,7 @@ class GestionProductosController extends Controller
      * @param  array{empresa_id:int,sede_id:?int}  $alcance
      * @return Builder<Producto>
      */
-    private function productQuery(array $filters, array $alcance, ServicioInventario $inventario): Builder
+    private function consultaProductos(array $filters, array $alcance, ServicioInventario $inventario): Builder
     {
         return $inventario->productosParaConsulta($alcance, $filters, true, true);
     }
@@ -794,7 +796,7 @@ class GestionProductosController extends Controller
     /**
      * @return array{buscar:?string,categoria:?int,stock:?string,estado:?string,oferta:bool,por_pagina:int}
      */
-    private function filters(Request $request): array
+    private function filtros(Request $request): array
     {
         $stock = trim((string) $request->input('stock', ''));
         $status = trim((string) $request->input('estado', ''));
@@ -818,7 +820,7 @@ class GestionProductosController extends Controller
      * @param  mixed  $previous  Parámetro recibido por la operación.
      * @return mixed Resultado de la operación.
      */
-    private function trendPercent(int $current, int $previous): ?float
+    private function porcentajeTendencia(int $current, int $previous): ?float
     {
         if ($previous === 0) {
             return null;
@@ -830,7 +832,7 @@ class GestionProductosController extends Controller
     /**
      * @param  Builder<Producto>  $query
      */
-    private function downloadCsv(Builder $query): StreamedResponse
+    private function descargarCsv(Builder $query): StreamedResponse
     {
         $products = $query->cursor();
 
@@ -841,7 +843,7 @@ class GestionProductosController extends Controller
             fputcsv($output, ['id', 'producto', 'marca', 'categoria', 'precio', 'stock', 'estado']);
 
             foreach ($products as $product) {
-                fputcsv($output, $this->exportRow($product));
+                fputcsv($output, $this->filaExportacion($product));
             }
 
             fclose($output);
@@ -853,9 +855,9 @@ class GestionProductosController extends Controller
      * @param  array{buscar:?string,categoria:?int,stock:?string,estado:?string,oferta:bool,por_pagina:int}  $filters
      * @param  array{empresa_id:int,sede_id:?int}  $alcance
      */
-    private function downloadCorporateReport(Collection $products, string $format, array $filters, array $alcance, Request $request, ExportadorTabular $exporter): Response
+    private function descargarReporteCorporativo(Collection $products, string $format, array $filters, array $alcance, Request $request, ExportadorTabular $exporter): Response
     {
-        $rows = $products->map(fn (Producto $product): array => $this->exportRow($product))->all();
+        $rows = $products->map(fn (Producto $product): array => $this->filaExportacion($product))->all();
         $stockTotal = array_sum(array_map(static fn (array $row): int => (int) ($row[5] ?? 0), $rows));
         $outOfStockCount = count(array_filter($rows, static fn (array $row): bool => (int) ($row[5] ?? 0) === 0));
         $stockLabel = match ($filters['stock']) {
@@ -905,11 +907,11 @@ class GestionProductosController extends Controller
     /**
      * @param  Collection<int, Producto>  $products
      */
-    private function downloadExcel(Collection $products): Response
+    private function descargarExcel(Collection $products): Response
     {
         $rows = $products->map(fn (Producto $product): string => '<tr>'.implode('', array_map(
             fn (string|int|float $value): string => '<td>'.htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8').'</td>',
-            $this->exportRow($product),
+            $this->filaExportacion($product),
         )).'</tr>')->implode('');
         $html = '<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif}table{border-collapse:collapse}th,td{border:1px solid #d9e3f0;padding:7px}th{background:#eaf2ff;color:#10234c;text-align:left}</style></head><body><h1>Catálogo de productos</h1><table><thead><tr><th>ID</th><th>Producto</th><th>Marca</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Estado</th></tr></thead><tbody>'.$rows.'</tbody></table></body></html>';
 
@@ -922,7 +924,7 @@ class GestionProductosController extends Controller
     /**
      * @param  Collection<int, Producto>  $products
      */
-    private function downloadPdf(Collection $products): Response
+    private function descargarPdf(Collection $products): Response
     {
         $header = [
             'CATALOGO DE PRODUCTOS',
@@ -932,7 +934,7 @@ class GestionProductosController extends Controller
             str_repeat('-', 108),
         ];
         $productLines = $products->map(function (Producto $product): string {
-            $row = $this->exportRow($product);
+            $row = $this->filaExportacion($product);
 
             return implode(' | ', [
                 $row[0],
@@ -954,7 +956,7 @@ class GestionProductosController extends Controller
             );
         }
 
-        return response($this->buildPdfDocument($pages), 200, [
+        return response($this->construirDocumentoPdf($pages), 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'attachment; filename="catalogo-productos.pdf"',
         ]);
@@ -963,7 +965,7 @@ class GestionProductosController extends Controller
     /**
      * @return array<int, string|int|float>
      */
-    private function exportRow(Producto $product): array
+    private function filaExportacion(Producto $product): array
     {
         $existencias = (float) ($product->existencias_alcance ?? 0);
 
@@ -981,7 +983,7 @@ class GestionProductosController extends Controller
     /**
      * @param  array<int, array<int, string>>  $pages
      */
-    private function buildPdfDocument(array $pages): string
+    private function construirDocumentoPdf(array $pages): string
     {
         $objects = [];
         $pageObjectIds = [];
@@ -1004,7 +1006,7 @@ class GestionProductosController extends Controller
 
             foreach ($page as $lineIndex => $line) {
                 $fontSize = $lineIndex === 0 ? 14 : 8;
-                $content .= "BT\n/F1 {$fontSize} Tf\n30 {$y} Td\n(".$this->escapePdfText($line).") Tj\nET\n";
+                $content .= "BT\n/F1 {$fontSize} Tf\n30 {$y} Td\n(".$this->escaparTextoPdf($line).") Tj\nET\n";
                 $y -= 15;
             }
 
@@ -1034,12 +1036,12 @@ class GestionProductosController extends Controller
     }
 
     /**
-     * Ejecuta la operación escapePdfText definida por la clase GestionProductosController.
+     * Escapa texto para el documento PDF generado por la clase GestionProductosController.
      *
      * @param  mixed  $value  Parámetro recibido por la operación.
      * @return string Resultado de la operación.
      */
-    private function escapePdfText(string $value): string
+    private function escaparTextoPdf(string $value): string
     {
         $encoded = iconv('UTF-8', 'Windows-1252//TRANSLIT', $value);
 

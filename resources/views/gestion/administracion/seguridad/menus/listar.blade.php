@@ -4,7 +4,7 @@
 @section('body_class', 'modulo-seguridad-rbac')
 
 @section('content')
-{{-- Administraci�n de men�s, submen�s y sus permisos visibles. --}}
+{{-- Administración de menús, submenús y sus permisos visibles. --}}
 <section class="tc-rbac-page tc-menu-page" data-menu-page>
     <header class="tc-rbac-hero"><div><span class="tc-rbac-eyebrow">Seguridad y delegación</span><h1>Menús y submenús dinámicos</h1><p>Configura la estructura visible del panel lateral según los permisos y roles.</p></div></header>
     @unless($ready)

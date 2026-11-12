@@ -16,10 +16,10 @@ class PublicidadInteligenteController extends Controller
     /**
      * Inicializa la instancia con las dependencias y el estado requeridos.
      *
-     * @param  mixed  $commerce  Parámetro recibido por la operación.
+     * @param  mixed  $servicioInteligencia  Parámetro recibido por la operación.
      * @return mixed Resultado de la operación.
      */
-    public function __construct(private readonly ServicioInteligenciaComercial $commerce) {}
+    public function __construct(private readonly ServicioInteligenciaComercial $servicioInteligencia) {}
 
     /**
      * Ejecuta la operación ads definida por la clase PublicidadInteligenteController.
@@ -28,6 +28,6 @@ class PublicidadInteligenteController extends Controller
      */
     public function ads(): View
     {
-        return view('gestion.ecommerce-marketing.campanas.publicidad-inteligente', $this->commerce->advertisingSummary());
+        return view('gestion.ecommerce-marketing.campanas.publicidad-inteligente', $this->servicioInteligencia->resumenPublicidad());
     }
 }

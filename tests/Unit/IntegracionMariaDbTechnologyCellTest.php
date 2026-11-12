@@ -120,7 +120,7 @@ it('refuses a second site to unassigned employees and preserves single-site stoc
         'cantidad_fisica' => 2, 'cantidad_reservada' => 0,
     ]);
     try {
-        app(ServicioInventario::class)->adjust($product, 'salida', 1, 'Prueba temporal de sede', $buyer);
+        app(ServicioInventario::class)->ajustar($product, 'salida', 1, 'Prueba temporal de sede', $buyer);
         $this->fail('El inventario no debe operar con dos sedes activas.');
     } catch (HttpException $exception) {
         expect($exception->getStatusCode())->toBeIn([403, 503]);
@@ -161,6 +161,10 @@ it('keeps ecommerce checkout and the three stock balances synchronized', functio
     $checkoutToken = bin2hex(random_bytes(32));
     $this->actingAs($customer)->withSession([
         'cart' => [$product->id => 1], 'checkout_token' => $checkoutToken,
+    ])->post(route('checkout'), ['checkout_token' => $checkoutToken])->assertUnprocessable();
+
+    $this->actingAs($customer)->withSession([
+        'cart' => [$product->id => ['cantidad' => 1, 'variante_id' => $variantId]], 'checkout_token' => $checkoutToken,
     ])->post(route('checkout'), ['checkout_token' => $checkoutToken])->assertRedirect();
 
     $order = Pedido::query()->where('usuario_id', $customer->id)->sole();

@@ -24,7 +24,7 @@ export const initializeReembolsos = (root) => {
  */
 const initializeRefundDemo = (root) => {
     const form = root.querySelector('[data-finance-refund-form]');
-    const dialog = root.querySelector('[data-pending-modal="crear"]');
+    const dialog = root.querySelector('[data-finance-dialog="crear"], [data-pending-modal="crear"]');
     const confirm = form?.querySelector('[data-finance-refund-confirm]');
     const error = form?.querySelector('[data-finance-refund-error]');
     const feedback = form?.querySelector('[data-finance-refund-feedback]');

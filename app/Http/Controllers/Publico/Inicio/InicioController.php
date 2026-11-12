@@ -12,21 +12,21 @@ use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 /**
- * Define la responsabilidad de la clase InicioController dentro de su m骴ulo.
+ * Define la responsabilidad de la clase InicioController dentro de su m贸dulo.
  *
  * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
  */
 class InicioController extends Controller
 {
     /**
-     * Ejecuta la operaci髇 __invoke definida por la clase InicioController.
+     * Ejecuta la operaci贸n __invoke definida por la clase InicioController.
      *
-     * @param  mixed  $catalogo  Par醡etro recibido por la operaci髇.
-     * @return View Resultado de la operaci髇.
+     * @param  mixed  $catalogo  Par谩metro recibido por la operaci贸n.
+     * @return View Resultado de la operaci贸n.
      */
     public function __invoke(Request $request, ServicioCatalogo $catalogo): View
     {
-        $featuredProducts = $catalogo->conExistenciasPotenciales(Producto::query()
+        $productosDestacados = $catalogo->conExistenciasPotenciales(Producto::query()
             ->with(['category', 'images'])
             ->active())
             ->whereNotNull('precio_original')
@@ -36,40 +36,40 @@ class InicioController extends Controller
             ->orderByDesc('id')
             ->limit(60)
             ->get();
-        $catalogo->agregarDisponibilidad($featuredProducts, auth()->user());
-        $featuredProducts = $featuredProducts->filter(fn (Producto $producto): bool => $producto->existencias_disponibles > 0)
-            ->take(20)->map(function (Producto $product): Producto {
-                $originalPrice = (float) $product->precio_original;
-                $salePrice = (float) $product->precio_oferta;
+        $catalogo->agregarDisponibilidad($productosDestacados, auth()->user());
+        $productosDestacados = $productosDestacados->filter(fn (Producto $producto): bool => $producto->existencias_disponibles > 0)
+            ->take(20)->map(function (Producto $producto): Producto {
+                $precioOriginal = (float) $producto->precio_original;
+                $precioOferta = (float) $producto->precio_oferta;
 
-                $product->setAttribute('display_original_price', $originalPrice);
-                $product->setAttribute('display_discount', $originalPrice > 0 ? round((1 - ($salePrice / $originalPrice)) * 100) : 0);
-                $product->setAttribute('display_specifications', trim(($product->almacenamiento ? $product->almacenamiento.' 路 ' : '').Str::limit(strip_tags((string) $product->descripcion), 38)));
+                $producto->setAttribute('display_original_price', $precioOriginal);
+                $producto->setAttribute('display_discount', $precioOriginal > 0 ? round((1 - ($precioOferta / $precioOriginal)) * 100) : 0);
+                $producto->setAttribute('display_specifications', trim(($producto->almacenamiento ? $producto->almacenamiento.' 路 ' : '').Str::limit(strip_tags((string) $producto->descripcion), 38)));
 
-                return $product;
+                return $producto;
             });
 
-        $categories = Categoria::query()->where('activo', true)->get();
+        $categorias = Categoria::query()->where('activo', true)->get();
 
         return view('publico.paginas.inicio', [
-            'featuredProducts' => $featuredProducts,
-            'cellCategoryId' => $this->categoryId($categories, 'celular'),
-            'accessoryCategoryId' => $this->categoryId($categories, 'accesorio'),
-            'canAddToCart' => $request->user() !== null,
+            'productosDestacados' => $productosDestacados,
+            'idCategoriaCelulares' => $this->idCategoria($categorias, 'celular'),
+            'idCategoriaAccesorios' => $this->idCategoria($categorias, 'accesorio'),
+            'puedeAgregarCarrito' => $request->user() !== null,
         ]);
     }
 
     /**
-     * Ejecuta la operaci髇 categoryId definida por la clase InicioController.
+     * Ejecuta la operaci贸n categoryId definida por la clase InicioController.
      *
-     * @param  mixed  $categories  Par醡etro recibido por la operaci髇.
-     * @param  mixed  $needle  Par醡etro recibido por la operaci髇.
-     * @return mixed Resultado de la operaci髇.
+     * @param  mixed  $categories  Par谩metro recibido por la operaci贸n.
+     * @param  mixed  $needle  Par谩metro recibido por la operaci贸n.
+     * @return mixed Resultado de la operaci贸n.
      */
-    private function categoryId(Collection $categories, string $needle): ?int
+    private function idCategoria(Collection $categorias, string $busqueda): ?int
     {
-        return $categories
-            ->first(fn (Categoria $category): bool => str_contains(mb_strtolower($category->nombre), $needle))
+        return $categorias
+            ->first(fn (Categoria $categoria): bool => str_contains(mb_strtolower($categoria->nombre), $busqueda))
             ?->id;
     }
 }

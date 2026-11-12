@@ -40,9 +40,9 @@ class CampaniaController extends Controller
     {
         $empresaId = $autorizacion->activeCompanyId();
         abort_unless($empresaId !== null, 409, 'Selecciona una empresa activa para consultar campañas.');
-        $filters = $this->filters($request);
+        $filters = $this->filtros($request);
         $consultaEmpresa = Campania::query()->where('empresa_id', $empresaId);
-        $campaigns = $this->campaignQuery($filters, $empresaId)
+        $campaigns = $this->consultaCampanias($filters, $empresaId)
             ->with('segments')
             ->withCount('events')
             ->orderByDesc('vistas')
@@ -67,8 +67,8 @@ class CampaniaController extends Controller
             'totalViews' => $totalViews,
             'totalClicks' => $totalClicks,
             'conversionRate' => $totalViews > 0 ? round(($totalClicks / $totalViews) * 100, 1) : 0,
-            'viewsTrend' => $this->trendPercent($currentViews, $previousViews),
-            'clicksTrend' => $this->trendPercent($currentClicks, $previousClicks),
+            'viewsTrend' => $this->porcentajeTendencia($currentViews, $previousViews),
+            'clicksTrend' => $this->porcentajeTendencia($currentClicks, $previousClicks),
             'topCampaigns' => (clone $consultaEmpresa)->with('segments')->orderByDesc('vistas')->orderByDesc('clics')->limit(5)->get(),
             'distribution' => (clone $consultaEmpresa)->select('ubicacion')->selectRaw('COUNT(*) as total')->groupBy('ubicacion')->orderByDesc('total')->get(),
             'recentEvents' => EventoCampania::query()->whereHas('campaign', static fn (Builder $consulta): Builder => $consulta->where('empresa_id', $empresaId))->with('campaign:id,nombre,titulo')->latest('creado_en')->limit(5)->get(['id', 'campana_id', 'tipo', 'creado_en']),
@@ -89,7 +89,7 @@ class CampaniaController extends Controller
         abort_unless($empresaId !== null, 409, 'Selecciona una empresa activa para registrar campañas.');
         $data = $request->validated();
         $segmentIds = $data['segmentos'] ?? [];
-        $data = $this->campaignData($data, $request);
+        $data = $this->datosCampania($data, $request);
 
         $campaign = Campania::create($data + ['empresa_id' => $empresaId, 'activo' => true, 'creado_en' => now(), 'actualizado_en' => now()]);
         $campaign->segments()->sync($segmentIds);
@@ -130,8 +130,8 @@ class CampaniaController extends Controller
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
         $empresaId = $autorizacion->activeCompanyId();
         abort_unless($empresaId !== null, 409, 'Selecciona una empresa activa para exportar campañas.');
-        $filters = $this->filters($request);
-        $campaigns = $this->campaignQuery($filters, $empresaId)->with('segments')->orderBy('id')->limit(5000)->get();
+        $filters = $this->filtros($request);
+        $campaigns = $this->consultaCampanias($filters, $empresaId)->with('segments')->orderBy('id')->limit(5000)->get();
         $rows = $campaigns->map(fn (Campania $campaign): array => [
             $campaign->nombre,
             $campaign->titulo,
@@ -176,7 +176,7 @@ class CampaniaController extends Controller
         abort_unless($campaign->empresa_id !== null && (int) $campaign->empresa_id === $autorizacion->activeCompanyId(), 404);
         $data = $request->validated();
         $segmentIds = $data['segmentos'] ?? [];
-        $data = $this->campaignData($data, $request);
+        $data = $this->datosCampania($data, $request);
         $before = $campaign->only(['nombre', 'titulo', 'ubicacion', 'inicia_en', 'finaliza_en', 'activo']);
         $campaign->update($data + ['actualizado_en' => now()]);
         $campaign->segments()->sync($segmentIds);
@@ -278,7 +278,7 @@ class CampaniaController extends Controller
      * @param  array{buscar:?string,ubicacion:?string,estado:?string,por_pagina:int}  $filters
      * @return Builder<Campania>
      */
-    private function campaignQuery(array $filters, int $empresaId): Builder
+    private function consultaCampanias(array $filters, int $empresaId): Builder
     {
         return Campania::query()->where('empresa_id', $empresaId)
             ->when($filters['buscar'], function (Builder $query, string $search): void {
@@ -297,7 +297,7 @@ class CampaniaController extends Controller
     /**
      * @return array{buscar:?string,ubicacion:?string,estado:?string,por_pagina:int}
      */
-    private function filters(Request $request): array
+    private function filtros(Request $request): array
     {
         $search = trim($request->string('buscar')->toString());
         $location = trim($request->string('ubicacion')->toString());
@@ -316,7 +316,7 @@ class CampaniaController extends Controller
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
-    private function campaignData(array $data, GuardarCampaniaRequest $request): array
+    private function datosCampania(array $data, GuardarCampaniaRequest $request): array
     {
         unset($data['segmentos'], $data['imagen']);
 
@@ -334,7 +334,7 @@ class CampaniaController extends Controller
      * @param  mixed  $previous  Parámetro recibido por la operación.
      * @return mixed Resultado de la operación.
      */
-    private function trendPercent(int $current, int $previous): ?float
+    private function porcentajeTendencia(int $current, int $previous): ?float
     {
         if ($previous === 0) {
             return null;

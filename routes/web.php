@@ -68,6 +68,7 @@ Route::middleware(['auth', 'cuenta.activa', 'sesion.usuario'])->group(function (
     Route::post('/catalogo/{product}/resena', [CatalogoController::class, 'storeReview'])
         ->whereNumber('product')->name('catalog.review.store');
 });
+
 Route::post('/campanas/{campaign}/evento', [CampaniaPublicaController::class, 'track'])
     ->whereNumber('campaign')->middleware('throttle:60,1')->name('campaigns.track');
 Route::get('/nosotros', [PaginaController::class, 'about'])->name('pages.about');
@@ -84,6 +85,7 @@ Route::get('/optimizador', [InteligenciaComercialController::class, 'optimizer']
 Route::get('/asistente', [AsistenteController::class, 'index'])->name('assistant');
 Route::post('/asistente', [AsistenteController::class, 'ask'])->middleware('throttle:10,1')->name('assistant.ask');
 
+// ruta de inicio de sesión, registro y cierre de sesión
 Route::middleware('guest')->group(function (): void {
     Route::get('/iniciar-sesion', [AutenticacionController::class, 'loginForm'])->name('login');
     Route::post('/iniciar-sesion', [AutenticacionController::class, 'login'])->middleware('throttle:login')->name('login.store');
@@ -288,6 +290,7 @@ Route::prefix('gestion')->middleware(['auth', 'cuenta.activa', 'sesion.usuario',
 
 Route::middleware(['auth', 'cuenta.activa', 'sesion.usuario'])->group(function (): void {
     Route::get('/gestion/cuenta', [CuentaController::class, 'dashboard'])->name('management.account');
+    Route::get('/gestion/cuenta/perfil', [CuentaController::class, 'profile'])->name('management.account.profile.show');
     Route::put('/gestion/cuenta/perfil', [CuentaAdministracionController::class, 'updateProfile'])->name('management.account.profile');
     Route::put('/gestion/cuenta/password', [CuentaAdministracionController::class, 'updatePassword'])->name('management.account.password');
     Route::put('/gestion/cuenta/fotografia', [CuentaAdministracionController::class, 'updateAvatar'])->name('management.account.avatar');

@@ -42,9 +42,9 @@ final class DashboardGlobalVentasController extends Controller
      */
     public function index(Request $request, ServicioAutorizacion $authorization): View
     {
-        $this->authorizeDashboard($request->user(), $authorization);
-        $filters = $this->filters($request, $authorization);
-        $orders = $this->orders($request->user(), $filters, $authorization);
+        $this->autorizarPanel($request->user(), $authorization);
+        $filters = $this->filtros($request, $authorization);
+        $orders = $this->pedidos($request->user(), $filters, $authorization);
         $registeredCount = (clone $orders)->count();
         $nonCancelledCount = (clone $orders)->whereNotIn('estado', ['Cancelado', 'Cancelada'])->count();
         $dailyTotals = collect();
@@ -77,10 +77,10 @@ final class DashboardGlobalVentasController extends Controller
 
         return view('gestion.analitica.dashboard-global.ventas.listar', [
             'filters' => $filters,
-            'sites' => $this->availableSites($request->user(), $authorization),
-            'channels' => $this->hasChannel() ? (clone $orders)->whereNotNull('canal')->distinct()->orderBy('canal')->pluck('canal') : collect(),
-            'hasSite' => $this->hasSite(),
-            'hasChannel' => $this->hasChannel(),
+            'sites' => $this->sedesDisponibles($request->user(), $authorization),
+            'channels' => $this->tieneCanal() ? (clone $orders)->whereNotNull('canal')->distinct()->orderBy('canal')->pluck('canal') : collect(),
+            'hasSite' => $this->tieneSede(),
+            'hasChannel' => $this->tieneCanal(),
             'orderCount' => $registeredCount,
             'nonCancelledCount' => $nonCancelledCount,
             'income' => null,
@@ -117,21 +117,21 @@ final class DashboardGlobalVentasController extends Controller
      */
     public function export(Request $request, string $format, ExportadorTabular $exporter, ServicioAutorizacion $authorization, RegistradorAuditoria $auditor): Response|StreamedResponse
     {
-        $this->authorizeDashboard($request->user(), $authorization);
+        $this->autorizarPanel($request->user(), $authorization);
         $authorization->assertAllowed($request->user(), 'gestion.analitica.reportes.exportar');
         abort_unless(in_array($format, ['pdf', 'excel', 'csv'], true), 404);
-        $filters = $this->filters($request, $authorization);
-        $orders = $this->orders($request->user(), $filters, $authorization);
+        $filters = $this->filtros($request, $authorization);
+        $orders = $this->pedidos($request->user(), $filters, $authorization);
         abort_if((clone $orders)->limit(self::MAX_EXPORT_ROWS + 1)->pluck('id')->count() > self::MAX_EXPORT_ROWS, 422, 'El período supera el límite de exportación. Reduce los filtros.');
         $selectColumns = ['id', 'creado_en', 'estado', 'total'];
         $columns = ['Pedido', 'Fecha (Lima)', 'Estado', 'Importe del pedido PEN (no cobro)'];
         $columnTypes = [0 => 'integer', 1 => 'datetime', 3 => 'currency'];
-        if ($this->hasSite()) {
+        if ($this->tieneSede()) {
             $selectColumns[] = 'sede_id';
             $columns[] = 'Sede ID';
             $columnTypes[count($columns) - 1] = 'integer';
         }
-        if ($this->hasChannel()) {
+        if ($this->tieneCanal()) {
             $selectColumns[] = 'canal';
             $columns[] = 'Canal';
         }
@@ -139,14 +139,14 @@ final class DashboardGlobalVentasController extends Controller
             $row = [
                 $order->id,
                 $order->creado_en?->timezone(self::BUSINESS_TIMEZONE)->format('Y-m-d H:i') ?? '',
-                self::safeExportText($order->estado, $format),
+                self::textoExportacionSeguro($order->estado, $format),
                 (string) $order->total,
             ];
-            if ($this->hasSite()) {
+            if ($this->tieneSede()) {
                 $row[] = $order->sede_id ?? '';
             }
-            if ($this->hasChannel()) {
-                $row[] = self::safeExportText($order->canal ?? '', $format);
+            if ($this->tieneCanal()) {
+                $row[] = self::textoExportacionSeguro($order->canal ?? '', $format);
             }
 
             return $row;
@@ -190,7 +190,7 @@ final class DashboardGlobalVentasController extends Controller
     }
 
     /** @return array{periodo:int,sede:?int,canal:?string} */
-    private function filters(Request $request, ServicioAutorizacion $authorization): array
+    private function filtros(Request $request, ServicioAutorizacion $authorization): array
     {
         $validated = $request->validate([
             'periodo' => ['nullable', 'integer', Rule::in([7, 30, 90])],
@@ -199,10 +199,10 @@ final class DashboardGlobalVentasController extends Controller
         ]);
 
         $siteId = isset($validated['sede']) ? (int) $validated['sede'] : null;
-        abort_if($siteId !== null && ! $this->hasSite(), 422, 'El filtro de sede no está disponible.');
-        abort_if(isset($validated['canal']) && ! $this->hasChannel(), 422, 'El filtro de canal no está disponible.');
+        abort_if($siteId !== null && ! $this->tieneSede(), 422, 'El filtro de sede no está disponible.');
+        abort_if(isset($validated['canal']) && ! $this->tieneCanal(), 422, 'El filtro de canal no está disponible.');
         if ($siteId !== null) {
-            abort_unless($this->availableSites($request->user(), $authorization)->contains('id', $siteId), 403);
+            abort_unless($this->sedesDisponibles($request->user(), $authorization)->contains('id', $siteId), 403);
         }
 
         $filters = [
@@ -213,7 +213,7 @@ final class DashboardGlobalVentasController extends Controller
 
         if (isset($validated['canal'])) {
             $channel = (string) $validated['canal'];
-            $channelExists = $this->orders($request->user(), $filters, $authorization)
+            $channelExists = $this->pedidos($request->user(), $filters, $authorization)
                 ->where('canal', $channel)
                 ->exists();
 
@@ -225,7 +225,7 @@ final class DashboardGlobalVentasController extends Controller
     }
 
     /** @param array{periodo:int,sede:?int,canal:?string} $filters */
-    private function orders(User $user, array $filters, ServicioAutorizacion $authorization): Builder
+    private function pedidos(User $user, array $filters, ServicioAutorizacion $authorization): Builder
     {
         $now = Carbon::now(self::BUSINESS_TIMEZONE);
         $today = $now->copy()->startOfDay();
@@ -245,8 +245,8 @@ final class DashboardGlobalVentasController extends Controller
                     $companyId === null ? $query->whereRaw('1 = 0') : $query->where('empresa_id', $companyId);
                 }
             } else {
-                abort_unless($this->hasSite(), 403);
-                $query->whereIn('sede_id', $this->assignedSiteIds($user, $authorization));
+                abort_unless($this->tieneSede(), 403);
+                $query->whereIn('sede_id', $this->idsSedesAsignadas($user, $authorization));
             }
 
             if (! $isGlobalAdministrator && Schema::hasColumn('pedidos', 'empresa_id') && Schema::hasColumn('sedes', 'empresa_id')) {
@@ -268,16 +268,16 @@ final class DashboardGlobalVentasController extends Controller
      * @param  mixed  $authorization  Parámetro recibido por la operación.
      * @return void Resultado de la operación.
      */
-    private function authorizeDashboard(User $user, ServicioAutorizacion $authorization): void
+    private function autorizarPanel(User $user, ServicioAutorizacion $authorization): void
     {
         abort_unless($authorization->allows($user, 'gestion.seguridad.consultar'), 403);
         $authorization->assertAllowed($user, 'gestion.panel.consultar');
     }
 
     /** @return Collection<int, object> */
-    private function availableSites(User $user, ServicioAutorizacion $authorization): Collection
+    private function sedesDisponibles(User $user, ServicioAutorizacion $authorization): Collection
     {
-        if (! $this->hasSite()) {
+        if (! $this->tieneSede()) {
             return collect();
         }
 
@@ -288,7 +288,7 @@ final class DashboardGlobalVentasController extends Controller
                 static fn ($query) => $query->join('empresas as dashboard_empresas', 'dashboard_empresas.id', '=', 'sedes.empresa_id')
                     ->where('dashboard_empresas.activo', true),
             )
-            ->when($authorization->isSeeded() && ! $this->hasGlobalOrganizationAccess($user), fn ($query) => $query->whereIn('sedes.id', $this->assignedSiteIds($user, $authorization)))
+            ->when($authorization->isSeeded() && ! $this->tieneAccesoOrganizacionGlobal($user), fn ($query) => $query->whereIn('sedes.id', $this->idsSedesAsignadas($user, $authorization)))
             ->orderBy('sedes.nombre');
 
         return $sites->get(['sedes.id', 'sedes.nombre']);
@@ -300,7 +300,7 @@ final class DashboardGlobalVentasController extends Controller
      * @param  mixed  $user  Parámetro recibido por la operación.
      * @return bool Resultado de la operación.
      */
-    private function hasGlobalOrganizationAccess(User $user): bool
+    private function tieneAccesoOrganizacionGlobal(User $user): bool
     {
         return DB::table('usuarios_roles')->join('roles', 'roles.id', '=', 'usuarios_roles.rol_id')
             ->where('usuarios_roles.usuario_id', $user->getKey())
@@ -315,7 +315,7 @@ final class DashboardGlobalVentasController extends Controller
     }
 
     /** @return array<int, int> */
-    private function assignedSiteIds(User $user, ServicioAutorizacion $authorization): array
+    private function idsSedesAsignadas(User $user, ServicioAutorizacion $authorization): array
     {
         $siteAssignments = DB::table('usuarios_sedes_roles')
             ->join('roles', 'roles.id', '=', 'usuarios_sedes_roles.rol_id')
@@ -337,9 +337,9 @@ final class DashboardGlobalVentasController extends Controller
             ->distinct();
         $siteIds = $siteAssignments->pluck('usuarios_sedes_roles.sede_id')->map(static fn ($id): int => (int) $id)->all();
 
-        $activeSiteId = $authorization->activeSiteIdFor($user);
+        $idSedeActiva = $authorization->activeSiteIdFor($user);
 
-        return $activeSiteId === null ? $siteIds : array_values(array_intersect($siteIds, [$activeSiteId]));
+        return $idSedeActiva === null ? $siteIds : array_values(array_intersect($siteIds, [$idSedeActiva]));
     }
 
     /**
@@ -347,7 +347,7 @@ final class DashboardGlobalVentasController extends Controller
      *
      * @return bool Resultado de la operación.
      */
-    private function hasSite(): bool
+    private function tieneSede(): bool
     {
         return Schema::hasTable('sedes') && Schema::hasColumn('pedidos', 'sede_id');
     }
@@ -357,7 +357,7 @@ final class DashboardGlobalVentasController extends Controller
      *
      * @return bool Resultado de la operación.
      */
-    private function hasChannel(): bool
+    private function tieneCanal(): bool
     {
         return Schema::hasColumn('pedidos', 'canal');
     }
@@ -369,7 +369,7 @@ final class DashboardGlobalVentasController extends Controller
      * @param  mixed  $format  Parámetro recibido por la operación.
      * @return string Resultado de la operación.
      */
-    private static function safeExportText(string $value, string $format): string
+    private static function textoExportacionSeguro(string $value, string $format): string
     {
         $clean = trim(preg_replace('/[\p{C}\p{Z}]+/u', ' ', $value) ?? '');
         if ($format === 'pdf') {

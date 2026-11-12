@@ -101,9 +101,9 @@
                             <div class="smartmatch-porcentaje"><b><?php echo e((int) $product->recommendation_score); ?>%</b><small>coincide</small></div>
                         </div>
                         <ul>
-                            <li><i class="bi bi-check-circle-fill"></i> Precio dentro del catÃ¡logo vigente</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Precio dentro del catálogo vigente</li>
                             <li><i class="bi bi-check-circle-fill"></i> Stock disponible: <?php echo e($product->existencias); ?></li>
-                            <li><i class="bi bi-check-circle-fill"></i> Puntaje calculado segÃºn tu selecciÃ³n</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Puntaje calculado según tu selección</li>
                         </ul>
                         <div class="smartmatch-botones">
                             <a class="btn btn-primary" href="<?php echo e(route('catalog.show', $product)); ?>">Ver equipo</a>

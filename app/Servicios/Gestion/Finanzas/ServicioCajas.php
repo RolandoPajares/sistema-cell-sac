@@ -33,11 +33,11 @@ class ServicioCajas
     /** @param array{sede_id:int,codigo:string,nombre:string} $data */
     public function crear(array $data, User $actor, ?string $ip): Caja
     {
-        $this->assertAdministrator($actor, 'gestion.pagos.crear');
+        $this->verificarAdministrador($actor, 'gestion.pagos.crear');
 
         return DB::transaction(function () use ($data, $actor, $ip): Caja {
             $site = Sede::query()->whereKey($data['sede_id'])->where('activa', true)->lockForUpdate()->firstOrFail();
-            $this->assertSite($actor, $site, 'gestion.pagos.crear');
+            $this->verificarSede($actor, $site, 'gestion.pagos.crear');
             $code = Str::upper(trim($data['codigo']));
             $name = trim($data['nombre']);
             abort_unless($code !== '' && $name !== '', 422, 'El código y nombre de la caja son obligatorios.');
@@ -58,12 +58,12 @@ class ServicioCajas
     /** @param array{sede_id:int,codigo:string,nombre:string} $data */
     public function actualizar(Caja $box, array $data, User $actor, ?string $ip): Caja
     {
-        $this->assertAdministrator($actor, 'gestion.pagos.actualizar');
+        $this->verificarAdministrador($actor, 'gestion.pagos.actualizar');
 
         return DB::transaction(function () use ($box, $data, $actor, $ip): Caja {
             $locked = Caja::query()->whereKey($box->getKey())->lockForUpdate()->firstOrFail();
             $site = Sede::query()->whereKey($locked->sede_id)->lockForUpdate()->firstOrFail();
-            $this->assertSite($actor, $site, 'gestion.pagos.actualizar');
+            $this->verificarSede($actor, $site, 'gestion.pagos.actualizar');
             abort_unless((int) $data['sede_id'] === (int) $locked->sede_id, 422, 'La sede de una caja existente no puede cambiarse.');
             $code = Str::upper(trim($data['codigo']));
             $name = trim($data['nombre']);
@@ -71,7 +71,7 @@ class ServicioCajas
             if ($locked->codigo === $code && $locked->nombre === $name) {
                 return $locked;
             }
-            abort_if($this->hasOpenSession($locked), 409, 'Cierra la sesión de caja antes de editar sus datos.');
+            abort_if($this->tieneSesionAbierta($locked), 409, 'Cierra la sesión de caja antes de editar sus datos.');
             abort_if(Caja::query()->where('sede_id', $site->id)->where('codigo', $code)
                 ->whereKeyNot($locked->getKey())->lockForUpdate()->exists(), 422, 'Ya existe una caja con ese código en la sede.');
             $before = $locked->only(['codigo', 'nombre']);
@@ -95,16 +95,16 @@ class ServicioCajas
      */
     public function cambiarEstado(Caja $box, bool $active, User $actor, ?string $ip): Caja
     {
-        $this->assertAdministrator($actor, 'gestion.pagos.actualizar');
+        $this->verificarAdministrador($actor, 'gestion.pagos.actualizar');
 
         return DB::transaction(function () use ($box, $active, $actor, $ip): Caja {
             $locked = Caja::query()->whereKey($box->getKey())->lockForUpdate()->firstOrFail();
             $site = Sede::query()->whereKey($locked->sede_id)->lockForUpdate()->firstOrFail();
-            $this->assertSite($actor, $site, 'gestion.pagos.actualizar');
+            $this->verificarSede($actor, $site, 'gestion.pagos.actualizar');
             if ($locked->activa === $active) {
                 return $locked;
             }
-            abort_if(! $active && $this->hasOpenSession($locked), 409, 'Cierra la sesión de caja antes de desactivarla.');
+            abort_if(! $active && $this->tieneSesionAbierta($locked), 409, 'Cierra la sesión de caja antes de desactivarla.');
             $locked->update(['activa' => $active]);
             $this->audit->record((int) $actor->getKey(), $active ? 'caja.activada' : 'caja.desactivada',
                 'cajas', (int) $locked->getKey(), ['activa' => ! $active], ['activa' => $active], $ip,
@@ -126,15 +126,15 @@ class ServicioCajas
      */
     public function abrirSesion(Caja $box, string $initialBalance, string $token, User $actor, ?string $ip): SesionCaja
     {
-        $this->assertAdministrator($actor, 'gestion.pagos.crear');
-        $balance = $this->amount($initialBalance, false);
+        $this->verificarAdministrador($actor, 'gestion.pagos.crear');
+        $balance = $this->importe($initialBalance, false);
 
         return DB::transaction(function () use ($box, $balance, $token, $actor, $ip): SesionCaja {
-            $this->lockCompany();
+            $this->bloquearEmpresa();
             $lockedBox = Caja::query()->whereKey($box->getKey())->lockForUpdate()->firstOrFail();
             $site = Sede::query()->whereKey($lockedBox->sede_id)->firstOrFail();
-            $this->assertSite($actor, $site, 'gestion.pagos.crear');
-            $existingId = $this->eventEntityId($token, 'sesiones_caja', 'caja.abierta');
+            $this->verificarSede($actor, $site, 'gestion.pagos.crear');
+            $existingId = $this->idEntidadEvento($token, 'sesiones_caja', 'caja.abierta');
             if ($existingId !== null) {
                 $existing = SesionCaja::query()->findOrFail($existingId);
                 abort_unless((int) $existing->caja_id === (int) $lockedBox->id
@@ -146,7 +146,7 @@ class ServicioCajas
             }
 
             abort_unless($lockedBox->activa, 409, 'Activa la caja antes de abrir una sesión.');
-            abort_if($this->hasOpenSession($lockedBox), 409, 'La caja ya tiene una sesión abierta.');
+            abort_if($this->tieneSesionAbierta($lockedBox), 409, 'La caja ya tiene una sesión abierta.');
             $session = SesionCaja::query()->create([
                 'caja_id' => $lockedBox->id, 'usuario_apertura_id' => $actor->id,
                 'estado' => 'abierta', 'saldo_inicial' => $balance, 'abierta_en' => now(),
@@ -173,19 +173,19 @@ class ServicioCajas
         User $actor,
         ?string $ip,
     ): MovimientoCaja {
-        $this->assertAdministrator($actor, 'gestion.pagos.crear');
+        $this->verificarAdministrador($actor, 'gestion.pagos.crear');
         abort_unless(in_array($direction, ['entrada', 'salida'], true), 422, 'Selecciona una dirección válida.');
-        $normalizedAmount = $this->amount($amount, true);
+        $normalizedAmount = $this->importe($amount, true);
         $description = trim($description);
         abort_unless($description !== '' && mb_strlen($description) <= 500, 422, 'Describe el motivo del movimiento.');
 
         return DB::transaction(function () use ($session, $direction, $normalizedAmount, $description, $token, $actor, $ip): MovimientoCaja {
-            $this->lockCompany();
+            $this->bloquearEmpresa();
             $lockedSession = SesionCaja::query()->whereKey($session->getKey())->lockForUpdate()->firstOrFail();
             $box = Caja::query()->whereKey($lockedSession->caja_id)->firstOrFail();
             $site = Sede::query()->whereKey($box->sede_id)->firstOrFail();
-            $this->assertSite($actor, $site, 'gestion.pagos.crear');
-            $existingId = $this->eventEntityId($token, 'movimientos_caja', 'caja.movimiento_manual');
+            $this->verificarSede($actor, $site, 'gestion.pagos.crear');
+            $existingId = $this->idEntidadEvento($token, 'movimientos_caja', 'caja.movimiento_manual');
             if ($existingId !== null) {
                 $existing = MovimientoCaja::query()->findOrFail($existingId);
                 abort_unless((int) $existing->sesion_caja_id === (int) $lockedSession->id
@@ -248,16 +248,16 @@ class ServicioCajas
      */
     public function cerrarSesion(SesionCaja $session, string $declaredBalance, string $token, User $actor, ?string $ip): SesionCaja
     {
-        $this->assertAdministrator($actor, 'gestion.pagos.actualizar');
-        $declared = $this->amount($declaredBalance, false);
+        $this->verificarAdministrador($actor, 'gestion.pagos.actualizar');
+        $declared = $this->importe($declaredBalance, false);
 
         return DB::transaction(function () use ($session, $declared, $token, $actor, $ip): SesionCaja {
-            $this->lockCompany();
+            $this->bloquearEmpresa();
             $locked = SesionCaja::query()->whereKey($session->getKey())->lockForUpdate()->firstOrFail();
             $box = Caja::query()->whereKey($locked->caja_id)->firstOrFail();
             $site = Sede::query()->whereKey($box->sede_id)->firstOrFail();
-            $this->assertSite($actor, $site, 'gestion.pagos.actualizar');
-            $existingId = $this->eventEntityId($token, 'sesiones_caja', 'caja.cerrada');
+            $this->verificarSede($actor, $site, 'gestion.pagos.actualizar');
+            $existingId = $this->idEntidadEvento($token, 'sesiones_caja', 'caja.cerrada');
             if ($existingId !== null) {
                 abort_unless($existingId === (int) $locked->id && $locked->saldo_cierre_declarado === $declared,
                     409, 'El identificador de operación ya pertenece a otro cierre.');
@@ -288,7 +288,7 @@ class ServicioCajas
      *
      * @return void Resultado de la operación.
      */
-    private function lockCompany(): void
+    private function bloquearEmpresa(): void
     {
         $companyId = $this->authorization->activeCompanyId();
         abort_unless($companyId !== null, 409, 'Selecciona una única empresa activa.');
@@ -296,14 +296,14 @@ class ServicioCajas
     }
 
     /**
-     * Ejecuta la operación eventEntityId definida por la clase ServicioCajas.
+     * Ejecuta la operación idEntidadEvento definida por la clase ServicioCajas.
      *
      * @param  mixed  $token  Parámetro recibido por la operación.
      * @param  mixed  $entity  Parámetro recibido por la operación.
      * @param  mixed  $action  Parámetro recibido por la operación.
      * @return mixed Resultado de la operación.
      */
-    private function eventEntityId(string $token, string $entity, string $action): ?int
+    private function idEntidadEvento(string $token, string $entity, string $action): ?int
     {
         abort_unless(Str::isUuid($token), 422,
             'El identificador de operación no es válido.');
@@ -325,7 +325,7 @@ class ServicioCajas
      * @param  mixed  $positive  Parámetro recibido por la operación.
      * @return string Resultado de la operación.
      */
-    private function amount(string $value, bool $positive): string
+    private function importe(string $value, bool $positive): string
     {
         abort_unless(preg_match('/\A(?:0|[1-9][0-9]{0,12})(?:\.[0-9]{1,2})?\z/', $value) === 1,
             422, 'Ingresa un importe válido con hasta dos decimales.');
@@ -336,27 +336,27 @@ class ServicioCajas
     }
 
     /**
-     * Ejecuta la operación assertAdministrator definida por la clase ServicioCajas.
+     * Ejecuta la operación verificarAdministrador definida por la clase ServicioCajas.
      *
      * @param  mixed  $actor  Parámetro recibido por la operación.
      * @param  mixed  $permission  Parámetro recibido por la operación.
      * @return void Resultado de la operación.
      */
-    private function assertAdministrator(User $actor, string $permission): void
+    private function verificarAdministrador(User $actor, string $permission): void
     {
         abort_unless($this->authorization->allowsGlobal($actor, 'gestion.seguridad.consultar'), 403);
         $this->authorization->assertAllowed($actor, $permission);
     }
 
     /**
-     * Ejecuta la operación assertSite definida por la clase ServicioCajas.
+     * Ejecuta la operación verificarSede definida por la clase ServicioCajas.
      *
      * @param  mixed  $actor  Parámetro recibido por la operación.
      * @param  mixed  $site  Parámetro recibido por la operación.
      * @param  mixed  $permission  Parámetro recibido por la operación.
      * @return void Resultado de la operación.
      */
-    private function assertSite(User $actor, Sede $site, string $permission): void
+    private function verificarSede(User $actor, Sede $site, string $permission): void
     {
         abort_unless($site->activa && (int) $site->empresa_id === $this->authorization->activeCompanyId()
             && $this->authorization->allowsRecord($actor, $permission, (int) $site->empresa_id, (int) $site->id), 403);
@@ -368,7 +368,7 @@ class ServicioCajas
      * @param  mixed  $box  Parámetro recibido por la operación.
      * @return bool Resultado de la operación.
      */
-    private function hasOpenSession(Caja $box): bool
+    private function tieneSesionAbierta(Caja $box): bool
     {
         return DB::table('sesiones_caja')->where('caja_id', $box->getKey())->where('estado', 'abierta')->exists();
     }

@@ -5,7 +5,7 @@ const openCampaignDialog = (dialog) => {
 };
 
 const closeCampaignDialog = (dialog) => {
-    if (dialog?.open) {
+    if (dialog instanceof HTMLDialogElement && dialog.open) {
         dialog.close();
     }
 };
@@ -89,7 +89,11 @@ document.querySelectorAll('[data-campanias-page]').forEach((page) => {
         });
     });
     page.querySelectorAll('[data-close-campaign-dialog]').forEach((button) => {
-        button.addEventListener('click', () => closeCampaignDialog(button.closest('dialog')));
+        button.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            closeCampaignDialog(button.closest('dialog'));
+        });
     });
     page.querySelectorAll('.campanias-dialog').forEach((dialog) => {
         dialog.addEventListener('click', (event) => {

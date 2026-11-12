@@ -52,12 +52,16 @@ it('muestra y actualiza campos de perfil habilitados por el rol vigente', functi
         'nombre' => 'Usuario actualizado',
         'correo' => $user->correo,
         'perfil' => [$field->getKey() => 'Responsable de pruebas'],
+        'telefono' => '+51 987 654 321',
+        'documento' => '12345678',
         'rol' => 'administrador',
         'activo' => false,
     ])->assertRedirect();
 
     expect($user->fresh()->nombre)->toBe('Usuario actualizado')
         ->and($user->fresh()->rol)->toBe($role->codigo)
+        ->and(DB::table('usuarios_perfiles')->where('usuario_id', $user->getKey())->value('telefono'))->toBe('+51 987 654 321')
+        ->and(DB::table('usuarios_perfiles')->where('usuario_id', $user->getKey())->value('documento'))->toBe('12345678')
         ->and(DB::table('usuarios_perfil_campos')->where('usuario_id', $user->getKey())->where('perfil_campo_id', $field->getKey())->value('valor'))
         ->toBe('Responsable de pruebas');
 });

@@ -18,7 +18,7 @@ $name = 'MD Assistant';
     <div class="assistant-bubble">
         <?php if ($name) { ?><b><?php echo e($name); ?></b><?php } ?>
 
-            <p>¡Hola! Puedo ayudarte a elegir un celular, buscar opciones por presupuesto, comparar necesidades o revisar productos disponibles. Escríbeme, por ejemplo: <em>“quiero un celular para gaming menor a S/1500�</em>.</p>
+            <p>¡Hola! Puedo ayudarte a elegir un celular, buscar opciones por presupuesto, comparar necesidades o revisar productos disponibles. Escríbeme, por ejemplo: <em>“quiero un celular para gaming menor a S/1500”</em>.</p>
 
     </div>
 </article>

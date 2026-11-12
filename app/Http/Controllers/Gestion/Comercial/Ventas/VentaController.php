@@ -58,7 +58,7 @@ class VentaController extends Controller
      */
     public function index(FiltroVentaRequest $request): View
     {
-        $filtros = $this->filters($request->validated());
+        $filtros = $this->filtros($request->validated());
         $query = $this->ventas->query($request->user(), $filtros);
         $estados = $this->ventas->query($request->user(), array_replace($filtros, ['estado' => null]))
             ->select('ventas.estado')->distinct()->orderBy('ventas.estado')->pluck('estado');
@@ -155,8 +155,8 @@ class VentaController extends Controller
             $customerName = $order->cliente?->razon_social ?: $order->cliente?->nombre_contacto;
 
             return [$order->id => [
-                'initials' => $this->initialsFor($customerName),
-                'status' => $this->statusFor($order->estado),
+                'initials' => $this->inicialesPara($customerName),
+                'status' => $this->estadoPresentacion($order->estado),
             ]];
         });
         $devicesUnavailable = $orders->getCollection()->mapWithKeys(function (Venta $order) use ($dispositivosPorDetalle): array {
@@ -189,12 +189,15 @@ class VentaController extends Controller
             'queryWithoutPage' => $request->except(['page']),
             'periodStartLabel' => CarbonImmutable::parse($filtros['desde'])->format('d/m/Y'),
             'periodEndLabel' => CarbonImmutable::parse($filtros['hasta'])->format('d/m/Y'),
-            'hasActiveFilters' => $this->hasActiveFilters($filtros),
+            'hasActiveFilters' => $this->tieneFiltrosActivos($filtros),
             'clientesDisponibles' => $clientesDisponibles,
             'sedesDisponibles' => $sedesDisponibles,
             'latestSales' => (clone $query)->with('cliente')->orderByDesc('ventas.fecha_venta')->orderByDesc('ventas.id')->limit(5)->get(),
             'customers' => $customers,
             'products' => $products,
+            'paymentMethods' => Schema::hasTable('medios_pago')
+                ? MedioPago::query()->where('activo', true)->orderBy('nombre')->get(['id', 'codigo', 'nombre'])
+                : collect(),
             'currentUserName' => $request->user()?->nombre ?? '',
             'defaultSaleDate' => now()->toDateString(),
             'canCreate' => $canCreate,
@@ -202,7 +205,7 @@ class VentaController extends Controller
         ]);
     }
 
-    private function initialsFor(?string $name): string
+    private function inicialesPara(?string $name): string
     {
         $parts = preg_split('/\s+/', trim((string) $name), -1, PREG_SPLIT_NO_EMPTY);
 
@@ -212,12 +215,12 @@ class VentaController extends Controller
     }
 
     /** @return array{label: string, class: string} */
-    private function statusFor(?string $status): array
+    private function estadoPresentacion(?string $status): array
     {
         return ['label' => $status ?: 'Sin estado', 'class' => 'muted'];
     }
 
-    private function hasActiveFilters(array $filters): bool
+    private function tieneFiltrosActivos(array $filters): bool
     {
         return (bool) (($filters['buscar'] ?? null)
             || ($filters['estado'] ?? null)
@@ -375,7 +378,11 @@ class VentaController extends Controller
         $venta = $this->registro->registrarFisica($datos, $request->user(), $datos['venta_token'], $request->ip());
         $request->session()->forget('venta_token');
 
-        return redirect()->route('management.sales')->with('status', 'Venta '.$venta->codigo.' confirmada. No se registró ningún pago.');
+        $mensajePago = isset($datos['medio_pago_id'])
+            ? ' y pago registrado.'
+            : '. No se registró ningún pago.';
+
+        return redirect()->route('management.sales')->with('status', 'Venta '.$venta->codigo.' confirmada'.$mensajePago);
     }
 
     /**
@@ -451,7 +458,7 @@ class VentaController extends Controller
     public function export(FiltroVentaRequest $request, string $format = 'csv', ?ExportadorTabular $exporter = null, ?RegistradorAuditoria $audit = null): Response|StreamedResponse
     {
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
-        $ventas = $this->ventas->query($request->user(), $this->filters($request->validated()))
+        $ventas = $this->ventas->query($request->user(), $this->filtros($request->validated()))
             ->with(['cliente:id,razon_social,nombre_contacto', 'pedido:id,canal'])
             ->orderBy('ventas.fecha_venta')->orderBy('ventas.id')->limit(5000)->get();
         $safe = static function (?string $value): string {
@@ -468,7 +475,7 @@ class VentaController extends Controller
             $safe($venta->estado),
             $safe($venta->canal ?: $venta->pedido?->canal),
         ])->all();
-        $filters = $this->filters($request->validated());
+        $filters = $this->filtros($request->validated());
         $response = ($exporter ?? app(ExportadorTabular::class))->download($format, 'ventas-'.now()->format('Ymd'),
             ['Código', 'Fecha', 'Cliente', 'Total', 'Moneda', 'Estado', 'Canal'],
             $rows,
@@ -494,12 +501,12 @@ class VentaController extends Controller
      * @param  mixed  $input  Parámetro recibido por la operación.
      * @return array Resultado de la operación.
      */
-    private function filters(array $input): array
+    private function filtros(array $input): array
     {
         $today = CarbonImmutable::today();
-        $to = $this->parseDate((string) ($input['hasta'] ?? ''), $today);
+        $to = $this->convertirFecha((string) ($input['hasta'] ?? ''), $today);
         $defaultFrom = filled($input['hasta'] ?? null) ? $to->subDays(29) : $today->subDays(29);
-        $from = $this->parseDate((string) ($input['desde'] ?? ''), $defaultFrom);
+        $from = $this->convertirFecha((string) ($input['desde'] ?? ''), $defaultFrom);
         if ($from->greaterThan($to) && filled($input['desde'] ?? null)) {
             $to = $from;
         }
@@ -517,13 +524,13 @@ class VentaController extends Controller
     }
 
     /**
-     * Ejecuta la operación parseDate definida por la clase VentaController.
+     * Convierte una fecha de entrada y aplica el valor alternativo indicado.
      *
      * @param  mixed  $value  Parámetro recibido por la operación.
      * @param  mixed  $fallback  Parámetro recibido por la operación.
      * @return CarbonImmutable Resultado de la operación.
      */
-    private function parseDate(string $value, CarbonImmutable $fallback): CarbonImmutable
+    private function convertirFecha(string $value, CarbonImmutable $fallback): CarbonImmutable
     {
         if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
             return $fallback;

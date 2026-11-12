@@ -49,7 +49,7 @@ class CotizacionController extends Controller
     public function index(Request $request): View
     {
         if ($request->routeIs('management.quotations')) {
-            return $this->administratorIndex($request);
+            return $this->indiceAdministrador($request);
         }
 
         $query = Cotizacion::with('customer', 'details.product')->latest('creado_en')->latest('id');
@@ -85,7 +85,7 @@ class CotizacionController extends Controller
      * @param  mixed  $request  Parámetro recibido por la operación.
      * @return View Resultado de la operación.
      */
-    private function administratorIndex(Request $request): View
+    private function indiceAdministrador(Request $request): View
     {
         $filters = $request->validate([
             'buscar' => ['nullable', 'string', 'max:160'],
@@ -189,7 +189,7 @@ class CotizacionController extends Controller
 
                 return [$quotation->id => [
                     'status' => $status,
-                    'status_class' => $this->statusClass($status),
+                    'status_class' => $this->claseEstado($status),
                     'customer_name' => $quotation->customer?->nombre_contacto ?? 'Cliente no disponible',
                     'reference' => 'COT-'.($quotation->creado_en?->format('Y') ?? now()->format('Y')).'-'.str_pad((string) $quotation->id, 4, '0', STR_PAD_LEFT),
                 ]];
@@ -225,7 +225,7 @@ class CotizacionController extends Controller
         ]);
     }
 
-    private function statusClass(string $status): string
+    private function claseEstado(string $status): string
     {
         return match ($status) {
             'Borrador' => 'draft',

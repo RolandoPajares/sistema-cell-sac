@@ -31,9 +31,9 @@ final class DashboardGlobalSedesController extends Controller
      */
     public function index(Request $request, ServicioAutorizacion $authorization): View
     {
-        $filters = $this->filters($request);
-        $sites = $this->sites();
-        $results = $this->results($filters, $sites);
+        $filters = $this->filtros($request);
+        $sites = $this->sedes();
+        $results = $this->resultados($filters, $sites);
         $totalOrders = $results->sum('pedidos');
         $totalIncome = $results->sum('ingresos');
         $maxIncome = max(1, (float) $results->max('ingresos'));
@@ -64,9 +64,9 @@ final class DashboardGlobalSedesController extends Controller
             'totalIncome' => $totalIncome,
             'siteBars' => $siteBars,
             'exportParameters' => $exportParameters,
-            'hasSite' => $this->hasSite(),
-            'hasChannel' => $this->hasChannel(),
-            'channels' => $this->hasChannel() ? DB::table('pedidos')->whereNotNull('canal')->distinct()->orderBy('canal')->pluck('canal') : collect(),
+            'hasSite' => $this->tieneSede(),
+            'hasChannel' => $this->tieneCanal(),
+            'channels' => $this->tieneCanal() ? DB::table('pedidos')->whereNotNull('canal')->distinct()->orderBy('canal')->pluck('canal') : collect(),
             'canExport' => $authorization->allows($request->user(), 'gestion.analitica.reportes.exportar'),
             'titulo' => 'Indicadores por sede',
             'icono' => 'bi-buildings',
@@ -94,8 +94,8 @@ final class DashboardGlobalSedesController extends Controller
         $authorization->assertAllowed($request->user(), 'gestion.analitica.reportes.exportar');
         abort_unless(in_array($format, ['pdf', 'excel', 'csv'], true), 404);
 
-        $filters = $this->filters($request);
-        $results = $this->results($filters, $this->sites());
+        $filters = $this->filtros($request);
+        $results = $this->resultados($filters, $this->sedes());
         $rows = $results->map(static fn (object $site): array => [
             $site->id,
             $site->nombre,
@@ -144,7 +144,7 @@ final class DashboardGlobalSedesController extends Controller
     }
 
     /** @return array{periodo:int,sede:?int,canal:?string} */
-    private function filters(Request $request): array
+    private function filtros(Request $request): array
     {
         $data = $request->validate([
             'periodo' => ['nullable', 'integer', Rule::in([7, 30, 90])],
@@ -154,13 +154,13 @@ final class DashboardGlobalSedesController extends Controller
 
         return [
             'periodo' => (int) ($data['periodo'] ?? 30),
-            'sede' => $this->hasSite() ? ($data['sede'] ?? null) : null,
-            'canal' => $this->hasChannel() ? ($data['canal'] ?? null) : null,
+            'sede' => $this->tieneSede() ? ($data['sede'] ?? null) : null,
+            'canal' => $this->tieneCanal() ? ($data['canal'] ?? null) : null,
         ];
     }
 
     /** @return Collection<int, object> */
-    private function sites(): Collection
+    private function sedes(): Collection
     {
         return Schema::hasTable('sedes') ? DB::table('sedes')->orderBy('nombre')->get(['id', 'nombre']) : collect();
     }
@@ -170,9 +170,9 @@ final class DashboardGlobalSedesController extends Controller
      * @param  Collection<int, object>  $sites
      * @return Collection<int, object>
      */
-    private function results(array $filters, Collection $sites): Collection
+    private function resultados(array $filters, Collection $sites): Collection
     {
-        if (! $this->hasSite()) {
+        if (! $this->tieneSede()) {
             return collect();
         }
 
@@ -208,7 +208,7 @@ final class DashboardGlobalSedesController extends Controller
      *
      * @return bool Resultado de la operación.
      */
-    private function hasSite(): bool
+    private function tieneSede(): bool
     {
         return Schema::hasTable('sedes') && Schema::hasColumn('pedidos', 'sede_id');
     }
@@ -218,7 +218,7 @@ final class DashboardGlobalSedesController extends Controller
      *
      * @return bool Resultado de la operación.
      */
-    private function hasChannel(): bool
+    private function tieneCanal(): bool
     {
         return Schema::hasColumn('pedidos', 'canal');
     }

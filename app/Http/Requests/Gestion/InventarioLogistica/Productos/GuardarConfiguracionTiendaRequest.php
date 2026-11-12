@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 
 /**
- * Define la responsabilidad de la clase GuardarConfiguracionTiendaRequest dentro de su módulo.
+ * Define la responsabilidad de la clase GuardarConfiguracionTiendaRequest dentro de su mÃ³dulo.
  *
  * La clase mantiene la responsabilidad que le corresponde dentro de la arquitectura actual.
  */

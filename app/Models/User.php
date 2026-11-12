@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Clientes\Cliente;
 use App\Models\Comercio\Pedido;
+use App\Models\Cuenta\PerfilUsuario;
 use App\Models\Cuenta\UsuarioPerfilCampo;
 use App\Models\Inventario\MovimientoInventario;
 use App\Models\Seguridad\Rol;
@@ -167,6 +168,11 @@ class User extends Authenticatable
     public function valoresPerfil(): HasMany
     {
         return $this->hasMany(UsuarioPerfilCampo::class, 'usuario_id');
+    }
+
+    public function perfil(): HasOne
+    {
+        return $this->hasOne(PerfilUsuario::class, 'usuario_id');
     }
 
     /**

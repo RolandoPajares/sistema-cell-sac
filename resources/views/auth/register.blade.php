@@ -42,14 +42,14 @@
 
             {{-- Campo para el nombre completo del usuario --}}
             <div class="form-group">
-                <label for="nombre">Nombre completo</label>
+                <label for="nombrce">Nombre completo</label>
                 <input id="nombre" class="input" type="text" name="nombre" value="{{ old('nombre') }}" maxlength="120" required autocomplete="name" placeholder="Tu nombre completo">
             </div>
 
             {{-- Campo para el correo electrónico --}}
             <div class="form-group">
                 <label for="correo">Correo</label>
-                <input id="correo" class="input" type="email" name="correo" value="{{ old('correo') }}" maxlength="160" required autocomplete="email" placeholder="ejemplo@correo.com">
+                <input id="correo" class="input" type="email" name="correo" value="{{ old('correo') }}" maxlength="160" required autocomplete="email" inputmode="email" placeholder="ejemplo@correo.com">
             </div>
 
             {{-- Campo condicional de RUC (se muestra únicamente para clientes mayoristas) --}}

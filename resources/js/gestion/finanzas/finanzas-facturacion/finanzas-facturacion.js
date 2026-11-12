@@ -75,6 +75,13 @@ document.querySelectorAll('[data-finanzas-diseno]').forEach((page) => {
     page.querySelectorAll('[data-ff-navigate]').forEach((button) => {
         button.addEventListener('click', () => window.location.assign(button.dataset.ffNavigate));
     });
+    page.querySelectorAll('[data-ff-focus]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const target = page.querySelector(`#${CSS.escape(button.dataset.ffFocus)}`) ?? page.querySelector('#cuentas-financieras-aside');
+            target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            target?.querySelector('select:not(:disabled), input:not(:disabled), textarea:not(:disabled)')?.focus({ preventScroll: true });
+        });
+    });
     page.querySelectorAll('[data-ff-open]').forEach((button) => {
         button.addEventListener('click', () => openDialog(page, button.dataset.ffOpen, null, getDialog));
     });
@@ -86,7 +93,10 @@ document.querySelectorAll('[data-finanzas-diseno]').forEach((page) => {
     });
 
     dialogs.forEach((dialog) => {
-        dialog.querySelectorAll('[data-ff-close]').forEach((button) => button.addEventListener('click', () => closeDialog(dialog)));
+        dialog.querySelectorAll('[data-ff-close]').forEach((button) => button.addEventListener('click', (event) => {
+            event.preventDefault();
+            closeDialog(dialog);
+        }));
         dialog.addEventListener('click', (event) => {
             if (event.target === dialog) closeDialog(dialog);
         });

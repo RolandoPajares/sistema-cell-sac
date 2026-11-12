@@ -136,7 +136,7 @@ class ConsultaVentas
         $tendencia = array_map(static fn (array $punto): array => $punto + [
             'sales_height' => $punto['sales'] / $maximoTotal * 100,
             'orders_height' => $punto['orders'] / $maximoCantidad * 100,
-            'sales_label' => self::formatCurrency($punto['sales'], $monedaReporte),
+            'sales_label' => self::formatearMoneda($punto['sales'], $monedaReporte),
         ], $puntos);
         $channelSegments = [];
         $channelStart = 0;
@@ -151,23 +151,23 @@ class ConsultaVentas
 
         return [
             'ordersCount' => $cantidad, 'realizedSales' => $cantidad, 'totalSales' => $monedasMultiples ? null : $total,
-            'totalSalesLabel' => self::formatCurrency($monedasMultiples ? null : $total, $monedaReporte),
+            'totalSalesLabel' => self::formatearMoneda($monedasMultiples ? null : $total, $monedaReporte),
             'monedasMultiples' => $monedasMultiples, 'monedaReporte' => $monedaReporte,
             'customersServed' => (int) $totales->clientes, 'averageTicket' => $monedasMultiples ? null : ($cantidad ? $total / $cantidad : 0),
-            'averageTicketLabel' => self::formatCurrency($monedasMultiples ? null : ($cantidad ? $total / $cantidad : 0), $monedaReporte),
-            'chartMaxLabel' => self::formatCurrency($maximoTotal, $monedaReporte),
-            'chartMidLabel' => self::formatCurrency($maximoTotal / 2, $monedaReporte),
-            'chartZeroLabel' => self::formatCurrency(0, $monedaReporte),
+            'averageTicketLabel' => self::formatearMoneda($monedasMultiples ? null : ($cantidad ? $total / $cantidad : 0), $monedaReporte),
+            'chartMaxLabel' => self::formatearMoneda($maximoTotal, $monedaReporte),
+            'chartMidLabel' => self::formatearMoneda($maximoTotal / 2, $monedaReporte),
+            'chartZeroLabel' => self::formatearMoneda(0, $monedaReporte),
             'channelDonut' => 'background: conic-gradient('.implode(', ', $channelSegments ?: ['#d9e7f6 0% 100%']).');',
             'salesTrend' => $tendencia, 'channelSummary' => $resumenCanales,
             'topProducts' => $detalles->map(static fn ($detalle): array => [
                 'name' => $detalle->descripcion_historica, 'units' => (float) $detalle->unidades,
-                'revenue' => (float) $detalle->importe, 'revenue_label' => self::formatCurrency((float) $detalle->importe, $monedaReporte), 'image' => null,
+                'revenue' => (float) $detalle->importe, 'revenue_label' => self::formatearMoneda((float) $detalle->importe, $monedaReporte), 'image' => null,
             ])->all(),
         ];
     }
 
-    private static function formatCurrency(float|int|string|null $value, string $currency): string
+    private static function formatearMoneda(float|int|string|null $value, string $currency): string
     {
         if ($value === null) {
             return 'Monedas múltiples';

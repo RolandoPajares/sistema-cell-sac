@@ -46,7 +46,7 @@ final class ServicioPaneles
      */
     public function roleDashboard(User $user, array $cart): array
     {
-        $orders = $this->customerOrders($user);
+        $orders = $this->pedidosDelCliente($user);
         $menu = $this->menus->paraUsuario($user);
         $links = collect($menu['grupos'])->flatMap(fn (array $group): array => $group['items'])
             ->filter(fn (array $item): bool => $item['enabled'])
@@ -69,7 +69,7 @@ final class ServicioPaneles
     /**
      * @return Collection<int, Pedido>
      */
-    private function customerOrders(User $user): Collection
+    private function pedidosDelCliente(User $user): Collection
     {
         if (! $this->autorizacion->allows($user, 'gestion.pedidos.consultar')) {
             return collect();

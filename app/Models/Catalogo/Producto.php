@@ -121,11 +121,11 @@ class Producto extends Model
     }
 
     /**
-     * Ejecuta la operación intelligenceProfile definida por la clase Producto.
+     * Ejecuta la operación perfilInteligencia definida por la clase Producto.
      *
      * @return HasOne Resultado de la operación.
      */
-    public function intelligenceProfile(): HasOne
+    public function perfilInteligencia(): HasOne
     {
         return $this->hasOne(PerfilInteligenciaProducto::class, 'producto_id');
     }

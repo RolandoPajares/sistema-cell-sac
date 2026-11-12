@@ -13,6 +13,7 @@ export default defineConfig({
                 'resources/css/auth/register.css',
                 'resources/css/gestion/comercial/clientes/clientes.css',
                 'resources/css/gestion/comercial/compras/compras.css',
+                'resources/css/modulos/seguridad-role-create.css',
                 'resources/js/layouts/panel/principal.js',
                 'resources/js/layouts/tienda/principal.js',
                 'resources/js/layouts/auth/principal.js',

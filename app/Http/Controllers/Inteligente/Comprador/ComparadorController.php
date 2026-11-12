@@ -29,7 +29,7 @@ class ComparadorController extends Controller
             ->unique()
             ->take(3)
             ->values();
-        $products = Producto::with('features', 'category', 'images', 'intelligenceProfile')->active()->whereIn('id', $ids)->get();
+        $products = Producto::with('features', 'category', 'images', 'perfilInteligencia')->active()->whereIn('id', $ids)->get();
         $products = $catalogService->prepararComparacion($products);
         $availableProducts = Producto::query()->active()->with('category')->orderBy('nombre')->limit(100)->get();
 

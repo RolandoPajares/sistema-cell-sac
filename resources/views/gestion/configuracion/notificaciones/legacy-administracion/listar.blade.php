@@ -4,10 +4,10 @@
 @section('body_class', 'modulo-notificaciones')
 
 @section('content')
-{{-- Presentaci�n del m�dulo usando la configuraci�n preparada fuera de Blade. --}}
+{{-- Presentación del módulo usando la configuración preparada fuera de Blade. --}}
 @php($module = config('gestion.administracion.notificaciones'))
 
-{{-- Este permiso controla la visibilidad; la autorizaci�n real permanece en el backend. --}}
+{{-- Este permiso controla la visibilidad; la autorización real permanece en el backend. --}}
 @can('gestion.seguridad.consultar')
 <section class="admin-system-module admin-system-module--{{ $module['key'] }}" data-pending-module="{{ $module['key'] }}" data-admin-system-module="{{ $module['key'] }}">
     <header class="admin-system-header">
@@ -21,7 +21,7 @@
         </div>
     </header>
 
-    {{-- Indicadores resumidos preparados por la capa de datos del m�dulo. --}}
+    {{-- Indicadores resumidos preparados por la capa de datos del módulo. --}}
     <section class="admin-system-kpis" aria-label="Indicadores de {{ $module['content']['title'] }}">
         @foreach ($module['kpis'] ?? [] as $kpi)
         <article class="admin-system-kpi admin-system-kpi--{{ $kpi['tone'] ?? 'blue' }}"><span class="admin-system-kpi-icon"><i class="bi {{ $kpi['icon'] }}" aria-hidden="true"></i></span>
@@ -48,7 +48,7 @@
             </select></label><button class="admin-system-filter-button" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i> Filtrar</button><button class="admin-system-clear-button" type="button" data-pending-notice="Los filtros se limpiarán cuando se conecte este módulo.">Limpiar</button></form>
     <span class="admin-system-filter-status" data-admin-system-filter-status role="status" aria-live="polite"></span>
 
-    {{-- Tabla principal con columnas, estado vac�o y paginaci�n visual. --}}
+    {{-- Tabla principal con columnas, estado vacío y paginación visual. --}}
     <section class="admin-system-table-card">
         <header class="admin-system-card-header">
             <div><span class="admin-system-card-icon"><i class="bi {{ $module['icon'] }}" aria-hidden="true"></i></span>
@@ -79,7 +79,7 @@
         </footer>
     </section>
 
-    {{-- Res�menes secundarios del m�dulo, sin c�lculos ni persistencia en la vista. --}}
+    {{-- Resúmenes secundarios del módulo, sin cálculos ni persistencia en la vista. --}}
     <section class="admin-system-summary-grid" aria-label="Resumen de {{ $module['content']['title'] }}">@foreach ($module['content']['summary'] as $summary)<article class="admin-system-summary-card">
             <header>
                 <div><span class="admin-system-summary-icon"><i class="bi bi-stars" aria-hidden="true"></i></span>
@@ -144,7 +144,7 @@
 </section>
 
 @else
-{{-- Estado alternativo para m�dulos pendientes de integraci�n con datos reales. --}}
+{{-- Estado alternativo para módulos pendientes de integración con datos reales. --}}
 <section class="gestion-pendiente-page gestion-pendiente-page--{{ $module['key'] }}" data-pending-module="{{ $module['key'] }}">
     <header class="gestion-pendiente-hero">
         <div class="gestion-pendiente-heading">
@@ -181,7 +181,7 @@
         @endforeach
     </div>
 
-    {{-- Bloque anal�tico �nicamente visual; no consulta ni modifica datos. --}}
+    {{-- Bloque analítico únicamente visual; no consulta ni modifica datos. --}}
     @if ($module['analytics'] ?? [] !== [])
     <section class="gestion-pendiente-analytics" aria-label="Análisis visual de {{ $module['title'] }}">
         @foreach ($module['analytics'] ?? [] as $module['analytics'] ?? []Card)

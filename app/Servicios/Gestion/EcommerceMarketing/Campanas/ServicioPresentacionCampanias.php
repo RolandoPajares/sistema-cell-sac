@@ -31,12 +31,12 @@ final class ServicioPresentacionCampanias
             ->concat($data['topCampaigns'] ?? [])
             ->filter(static fn (mixed $campaign): bool => is_object($campaign))
             ->unique('id');
-        $data['campaignStatuses'] = $this->statuses($campaignRecords);
-        $data['campaignImages'] = $this->images($allCampaigns);
-        $data['campaignSegmentIds'] = $this->segmentIds($campaignRecords);
-        $data['viewsTrendLabel'] = $this->trendLabel($data['viewsTrend'] ?? null);
-        $data['clicksTrendLabel'] = $this->trendLabel($data['clicksTrend'] ?? null);
-        $data['distributionTotal'] = max(1, (int) $this->sum($data['distribution'] ?? []));
+        $data['campaignStatuses'] = $this->estados($campaignRecords);
+        $data['campaignImages'] = $this->imagenes($allCampaigns);
+        $data['campaignSegmentIds'] = $this->idsSegmentos($campaignRecords);
+        $data['viewsTrendLabel'] = $this->etiquetaTendencia($data['viewsTrend'] ?? null);
+        $data['clicksTrendLabel'] = $this->etiquetaTendencia($data['clicksTrend'] ?? null);
+        $data['distributionTotal'] = max(1, (int) $this->suma($data['distribution'] ?? []));
         $firstDistribution = collect($data['distribution'] ?? [])->first();
         $data['distributionAngle'] = min(360, (($firstDistribution?->total ?? 0) / $data['distributionTotal']) * 360);
         $data['perPageOptions'] = [10, 20, 50];
@@ -46,7 +46,7 @@ final class ServicioPresentacionCampanias
     }
 
     /** @param iterable<int, object> $campaigns */
-    private function statuses(iterable $campaigns): array
+    private function estados(iterable $campaigns): array
     {
         $statuses = [];
 
@@ -64,7 +64,7 @@ final class ServicioPresentacionCampanias
     }
 
     /** @param iterable<int, object> $campaigns */
-    private function images(iterable $campaigns): array
+    private function imagenes(iterable $campaigns): array
     {
         $images = [];
 
@@ -79,7 +79,7 @@ final class ServicioPresentacionCampanias
     }
 
     /** @param iterable<int, object> $campaigns */
-    private function segmentIds(iterable $campaigns): array
+    private function idsSegmentos(iterable $campaigns): array
     {
         $segmentIds = [];
 
@@ -90,14 +90,14 @@ final class ServicioPresentacionCampanias
         return $segmentIds;
     }
 
-    private function trendLabel(?float $trend): string
+    private function etiquetaTendencia(?float $trend): string
     {
         return $trend === null
             ? 'Sin periodo anterior'
             : ($trend >= 0 ? '+' : '').number_format($trend, 1).'% vs. mes anterior';
     }
 
-    private function sum(iterable $values): float|int
+    private function suma(iterable $values): float|int
     {
         return $values instanceof Collection ? $values->sum('total') : collect($values)->sum('total');
     }

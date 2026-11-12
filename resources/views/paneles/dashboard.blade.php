@@ -91,9 +91,9 @@
 <section class="dashboard-page" data-admin-dashboard>
     <header class="dashboard-hero">
         <div>
-            <span class="dashboard-eyebrow">Administración</span>
-            <h1>Panel de administración <span aria-hidden="true"></span></h1>
-            <p>Control total de tu operación comercial, inventario y marketing en un solo lugar.</p>
+            <span class="dashboard-eyebrow">AdministraciÃ³n</span>
+            <h1>Panel de administraciÃ³n <span aria-hidden="true"></span></h1>
+            <p>Control total de tu operaciÃ³n comercial, inventario y marketing en un solo lugar.</p>
         </div>
         <time class="dashboard-date-card" datetime="{{ $dashboardNow->toDateString() }}">
             <span class="dashboard-date-icon"><i class="bi bi-calendar3" aria-hidden="true"></i></span>
@@ -146,7 +146,7 @@
             <div>
                 <small>Productos sin existencias</small>
                 <strong>{{ number_format($lowStock) }}</strong>
-                <span class="dashboard-trend {{ $activeProducts === 0 ? 'is-neutral' : ($lowStock > 0 ? 'is-negative' : 'is-positive') }}"><i class="bi bi-{{ $activeProducts === 0 ? 'inbox' : ($lowStock > 0 ? 'exclamation-triangle' : 'check-circle') }}" aria-hidden="true"></i> {{ $activeProducts === 0 ? 'Sin productos registrados' : ($lowStock > 0 ? 'Requiere reposición' : 'Existencias disponibles') }}</span>
+                <span class="dashboard-trend {{ $activeProducts === 0 ? 'is-neutral' : ($lowStock > 0 ? 'is-negative' : 'is-positive') }}"><i class="bi bi-{{ $activeProducts === 0 ? 'inbox' : ($lowStock > 0 ? 'exclamation-triangle' : 'check-circle') }}" aria-hidden="true"></i> {{ $activeProducts === 0 ? 'Sin productos registrados' : ($lowStock > 0 ? 'Requiere reposiciÃ³n' : 'Existencias disponibles') }}</span>
             </div>
         </article>
 
@@ -169,15 +169,15 @@
             <header class="dashboard-card-header">
                 <div class="dashboard-card-title"><i class="bi bi-bar-chart-line-fill" aria-hidden="true"></i>
                     <div>
-                        <h2>Ventas de los últimos 12 meses</h2>
+                        <h2>Ventas de los Ãºltimos 12 meses</h2>
                         <p>Ventas confirmadas en MariaDB.</p>
                     </div>
                 </div>
                 <label class="dashboard-select-wrap">
                     <span class="visually-hidden">Periodo de ventas</span>
                     <select data-dashboard-range>
-                        <option value="12">Últimos 12 meses</option>
-                        <option value="6">Últimos 6 meses</option>
+                        <option value="12">Ãšltimos 12 meses</option>
+                        <option value="6">Ãšltimos 6 meses</option>
                     </select>
                 </label>
             </header>
@@ -215,7 +215,7 @@
                 <div class="dashboard-card-title"><i class="bi bi-clock-history" aria-hidden="true"></i>
                     <div>
                         <h2>Estado de pedidos</h2>
-                        <p>Distribución de todos los pedidos registrados.</p>
+                        <p>DistribuciÃ³n de todos los pedidos registrados.</p>
                     </div>
                 </div>
                 <span class="dashboard-period-label">Todos</span>
@@ -228,7 +228,7 @@
                     @forelse ($orderStatuses as $status)
                     <li><span class="dashboard-status-dot" style="--status-color: {{ $status['color'] }}"></span><b>{{ $status['label'] }}</b><strong>{{ number_format($status['total']) }}</strong><small>({{ $orderStatusTotal > 0 ? number_format(($status['total'] / $orderStatusTotal) * 100, 1) : '0.0' }}%)</small></li>
                     @empty
-                    <li class="dashboard-list-empty"><i class="bi bi-inbox" aria-hidden="true"></i><span>Aún no hay pedidos registrados.</span></li>
+                    <li class="dashboard-list-empty"><i class="bi bi-inbox" aria-hidden="true"></i><span>AÃºn no hay pedidos registrados.</span></li>
                     @endforelse
                 </ul>
             </div>
@@ -238,8 +238,8 @@
             <header class="dashboard-card-header">
                 <div class="dashboard-card-title"><i class="bi bi-grid-3x3-gap-fill" aria-hidden="true"></i>
                     <div>
-                        <h2>Accesos rápidos</h2>
-                        <p>Atajos de administración.</p>
+                        <h2>Accesos rÃ¡pidos</h2>
+                        <p>Atajos de administraciÃ³n.</p>
                     </div>
                 </div>
             </header>
@@ -257,7 +257,7 @@
                 <div class="dashboard-card-title"><i class="bi bi-clipboard2-check" aria-hidden="true"></i>
                     <div>
                         <h2>Pedidos recientes</h2>
-                        <p>Últimas operaciones comerciales.</p>
+                        <p>Ãšltimas operaciones comerciales.</p>
                     </div>
                 </div><a href="{{ route('management.orders') }}">Ver todos</a>
             </header>
@@ -298,7 +298,7 @@
                 <div class="dashboard-card-title"><i class="bi bi-exclamation-triangle-fill is-danger" aria-hidden="true"></i>
                     <div>
                         <h2>Alertas de inventario</h2>
-                        <p>Productos sin saldo físico en almacén.</p>
+                        <p>Productos sin saldo fÃ­sico en almacÃ©n.</p>
                     </div>
                 </div><a href="{{ route('management.inventory') }}">Ver todos</a>
             </header>
@@ -314,7 +314,7 @@
                     <strong>{{ number_format((float) $product->existencias_alcance) }} {{ (float) $product->existencias_alcance === 1.0 ? 'unidad' : 'unidades' }}</strong><i class="bi bi-chevron-right" aria-hidden="true"></i>
                 </a>
                 @empty
-                <div class="dashboard-empty-state"><i class="bi bi-{{ $activeProducts === 0 ? 'inbox' : 'shield-check' }}" aria-hidden="true"></i><strong>{{ $activeProducts === 0 ? 'No hay productos registrados' : 'Sin alertas de inventario' }}</strong><span>{{ $activeProducts === 0 ? 'Registra productos para consultar sus existencias por almacén.' : 'Todos los productos activos tienen existencias disponibles.' }}</span></div>
+                <div class="dashboard-empty-state"><i class="bi bi-{{ $activeProducts === 0 ? 'inbox' : 'shield-check' }}" aria-hidden="true"></i><strong>{{ $activeProducts === 0 ? 'No hay productos registrados' : 'Sin alertas de inventario' }}</strong><span>{{ $activeProducts === 0 ? 'Registra productos para consultar sus existencias por almacÃ©n.' : 'Todos los productos activos tienen existencias disponibles.' }}</span></div>
                 @endforelse
             </div>
         </section>
@@ -323,7 +323,7 @@
             <header class="dashboard-card-header">
                 <div class="dashboard-card-title"><i class="bi bi-trophy-fill is-warning" aria-hidden="true"></i>
                     <div>
-                        <h2>Productos más vendidos</h2>
+                        <h2>Productos mÃ¡s vendidos</h2>
                         <p>Ranking basado en ventas confirmadas.</p>
                     </div>
                 </div><a href="{{ route('management.reports') }}">Ver todos</a>
@@ -339,7 +339,7 @@
                     <span><b>{{ $venta->producto?->nombre ?? $venta->descripcion_historica }}</b><small>{{ number_format((int) $venta->unidades_vendidas) }} unidades vendidas</small></span><strong>S/ {{ number_format((float) $venta->importe_vendido, 2) }}</strong>
                 </li>
                 @empty
-                <li class="dashboard-empty-state"><i class="bi bi-bar-chart" aria-hidden="true"></i><strong>Aún no hay ventas</strong><span>El ranking aparecerá cuando existan ventas confirmadas.</span></li>
+                <li class="dashboard-empty-state"><i class="bi bi-bar-chart" aria-hidden="true"></i><strong>AÃºn no hay ventas</strong><span>El ranking aparecerÃ¡ cuando existan ventas confirmadas.</span></li>
                 @endforelse
             </ol>
         </section>
@@ -350,7 +350,7 @@
             <header class="dashboard-card-header">
                 <div class="dashboard-card-title"><i class="bi bi-megaphone-fill" aria-hidden="true"></i>
                     <div>
-                        <h2>Rendimiento de campañas</h2>
+                        <h2>Rendimiento de campaÃ±as</h2>
                         <p>Vistas y clics registrados en publicidad.</p>
                     </div>
                 </div><a href="{{ route('management.campaigns') }}">Ver todas</a>
@@ -358,11 +358,11 @@
             <div class="dashboard-campaign-list">
                 @forelse ($campaigns as $campaign)
                 @php($campaignProgress = min(100, round(((int) $campaign->vistas / $campaignMaxViews) * 100)))
-                <div class="dashboard-campaign-row"><span><b>{{ $campaign->nombre }}</b><small>{{ number_format((int) $campaign->vistas) }} vistas · {{ number_format((int) $campaign->clics) }} clics</small></span>
+                <div class="dashboard-campaign-row"><span><b>{{ $campaign->nombre }}</b><small>{{ number_format((int) $campaign->vistas) }} vistas Â· {{ number_format((int) $campaign->clics) }} clics</small></span>
                     <div class="dashboard-progress"><span data-dashboard-progress style="--progress: {{ $campaignProgress }}%"></span></div><strong>{{ $campaign->vistas > 0 ? number_format(($campaign->clics / $campaign->vistas) * 100, 1) : '0.0' }}%</strong>
                 </div>
                 @empty
-                <div class="dashboard-empty-state"><i class="bi bi-megaphone" aria-hidden="true"></i><strong>No hay campañas activas</strong><span>Las campañas registradas aparecerán aquí.</span></div>
+                <div class="dashboard-empty-state"><i class="bi bi-megaphone" aria-hidden="true"></i><strong>No hay campaÃ±as activas</strong><span>Las campaÃ±as registradas aparecerÃ¡n aquÃ­.</span></div>
                 @endforelse
             </div>
         </section>
@@ -372,17 +372,17 @@
                 <div class="dashboard-card-title"><i class="bi bi-clock-history" aria-hidden="true"></i>
                     <div>
                         <h2>Actividad reciente</h2>
-                        <p>Últimos movimientos auditados.</p>
+                        <p>Ãšltimos movimientos auditados.</p>
                     </div>
                 </div><a href="{{ route('management.audit') }}">Ver todas</a>
             </header>
             <div class="dashboard-activity-list">
                 @forelse ($recentActivity as $activity)
                 <article><span class="dashboard-activity-dot"><i class="bi bi-{{ $activity->entidad === 'pedidos' ? 'cart-check' : ($activity->entidad === 'productos' ? 'box-seam' : 'person') }}" aria-hidden="true"></i></span>
-                    <div><b>{{ $activity->accion }}</b><small>{{ $activity->user?->nombre ?? 'Sistema' }} · {{ $activity->entidad }}{{ $activity->entidad_id ? ' #'.$activity->entidad_id : '' }}</small></div><time datetime="{{ $activity->creado_en?->toIso8601String() }}">{{ $activity->creado_en?->diffForHumans() }}</time>
+                    <div><b>{{ $activity->accion }}</b><small>{{ $activity->user?->nombre ?? 'Sistema' }} Â· {{ $activity->entidad }}{{ $activity->entidad_id ? ' #'.$activity->entidad_id : '' }}</small></div><time datetime="{{ $activity->creado_en?->toIso8601String() }}">{{ $activity->creado_en?->diffForHumans() }}</time>
                 </article>
                 @empty
-                <div class="dashboard-empty-state"><i class="bi bi-clock-history" aria-hidden="true"></i><strong>Sin actividad reciente</strong><span>Las acciones auditadas aparecerán aquí.</span></div>
+                <div class="dashboard-empty-state"><i class="bi bi-clock-history" aria-hidden="true"></i><strong>Sin actividad reciente</strong><span>Las acciones auditadas aparecerÃ¡n aquÃ­.</span></div>
                 @endforelse
             </div>
         </section>
@@ -402,7 +402,7 @@
                     <div><b>{{ $reminder['title'] }}</b><small>{{ $reminder['detail'] }}</small></div>
                 </li>
                 @empty
-                <li class="dashboard-task-empty"><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span><b>No hay tareas pendientes</b><small>Tu operación está al día.</small></span></li>
+                <li class="dashboard-task-empty"><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span><b>No hay tareas pendientes</b><small>Tu operaciÃ³n estÃ¡ al dÃ­a.</small></span></li>
                 @endforelse
             </ul>
         </section>

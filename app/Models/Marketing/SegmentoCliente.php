@@ -14,6 +14,8 @@ class SegmentoCliente extends Model
 {
     protected $table = 'segmentos_clientes';
 
+    public $timestamps = false;
+
     protected $fillable = ['nombre', 'tipo', 'criterios', 'activo'];
 
     /**

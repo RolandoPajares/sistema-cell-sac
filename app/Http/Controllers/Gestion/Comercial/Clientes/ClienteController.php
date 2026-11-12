@@ -47,12 +47,12 @@ class ClienteController extends Controller
     {
         $usuario = $request->user();
         abort_unless($usuario instanceof User, 403);
-        $filters = $this->filters($request);
+        $filters = $this->filtros($request);
         $consultaClientes = fn (): Builder => $this->consultaClientesEnAlcance($usuario, 'gestion.clientes.consultar');
         $consultaPedidos = fn (): Builder => $this->autorizacion->scopeRecordsFor(
             Pedido::query(), $usuario, 'gestion.pedidos.consultar', 'usuario_id',
         );
-        $customers = $this->customerQuery($filters, $usuario)
+        $customers = $this->consultaClientes($filters, $usuario)
             ->with('user:id,nombre,correo,rol')
             ->orderBy('nombre_contacto')
             ->paginate($filters['por_pagina'])
@@ -73,7 +73,7 @@ class ClienteController extends Controller
             ->get(['id', 'usuario_id', 'total', 'creado_en']);
         $recentCustomers = $consultaClientes()->latest('creado_en')->limit(3)
             ->get(['id', 'nombre_contacto', 'correo', 'creado_en']);
-        $recentActivity = $this->recentActivity($recentOrders, $recentCustomers);
+        $recentActivity = $this->actividadReciente($recentOrders, $recentCustomers);
         $totalCustomers = $consultaClientes()->count();
         $activeCustomers = $consultaClientes()->where('activo', true)->count();
         $wholesaleCustomers = $consultaClientes()->where('tipo', 'mayorista')->count();
@@ -90,7 +90,7 @@ class ClienteController extends Controller
                 'initials' => collect(array_slice($parts ?: ['CL'], 0, 2))
                     ->map(static fn (string $part): string => mb_strtoupper(mb_substr($part, 0, 1)))
                     ->implode(''),
-                'last_purchase_label' => $this->purchaseDateLabel($lastPurchaseForCustomer?->creado_en),
+                'last_purchase_label' => $this->etiquetaFechaCompra($lastPurchaseForCustomer?->creado_en),
             ]];
         })->all();
 
@@ -108,19 +108,19 @@ class ClienteController extends Controller
             'lastPurchases' => $lastPurchases,
             'recentActivity' => $recentActivity,
             'customerPresentation' => $customerPresentation,
-            'wholesalePercent' => $this->percentage($wholesaleCustomers, $totalCustomers),
-            'retailPercent' => $this->percentage($retailCustomers, $totalCustomers),
+            'wholesalePercent' => $this->porcentaje($wholesaleCustomers, $totalCustomers),
+            'retailPercent' => $this->porcentaje($retailCustomers, $totalCustomers),
             'commercialLevel' => $totalPurchases > 0 ? 'Activo' : 'Sin compras',
-            'lastPurchaseLabel' => $this->purchaseDateLabel($lastPurchase?->creado_en),
+            'lastPurchaseLabel' => $this->etiquetaFechaCompra($lastPurchase?->creado_en),
         ]);
     }
 
-    private function percentage(int $value, int $total): float
+    private function porcentaje(int $value, int $total): float
     {
         return $total > 0 ? round(($value / $total) * 100, 1) : 0.0;
     }
 
-    private function purchaseDateLabel(mixed $date): string
+    private function etiquetaFechaCompra(mixed $date): string
     {
         if ($date === null) {
             return 'Sin compras';
@@ -143,8 +143,8 @@ class ClienteController extends Controller
         $usuario = $request->user();
         abort_unless($usuario instanceof User, 403);
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
-        $filters = $this->filters($request);
-        $customers = $this->customerQuery($filters, $usuario)
+        $filters = $this->filtros($request);
+        $customers = $this->consultaClientes($filters, $usuario)
             ->with('user:id,nombre,correo')
             ->orderBy('nombre_contacto')->orderBy('id')->limit(5000)->get();
         $rows = $customers->map(static fn (Cliente $customer): array => [
@@ -311,7 +311,7 @@ class ClienteController extends Controller
      * @param  array{buscar:?string,tipo:?string,estado:?string,ciudad:?string,por_pagina:int}  $filters
      * @return Builder<Cliente>
      */
-    private function customerQuery(array $filters, User $usuario): Builder
+    private function consultaClientes(array $filters, User $usuario): Builder
     {
         return $this->consultaClientesEnAlcance($usuario, 'gestion.clientes.consultar')
             ->when($filters['buscar'], function (Builder $query, string $search): void {
@@ -374,7 +374,7 @@ class ClienteController extends Controller
     /**
      * @return array{buscar:?string,tipo:?string,estado:?string,ciudad:?string,por_pagina:int}
      */
-    private function filters(Request $request): array
+    private function filtros(Request $request): array
     {
         $search = trim($request->string('buscar')->toString());
         $type = trim($request->string('tipo')->toString());
@@ -396,7 +396,7 @@ class ClienteController extends Controller
      * @param  Collection<int, Cliente>  $recentCustomers
      * @return Collection<int, array{icon:string,color:string,title:string,detail:string,date:mixed}>
      */
-    private function recentActivity(Collection $recentOrders, Collection $recentCustomers): Collection
+    private function actividadReciente(Collection $recentOrders, Collection $recentCustomers): Collection
     {
         $activities = collect();
 

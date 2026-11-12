@@ -51,7 +51,15 @@
                     @auth
                         <div class="product-detail-actions"><button class="product-detail-buy product-detail-buy--primary" type="submit" @disabled($product->existencias_disponibles <= 0) data-add-to-cart><i class="bi bi-cart3" aria-hidden="true"></i> Agregar al carrito</button><button class="product-detail-buy product-detail-buy--success" type="submit" name="comprar_ahora" value="1" @disabled($product->existencias_disponibles <= 0)><i class="bi bi-lightning-charge" aria-hidden="true"></i> Comprar ahora</button></div>
                     @else
-                        <a class="product-detail-buy product-detail-buy--success" href="{{ route('login') }}"><i class="bi bi-cart3" aria-hidden="true"></i> Comprar</a>
+                        <details class="product-detail-purchase-choice">
+                            <summary class="product-detail-buy product-detail-buy--success" @if($product->existencias_disponibles <= 0) aria-disabled="true" @endif><i class="bi bi-lightning-charge" aria-hidden="true"></i> Comprar ahora</summary>
+                            @if($product->existencias_disponibles > 0)
+                                <div class="product-detail-purchase-options">
+                                    <a class="product-detail-buy product-detail-buy--primary" href="{{ route('login') }}">Iniciar sesión</a>
+                                    <button class="product-detail-buy product-detail-buy--success" type="submit" name="comprar_ahora" value="1">Continuar como invitado</button>
+                                </div>
+                            @endif
+                        </details>
                     @endauth
                     <p class="product-detail-form-message" data-form-message role="status" hidden></p>
                 </form>

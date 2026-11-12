@@ -9,6 +9,7 @@ use Illuminate\View\View;
 
 class SeguimientoPedidoController extends Controller
 {
+    //
     public function show(Request $request, Pedido $order): View
     {
         $token = $request->string('token')->toString();

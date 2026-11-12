@@ -27,7 +27,7 @@
             @else
             <button class="compras-secondary-button" type="button" disabled title="Requiere el permiso de exportación de compras"><i class="bi bi-download" aria-hidden="true"></i> Exportar</button>
             @endif
-            <button class="compras-primary-button" type="button" data-admin-dialog-open="nueva-compra" @disabled(! $canCreate) title="{{ $canCreate ? 'Registrar una compra' : ($canCreatePermission && $canCreateLocation ? 'Registra al menos un proveedor y un producto activo' : 'Requiere permiso de creación y una ubicación autorizada') }}">
+            <button class="compras-primary-button" type="button" data-admin-dialog-open="nueva-compra" @disabled(! ($canCreatePermission && $canCreateLocation)) title="{{ $canCreatePermission && $canCreateLocation ? 'Registrar una compra' : 'Requiere permiso de creación y una ubicación autorizada' }}">
                 <i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva compra
             </button>
         </div>
@@ -252,6 +252,35 @@
         <div class="admin-dialog-body">
             @include('gestion.comercial.compras.registrar', ['suppliers' => $suppliers, 'products' => $products])
         </div>
+        <dialog class="compras-product-dialog" data-purchase-product-dialog aria-labelledby="agregar-producto-compra-titulo">
+            <div class="compras-product-dialog-card">
+                <header class="compras-product-dialog-header">
+                    <div><span class="compras-form-eyebrow">Compras</span><h2 id="agregar-producto-compra-titulo">Agregar producto a la compra</h2><p>Selecciona un producto existente o continúa con uno nuevo.</p></div>
+                    <button type="button" class="compras-product-dialog-close" data-purchase-product-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+                </header>
+                <div class="compras-product-dialog-body">
+                    <div class="compras-product-tabs" role="tablist" aria-label="Origen del producto">
+                        <button type="button" class="is-active" data-purchase-product-tab="existente" role="tab">Producto existente</button>
+                        <button type="button" data-purchase-product-tab="nuevo" role="tab">Nuevo producto</button>
+                    </div>
+                    <section data-purchase-product-panel="existente">
+                        <div class="compras-product-picker-grid">
+                            <label>Producto <b>*</b><select data-purchase-picker-product><option value="">Seleccionar producto</option>@foreach ($products as $product)<option value="{{ $product->id }}">{{ $product->nombre }}</option>@endforeach</select></label>
+                            <label>Variante<select data-purchase-picker-variant><option value="">Sin variante</option>@foreach ($products as $product)@foreach ($product->variants->where('estado', 'activo') as $variant)<option value="{{ $variant->id }}" data-product-id="{{ $product->id }}">{{ $product->nombre }} - {{ $variant->nombre_color }}</option>@endforeach @endforeach</select></label>
+                            <label>Cantidad <b>*</b><input type="number" min="1" value="1" data-purchase-picker-quantity></label>
+                            <label>Costo unitario <b>*</b><input type="number" min="0" step="0.01" data-purchase-picker-cost></label>
+                            <label>Descuento<input type="number" min="0" step="0.01" value="0" data-purchase-picker-discount></label>
+                            <label>Impuesto<input type="number" min="0" step="0.01" value="0" data-purchase-picker-tax></label>
+                        </div>
+                        <button type="button" class="compras-primary-button" data-purchase-product-add><i class="bi bi-plus-lg" aria-hidden="true"></i> Agregar a la compra</button>
+                    </section>
+                    <section data-purchase-product-panel="nuevo" hidden>
+                        <div class="compras-product-new-note"><i class="bi bi-info-circle" aria-hidden="true"></i><div><strong>El producto nuevo se registra desde Catálogo</strong><p>Al guardarlo podrás volver a esta compra y seleccionarlo como producto existente.</p></div></div>
+                        <a class="compras-primary-button compras-product-new-link" href="{{ route('management.products') }}"><i class="bi bi-box-seam" aria-hidden="true"></i> Ir a productos</a>
+                    </section>
+                </div>
+            </div>
+        </dialog>
     </dialog>
 
     @foreach ($purchases as $purchase)
@@ -270,15 +299,16 @@
     @endforeach
 
     <dialog class="admin-dialog compras-create-dialog" id="importar-compras" aria-labelledby="importar-compras-title">
-        <header class="admin-dialog-header">
-            <div>
-                <h2 id="importar-compras-title">Importar compras</h2>
-                <p>Importa líneas reales con validación y transacción.</p>
-            </div><button class="admin-dialog-close" type="button" data-admin-dialog-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
-        </header>
-        <div class="admin-dialog-body">
-            <form method="post" action="{{ route('management.purchases.import') }}" enctype="multipart/form-data" class="form-card">@csrf<p>Descarga la plantilla Excel, completa una fila por línea de compra y vuelve a cargarla. Los identificadores deben corresponder a proveedores, productos y variantes existentes.</p><p><strong>Columnas:</strong> <code>proveedor_id, fecha_compra, producto_id, variante_id, cantidad, costo_unitario</code>.</p><a class="compras-secondary-button" href="{{ route('management.purchases.import_template') }}"><i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i> Descargar plantilla Excel</a><label>Archivo Excel<input type="file" name="archivo" accept=".xlsx,.csv,text/csv" required></label>
-                <footer class="compras-form-actions"><button type="button" class="compras-secondary-button" data-admin-dialog-close>Cancelar</button><button type="submit" class="compras-primary-button"><i class="bi bi-upload" aria-hidden="true"></i> Importar</button></footer>
+        <div class="compras-import-modal">
+            <header class="compras-import-header"><div class="compras-import-brand"><i class="bi bi-cart3" aria-hidden="true"></i></div><div><span>Compras y logística</span><h2 id="importar-compras-title">Importar compras</h2><p>Importa líneas reales con validación y transacción.</p></div><button class="compras-import-close" type="button" data-admin-dialog-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
+            <div class="compras-import-steps" aria-label="Pasos de importación"><span><i class="bi bi-download" aria-hidden="true"></i><b>1. Descargar plantilla</b></span><i class="bi bi-chevron-right" aria-hidden="true"></i><span><i class="bi bi-table" aria-hidden="true"></i><b>2. Completar datos</b></span><i class="bi bi-chevron-right" aria-hidden="true"></i><span><i class="bi bi-upload" aria-hidden="true"></i><b>3. Subir e importar</b></span></div>
+            <form method="post" action="{{ route('management.purchases.import') }}" enctype="multipart/form-data" class="compras-import-form">@csrf
+                <p class="compras-import-lead">Descarga la plantilla Excel, completa una fila por línea de compra y vuelve a cargarla. Los identificadores deben corresponder a proveedores, productos y variantes existentes.</p>
+                <div class="compras-import-columns"><i class="bi bi-layers" aria-hidden="true"></i><strong>Columnas requeridas:</strong><span>Usa la plantilla oficial para ver la estructura de columnas.</span></div>
+                <a class="compras-import-template" href="{{ route('management.purchases.import_template') }}"><i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i> Descargar plantilla Excel</a>
+                <label class="compras-import-file"><span>Archivo Excel <small>.xlsx · Máximo 10 MB</small></span><input type="file" name="archivo" accept=".xlsx,.csv,text/csv" required><i class="bi bi-cloud-arrow-up" aria-hidden="true"></i><strong>Ningún archivo seleccionado</strong><em>Arrastra y suelta tu archivo aquí o haz clic para seleccionarlo</em></label>
+                <div class="compras-import-note"><i class="bi bi-info-circle" aria-hidden="true"></i><span>Se validarán proveedores, productos, variantes y formatos antes de importar.</span></div>
+                <footer class="compras-import-actions"><button type="button" class="compras-import-cancel" data-admin-dialog-close>Cancelar</button><button type="submit" class="compras-import-submit"><i class="bi bi-upload" aria-hidden="true"></i> Importar</button></footer>
             </form>
         </div>
     </dialog>

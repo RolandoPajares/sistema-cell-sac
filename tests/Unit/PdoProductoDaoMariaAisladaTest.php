@@ -35,7 +35,13 @@ it('persiste producto y variante usando exclusivamente la instancia MariaDB aisl
 
     $category = $pdo->query('SELECT id, nombre, empresa_id FROM categorias ORDER BY id LIMIT 1')->fetch(PDO::FETCH_ASSOC);
     if (! is_array($category)) {
-        $this->markTestSkipped('La base aislada no contiene una categoría para la prueba.');
+        $categoryName = 'Categoria DAO QA '.bin2hex(random_bytes(4));
+        $statement = $pdo->prepare('INSERT INTO categorias (nombre, empresa_id) VALUES (?, NULL)');
+        $statement->execute([$categoryName]);
+        $category = $pdo->query('SELECT id, nombre, empresa_id FROM categorias ORDER BY id DESC LIMIT 1')->fetch(PDO::FETCH_ASSOC);
+    }
+    if (! is_array($category)) {
+        throw new RuntimeException('No se pudo preparar una categoria valida para la prueba DAO.');
     }
 
     $pdo->beginTransaction();

@@ -31,6 +31,171 @@ trait RefreshSpanishTestDatabase
             return;
         }
 
+        if (! Schema::hasTable('modulos')) {
+            Schema::create('modulos', function (Blueprint $table): void {
+                $table->bigIncrements('id');
+                $table->string('codigo', 80)->unique();
+                $table->string('nombre', 140);
+                $table->string('descripcion', 255)->nullable();
+                $table->string('icono', 100)->nullable();
+                $table->unsignedInteger('orden')->default(0);
+                $table->boolean('habilitado')->default(true);
+                $table->timestamp('creado_en')->nullable();
+                $table->timestamp('actualizado_en')->nullable();
+            });
+        }
+        if (! Schema::hasTable('pantallas')) {
+            Schema::create('pantallas', function (Blueprint $table): void {
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('modulo_id');
+                $table->string('codigo', 120)->unique();
+                $table->string('nombre', 160);
+                $table->string('ruta', 160)->nullable();
+                $table->string('icono', 100)->nullable();
+                $table->boolean('habilitada')->default(true);
+                $table->timestamp('creado_en')->nullable();
+                $table->timestamp('actualizado_en')->nullable();
+            });
+        }
+        if (! Schema::hasTable('roles')) {
+            Schema::create('roles', function (Blueprint $table): void {
+                $table->bigIncrements('id');
+                $table->string('codigo', 40)->unique();
+                $table->string('nombre', 120);
+                $table->string('descripcion', 255)->nullable();
+                $table->string('alcance_permitido', 20)->default('sede');
+                $table->boolean('es_sistema')->default(false);
+                $table->boolean('activo')->default(true);
+                $table->timestamp('creado_en')->nullable();
+                $table->timestamp('actualizado_en')->nullable();
+            });
+        }
+        if (! Schema::hasTable('menus')) {
+            Schema::create('menus', function (Blueprint $table): void {
+                $table->bigIncrements('id');
+                $table->string('codigo', 80)->unique();
+                $table->string('nombre', 140);
+                $table->string('contexto', 40)->default('sidebar');
+                $table->boolean('habilitado')->default(true);
+                $table->timestamp('creado_en')->nullable();
+                $table->timestamp('actualizado_en')->nullable();
+            });
+        }
+        if (! Schema::hasTable('permisos')) {
+            Schema::create('permisos', function (Blueprint $table): void {
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('modulo_id');
+                $table->unsignedBigInteger('pantalla_id')->nullable();
+                $table->string('codigo', 160)->unique();
+                $table->string('accion', 60);
+                $table->string('nombre', 160);
+                $table->boolean('es_sistema')->default(true);
+                $table->boolean('activo')->default(true);
+                $table->timestamp('creado_en')->nullable();
+                $table->timestamp('actualizado_en')->nullable();
+            });
+        }
+        if (! Schema::hasTable('elementos_menu')) {
+            Schema::create('elementos_menu', function (Blueprint $table): void {
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('menu_id');
+                $table->unsignedBigInteger('padre_id')->nullable();
+                $table->unsignedBigInteger('pantalla_id')->nullable();
+                $table->unsignedBigInteger('permiso_id')->nullable();
+                $table->string('codigo', 100);
+                $table->string('etiqueta', 160);
+                $table->string('icono', 100)->nullable();
+                $table->string('tipo', 20)->default('pantalla');
+                $table->unsignedInteger('orden')->default(0);
+                $table->boolean('habilitado')->default(true);
+                $table->timestamp('creado_en')->nullable();
+                $table->timestamp('actualizado_en')->nullable();
+            });
+        }
+        if (! Schema::hasTable('roles_menus')) {
+            Schema::create('roles_menus', function (Blueprint $table): void {
+                $table->unsignedBigInteger('rol_id');
+                $table->unsignedBigInteger('menu_id');
+                $table->timestamp('creado_en')->useCurrent();
+                $table->primary(['rol_id', 'menu_id']);
+            });
+        }
+
+        if (! Schema::hasTable('segmentos_clientes')) {
+            Schema::create('segmentos_clientes', function (Blueprint $table): void {
+                $table->bigIncrements('id');
+                $table->string('nombre', 120)->unique();
+                $table->string('tipo', 30);
+                $table->text('criterios');
+                $table->boolean('activo')->default(true);
+                $table->timestamp('creado_en')->nullable();
+                $table->timestamp('actualizado_en')->nullable();
+                $table->index('activo');
+            });
+        }
+
+        if (! Schema::hasTable('registros_auditoria')) {
+            Schema::create('registros_auditoria', function (Blueprint $table): void {
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('usuario_id')->nullable();
+                $table->string('accion', 80);
+                $table->string('entidad', 80);
+                $table->unsignedBigInteger('entidad_id')->nullable();
+                $table->text('valores_anteriores')->nullable();
+                $table->text('valores_nuevos')->nullable();
+                $table->string('direccion_ip', 45)->nullable();
+                $table->timestamp('creado_en')->useCurrent();
+                $table->char('identificador_universal_evento', 36)->nullable()->unique();
+                $table->string('rol_codigo', 40)->nullable();
+                $table->unsignedBigInteger('empresa_id')->nullable();
+                $table->unsignedBigInteger('sede_id')->nullable();
+                $table->string('modulo', 80)->nullable();
+                $table->string('resultado', 20)->nullable();
+                $table->text('agente_usuario')->nullable();
+                $table->string('correlacion_id', 64)->nullable();
+                $table->text('observaciones')->nullable();
+                $table->dateTime('ocurrido_en')->nullable();
+                $table->string('tabla_afectada', 100)->nullable();
+                $table->string('identificador_entidad', 128)->nullable();
+                $table->text('cambios')->nullable();
+                $table->string('origen', 20)->default('laravel');
+                $table->index(['usuario_id', 'creado_en']);
+                $table->index(['entidad', 'entidad_id']);
+                $table->index(['sede_id', 'creado_en']);
+            });
+        }
+
+        if (! Schema::hasTable('pedidos')) {
+            Schema::create('pedidos', function (Blueprint $table): void {
+                $table->increments('id');
+                $table->unsignedBigInteger('usuario_id')->nullable();
+                $table->string('cliente_invitado_nombre', 160)->nullable();
+                $table->string('cliente_invitado_correo', 160)->nullable();
+                $table->string('cliente_invitado_telefono', 30)->nullable();
+                $table->char('token_acceso_publico', 64)->nullable();
+                $table->text('direccion_entrega_snapshot')->nullable();
+                $table->decimal('total', 10, 2)->default(0);
+                $table->decimal('subtotal', 10, 2)->default(0);
+                $table->decimal('descuento', 10, 2)->default(0);
+                $table->string('cupon_codigo', 50)->nullable();
+                $table->string('estado', 40)->default('Pendiente');
+                $table->timestamp('creado_en')->useCurrent();
+                $table->unsignedInteger('cliente_id')->nullable();
+                $table->unsignedInteger('cotizacion_id')->nullable();
+                $table->string('canal', 30)->nullable();
+                $table->string('tipo_venta', 30)->nullable();
+                $table->string('observaciones', 500)->nullable();
+                $table->unsignedBigInteger('cupon_id')->nullable();
+                $table->unsignedBigInteger('direccion_entrega_id')->nullable();
+                $table->unsignedBigInteger('direccion_facturacion_id')->nullable();
+                $table->text('direccion_entrega_historica')->nullable();
+                $table->text('direccion_facturacion_historica')->nullable();
+                $table->unsignedBigInteger('empresa_id')->nullable();
+                $table->unsignedBigInteger('sede_id')->nullable();
+                $table->unsignedBigInteger('almacen_id')->nullable();
+            });
+        }
+
         if (! Schema::hasColumn('pedidos', 'tipo_venta')) {
             Schema::table('pedidos', function (Blueprint $table): void {
                 $table->string('tipo_venta', 30)->nullable();
@@ -57,6 +222,349 @@ trait RefreshSpanishTestDatabase
                 $table->boolean('acceso_controlado')->default(true);
                 $table->timestamp('creado_en')->nullable();
                 $table->timestamp('actualizado_en')->nullable();
+            });
+        }
+
+        if (! Schema::hasTable('usuarios_perfiles')) {
+            Schema::create('usuarios_perfiles', function (Blueprint $table): void {
+                $table->id();
+                $table->foreignId('usuario_id')->unique()->constrained('usuarios')->cascadeOnDelete();
+                $table->string('telefono', 30)->nullable();
+                $table->string('documento', 20)->nullable();
+                $table->timestamp('creado_en')->useCurrent();
+                $table->timestamp('actualizado_en')->useCurrent();
+            });
+        }
+
+        if (! Schema::hasTable('empresas')) {
+            Schema::create('empresas', function (Blueprint $table): void {
+                $table->bigIncrements('id');
+                $table->string('codigo', 30)->unique();
+                $table->string('razon_social', 180);
+                $table->string('nombre_comercial', 180)->nullable();
+                $table->char('ruc', 11)->nullable()->unique();
+                $table->char('moneda_base', 3)->default('PEN');
+                $table->boolean('activo')->default(true);
+                $table->timestamp('creado_en')->nullable();
+                $table->timestamp('actualizado_en')->nullable();
+            });
+        }
+
+        if (! Schema::hasTable('sedes')) {
+            Schema::create('sedes', function (Blueprint $table): void {
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('empresa_id');
+                $table->string('codigo', 30);
+                $table->string('nombre', 140);
+                $table->string('direccion', 255)->nullable();
+                $table->string('telefono', 30)->nullable();
+                $table->string('zona_horaria', 64)->default('America/Lima');
+                $table->boolean('activa')->default(true);
+                $table->timestamp('creado_en')->nullable();
+                $table->timestamp('actualizado_en')->nullable();
+                $table->unique(['empresa_id', 'codigo']);
+            });
+        }
+
+        if (! Schema::hasTable('almacenes')) {
+            Schema::create('almacenes', function (Blueprint $table): void {
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('sede_id');
+                $table->string('codigo', 30);
+                $table->string('nombre', 140);
+                $table->string('tipo', 30)->default('general');
+                $table->boolean('permite_venta')->default(true);
+                $table->boolean('activo')->default(true);
+                $table->timestamp('creado_en')->nullable();
+                $table->timestamp('actualizado_en')->nullable();
+                $table->unique(['sede_id', 'codigo']);
+            });
+        }
+
+        if (! Schema::hasTable('categorias')) {
+            Schema::create('categorias', function (Blueprint $table): void {
+                $table->increments('id');
+                $table->string('nombre', 120)->unique();
+                $table->string('descripcion', 500)->nullable();
+                $table->boolean('activo')->default(true);
+                $table->timestamp('creado_en')->useCurrent();
+                $table->unsignedBigInteger('empresa_id')->nullable();
+                $table->index('empresa_id');
+            });
+        }
+
+        if (! Schema::hasTable('clientes')) {
+            Schema::create('clientes', function (Blueprint $table): void {
+                $table->increments('id');
+                $table->unsignedBigInteger('usuario_id')->nullable();
+                $table->string('tipo', 20)->default('minorista');
+                $table->string('tipo_documento', 3)->nullable();
+                $table->string('documento', 20)->unique();
+                $table->string('razon_social', 160)->nullable();
+                $table->string('nombre_contacto', 160);
+                $table->string('correo', 160);
+                $table->string('telefono', 30)->nullable();
+                $table->string('ciudad', 80)->nullable();
+                $table->boolean('activo')->default(true);
+                $table->timestamp('creado_en')->useCurrent();
+                $table->unsignedBigInteger('empresa_id')->nullable();
+                $table->index('empresa_id');
+            });
+        }
+
+        if (! Schema::hasTable('proveedores')) {
+            Schema::create('proveedores', function (Blueprint $table): void {
+                $table->increments('id');
+                $table->string('nombre', 160);
+                $table->string('ruc', 20)->unique();
+                $table->string('correo', 160);
+                $table->string('telefono', 30)->nullable();
+                $table->string('ciudad', 80)->nullable();
+                $table->boolean('activo')->default(true);
+                $table->timestamp('creado_en')->useCurrent();
+                $table->unsignedBigInteger('empresa_id')->nullable();
+                $table->index('empresa_id');
+            });
+        }
+
+        if (! Schema::hasTable('productos')) {
+            Schema::create('productos', function (Blueprint $table): void {
+                $table->increments('id');
+                $table->string('marca', 80);
+                $table->string('nombre', 160);
+                $table->unsignedInteger('categoria_id');
+                $table->string('categoria', 120);
+                $table->decimal('precio', 10, 2)->default(0);
+                $table->decimal('precio_original', 10, 2)->nullable();
+                $table->string('descuento', 20)->nullable();
+                $table->decimal('precio_oferta', 10, 2)->nullable();
+                $table->string('url_imagen', 255)->nullable();
+                $table->unsignedInteger('existencias')->default(0);
+                $table->string('almacenamiento', 80)->nullable();
+                $table->string('color', 80)->nullable();
+                $table->string('etiqueta', 80)->nullable();
+                $table->text('descripcion')->nullable();
+                $table->boolean('activo')->default(true);
+                $table->timestamp('creado_en')->useCurrent();
+                $table->unsignedBigInteger('empresa_id')->nullable();
+                $table->index(['categoria_id', 'empresa_id']);
+                $table->index('empresa_id');
+            });
+        }
+
+        if (! Schema::hasTable('compras')) {
+            Schema::create('compras', function (Blueprint $table): void {
+                $table->increments('id');
+                $table->unsignedInteger('proveedor_id');
+                $table->unsignedBigInteger('creado_por_usuario_id')->nullable();
+                $table->decimal('total', 12, 2)->default(0);
+                $table->string('estado', 30)->default('Pendiente');
+                $table->date('fecha_compra');
+                $table->boolean('activo')->default(true);
+                $table->timestamp('creado_en')->useCurrent();
+                $table->string('numero_referencia', 100)->nullable();
+                $table->char('moneda', 3)->default('PEN');
+                $table->dateTime('actualizado_en')->nullable();
+                $table->unsignedBigInteger('empresa_id')->nullable();
+                $table->unsignedBigInteger('sede_id')->nullable();
+                $table->unsignedBigInteger('almacen_id')->nullable();
+                $table->index(['empresa_id', 'fecha_compra']);
+                $table->index(['sede_id', 'fecha_compra']);
+            });
+        }
+
+        if (! Schema::hasTable('cotizaciones')) {
+            Schema::create('cotizaciones', function (Blueprint $table): void {
+                $table->increments('id');
+                $table->unsignedInteger('cliente_id')->nullable();
+                $table->unsignedBigInteger('creado_por_usuario_id')->nullable();
+                $table->decimal('total', 12, 2)->default(0);
+                $table->string('estado', 30)->default('Borrador');
+                $table->string('notas', 500)->nullable();
+                $table->boolean('activo')->default(true);
+                $table->timestamp('creado_en')->useCurrent();
+                $table->char('moneda', 3)->default('PEN');
+                $table->unsignedBigInteger('empresa_id')->nullable();
+                $table->unsignedBigInteger('sede_id')->nullable();
+                $table->index(['empresa_id', 'creado_en']);
+                $table->index(['cliente_id', 'empresa_id']);
+            });
+        }
+
+        if (! Schema::hasTable('cupones')) {
+            Schema::create('cupones', function (Blueprint $table): void {
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('empresa_id');
+                $table->string('codigo', 50);
+                $table->string('tipo_descuento', 20);
+                $table->decimal('valor', 10, 2);
+                $table->decimal('minimo_compra', 10, 2)->default(0);
+                $table->unsignedInteger('limite_usos')->nullable();
+                $table->unsignedInteger('usos')->default(0);
+                $table->dateTime('inicia_en');
+                $table->dateTime('finaliza_en');
+                $table->boolean('activo')->default(true);
+                $table->timestamp('creado_en')->nullable();
+                $table->timestamp('actualizado_en')->nullable();
+                $table->unique(['empresa_id', 'codigo'], 'un_cupones_empresa_codigo');
+                $table->unique(['id', 'empresa_id'], 'un_cupones_id_empresa');
+                $table->index(['activo', 'inicia_en', 'finaliza_en'], 'ind_cupones_vigencia');
+                $table->index('activo', 'ind_cupones_activo');
+                $table->index(['empresa_id', 'activo', 'inicia_en', 'finaliza_en'], 'ind_cupones_empresa_vigencia');
+            });
+        }
+
+        if (! Schema::hasTable('campanas_publicitarias')) {
+            Schema::create('campanas_publicitarias', function (Blueprint $table): void {
+                $table->increments('id');
+                $table->string('nombre', 120);
+                $table->string('ubicacion', 30)->default('emergente')->index();
+                $table->string('titulo', 160);
+                $table->string('descripcion', 500)->nullable();
+                $table->string('texto_boton', 80)->default('Ver oferta');
+                $table->string('url_boton', 255)->default('catalog');
+                $table->string('url_imagen')->nullable();
+                $table->decimal('precio_anterior', 10, 2)->nullable();
+                $table->decimal('precio_oferta', 10, 2)->nullable();
+                $table->dateTime('inicia_en')->index();
+                $table->dateTime('finaliza_en')->index();
+                $table->boolean('activo')->default(true)->index();
+                $table->unsignedInteger('vistas')->default(0);
+                $table->unsignedInteger('clics')->default(0);
+                $table->timestamp('creado_en')->useCurrent();
+                $table->timestamp('actualizado_en')->nullable();
+                $table->unsignedBigInteger('empresa_id')->nullable();
+            });
+        }
+
+        if (! Schema::hasTable('eventos_campana')) {
+            Schema::create('eventos_campana', function (Blueprint $table): void {
+                $table->id();
+                $table->unsignedInteger('campana_id');
+                $table->foreignId('usuario_id')->nullable()->constrained('usuarios')->nullOnDelete();
+                $table->string('tipo', 20)->index();
+                $table->string('sesion_hash', 64)->nullable()->index();
+                $table->timestamp('creado_en')->useCurrent();
+                $table->index(['campana_id', 'tipo', 'creado_en']);
+            });
+        }
+
+        if (! Schema::hasTable('campana_segmento')) {
+            Schema::create('campana_segmento', function (Blueprint $table): void {
+                $table->unsignedInteger('campana_id');
+                $table->unsignedBigInteger('segmento_id');
+                $table->primary(['campana_id', 'segmento_id']);
+            });
+        }
+
+        if (! Schema::hasTable('mensajes_contacto')) {
+            Schema::create('mensajes_contacto', function (Blueprint $table): void {
+                $table->increments('id');
+                $table->string('nombre', 120);
+                $table->string('contacto', 160);
+                $table->text('mensaje');
+                $table->string('estado', 30)->default('Nuevo')->index();
+                $table->timestamp('creado_en')->useCurrent();
+            });
+        }
+
+        if (! Schema::hasTable('movimientos_inventario')) {
+            Schema::create('movimientos_inventario', function (Blueprint $table): void {
+                $table->bigIncrements('id');
+                $table->unsignedInteger('producto_id');
+                $table->unsignedBigInteger('usuario_id')->nullable();
+                $table->string('tipo_movimiento', 30);
+                $table->decimal('cantidad', 18, 6);
+                $table->string('notas', 500);
+                $table->dateTime('creado_en')->useCurrent();
+                $table->unsignedBigInteger('empresa_id')->nullable();
+                $table->unsignedBigInteger('sede_id')->nullable();
+                $table->unsignedBigInteger('almacen_id')->nullable();
+                $table->unsignedInteger('variante_id')->nullable();
+                $table->string('documento_tipo', 60)->nullable();
+                $table->string('documento_id', 80)->nullable();
+                $table->index(['producto_id', 'creado_en'], 'ind_movimientos_producto_fecha');
+                $table->index('usuario_id', 'ind_movimientos_usuario');
+                $table->index(['sede_id', 'creado_en'], 'ind_movimientos_sede_fecha');
+                $table->index(['almacen_id', 'variante_id', 'creado_en'], 'ind_movimientos_almacen_variante_fecha');
+                $table->index(['documento_tipo', 'documento_id'], 'ind_movimientos_documento');
+                $table->index('variante_id', 'ind_movimientos_variante');
+            });
+        }
+
+        if (! Schema::hasTable('productos_favoritos')) {
+            Schema::create('productos_favoritos', function (Blueprint $table): void {
+                $table->id();
+                $table->unsignedInteger('producto_id');
+                $table->unsignedBigInteger('usuario_id');
+                $table->timestamp('creado_en')->useCurrent();
+                $table->unique(['producto_id', 'usuario_id']);
+            });
+        }
+
+        if (! Schema::hasTable('productos_resenas')) {
+            Schema::create('productos_resenas', function (Blueprint $table): void {
+                $table->id();
+                $table->unsignedInteger('producto_id');
+                $table->unsignedBigInteger('usuario_id');
+                $table->unsignedTinyInteger('valoracion');
+                $table->text('comentario')->nullable();
+                $table->timestamp('creado_en')->useCurrent();
+                $table->timestamp('actualizado_en')->useCurrent();
+                $table->unique(['producto_id', 'usuario_id']);
+                $table->index(['producto_id', 'valoracion']);
+            });
+        }
+
+        if (! Schema::hasTable('perfiles_inteligentes_productos')) {
+            Schema::create('perfiles_inteligentes_productos', function (Blueprint $table): void {
+                $table->unsignedInteger('producto_id')->primary();
+                $table->unsignedTinyInteger('puntuacion_rendimiento')->default(70);
+                $table->unsignedTinyInteger('puntuacion_camara')->default(70);
+                $table->unsignedTinyInteger('puntuacion_bateria')->default(70);
+                $table->unsignedTinyInteger('puntuacion_valor')->default(70);
+                $table->timestamp('actualizado_en')->nullable();
+            });
+        }
+
+        if (! Schema::hasTable('perfil_campos')) {
+            Schema::create('perfil_campos', function (Blueprint $table): void {
+                $table->id();
+                $table->string('codigo', 80)->unique();
+                $table->string('etiqueta', 120);
+                $table->string('tipo', 30)->default('text');
+                $table->json('opciones')->nullable();
+                $table->unsignedInteger('orden')->default(0);
+                $table->boolean('activo')->default(true);
+                $table->dateTime('creado_en')->useCurrent();
+                $table->dateTime('actualizado_en')->useCurrent();
+                $table->index(['activo', 'orden']);
+            });
+        }
+
+        if (! Schema::hasTable('roles_perfil_campos')) {
+            Schema::create('roles_perfil_campos', function (Blueprint $table): void {
+                $table->foreignId('rol_id')->constrained('roles')->cascadeOnDelete();
+                $table->foreignId('perfil_campo_id')->constrained('perfil_campos')->cascadeOnDelete();
+                $table->boolean('visible')->default(true);
+                $table->boolean('editable')->default(false);
+                $table->boolean('requerido')->default(false);
+                $table->dateTime('creado_en')->useCurrent();
+                $table->dateTime('actualizado_en')->useCurrent();
+                $table->primary(['rol_id', 'perfil_campo_id']);
+                $table->index(['perfil_campo_id', 'visible']);
+            });
+        }
+
+        if (! Schema::hasTable('usuarios_perfil_campos')) {
+            Schema::create('usuarios_perfil_campos', function (Blueprint $table): void {
+                $table->id();
+                $table->foreignId('usuario_id')->constrained('usuarios')->cascadeOnDelete();
+                $table->foreignId('perfil_campo_id')->constrained('perfil_campos')->cascadeOnDelete();
+                $table->text('valor')->nullable();
+                $table->dateTime('creado_en')->useCurrent();
+                $table->dateTime('actualizado_en')->useCurrent();
+                $table->unique(['usuario_id', 'perfil_campo_id']);
             });
         }
 

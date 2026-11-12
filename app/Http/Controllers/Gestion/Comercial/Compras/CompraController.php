@@ -256,9 +256,9 @@ class CompraController extends Controller
                     : $status;
 
                 return [$purchase->id => [
-                    'status_class' => $this->statusClass($status),
-                    'reception_class' => $this->statusClass($receptionStatus),
-                    'reception_label' => $this->receptionLabel($receptionStatus),
+                    'status_class' => $this->claseEstado($status),
+                    'reception_class' => $this->claseEstado($receptionStatus),
+                    'reception_label' => $this->etiquetaRecepcion($receptionStatus),
                     'supplier_name' => $purchase->supplier?->nombre ?? 'Proveedor no disponible',
                     'reference' => 'OC-'.($purchase->fecha_compra?->format('y') ?? now()->format('y')).'-'.str_pad((string) $purchase->id, 5, '0', STR_PAD_LEFT),
                 ]];
@@ -303,7 +303,7 @@ class CompraController extends Controller
         ]);
     }
 
-    private function statusClass(string $status): string
+    private function claseEstado(string $status): string
     {
         return match ($status) {
             'Pendiente', 'En proceso' => 'pending',
@@ -315,7 +315,7 @@ class CompraController extends Controller
         };
     }
 
-    private function receptionLabel(string $status): string
+    private function etiquetaRecepcion(string $status): string
     {
         return match ($status) {
             'Recibida', 'Completada' => 'Completa',
@@ -445,7 +445,7 @@ class CompraController extends Controller
             $output = fopen($temporaryCsv, 'wb');
             abort_if($output === false, 422, 'No se pudo preparar el archivo Excel.');
             fputcsv($output, $expected);
-            foreach ($this->readXlsxRows($file) as $row) {
+            foreach ($this->leerFilasXlsx($file) as $row) {
                 fputcsv($output, $row);
             }
             fclose($output);
@@ -575,12 +575,12 @@ class CompraController extends Controller
         $compraActualizada = $compra->fresh();
 
         return back()->with('status', $compraActualizada?->estado === 'Recibida'
-            ? 'La recepci�n complet� la compra y actualiz� las existencias.'
-            : 'La recepci�n parcial qued� registrada y la discrepancia se agreg� a la auditor�a.');
+            ? 'La recepción completó la compra y actualizó las existencias.'
+            : 'La recepción parcial quedó registrada y la discrepancia se agregó a la auditoría.');
     }
 
     /** @return array<int, array<int, string>> */
-    private function readXlsxRows(UploadedFile $file): array
+    private function leerFilasXlsx(UploadedFile $file): array
     {
         abort_unless(class_exists(ZipArchive::class), 422, 'El servidor no tiene habilitada la lectura de archivos Excel.');
         $zip = new ZipArchive;

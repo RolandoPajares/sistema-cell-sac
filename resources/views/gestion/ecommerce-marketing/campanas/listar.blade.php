@@ -5,7 +5,7 @@
 
 @section('content')
 
-    <section class="campanias-page" data-campanias-page data-campanias-reopen="{{ $errors->any() ? 'crear' : '' }}">
+    <section class="campanias-page" data-campanias-page data-campanias-reopen="{{ $errors->any() || request('abrir') === 'crear' ? 'crear' : '' }}">
         <header class="campanias-hero">
             <div>
                 <span class="campanias-eyebrow">Marketing Center</span>

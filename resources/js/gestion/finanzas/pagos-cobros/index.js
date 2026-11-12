@@ -28,7 +28,7 @@ const initializePaymentDemo = (root) => {
     const partyType = form?.querySelector('[data-finance-payment-party-type]');
     const title = form?.querySelector('[data-finance-payment-title]');
     const confirm = form?.querySelector('[data-finance-payment-confirm]');
-    const dialog = root.querySelector('[data-pending-modal="crear"]');
+    const dialog = root.querySelector('[data-finance-dialog="crear"], [data-pending-modal="crear"]');
     const error = form?.querySelector('[data-finance-payment-error]');
     const feedback = form?.querySelector('[data-finance-payment-feedback]');
 

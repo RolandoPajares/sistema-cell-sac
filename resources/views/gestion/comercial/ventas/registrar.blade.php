@@ -37,6 +37,20 @@
                 <span>Vendedor</span>
                 <input type="text" value="{{ auth()->user()->nombre }}" readonly>
             </label>
+            <label class="ventas-modal-field">
+                <span>Medio de pago</span>
+                <select name="medio_pago_id">
+                    <option value="">Sin pago registrado</option>
+                    @foreach ($paymentMethods as $paymentMethod)
+                        <option value="{{ $paymentMethod->id }}" data-payment-code="{{ $paymentMethod->codigo }}" @selected((string) old('medio_pago_id') === (string) $paymentMethod->id)>{{ $paymentMethod->nombre }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <label class="ventas-modal-field" data-cash-payment hidden>
+                <span>Monto recibido en efectivo <b>*</b></span>
+                <input type="number" name="importe_pago" min="0" step="0.01" inputmode="decimal" value="{{ old('importe_pago') }}" data-cash-amount>
+                <small data-cash-change>Vuelto: S/ 0.00</small>
+            </label>
         </div>
         <label class="ventas-modal-field">
             <span>Observaciones</span>
@@ -67,6 +81,7 @@
         <div class="ventas-modal-summary">
             <span>Subtotal <strong data-sales-subtotal>S/ 0.00</strong></span>
             <span>Descuento <strong>S/ 0.00</strong></span>
+            <span>IGV (18%) <strong data-sales-tax>S/ 0.00</strong></span>
             <span class="ventas-modal-total">Total <strong data-sales-total>S/ 0.00</strong></span>
         </div>
     </section>

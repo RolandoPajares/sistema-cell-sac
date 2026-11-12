@@ -13,8 +13,8 @@
         <h1>Tu próximo celular está  <span>en MD Technology Cell</span></h1>
         <p>Celulares y accesorios originales con atención local y precios para ti.</p>
         <div class="home-hero-banner-actions">
-            <a class="btn btn-primary" href="{{ route('catalog.index', $cellCategoryId ? ['categoria' => $cellCategoryId] : []) }}">Ver celulares <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
-            <a class="btn btn-ghost" href="{{ route('catalog.index', $accessoryCategoryId ? ['categoria' => $accessoryCategoryId] : []) }}"><i class="bi bi-tag" aria-hidden="true"></i> Explorar accesorios</a>
+            <a class="btn btn-primary" href="{{ route('catalog.index', $idCategoriaCelulares ? ['categoria' => $idCategoriaCelulares] : []) }}">Ver celulares <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+            <a class="btn btn-ghost" href="{{ route('catalog.index', $idCategoriaAccesorios ? ['categoria' => $idCategoriaAccesorios] : []) }}"><i class="bi bi-tag" aria-hidden="true"></i> Explorar accesorios</a>
         </div>
     </div>
 </section>
@@ -49,7 +49,6 @@
             <a class="smart-tile smart-purple" href="{{ route('recommendations') }}"><span><i class="bi bi-lightbulb-fill" aria-hidden="true"></i></span><div><b>SmartMatch</b><small>Encuentra el equipo ideal según tu estilo de vida.</small></div><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
             <a class="smart-tile smart-orange" href="{{ route('comparison') }}"><span><i class="bi bi-columns-gap" aria-hidden="true"></i></span><div><b>Comparador</b><small>Compara hasta 3 equipos con puntajes.</small></div><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
             <a class="smart-tile smart-gold" href="{{ route('smart.wholesale') }}"><span><i class="bi bi-cash-coin" aria-hidden="true"></i></span><div><b>Modo emprendedor</b><small>Arma una compra mayorista según tu presupuesto.</small></div><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
-            <a class="smart-tile smart-assistant" href="{{ route('assistant') }}"><span><i class="bi bi-robot" aria-hidden="true"></i></span><div><b>MD Assistant <em>NUEVO</em></b><small>Conversa con IA y recibe recomendaciones al instante.</small></div><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
         </div>
     </div>
 </section>
@@ -60,31 +59,31 @@
             <div><h2>Los más populares en oferta</h2><p>Ofertas vigentes seleccionadas de todas las categorías.</p></div>
             <a href="{{ route('catalog.index') }}" class="home-view-all">Ver todos los productos <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
         </div>
-        <div class="product-grid home-product-grid" @if($featuredProducts->isEmpty()) hidden @endif>
-            @foreach($featuredProducts as $product)
+        <div class="product-grid home-product-grid" @if($productosDestacados->isEmpty()) hidden @endif>
+            @foreach($productosDestacados as $producto)
                 <article class="product-card home-product-card">
-                    <a class="home-product-image-link" href="{{ route('catalog.show', $product) }}" aria-label="Ver {{ $product->marca }} {{ $product->nombre }}">
+                    <a class="home-product-image-link" href="{{ route('catalog.show', $producto) }}" aria-label="Ver {{ $producto->marca }} {{ $producto->nombre }}">
                         <div class="product-art home-product-art">
-                            <span class="badge">{{ $product->etiqueta ?: 'Oferta' }}</span>
-                            @if($product->url_imagen_principal)
-                                <img class="home-product-photo" src="{{ $product->url_imagen_principal }}" alt="{{ $product->marca }} {{ $product->nombre }}" loading="lazy">
+                            <span class="badge">{{ $producto->etiqueta ?: 'Oferta' }}</span>
+                            @if($producto->url_imagen_principal)
+                                <img class="home-product-photo" src="{{ $producto->url_imagen_principal }}" alt="{{ $producto->marca }} {{ $producto->nombre }}" loading="lazy">
                             @else
-                                <div class="home-product-placeholder" role="img" aria-label="Imagen no disponible"><i class="bi bi-phone" aria-hidden="true"></i><span>{{ $product->marca }}</span></div>
+                                <div class="home-product-placeholder" role="img" aria-label="Imagen no disponible"><i class="bi bi-phone" aria-hidden="true"></i><span>{{ $producto->marca }}</span></div>
                             @endif
                         </div>
                     </a>
                     <div class="product-body home-product-body">
-                        <div class="product-meta"><span>{{ $product->marca }}</span><span>{{ $product->category?->nombre ?: $product->categoria }}</span></div>
-                        <h3>{{ $product->nombre }}</h3>
-                        <div class="home-product-specs">{{ $product->display_specifications }}</div>
-                        @if($product->display_discount > 0)<div class="home-product-pricing"><del>S/ {{ number_format($product->display_original_price, 2) }}</del><span>-{{ $product->display_discount }}%</span></div>@endif
-                        <div class="price">S/ {{ number_format((float) $product->precio_oferta, 2) }}</div>
-                        <div class="stock">{{ $product->existencias_disponibles }} unidades disponibles</div>
+                        <div class="product-meta"><span>{{ $producto->marca }}</span><span>{{ $producto->category?->nombre ?: $producto->categoria }}</span></div>
+                        <h3>{{ $producto->nombre }}</h3>
+                        <div class="home-product-specs">{{ $producto->display_specifications }}</div>
+                        @if($producto->display_discount > 0)<div class="home-product-pricing"><del>S/ {{ number_format($producto->display_original_price, 2) }}</del><span>-{{ $producto->display_discount }}%</span></div>@endif
+                        <div class="price">S/ {{ number_format((float) $producto->precio_oferta, 2) }}</div>
+                        <div class="stock">{{ $producto->existencias_disponibles }} unidades disponibles</div>
                         <div class="home-product-actions">
                             @auth
                                 <form
                                     class="home-product-buy-form"
-                                    action="{{ route('cart.add', $product) }}"
+                                    action="{{ route('cart.add', $producto) }}"
                                     method="post"
                                 >
                                     @csrf
@@ -95,15 +94,25 @@
                                     </button>
                                 </form>
                             @else
-                                <a class="btn btn-primary home-product-action" href="{{ route('login') }}"><i class="bi bi-cart3" aria-hidden="true"></i> Comprar</a>
+                                <details class="home-product-buy-choice">
+                                    <summary class="btn btn-primary home-product-action"><i class="bi bi-cart3" aria-hidden="true"></i> Comprar</summary>
+                                    <div class="home-product-buy-options">
+                                        <a class="btn btn-ghost" href="{{ route('login') }}">Iniciar sesión</a>
+                                        <form action="{{ route('cart.add', $producto) }}" method="post">
+                                            @csrf
+                                            <input type="hidden" name="cantidad" value="1">
+                                            <button class="btn btn-primary" type="submit">Continuar como invitado</button>
+                                        </form>
+                                    </div>
+                                </details>
                             @endauth
-                            <a class="btn btn-ghost home-product-details" href="{{ route('catalog.show', $product) }}"><i class="bi bi-eye" aria-hidden="true"></i> Ver detalles</a>
+                            <a class="btn btn-ghost home-product-details" href="{{ route('catalog.show', $producto) }}"><i class="bi bi-eye" aria-hidden="true"></i> Ver detalles</a>
                         </div>
                     </div>
                 </article>
             @endforeach
         </div>
-        <p class="home-products-empty" @if($featuredProducts->isNotEmpty()) hidden @endif>No hay productos disponibles por el momento.</p>
+        <p class="home-products-empty" @if($productosDestacados->isNotEmpty()) hidden @endif>No hay productos disponibles por el momento.</p>
     </div>
 </section>
 
@@ -116,5 +125,4 @@
     </div>
 </section>
 
-<a class="assistant-fab" href="{{ route('assistant') }}" aria-label="Abrir Cell AI"><span><i class="bi bi-robot" aria-hidden="true"></i></span><span><b>Cell AI</b><small>Asesor virtual</small></span><i class="assistant-status" aria-hidden="true"></i></a>
 @endsection
