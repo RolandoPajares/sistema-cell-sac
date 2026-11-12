@@ -15,8 +15,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 final class CasoSoporte extends Model
 {
+    // Usa la tabla 'casos_soporte' como origen de los registros de este modelo.
     protected $table = 'casos_soporte';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = [
         'empresa_id', 'sede_id', 'cliente_id', 'asignado_a_usuario_id', 'codigo', 'asunto', 'estado', 'prioridad',
         'creado_en', 'actualizado_en',

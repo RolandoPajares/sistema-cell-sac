@@ -2,9 +2,13 @@
 {{-- Bloque principal: organiza filtros, indicadores, gráficos y tablas del reporte global. --}}
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Reportes globales')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-reportes')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
     {{-- El controlador entrega indicadores, series y configuraciones visuales ya preparados. --}}
 
@@ -25,8 +29,10 @@
             </details>
         </header>
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
         <form class="reportes-toolbar" method="GET" action="{{ route('management.reports') }}" data-report-filter-form>
             <nav class="reportes-tabs" role="tablist" aria-label="Secciones del reporte">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @foreach ($reportTabs as $key => $tab)
                     <button class="{{ $activeReportView === $key ? 'is-active' : '' }}" type="button" role="tab" aria-selected="{{ $activeReportView === $key ? 'true' : 'false' }}" data-report-tab="{{ $key }}" aria-controls="report-panel-{{ $key }}">
                         <i class="bi {{ $tab['icon'] }}" aria-hidden="true"></i>{{ $tab['label'] }}
@@ -60,11 +66,13 @@
                 <section class="reportes-card reportes-chart-card">
                     <header class="reportes-card-header"><div><h2>Ventas y pedidos</h2><p>Comparativo de actividad en el periodo seleccionado.</p></div><span class="reportes-card-period">Diario <i class="bi bi-chevron-down" aria-hidden="true"></i></span></header>
                     <div class="reportes-chart-legend"><span><i class="reportes-legend-dot reportes-legend-dot--blue"></i>Ventas (S/)</span><span><i class="reportes-legend-dot reportes-legend-dot--green"></i>Pedidos</span></div>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                     @if ($orders > 0 || $sales > 0)
                         <div class="reportes-chart" aria-label="Gráfico de ventas y pedidos">
                             <div class="reportes-chart-scale"><span>S/ {{ number_format($salesMax, 0) }}</span><span>S/ {{ number_format($salesMax * .75, 0) }}</span><span>S/ {{ number_format($salesMax * .5, 0) }}</span><span>S/ {{ number_format($salesMax * .25, 0) }}</span><span>S/ 0</span></div>
                             <div class="reportes-chart-plot"><div class="reportes-chart-lines"><span></span><span></span><span></span><span></span><span></span></div><div class="reportes-bars">@foreach ($salesTrend as $point)<div class="reportes-bar-column" title="{{ $point['label'] }}: S/ {{ number_format($point['sales'], 2) }} · {{ $point['orders'] }} pedidos"><span class="reportes-bar" style="height: {{ $point['sales_height'] }}%"></span><small>{{ $point['label'] }}</small></div>@endforeach</div><svg class="reportes-orders-line" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Pedidos por día"><polyline points="{{ implode(' ', $chartPoints) }}"></polyline>@foreach ($chartCircles as $circle)<circle cx="{{ $circle['x'] }}" cy="{{ $circle['y'] }}" r="1.2"></circle>@endforeach</svg></div>
                         </div>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                     @else
                         <div class="reportes-empty"><i class="bi bi-bar-chart" aria-hidden="true"></i><strong>Sin ventas en este periodo</strong><span>Los datos aparecerán cuando se registren pedidos.</span></div>
                     @endif

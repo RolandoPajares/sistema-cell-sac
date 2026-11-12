@@ -1,3 +1,4 @@
+
 <dialog class="tc-em__dialog" data-em-dialog data-em-prices-dialog aria-labelledby="tc-em-price-dialog-title">
     <div class="tc-em__dialog-card">
         <header>
@@ -8,8 +9,11 @@
             </div>
             <button type="button" class="tc-em__close" data-em-close aria-label="Cerrar"><i class="bi bi-x-lg"></i></button>
         </header>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
         <form method="POST" action="{{ route('management.products.wholesale_prices.update') }}" enctype="multipart/form-data" data-em-wholesale-price-form data-em-edit-action="{{ route('management.products.wholesale_prices.update') }}" data-em-import-action="{{ route('management.products.wholesale_prices.import') }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
             @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
             @method('PUT')
             <input type="hidden" name="producto_id" value="" data-em-edit-product-id>
             <div class="tc-em__dialog-body">

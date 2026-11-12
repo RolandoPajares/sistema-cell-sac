@@ -14,6 +14,7 @@ class ActualizarCampaniaRequest extends GuardarCampaniaRequest
      *
      * @return array Resultado de la operación.
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         return parent::rules();

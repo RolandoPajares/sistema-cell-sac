@@ -17,8 +17,10 @@ class MedioPago extends Model
     /** @use HasFactory<MedioPagoFactory> */
     use HasFactory;
 
+    // Usa la tabla 'medios_pago' como origen de los registros de este modelo.
     protected $table = 'medios_pago';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['codigo', 'nombre', 'requiere_caja', 'requiere_banco', 'activo'];
 
     public $timestamps = false;

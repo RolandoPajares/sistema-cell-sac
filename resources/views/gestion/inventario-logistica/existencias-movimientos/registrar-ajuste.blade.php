@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +9,9 @@
 <body>
     
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
 <form method="post" class="admin-edit-popover" action="{{ route('management.inventory.adjust', $product) }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
     @csrf
     <div class="admin-form-grid">
         <label class="admin-form-group">

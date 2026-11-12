@@ -22,8 +22,10 @@ class Menu extends Model
     /** @use HasFactory<MenuFactory> */
     use HasFactory;
 
+    // Usa la tabla 'menus' como origen de los registros de este modelo.
     protected $table = 'menus';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['codigo', 'nombre', 'contexto', 'habilitado'];
 
     /**

@@ -33,27 +33,36 @@ class AlmacenController extends Controller
      */
     public function index(FiltroAlmacenesRequest $request, ServicioAutorizacion $autorizacion): View
     {
+        // Obtiene en $usuario la informacion de la solicitud o del usuario actual.
         $usuario = $request->user();
+        // Guarda en $permisoConsulta el resultado necesario para continuar esta operacion.
         $permisoConsulta = 'gestion.organizacion.consultar';
+        // Guarda en $sedes el resultado necesario para continuar esta operacion.
         $sedes = $this->consultaSedesAutorizadas($usuario, $autorizacion, $permisoConsulta)
             ->withCount('almacenes')
             ->orderBy('nombre')
             ->orderBy('id')
             ->get(['id', 'codigo', 'nombre', 'activa']);
+        // Guarda en $idsSede el resultado necesario para continuar esta operacion.
         $idsSede = $sedes->modelKeys();
+        // Prepara en $consultaBase la consulta que obtiene o modifica los registros necesarios.
         $consultaBase = Almacen::query()->whereIn('sede_id', $idsSede);
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $filtros = $request->validated();
 
+        // Guarda en $consulta el resultado necesario para continuar esta operacion.
         $consulta = (clone $consultaBase)
             ->with('sede:id,nombre')
             ->select('almacenes.*')
             ->selectSub(
+                // Ejecuta la consulta o modificacion de base de datos indicada en la instruccion siguiente.
                 DB::table('existencias_almacen')
                     ->selectRaw('COALESCE(SUM(cantidad_fisica), 0)')
                     ->whereColumn('almacen_id', 'almacenes.id'),
                 'unidades_fisicas',
             )
             ->selectSub(
+                // Ejecuta la consulta o modificacion de base de datos indicada en la instruccion siguiente.
                 DB::table('existencias_almacen')
                     ->selectRaw('COUNT(DISTINCT producto_id)')
                     ->whereColumn('almacen_id', 'almacenes.id')
@@ -61,7 +70,9 @@ class AlmacenController extends Controller
                 'productos_con_existencias',
             );
 
+        // Comprueba la condicion filled($filtros['buscar'] ?? null) antes de ejecutar este bloque.
         if (filled($filtros['buscar'] ?? null)) {
+            // Guarda en $buscar el resultado necesario para continuar esta operacion.
             $buscar = trim((string) $filtros['buscar']);
             $consulta->where(function (Builder $subconsulta) use ($buscar): void {
                 $subconsulta->where('almacenes.codigo', 'like', '%'.$buscar.'%')
@@ -70,33 +81,42 @@ class AlmacenController extends Controller
             });
         }
 
+        // Comprueba la condicion filled($filtros['sede_id'] ?? null) antes de ejecutar este bloque.
         if (filled($filtros['sede_id'] ?? null)) {
             $consulta->where('sede_id', (int) $filtros['sede_id']);
         }
 
+        // Comprueba la condicion filled($filtros['tipo'] ?? null) antes de ejecutar este bloque.
         if (filled($filtros['tipo'] ?? null)) {
             $consulta->where('tipo', $filtros['tipo']);
         }
 
+        // Comprueba la condicion filled($filtros['estado'] ?? null) antes de ejecutar este bloque.
         if (filled($filtros['estado'] ?? null)) {
             $consulta->where('activo', $filtros['estado'] === 'activo');
         }
 
+        // Guarda en $almacenes el resultado necesario para continuar esta operacion.
         $almacenes = $consulta->orderBy('nombre')->orderBy('id')->paginate(15)->withQueryString();
+        // Guarda en $tipos el resultado necesario para continuar esta operacion.
         $tipos = (clone $consultaBase)->whereNotNull('tipo')->where('tipo', '<>', '')
             ->distinct()->orderBy('tipo')->pluck('tipo');
+        // Guarda en $resumen el resultado necesario para continuar esta operacion.
         $resumen = (clone $consultaBase)->selectRaw(
             'COUNT(*) AS total, SUM(CASE WHEN activo = 1 THEN 1 ELSE 0 END) AS activos, SUM(CASE WHEN permite_venta = 1 THEN 1 ELSE 0 END) AS habilitados_venta',
         )->first();
+        // Prepara en $unidadesFisicas la consulta que obtiene o modifica los registros necesarios.
         $unidadesFisicas = DB::table('existencias_almacen as existencia')
             ->join('almacenes as almacen', 'almacen.id', '=', 'existencia.almacen_id')
             ->whereIn('almacen.sede_id', $idsSede)
             ->sum('existencia.cantidad_fisica');
+        // Prepara en $productosConExistencias la consulta que obtiene o modifica los registros necesarios.
         $productosConExistencias = DB::table('existencias_almacen as existencia')
             ->join('almacenes as almacen', 'almacen.id', '=', 'existencia.almacen_id')
             ->whereIn('almacen.sede_id', $idsSede)
             ->where('existencia.cantidad_fisica', '>', 0)
             ->distinct()->count('existencia.producto_id');
+        // Prepara en $existenciasPorSede la consulta que obtiene o modifica los registros necesarios.
         $existenciasPorSede = DB::table('existencias_almacen as existencia')
             ->join('almacenes as almacen', 'almacen.id', '=', 'existencia.almacen_id')
             ->whereIn('almacen.sede_id', $idsSede)
@@ -109,25 +129,30 @@ class AlmacenController extends Controller
             'almacenes' => (int) $sede->almacenes_count,
             'unidades_fisicas' => (float) ($existenciasPorSede->get($sede->id) ?? 0),
         ]);
+        // Guarda en $barrasAlmacenes el resultado necesario para continuar esta operacion.
         $barrasAlmacenes = (clone $consultaBase)
             ->select('almacenes.id', 'almacenes.nombre', 'almacenes.sede_id')
             ->selectSub(
+                // Ejecuta la consulta o modificacion de base de datos indicada en la instruccion siguiente.
                 DB::table('existencias_almacen')
                     ->selectRaw('COALESCE(SUM(cantidad_fisica), 0)')
                     ->whereColumn('almacen_id', 'almacenes.id'),
                 'unidades_fisicas',
             )
             ->orderByDesc('unidades_fisicas')->orderBy('nombre')->limit(5)->get();
+        // Guarda en $unidadesMaximas el resultado necesario para continuar esta operacion.
         $unidadesMaximas = max((float) $barrasAlmacenes->max('unidades_fisicas'), 1);
         $barrasAlmacenes = $barrasAlmacenes->map(static fn (Almacen $almacen): array => [
             'nombre' => $almacen->nombre,
             'unidades_fisicas' => (float) $almacen->unidades_fisicas,
             'porcentaje_relativo' => (int) round(((float) $almacen->unidades_fisicas / $unidadesMaximas) * 100),
         ]);
+        // Guarda en $sedesActivas el resultado necesario para continuar esta operacion.
         $sedesActivas = $this->consultaSedesAutorizadas($usuario, $autorizacion, 'gestion.organizacion.actualizar')
             ->where('activa', true)
             ->orderBy('nombre')->orderBy('id')->get(['id', 'codigo', 'nombre']);
 
+        // Devuelve la vista 'gestion.inventario-logistica.almacenes.listar' con los datos preparados por este controlador.
         return view('gestion.inventario-logistica.almacenes.listar', [
             'almacenes' => $almacenes,
             'filtros' => $filtros,
@@ -158,18 +183,25 @@ class AlmacenController extends Controller
         ServicioAutorizacion $autorizacion,
         RegistradorAuditoria $auditoria,
     ): RedirectResponse {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $datos = $request->validated();
+        // Obtiene en $usuario la informacion de la solicitud o del usuario actual.
         $usuario = $request->user();
 
+        // Ejecuta la consulta o modificacion de base de datos indicada en la instruccion siguiente.
         DB::transaction(function () use ($datos, $usuario, $autorizacion, $auditoria, $request): void {
+            // Guarda en $sede el resultado necesario para continuar esta operacion.
             $sede = $this->consultaSedesAutorizadas($usuario, $autorizacion, 'gestion.organizacion.actualizar')
                 ->whereKey((int) $datos['sede_id'])->lockForUpdate()->first();
 
+            // Detiene la solicitud si se cumple la validacion de seguridad indicada.
             abort_if($sede === null, 404, 'La sede seleccionada no pertenece a tu alcance autorizado.');
+            // Comprueba la condicion ! $sede->activa antes de ejecutar este bloque.
             if (! $sede->activa) {
                 throw ValidationException::withMessages(['sede_id' => 'Selecciona una sede activa para registrar el almacén.']);
             }
 
+            // Crea y guarda en $almacen el registro correspondiente mediante el modelo.
             $almacen = $sede->almacenes()->create([
                 'codigo' => $datos['codigo'],
                 'nombre' => $datos['nombre'],
@@ -185,6 +217,7 @@ class AlmacenController extends Controller
             );
         }, 3);
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'El almacén quedó registrado.');
     }
 
@@ -199,12 +232,17 @@ class AlmacenController extends Controller
         ServicioAutorizacion $autorizacion,
         RegistradorAuditoria $auditoria,
     ): RedirectResponse {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $datos = $request->validated();
+        // Obtiene en $usuario la informacion de la solicitud o del usuario actual.
         $usuario = $request->user();
 
+        // Ejecuta la consulta o modificacion de base de datos indicada en la instruccion siguiente.
         DB::transaction(function () use ($datos, $usuario, $autorizacion, $auditoria, $request, $almacen): void {
+            // Guarda en $almacen el resultado necesario para continuar esta operacion.
             $almacen = $this->consultaAlmacenesAutorizados($usuario, $autorizacion, 'gestion.organizacion.actualizar')
                 ->whereKey($almacen->getKey())->with('sede')->lockForUpdate()->firstOrFail();
+            // Agrupa en $valoresAnteriores los datos que se utilizaran en la siguiente operacion.
             $valoresAnteriores = [
                 'codigo' => $almacen->codigo,
                 'nombre' => $almacen->nombre,
@@ -229,6 +267,7 @@ class AlmacenController extends Controller
             );
         }, 3);
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Los datos del almacén quedaron actualizados.');
     }
 
@@ -243,15 +282,22 @@ class AlmacenController extends Controller
         ServicioAutorizacion $autorizacion,
         RegistradorAuditoria $auditoria,
     ): RedirectResponse {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $datos = $request->validated();
+        // Obtiene en $usuario la informacion de la solicitud o del usuario actual.
         $usuario = $request->user();
 
+        // Ejecuta la consulta o modificacion de base de datos indicada en la instruccion siguiente.
         DB::transaction(function () use ($datos, $usuario, $autorizacion, $auditoria, $request, $almacen): void {
+            // Guarda en $almacen el resultado necesario para continuar esta operacion.
             $almacen = $this->consultaAlmacenesAutorizados($usuario, $autorizacion, 'gestion.organizacion.actualizar')
                 ->whereKey($almacen->getKey())->with('sede')->lockForUpdate()->firstOrFail();
+            // Guarda en $estadoAnterior el resultado necesario para continuar esta operacion.
             $estadoAnterior = (bool) $almacen->activo;
+            // Guarda en $estadoNuevo el resultado necesario para continuar esta operacion.
             $estadoNuevo = (bool) $datos['activo'];
 
+            // Comprueba la condicion $estadoAnterior === $estadoNuevo antes de ejecutar este bloque.
             if ($estadoAnterior === $estadoNuevo) {
                 return;
             }
@@ -266,6 +312,7 @@ class AlmacenController extends Controller
             );
         }, 3);
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', $datos['activo'] ? 'El almacén quedó activado.' : 'El almacén quedó desactivado.');
     }
 
@@ -280,6 +327,7 @@ class AlmacenController extends Controller
     {
         return Almacen::query()->whereIn(
             'sede_id',
+            // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
             $this->consultaSedesAutorizadas($usuario, $autorizacion, $codigoPermiso)->select('id'),
         );
     }

@@ -18,8 +18,10 @@ class CuentaBancaria extends Model
     /** @use HasFactory<CuentaBancariaFactory> */
     use HasFactory;
 
+    // Usa la tabla 'cuentas_bancarias' como origen de los registros de este modelo.
     protected $table = 'cuentas_bancarias';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = [
         'empresa_id', 'codigo', 'banco', 'tipo_cuenta', 'moneda',
         'cuenta_mascara', 'referencia_secreto', 'activa',
@@ -27,6 +29,7 @@ class CuentaBancaria extends Model
 
     public $timestamps = false;
 
+    // Oculta estos atributos cuando el modelo se convierte en array o JSON.
     protected $hidden = ['referencia_secreto'];
 
     /**

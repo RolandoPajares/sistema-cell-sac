@@ -45,15 +45,22 @@ class FinalizarCompraController extends Controller
      */
     public function index(Request $request): View
     {
+        // Comprueba la condicion ! is_string($request->session()->get('checkout_token')) antes de ejecutar este bloque.
         if (! is_string($request->session()->get('checkout_token'))) {
             $request->session()->put('checkout_token', bin2hex(random_bytes(32)));
         }
+        // Guarda en $cart el resultado necesario para continuar esta operacion.
         $cart = $this->carritoService->normalizar((array) $request->session()->get('cart', []));
+        // Prepara en $products la consulta que obtiene o modifica los registros necesarios.
         $products = Producto::query()->with('variants')->active()->whereIn('id', array_keys($cart))->get()->keyBy('id');
+        // Guarda en $lines el resultado necesario para continuar esta operacion.
         $lines = collect($cart)->map(function (array $linea, int $id) use ($products): ?array {
+            // Guarda en $product el resultado necesario para continuar esta operacion.
             $product = $products->get((int) $id);
+            // Guarda en $disponible el resultado necesario para continuar esta operacion.
             $disponible = $product ? $this->inventario->disponibilidadPublica($product, $linea['variante_id']) : 0;
 
+            // Comprueba la condicion ! $product || $linea['cantidad'] < 1 antes de ejecutar este bloque.
             if (! $product || $linea['cantidad'] < 1) {
                 return null;
             }
@@ -69,6 +76,7 @@ class FinalizarCompraController extends Controller
         $puedeConfirmar = $lines->isNotEmpty() && $lines->count() === count($cart)
             && $lines->every(fn (array $line): bool => $line['quantity'] <= $line['disponible']);
 
+        // Devuelve la vista 'publico.comercio.finalizar-compra' con los datos preparados por este controlador.
         return view('publico.comercio.finalizar-compra', [
             'lines' => $lines,
             'total' => $lines->sum('subtotal'),
@@ -94,21 +102,29 @@ class FinalizarCompraController extends Controller
      */
     public function store(FinalizarCompraRequest $request): RedirectResponse
     {
+        // Guarda en $cart el resultado necesario para continuar esta operacion.
         $cart = (array) $request->session()->get('cart', []);
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_if($cart === [], 422, 'El carrito está vacío.');
 
         $order = $request->user() !== null
+            // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
             ? $this->orderService->finalizarCompra($request->user(), $cart, $request->session()->get('coupon_code'), $request->ip(), $request->validated('checkout_token'))
+            // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
             : $this->orderService->finalizarCompraInvitado($cart, $request->session()->get('coupon_code'), $request->ip(), $request->validated());
 
         $request->session()->forget(['cart', 'coupon_code', 'checkout_token']);
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $this->orderService->registrarPagoPendiente($order, $request->validated('medio_pago_id'), $request->user()?->getKey());
 
+        // Comprueba la condicion $request->user() === null antes de ejecutar este bloque.
         if ($request->user() === null) {
+            // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
             return redirect()->route('orders.tracking', [$order, 'token' => $request->validated('checkout_token')])
                 ->with('status', 'Pedido registrado correctamente.');
         }
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return redirect()->route('orders.show', $order)->with('status', 'Pedido registrado. El sistema todavía no procesa pagos.');
     }
 }

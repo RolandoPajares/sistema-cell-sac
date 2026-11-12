@@ -33,14 +33,21 @@ class SesionCajaController extends Controller
      */
     public function index(FiltroSesionesCajaRequest $request, ServicioAutorizacion $authorization): View
     {
+        // Guarda en $companyId el resultado necesario para continuar esta operacion.
         $companyId = $authorization->activeCompanyId();
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($companyId !== null, 409, 'Selecciona una única empresa activa.');
+        // Obtiene en $visibleSiteIds la informacion de la solicitud o del usuario actual.
         $visibleSiteIds = $authorization->authorizedSiteIds($request->user(), 'gestion.pagos.consultar');
+        // Prepara en $sites la consulta que obtiene o modifica los registros necesarios.
         $sites = Sede::query()->where('empresa_id', $companyId)->where('activa', true)
             ->whereIn('id', $visibleSiteIds)->orderBy('nombre')->get(['id', 'empresa_id', 'nombre']);
+        // Guarda en $siteIds el resultado necesario para continuar esta operacion.
         $siteIds = $sites->modelKeys();
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $filters = $request->validated();
         $base = SesionCaja::query()->whereHas('caja', static fn (Builder $box): Builder => $box->whereIn('sede_id', $siteIds));
+        // Guarda en $sessions el resultado necesario para continuar esta operacion.
         $sessions = (clone $base)
             ->when($filters['buscar'] ?? null, static fn (Builder $query, string $search): Builder => $query
                 ->whereHas('caja', static fn (Builder $box): Builder => $box
@@ -53,11 +60,14 @@ class SesionCajaController extends Controller
             ->when($filters['hasta'] ?? null, static fn (Builder $query, string $to): Builder => $query->whereDate('abierta_en', '<=', $to))
             ->with(['caja.sede:id,nombre', 'usuarioApertura:id,nombre', 'usuarioCierre:id,nombre'])
             ->latest('abierta_en')->paginate(20)->withQueryString();
+        // Obtiene en $creatableSiteIds la informacion de la solicitud o del usuario actual.
         $creatableSiteIds = $authorization->authorizedSiteIds($request->user(), 'gestion.pagos.crear');
+        // Prepara en $boxes la consulta que obtiene o modifica los registros necesarios.
         $boxes = Caja::query()->whereIn('sede_id', array_intersect($siteIds, $creatableSiteIds))
             ->where('activa', true)->whereDoesntHave('sesiones', static fn (Builder $query): Builder => $query->where('estado', 'abierta'))
             ->with('sede:id,nombre')->orderBy('codigo')->get();
 
+        // Devuelve la vista 'gestion.finanzas.aperturas-cierres.operativa' con los datos preparados por este controlador.
         return view('gestion.finanzas.aperturas-cierres.operativa', [
             'sessions' => $sessions,
             'sites' => $sites,
@@ -78,10 +88,13 @@ class SesionCajaController extends Controller
      */
     public function store(AbrirSesionCajaRequest $request, ServicioCajas $boxes): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $data = $request->validated();
+        // Prepara en $session la consulta que obtiene o modifica los registros necesarios.
         $session = $boxes->abrirSesion(Caja::query()->findOrFail($data['caja_id']),
             $data['saldo_inicial'], $data['token'], $request->user(), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return redirect()->route('management.payments.cash_sessions.show', $session)
             ->with('status', 'Sesión de caja abierta.');
     }
@@ -97,13 +110,17 @@ class SesionCajaController extends Controller
      */
     public function show(Request $request, SesionCaja $sesionCaja, ServicioAutorizacion $authorization, ServicioCajas $boxes): View
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($authorization->allowsGlobal($request->user(), 'gestion.seguridad.consultar'), 403);
         $sesionCaja->load(['caja.sede', 'usuarioApertura:id,nombre', 'usuarioCierre:id,nombre']);
+        // Guarda en $site el resultado necesario para continuar esta operacion.
         $site = $sesionCaja->caja->sede;
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless((int) $site->empresa_id === $authorization->activeCompanyId()
             && $authorization->allowsRecord($request->user(), 'gestion.pagos.consultar',
                 (int) $site->empresa_id, (int) $site->id), 404);
 
+        // Devuelve la vista 'gestion.finanzas.aperturas-cierres.detalle' con los datos preparados por este controlador.
         return view('gestion.finanzas.aperturas-cierres.detalle', [
             'session' => $sesionCaja,
             'movements' => $sesionCaja->movimientos()->with('creador:id,nombre')->latest('id')->paginate(25),
@@ -125,10 +142,12 @@ class SesionCajaController extends Controller
      */
     public function storeMovement(RegistrarMovimientoCajaRequest $request, SesionCaja $sesionCaja, ServicioCajas $boxes): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $data = $request->validated();
         $boxes->registrarMovimiento($sesionCaja, $data['direccion'], $data['importe'], $data['descripcion'],
             $data['token'], $request->user(), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return redirect()->route('management.payments.cash_sessions.show', $sesionCaja)
             ->with('status', 'Movimiento de caja registrado.');
     }
@@ -143,10 +162,12 @@ class SesionCajaController extends Controller
      */
     public function update(CerrarSesionCajaRequest $request, SesionCaja $sesionCaja, ServicioCajas $boxes): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $data = $request->validated();
         $boxes->cerrarSesion($sesionCaja, $data['saldo_cierre_declarado'], $data['token'],
             $request->user(), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return redirect()->route('management.payments.cash_sessions.show', $sesionCaja)
             ->with('status', 'Sesión de caja cerrada con arqueo conforme.');
     }

@@ -1,3 +1,4 @@
+
 {{-- Enlaces compartidos para navegar entre las pantallas de cuenta. --}}
 <nav class="profile-account-links" aria-label="Secciones de mi cuenta">
     <a href="{{ route($profileNavigationRoute) }}">Mi perfil</a>

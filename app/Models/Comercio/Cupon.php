@@ -15,8 +15,10 @@ class Cupon extends Model
 
     public const UPDATED_AT = 'actualizado_en';
 
+    // Usa la tabla 'cupones' como origen de los registros de este modelo.
     protected $table = 'cupones';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = [
         'empresa_id', 'codigo', 'tipo_descuento', 'valor', 'minimo_compra', 'limite_usos',
         'usos', 'inicia_en', 'finaliza_en', 'activo',

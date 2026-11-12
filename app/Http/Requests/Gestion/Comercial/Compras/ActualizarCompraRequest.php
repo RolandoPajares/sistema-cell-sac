@@ -12,6 +12,7 @@ class ActualizarCompraRequest extends GuardarCompraRequest
      *
      * @return array<string, mixed>
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         $rules = parent::rules();

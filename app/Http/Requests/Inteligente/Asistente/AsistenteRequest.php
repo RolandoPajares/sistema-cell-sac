@@ -14,6 +14,7 @@ class AsistenteRequest extends FormRequest
      *
      * @return void Actualiza los datos internos de la solicitud antes de validar.
      */
+    // Ajusta o limpia los datos recibidos antes de aplicar las reglas de validacion.
     protected function prepareForValidation(): void
     {
         if (! $this->filled('consulta') && $this->filled('message')) {
@@ -26,6 +27,7 @@ class AsistenteRequest extends FormRequest
      *
      * @return bool Siempre devuelve true; la restricción se aplica mediante las reglas.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return true;
@@ -36,6 +38,7 @@ class AsistenteRequest extends FormRequest
      *
      * @return array<string, list<string>> Reglas aplicadas al campo `consulta`.
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         return ['consulta' => ['required', 'string', 'max:300']];

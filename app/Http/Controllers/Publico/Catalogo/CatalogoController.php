@@ -28,13 +28,17 @@ class CatalogoController extends Controller
      */
     public function index(FiltroCatalogoRequest $request, ServicioCatalogo $catalogService): View
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $filters = $request->validated();
 
+        // Prepara en $products la consulta que obtiene o modifica los registros necesarios.
         $products = $catalogService->query($filters)->paginate(20)->withQueryString();
         $catalogService->agregarDisponibilidad($products->getCollection(), $request->user());
 
         $products->getCollection()->transform(function (Producto $product): Producto {
+            // Guarda en $salePrice el resultado necesario para continuar esta operacion.
             $salePrice = (float) ($product->precio_oferta ?? $product->precio);
+            // Guarda en $originalPrice el resultado necesario para continuar esta operacion.
             $originalPrice = (float) ($product->precio_original ?? $product->precio);
 
             return $product->setAttribute('catalog_sale_price', $salePrice)
@@ -44,14 +48,22 @@ class CatalogoController extends Controller
                     : 0);
         });
 
+        // Guarda en $selectedCategory el resultado necesario para continuar esta operacion.
         $selectedCategory = $filters['categoria'] ?? null;
+        // Guarda en $selectedBrand el resultado necesario para continuar esta operacion.
         $selectedBrand = $filters['marca'] ?? null;
+        // Guarda en $selectedOrder el resultado necesario para continuar esta operacion.
         $selectedOrder = $filters['orden'] ?? 'nuevo';
+        // Guarda en $minimumPrice el resultado necesario para continuar esta operacion.
         $minimumPrice = $filters['min'] ?? null;
+        // Guarda en $maximumPrice el resultado necesario para continuar esta operacion.
         $maximumPrice = $filters['max'] ?? null;
+        // Guarda en $baseFilters el resultado necesario para continuar esta operacion.
         $baseFilters = collect($filters)->except('page')->all();
+        // Guarda en $filterOptions el resultado necesario para continuar esta operacion.
         $filterOptions = $catalogService->filterOptions();
 
+        // Devuelve la vista 'publico.catalogo.index' con los datos preparados por este controlador.
         return view('publico.catalogo.index', [
             'products' => $products,
             ...$filterOptions,
@@ -83,30 +95,42 @@ class CatalogoController extends Controller
      */
     public function show(Request $request, Producto $product, ServicioCatalogo $catalogService): View
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($product->activo, 404);
 
         $product->load('category', 'images', 'features', 'variants.images', 'reviews');
         $catalogService->agregarDisponibilidad($product->newCollection([$product]), $request->user());
         $catalogService->agregarDisponibilidadVariantes($product->variants);
+        // Guarda en $relatedProducts el resultado necesario para continuar esta operacion.
         $relatedProducts = $catalogService->relacionados($product);
         $catalogService->agregarDisponibilidad($relatedProducts, $request->user());
 
+        // Guarda en $categoryName el resultado necesario para continuar esta operacion.
         $categoryName = $product->category?->nombre ?: $product->categoria;
+        // Guarda en $imageItems el resultado necesario para continuar esta operacion.
         $imageItems = $product->images->pluck('ruta_imagen');
+        // Comprueba la condicion $imageItems->isEmpty() && $product->url_imagen antes de ejecutar este bloque.
         if ($imageItems->isEmpty() && $product->url_imagen) {
+            // Guarda en $imageItems el resultado necesario para continuar esta operacion.
             $imageItems = collect([$product->url_imagen]);
         }
         $imageItems = $imageItems->map(static fn (string $route): array => [
             'url' => Producto::urlPublicaDeImagen($route),
         ])->values();
+        // Guarda en $firstVariant el resultado necesario para continuar esta operacion.
         $firstVariant = $product->variants->first();
+        // Guarda en $salePrice el resultado necesario para continuar esta operacion.
         $salePrice = (float) ($product->precio_oferta ?? $product->precio);
+        // Guarda en $originalPrice el resultado necesario para continuar esta operacion.
         $originalPrice = (float) ($product->precio_original ?? $product->precio);
         $isAuthenticated = $request->user() !== null;
+        // Guarda en $hasStock el resultado necesario para continuar esta operacion.
         $hasStock = (int) $product->existencias_disponibles > 0;
+        // Obtiene en $userRating la informacion de la solicitud o del usuario actual.
         $userRating = (int) ($request->user()
             ? ResenaProducto::query()->where('producto_id', $product->getKey())->where('usuario_id', $request->user()->getKey())->value('valoracion')
             : 0);
+        // Obtiene en $isFavorite la informacion de la solicitud o del usuario actual.
         $isFavorite = $request->user()
             ? $product->favorites()->where('usuario_id', $request->user()->getKey())->exists()
             : false;
@@ -123,7 +147,9 @@ class CatalogoController extends Controller
                 ? Producto::urlPublicaDeImagen($variant->images->first()->ruta_imagen)
                 : null,
         ])->values();
+        // Guarda en $variantOptions el resultado necesario para continuar esta operacion.
         $variantOptions = $product->variants->values()->map(static function ($variant, int $index): array {
+            // Guarda en $stock el resultado necesario para continuar esta operacion.
             $stock = (int) ($variant->existencias_disponibles ?? $variant->existencias);
 
             return [
@@ -135,6 +161,7 @@ class CatalogoController extends Controller
             ];
         });
 
+        // Devuelve la vista 'publico.catalogo.detalle' con los datos preparados por este controlador.
         return view('publico.catalogo.detalle', [
             'product' => $product,
             'relatedProducts' => $relatedProducts,
@@ -187,13 +214,16 @@ class CatalogoController extends Controller
      */
     public function toggleFavorite(Request $request, Producto $product): JsonResponse
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($product->activo, 404);
 
+        // Prepara en $favorite la consulta que obtiene o modifica los registros necesarios.
         $favorite = FavoritoProducto::query()
             ->where('producto_id', $product->getKey())
             ->where('usuario_id', $request->user()->getKey())
             ->first();
 
+        // Comprueba la condicion $favorite antes de ejecutar este bloque.
         if ($favorite) {
             $favorite->delete();
         } else {
@@ -203,6 +233,7 @@ class CatalogoController extends Controller
             ]);
         }
 
+        // Devuelve al navegador el resultado HTTP producido por la instruccion siguiente.
         return response()->json(['favorito' => ! $favorite]);
     }
 
@@ -217,15 +248,20 @@ class CatalogoController extends Controller
      */
     public function storeReview(GuardarResenaProductoRequest $request, Producto $product): JsonResponse
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($product->activo, 404);
 
+        // Guarda en $review el resultado necesario para continuar esta operacion.
         $review = $product->reviews()->updateOrCreate(
             ['usuario_id' => $request->user()->getKey()],
+            // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
             $request->validated(),
         );
 
+        // Guarda en $reviews el resultado necesario para continuar esta operacion.
         $reviews = $product->reviews()->get(['valoracion']);
 
+        // Devuelve al navegador el resultado HTTP producido por la instruccion siguiente.
         return response()->json([
             'valoracion' => (int) $review->valoracion,
             'promedio' => round((float) ($reviews->avg('valoracion') ?? 0), 1),

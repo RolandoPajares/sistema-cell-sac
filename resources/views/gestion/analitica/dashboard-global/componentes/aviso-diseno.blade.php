@@ -1,3 +1,4 @@
+
 {{-- Componente de analitica: dashboard-global\componentes\aviso-diseno.blade.php. Renderiza un bloque visual reutilizable. --}}
 {{-- Bloque visual: comunica una advertencia o información complementaria al usuario. --}}
 <div class="tc-dg__design-notice" role="status">

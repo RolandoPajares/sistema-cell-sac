@@ -18,6 +18,7 @@ final class GuardarCasoSoporteRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return $this->user() !== null && app(ServicioAutorizacion::class)->allows($this->user(), 'gestion.soporte.crear');
@@ -28,12 +29,17 @@ final class GuardarCasoSoporteRequest extends FormRequest
      *
      * @return array Resultado de la operación.
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         return [
+            // Valida el campo 'codigo' con las reglas definidas en la instruccion siguiente.
             'codigo' => ['required', 'string', 'max:50', 'alpha_dash', Rule::unique('casos_soporte', 'codigo')],
+            // Valida el campo 'asunto' con las reglas definidas en la instruccion siguiente.
             'asunto' => ['required', 'string', 'max:180'],
+            // Valida el campo 'prioridad' con las reglas definidas en la instruccion siguiente.
             'prioridad' => ['required', Rule::in(['baja', 'normal', 'alta', 'urgente'])],
+            // Valida el campo 'cliente_id' con las reglas definidas en la instruccion siguiente.
             'cliente_id' => ['nullable', 'integer', 'exists:clientes,id'],
         ];
     }

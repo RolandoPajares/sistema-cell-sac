@@ -1,9 +1,12 @@
+
 <div class="gestion-pendiente-modal-shell">
     <header class="gestion-pendiente-modal-header">
         <div><span class="gestion-pendiente-modal-icon"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i></span><div><span class="gestion-pendiente-eyebrow">Operaciones comerciales</span><h2 id="devoluciones-garantias-crear-title">Nueva solicitud</h2><p>Registra una devolución o garantía y asigna su seguimiento.</p></div></div>
         <button type="button" class="gestion-pendiente-close" data-pending-close aria-label="Cerrar ventana"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
     </header>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
     <form method="POST" action="{{ route('management.returns.store') }}" data-pending-backend-form>
+{{-- proteccion CSRF que valida el origen del formulario. --}}
         @csrf
         <div class="gestion-pendiente-modal-body">
             {{-- Presenta los datos relacionados que se necesitan para registrar la solicitud. --}}

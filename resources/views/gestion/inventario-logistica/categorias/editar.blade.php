@@ -1,6 +1,10 @@
+
 {{-- Formulario completo e independiente para editar una categoría existente. --}}
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
 <form class="categorias-modal-form" method="post" action="{{ route('management.categories.update', $category) }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
     @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
     @method('PUT')
 
     {{-- Datos actuales de la categoría; old() conserva los valores tras una validación fallida. --}}

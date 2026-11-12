@@ -18,6 +18,7 @@ class GuardarCategoriaRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return $this->user() !== null && app(ServicioAutorizacion::class)->allowsRoute($this);
@@ -28,11 +29,15 @@ class GuardarCategoriaRequest extends FormRequest
      *
      * @return array Resultado de la operación.
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         return [
+            // Valida el campo 'nombre' con las reglas definidas en la instruccion siguiente.
             'nombre' => ['required', 'string', 'max:120', Rule::unique('categorias', 'nombre')],
+            // Valida el campo 'descripcion' con las reglas definidas en la instruccion siguiente.
             'descripcion' => ['nullable', 'string', 'max:500'],
+            // Valida el campo 'activo' con las reglas definidas en la instruccion siguiente.
             'activo' => ['sometimes', 'boolean'],
         ];
     }

@@ -1,9 +1,18 @@
+/**
+ * GUIA DE EXPOSICION JAVASCRIPT
+ * Archivo: resources/js/gestion/comercial/clientes/index.js
+ * Este modulo contiene comportamiento de interfaz, eventos, validaciones y/o
+ * comunicacion con el backend. Los comentarios explican el flujo sin cambiar la logica.
+ */
+
 (() => {
     const page = document.querySelector("[data-client-page]");
     const createDialog = document.querySelector("#nuevo-cliente");
     const importDialog = document.querySelector("[data-client-import-dialog]");
 
+    // Funcion: configureClientForms concentra una tarea reutilizable del modulo.
     const configureClientForms = () => {
+        // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
         document.querySelectorAll("[data-client-form]").forEach((form) => {
             const options = [...form.querySelectorAll("[data-client-person]")];
             const legalFields = [...form.querySelectorAll("[data-legal-only]")];
@@ -30,21 +39,29 @@
             const hiddenDocumentType = form.querySelector("[data-client-document-hidden]");
             const companyDocumentType = form.querySelector("[data-client-document-type-company]");
 
+            // Funcion: syncContactName concentra una tarea reutilizable del modulo.
             const syncContactName = () => {
+                // Condicional: evalua "!hiddenContactInput" para decidir si ejecuta el bloque siguiente.
                 if (!hiddenContactInput) return;
                 hiddenContactInput.value = personType === "juridica"
                     ? (legalName?.value || "")
                     : `${firstName?.value || ""} ${lastName?.value || ""}`.trim();
             };
 
+            // Funcion: syncDocument concentra una tarea reutilizable del modulo.
             const syncDocument = () => {
+                // Condicional: evalua "!documentInput || !companyDocument" para decidir si ejecuta el bloque siguiente.
                 if (!documentInput || !companyDocument) return;
+                // Condicional: evalua "form.dataset.personType === "juridica"" para decidir si ejecuta el bloque siguiente.
                 if (form.dataset.personType === "juridica") documentInput.value = companyDocument.value;
+                // Caso alternativo: atiende la situacion en la que ninguna condicion anterior resulto verdadera.
                 else companyDocument.value = documentInput.value;
             };
 
+            // Funcion: updateForm concentra una tarea reutilizable del modulo.
             const updateForm = (personType) => {
                 form.dataset.personType = personType;
+                // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
                 options.forEach((option) => {
                     const isActive = option.dataset.clientPerson === personType;
                     option.classList.toggle("is-active", isActive);
@@ -53,50 +70,67 @@
                         isActive ? "true" : "false",
                     );
                 });
+                // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
                 legalFields.forEach((field) => {
                     field.hidden = personType !== "juridica";
                 });
+                // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
                 naturalFields.forEach((field) => { field.hidden = personType !== "natural"; });
+                // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
                 juridicaFields.forEach((field) => { field.hidden = personType !== "juridica"; });
+                // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
                 naturalLabels.forEach((label) => {
                     label.hidden = personType !== "natural";
                 });
+                // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
                 legalLabels.forEach((label) => {
                     label.hidden = personType !== "juridica";
                 });
+                // Condicional: evalua "contactInput" para decidir si ejecuta el bloque siguiente.
                 if (contactInput) {
                     contactInput.placeholder =
                         personType === "juridica"
                             ? "Nombre de la persona de contacto"
                             : "Ingresa nombres y apellidos";
                 }
+                // Condicional: evalua "documentType" para decidir si ejecuta el bloque siguiente.
                 if (documentType) {
                     documentType.value =
                         personType === "juridica" ? "ruc" : "dni";
                 }
+                // Condicional: evalua "companyDocumentType" para decidir si ejecuta el bloque siguiente.
                 if (companyDocumentType) companyDocumentType.value = "ruc";
+                // Condicional: evalua "companyDocument && documentInput && personType === "juridica" && !companyDocument.value" para decidir si ejecuta el bloque siguiente.
                 if (companyDocument && documentInput && personType === "juridica" && !companyDocument.value) companyDocument.value = documentInput.value;
+                // Condicional: evalua "hiddenDocumentType" para decidir si ejecuta el bloque siguiente.
                 if (hiddenDocumentType) hiddenDocumentType.value = personType === "juridica" ? "ruc" : "dni";
+                // Evento: escucha el evento input y ejecuta la funcion asociada cuando ocurre.
                 [firstName, lastName, legalName].filter(Boolean).forEach((field) => field.addEventListener("input", syncContactName));
                 syncContactName();
                 syncDocument();
             };
 
+            // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
             options.forEach((option) =>
+                // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
                 option.addEventListener("click", () =>
                     updateForm(option.dataset.clientPerson),
                 ),
             );
+            // Evento: escucha el evento input y ejecuta la funcion asociada cuando ocurre.
             companyDocument?.addEventListener("input", syncDocument);
             updateForm(form.dataset.personType || "natural");
         });
     };
 
+    // Condicional: evalua "!page || !createDialog" para decidir si ejecuta el bloque siguiente.
     if (!page || !createDialog) {
         return;
     }
 
+    // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
     page.querySelectorAll("[data-open-client-create]").forEach((button) =>
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         button.addEventListener("click", () => createDialog.showModal()),
     );
     const importStages = [
@@ -139,6 +173,7 @@
     let importStep = 0;
     let selectedImportFileName = "";
     let importFileReady = false;
+    // Funcion: parseCsv concentra una tarea reutilizable del modulo.
     const parseCsv = (text) => {
         const rows = [];
         let row = [],
@@ -146,41 +181,51 @@
             quoted = false;
         for (let index = 0; index < text.length; index += 1) {
             const character = text[index];
+            // Condicional: evalua "character === '"' && text[index + 1] === '"' && quoted" para decidir si ejecuta el bloque siguiente.
             if (character === '"' && text[index + 1] === '"' && quoted) {
                 cell += '"';
                 index += 1;
                 continue;
             }
+            // Condicional: evalua "character === '"'" para decidir si ejecuta el bloque siguiente.
             if (character === '"') {
                 quoted = !quoted;
                 continue;
             }
+            // Condicional: evalua "character === "," && !quoted" para decidir si ejecuta el bloque siguiente.
             if (character === "," && !quoted) {
                 row.push(cell.trim());
                 cell = "";
                 continue;
             }
+            // Condicional: evalua "(character === "\n" || character === "\r") && !quoted" para decidir si ejecuta el bloque siguiente.
             if ((character === "\n" || character === "\r") && !quoted) {
+                // Condicional: evalua "character === "\r" && text[index + 1] === "\n"" para decidir si ejecuta el bloque siguiente.
                 if (character === "\r" && text[index + 1] === "\n") index += 1;
                 row.push(cell.trim());
                 cell = "";
+                // Condicional: evalua "row.some((value) => value !== "")) rows.push(row" para decidir si ejecuta el bloque siguiente.
                 if (row.some((value) => value !== "")) rows.push(row);
                 row = [];
                 continue;
             }
             cell += character;
         }
+        // Condicional: evalua "cell !== "" || row.length" para decidir si ejecuta el bloque siguiente.
         if (cell !== "" || row.length) {
             row.push(cell.trim());
             rows.push(row);
         }
         return rows;
     };
+    // Funcion: renderImportPreview concentra una tarea reutilizable del modulo.
     const renderImportPreview = (rows) => {
+        // Condicional: evalua "!importPreview" para decidir si ejecuta el bloque siguiente.
         if (!importPreview) return;
         importPreview.innerHTML =
             rows
                 .slice(1, 11)
+                // Recorrido: usa map para procesar cada elemento y obtener o actualizar datos.
                 .map(
                     (row) =>
                         `<tr>${Array.from(
@@ -195,7 +240,9 @@
                 .join("") ||
             '<tr><td colspan="7">El CSV no contiene filas de datos.</td></tr>';
     };
+    // Funcion: renderImportValidations concentra una tarea reutilizable del modulo.
     const renderImportValidations = (rows) => {
+        // Condicional: evalua "!importValidations" para decidir si ejecuta el bloque siguiente.
         if (!importValidations) return;
         const expected = [
             "tipo",
@@ -206,6 +253,7 @@
             "telefono",
             "ciudad",
         ];
+        // Recorrido: usa map para procesar cada elemento y obtener o actualizar datos.
         const headers = (rows[0] ?? []).map((value) =>
             String(value).replace(/^﻿/, "").toLowerCase(),
         );
@@ -217,11 +265,14 @@
             ? '<li class="is-valid"><i class="bi bi-check-circle" aria-hidden="true"></i> Cabecera correcta y hay filas para enviar al servidor.</li><li><i class="bi bi-info-circle" aria-hidden="true"></i> El servidor volverá a validar tipos, correos y documentos duplicados.</li>'
             : '<li class="is-warning"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i> La cabecera o el contenido no coincide con la plantilla CSV.</li>';
     };
+    // Funcion: renderImportStep concentra una tarea reutilizable del modulo.
     const renderImportStep = (step) => {
         importStep = step;
+        // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
         importStages.forEach((stage) => {
             stage.hidden = Number(stage.dataset.clientImportStage) !== step;
         });
+        // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
         importIndicators.forEach((indicator) =>
             indicator.classList.toggle(
                 "is-current",
@@ -235,6 +286,7 @@
         importFeedback.hidden = true;
         importFinalFile.textContent = selectedImportFileName || "—";
     };
+    // Funcion: resetImportWizard concentra una tarea reutilizable del modulo.
     const resetImportWizard = () => {
         selectedImportFileName = "";
         importFile.value = "";
@@ -242,11 +294,13 @@
         importAcknowledgement.checked = false;
         importConfirm.disabled = false;
         importFileReady = false;
+        // Condicional: evalua "importPreview" para decidir si ejecuta el bloque siguiente.
         if (importPreview)
             importPreview.innerHTML =
                 '<tr><td colspan="7">Selecciona un CSV para consultar su contenido.</td></tr>';
         renderImportStep(0);
     };
+    // Evento: escucha una interaccion del usuario o del navegador y ejecuta la funcion asociada cuando ocurre.
     page.querySelector("[data-open-client-import]")?.addEventListener(
         "click",
         () => {
@@ -256,6 +310,7 @@
     );
     importDialog
         ?.querySelector("[data-client-import-download]")
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         ?.addEventListener("click", () => {
             const csv =
                 "\uFEFFtipo,documento,nombre_contacto,razon_social,correo,telefono,ciudad\r\n";
@@ -268,8 +323,10 @@
             link.click();
             window.setTimeout(() => URL.revokeObjectURL(url), 1000);
         });
+    // Evento: escucha el evento change y ejecuta la funcion asociada cuando ocurre.
     importFile?.addEventListener("change", () => {
         const file = importFile.files?.[0] ?? null;
+        // Condicional: evalua "file && !/\.(csv|txt)$/i.test(file.name)" para decidir si ejecuta el bloque siguiente.
         if (file && !/\.(csv|txt)$/i.test(file.name)) {
             selectedImportFileName = "";
             importFile.value = "";
@@ -284,6 +341,7 @@
             : "No se ha seleccionado un archivo.";
         importError.hidden = true;
         importFileReady = false;
+        // Condicional: evalua "file" para decidir si ejecuta el bloque siguiente.
         if (file) {
             file.text()
                 .then((text) => {
@@ -298,10 +356,13 @@
                 });
         }
     });
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     importPrevious?.addEventListener("click", () =>
         renderImportStep(Math.max(0, importStep - 1)),
     );
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     importNext?.addEventListener("click", () => {
+        // Condicional: evalua "importStep === 1 && (!selectedImportFileName || !importFileReady)" para decidir si ejecuta el bloque siguiente.
         if (importStep === 1 && (!selectedImportFileName || !importFileReady)) {
             importError.textContent =
                 "Selecciona un CSV válido para continuar.";
@@ -310,7 +371,9 @@
         }
         renderImportStep(Math.min(4, importStep + 1));
     });
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     importConfirm?.addEventListener("click", (event) => {
+        // Condicional: evalua "!importAcknowledgement.checked" para decidir si ejecuta el bloque siguiente.
         if (!importAcknowledgement.checked) {
             importError.textContent =
                 "Confirma que revisaste la vista previa y sus advertencias.";
@@ -322,7 +385,9 @@
     });
     document
         .querySelectorAll("[data-open-client-edit]")
+        // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
         .forEach((button) =>
+            // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
             button.addEventListener("click", () =>
                 document
                     .getElementById(button.dataset.openClientEdit)
@@ -331,29 +396,39 @@
         );
     document
         .querySelectorAll("[data-open-client-view]")
+        // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
         .forEach((button) =>
+            // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
             button.addEventListener("click", () =>
                 document
                     .getElementById(button.dataset.openClientView)
                     ?.showModal(),
             ),
         );
+    // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
     document.querySelectorAll(".clientes-dialog").forEach((dialog) => {
         dialog
             .querySelectorAll("[data-close-client-dialog]")
+            // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
             .forEach((button) =>
+                // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
                 button.addEventListener("click", () => dialog.close()),
             );
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         dialog.addEventListener("click", (event) => {
+            // Condicional: evalua "event.target === dialog" para decidir si ejecuta el bloque siguiente.
             if (event.target === dialog) {
                 dialog.close();
             }
         });
     });
+    // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
     page.querySelectorAll("[data-refresh-clients]").forEach((button) =>
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         button.addEventListener("click", () => window.location.reload()),
     );
 
+    // Condicional: evalua "page.dataset.openOnLoad === "true"" para decidir si ejecuta el bloque siguiente.
     if (page.dataset.openOnLoad === "true") {
         createDialog.showModal();
     }

@@ -1,3 +1,4 @@
+
 <section class="assistant-chat panel" id="assistantChat" data-endpoint="{{ route('assistant.ask') }}">
     <div class="assistant-chat-head">
         <div class="assistant-avatar">MD</div>
@@ -9,6 +10,7 @@
     </div>
 
     <div class="assistant-messages" id="assistantMessages" aria-live="polite">
+{{-- logica auxiliar de la vista que prepara valores para la presentacion. --}}
         @php
             $role = 'bot';
             $name = 'MD Assistant';
@@ -16,6 +18,7 @@
 <article class="assistant-message assistant-message-{{ $role }}">
     <div class="assistant-message-avatar">{{ $role === 'user' ? 'TÚ' : 'MD' }}</div>
     <div class="assistant-bubble">
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
         @if($name)<b>{{ $name }}</b>@endif
 
             <p>¡Hola! Puedo ayudarte a elegir un celular, buscar opciones por presupuesto, comparar necesidades o revisar productos disponibles. Escríbeme, por ejemplo: <em>“quiero un celular para gaming menor a S/1500”</em>.</p>
@@ -25,6 +28,7 @@
 
     </div>
 
+{{-- logica auxiliar de la vista que prepara valores para la presentacion. --}}
     @php
     $suggestions ??= [
         ['icon' => 'bi-controller', 'label' => 'Gaming < S/1500', 'prompt' => 'Quiero un celular para gaming menor a S/1500'],
@@ -35,13 +39,16 @@
 @endphp
 
 <div class="assistant-quick-actions" aria-label="Preguntas rápidas">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
     @foreach($suggestions as $suggestion)
         <button type="button" data-assistant-prompt="{{ $suggestion['prompt'] }}"><i class="bi {{ $suggestion['icon'] }}"></i> {{ $suggestion['label'] }}</button>
     @endforeach
 </div>
 
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
     <form class="assistant-composer" id="assistantForm">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
         @csrf
         <input
             class="input"

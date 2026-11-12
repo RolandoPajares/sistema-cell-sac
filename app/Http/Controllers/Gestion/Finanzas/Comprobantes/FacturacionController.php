@@ -29,6 +29,7 @@ class FacturacionController extends Controller
      */
     public function index(Request $request, ServicioAutorizacion $autorizacion): View
     {
+        // Guarda en $filtros el resultado necesario para continuar esta operacion.
         $filtros = $request->validate([
             'buscar' => ['nullable', 'string', 'max:100'],
             'estado' => ['nullable', 'string', 'max:30'],
@@ -37,10 +38,14 @@ class FacturacionController extends Controller
             'desde' => ['nullable', 'date'],
             'hasta' => ['nullable', 'date', 'after_or_equal:desde'],
         ]);
+        // Guarda en $empresaId el resultado necesario para continuar esta operacion.
         $empresaId = $autorizacion->activeCompanyId();
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($empresaId !== null, 409, 'Selecciona una empresa activa para consultar facturación.');
+        // Obtiene en $sedesId la informacion de la solicitud o del usuario actual.
         $sedesId = $autorizacion->authorizedSiteIds($request->user(), 'gestion.facturacion.consultar');
 
+        // Prepara en $consulta la consulta que obtiene o modifica los registros necesarios.
         $consulta = DB::table('documentos_electronicos as documentos')
             ->leftJoin('tipos_documento_electronico as tipos', 'tipos.codigo', '=', 'documentos.tipo_documento_id')
             ->where('documentos.empresa_id', $empresaId)
@@ -58,22 +63,30 @@ class FacturacionController extends Controller
             ->when(($filtros['periodo'] ?? null) === 'ultimos_30_dias', static fn (Builder $consulta): Builder => $consulta->where('documentos.fecha_emision', '>=', now()->subDays(30)))
             ->when(($filtros['periodo'] ?? null) === 'anio', static fn (Builder $consulta): Builder => $consulta->whereYear('documentos.fecha_emision', now()->year));
 
+        // Guarda en $cantidadDocumentos el resultado necesario para continuar esta operacion.
         $cantidadDocumentos = (clone $consulta)->count('documentos.id');
+        // Guarda en $cantidadEstados el resultado necesario para continuar esta operacion.
         $cantidadEstados = (clone $consulta)->select('documentos.estado')->distinct()->get()->count();
+        // Guarda en $cantidadTipos el resultado necesario para continuar esta operacion.
         $cantidadTipos = (clone $consulta)->select('documentos.tipo_documento_id')->distinct()->get()->count();
+        // Guarda en $importesPorMoneda el resultado necesario para continuar esta operacion.
         $importesPorMoneda = (clone $consulta)->select('documentos.moneda')
             ->selectRaw('SUM(documentos.total) AS importe_total')
             ->groupBy('documentos.moneda')->get();
+        // Guarda en $documentos el resultado necesario para continuar esta operacion.
         $documentos = (clone $consulta)->select([
             'documentos.id', 'documentos.sede_id', 'documentos.tipo_documento_id', 'tipos.nombre as tipo_nombre',
             'documentos.serie', 'documentos.correlativo', 'documentos.estado', 'documentos.moneda',
             'documentos.total', 'documentos.fecha_emision', 'documentos.receptor_historico',
         ])->orderByDesc('documentos.fecha_emision')->orderByDesc('documentos.id')->paginate(20)->withQueryString();
+        // Prepara en $estados la consulta que obtiene o modifica los registros necesarios.
         $estados = DB::table('documentos_electronicos')->where('empresa_id', $empresaId)
             ->whereIn('sede_id', $sedesId)->distinct()->orderBy('estado')->pluck('estado')->all();
+        // Guarda en $resumenEstados el resultado necesario para continuar esta operacion.
         $resumenEstados = (clone $consulta)->select('documentos.estado')
             ->selectRaw('COUNT(*) AS cantidad')->groupBy('documentos.estado')->orderBy('documentos.estado')->get();
 
+        // Guarda en $modulo el resultado necesario para continuar esta operacion.
         $modulo = require config_path('gestion/finanzas/facturacion.php');
         $modulo['mode'] = 'consult';
         $modulo['connected'] = true;
@@ -83,11 +96,14 @@ class FacturacionController extends Controller
         $modulo['record_plural'] = 'comprobantes';
         $modulo['export_route'] = 'management.billing.export';
         $modulo['export_label'] = 'Exportar comprobantes';
+        // Prepara en $tipos la consulta que obtiene o modifica los registros necesarios.
         $tipos = DB::table('tipos_documento_electronico')->where('activo', true)->orderBy('nombre')->pluck('nombre', 'codigo')->all();
         $modulo['filters'] = $filtros + ['buscar' => null, 'estado' => null, 'tipo' => null, 'periodo' => null];
         $modulo['filter_options'] = ['statuses' => $estados, 'types' => $tipos];
         $modulo['records'] = $documentos->getCollection()->map(static function (object $documento): array {
+            // Guarda en $receptor el resultado necesario para continuar esta operacion.
             $receptor = json_decode((string) $documento->receptor_historico, true);
+            // Guarda en $nombreReceptor el resultado necesario para continuar esta operacion.
             $nombreReceptor = is_array($receptor)
                 ? ($receptor['razon_social'] ?? $receptor['nombre'] ?? $receptor['nombre_completo'] ?? 'Sin nombre en el receptor histórico')
                 : 'Sin nombre en el receptor histórico';
@@ -119,14 +135,18 @@ class FacturacionController extends Controller
             ['label' => 'Tipos documentales', 'value' => $cantidadTipos, 'helper' => 'Tipos usados en MariaDB', 'icon' => 'bi-file-earmark-text', 'tone' => 'purple'],
         ];
 
+        // Guarda en $moduleKey el resultado necesario para continuar esta operacion.
         $moduleKey = (string) $modulo['key'];
         $filterOptions = $modulo['filter_options'] ?? ['types' => [], 'statuses' => []];
+        // Guarda en $filterValues el resultado necesario para continuar esta operacion.
         $filterValues = $modulo['filters'] ?? [];
+        // Guarda en $exportParameters el resultado necesario para continuar esta operacion.
         $exportParameters = array_filter(
             $filterValues,
             static fn (mixed $value): bool => $value !== null && $value !== ''
         );
 
+        // Devuelve la vista 'gestion.finanzas.comprobantes.listar' con los datos preparados por este controlador.
         return view('gestion.finanzas.comprobantes.listar', [
             'module' => $modulo,
             'moduleKey' => $moduleKey,
@@ -148,7 +168,9 @@ class FacturacionController extends Controller
         ExportadorTabular $exportador,
         RegistradorAuditoria $auditoria,
     ): Response|StreamedResponse {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
+        // Guarda en $filtros el resultado necesario para continuar esta operacion.
         $filtros = $request->validate([
             'buscar' => ['nullable', 'string', 'max:100'],
             'estado' => ['nullable', 'string', 'max:30'],
@@ -157,9 +179,13 @@ class FacturacionController extends Controller
             'desde' => ['nullable', 'date'],
             'hasta' => ['nullable', 'date', 'after_or_equal:desde'],
         ]);
+        // Guarda en $empresaId el resultado necesario para continuar esta operacion.
         $empresaId = $autorizacion->activeCompanyId();
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($empresaId !== null, 409, 'Selecciona una empresa activa para exportar facturación.');
+        // Obtiene en $sedesId la informacion de la solicitud o del usuario actual.
         $sedesId = $autorizacion->authorizedSiteIds($request->user(), 'gestion.facturacion.consultar');
+        // Prepara en $consulta la consulta que obtiene o modifica los registros necesarios.
         $consulta = DB::table('documentos_electronicos as documentos')
             ->leftJoin('tipos_documento_electronico as tipos', 'tipos.codigo', '=', 'documentos.tipo_documento_id')
             ->where('documentos.empresa_id', $empresaId)
@@ -181,8 +207,11 @@ class FacturacionController extends Controller
                 'tipos.nombre as tipo_nombre', 'documentos.estado', 'documentos.moneda', 'documentos.total',
                 'documentos.fecha_emision', 'documentos.receptor_historico',
             ])->orderBy('documentos.fecha_emision')->orderBy('documentos.id')->get();
+        // Guarda en $rows el resultado necesario para continuar esta operacion.
         $rows = $consulta->map(static function (object $documento): array {
+            // Guarda en $receptor el resultado necesario para continuar esta operacion.
             $receptor = json_decode((string) $documento->receptor_historico, true);
+            // Guarda en $nombre el resultado necesario para continuar esta operacion.
             $nombre = is_array($receptor) ? ($receptor['razon_social'] ?? $receptor['nombre'] ?? $receptor['nombre_completo'] ?? 'Sin nombre') : 'Sin nombre';
 
             return [
@@ -195,6 +224,7 @@ class FacturacionController extends Controller
                 $documento->fecha_emision,
             ];
         })->all();
+        // Guarda en $response el resultado necesario para continuar esta operacion.
         $response = $exportador->download($format, 'comprobantes-electronicos',
             ['Comprobante', 'Receptor', 'Tipo', 'Moneda', 'Total', 'Estado', 'Emitido'],
             $rows,

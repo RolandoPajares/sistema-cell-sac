@@ -21,8 +21,10 @@ class TransferenciaExistencia extends Model
     /** @use HasFactory<TransferenciaExistenciaFactory> */
     use HasFactory;
 
+    // Usa la tabla 'transferencias_existencias' como origen de los registros de este modelo.
     protected $table = 'transferencias_existencias';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = [
         'empresa_id', 'sede_origen_id', 'almacen_origen_id', 'sede_destino_id', 'almacen_destino_id',
         'codigo', 'estado', 'solicitado_por_usuario_id', 'aprobado_por_usuario_id', 'enviado_en', 'recibido_en', 'creado_en',

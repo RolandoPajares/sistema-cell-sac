@@ -18,6 +18,7 @@ class AnularOperacionFinancieraRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return $this->user() instanceof User
@@ -34,8 +35,11 @@ class AnularOperacionFinancieraRequest extends FormRequest
     public function messages(): array
     {
         return [
+            // Valida el campo 'motivo.required' con las reglas definidas en la instruccion siguiente.
             'motivo.required' => 'Explica el motivo de la anulación.',
+            // Valida el campo 'motivo.min' con las reglas definidas en la instruccion siguiente.
             'motivo.min' => 'El motivo debe tener al menos 10 caracteres.',
+            // Valida el campo 'motivo.max' con las reglas definidas en la instruccion siguiente.
             'motivo.max' => 'El motivo no puede superar 500 caracteres.',
         ];
     }

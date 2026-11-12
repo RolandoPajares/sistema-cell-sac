@@ -1,8 +1,12 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Detalle de envío '.$envio->codigo)
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-inventario-logistica')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section class="tc-il">
     <header class="tc-il__header">
@@ -34,6 +38,7 @@
         </article>
         <article class="tc-il__card">
             <div class="tc-il__card-heading"><h2><i class="bi bi-clock-history" aria-hidden="true"></i> Trazabilidad</h2><small>{{ $envio->eventos->count() }} eventos</small></div>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @forelse ($envio->eventos as $evento)
                 <div class="tc-il__card-heading"><span>{{ $evento->estado }}</span><strong>{{ $evento->ocurrido_en?->format('d/m/Y H:i') }}</strong><small>{{ $evento->descripcion ?: 'Sin descripción' }}</small></div>
             @empty

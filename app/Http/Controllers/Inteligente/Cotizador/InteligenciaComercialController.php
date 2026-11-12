@@ -30,9 +30,12 @@ class InteligenciaComercialController extends Controller
      */
     public function optimizer(OptimizadorInteligenteRequest $request): View
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $budget = (float) ($request->validated('presupuesto') ?? 0);
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $goal = (string) ($request->validated('objetivo') ?? 'variety');
 
+        // Devuelve la vista 'inteligente.cotizador.formulario' con los datos preparados por este controlador.
         return view('inteligente.cotizador.formulario', [
             'budget' => $budget,
             'goal' => $goal,
@@ -47,6 +50,7 @@ class InteligenciaComercialController extends Controller
      */
     public function wholesale(): View
     {
+        // Devuelve la vista 'inteligente.cotizador.resumen' con los datos preparados por este controlador.
         return view('inteligente.cotizador.resumen', [
             'products' => $this->servicioInteligencia->productosMayoristas(),
             'brands' => ['SAMSUNG', 'Apple', 'oppo', 'XIAOMI', 'HONOR', 'JBL', 'Beats'],

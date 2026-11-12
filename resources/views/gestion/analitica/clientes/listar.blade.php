@@ -2,9 +2,13 @@
 {{-- Bloque principal: ofrece el acceso al reporte analítico de clientes. --}}
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Analítica de clientes')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-analitica-clientes')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 {{-- Vista de compatibilidad para conservar la plantilla heredada del módulo. --}}
 <section class="admin-analysis-module admin-analysis-module--analitica-clientes" aria-labelledby="analitica-clientes-title">

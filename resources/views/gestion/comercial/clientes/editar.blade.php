@@ -1,5 +1,9 @@
+
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
 <form method="post" action="{{ route('management.customers.update', $customer) }}" class="form-card cliente-registro-form" data-client-form data-person-type="{{ old('tipo_documento', $customer->tipo_documento) === 'ruc' ? 'juridica' : 'natural' }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
     @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
     @method('PUT')
     <header class="cliente-registro-heading"><span class="cliente-registro-icon"><i class="bi bi-people" aria-hidden="true"></i></span><div><h2>Editar cliente</h2><p>Actualiza la información comercial y de contacto.</p></div><button type="button" class="cliente-registro-close" data-close-client-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
     <fieldset class="cliente-person-switcher"><legend><i class="bi bi-people" aria-hidden="true"></i> Tipo de persona</legend><div class="cliente-person-options" role="group" aria-label="Tipo de persona"><button type="button" class="cliente-person-option" data-client-person="natural" aria-pressed="false"><i class="bi bi-person" aria-hidden="true"></i> Persona natural <i class="bi bi-check-circle-fill cliente-person-check" aria-hidden="true"></i></button><button type="button" class="cliente-person-option" data-client-person="juridica" aria-pressed="false"><i class="bi bi-building" aria-hidden="true"></i> Persona jurídica <i class="bi bi-check-circle-fill cliente-person-check" aria-hidden="true"></i></button></div></fieldset>

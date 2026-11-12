@@ -1,4 +1,7 @@
+
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
 <form method="post" action="{{ route('management.customers.store') }}" class="form-card cliente-registro-form" data-client-form data-person-type="{{ old('tipo_documento') === 'ruc' ? 'juridica' : 'natural' }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
     @csrf
     <header class="cliente-registro-heading">
         <span class="cliente-registro-icon"><i class="bi bi-people" aria-hidden="true"></i></span>

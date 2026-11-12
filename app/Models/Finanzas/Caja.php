@@ -19,8 +19,10 @@ class Caja extends Model
     /** @use HasFactory<CajaFactory> */
     use HasFactory;
 
+    // Usa la tabla 'cajas' como origen de los registros de este modelo.
     protected $table = 'cajas';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['sede_id', 'codigo', 'nombre', 'activa', 'creado_en'];
 
     public $timestamps = false;

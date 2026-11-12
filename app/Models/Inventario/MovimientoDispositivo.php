@@ -12,8 +12,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 final class MovimientoDispositivo extends Model
 {
+    // Usa la tabla 'movimientos_dispositivos' como origen de los registros de este modelo.
     protected $table = 'movimientos_dispositivos';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = [
         'dispositivo_id', 'movimiento_inventario_id', 'estado_anterior', 'estado_nuevo', 'creado_en',
     ];

@@ -1,8 +1,12 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Módulos y pantallas')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-seguridad-rbac')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 {{-- Catálogo de módulos y pantallas registradas en RBAC. --}}
 <section class="tc-rbac-page" data-module-page>
@@ -12,9 +16,11 @@
             <p>Administra únicamente funcionalidades y rutas que ya existen en Laravel.</p>
         </div><a class="tc-rbac-primary" href="{{ route('management.menus') }}"><i class="bi bi-list-nested" aria-hidden="true"></i> Configurar menús</a>
     </header>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @unless($ready)<div class="tc-rbac-alert" role="alert">El catálogo dinámico no está disponible.</div>@else
     <nav class="tc-rbac-tabs" aria-label="Administración de seguridad"><a href="{{ route('management.users') }}">Gestión de usuarios</a><a href="{{ route('management.roles_permissions') }}">Roles y permisos</a><a href="{{ route('management.permissions_matrix') }}">Matriz de privilegios</a><a href="{{ route('management.user_assignments') }}">Asignaciones globales y por sede</a><a href="{{ route('management.menus') }}">Menús y submenús dinámicos</a><a class="is-active" href="{{ route('management.modules') }}">Módulos y pantallas</a></nav>
     <section class="tc-rbac-toolbar"><label class="tc-rbac-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar</span><input type="search" data-module-filter placeholder="Buscar módulo o pantalla"></label><span class="tc-rbac-summary"><strong>{{ $modules->count() }}</strong> módulos · <strong>{{ $modules->sum(fn($module) => $module->screens->count()) }}</strong> pantallas</span></section>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
     @foreach($modules as $module)
     <section class="tc-rbac-card tc-rbac-module-card" data-module-row data-search="{{ strtolower($module->nombre.' '.$module->codigo.' '.$module->screens->pluck('nombre')->join(' ')) }}">
         <header class="tc-rbac-menu-header">
@@ -43,6 +49,7 @@
             </table>
         </div><button type="button" class="tc-rbac-action tc-rbac-action--primary" data-open-dialog="modulo-{{ $module->id }}">Editar módulo</button>
     </section>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
     @foreach($module->screens as $screen)<dialog class="tc-rbac-dialog" id="pantalla-{{ $screen->id }}" aria-labelledby="pantalla-title-{{ $screen->id }}">
         <div class="tc-rbac-dialog-card">
             <header>
@@ -67,6 +74,7 @@
                         <dd>{{ $module->nombre }}</dd>
                     </div>
                 </dl>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                 <form method="post" action="{{ route('management.modules.screens.update', $screen->id) }}">@csrf @method('PATCH')<label>Nombre visible<input type="text" name="nombre" value="{{ $screen->nombre }}" maxlength="160" required></label><label>Icono Bootstrap<input type="text" name="icono" value="{{ $screen->icono }}" maxlength="100"></label><input type="hidden" name="habilitada" value="{{ $screen->habilitada ? 1 : 0 }}">@if($screen->habilitada && $screen->ruta_funcional)<button class="tc-rbac-action tc-rbac-action--danger" type="submit" name="habilitada" value="0"><i class="bi bi-pause-circle"></i> Desactivar pantalla</button>@elseif($screen->ruta_funcional)<button class="tc-rbac-primary" type="submit" name="habilitada" value="1"><i class="bi bi-play-circle"></i> Activar pantalla</button>@else<p class="tc-rbac-alert">No se puede activar: esta pantalla no tiene una ruta funcional registrada.</p>@endif<footer><button type="button" class="tc-rbac-secondary" data-close-dialog>Cerrar</button><button type="submit" class="tc-rbac-primary">Guardar datos</button></footer>
                 </form>
             </div>
@@ -77,6 +85,7 @@
             <header>
                 <h2>Editar módulo</h2><button type="button" class="tc-rbac-dialog-close" data-close-dialog aria-label="Cerrar">×</button>
             </header>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form method="post" action="{{ route('management.modules.update', $module->id) }}" class="tc-rbac-dialog-body">@csrf @method('PATCH')<label>Nombre visible<input type="text" name="nombre" value="{{ $module->nombre }}" maxlength="140" required></label><label>Descripción<textarea name="descripcion" maxlength="255">{{ $module->descripcion }}</textarea></label><label>Icono Bootstrap<input type="text" name="icono" value="{{ $module->icono }}" maxlength="100"></label><label>Orden<input type="number" name="orden" value="{{ $module->orden }}" min="0" max="10000" required></label><input type="hidden" name="habilitado" value="0"><label><input type="checkbox" name="habilitado" value="1" @checked($module->habilitado)> Módulo habilitado</label>
                 <footer><button type="button" class="tc-rbac-secondary" data-close-dialog>Cancelar</button><button class="tc-rbac-primary" type="submit">Guardar cambios</button></footer>
             </form>
@@ -87,6 +96,7 @@
 </section>
 @endsection
 
+{{-- bloque de estilos o scripts para el lugar reservado por la plantilla. --}}
 @push('scripts')
 @vite('resources/js/gestion/administracion/seguridad/roles-permisos/modulos.js')
 @endpush

@@ -14,8 +14,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Compra extends Model
 {
+    // Usa la tabla 'compras' como origen de los registros de este modelo.
     protected $table = 'compras';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['proveedor_id', 'creado_por_usuario_id', 'total', 'estado', 'fecha_compra', 'activo', 'creado_en', 'actualizado_en', 'empresa_id', 'sede_id', 'almacen_id', 'numero_referencia', 'moneda'];
 
     public $timestamps = false;

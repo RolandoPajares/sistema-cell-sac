@@ -17,6 +17,7 @@ class RecomendacionRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return true;
@@ -27,11 +28,15 @@ class RecomendacionRequest extends FormRequest
      *
      * @return array Resultado de la operación.
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         return [
+            // Valida el campo 'presupuesto' con las reglas definidas en la instruccion siguiente.
             'presupuesto' => ['nullable', 'numeric', 'min:0'],
+            // Valida el campo 'uso' con las reglas definidas en la instruccion siguiente.
             'uso' => ['nullable', Rule::in(['gaming', 'camera', 'study', 'work', 'social'])],
+            // Valida el campo 'prioridad' con las reglas definidas en la instruccion siguiente.
             'prioridad' => ['nullable', Rule::in(['rendimiento', 'camara', 'bateria', 'valor'])],
         ];
     }

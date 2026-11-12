@@ -34,8 +34,11 @@ class CuponController extends Controller
      */
     public function index(Request $request, ServicioCupones $coupons, ServicioAutorizacion $autorizacion): View
     {
+        // Guarda en $filters el resultado necesario para continuar esta operacion.
         $filters = $this->filtros($request);
+        // Guarda en $empresaId el resultado necesario para continuar esta operacion.
         $empresaId = $autorizacion->activeCompanyId();
+        // Prepara en $couponList la consulta que obtiene o modifica los registros necesarios.
         $couponList = $coupons->query($filters, $empresaId)->orderByDesc('id')->paginate(10)->withQueryString();
         $couponList->setCollection($couponList->getCollection()->map(function (Cupon $coupon) use ($coupons): Cupon {
             $coupon->setAttribute('estado_vigencia', $coupons->status($coupon));
@@ -43,6 +46,7 @@ class CuponController extends Controller
             return $coupon;
         }));
 
+        // Devuelve la vista 'gestion.ecommerce-marketing.promociones-cupones.listar' con los datos preparados por este controlador.
         return view('gestion.ecommerce-marketing.promociones-cupones.listar', [
             'coupons' => $couponList,
             'filters' => $filters,
@@ -66,8 +70,10 @@ class CuponController extends Controller
      */
     public function store(GuardarCuponRequest $request, ServicioCupones $coupons): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $coupons->registrar($request->validated(), $request->user(), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Cupón registrado.');
     }
 
@@ -81,8 +87,10 @@ class CuponController extends Controller
      */
     public function update(ActualizarCuponRequest $request, Cupon $coupon, ServicioCupones $coupons): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $coupons->update($coupon, $request->validated(), $request->user(), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Cupón actualizado.');
     }
 
@@ -98,6 +106,7 @@ class CuponController extends Controller
     {
         $coupons->deactivate($coupon, $request->user(), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Cupón cancelado. Ya no estará disponible para nuevos canjes.');
     }
 
@@ -113,12 +122,18 @@ class CuponController extends Controller
      */
     public function export(Request $request, ServicioCupones $coupons, ServicioAutorizacion $autorizacion, ExportadorTabular $exporter, RegistradorAuditoria $audit): Response|StreamedResponse
     {
+        // Guarda en $format el resultado necesario para continuar esta operacion.
         $format = (string) ($request->route('format') ?: 'csv');
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
+        // Guarda en $filters el resultado necesario para continuar esta operacion.
         $filters = $this->filtros($request);
+        // Prepara en $records la consulta que obtiene o modifica los registros necesarios.
         $records = $coupons->query($filters, $autorizacion->activeCompanyId())->orderBy('id')->limit(5000)->get();
         $rows = $records->map(fn (Cupon $coupon): array => [
+            // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
             $this->valorCsvSeguro($coupon->codigo),
+            // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
             $this->valorCsvSeguro($coupon->tipo_descuento),
             $coupon->valor,
             $coupon->minimo_compra,
@@ -128,6 +143,7 @@ class CuponController extends Controller
             $coupon->finaliza_en?->toDateTimeString(),
             $coupons->status($coupon),
         ])->all();
+        // Guarda en $response el resultado necesario para continuar esta operacion.
         $response = $exporter->download($format, 'cupones-'.now()->format('Ymd'),
             ['Código', 'Tipo de descuento', 'Valor', 'Compra mínima', 'Usos', 'Límite de usos', 'Vigente desde', 'Vigente hasta', 'Estado'],
             $rows,
@@ -150,12 +166,14 @@ class CuponController extends Controller
     /** @return array{buscar:?string,tipo:?string,estado:?string,vigencia:?string} */
     private function filtros(Request $request): array
     {
+        // Guarda en $validated el resultado necesario para continuar esta operacion.
         $validated = $request->validate([
             'buscar' => ['nullable', 'string', 'max:100'],
             'tipo' => ['nullable', 'in:porcentaje,fijo'],
             'estado' => ['nullable', 'in:Activo,Programado,Finalizado'],
             'vigencia' => ['nullable', 'in:este_mes,proximos_30_dias,historico'],
         ]);
+        // Guarda en $search el resultado necesario para continuar esta operacion.
         $search = trim((string) ($validated['buscar'] ?? ''));
 
         return [

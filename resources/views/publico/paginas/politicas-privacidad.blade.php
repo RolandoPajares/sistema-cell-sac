@@ -1,8 +1,12 @@
 @extends('layouts.tienda.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Políticas de privacidad | MD Technology Cell')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-politicas-privacidad')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
     <section class="container content-page">
         <span class="eyebrow">INFORMACIÓN</span>

@@ -12,8 +12,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 final class EventoEnvioPedido extends Model
 {
+    // Usa la tabla 'eventos_envios_pedidos' como origen de los registros de este modelo.
     protected $table = 'eventos_envios_pedidos';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = [
         'envio_pedido_id', 'estado', 'descripcion', 'fuente', 'identificador_externo',
         'ocurrido_en', 'registrado_en', 'datos_seguros',

@@ -1,166 +1,317 @@
+/* Define los estilos visuales del modulo o componente 'inventario-logistica'. */
+
+/* Aplica estos estilos al bloque '.modulo-inventario-logistica .admin-main'. */
 .modulo-inventario-logistica .admin-main { max-width: none; padding: 18px 22px 34px; }
+/* Aplica estos estilos al bloque '.tc-il'. */
 .tc-il { --il-blue: #0767e9; --il-ink: #071d54; --il-line: #d4e1f3; color: var(--il-ink); font-size: .8rem; }
+/* Aplica estos estilos al bloque '.tc-il *, .tc-il *::before, .tc-il *::after'. */
 .tc-il *, .tc-il *::before, .tc-il *::after { box-sizing: border-box; }
+/* Aplica estos estilos al bloque '.tc-il__header'. */
 .tc-il__header { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 14px; }
+/* Aplica estos estilos al bloque '.tc-il__breadcrumb'. */
 .tc-il__breadcrumb { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 18px; color: #174789; background: #e9f3ff; font-size: .72rem; font-weight: 800; }
+/* Aplica estos estilos al bloque '.tc-il__breadcrumb i'. */
 .tc-il__breadcrumb i { color: var(--il-blue); }
+/* Aplica estos estilos al bloque '.tc-il__header h1'. */
 .tc-il__header h1 { display: flex; align-items: center; gap: 14px; margin: 8px 0 3px; color: #071c4e; font-size: clamp(1.7rem, 2.1vw, 2.25rem); font-weight: 850; letter-spacing: -.04em; line-height: 1.1; }
+/* Aplica estos estilos al bloque '.tc-il__header h1 i'. */
 .tc-il__header h1 i { color: #0a4fb9; }
+/* Aplica estos estilos al bloque '.tc-il__header p'. */
 .tc-il__header p { margin: 0; color: #526a94; font-size: .87rem; }
+/* Aplica estos estilos al bloque '.tc-il__header-actions'. */
 .tc-il__header-actions { display: flex; flex-wrap: wrap; gap: 9px; }
+/* Aplica estos estilos al bloque '.tc-il__button'. */
 .tc-il__button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 39px; padding: 0 15px; border: 1px solid #9abaf3; border-radius: 8px; color: #0747af; background: linear-gradient(#fff, #f7faff); font: inherit; font-weight: 800; white-space: nowrap; box-shadow: 0 3px 9px #1d5daf17; }
+/* Aplica estos estilos al bloque '.tc-il__button--primary'. */
 .tc-il__button--primary { border-color: #0755c8; color: #fff; background: linear-gradient(160deg, #0b7cfa, #073db6); }
+/* Aplica estos estilos al bloque '.tc-il__button:disabled, .tc-il__row-actions button:disabled'. */
 .tc-il__button:disabled, .tc-il__row-actions button:disabled { cursor: not-allowed; }
+/* Aplica estos estilos al bloque '.tc-il__notice'. */
 .tc-il__notice { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; width: fit-content; max-width: 100%; margin: 0 0 12px; padding: 7px 11px; border: 1px solid #b9d5f7; border-radius: 8px; color: #12529c; background: #ebf5ff; font-size: .71rem; }
+/* Aplica estos estilos al bloque '.tc-il__notice a'. */
 .tc-il__notice a { margin-left: 5px; color: #064fb9; font-weight: 800; text-decoration: none; }
 .tc-il__notice a:hover { text-decoration: underline; }
+/* Aplica estos estilos al bloque '.tc-il__metrics'. */
 .tc-il__metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; margin-bottom: 13px; }
+/* Aplica estos estilos al bloque '.tc-il__metric'. */
 .tc-il__metric { display: flex; align-items: center; gap: 12px; min-width: 0; min-height: 85px; padding: 12px 14px; border: 1px solid #d7e6f8; border-radius: 13px; background: linear-gradient(125deg, #fff, #edf6ff); box-shadow: 0 4px 12px #1d5ba814; }
+/* Aplica estos estilos al bloque '.tc-il__metric--verde'. */
 .tc-il__metric--verde { background: linear-gradient(125deg, #fff, #ebfbf0); }
+/* Aplica estos estilos al bloque '.tc-il__metric--rojo'. */
 .tc-il__metric--rojo { background: linear-gradient(125deg, #fff, #fff0f2); }
+/* Aplica estos estilos al bloque '.tc-il__metric--ambar'. */
 .tc-il__metric--ambar { background: linear-gradient(125deg, #fff, #fff7e4); }
+/* Aplica estos estilos al bloque '.tc-il__metric--violeta'. */
 .tc-il__metric--violeta { background: linear-gradient(125deg, #fff, #f2efff); }
+/* Aplica estos estilos al bloque '.tc-il__metric-icon'. */
 .tc-il__metric-icon { display: grid; flex: 0 0 46px; width: 46px; height: 46px; place-items: center; border-radius: 12px; color: #086af0; background: #e2f0ff; font-size: 1.6rem; }
+/* Aplica estos estilos al bloque '.tc-il__metric--verde .tc-il__metric-icon'. */
 .tc-il__metric--verde .tc-il__metric-icon { color: #08a64c; background: #def9e8; }
+/* Aplica estos estilos al bloque '.tc-il__metric--rojo .tc-il__metric-icon'. */
 .tc-il__metric--rojo .tc-il__metric-icon { color: #ed2442; background: #ffe4e8; }
+/* Aplica estos estilos al bloque '.tc-il__metric--ambar .tc-il__metric-icon'. */
 .tc-il__metric--ambar .tc-il__metric-icon { color: #e59a06; background: #fff0cf; }
+/* Aplica estos estilos al bloque '.tc-il__metric--violeta .tc-il__metric-icon'. */
 .tc-il__metric--violeta .tc-il__metric-icon { color: #6835eb; background: #eae4ff; }
+/* Aplica estos estilos al bloque '.tc-il__metric div'. */
 .tc-il__metric div { display: grid; min-width: 0; gap: 1px; }
+/* Aplica estos estilos al bloque '.tc-il__metric small'. */
 .tc-il__metric small { overflow: hidden; font-size: .7rem; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+/* Aplica estos estilos al bloque '.tc-il__metric strong'. */
 .tc-il__metric strong { overflow: hidden; font-size: clamp(1.1rem, 1.45vw, 1.65rem); font-weight: 850; line-height: 1.12; text-overflow: ellipsis; white-space: nowrap; }
+/* Aplica estos estilos al bloque '.tc-il__metric div > span'. */
 .tc-il__metric div > span { color: #5d7197; font-size: .67rem; }
+/* Aplica estos estilos al bloque '.tc-il__metric > b'. */
 .tc-il__metric > b { align-self: flex-end; margin-left: auto; color: #0a9b40; font-size: .68rem; white-space: nowrap; }
+/* Aplica estos estilos al bloque '.tc-il__filters, .tc-il__card'. */
 .tc-il__filters, .tc-il__card { min-width: 0; border: 1px solid var(--il-line); border-radius: 13px; background: linear-gradient(135deg, #fff, #f8fbff); box-shadow: 0 5px 15px #1f58a314; }
+/* Aplica estos estilos al bloque '.tc-il__filters'. */
 .tc-il__filters { margin-bottom: 13px; padding: 10px 12px; }
+/* Aplica estos estilos al bloque '.tc-il__search'. */
 .tc-il__search { display: flex; align-items: center; gap: 9px; min-height: 35px; padding: 0 11px; border: 1px solid #c7d7ed; border-radius: 7px; color: #546d96; background: #fff; }
+/* Aplica estos estilos al bloque '.tc-il__search input'. */
 .tc-il__search input { width: 100%; min-width: 0; border: 0; outline: 0; color: var(--il-ink); background: transparent; font: inherit; }
+/* Aplica estos estilos al bloque '.tc-il__search input::placeholder'. */
 .tc-il__search input::placeholder { color: #6c80a3; }
+/* Aplica estos estilos al bloque '.tc-il__filter-fields'. */
 .tc-il__filter-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); align-items: end; gap: 10px; margin-top: 8px; }
+/* Aplica estos estilos al bloque '.tc-il__filter-fields label'. */
 .tc-il__filter-fields label { display: grid; min-width: 0; gap: 4px; font-size: .69rem; font-weight: 800; }
+/* Aplica estos estilos al bloque '.tc-il__filter-fields select, .tc-il__form-grid select, .tc-il__form-grid input, .tc-il__form-grid textarea'. */
 .tc-il__filter-fields select, .tc-il__form-grid select, .tc-il__form-grid input, .tc-il__form-grid textarea { width: 100%; min-height: 34px; padding: 0 9px; border: 1px solid #cad9ed; border-radius: 7px; color: #173c77; background: #fbfdff; font: inherit; }
+/* Aplica estos estilos al bloque '.tc-il__main-grid'. */
 .tc-il__main-grid { display: grid; grid-template-columns: minmax(0, 2.15fr) minmax(280px, .8fr); align-items: start; gap: 13px; margin-bottom: 13px; }
+/* Aplica estos estilos al bloque '.tc-il__card-heading'. */
 .tc-il__card-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 11px 13px; }
+/* Aplica estos estilos al bloque '.tc-il__card-heading h2, .tc-il__quick-form h2'. */
 .tc-il__card-heading h2, .tc-il__quick-form h2 { display: flex; align-items: center; gap: 9px; margin: 0; color: #082c82; font-size: 1rem; font-weight: 850; }
+/* Aplica estos estilos al bloque '.tc-il__card-heading h2 i, .tc-il__quick-form h2 i'. */
 .tc-il__card-heading h2 i, .tc-il__quick-form h2 i { color: #0669ef; font-size: 1.1rem; }
+/* Aplica estos estilos al bloque '.tc-il__card-heading small'. */
 .tc-il__card-heading small { color: #5b7197; font-size: .67rem; white-space: nowrap; }
+/* Aplica estos estilos al bloque '.tc-il__table-card'. */
 .tc-il__table-card { overflow: hidden; }
+/* Aplica estos estilos al bloque '.tc-il__table-wrap'. */
 .tc-il__table-wrap { overflow-x: auto; }
+/* Aplica estos estilos al bloque '.tc-il__table-wrap table'. */
 .tc-il__table-wrap table { width: 100%; border-collapse: collapse; font-size: .68rem; white-space: nowrap; }
+/* Aplica estos estilos al bloque '.tc-il__table-wrap thead'. */
 .tc-il__table-wrap thead { color: #112d66; background: #edf4ff; }
+/* Aplica estos estilos al bloque '.tc-il__table-wrap th, .tc-il__table-wrap td'. */
 .tc-il__table-wrap th, .tc-il__table-wrap td { padding: 8px 7px; border-bottom: 1px solid #e1eaf6; text-align: left; }
 .tc-il__table-wrap tbody tr:nth-child(even) { background: #f8fbff; }
 .tc-il__table-wrap tbody td:first-child { color: #0757c6; font-weight: 800; }
+/* Aplica estos estilos al bloque '.tc-il__table-wrap tbody tr[hidden], .tc-il__empty[hidden]'. */
 .tc-il__table-wrap tbody tr[hidden], .tc-il__empty[hidden] { display: none; }
+/* Aplica estos estilos al bloque '.tc-il__pill'. */
 .tc-il__pill { display: inline-flex; padding: 4px 9px; border-radius: 15px; color: #075ad1; background: #ddecff; font-size: .64rem; font-weight: 800; }
+/* Aplica estos estilos al bloque '.tc-il__pill--verde'. */
 .tc-il__pill--verde { color: #078a46; background: #d9f7e5; }
+/* Aplica estos estilos al bloque '.tc-il__pill--rojo'. */
 .tc-il__pill--rojo { color: #d92742; background: #ffe2e6; }
+/* Aplica estos estilos al bloque '.tc-il__pill--ambar'. */
 .tc-il__pill--ambar { color: #b87900; background: #fff1cb; }
+/* Aplica estos estilos al bloque '.tc-il__row-actions'. */
 .tc-il__row-actions { display: flex; gap: 4px; }
+/* Aplica estos estilos al bloque '.tc-il__row-actions button'. */
 .tc-il__row-actions button { width: 25px; height: 25px; border: 1px solid #cfddf2; border-radius: 7px; color: #0758cc; background: #f5faff; }
+/* Aplica estos estilos al bloque '.tc-il__empty'. */
 .tc-il__empty { margin: 0; padding: 16px; color: #547099; text-align: center; }
+/* Aplica estos estilos al bloque '.tc-il__quick-form'. */
 .tc-il__quick-form { padding: 11px 13px 13px; }
+/* Aplica estos estilos al bloque '.tc-il__quick-form > p'. */
 .tc-il__quick-form > p { margin: 5px 0 12px; color: #617698; font-size: .68rem; }
+/* Aplica estos estilos al bloque '.tc-il__form-grid'. */
 .tc-il__form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+/* Aplica estos estilos al bloque '.tc-il__form-grid label'. */
 .tc-il__form-grid label { display: grid; min-width: 0; gap: 4px; color: #092a65; font-size: .68rem; font-weight: 800; }
+/* Aplica estos estilos al bloque '.tc-il__form-grid label > span'. */
 .tc-il__form-grid label > span { color: #e22740; }
+/* Aplica estos estilos al bloque '.tc-il__form-grid .tc-il__form-full'. */
 .tc-il__form-grid .tc-il__form-full { grid-column: 1 / -1; }
+/* Aplica estos estilos al bloque '.tc-il__form-grid textarea'. */
 .tc-il__form-grid textarea { min-height: 58px; padding-top: 8px; resize: none; }
 .tc-il__form-grid :disabled { opacity: 1; color: #7083a0; cursor: not-allowed; }
+/* Aplica estos estilos al bloque '.tc-il__submit'. */
 .tc-il__submit { width: 100%; margin-top: 13px; }
+/* Aplica estos estilos al bloque '.tc-il__bottom-grid'. */
 .tc-il__bottom-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; }
+/* Aplica estos estilos al bloque '.tc-il__bottom-grid > .tc-il__card'. */
 .tc-il__bottom-grid > .tc-il__card { min-height: 198px; padding-bottom: 12px; }
+/* Aplica estos estilos al bloque '.tc-il__donut-layout'. */
 .tc-il__donut-layout { display: flex; align-items: center; gap: 16px; padding: 5px 13px; }
+/* Aplica estos estilos al bloque '.tc-il__donut'. */
 .tc-il__donut { display: grid; flex: 0 0 128px; width: 128px; height: 128px; place-items: center; border-radius: 50%; background: var(--tc-il-donut); }
+/* Aplica estos estilos al bloque '.tc-il__donut > span'. */
 .tc-il__donut > span { display: grid; align-content: center; width: 90px; height: 90px; border-radius: 50%; background: #fff; text-align: center; }
+/* Aplica estos estilos al bloque '.tc-il__donut strong'. */
 .tc-il__donut strong { font-size: 1.15rem; }
+/* Aplica estos estilos al bloque '.tc-il__donut small'. */
 .tc-il__donut small { color: #536e9a; font-size: .68rem; }
+/* Aplica estos estilos al bloque '.tc-il__legend'. */
 .tc-il__legend { flex: 1; min-width: 0; margin: 0; padding: 0; list-style: none; }
+/* Aplica estos estilos al bloque '.tc-il__legend li'. */
 .tc-il__legend li { display: flex; align-items: center; gap: 6px; padding: 6px 0; border-bottom: 1px solid #e6eef8; font-size: .67rem; }
+/* Aplica estos estilos al bloque '.tc-il__legend li i'. */
 .tc-il__legend li i { width: 8px; height: 8px; border-radius: 50%; background: #1482f7; }
 .tc-il__legend li:nth-child(2) i { background: #2ac76a; }
 .tc-il__legend li:nth-child(3) i { background: #ffbf24; }
 .tc-il__legend li:nth-child(4) i { background: #f25769; }
+/* Aplica estos estilos al bloque '.tc-il__legend li span'. */
 .tc-il__legend li span { flex: 1; }
+/* Aplica estos estilos al bloque '.tc-il__columns'. */
 .tc-il__columns { display: flex; align-items: end; justify-content: space-around; gap: 12px; height: 146px; margin: 0 15px; padding-top: 10px; border-bottom: 1px solid #bdcde6; }
+/* Aplica estos estilos al bloque '.tc-il__columns > div'. */
 .tc-il__columns > div { display: flex; flex: 1; height: 100%; min-width: 0; flex-direction: column; align-items: center; justify-content: end; gap: 3px; text-align: center; }
+/* Aplica estos estilos al bloque '.tc-il__columns strong'. */
 .tc-il__columns strong { font-size: .72rem; }
+/* Aplica estos estilos al bloque '.tc-il__columns i'. */
 .tc-il__columns i { display: block; width: 100%; max-width: 56px; min-height: 4px; border-radius: 5px 5px 0 0; background: linear-gradient(#38a1ff, #0061e8); }
 .tc-il__columns > div:nth-child(2) i { background: linear-gradient(#6fbaff, #3991ed); }
 .tc-il__columns > div:nth-child(3) i { background: linear-gradient(#5ee491, #16b35a); }
 .tc-il__columns > div:nth-child(4) i { background: linear-gradient(#ffdb62, #ffba17); }
+/* Aplica estos estilos al bloque '.tc-il__columns small'. */
 .tc-il__columns small { min-height: 25px; color: #38547f; font-size: .62rem; }
+/* Aplica estos estilos al bloque '.tc-il__bars'. */
 .tc-il__bars { display: grid; gap: 10px; padding: 10px 15px 6px; }
+/* Aplica estos estilos al bloque '.tc-il__bars > div'. */
 .tc-il__bars > div { display: grid; grid-template-columns: minmax(72px, .8fr) minmax(40px, 1fr) 26px; align-items: center; gap: 8px; font-size: .67rem; }
+/* Aplica estos estilos al bloque '.tc-il__bars i'. */
 .tc-il__bars i { height: 10px; overflow: hidden; border-radius: 10px; background: #e6eef7; }
+/* Aplica estos estilos al bloque '.tc-il__bars i b'. */
 .tc-il__bars i b { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #4faeff, #0768eb); }
+/* Aplica estos estilos al bloque '.tc-il__ranking'. */
 .tc-il__ranking { padding: 3px 13px; }
+/* Aplica estos estilos al bloque '.tc-il__ranking > div'. */
 .tc-il__ranking > div { display: flex; align-items: center; gap: 9px; padding: 7px 0; border-bottom: 1px solid #e3ebf6; font-size: .68rem; }
+/* Aplica estos estilos al bloque '.tc-il__ranking b'. */
 .tc-il__ranking b { display: grid; width: 20px; height: 20px; place-items: center; border-radius: 50%; color: #0658cb; background: #dcecff; }
+/* Aplica estos estilos al bloque '.tc-il__ranking span'. */
 .tc-il__ranking span { flex: 1; }
 @media (max-width: 800px) { .tc-il__metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tc-il__main-grid { grid-template-columns: minmax(0, 1fr); } .tc-il__bottom-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 760px) { .modulo-inventario-logistica .admin-main { padding: 15px 11px 26px; } .tc-il__header { align-items: start; flex-direction: column; } .tc-il__header-actions { width: 100%; } .tc-il__metrics, .tc-il__bottom-grid { grid-template-columns: minmax(0, 1fr); } .tc-il__filter-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tc-il__filter-fields .tc-il__button { grid-column: 1 / -1; } .tc-il__card-heading { flex-wrap: wrap; } }
 
+/* Aplica estos estilos al bloque '.tc-il [hidden]'. */
 .tc-il [hidden] { display: none !important; }
+/* Aplica estos estilos al bloque '.tc-il__button, .tc-il__row-actions button'. */
 .tc-il__button, .tc-il__row-actions button { cursor: pointer; }
+/* Aplica estos estilos al bloque '.tc-il__button:disabled, .tc-il__row-actions button:disabled'. */
 .tc-il__button:disabled, .tc-il__row-actions button:disabled { cursor: not-allowed; opacity: .62; }
+/* Aplica estos estilos al bloque '.tc-il__dialog'. */
 .tc-il__dialog { width: min(100% - 28px, 760px); max-height: min(92vh, 900px); padding: 0; overflow: auto; border: 0; border-radius: 15px; color: #071d54; background: transparent; box-shadow: 0 24px 76px #071d5452; }
+/* Aplica estos estilos al bloque '.tc-il__dialog::backdrop'. */
 .tc-il__dialog::backdrop { background: #061a3db8; backdrop-filter: blur(3px); }
+/* Aplica estos estilos al bloque '.tc-il__dialog-card'. */
 .tc-il__dialog-card { overflow: hidden; border: 1px solid #d4e1f3; border-radius: 15px; background: #fff; }
+/* Aplica estos estilos al bloque '.tc-il__dialog-header'. */
 .tc-il__dialog-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 13px; padding: 18px 21px; border-bottom: 1px solid #e0eaf5; }
+/* Aplica estos estilos al bloque '.tc-il__dialog-header > div'. */
 .tc-il__dialog-header > div { display: flex; align-items: center; gap: 11px; min-width: 0; }
+/* Aplica estos estilos al bloque '.tc-il__dialog-icon'. */
 .tc-il__dialog-icon { display: grid; flex: 0 0 40px; width: 40px; height: 40px; place-items: center; border-radius: 11px; color: #0870ec; background: #e4f1ff; font-size: 1.2rem; }
+/* Aplica estos estilos al bloque '.tc-il__dialog-icon--warning'. */
 .tc-il__dialog-icon--warning { color: #c98400; background: #fff1d2; }
+/* Aplica estos estilos al bloque '.tc-il__dialog-header h2'. */
 .tc-il__dialog-header h2 { margin: 0; color: #10204e; font-size: 1.04rem; }
+/* Aplica estos estilos al bloque '.tc-il__dialog-header p'. */
 .tc-il__dialog-header p { margin: 4px 0 0; color: #6f83a6; font-size: .7rem; }
+/* Aplica estos estilos al bloque '.tc-il__dialog-close'. */
 .tc-il__dialog-close { display: grid; flex: 0 0 32px; width: 32px; height: 32px; place-items: center; border: 1px solid #d7e5f3; border-radius: 8px; color: #58759f; background: #fff; cursor: pointer; }
+/* Aplica estos estilos al bloque '.tc-il__dialog-body'. */
 .tc-il__dialog-body { display: grid; gap: 15px; max-height: calc(92vh - 145px); padding: 19px 21px; overflow-y: auto; }
+/* Aplica estos estilos al bloque '.tc-il__dialog-body > section'. */
 .tc-il__dialog-body > section { display: grid; gap: 13px; }
+/* Aplica estos estilos al bloque '.tc-il__dialog-body h3'. */
 .tc-il__dialog-body h3 { margin: 0; color: #10366f; font-size: .91rem; }
+/* Aplica estos estilos al bloque '.tc-il__dialog-body p'. */
 .tc-il__dialog-body p { margin: 0; color: #566e93; font-size: .74rem; line-height: 1.55; }
+/* Aplica estos estilos al bloque '.tc-il__steps'. */
 .tc-il__steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(115px, 1fr)); gap: 7px; padding-bottom: 12px; border-bottom: 1px solid #e4edf7; }
+/* Aplica estos estilos al bloque '.tc-il__steps span'. */
 .tc-il__steps span { padding: 7px 8px; border: 1px solid #dce7f5; border-radius: 8px; color: #7386a5; background: #f8fbff; font-size: .64rem; font-weight: 800; text-align: center; }
+/* Aplica estos estilos al bloque '.tc-il__steps span.is-current'. */
 .tc-il__steps span.is-current { border-color: #72aaf3; color: #0758c8; background: #e9f3ff; }
+/* Aplica estos estilos al bloque '.tc-il__field-grid'. */
 .tc-il__field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+/* Aplica estos estilos al bloque '.tc-il__field'. */
 .tc-il__field { display: grid; min-width: 0; gap: 6px; color: #1b3765; font-size: .7rem; font-weight: 800; }
+/* Aplica estos estilos al bloque '.tc-il__field--full'. */
 .tc-il__field--full { grid-column: 1 / -1; }
+/* Aplica estos estilos al bloque '.tc-il__field input, .tc-il__field select, .tc-il__field textarea'. */
 .tc-il__field input, .tc-il__field select, .tc-il__field textarea { width: 100%; min-height: 38px; padding: 8px 10px; border: 1px solid #cfdeef; border-radius: 8px; outline: 0; color: #173c77; background: #fff; font: inherit; font-weight: 500; }
+/* Aplica estos estilos al bloque '.tc-il__field textarea'. */
 .tc-il__field textarea { resize: vertical; }
 .tc-il__field :focus { border-color: #348af1; box-shadow: 0 0 0 3px #1680ef20; }
+/* Aplica estos estilos al bloque '.tc-il__field [aria-invalid="true"]'. */
 .tc-il__field [aria-invalid="true"] { border-color: #e2394a; box-shadow: 0 0 0 3px #e2394a18; }
+/* Aplica estos estilos al bloque '.tc-il__product-rows'. */
 .tc-il__product-rows { display: grid; gap: 9px; }
+/* Aplica estos estilos al bloque '.tc-il__product-row'. */
 .tc-il__product-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(100px, .35fr) 34px; align-items: end; gap: 8px; padding: 10px; border: 1px solid #e1eaf5; border-radius: 9px; background: #f9fbff; }
+/* Aplica estos estilos al bloque '.tc-il__remove-row'. */
 .tc-il__remove-row { width: 34px; height: 38px; border: 1px solid #f0d0d5; border-radius: 8px; color: #cf3545; background: #fff; cursor: pointer; }
 .tc-il__remove-row:disabled { color: #9baac0; border-color: #dce5ef; cursor: not-allowed; }
+/* Aplica estos estilos al bloque '.tc-il__notice-inline'. */
 .tc-il__notice-inline { padding: 10px 12px; border: 1px solid #c8dcf5; border-radius: 8px; color: #20528f !important; background: #f0f7ff; }
+/* Aplica estos estilos al bloque '.tc-il__error'. */
 .tc-il__error { color: #b32235 !important; }
+/* Aplica estos estilos al bloque '.tc-il__feedback'. */
 .tc-il__feedback { padding: 10px 12px; border: 1px solid #a8ddc1; border-radius: 8px; color: #087542 !important; background: #effbf5; }
+/* Aplica estos estilos al bloque '.tc-il__check'. */
 .tc-il__check { display: flex; align-items: flex-start; gap: 8px; color: #28466f; font-size: .72rem; line-height: 1.5; }
+/* Aplica estos estilos al bloque '.tc-il__check input'. */
 .tc-il__check input { flex: 0 0 auto; margin-top: 2px; accent-color: #0873ed; }
+/* Aplica estos estilos al bloque '.tc-il__validation-list'. */
 .tc-il__validation-list { display: grid; gap: 9px; margin: 0; padding-left: 20px; color: #465f85; font-size: .73rem; line-height: 1.5; }
+/* Aplica estos estilos al bloque '.tc-il__review-list, .tc-il__detail-list'. */
 .tc-il__review-list, .tc-il__detail-list { display: grid; gap: 0; margin: 0; }
+/* Aplica estos estilos al bloque '.tc-il__review-list > div, .tc-il__detail-list > div'. */
 .tc-il__review-list > div, .tc-il__detail-list > div { display: grid; grid-template-columns: minmax(120px, .45fr) minmax(0, 1fr); gap: 12px; padding: 9px 0; border-bottom: 1px solid #e8eef6; }
+/* Aplica estos estilos al bloque '.tc-il__review-list dt, .tc-il__detail-list dt'. */
 .tc-il__review-list dt, .tc-il__detail-list dt { color: #63799b; font-size: .68rem; font-weight: 800; }
+/* Aplica estos estilos al bloque '.tc-il__review-list dd, .tc-il__detail-list dd'. */
 .tc-il__review-list dd, .tc-il__detail-list dd { margin: 0; color: #193c70; font-size: .72rem; overflow-wrap: anywhere; }
+/* Aplica estos estilos al bloque '.tc-il__shipment-timeline h3'. */
 .tc-il__shipment-timeline h3 { color: #12366d; font-size: .83rem; }
+/* Aplica estos estilos al bloque '.tc-il__shipment-timeline ol'. */
 .tc-il__shipment-timeline ol { display: grid; gap: 8px; margin: 0; padding-left: 20px; color: #64799a; font-size: .68rem; }
+/* Aplica estos estilos al bloque '.tc-il__shipment-timeline li strong, .tc-il__shipment-timeline li span'. */
 .tc-il__shipment-timeline li strong, .tc-il__shipment-timeline li span { display: block; }
+/* Aplica estos estilos al bloque '.tc-il__shipment-timeline li strong'. */
 .tc-il__shipment-timeline li strong { color: #1d477f; }
+/* Aplica estos estilos al bloque '.tc-il__dialog-footer'. */
 .tc-il__dialog-footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; padding: 13px 21px 18px; border-top: 1px solid #e8eef6; }
+/* Aplica estos estilos al bloque '.tc-il__dialog-footer [hidden]'. */
 .tc-il__dialog-footer [hidden] { display: none !important; }
+/* Aplica estos estilos al bloque '.tc-il__table-wrap'. */
 .tc-il__table-wrap { overflow-x: auto; }
+/* Aplica estos estilos al bloque '.tc-il__table-wrap table'. */
 .tc-il__table-wrap table { min-width: 520px; }
+/* Aplica estos estilos al bloque '.tc-il__transfer-detail > summary'. */
 .tc-il__transfer-detail > summary { display: inline-flex; min-height: 30px; padding: 0 10px; font-size: .66rem; cursor: pointer; }
+/* Aplica estos estilos al bloque '.tc-il__transfer-panel'. */
 .tc-il__transfer-panel { min-width: min(900px, calc(100vw - 80px)); max-width: 1150px; padding: 14px; border: 1px solid #d9e5f5; border-radius: 10px; background: #fff; white-space: normal; }
+/* Aplica estos estilos al bloque '.tc-il__transfer-panel h3'. */
 .tc-il__transfer-panel h3 { margin: 12px 0 7px; color: #12366d; font-size: .82rem; }
+/* Aplica estos estilos al bloque '.tc-il__transfer-actions'. */
 .tc-il__transfer-actions { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; margin-top: 10px; }
+/* Aplica estos estilos al bloque '.tc-il__transfer-actions > form'. */
 .tc-il__transfer-actions > form { display: flex; flex-wrap: wrap; align-items: end; gap: 7px; }
+/* Aplica estos estilos al bloque '.tc-il__transfer-actions input, .tc-il__transfer-actions textarea'. */
 .tc-il__transfer-actions input, .tc-il__transfer-actions textarea { max-width: 220px; min-height: 34px; padding: 6px 8px; border: 1px solid #cad9ed; border-radius: 7px; color: #173c77; font: inherit; }
+/* Aplica estos estilos al bloque '.tc-il__transfer-line-form'. */
 .tc-il__transfer-line-form { display: grid !important; grid-template-columns: minmax(150px, 1fr) 100px minmax(160px, 1fr) auto; align-items: end; width: 100%; padding: 9px; border: 1px solid #e1eaf5; border-radius: 9px; background: #f9fbff; }
+/* Aplica estos estilos al bloque '.tc-il__transfer-line-form strong'. */
 .tc-il__transfer-line-form strong { grid-column: 1 / -1; color: #15396e; font-size: .7rem; }
+/* Aplica estos estilos al bloque '.tc-il__transfer-line-list'. */
 .tc-il__transfer-line-list { display: grid; gap: 8px; margin: 14px 0 9px; }
+/* Aplica estos estilos al bloque '.tc-il__pagination'. */
 .tc-il__pagination { padding: 12px; }
+/* Aplica estos estilos al bloque '.tc-il__pagination nav'. */
 .tc-il__pagination nav { display: flex; justify-content: flex-end; }
+/* Aplica estos estilos al bloque '.tc-il__dialog-card > .tc-il__dialog-body'. */
 .tc-il__dialog-card > .tc-il__dialog-body { display: grid; gap: 12px; }
 @media (max-width: 760px) { .tc-il__transfer-line-form { grid-template-columns: 1fr; } .tc-il__transfer-panel { min-width: min(100%, calc(100vw - 52px)); } }
+/* Aplica estos estilos al bloque '.tc-il__dialog [data-il-step][hidden], .tc-il__dialog [data-il-import-stage][hidden]'. */
 .tc-il__dialog [data-il-step][hidden], .tc-il__dialog [data-il-import-stage][hidden] { display: none !important; }
 @media (max-width: 600px) { .tc-il__dialog { width: min(100% - 16px, 760px); max-height: 94vh; } .tc-il__dialog-body { max-height: calc(94vh - 145px); padding: 15px; } .tc-il__dialog-header, .tc-il__dialog-footer { padding-right: 15px; padding-left: 15px; } .tc-il__field-grid { grid-template-columns: 1fr; } .tc-il__field--full { grid-column: auto; } .tc-il__product-row { grid-template-columns: minmax(0, 1fr) 88px 32px; padding: 8px; } .tc-il__dialog-footer { align-items: stretch; flex-direction: column-reverse; } .tc-il__dialog-footer .tc-il__button { width: 100%; } }

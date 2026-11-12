@@ -1,8 +1,12 @@
 @extends('layouts.tienda.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-inicio publicidad-inicio')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Inicio | MD Technology Cell')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section class="home-hero home-hero-banner">
     <a class="home-hero-banner-link" href="{{ route('catalog.index') }}" aria-label="Ver catálogo de celulares y accesorios">
@@ -60,13 +64,16 @@
             <a href="{{ route('catalog.index') }}" class="home-view-all">Ver todos los productos <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
         </div>
         <div class="product-grid home-product-grid" @if($productosDestacados->isEmpty()) hidden @endif>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @foreach($productosDestacados as $producto)
                 <article class="product-card home-product-card">
                     <a class="home-product-image-link" href="{{ route('catalog.show', $producto) }}" aria-label="Ver {{ $producto->marca }} {{ $producto->nombre }}">
                         <div class="product-art home-product-art">
                             <span class="badge">{{ $producto->etiqueta ?: 'Oferta' }}</span>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                             @if($producto->url_imagen_principal)
                                 <img class="home-product-photo" src="{{ $producto->url_imagen_principal }}" alt="{{ $producto->marca }} {{ $producto->nombre }}" loading="lazy">
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                             @else
                                 <div class="home-product-placeholder" role="img" aria-label="Imagen no disponible"><i class="bi bi-phone" aria-hidden="true"></i><span>{{ $producto->marca }}</span></div>
                             @endif
@@ -76,16 +83,19 @@
                         <div class="product-meta"><span>{{ $producto->marca }}</span><span>{{ $producto->category?->nombre ?: $producto->categoria }}</span></div>
                         <h3>{{ $producto->nombre }}</h3>
                         <div class="home-product-specs">{{ $producto->display_specifications }}</div>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                         @if($producto->display_discount > 0)<div class="home-product-pricing"><del>S/ {{ number_format($producto->display_original_price, 2) }}</del><span>-{{ $producto->display_discount }}%</span></div>@endif
                         <div class="price">S/ {{ number_format((float) $producto->precio_oferta, 2) }}</div>
                         <div class="stock">{{ $producto->existencias_disponibles }} unidades disponibles</div>
                         <div class="home-product-actions">
                             @auth
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                                 <form
                                     class="home-product-buy-form"
                                     action="{{ route('cart.add', $producto) }}"
                                     method="post"
                                 >
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                                     @csrf
                                     <input type="hidden" name="cantidad" value="1">
                                     <button class="btn btn-primary home-product-action" type="submit">
@@ -93,12 +103,15 @@
                                         Comprar
                                     </button>
                                 </form>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                             @else
                                 <details class="home-product-buy-choice">
                                     <summary class="btn btn-primary home-product-action"><i class="bi bi-cart3" aria-hidden="true"></i> Comprar</summary>
                                     <div class="home-product-buy-options">
                                         <a class="btn btn-ghost" href="{{ route('login') }}">Iniciar sesión</a>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                                         <form action="{{ route('cart.add', $producto) }}" method="post">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                                             @csrf
                                             <input type="hidden" name="cantidad" value="1">
                                             <button class="btn btn-primary" type="submit">Continuar como invitado</button>

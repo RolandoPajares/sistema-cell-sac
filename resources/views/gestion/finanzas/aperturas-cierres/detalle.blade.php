@@ -1,8 +1,12 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Arqueo de caja')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-finanzas-facturacion')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section class="tc-ff" data-cajas-operativas data-cajas-reopen="{{ old('_form') === 'movimiento' && $errors->any() ? 'crear' : '' }}">
     <header class="tc-ff__header">
@@ -12,12 +16,15 @@
             <p>{{ $session->caja->sede->nombre }} · Apertura {{ $session->abierta_en?->format('d/m/Y H:i') }} · {{ $session->usuarioApertura?->nombre }}</p>
         </div>
         <div class="tc-ff__header-actions">
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if ($canMove)<button type="button" class="tc-ff__button tc-ff__button--primary" data-box-open="crear"><i class="bi bi-plus-lg" aria-hidden="true"></i>Registrar movimiento</button>@endif
             <a class="tc-ff__button" href="{{ route('management.payments.preview.cash_sessions') }}">Historial</a>
         </div>
     </header>
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if (session('status')) <p class="alert alert-success" role="status">{{ session('status') }}</p> @endif
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
     @foreach ($errors->all() as $error) <p class="text-danger" role="alert">{{ $error }}</p> @endforeach
 
     <div class="tc-ff__metrics">
@@ -34,6 +41,7 @@
                 <table>
                     <thead><tr><th>Fecha</th><th>Dirección</th><th>Tipo</th><th>Importe</th><th>Descripción</th><th>Usuario</th></tr></thead>
                     <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                         @forelse ($movements as $movement)
                             <tr><td>{{ $movement->creado_en?->format('d/m/Y H:i') }}</td><td><span class="tc-ff__pill tc-ff__pill--{{ $movement->direccion === 'entrada' ? 'verde' : 'rojo' }}">{{ ucfirst($movement->direccion) }}</span></td><td>{{ $movement->tipo }}</td><td>S/ {{ $movement->importe }}</td><td>{{ $movement->descripcion ?? '—' }}</td><td>{{ $movement->creador?->nombre ?? 'Sistema' }}</td></tr>
                         @empty
@@ -42,16 +50,21 @@
                     </tbody>
                 </table>
             </div>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if ($movements->hasPages())<div class="tc-ff__card-heading"><small>Página {{ $movements->currentPage() }} de {{ $movements->lastPage() }}</small><div class="tc-ff__header-actions">@if ($movements->previousPageUrl()) <a class="tc-ff__button" href="{{ $movements->previousPageUrl() }}">Anterior</a> @endif @if ($movements->nextPageUrl()) <a class="tc-ff__button" href="{{ $movements->nextPageUrl() }}">Siguiente</a> @endif</div></div>@endif
         </article>
         <aside class="tc-ff__card tc-ff__aside">
             <h2><i class="bi bi-clipboard-check" aria-hidden="true"></i>Estado y cierre</h2>
             <p><span class="tc-ff__pill tc-ff__pill--{{ $session->estado === 'abierta' ? 'verde' : 'azul' }}">{{ ucfirst($session->estado) }}</span></p>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if ($session->estado === 'cerrada')
                 <div class="tc-ff__summary"><div><span>Efectivo declarado</span><b>S/ {{ $session->saldo_cierre_declarado }}</b></div><div><span>Diferencia</span><b>S/ {{ $balance['diferencia'] }}</b></div><div><span>Responsable del cierre</span><b>{{ $session->usuarioCierre?->nombre }}</b></div><div><span>Fecha de cierre</span><b>{{ $session->cerrada_en?->format('d/m/Y H:i') }}</b></div></div>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
             @elseif ($canClose)
                 <p>Cuenta físicamente el efectivo. Si difiere del saldo esperado, el cierre se bloquea hasta documentar y conciliar la diferencia.</p>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                 <form method="POST" action="{{ route('management.payments.cash_sessions.update', $session) }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                     @csrf @method('PATCH')
                     <input type="hidden" name="token" value="{{ (string) \Illuminate\Support\Str::uuid() }}">
                     <div class="tc-ff__form-grid"><label>Efectivo contado al cierre (S/) *<input type="text" name="saldo_cierre_declarado" inputmode="decimal" value="{{ old('saldo_cierre_declarado') }}" required></label></div>
@@ -61,9 +74,12 @@
         </aside>
     </div>
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if ($canMove)
         <dialog class="tc-ff__dialog" data-box-dialog="crear" aria-labelledby="cash-movement-title">
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form class="tc-ff__dialog-card" method="POST" action="{{ route('management.payments.cash_sessions.movements.store', $session) }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                 @csrf
                 <input type="hidden" name="_form" value="movimiento">
                 <input type="hidden" name="token" value="{{ (string) \Illuminate\Support\Str::uuid() }}">

@@ -1,24 +1,48 @@
+/* Define los estilos visuales del modulo o componente 'seguridad-role-create'. */
+
+/* Aplica estos estilos al bloque '.tc-rbac-role-create-card'. */
 .tc-rbac-role-create-card { width: min(820px, calc(100vw - 24px)); display: grid; grid-template-columns: 220px minmax(0, 1fr); overflow: hidden; background: #fff; }
+/* Aplica estos estilos al bloque '.tc-rbac-role-create-aside'. */
 .tc-rbac-role-create-aside { display: flex; flex-direction: column; justify-content: flex-end; gap: 10px; padding: 28px 22px; color: #fff; background: linear-gradient(155deg, #0648bd, #087cf2); }
+/* Aplica estos estilos al bloque '.tc-rbac-role-create-logo'. */
 .tc-rbac-role-create-logo { display: grid; width: 68px; height: 68px; place-items: center; border-radius: 20px; color: #fff; background: #ffffff24; font-size: 2.35rem; box-shadow: 0 10px 22px #052d8044; }
+/* Aplica estos estilos al bloque '.tc-rbac-role-create-aside h2'. */
 .tc-rbac-role-create-aside h2 { margin: 6px 0 0; font-size: 1.4rem; }
+/* Aplica estos estilos al bloque '.tc-rbac-role-create-aside p'. */
 .tc-rbac-role-create-aside p { margin: 0 0 8px; color: #e6f2ff; line-height: 1.4; }
+/* Aplica estos estilos al bloque '.tc-rbac-role-create-aside > span'. */
 .tc-rbac-role-create-aside > span { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 999px; color: #fff; background: #ffffff1c; font-size: .7rem; font-weight: 800; }
+/* Aplica estos estilos al bloque '.tc-rbac-role-create-main'. */
 .tc-rbac-role-create-main { display: flex; min-width: 0; min-height: 0; flex-direction: column; }
+/* Aplica estos estilos al bloque '.tc-rbac-role-create-header'. */
 .tc-rbac-role-create-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid #e5eef8; background: #fbfdff; }
+/* Aplica estos estilos al bloque '.tc-rbac-role-create-header > div'. */
 .tc-rbac-role-create-header > div { display: flex; align-items: center; gap: 14px; }
+/* Aplica estos estilos al bloque '.tc-rbac-role-create-header h2'. */
 .tc-rbac-role-create-header h2 { color: #102b62; font-size: 1.55rem; }
+/* Aplica estos estilos al bloque '.tc-rbac-role-create-header p'. */
 .tc-rbac-role-create-header p { margin: 4px 0 0; color: #62789d; font-size: .85rem; }
+/* Aplica estos estilos al bloque '.tc-rbac-role-create-header > button'. */
 .tc-rbac-role-create-header > button { width: 40px; height: 40px; border: 0; border-radius: 50%; color: #173b78; background: #e7f2ff; font-size: 1.5rem; cursor: pointer; }
+/* Aplica estos estilos al bloque '.tc-rbac-role-create-main .tc-rbac-dialog-body'. */
 .tc-rbac-role-create-main .tc-rbac-dialog-body { min-height: 0; overflow: auto; padding: 18px 22px; }
+/* Aplica estos estilos al bloque '.tc-rbac-role-create-main .tc-rbac-dialog-body label'. */
 .tc-rbac-role-create-main .tc-rbac-dialog-body label { font-size: .82rem; }
+/* Aplica estos estilos al bloque '.tc-rbac-role-create-main .tc-rbac-dialog-body label > b'. */
 .tc-rbac-role-create-main .tc-rbac-dialog-body label > b { color: #e4435a; }
+/* Aplica estos estilos al bloque '.tc-rbac-role-create-main .tc-rbac-dialog-body input, .tc-rbac-role-create-main .tc-rbac-dialog-body select, .tc-rbac-role-create-main .tc-rbac-dialog-body textarea'. */
 .tc-rbac-role-create-main .tc-rbac-dialog-body input, .tc-rbac-role-create-main .tc-rbac-dialog-body select, .tc-rbac-role-create-main .tc-rbac-dialog-body textarea { min-height: 42px; padding: 9px 12px; border-radius: 9px; font-size: .86rem; }
+/* Aplica estos estilos al bloque '.tc-rbac-role-create-main .tc-rbac-dialog-body textarea'. */
 .tc-rbac-role-create-main .tc-rbac-dialog-body textarea { min-height: 82px; }
+/* Aplica estos estilos al bloque '.tc-rbac-role-create-info'. */
 .tc-rbac-role-create-info { display: flex; align-items: center; gap: 10px; margin: 0; padding: 12px 14px; border-radius: 10px; color: #204f92; background: #eaf4ff; font-size: .75rem; }
+/* Aplica estos estilos al bloque '.tc-rbac-role-create-info i'. */
 .tc-rbac-role-create-info i { color: #0874ed; font-size: 1.1rem; }
+/* Aplica estos estilos al bloque '.tc-rbac-role-create-main .tc-rbac-dialog-body footer'. */
 .tc-rbac-role-create-main .tc-rbac-dialog-body footer { padding-top: 18px; }
+/* Aplica estos estilos al bloque '.tc-rbac-role-create-main .tc-rbac-dialog-body footer button'. */
 .tc-rbac-role-create-main .tc-rbac-dialog-body footer button { min-height: 44px; padding: 0 20px; border: 1px solid #cbdcf0; border-radius: 10px; color: #274a7e; background: #fff; font: inherit; font-weight: 800; cursor: pointer; }
+/* Aplica estos estilos al bloque '.tc-rbac-role-create-main .tc-rbac-dialog-body footer .tc-rbac-primary'. */
 .tc-rbac-role-create-main .tc-rbac-dialog-body footer .tc-rbac-primary { border: 0; color: #fff; background: linear-gradient(110deg, #087cf2, #0749b9); }
 .tc-rbac-dialog:has(.tc-rbac-role-create-card) { width: min(820px, calc(100vw - 24px)); max-width: none; max-height: calc(100vh - 24px); overflow: hidden; border-radius: 18px; }
 .tc-rbac-dialog:has(.tc-rbac-role-create-card) .tc-rbac-role-create-card { width: 100%; min-height: min(500px, calc(100vh - 24px)); max-height: calc(100vh - 24px); }

@@ -1,3 +1,4 @@
+
 <dialog class="tc-org__dialog" data-org-dialog aria-labelledby="tc-org-modal-title">
     <div class="tc-org__dialog-card">
         <header class="tc-org__dialog-header">
@@ -5,13 +6,17 @@
             <div><small>{{ in_array($tipo, ['empresa', 'sedes', 'almacenes'], true) ? 'Organización · Datos de MariaDB' : 'Organización y Sedes · Vista de diseño' }}</small><h2 id="tc-org-modal-title" data-org-modal-title></h2><p data-org-modal-description></p></div>
             <button type="button" class="tc-org__dialog-close" data-org-close aria-label="Cerrar formulario"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
         </header>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
         <form class="tc-org__dialog-form" data-org-form @if (in_array($tipo, ['empresa', 'almacenes', 'sedes', 'responsables'], true)) data-org-real-form method="post" action="{{ $tipo === 'almacenes' ? route('management.company_settings.warehouses.store') : ($tipo === 'sedes' ? route('management.company_settings.sites.store') : ($tipo === 'responsables' ? route('management.company_settings.responsibles.store') : route('management.company_settings.data.update'))) }}" @else novalidate @endif>
             <div class="tc-org__dialog-steps" data-org-steps aria-label="Pasos del formulario"><span data-org-step-indicator="1">1 · Información</span><span data-org-step-indicator="2">2 · Detalles</span><span data-org-step-indicator="3">3 · Confirmación</span></div>
             <div class="tc-org__dialog-body">
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                 @if (in_array($tipo, ['empresa', 'almacenes', 'sedes', 'responsables'], true))
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                     @csrf
                     <input type="hidden" name="_method" value="POST" data-org-method>
                 @endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                 @if ($tipo === 'empresa')
                     <section data-org-step="1"><h3><i class="bi bi-buildings"></i> Identidad empresarial</h3><div class="tc-org__field-grid">
                         <label>Razón social <b>*</b><input name="razon_social" required maxlength="180" value="{{ old('razon_social', $empresa?->razon_social) }}"></label>
@@ -22,6 +27,7 @@
                         <label>Moneda base <b>*</b><input name="moneda_base" required pattern="[A-Z]{3}" maxlength="3" value="{{ old('moneda_base', $empresa?->moneda_base) }}"><small>Código de tres letras guardado para la empresa.</small></label>
                     </div></section>
                     <section data-org-step="3" hidden><h3><i class="bi bi-check2-circle"></i> Confirmación</h3><p class="tc-org__dialog-note">Se actualizarán únicamente las columnas empresariales vigentes y el cambio quedará registrado en auditoría.</p></section>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                 @elseif ($tipo === 'sedes')
                     <section data-org-step="1"><h3><i class="bi bi-shop"></i> Identificación de la sede</h3><div class="tc-org__field-grid">
                         <label>Nombre de la sede <b>*</b><input name="nombre" required maxlength="140" value="{{ old('nombre') }}"></label>
@@ -32,6 +38,7 @@
                         <label>Dirección<input name="direccion" maxlength="255" value="{{ old('direccion') }}"></label>
                         <label>Teléfono<input name="telefono" type="tel" maxlength="30" value="{{ old('telefono') }}"></label>
                     </div></section>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                 @elseif ($tipo === 'almacenes')
                     <section data-org-step="1"><h3><i class="bi bi-box-seam"></i> Identificación del almacén</h3><div class="tc-org__field-grid">
                         <label>Nombre del almacén <b>*</b><input name="nombre" required maxlength="140" value="{{ old('nombre') }}"></label>
@@ -40,6 +47,7 @@
                         <label>Tipo de almacén <b>*</b><input name="tipo" required maxlength="30" value="{{ old('tipo', 'general') }}"></label>
                         <label class="tc-org__field-check"><input type="hidden" name="permite_venta" value="0"><input name="permite_venta" type="checkbox" value="1" checked> Este almacén permite ventas</label>
                     </div></section>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                 @elseif ($tipo === 'personal')
                     <section data-org-step="1"><h3><i class="bi bi-person-check"></i> Usuario existente</h3><div class="tc-org__field-grid">
                         <label>Colaborador <b>*</b><select name="colaborador" required><option value="">Seleccionar usuario existente…</option><option>Carlos Mendoza</option><option>Lucía Ramírez</option><option>José Vargas</option><option>Paola Aguilar</option><option>Diego Rojas</option></select><small>Lista ilustrativa; se cargará desde la gestión de usuarios.</small></label>
@@ -47,6 +55,7 @@
                         <label>Área<input name="area" maxlength="100"></label><label>Cargo<input name="cargo" maxlength="100"></label>
                         <label>Fecha de inicio <b>*</b><input name="inicio" type="date" required></label><label>Fecha de fin<input name="fin" type="date"></label>
                     </div></section>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                 @else
                     <section data-org-step="1"><h3><i class="bi bi-diagram-3"></i> Recurso y responsable</h3><div class="tc-org__field-grid">
                         <label>Tipo de recurso <b>*</b><select name="tipo_recurso" required><option value="">Seleccionar…</option><option value="sede">Sede</option><option value="almacen">Almacén</option><option value="" disabled>Área (sin entidad en el esquema)</option></select></label>
@@ -69,8 +78,10 @@
     </div>
 </dialog>
 <dialog class="tc-org__dialog tc-org__dialog--small" data-org-detail-dialog aria-labelledby="tc-org-detail-title"><div class="tc-org__dialog-card"><header class="tc-org__dialog-header"><span class="tc-org__dialog-icon"><i class="bi bi-eye" aria-hidden="true"></i></span><div><small>{{ in_array($tipo, ['almacenes', 'sedes'], true) ? 'Organización · Registro almacenado' : 'Organización y Sedes · Datos ilustrativos' }}</small><h2 id="tc-org-detail-title">Detalle</h2><p>Consulta del registro mostrado en esta pantalla.</p></div><button type="button" class="tc-org__dialog-close" data-org-close aria-label="Cerrar detalle"><i class="bi bi-x-lg"></i></button></header><div class="tc-org__dialog-body"><dl class="tc-org__detail-list" data-org-detail-list></dl></div><footer class="tc-org__dialog-footer"><button type="button" class="tc-org__button tc-org__button--primary" data-org-close>Cerrar</button></footer></div></dialog>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
 @if (in_array($tipo, ['almacenes', 'sedes'], true))
     <dialog class="tc-org__dialog tc-org__dialog--small" data-org-confirm-dialog aria-labelledby="tc-org-confirm-title"><div class="tc-org__dialog-card"><header class="tc-org__dialog-header"><span class="tc-org__dialog-icon"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i></span><div><small>Organización · {{ $tipo === 'almacenes' ? 'Almacenes registrados' : 'Sedes registradas' }}</small><h2 id="tc-org-confirm-title">Confirmar cambio de estado</h2><p data-org-confirm-description></p></div><button type="button" class="tc-org__dialog-close" data-org-close aria-label="Cerrar confirmación"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><form method="post" action="" data-org-status-form data-org-real-status-form>@csrf<input type="hidden" name="_method" value="PATCH"><input type="hidden" name="{{ $tipo === 'almacenes' ? 'activo' : 'activa' }}" value="0" data-org-status-value><div class="tc-org__dialog-body"><label class="tc-org__confirm-label">Motivo del cambio <b>*</b><textarea name="motivo" required minlength="10" maxlength="500" rows="3" placeholder="Explica el motivo del cambio de estado"></textarea></label></div><footer class="tc-org__dialog-footer"><button type="button" class="tc-org__button" data-org-close>Cancelar</button><button type="submit" class="tc-org__button tc-org__button--primary">Confirmar</button></footer></form></div></dialog>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
 @else
     <dialog class="tc-org__dialog tc-org__dialog--small" data-org-confirm-dialog aria-labelledby="tc-org-confirm-title"><div class="tc-org__dialog-card"><header class="tc-org__dialog-header"><span class="tc-org__dialog-icon"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i></span><div><small>Organización y Sedes · Vista de diseño</small><h2 id="tc-org-confirm-title">Confirmar cambio de estado</h2><p data-org-confirm-description></p></div><button type="button" class="tc-org__dialog-close" data-org-close aria-label="Cerrar confirmación"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="tc-org__dialog-body"><label class="tc-org__confirm-label">Motivo del cambio <b>*</b><textarea required minlength="10" maxlength="500" rows="3" data-org-confirm-reason placeholder="Explica el motivo del cambio de estado"></textarea></label><p class="tc-org__dialog-note">Esta confirmación es visual; no modificará el estado del registro.</p><p class="tc-org__dialog-feedback" data-org-confirm-feedback role="status" aria-live="polite"></p></div><footer class="tc-org__dialog-footer"><button type="button" class="tc-org__button" data-org-close>Cancelar</button><button type="button" class="tc-org__button tc-org__button--primary" data-org-confirm>Confirmar</button></footer></div></dialog>
 @endif

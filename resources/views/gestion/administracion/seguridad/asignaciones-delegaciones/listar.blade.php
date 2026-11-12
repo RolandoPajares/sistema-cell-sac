@@ -1,8 +1,12 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Asignaciones globales y por sede')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-seguridad-rbac')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 {{-- Consulta y asignación de roles globales o por sede. --}}
 {{-- Pantalla de consulta y asignación de roles por usuario. --}}
@@ -13,6 +17,7 @@
             <p>Asigna, revoca y consulta privilegios efectivos por cuenta desde una sola operación auditada.</p>
         </div><a class="tc-rbac-primary" href="{{ route('management.roles_permissions') }}"><i class="bi bi-shield-lock" aria-hidden="true"></i> Roles y permisos</a>
     </header>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @unless($ready)<div class="tc-rbac-alert" role="alert">El esquema RBAC no está disponible. No se muestran formularios simulados.</div>@else
     <nav class="tc-rbac-tabs" aria-label="Administración de seguridad"><a href="{{ route('management.users') }}">Gestión de usuarios</a><a href="{{ route('management.roles_permissions') }}">Roles y permisos</a><a href="{{ route('management.permissions_matrix') }}">Matriz de privilegios</a><a class="is-active" href="{{ route('management.user_assignments') }}">Asignaciones globales y por sede</a><a href="{{ route('management.menus') }}">Menús y submenús dinámicos</a><a href="{{ route('management.modules') }}">Módulos y pantallas</a></nav>
     <section class="tc-rbac-toolbar"><label class="tc-rbac-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar usuarios</span><input type="search" data-assignment-filter placeholder="Buscar usuario o correo"></label><span class="tc-rbac-summary"><strong>{{ $users->total() }}</strong> usuarios consultados</span></section>
@@ -29,6 +34,7 @@
                     </tr>
                 </thead>
                 <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @forelse($users as $user)
                     {{-- Las asignaciones ya fueron preparadas por el controlador. --}}
                     <tr data-assignment-row data-search="{{ strtolower($user->nombre.' '.$user->correo) }}">
@@ -51,6 +57,7 @@
     @endunless
 </section>
 
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
 @foreach($users as $user)
 {{-- IDs de roles vigentes usados para marcar las casillas del formulario. --}}
 <dialog class="tc-rbac-dialog" id="asignar-roles-{{ $user->id }}" aria-labelledby="asignar-roles-title-{{ $user->id }}">
@@ -62,6 +69,7 @@
                 </div>
             </div><button type="button" class="tc-rbac-dialog-close" data-close-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
         </header>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
         <form method="post" action="{{ route('management.user_assignments.sync', $user) }}" class="tc-rbac-dialog-body">@csrf @method('PUT')<p class="tc-rbac-info">Las casillas marcadas se conservarán. Las desmarcadas se revocarán y quedarán registradas en auditoría.</p>
             <div class="tc-rbac-choice-grid">@foreach($roles as $role)<label class="tc-rbac-choice"><input type="checkbox" name="roles[]" value="{{ $role->id }}" @checked(in_array($role->id, $role->alcance_permitido === 'sede' ? $assignmentPresentation[$user->id]['currentSite'] : $assignmentPresentation[$user->id]['currentGlobal'], true))><span><strong>{{ $role->nombre }}</strong><small>{{ ucfirst($role->alcance_permitido) }} · {{ $role->codigo }}</small></span></label>@endforeach</div>
             <footer><button type="button" class="tc-rbac-secondary" data-close-dialog>Cancelar</button><button class="tc-rbac-primary" type="submit"><i class="bi bi-save" aria-hidden="true"></i> Guardar asignación</button></footer>
@@ -70,6 +78,7 @@
 </dialog>
 @endforeach
 @endsection
+{{-- bloque de estilos o scripts para el lugar reservado por la plantilla. --}}
 @push('scripts')
 @vite('resources/js/gestion/administracion/seguridad/roles-permisos/asignaciones.js')
 @endpush

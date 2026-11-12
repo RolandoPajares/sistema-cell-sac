@@ -7,10 +7,12 @@ use Illuminate\Support\Str;
 
 final class ServicioPresentacionCategorias
 {
+    // Determina el icono visual que corresponde a la categoria recibida.
     public function icono(Categoria $categoria): string
     {
         $nombre = Str::lower($categoria->nombre);
 
+        // Selecciona el resultado segun el nombre o condicion evaluada.
         return match (true) {
             Str::contains($nombre, 'audio') => 'bi-headphones',
             Str::contains($nombre, ['celular', 'smart']) => 'bi-phone',

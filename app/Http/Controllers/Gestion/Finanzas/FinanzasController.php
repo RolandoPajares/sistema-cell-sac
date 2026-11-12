@@ -49,20 +49,30 @@ class FinanzasController extends Controller
      */
     public function pagos(FiltroPagosRequest $request, ServicioConsultasFinancieras $financialQueries, ServicioAutorizacion $authorization): View
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $filters = $request->validated();
+        // Obtiene en $query la informacion de la solicitud o del usuario actual.
         $query = $financialQueries->pagos($request->user(), $filters);
+        // Guarda en $stats el resultado necesario para continuar esta operacion.
         $stats = (clone $query)->selectRaw('COUNT(*) AS cantidad')
             ->selectRaw("SUM(CASE WHEN tipo = 'cobro' THEN 1 ELSE 0 END) AS cobros")
             ->selectRaw("SUM(CASE WHEN tipo = 'pago' THEN 1 ELSE 0 END) AS pagos")
             ->first();
+        // Guarda en $amountsByCurrency el resultado necesario para continuar esta operacion.
         $amountsByCurrency = (clone $query)->select('moneda')->selectRaw('COALESCE(SUM(importe), 0) AS importe_total')->groupBy('moneda')->get();
+        // Guarda en $rows el resultado necesario para continuar esta operacion.
         $rows = (clone $query)->orderByDesc('fecha_pago')->orderByDesc('id')->paginate(self::PAGE_SIZE)->withQueryString();
+        // Obtiene en $baseQuery la informacion de la solicitud o del usuario actual.
         $baseQuery = $financialQueries->pagos($request->user(), []);
+        // Obtiene en $canCreate la informacion de la solicitud o del usuario actual.
         $canCreate = $authorization->allows($request->user(), 'gestion.pagos.crear');
+        // Obtiene en $formOptions la informacion de la solicitud o del usuario actual.
         $formOptions = $canCreate ? $financialQueries->opcionesPago($request->user()) : [];
+        // Guarda en $canSubmit el resultado necesario para continuar esta operacion.
         $canSubmit = ($formOptions['documentos'] ?? collect())->isNotEmpty()
             && ($formOptions['medios'] ?? collect())->isNotEmpty();
 
+        // Devuelve la vista 'gestion.finanzas.pagos-cobros.listar' con los datos preparados por este controlador.
         return view('gestion.finanzas.pagos-cobros.listar', [
             'module' => [
                 'key' => 'pagos',
@@ -88,9 +98,13 @@ class FinanzasController extends Controller
                     'statuses' => (clone $baseQuery)->distinct()->orderBy('estado')->pluck('estado')->all(),
                 ],
                 'kpis' => [
+                    // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
                     $this->metrica('Registros filtrados', (int) ($stats->cantidad ?? 0), 'bi-receipt', 'blue', 'Según los filtros aplicados'),
+                    // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
                     $this->metrica('Importes registrados', $this->totalesMonetarios($amountsByCurrency), 'bi-cash-coin', 'green', 'Separados por moneda; no equivale a conciliación bancaria'),
+                    // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
                     $this->metrica('Cobros', (int) ($stats->cobros ?? 0), 'bi-arrow-down-circle', 'blue', 'Tipo registrado en pagos'),
+                    // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
                     $this->metrica('Pagos', (int) ($stats->pagos ?? 0), 'bi-arrow-up-circle', 'orange', 'Tipo registrado en pagos'),
                 ],
                 'summary' => $this->resumenEstados((clone $baseQuery)->select('estado')->selectRaw('COUNT(*) AS cantidad')->groupBy('estado')->orderBy('estado')->get()),
@@ -116,21 +130,29 @@ class FinanzasController extends Controller
      */
     public function reembolsos(FiltroReembolsosRequest $request, ServicioConsultasFinancieras $financialQueries, ServicioAutorizacion $authorization): View
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $filters = $request->validated();
+        // Obtiene en $query la informacion de la solicitud o del usuario actual.
         $query = $financialQueries->reembolsos($request->user(), $filters);
+        // Guarda en $stats el resultado necesario para continuar esta operacion.
         $stats = (clone $query)->selectRaw('COUNT(*) AS cantidad')
             ->selectRaw("SUM(CASE WHEN estado = 'pendiente' THEN 1 ELSE 0 END) AS pendientes")
             ->first();
+        // Guarda en $amountsByCurrency el resultado necesario para continuar esta operacion.
         $amountsByCurrency = (clone $query)
             ->join('pagos as pagos_reembolso', 'pagos_reembolso.id', '=', 'reembolsos.pago_id')
             ->select('pagos_reembolso.moneda')
             ->selectRaw('COALESCE(SUM(reembolsos.importe), 0) AS importe_total')
             ->groupBy('pagos_reembolso.moneda')
             ->get();
+        // Guarda en $rows el resultado necesario para continuar esta operacion.
         $rows = (clone $query)->orderByDesc('creado_en')->orderByDesc('id')->paginate(self::PAGE_SIZE)->withQueryString();
+        // Obtiene en $baseQuery la informacion de la solicitud o del usuario actual.
         $baseQuery = $financialQueries->reembolsos($request->user(), []);
+        // Obtiene en $canCreate la informacion de la solicitud o del usuario actual.
         $canCreate = $authorization->allows($request->user(), 'gestion.reembolsos.crear');
 
+        // Devuelve la vista 'gestion.finanzas.reembolsos.listar' con los datos preparados por este controlador.
         return view('gestion.finanzas.reembolsos.listar', [
             'module' => [
                 'key' => 'reembolsos',
@@ -153,9 +175,13 @@ class FinanzasController extends Controller
                     'statuses' => (clone $baseQuery)->distinct()->orderBy('estado')->pluck('estado')->all(),
                 ],
                 'kpis' => [
+                    // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
                     $this->metrica('Reembolsos filtrados', (int) ($stats->cantidad ?? 0), 'bi-inbox', 'blue', 'Según los filtros aplicados'),
+                    // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
                     $this->metrica('Importes registrados', $this->totalesMonetarios($amountsByCurrency), 'bi-cash-coin', 'orange', 'Separados por moneda; no confirma la ejecución del pago'),
+                    // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
                     $this->metrica('Pendientes', (int) ($stats->pendientes ?? 0), 'bi-hourglass-split', 'orange', 'Estado pendiente registrado'),
+                    // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
                     $this->metrica('Estados distintos', (clone $baseQuery)->distinct('estado')->count('estado'), 'bi-list-check', 'purple', 'Estados presentes en la tabla'),
                 ],
                 'summary' => $this->resumenEstados((clone $baseQuery)->select('estado')->selectRaw('COUNT(*) AS cantidad')->groupBy('estado')->orderBy('estado')->get()),
@@ -180,8 +206,10 @@ class FinanzasController extends Controller
      */
     public function registrarPago(RegistrarPagoRequest $request, ServicioOperacionesFinancieras $operations): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $payment = $operations->registrarPago($request->validated(), $request->user(), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return redirect()->route('management.payments.show', $payment)
             ->with('status', 'Solicitud registrada como pendiente. No se ha confirmado ningún cobro ni pago.');
     }
@@ -196,12 +224,15 @@ class FinanzasController extends Controller
      */
     public function detallePago(Request $request, Pago $pago, ServicioAutorizacion $authorization): View
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($authorization->allowsRecord($request->user(), 'gestion.pagos.consultar', (int) $pago->empresa_id, (int) $pago->sede_id), 404);
         $pago->load(['medioPago:id,nombre,requiere_caja,requiere_banco', 'sesionCaja:id,caja_id,estado',
             'cuentaBancaria:id,codigo,banco,moneda', 'usuario:id,nombre', 'pedido:id', 'venta:id,codigo', 'compra:id,numero_referencia']);
+        // Prepara en $history la consulta que obtiene o modifica los registros necesarios.
         $history = RegistroAuditoria::query()->where('entidad', 'pagos')->where('entidad_id', $pago->getKey())
             ->with('user:id,nombre')->orderBy('id')->get();
 
+        // Devuelve la vista 'gestion.finanzas.pagos-cobros.detalle' con los datos preparados por este controlador.
         return view('gestion.finanzas.pagos-cobros.detalle', [
             'record' => $pago,
             'history' => $history,
@@ -225,10 +256,12 @@ class FinanzasController extends Controller
      */
     public function confirmarPagoEfectivo(ConfirmarPagoEfectivoRequest $request, Pago $pago, ServicioOperacionesFinancieras $operations): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $data = $request->validated();
         $operations->confirmarPagoEfectivo($pago, $data['importe_contado'], $data['observacion'],
             $request->user(), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return redirect()->route('management.payments.show', $pago)
             ->with('status', 'Efectivo confirmado y movimiento de caja registrado.');
     }
@@ -243,8 +276,10 @@ class FinanzasController extends Controller
      */
     public function anularPago(AnularOperacionFinancieraRequest $request, Pago $pago, ServicioOperacionesFinancieras $operations): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $operations->anularPago($pago, $request->user(), $request->validated('motivo'), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return redirect()->route('management.payments.show', $pago)->with('status', 'Solicitud pendiente anulada.');
     }
 
@@ -257,8 +292,10 @@ class FinanzasController extends Controller
      */
     public function solicitarReembolso(SolicitarReembolsoRequest $request, ServicioOperacionesFinancieras $operations): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $refund = $operations->solicitarReembolso($request->validated(), $request->user(), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return redirect()->route('management.refunds.show', $refund)
             ->with('status', 'Solicitud de reembolso registrada. No se ha enviado dinero.');
     }
@@ -274,12 +311,16 @@ class FinanzasController extends Controller
     public function detalleReembolso(Request $request, Reembolso $reembolso, ServicioAutorizacion $authorization): View
     {
         $reembolso->load(['pago:id,empresa_id,sede_id,codigo,moneda,importe,estado,referencia', 'devolucion:id,codigo,estado,resolucion', 'autorizadoPor:id,nombre']);
+        // Guarda en $payment el resultado necesario para continuar esta operacion.
         $payment = $reembolso->pago;
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($payment !== null && $authorization->allowsRecord($request->user(), 'gestion.reembolsos.consultar',
             (int) $payment->empresa_id, (int) $payment->sede_id), 404);
+        // Prepara en $history la consulta que obtiene o modifica los registros necesarios.
         $history = RegistroAuditoria::query()->where('entidad', 'reembolsos')->where('entidad_id', $reembolso->getKey())
             ->with('user:id,nombre')->orderBy('id')->get();
 
+        // Devuelve la vista 'gestion.finanzas.reembolsos.detalle' con los datos preparados por este controlador.
         return view('gestion.finanzas.reembolsos.detalle', [
             'record' => $reembolso,
             'history' => $history,
@@ -302,6 +343,7 @@ class FinanzasController extends Controller
     {
         $operations->aprobarReembolso($reembolso, $request->user(), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return redirect()->route('management.refunds.show', $reembolso)
             ->with('status', 'Solicitud aprobada para gestión. No se ha ejecutado el reembolso.');
     }
@@ -316,8 +358,10 @@ class FinanzasController extends Controller
      */
     public function anularReembolso(AnularOperacionFinancieraRequest $request, Reembolso $reembolso, ServicioOperacionesFinancieras $operations): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $operations->anularReembolso($reembolso, $request->user(), $request->validated('motivo'), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return redirect()->route('management.refunds.show', $reembolso)->with('status', 'Solicitud pendiente anulada.');
     }
 
@@ -335,10 +379,13 @@ class FinanzasController extends Controller
     public function exportarPagos(FiltroPagosRequest $request, string $format, ServicioConsultasFinancieras $financialQueries, ServicioAutorizacion $authorization, ExportadorTabular $exporter, RegistradorAuditoria $auditor): Response|StreamedResponse
     {
         $authorization->assertAllowed($request->user(), 'gestion.pagos.exportar');
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
 
         return $this->exportarRegistros(
+            // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
             $request->user(), $request->validated(), 'pagos',
+            // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
             $financialQueries->pagos($request->user(), $request->validated()),
             ['Código', 'Tercero asociado', 'Origen', 'Tipo', 'Medio de pago', 'Importe', 'Moneda', 'Estado', 'Fecha de pago'],
             fn (Pago $payment): array => $this->celdasExportacionPago($payment, $format),
@@ -360,10 +407,13 @@ class FinanzasController extends Controller
     public function exportarReembolsos(FiltroReembolsosRequest $request, string $format, ServicioConsultasFinancieras $financialQueries, ServicioAutorizacion $authorization, ExportadorTabular $exporter, RegistradorAuditoria $auditor): Response|StreamedResponse
     {
         $authorization->assertAllowed($request->user(), 'gestion.reembolsos.exportar');
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
 
         return $this->exportarRegistros(
+            // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
             $request->user(), $request->validated(), 'reembolsos',
+            // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
             $financialQueries->reembolsos($request->user(), $request->validated()),
             ['ID', 'Devolución', 'Cliente', 'Pago asociado', 'Importe', 'Moneda', 'Estado', 'Fecha de registro'],
             fn (Reembolso $refund): array => $this->celdasExportacionReembolso($refund, $format),
@@ -377,8 +427,11 @@ class FinanzasController extends Controller
      */
     private function exportarRegistros(User $actor, array $filters, string $entity, Builder $query, array $columns, callable $map, string $format, ExportadorTabular $exporter, RegistradorAuditoria $auditor, ?string $ip): Response|StreamedResponse
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_if((clone $query)->limit(self::MAX_EXPORT_ROWS + 1)->pluck('id')->count() > self::MAX_EXPORT_ROWS, 422, 'El conjunto supera el límite de exportación. Reduce los filtros.');
+        // Guarda en $rows el resultado necesario para continuar esta operacion.
         $rows = $query->orderBy('id')->get()->map($map)->all();
+        // Agrupa en $report los datos que se utilizaran en la siguiente operacion.
         $report = [
             'title' => 'REPORTE DE '.mb_strtoupper($entity),
             'subtitle' => 'Registros financieros existentes en el período filtrado.',
@@ -391,6 +444,7 @@ class FinanzasController extends Controller
             'indicators' => [['label' => 'Registros incluidos', 'value' => count($rows)]],
             'summary_row' => ['label' => 'Registros incluidos: '.count($rows), 'values' => []],
         ];
+        // Guarda en $response el resultado necesario para continuar esta operacion.
         $response = $exporter->download($format, $entity.'-'.now()->format('Ymd'), $columns, $rows, $report);
 
         $auditor->record((int) $actor->getKey(), 'exportar', $entity, null, null, [
@@ -407,10 +461,13 @@ class FinanzasController extends Controller
     {
         return [
             $payment->codigo,
+            // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
             $this->contrapartePago($payment),
+            // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
             $this->origenPago($payment),
             $payment->tipo,
             $payment->medioPago?->nombre ?? 'Sin medio asociado',
+            // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
             $this->formatearDinero((float) $payment->importe, $payment->moneda),
             $payment->estado,
             $payment->fecha_pago?->format('d/m/Y H:i') ?? '',
@@ -441,6 +498,7 @@ class FinanzasController extends Controller
      */
     private function contrapartePago(Pago $payment): string
     {
+        // Comprueba la condicion $payment->tipo === 'pago' antes de ejecutar este bloque.
         if ($payment->tipo === 'pago') {
             return (string) ($payment->compra?->supplier?->nombre ?? 'Proveedor no asociado');
         }
@@ -475,6 +533,7 @@ class FinanzasController extends Controller
             $refund->devolucion?->codigo ?? 'Devolución no asociada',
             $refund->devolucion?->customer?->nombre_contacto ?? $refund->devolucion?->customer?->razon_social ?? 'Sin cliente asociado',
             $refund->pago?->codigo ?? 'Pago no asociado',
+            // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
             $this->formatearDinero((float) $refund->importe, $refund->pago?->moneda ?? 'PEN'),
             $refund->estado,
             $refund->creado_en?->format('d/m/Y H:i') ?? '',
@@ -533,6 +592,7 @@ class FinanzasController extends Controller
      */
     private function totalesMonetarios(Collection $totals): string
     {
+        // Comprueba la condicion $totals->isEmpty() antes de ejecutar este bloque.
         if ($totals->isEmpty()) {
             return '—';
         }
@@ -550,8 +610,11 @@ class FinanzasController extends Controller
      */
     private static function textoExportacionSeguro(string $value, string $format): string
     {
+        // Guarda en $clean el resultado necesario para continuar esta operacion.
         $clean = trim(preg_replace('/[\p{C}\p{Z}]+/u', ' ', $value) ?? '');
+        // Comprueba la condicion $format === 'pdf' antes de ejecutar este bloque.
         if ($format === 'pdf') {
+            // Guarda en $clean el resultado necesario para continuar esta operacion.
             $clean = mb_convert_encoding(mb_convert_encoding($clean, 'Windows-1252', 'UTF-8'), 'UTF-8', 'Windows-1252');
         }
 

@@ -1,8 +1,12 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Control de IMEI y series')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-inventario-logistica')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section class="tc-il">
     <header class="tc-il__header">
@@ -25,6 +29,7 @@
         <article class="tc-il__metric tc-il__metric--ambar"><span class="tc-il__metric-icon"><i class="bi bi-list-check" aria-hidden="true"></i></span><div><small>Estados registrados</small><strong>{{ number_format($resumen['estados'], 0, ',', ' ') }}</strong><span>Valores presentes en MariaDB</span></div></article>
     </div>
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
     <form class="tc-il__filters" method="GET" action="{{ route('management.inventory.preview.serials') }}">
         <label class="tc-il__search">
             <i class="bi bi-search" aria-hidden="true"></i>
@@ -35,6 +40,7 @@
                 <span>Producto</span>
                 <select name="producto">
                     <option value="">Todos los productos</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach ($productos as $producto)
                         <option value="{{ $producto->id }}" @selected((string) request('producto') === (string) $producto->id)>{{ $producto->marca }} / {{ $producto->nombre }}</option>
                     @endforeach
@@ -44,6 +50,7 @@
                 <span>Almacén</span>
                 <select name="almacen">
                     <option value="">Todos los almacenes autorizados</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach ($almacenes as $almacen)
                         <option value="{{ $almacen->id }}" @selected((string) request('almacen') === (string) $almacen->id)>{{ $almacen->nombre }}</option>
                     @endforeach
@@ -53,12 +60,14 @@
                 <span>Estado</span>
                 <select name="estado">
                     <option value="">Todos los estados</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach ($estados as $estado)
                         <option value="{{ $estado }}" @selected(request('estado') === $estado)>{{ $estado }}</option>
                     @endforeach
                 </select>
             </label>
             <button type="submit" class="tc-il__button tc-il__button--primary"><i class="bi bi-funnel" aria-hidden="true"></i> Aplicar filtros</button>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if (request()->hasAny(['buscar', 'producto', 'almacen', 'estado']))
                 <a class="tc-il__button" href="{{ route('management.inventory.preview.serials') }}">Limpiar filtros</a>
             @endif
@@ -85,6 +94,7 @@
                         </tr>
                     </thead>
                     <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                         @forelse ($dispositivos as $dispositivo)
                             <tr>
                                 <td>{{ $dispositivo->identificadorLegible() }}</td>
@@ -94,9 +104,11 @@
                                 <td><span class="tc-il__pill">{{ $dispositivo->estado }}</span></td>
                                 <td>{{ $dispositivo->fecha_ingreso?->format('d/m/Y H:i') ?? '—' }}</td>
                                 <td>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                     @if ($dispositivo->ultimoMovimiento)
                                         {{ $dispositivo->ultimoMovimiento->estado_anterior ? $dispositivo->ultimoMovimiento->estado_anterior.' → ' : '' }}{{ $dispositivo->ultimoMovimiento->estado_nuevo }}
                                         <small>{{ $dispositivo->ultimoMovimiento->creado_en?->format('d/m/Y H:i') }}</small>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                                     @else
                                         Sin movimiento vinculado
                                     @endif
@@ -105,8 +117,10 @@
                         @empty
                             <tr>
                                 <td colspan="7" class="tc-il__empty">
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                     @if ($resumen['total'] === 0)
                                         No hay dispositivos registrados para las sedes autorizadas.
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                                     @else
                                         No se encontraron dispositivos con los filtros seleccionados.
                                     @endif
@@ -116,6 +130,7 @@
                     </tbody>
                 </table>
             </div>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if ($dispositivos->hasPages())
                 <div class="tc-il__pagination">{{ $dispositivos->links() }}</div>
             @endif
@@ -123,6 +138,7 @@
 
         <article class="tc-il__card">
             <div class="tc-il__card-heading"><h2><i class="bi bi-pie-chart" aria-hidden="true"></i> Equipos por estado</h2></div>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @forelse ($distribucion as $grupo)
                 <div class="tc-il__card-heading">
                     <span>{{ $grupo['estado'] }}</span>

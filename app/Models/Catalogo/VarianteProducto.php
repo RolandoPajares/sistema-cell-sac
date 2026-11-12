@@ -13,8 +13,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class VarianteProducto extends Model
 {
+    // Usa la tabla 'variantes_productos' como origen de los registros de este modelo.
     protected $table = 'variantes_productos';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['producto_id', 'codigo_sku', 'codigo_barras', 'nombre_color', 'codigo_color', 'existencias', 'controla_serie', 'estado', 'fecha_creacion'];
 
     public $timestamps = false;

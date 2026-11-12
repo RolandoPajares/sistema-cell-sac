@@ -1,5 +1,8 @@
 @extends('layouts.tienda.principal')
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Página no encontrada')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section class="container form-page">
     <div class="form-card" style="text-align:center">

@@ -19,8 +19,10 @@ class Reembolso extends Model
     /** @use HasFactory<ReembolsoFactory> */
     use HasFactory;
 
+    // Usa la tabla 'reembolsos' como origen de los registros de este modelo.
     protected $table = 'reembolsos';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['devolucion_id', 'pago_id', 'importe', 'estado', 'autorizado_por_usuario_id', 'creado_en'];
 
     public $timestamps = false;

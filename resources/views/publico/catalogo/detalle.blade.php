@@ -1,8 +1,12 @@
 @extends('layouts.tienda.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-producto')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', $product->nombre.' | MD Technology Cell')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section class="product-page-light" data-product-detail data-product-id="{{ $product->id }}" data-variant-data='@json($variantData)' data-authenticated="{{ $isAuthenticated ? '1' : '0' }}" data-login-url="{{ route('login') }}" data-favorite-url="{{ route('catalog.favorite', $product) }}" data-review-url="{{ route('catalog.review.store', $product) }}" data-favorite-initial="{{ $isFavorite ? '1' : '0' }}" data-rating-initial="{{ $userRating }}">
     <div class="container product-detail-container">
@@ -16,11 +20,13 @@
         <div class="product-detail-modern">
             <div class="detail-gallery" aria-label="Imágenes del producto">
                 <div class="gallery-thumbs" data-gallery-thumbs @if(!$primaryImage) hidden @endif>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach($imageItems as $index => $image)
                         <button class="gallery-thumb {{ $index === 0 ? 'active' : '' }}" type="button" data-src="{{ $image['url'] }}" aria-label="Ver imagen {{ $index + 1 }}" @if($index === 0) aria-current="true" @endif><img src="{{ $image['url'] }}" alt="" loading="lazy"></button>
                     @endforeach
                 </div>
                 <div class="detail-main-image" data-zoom-source>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                     @if($primaryImage)<img data-main-product-image src="{{ $primaryImage }}" alt="{{ $product->marca }} {{ $product->nombre }}">@endif
                     <div class="detail-product-placeholder detail-product-placeholder--{{ $visualType }}" data-image-placeholder @if($primaryImage) hidden @endif role="img" aria-label="Imagen no disponible"><span class="detail-product-icon"><strong>{{ $product->marca }}</strong><i class="bi {{ $visualType === 'audio' ? 'bi-headphones' : ($visualType === 'celular' ? 'bi-phone' : 'bi-box-seam') }}" aria-hidden="true"></i></span><span>Imagen no disponible</span></div>
                     <div class="detail-gallery-actions"><button type="button" class="detail-icon-button" data-favorite-toggle aria-pressed="false" title="Añadir a favoritos"><i class="bi bi-heart" aria-hidden="true"></i><span class="visually-hidden" data-favorite-label>Añadir a favoritos</span></button><button type="button" class="detail-icon-button" data-zoom-open title="Ampliar imagen"><i class="bi bi-zoom-in" aria-hidden="true"></i><span class="visually-hidden">Ampliar imagen</span></button></div>
@@ -36,23 +42,29 @@
                 <div class="product-detail-price"><strong data-current-price>S/ {{ number_format($salePrice, 2) }}</strong>@if($discount > 0)<div class="product-detail-old-price"><del>S/ {{ number_format($originalPrice, 2) }}</del><span class="product-detail-discount">-{{ $discount }}%</span></div>@endif</div>
                 <p class="product-detail-stock {{ $stockClass }}" data-current-stock data-stock="{{ $product->existencias_disponibles }}"><i class="bi {{ $stockIcon }}" aria-hidden="true"></i>{{ $stockLabel }}</p>
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                 @if($product->variants->isNotEmpty())
                     <fieldset class="product-variant-selector"><legend>Variante</legend><div class="variant-options" role="radiogroup" aria-label="Variantes disponibles">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                         @foreach($variantOptions as $variant)
                             <label class="variant-option {{ $variant['selected'] ? 'is-selected' : '' }} {{ $variant['class'] }}"><input type="radio" name="variante_visual" value="{{ $variant['id'] }}" data-variant-option @checked($variant['selected']) @disabled($variant['disabled'])><span>{{ $variant['name'] }}</span></label>
                         @endforeach
                     </div></fieldset>
                 @endif
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                 <form class="product-detail-cart" action="{{ route('cart.add', $product) }}" method="post" data-product-form>
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                     @csrf
                     <input type="hidden" name="variante_id" value="{{ $firstVariant?->id }}" data-selected-variant>
                     <div class="quantity-control"><label for="cantidad-producto">Cantidad</label><div><button type="button" data-quantity-minus aria-label="Disminuir cantidad">−</button><input id="cantidad-producto" type="number" name="cantidad" value="1" min="1" max="{{ max(1, $product->existencias_disponibles) }}" inputmode="numeric" data-quantity-input><button type="button" data-quantity-plus aria-label="Aumentar cantidad">+</button></div></div>
                     @auth
                         <div class="product-detail-actions"><button class="product-detail-buy product-detail-buy--primary" type="submit" @disabled($product->existencias_disponibles <= 0) data-add-to-cart><i class="bi bi-cart3" aria-hidden="true"></i> Agregar al carrito</button><button class="product-detail-buy product-detail-buy--success" type="submit" name="comprar_ahora" value="1" @disabled($product->existencias_disponibles <= 0)><i class="bi bi-lightning-charge" aria-hidden="true"></i> Comprar ahora</button></div>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                     @else
                         <details class="product-detail-purchase-choice">
                             <summary class="product-detail-buy product-detail-buy--success" @if($product->existencias_disponibles <= 0) aria-disabled="true" @endif><i class="bi bi-lightning-charge" aria-hidden="true"></i> Comprar ahora</summary>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                             @if($product->existencias_disponibles > 0)
                                 <div class="product-detail-purchase-options">
                                     <a class="product-detail-buy product-detail-buy--primary" href="{{ route('login') }}">Iniciar sesión</a>

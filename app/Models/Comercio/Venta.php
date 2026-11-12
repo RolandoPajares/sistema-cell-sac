@@ -16,8 +16,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Venta extends Model
 {
+    // Usa la tabla 'ventas' como origen de los registros de este modelo.
     protected $table = 'ventas';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['empresa_id', 'sede_id', 'almacen_id', 'pedido_id', 'cliente_id', 'usuario_id', 'codigo', 'estado', 'moneda', 'subtotal', 'descuento', 'impuestos', 'total', 'fecha_venta', 'canal', 'observaciones'];
 
     public const CREATED_AT = 'creado_en';

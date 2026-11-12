@@ -18,6 +18,7 @@ final class ActualizarEstadoEnvioPedidoRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return $this->user() !== null && app(ServicioAutorizacion::class)->allows($this->user(), 'gestion.inventario.ajustar');
@@ -28,12 +29,17 @@ final class ActualizarEstadoEnvioPedidoRequest extends FormRequest
      *
      * @return array Resultado de la operación.
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         return [
+            // Valida el campo 'estado' con las reglas definidas en la instruccion siguiente.
             'estado' => ['required', Rule::in(['pendiente', 'preparando', 'despachado', 'en_transito', 'entregado', 'incidencia', 'cancelado'])],
+            // Valida el campo 'descripcion' con las reglas definidas en la instruccion siguiente.
             'descripcion' => ['nullable', 'string', 'max:500'],
+            // Valida el campo 'identificador_externo' con las reglas definidas en la instruccion siguiente.
             'identificador_externo' => ['nullable', 'string', 'max:160', 'regex:/\A[A-Za-z0-9._:-]+\z/'],
+            // Valida el campo 'ocurrido_en' con las reglas definidas en la instruccion siguiente.
             'ocurrido_en' => ['nullable', 'date'],
         ];
     }

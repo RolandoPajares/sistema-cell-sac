@@ -26,13 +26,18 @@ class CampaniaPublicaController extends Controller
     public function track(Request $request, Campania $campaign): RedirectResponse
     {
         $type = $request->validate(['tipo' => ['required', 'in:vista,clic']])['tipo'];
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($campaign->activo && $campaign->inicia_en <= now() && $campaign->finaliza_en >= now(), 404);
 
+        // Ejecuta la consulta o modificacion de base de datos indicada en la instruccion siguiente.
         DB::transaction(function () use ($request, $campaign, $type): void {
+            // Guarda en $sessionHash el resultado necesario para continuar esta operacion.
             $sessionHash = hash_hmac('sha256', $request->session()->getId(), (string) config('app.key'));
+            // Prepara en $alreadyTracked la consulta que obtiene o modifica los registros necesarios.
             $alreadyTracked = EventoCampania::query()->where('campana_id', $campaign->id)->where('tipo', $type)
                 ->where('sesion_hash', $sessionHash)->whereDate('creado_en', now()->toDateString())->exists();
 
+            // Comprueba la condicion $alreadyTracked antes de ejecutar este bloque.
             if ($alreadyTracked) {
                 return;
             }
@@ -47,6 +52,7 @@ class CampaniaPublicaController extends Controller
             $campaign->increment($type === 'clic' ? 'clics' : 'vistas');
         });
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return redirect()->route('catalog.index')->with('status', $type === 'clic' ? 'Campaña registrada.' : null);
     }
 }

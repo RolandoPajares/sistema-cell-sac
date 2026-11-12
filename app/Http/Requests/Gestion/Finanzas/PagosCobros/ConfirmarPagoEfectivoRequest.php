@@ -18,6 +18,7 @@ class ConfirmarPagoEfectivoRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return $this->user() instanceof User
@@ -29,7 +30,9 @@ class ConfirmarPagoEfectivoRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // Valida el campo 'importe_contado' con las reglas definidas en la instruccion siguiente.
             'importe_contado' => ['required', 'regex:/\A(?:0|[1-9][0-9]{0,12})(?:\.[0-9]{1,2})?\z/'],
+            // Valida el campo 'observacion' con las reglas definidas en la instruccion siguiente.
             'observacion' => ['required', 'string', 'max:500'],
         ];
     }
@@ -38,9 +41,13 @@ class ConfirmarPagoEfectivoRequest extends FormRequest
     public function messages(): array
     {
         return [
+            // Muestra el mensaje del campo 'importe_contado' cuando falla la regla 'required'.
             'importe_contado.required' => 'Declara el efectivo contado antes de confirmar.',
+            // Muestra el mensaje del campo 'importe_contado' cuando falla la regla 'regex'.
             'importe_contado.regex' => 'El efectivo contado debe tener hasta dos decimales.',
+            // Muestra el mensaje del campo 'observacion' cuando falla la regla 'required'.
             'observacion.required' => 'Documenta la verificación del efectivo.',
+            // Muestra el mensaje del campo 'observacion' cuando falla la regla 'max'.
             'observacion.max' => 'La observación no puede superar 500 caracteres.',
         ];
     }

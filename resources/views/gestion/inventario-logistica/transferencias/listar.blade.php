@@ -1,8 +1,12 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Transferencias entre almacenes')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-inventario-logistica')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section class="tc-il" data-il-transfer-manager>
     <header class="tc-il__header">
@@ -24,12 +28,15 @@
         </div>
     </header>
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if (session('status'))
         <div class="tc-il__notice" role="status"><i class="bi bi-check-circle" aria-hidden="true"></i>{{ session('status') }}</div>
     @endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if ($errors->any())
         <div class="tc-il__notice" role="alert"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i><span>{{ $errors->first() }}</span></div>
     @endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @unless ($supports_difference_reconciliation)
         <div class="tc-il__notice" role="status"><i class="bi bi-info-circle" aria-hidden="true"></i><strong>Conciliación pendiente</strong><span>El esquema aún no registra cantidades devueltas; la migración independiente sigue sin ejecutarse.</span></div>
     @endunless
@@ -41,6 +48,7 @@
         <article class="tc-il__metric tc-il__metric--verde"><span class="tc-il__metric-icon"><i class="bi bi-check-circle" aria-hidden="true"></i></span><div><small>Recibidas, por cerrar</small><strong>{{ $metrics['pendientes_cierre'] }}</strong><span>Listas para cierre</span></div></article>
     </div>
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
     <form method="GET" action="{{ route('management.inventory.preview.transfers') }}" class="tc-il__filters">
         <label class="tc-il__search"><i class="bi bi-search" aria-hidden="true"></i><input type="search" name="buscar" value="{{ $filters['buscar'] ?? '' }}" placeholder="Buscar por código o producto…" aria-label="Buscar transferencias"></label>
         <div class="tc-il__filter-fields">
@@ -56,6 +64,7 @@
             <table>
                 <thead><tr><th>Código</th><th>Origen</th><th>Destino</th><th>Solicitó</th><th>Fecha</th><th>Unidades solicitadas</th><th>Estado</th><th>Operaciones</th></tr></thead>
                 <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @forelse ($transfers as $transfer)
                         <tr>
                             <td>{{ $transfer->codigo }}</td>
@@ -71,34 +80,50 @@
                                     <div class="tc-il__transfer-panel">
                                         <h3>Productos y cantidades</h3>
                                         <div class="tc-il__table-wrap"><table><thead><tr><th>Producto</th><th>Variante</th><th>Solicitada</th><th>Enviada</th><th>Recibida</th><th>Devuelta</th><th>Conciliada</th></tr></thead><tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                                             @foreach ($transfer->detalles as $detail)
                                                 <tr><td>{{ $detail->producto?->nombre }}</td><td>{{ $detail->variante?->nombre_color ?? '—' }}</td><td>{{ (int) $detail->cantidad_solicitada }}</td><td>{{ (int) $detail->cantidad_enviada }}</td><td>{{ (int) $detail->cantidad_recibida }}</td><td>{{ $supports_return_reconciliation ? (int) $detail->cantidad_devuelta : '—' }}</td><td>{{ $supports_difference_reconciliation ? (int) $detail->cantidad_conciliada : '—' }}</td></tr>
                                             @endforeach
                                         </tbody></table></div>
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                         @if (in_array($transfer->estado, ['solicitada', 'aprobada'], true))
                                             <div class="tc-il__transfer-actions">
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                                 @if ($transfer->estado === 'solicitada')
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                                                     <form method="POST" action="{{ route('management.inventory.transfer_approve', $transfer) }}">@csrf<input type="hidden" name="clave_idempotencia" value="{{ \Illuminate\Support\Str::uuid() }}"><button class="tc-il__button tc-il__button--primary" type="submit">Aprobar</button></form>
                                                 @endif
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                                                 @foreach ([['reject', 'Rechazar'], ['cancel', 'Cancelar']] as [$action, $label])
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                                                     <form method="POST" action="{{ route('management.inventory.transfer_'.$action, $transfer) }}">@csrf<input type="hidden" name="clave_idempotencia" value="{{ \Illuminate\Support\Str::uuid() }}"><input type="text" name="motivo" maxlength="500" required placeholder="Motivo"><button class="tc-il__button" type="submit">{{ $label }}</button></form>
                                                 @endforeach
                                             </div>
                                         @endif
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                         @if (in_array($transfer->estado, ['aprobada', 'en tránsito', 'recibida parcialmente'], true))
                                             <div class="tc-il__transfer-actions">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                                                 @foreach ($transfer->detalles as $detail)
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                                     @if ($detail->pending_dispatch > 0)
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                                                         <form method="POST" action="{{ route('management.inventory.transfer_dispatch', $transfer) }}" class="tc-il__transfer-line-form">@csrf<input type="hidden" name="clave_idempotencia" value="{{ \Illuminate\Support\Str::uuid() }}"><input type="hidden" name="items[0][detalle_id]" value="{{ $detail->id }}"><strong>Despachar · {{ $detail->producto?->nombre }}</strong><label>Cantidad<input type="number" name="items[0][cantidad]" min="1" max="{{ $detail->pending_dispatch }}" required></label><label>IMEI / serie, uno por línea si aplica<textarea name="items[0][series]" rows="2" maxlength="4000"></textarea></label><button class="tc-il__button tc-il__button--primary" type="submit">Registrar despacho</button></form>
                                                     @endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                                     @if ($detail->pending_receipt > 0 && $supports_difference_reconciliation)
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                                                         <form method="POST" action="{{ route('management.inventory.transfer_reconcile', $transfer) }}" class="tc-il__transfer-line-form">@csrf<input type="hidden" name="clave_idempotencia" value="{{ \Illuminate\Support\Str::uuid() }}"><input type="hidden" name="items[0][detalle_id]" value="{{ $detail->id }}"><strong>Conciliar faltante: {{ $detail->producto?->nombre }}</strong><label>Cantidad con diferencia<input type="number" name="items[0][cantidad]" min="1" max="{{ $detail->pending_receipt }}" required></label><label>IMEI / serie de la diferencia, uno por linea si aplica<textarea name="items[0][series]" rows="2" maxlength="4000"></textarea></label><label>Motivo documentado<input type="text" name="motivo" minlength="5" maxlength="500" required></label><button class="tc-il__button" type="submit">Registrar conciliacion</button></form>
                                                     @endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                                     @if ($detail->pending_receipt > 0)
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                                                         <form method="POST" action="{{ route('management.inventory.transfer_receive', $transfer) }}" class="tc-il__transfer-line-form">@csrf<input type="hidden" name="clave_idempotencia" value="{{ \Illuminate\Support\Str::uuid() }}"><input type="hidden" name="items[0][detalle_id]" value="{{ $detail->id }}"><strong>Recibir · {{ $detail->producto?->nombre }}</strong><label>Cantidad recibida<input type="number" name="items[0][cantidad]" min="1" max="{{ $detail->pending_receipt }}" required></label><label>IMEI / serie recibida, uno por línea si aplica<textarea name="items[0][series]" rows="2" maxlength="4000"></textarea></label><button class="tc-il__button tc-il__button--primary" type="submit">Registrar recepción</button></form>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                                         @if ($supports_return_reconciliation)
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                                                             <form method="POST" action="{{ route('management.inventory.transfer_return', $transfer) }}" class="tc-il__transfer-line-form">@csrf<input type="hidden" name="clave_idempotencia" value="{{ \Illuminate\Support\Str::uuid() }}"><input type="hidden" name="items[0][detalle_id]" value="{{ $detail->id }}"><strong>Devolver al origen · {{ $detail->producto?->nombre }}</strong><label>Cantidad devuelta<input type="number" name="items[0][cantidad]" min="1" max="{{ $detail->pending_receipt }}" required></label><label>IMEI / serie devuelta, uno por línea si aplica<textarea name="items[0][series]" rows="2" maxlength="4000"></textarea></label><label>Motivo documentado<input type="text" name="motivo" maxlength="500" required></label><button class="tc-il__button" type="submit">Registrar devolución</button></form>
                                                         @endif
                                                     @endif
@@ -106,12 +131,15 @@
                                             </div>
                                         @endif
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                         @if (in_array($transfer->estado, ['en tránsito', 'recibida totalmente', 'recibida parcialmente'], true))
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                                             <form method="POST" action="{{ route('management.inventory.transfer_close', $transfer) }}" class="tc-il__transfer-actions">@csrf<input type="hidden" name="clave_idempotencia" value="{{ \Illuminate\Support\Str::uuid() }}"><label>Nota de cierre si hay diferencias<input type="text" name="motivo" minlength="5" maxlength="500"></label><button class="tc-il__button tc-il__button--primary" type="submit">Cerrar transferencia</button></form>
                                         @endif
 
                                         <h3>Movimientos registrados</h3>
                                         <div class="tc-il__table-wrap"><table><thead><tr><th>Movimiento</th><th>Producto</th><th>Cantidad</th><th>Almacén</th><th>Usuario</th><th>Fecha</th></tr></thead><tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                                             @forelse ($movements->get((string) $transfer->id, collect()) as $movement)
                                                 <tr><td>{{ str_replace('transferencia_', '', $movement->documento_tipo) }}</td><td>{{ $movement->product?->nombre }}</td><td>{{ abs((float) $movement->cantidad) }}</td><td>{{ $movement->almacen?->nombre ?? $movement->almacen_id }}</td><td>{{ $movement->user?->nombre ?? '—' }}</td><td>{{ $movement->creado_en?->format('d/m/Y H:i:s') }}</td></tr>
                                             @empty
@@ -132,7 +160,9 @@
     </article>
 
     <dialog class="tc-il__dialog" data-transfer-dialog aria-labelledby="transfer-create-title">
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
         <form method="POST" action="{{ route('management.inventory.transfer_request') }}" class="tc-il__dialog-card" data-transfer-create-form>
+{{-- proteccion CSRF que valida el origen del formulario. --}}
             @csrf
             <input type="hidden" name="clave_idempotencia" value="{{ \Illuminate\Support\Str::uuid() }}">
             <header class="tc-il__dialog-header"><div><span class="tc-il__dialog-icon"><i class="bi bi-arrow-left-right" aria-hidden="true"></i></span><div><h2 id="transfer-create-title">Nueva solicitud</h2><p>La solicitud no reserva ni descuenta existencias.</p></div></div><button type="button" class="tc-il__dialog-close" data-transfer-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>

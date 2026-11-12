@@ -17,6 +17,7 @@ class ActualizarContrasenaRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return $this->user() !== null;
@@ -27,10 +28,13 @@ class ActualizarContrasenaRequest extends FormRequest
      *
      * @return array Resultado de la operación.
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         return [
+            // Valida el campo 'password_actual' con las reglas definidas en la instruccion siguiente.
             'password_actual' => ['required', 'current_password'],
+            // Valida el campo 'password' con las reglas definidas en la instruccion siguiente.
             'password' => ['required', 'confirmed', Password::min(10)->letters()->numbers()],
         ];
     }

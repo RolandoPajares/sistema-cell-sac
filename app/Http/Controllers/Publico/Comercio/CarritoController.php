@@ -46,12 +46,18 @@ class CarritoController extends Controller
      */
     public function index(Request $request): View
     {
+        // Guarda en $cart el resultado necesario para continuar esta operacion.
         $cart = $this->carritoService->normalizar((array) $request->session()->get('cart', []));
+        // Prepara en $products la consulta que obtiene o modifica los registros necesarios.
         $products = Producto::query()->with('images', 'variants')->active()->whereIn('id', array_keys($cart))->get()->keyBy('id');
+        // Guarda en $lines el resultado necesario para continuar esta operacion.
         $lines = collect($cart)->map(function (array $linea, int $id) use ($products): ?array {
+            // Guarda en $product el resultado necesario para continuar esta operacion.
             $product = $products->get((int) $id);
+            // Guarda en $varianteId el resultado necesario para continuar esta operacion.
             $varianteId = $linea['variante_id'];
             $variante = $varianteId === null ? null : $product?->variants->firstWhere('id', $varianteId);
+            // Guarda en $disponible el resultado necesario para continuar esta operacion.
             $disponible = $product ? $this->inventario->disponibilidadPublica($product, $varianteId) : 0;
 
             return $product ? [
@@ -63,6 +69,7 @@ class CarritoController extends Controller
             ] : null;
         })->filter()->values();
 
+        // Devuelve la vista 'publico.comercio.carrito' con los datos preparados por este controlador.
         return view('publico.comercio.carrito', ['lines' => $lines, 'total' => $lines->sum('subtotal')]);
     }
 
@@ -81,32 +88,48 @@ class CarritoController extends Controller
      */
     public function add(AgregarCarritoRequest $request, Producto $product): RedirectResponse
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($product->activo, 404);
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $quantity = (int) ($request->validated('cantidad') ?? 1);
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $variantId = $request->validated('variante_id');
         $variantId = $variantId === null ? null : (int) $variantId;
+        // Guarda en $hasVariants el resultado necesario para continuar esta operacion.
         $hasVariants = $product->variants()->exists();
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_if($hasVariants && $variantId === null, 422, 'Selecciona una variante.');
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_if(! $hasVariants && $variantId !== null, 422, 'Esta combinación no está disponible.');
+        // Comprueba la condicion $variantId !== null antes de ejecutar este bloque.
         if ($variantId !== null) {
+            // Detiene la solicitud si se cumple la validacion de seguridad indicada.
             abort_unless($product->variants()->whereKey($variantId)->where('estado', 'activo')->exists(), 422, 'Esta combinación no está disponible.');
         }
+        // Guarda en $disponible el resultado necesario para continuar esta operacion.
         $disponible = $this->inventario->disponibilidadPublica($product, $variantId);
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_if($disponible < $quantity, 422, 'La cantidad supera el stock disponible.');
 
+        // Guarda en $cart el resultado necesario para continuar esta operacion.
         $cart = $this->carritoService->normalizar((array) $request->session()->get('cart', []));
+        // Guarda en $existente el resultado necesario para continuar esta operacion.
         $existente = $cart[$product->id] ?? null;
         $nuevaCantidad = $existente !== null && $existente['variante_id'] === $variantId
             ? $existente['cantidad'] + $quantity
             : $quantity;
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_if($nuevaCantidad > $disponible, 422, 'La cantidad supera el stock disponible.');
         $cart[$product->id] = ['cantidad' => $nuevaCantidad, 'variante_id' => $variantId];
         $request->session()->put('cart', $cart);
 
+        // Comprueba la condicion $request->boolean('comprar_ahora') antes de ejecutar este bloque.
         if ($request->boolean('comprar_ahora')) {
+            // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
             return redirect()->route('checkout.form');
         }
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Producto agregado al carrito.');
     }
 
@@ -124,21 +147,29 @@ class CarritoController extends Controller
      */
     public function update(ActualizarCarritoRequest $request, Producto $product): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $quantity = (int) $request->validated('cantidad');
+        // Guarda en $cart el resultado necesario para continuar esta operacion.
         $cart = $this->carritoService->normalizar((array) $request->session()->get('cart', []));
+        // Guarda en $linea el resultado necesario para continuar esta operacion.
         $linea = $cart[$product->id] ?? null;
 
+        // Comprueba la condicion $quantity === 0 antes de ejecutar este bloque.
         if ($quantity === 0) {
             unset($cart[$product->id]);
         } else {
+            // Detiene la solicitud si se cumple la validacion de seguridad indicada.
             abort_unless($linea !== null, 404);
+            // Guarda en $disponible el resultado necesario para continuar esta operacion.
             $disponible = $this->inventario->disponibilidadPublica($product, $linea['variante_id']);
+            // Detiene la solicitud si se cumple la validacion de seguridad indicada.
             abort_if($quantity > $disponible, 422, 'La cantidad supera el stock disponible.');
             $cart[$product->id]['cantidad'] = $quantity;
         }
 
         $request->session()->put('cart', $cart);
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back();
     }
 
@@ -151,10 +182,12 @@ class CarritoController extends Controller
      */
     public function remove(Request $request, Producto $product): RedirectResponse
     {
+        // Guarda en $cart el resultado necesario para continuar esta operacion.
         $cart = (array) $request->session()->get('cart', []);
         unset($cart[$product->id]);
         $request->session()->put('cart', $cart);
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Producto retirado del carrito.');
     }
 
@@ -168,6 +201,7 @@ class CarritoController extends Controller
     {
         $request->session()->forget(['cart', 'coupon_code']);
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Carrito vaciado.');
     }
 
@@ -179,23 +213,31 @@ class CarritoController extends Controller
      */
     public function updateLegacy(Request $request): RedirectResponse
     {
+        // Guarda en $submitted el resultado necesario para continuar esta operacion.
         $submitted = (array) $request->input('cart', $request->input('items', []));
+        // Guarda en $cart el resultado necesario para continuar esta operacion.
         $cart = $this->carritoService->normalizar($submitted);
 
+        // Recorre $cart as $id => $linea y procesa cada elemento de la coleccion.
         foreach ($cart as $id => $linea) {
+            // Guarda en $quantity el resultado necesario para continuar esta operacion.
             $quantity = $linea['cantidad'];
+            // Prepara en $product la consulta que obtiene o modifica los registros necesarios.
             $product = Producto::query()->find((int) $id);
 
+            // Comprueba la condicion ! $product || $quantity < 1 antes de ejecutar este bloque.
             if (! $product || $quantity < 1) {
                 continue;
             }
 
+            // Guarda en $disponible el resultado necesario para continuar esta operacion.
             $disponible = $this->inventario->disponibilidadPublica($product, $linea['variante_id']);
             $cart[(int) $id]['cantidad'] = min($quantity, $disponible);
         }
 
         $request->session()->put('cart', array_filter($cart, fn (array $linea): bool => $linea['cantidad'] > 0));
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Carrito actualizado.');
     }
 
@@ -207,19 +249,25 @@ class CarritoController extends Controller
      */
     public function applyCoupon(AplicarCuponRequest $request): RedirectResponse
     {
+        // Guarda en $code el resultado necesario para continuar esta operacion.
         $code = mb_strtoupper($request->string('codigo')->trim()->toString());
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(Schema::hasColumn('cupones', 'empresa_id'), 503,
             'Los cupones no están disponibles hasta configurar su empresa propietaria.');
         $ubicacion = $request->user() !== null
             ? $this->autorizacion->operationLocation($request->user())
             : ['empresa_id' => $this->autorizacion->activeCompanyId()];
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($ubicacion['empresa_id'] !== null, 503, 'No hay una empresa autorizada para validar el cupón.');
+        // Prepara en $coupon la consulta que obtiene o modifica los registros necesarios.
         $coupon = Cupon::query()->where('empresa_id', $ubicacion['empresa_id'])->where('codigo', $code)->where('activo', true)
             ->where('inicia_en', '<=', now())->where('finaliza_en', '>=', now())->first();
 
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($coupon && ($coupon->limite_usos === null || $coupon->usos < $coupon->limite_usos), 422, 'Cupón no válido o agotado.');
         $request->session()->put('coupon_code', $coupon->codigo);
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Cupón guardado. El descuento se validará nuevamente al confirmar el pedido.');
     }
 }

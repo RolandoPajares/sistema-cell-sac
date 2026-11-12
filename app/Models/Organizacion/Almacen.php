@@ -21,8 +21,10 @@ class Almacen extends Model
     /** @use HasFactory<AlmacenFactory> */
     use HasFactory;
 
+    // Usa la tabla 'almacenes' como origen de los registros de este modelo.
     protected $table = 'almacenes';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['sede_id', 'codigo', 'nombre', 'tipo', 'permite_venta', 'activo'];
 
     /**

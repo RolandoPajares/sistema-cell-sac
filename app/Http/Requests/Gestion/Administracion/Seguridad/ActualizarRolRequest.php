@@ -19,6 +19,7 @@ class ActualizarRolRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return $this->user() !== null
@@ -30,14 +31,18 @@ class ActualizarRolRequest extends FormRequest
      *
      * @return array Resultado de la operación.
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         $role = $this->route('role');
         $roleId = $role instanceof Rol ? $role->getKey() : $role;
 
         return [
+            // Valida el campo 'nombre' con las reglas definidas en la instruccion siguiente.
             'nombre' => ['required', 'string', 'max:120', Rule::unique('roles', 'nombre')->ignore($roleId)],
+            // Valida el campo 'descripcion' con las reglas definidas en la instruccion siguiente.
             'descripcion' => ['nullable', 'string', 'max:255'],
+            // Valida el campo 'alcance_permitido' con las reglas definidas en la instruccion siguiente.
             'alcance_permitido' => ['required', Rule::in(['empresa', 'sede', 'propio'])],
         ];
     }

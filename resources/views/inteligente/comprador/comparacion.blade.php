@@ -1,8 +1,12 @@
 @extends('layouts.tienda.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-comparador')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Comparador inteligente')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
     <section class="smart-page">
         <div class="comparator-reference-hero comparator-reference-hero--full">
@@ -14,12 +18,15 @@
         </div>
         <div class="container">
             <div class="comparator-steps" aria-label="Pasos del comparador"><span><b>1</b> Selecciona hasta 3 equipos</span><span><b>2</b> Compara características</span><span><b>3</b> Elige el ideal para ti</span></div>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form class="panel smart-form compare-picker" method="get" id="compareForm">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @for ($slot = 1; $slot <= 3; $slot++)
                     <label>
                         Equipo {{ $slot }}
                         <select class="compare-select">
                             <option value="">-- Opcional --</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                             @foreach ($availableProducts as $option)
                                 <option value="{{ $option->id }}" @selected((string) $selectedIds->get($slot - 1) === (string) $option->id)>
                                     {{ $option->marca }} {{ $option->nombre }}
@@ -32,8 +39,10 @@
                 <button class="btn btn-primary" type="submit">Comparar ahora</button>
             </form>
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if ($products->isNotEmpty())
                 <div class="comparison-grid">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach ($products as $product)
 <article class="panel comparison-card">
     <img class="comparison-product-photo" src="{{ $product->comparison_image }}" alt="{{ $product->marca }} {{ $product->nombre }}" loading="lazy">
@@ -51,6 +60,7 @@
 
                     @endforeach
                 </div>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
             @else
                 <div class="panel comparison-empty">
                     <i class="bi bi-columns-gap"></i>

@@ -12,10 +12,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class PerfilInteligenciaProducto extends Model
 {
+    // Usa la tabla 'perfiles_inteligentes_productos' como origen de los registros de este modelo.
     protected $table = 'perfiles_inteligentes_productos';
 
     protected $primaryKey = 'producto_id';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['producto_id', 'puntuacion_rendimiento', 'puntuacion_camara', 'puntuacion_bateria', 'puntuacion_valor', 'actualizado_en'];
 
     public $incrementing = false;

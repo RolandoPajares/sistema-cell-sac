@@ -1,3 +1,4 @@
+
 <div class="tc-cs__grid tc-cs__grid--notify">
     <div>
         <article class="tc-cs__card">
@@ -13,6 +14,7 @@
 
         <article class="tc-cs__card tc-cs__section">
             <h2><i class="bi bi-list-ul" aria-hidden="true"></i> Eventos de notificaciones recientes</h2>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form method="GET" class="tc-cs__toolbar">
                 <label><i class="bi bi-search" aria-hidden="true"></i><input type="search" name="buscar" value="{{ $filtros['buscar'] ?? '' }}" placeholder="Buscar en tus notificaciones…"></label>
                 <select name="estado" aria-label="Estado de notificaciones">
@@ -23,6 +25,7 @@
                 <button type="submit" class="tc-cs__button">Buscar</button>
             </form>
             <div class="tc-cs__table-wrap"><table><thead><tr><th>Tipo</th><th>Contenido</th><th>Estado</th><th>Fecha</th><th>Acción</th></tr></thead><tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @forelse ($notificaciones as $notificacion)
                     <tr><td>{{ $notificacion->nombreTipo() }}</td><td>{{ $notificacion->datosLegibles() }}</td><td>{{ $notificacion->leido_en ? 'Leída' : 'No leída' }}</td><td>{{ $notificacion->creado_en }}</td><td>@if (! $notificacion->leido_en)<form method="post" action="{{ route('management.account.notifications.read', $notificacion->getKey()) }}">@csrf @method('PATCH')<button type="submit" class="tc-cs__text-button">Marcar como leída</button></form>@else<span>—</span>@endif</td></tr>
                 @empty

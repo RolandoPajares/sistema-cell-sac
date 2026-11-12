@@ -1,8 +1,12 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Soporte y reclamos')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-soporte-reclamos')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section class="gestion-soporte-page" data-pending-module="soporte-reclamos" data-backend="true">
     <header class="gestion-soporte-header">
@@ -26,6 +30,7 @@
     </header>
 
     <section class="gestion-soporte-kpis" aria-label="Indicadores de soporte">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
         @foreach ($module['kpis'] as $kpi)
             <article class="gestion-soporte-kpi gestion-soporte-kpi--{{ $kpi['tone'] }}">
                 <span class="gestion-soporte-kpi-icon"><i class="bi {{ $kpi['icon'] }}" aria-hidden="true"></i></span>
@@ -35,6 +40,7 @@
         @endforeach
     </section>
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
     <form class="gestion-soporte-filters" method="GET" action="{{ route('management.support') }}">
         <label class="gestion-soporte-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar tickets</span><input name="buscar" type="search" value="{{ $module['filters']['buscar'] ?? '' }}" placeholder="Buscar ticket o asunto..."></label>
         <label><span class="visually-hidden">Filtrar por prioridad</span><select name="prioridad"><option value="">Prioridad: Todas</option><option value="alta" @selected(($module['filters']['prioridad'] ?? '') === 'alta')>Alta</option><option value="normal" @selected(($module['filters']['prioridad'] ?? '') === 'normal')>Normal</option><option value="baja" @selected(($module['filters']['prioridad'] ?? '') === 'baja')>Baja</option><option value="urgente" @selected(($module['filters']['prioridad'] ?? '') === 'urgente')>Urgente</option></select></label>
@@ -53,6 +59,7 @@
             <table class="gestion-soporte-table">
                 <thead><tr>@foreach ($module['tableColumns'] as $column)<th>{{ $column }}</th>@endforeach</tr></thead>
                 <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @forelse ($module['rows'] ?? [] as $row)
                     <tr><td>{{ $row['codigo'] }}</td><td>{{ $row['cliente'] }}</td><td>{{ $row['asunto'] }}</td><td>{{ $row['prioridad'] }}</td><td>{{ $row['estado'] }}</td><td>{{ $row['actualizado'] }}</td><td><button type="button" aria-label="Ver caso" data-pending-open="ver" data-pending-record="{{ base64_encode(json_encode($row['record'], JSON_UNESCAPED_UNICODE)) }}"><i class="bi bi-eye" aria-hidden="true"></i></button><button type="button" aria-label="Editar caso" data-pending-open="editar" data-pending-action="{{ $row['edit_url'] }}" data-pending-record="{{ base64_encode(json_encode($row['record'], JSON_UNESCAPED_UNICODE)) }}"><i class="bi bi-pencil" aria-hidden="true"></i></button><button type="button" aria-label="Cerrar caso" data-pending-open="eliminar" data-pending-action="{{ $row['delete_url'] }}" data-pending-method="PATCH" data-pending-record="{{ base64_encode(json_encode($row['record'], JSON_UNESCAPED_UNICODE)) }}"><i class="bi bi-check2-circle" aria-hidden="true"></i></button></td></tr>
                 @empty
@@ -89,6 +96,7 @@
     <div class="gestion-pendiente-modal-body">
         <div class="gestion-pendiente-modal-notice"><i class="bi bi-info-circle" aria-hidden="true"></i><div><strong>Vista preparada para integración</strong><p>No hay un registro real seleccionado. El detalle se poblará desde el backend cuando se conecte este módulo.</p></div></div>
         <div class="gestion-pendiente-detail-grid">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @foreach (($module['fields'] ?? []) as $field)
                 <div><small>{{ $field['label'] }}</small><strong>—</strong></div>
             @endforeach

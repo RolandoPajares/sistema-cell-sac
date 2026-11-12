@@ -1,6 +1,10 @@
+/* Define los estilos visuales del modulo o componente 'publicidad'. */
+
+/* Aplica estos estilos al bloque '.body-publicidad-abierta'. */
 .body-publicidad-abierta {
   overflow: hidden;
 }
+/* Aplica estos estilos al bloque '.publicidad-modal-fondo'. */
 .publicidad-modal-fondo {
   position: fixed;
   inset: 0;
@@ -12,9 +16,11 @@
   backdrop-filter: blur(5px);
 }
 .publicidad-modal-fondo[hidden],
+/* Aplica estos estilos al bloque '.publicidad-contextual[hidden]'. */
 .publicidad-contextual[hidden] {
   display: none;
 }
+/* Aplica estos estilos al bloque '.publicidad-modal'. */
 .publicidad-modal {
   position: relative;
   display: grid;
@@ -28,6 +34,7 @@
   box-shadow: 0 30px 100px rgba(0, 0, 0, 0.42);
   animation: entradaPublicidad 0.32s ease-out;
 }
+/* Aplica estos estilos al bloque '.publicidad-modal-arte'. */
 .publicidad-modal-arte {
   position: relative;
   min-height: 450px;
@@ -66,6 +73,7 @@
   left: -100px;
   bottom: -100px;
 }
+/* Aplica estos estilos al bloque '.publicidad-modal-arte > span'. */
 .publicidad-modal-arte > span {
   position: relative;
   z-index: 1;
@@ -81,24 +89,29 @@
 }
 .publicidad-modal-arte > b,
 .publicidad-modal-arte > strong,
+/* Aplica estos estilos al bloque '.publicidad-modal-arte > small'. */
 .publicidad-modal-arte > small {
   position: relative;
   z-index: 1;
 }
+/* Aplica estos estilos al bloque '.publicidad-modal-arte > b'. */
 .publicidad-modal-arte > b {
   font-size: 1rem;
   letter-spacing: 0.32em;
 }
+/* Aplica estos estilos al bloque '.publicidad-modal-arte > strong'. */
 .publicidad-modal-arte > strong {
   font-size: 2.25rem;
   line-height: 1.05;
 }
+/* Aplica estos estilos al bloque '.publicidad-modal-arte > small'. */
 .publicidad-modal-arte > small {
   max-width: 250px;
   margin-top: 15px;
   line-height: 1.5;
   opacity: 0.84;
 }
+/* Aplica estos estilos al bloque '.publicidad-modal-contenido'. */
 .publicidad-modal-contenido {
   display: flex;
   flex-direction: column;
@@ -106,6 +119,7 @@
   align-items: flex-start;
   padding: 44px;
 }
+/* Aplica estos estilos al bloque '.publicidad-etiqueta'. */
 .publicidad-etiqueta {
   display: inline-flex;
   align-items: center;
@@ -118,17 +132,20 @@
   font-weight: 900;
   letter-spacing: 0.04em;
 }
+/* Aplica estos estilos al bloque '.publicidad-modal-contenido h2'. */
 .publicidad-modal-contenido h2 {
   margin: 15px 0 9px;
   color: var(--text);
   font-size: clamp(1.85rem, 4vw, 2.55rem);
   line-height: 1.04;
 }
+/* Aplica estos estilos al bloque '.publicidad-modal-contenido p'. */
 .publicidad-modal-contenido p {
   margin: 0 0 18px;
   color: var(--muted);
   line-height: 1.65;
 }
+/* Aplica estos estilos al bloque '.publicidad-beneficios'. */
 .publicidad-beneficios {
   display: flex;
   flex-wrap: wrap;
@@ -138,22 +155,27 @@
   font-size: 0.78rem;
   font-weight: 800;
 }
+/* Aplica estos estilos al bloque '.publicidad-precio'. */
 .publicidad-precio {
   display: flex;
   align-items: baseline;
   gap: 12px;
   margin-bottom: 22px;
 }
+/* Aplica estos estilos al bloque '.publicidad-precio del'. */
 .publicidad-precio del {
   color: var(--muted);
 }
+/* Aplica estos estilos al bloque '.publicidad-precio strong'. */
 .publicidad-precio strong {
   color: var(--primary);
   font-size: 2rem;
 }
+/* Aplica estos estilos al bloque '.publicidad-modal-contenido > .btn'. */
 .publicidad-modal-contenido > .btn {
   min-width: 210px;
 }
+/* Aplica estos estilos al bloque '.publicidad-despues'. */
 .publicidad-despues {
   align-self: center;
   border: 0;
@@ -163,6 +185,7 @@
   cursor: pointer;
   text-decoration: underline;
 }
+/* Aplica estos estilos al bloque '.publicidad-cerrar'. */
 .publicidad-cerrar {
   position: absolute;
   right: 12px;
@@ -179,6 +202,7 @@
   cursor: pointer;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.13);
 }
+/* Aplica estos estilos al bloque '.publicidad-contextual'. */
 .publicidad-contextual {
   position: fixed;
   right: 20px;
@@ -196,12 +220,14 @@
   box-shadow: 0 22px 65px rgba(11, 31, 74, 0.22);
   animation: subePublicidad 0.3s ease-out;
 }
+/* Aplica estos estilos al bloque '.publicidad-contextual .publicidad-cerrar'. */
 .publicidad-contextual .publicidad-cerrar {
   right: 6px;
   top: -13px;
   width: 28px;
   height: 28px;
 }
+/* Aplica estos estilos al bloque '.publicidad-contextual-icono'. */
 .publicidad-contextual-icono {
   width: 48px;
   height: 48px;
@@ -215,30 +241,36 @@
 }
 .publicidad-contextual small,
 .publicidad-contextual b,
+/* Aplica estos estilos al bloque '.publicidad-contextual p'. */
 .publicidad-contextual p {
   display: block;
 }
+/* Aplica estos estilos al bloque '.publicidad-contextual small'. */
 .publicidad-contextual small {
   color: #0873f9;
   font-size: 0.65rem;
   font-weight: 900;
   letter-spacing: 0.05em;
 }
+/* Aplica estos estilos al bloque '.publicidad-contextual b'. */
 .publicidad-contextual b {
   margin: 2px 0;
   color: var(--text);
 }
+/* Aplica estos estilos al bloque '.publicidad-contextual p'. */
 .publicidad-contextual p {
   margin: 0;
   color: var(--muted);
   font-size: 0.76rem;
   line-height: 1.35;
 }
+/* Aplica estos estilos al bloque '.publicidad-contextual > .btn'. */
 .publicidad-contextual > .btn {
   white-space: nowrap;
   font-size: 0.78rem;
   padding: 10px 12px;
 }
+/* Aplica estos estilos al bloque '.publicidad-lanzador'. */
 .publicidad-lanzador {
   position: fixed;
   left: 16px;
@@ -262,53 +294,67 @@
 .publicidad-lanzador:hover {
   transform: translateY(-2px);
 }
+/* Aplica estos estilos al bloque '.publicidad-lanzador i'. */
 .publicidad-lanzador i {
   font-size: 1rem;
 }
+/* Aplica estos estilos al bloque '@keyframes entradaPublicidad'. */
 @keyframes entradaPublicidad {
+/* Aplica estos estilos al bloque 'from'. */
   from {
     opacity: 0;
     transform: translateY(16px) scale(0.98);
   }
+/* Aplica estos estilos al bloque 'to'. */
   to {
     opacity: 1;
     transform: none;
   }
 }
+/* Aplica estos estilos al bloque '@keyframes subePublicidad'. */
 @keyframes subePublicidad {
+/* Aplica estos estilos al bloque 'from'. */
   from {
     opacity: 0;
     transform: translateY(18px);
   }
+/* Aplica estos estilos al bloque 'to'. */
   to {
     opacity: 1;
     transform: none;
   }
 }
 @media (max-width: 760px) {
+/* Aplica estos estilos al bloque '.publicidad-modal'. */
   .publicidad-modal {
     grid-template-columns: 1fr;
     width: min(520px, 96vw);
   }
+/* Aplica estos estilos al bloque '.publicidad-modal-arte'. */
   .publicidad-modal-arte {
     min-height: 180px;
     padding: 24px;
   }
+/* Aplica estos estilos al bloque '.publicidad-modal-arte > span'. */
   .publicidad-modal-arte > span {
     width: 68px;
     height: 68px;
     margin-bottom: 10px;
     font-size: 2.3rem;
   }
+/* Aplica estos estilos al bloque '.publicidad-modal-arte > strong'. */
   .publicidad-modal-arte > strong {
     font-size: 1.65rem;
   }
+/* Aplica estos estilos al bloque '.publicidad-modal-arte > small'. */
   .publicidad-modal-arte > small {
     display: none;
   }
+/* Aplica estos estilos al bloque '.publicidad-modal-contenido'. */
   .publicidad-modal-contenido {
     padding: 27px 24px;
   }
+/* Aplica estos estilos al bloque '.publicidad-contextual'. */
   .publicidad-contextual {
     left: 12px;
     right: 12px;
@@ -316,47 +362,60 @@
     width: auto;
     grid-template-columns: auto 1fr;
   }
+/* Aplica estos estilos al bloque '.publicidad-contextual > .btn'. */
   .publicidad-contextual > .btn {
     grid-column: 1/-1;
     width: 100%;
   }
+/* Aplica estos estilos al bloque '.publicidad-lanzador'. */
   .publicidad-lanzador {
     left: 10px;
     bottom: 10px;
   }
+/* Aplica estos estilos al bloque '.publicidad-modal-contenido > .btn'. */
   .publicidad-modal-contenido > .btn {
     width: 100%;
   }
 }
 @media (max-width: 430px) {
+/* Aplica estos estilos al bloque '.publicidad-modal-fondo'. */
   .publicidad-modal-fondo {
     padding: 10px;
   }
+/* Aplica estos estilos al bloque '.publicidad-modal'. */
   .publicidad-modal {
     max-height: 96vh;
     border-radius: 20px;
   }
+/* Aplica estos estilos al bloque '.publicidad-modal-arte'. */
   .publicidad-modal-arte {
     min-height: 145px;
   }
+/* Aplica estos estilos al bloque '.publicidad-modal-contenido'. */
   .publicidad-modal-contenido {
     padding: 22px 19px;
   }
+/* Aplica estos estilos al bloque '.publicidad-modal-contenido h2'. */
   .publicidad-modal-contenido h2 {
     font-size: 1.75rem;
   }
+/* Aplica estos estilos al bloque '.publicidad-beneficios'. */
   .publicidad-beneficios {
     margin-bottom: 14px;
   }
+/* Aplica estos estilos al bloque '.publicidad-contextual-icono'. */
   .publicidad-contextual-icono {
     display: none;
   }
+/* Aplica estos estilos al bloque '.publicidad-contextual'. */
   .publicidad-contextual {
     grid-template-columns: 1fr;
   }
+/* Aplica estos estilos al bloque '.publicidad-lanzador span'. */
   .publicidad-lanzador span {
     display: none;
   }
+/* Aplica estos estilos al bloque '.publicidad-lanzador'. */
   .publicidad-lanzador {
     width: 44px;
     height: 44px;
@@ -366,9 +425,11 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .publicidad-modal,
+/* Aplica estos estilos al bloque '.publicidad-contextual'. */
   .publicidad-contextual {
     animation: none;
   }
+/* Aplica estos estilos al bloque '.publicidad-lanzador'. */
   .publicidad-lanzador {
     transition: none;
   }

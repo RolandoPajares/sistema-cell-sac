@@ -1,19 +1,25 @@
 @extends('layouts.auth.principal')
 
+
 {{-- Configuración de la clase CSS del cuerpo y el título de la página --}}
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-autenticacion')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Iniciar sesión')
 
 {{-- Carga de los estilos CSS específicos del formulario de login --}}
+{{-- bloque de estilos o scripts para el lugar reservado por la plantilla. --}}
 @push('styles')
     @vite('resources/css/auth/login.css')
 @endpush
 
 {{-- Carga del script JS para alternar la visibilidad de la contraseña --}}
+{{-- bloque de estilos o scripts para el lugar reservado por la plantilla. --}}
 @push('scripts')
     @vite('resources/js/auth/login.js')
 @endpush
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 {{-- Contenedor principal de la pantalla de autenticación --}}
 <div class="auth-reference">
@@ -36,6 +42,7 @@
             <h2>Iniciar sesión</h2>
 
             {{-- Alerta de errores de validación enviados desde el servidor --}}
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if ($errors->any())
                 <div class="alert alert-error" role="alert">{{ $errors->first() }}</div>
             @endif
@@ -44,7 +51,9 @@
 
 
             {{-- Formulario principal de inicio de sesión con token CSRF --}}
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form method="POST" action="{{ route('login.store') }}" novalidate>
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                 @csrf
 
                 {{-- Campo de entrada para el correo electrónico --}}

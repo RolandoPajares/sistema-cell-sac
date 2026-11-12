@@ -26,6 +26,7 @@ class InicioController extends Controller
      */
     public function __invoke(Request $request, ServicioCatalogo $catalogo): View
     {
+        // Prepara en $productosDestacados la consulta que obtiene o modifica los registros necesarios.
         $productosDestacados = $catalogo->conExistenciasPotenciales(Producto::query()
             ->with(['category', 'images'])
             ->active())
@@ -39,7 +40,9 @@ class InicioController extends Controller
         $catalogo->agregarDisponibilidad($productosDestacados, auth()->user());
         $productosDestacados = $productosDestacados->filter(fn (Producto $producto): bool => $producto->existencias_disponibles > 0)
             ->take(20)->map(function (Producto $producto): Producto {
+                // Guarda en $precioOriginal el resultado necesario para continuar esta operacion.
                 $precioOriginal = (float) $producto->precio_original;
+                // Guarda en $precioOferta el resultado necesario para continuar esta operacion.
                 $precioOferta = (float) $producto->precio_oferta;
 
                 $producto->setAttribute('display_original_price', $precioOriginal);
@@ -49,8 +52,10 @@ class InicioController extends Controller
                 return $producto;
             });
 
+        // Prepara en $categorias la consulta que obtiene o modifica los registros necesarios.
         $categorias = Categoria::query()->where('activo', true)->get();
 
+        // Devuelve la vista 'publico.paginas.inicio' con los datos preparados por este controlador.
         return view('publico.paginas.inicio', [
             'productosDestacados' => $productosDestacados,
             'idCategoriaCelulares' => $this->idCategoria($categorias, 'celular'),

@@ -1,8 +1,12 @@
 @extends('layouts.tienda.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Portal mayorista')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-mayorista')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
     <section class="mayorista-hero">
         <div class="container mayorista-hero-grid">
@@ -15,6 +19,7 @@
                     <a class="btn btn-ghost" href="#catalogo-b2b"><i class="bi bi-grid"></i> Ver catálogo mayorista</a>
                 </div>
                 <div class="mayorista-beneficios">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach ($benefits as $benefit)
                         <span><i class="bi {{ $benefit['icon'] }}"></i>{{ $benefit['label'] }}</span>
                     @endforeach
@@ -35,6 +40,7 @@
 
     <section class="container marcas-mayorista">
         <b>Las mejores marcas<br>para tu negocio</b>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
         @foreach (['SAMSUNG', 'Apple', 'oppo', 'XIAOMI', 'HONOR', 'JBL', 'Beats'] as $brand)
             <span>{{ $brand }}</span>
         @endforeach
@@ -57,6 +63,7 @@
                 <a href="{{ route('catalog.index') }}">Ver todo el catálogo <i class="bi bi-arrow-right"></i></a>
             </header>
             <div class="productos-mayorista">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @forelse ($products as $product)
                     <article>
                         <span>Disponible</span>
@@ -75,7 +82,9 @@
         <aside class="cotizacion-rapida" id="solicitar-cotizacion">
             <h2>Solicita tu cotización mayorista</h2>
             <p>Cuéntanos sobre tu empresa y te enviaremos una propuesta personalizada.</p>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form action="{{ route('pages.contact.store') }}" method="post">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                 @csrf
                 <input type="hidden" name="nombre" value="{{ $currentUserName ?: 'Solicitud mayorista' }}">
                 <input type="hidden" name="contacto" value="{{ $currentUserEmail ?: 'Portal mayorista' }}">

@@ -31,11 +31,13 @@ class TransferenciaExistenciaController extends Controller
      */
     public function index(Request $request, ServicioTransferenciasExistencias $transfers): View
     {
+        // Guarda en $filters el resultado necesario para continuar esta operacion.
         $filters = $request->validate([
             'buscar' => ['nullable', 'string', 'max:100'],
             'estado' => ['nullable', 'in:solicitada,aprobada,en tránsito,recibida parcialmente,recibida totalmente,cerrada,rechazada,cancelada'],
         ]);
 
+        // Devuelve la vista 'gestion.inventario-logistica.transferencias.listar' con los datos preparados por este controlador.
         return view('gestion.inventario-logistica.transferencias.listar', [
             ...$transfers->pageData($this->actor($request), [
                 'buscar' => trim((string) ($filters['buscar'] ?? '')) ?: null,
@@ -54,6 +56,7 @@ class TransferenciaExistenciaController extends Controller
      */
     public function store(GuardarTransferenciaExistenciaRequest $request, ServicioTransferenciasExistencias $transfers): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $transfer = $transfers->request($request->validated(), $this->actor($request), $request->ip());
 
         return $this->success('Se registro la solicitud '.$transfer->codigo.'. No se modifico el inventario.');
@@ -69,6 +72,7 @@ class TransferenciaExistenciaController extends Controller
      */
     public function approve(AccionTransferenciaExistenciaRequest $request, TransferenciaExistencia $transfer, ServicioTransferenciasExistencias $transfers): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $transfers->approve($transfer, $this->actor($request), $request->validated('clave_idempotencia'), $request->ip());
 
         return $this->success('Transferencia aprobada. El inventario sigue sin cambios hasta el despacho.');
@@ -84,6 +88,7 @@ class TransferenciaExistenciaController extends Controller
      */
     public function dispatch(AccionTransferenciaExistenciaRequest $request, TransferenciaExistencia $transfer, ServicioTransferenciasExistencias $transfers): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $transfers->dispatch($transfer, $request->validated(), $this->actor($request), $request->ip());
 
         return $this->success('Despacho registrado; las cantidades quedaron en transito.');
@@ -99,6 +104,7 @@ class TransferenciaExistenciaController extends Controller
      */
     public function receive(AccionTransferenciaExistenciaRequest $request, TransferenciaExistencia $transfer, ServicioTransferenciasExistencias $transfers): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $updated = $transfers->receive($transfer, $request->validated(), $this->actor($request), $request->ip());
 
         return $this->success('Recepcion registrada: '.$updated->estado.'.');
@@ -114,6 +120,7 @@ class TransferenciaExistenciaController extends Controller
      */
     public function returnToOrigin(AccionTransferenciaExistenciaRequest $request, TransferenciaExistencia $transfer, ServicioTransferenciasExistencias $transfers): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $transfers->returnToOrigin($transfer, $request->validated(), $this->actor($request), $request->ip());
 
         return $this->success('Devolucion al almacen de origen registrada y auditada.');
@@ -129,6 +136,7 @@ class TransferenciaExistenciaController extends Controller
      */
     public function reconcileDifference(AccionTransferenciaExistenciaRequest $request, TransferenciaExistencia $transfer, ServicioTransferenciasExistencias $transfers): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $transfers->reconcileDifference($transfer, $request->validated(), $this->actor($request), $request->ip());
 
         return $this->success('Diferencia conciliada y auditada; no se modificaron existencias.');
@@ -144,6 +152,7 @@ class TransferenciaExistenciaController extends Controller
      */
     public function reject(AccionTransferenciaExistenciaRequest $request, TransferenciaExistencia $transfer, ServicioTransferenciasExistencias $transfers): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $transfers->reject($transfer, $request->validated(), $this->actor($request), $request->ip());
 
         return $this->success('Solicitud rechazada. No se modifico el inventario.');
@@ -159,6 +168,7 @@ class TransferenciaExistenciaController extends Controller
      */
     public function cancel(AccionTransferenciaExistenciaRequest $request, TransferenciaExistencia $transfer, ServicioTransferenciasExistencias $transfers): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $transfers->cancel($transfer, $request->validated(), $this->actor($request), $request->ip());
 
         return $this->success('Transferencia cancelada. No se modifico el inventario.');
@@ -174,6 +184,7 @@ class TransferenciaExistenciaController extends Controller
      */
     public function close(AccionTransferenciaExistenciaRequest $request, TransferenciaExistencia $transfer, ServicioTransferenciasExistencias $transfers): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $transfers->close($transfer, $request->validated(), $this->actor($request), $request->ip());
 
         return $this->success('Transferencia conciliada y cerrada.');
@@ -190,11 +201,14 @@ class TransferenciaExistenciaController extends Controller
      */
     public function export(Request $request, ServicioTransferenciasExistencias $transfers, ExportadorTabular $exporter, string $format = 'csv'): Response|StreamedResponse
     {
+        // Guarda en $filters el resultado necesario para continuar esta operacion.
         $filters = $request->validate([
             'buscar' => ['nullable', 'string', 'max:100'],
             'estado' => ['nullable', 'in:solicitada,aprobada,en tránsito,recibida parcialmente,recibida totalmente,cerrada,rechazada,cancelada'],
         ]);
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(in_array($format, ['pdf', 'excel', 'csv'], true), 422, 'Formato de exportación no permitido.');
+        // Guarda en $records el resultado necesario para continuar esta operacion.
         $records = $transfers->exportQuery($this->actor($request), $filters)->with([
             'sedeOrigen:id,nombre', 'sedeDestino:id,nombre', 'almacenOrigen:id,nombre', 'almacenDestino:id,nombre',
         ])->limit(5000)->get();
@@ -230,6 +244,7 @@ class TransferenciaExistenciaController extends Controller
      */
     private function actor(Request $request): User
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($request->user() instanceof User, 401);
 
         return $request->user();
@@ -243,6 +258,7 @@ class TransferenciaExistenciaController extends Controller
      */
     private function success(string $message): RedirectResponse
     {
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return redirect()->route('management.inventory.preview.transfers')->with('status', $message);
     }
 }

@@ -1,61 +1,78 @@
+/* Define los estilos visuales del modulo o componente 'responsive'. */
+
+/* Aplica estos estilos al bloque '@media (min-width: 981px) and (max-width: 1450px)'. */
 @media (min-width: 981px) and (max-width: 1450px) {
+/* Aplica estos estilos al bloque '.navbar'. */
   .navbar {
     gap: 12px;
   }
 
+/* Aplica estos estilos al bloque '.brand'. */
   .brand {
     flex-basis: auto;
   }
 
+/* Aplica estos estilos al bloque '.brand img'. */
   .brand img {
     width: 136px;
     height: 58px;
   }
 
+/* Aplica estos estilos al bloque '.navlinks'. */
   .navlinks {
     gap: 13px;
   }
 
+/* Aplica estos estilos al bloque '.navlinks a'. */
   .navlinks a {
     font-size: 0.88rem;
   }
 
+/* Aplica estos estilos al bloque '.nav-actions'. */
   .nav-actions {
     gap: 5px;
   }
 
+/* Aplica estos estilos al bloque '.nav-actions .btn'. */
   .nav-actions .btn {
     padding: 10px 11px;
   }
 
+/* Aplica estos estilos al bloque '.header-search'. */
   .header-search {
     max-width: 230px;
   }
 }
 
 @media (min-width: 781px) {
+/* Aplica estos estilos al bloque '.site-header .container'. */
   .site-header .container {
     width: min(1340px, 94%);
   }
 
+/* Aplica estos estilos al bloque '.navbar'. */
   .navbar {
     min-height: 36px;
     gap: 10px;
   }
 
+/* Aplica estos estilos al bloque '.brand img'. */
   .brand img {
     width: 96px;
     height: 34px;
   }
 
+/* Aplica estos estilos al bloque '.navlinks'. */
   .navlinks {
     gap: 18px;
   }
 
+/* Aplica estos estilos al bloque '.navlinks a'. */
   .navlinks a {
     font-size: 0.53rem;
   }
 
+/* Aplica estos estilos al bloque '.header-search'. */
   .header-search {
     max-width: 270px;
     min-width: 180px;
@@ -63,14 +80,17 @@
     padding-left: 10px;
   }
 
+/* Aplica estos estilos al bloque '.header-search input'. */
   .header-search input {
     font-size: 0.52rem;
   }
 
+/* Aplica estos estilos al bloque '.nav-actions'. */
   .nav-actions {
     gap: 5px;
   }
 
+/* Aplica estos estilos al bloque '.icon-btn'. */
   .icon-btn {
     width: 27px;
     height: 27px;
@@ -78,6 +98,7 @@
     font-size: 0.7rem;
   }
 
+/* Aplica estos estilos al bloque '.icon-btn sup'. */
   .icon-btn sup {
     top: -4px;
     right: -4px;
@@ -86,6 +107,7 @@
     font-size: 8px;
   }
 
+/* Aplica estos estilos al bloque '.header-login'. */
   .header-login {
     min-height: 27px;
     padding: 0 8px;
@@ -95,6 +117,7 @@
 }
 
 @media (max-width: 780px) {
+/* Aplica estos estilos al bloque '.navlinks'. */
   .navlinks {
     display: none;
     position: absolute;
@@ -111,11 +134,13 @@
     margin-left: 0;
   }
 
+/* Aplica estos estilos al bloque '.navlinks a'. */
   .navlinks a {
     height: auto;
     padding: 10px 12px;
   }
 
+/* Aplica estos estilos al bloque '.navlinks a.active::after'. */
   .navlinks a.active::after {
     top: 7px;
     right: auto;
@@ -126,10 +151,12 @@
     border-radius: 0 3px 3px 0;
   }
 
+/* Aplica estos estilos al bloque '.navlinks.open'. */
   .navlinks.open {
     display: flex;
   }
 
+/* Aplica estos estilos al bloque '.menu-toggle'. */
   .menu-toggle {
     display: block;
     margin-left: auto;
@@ -139,95 +166,116 @@
     font-size: 1.4rem;
   }
 
+/* Aplica estos estilos al bloque '.header-search'. */
   .header-search {
     margin-left: auto;
     max-width: 320px;
   }
 
+/* Aplica estos estilos al bloque '.nav-actions .btn'. */
   .nav-actions .btn {
     display: none;
   }
 
+/* Aplica estos estilos al bloque '.brand'. */
   .brand {
     min-width: 150px;
   }
 
+/* Aplica estos estilos al bloque '.brand img'. */
   .brand img {
     width: 150px;
     height: 58px;
   }
 
   .hero-grid,
+/* Aplica estos estilos al bloque '.detail-grid'. */
   .detail-grid {
     grid-template-columns: 1fr;
   }
 
+/* Aplica estos estilos al bloque '.hero-card img'. */
   .hero-card img {
     height: 330px;
   }
 
+/* Aplica estos estilos al bloque '.product-grid'. */
   .product-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
+/* Aplica estos estilos al bloque '.brands'. */
   .brands {
     grid-template-columns: repeat(4, 1fr);
   }
 
+/* Aplica estos estilos al bloque '.gallery'. */
   .gallery {
     grid-template-columns: repeat(2, 1fr);
   }
 
+/* Aplica estos estilos al bloque '.filters'. */
   .filters {
     grid-template-columns: 1fr 1fr;
   }
 
+/* Aplica estos estilos al bloque '.dashboard-cards'. */
   .dashboard-cards {
     grid-template-columns: repeat(2, 1fr);
   }
 
+/* Aplica estos estilos al bloque '.admin-layout'. */
   .admin-layout {
     grid-template-columns: 1fr;
   }
 
+/* Aplica estos estilos al bloque '.sidebar'. */
   .sidebar {
     grid-template-columns: repeat(4, 1fr);
   }
 }
 
 @media (max-width: 640px) {
+/* Aplica estos estilos al bloque '.topbar .container'. */
   .topbar .container {
     flex-direction: column;
     gap: 3px;
   }
 
+/* Aplica estos estilos al bloque '.navbar'. */
   .navbar {
     min-height: 74px;
     gap: 8px;
   }
 
+/* Aplica estos estilos al bloque '.brand'. */
   .brand {
     min-width: 120px;
   }
 
+/* Aplica estos estilos al bloque '.brand img'. */
   .brand img {
     width: 120px;
     height: 50px;
   }
 
+/* Aplica estos estilos al bloque '.header-search'. */
   .header-search {
     display: none;
   }
 
   .header-account span,
+/* Aplica estos estilos al bloque '.nav-actions form'. */
   .nav-actions form {
     display: none;
   }
 
+/* Aplica estos estilos al bloque '.hero'. */
   .hero {
     padding-top: 44px;
   }
 
+/* Aplica estos estilos al bloque '.hero h1'. */
   .hero h1 {
     font-size: 2.7rem;
   }
@@ -238,81 +286,99 @@
   .brands,
   .gallery,
   .info-list,
+/* Aplica estos estilos al bloque '.dashboard-cards'. */
   .dashboard-cards {
     grid-template-columns: 1fr;
   }
 
+/* Aplica estos estilos al bloque '.filters'. */
   .filters {
     grid-template-columns: 1fr;
   }
 
+/* Aplica estos estilos al bloque '.hero-card img'. */
   .hero-card img {
     height: 270px;
   }
 
+/* Aplica estos estilos al bloque '.gallery img'. */
   .gallery img {
     height: 280px;
   }
 
+/* Aplica estos estilos al bloque '.section-head'. */
   .section-head {
     display: block;
   }
 
+/* Aplica estos estilos al bloque '.cta'. */
   .cta {
     display: block;
   }
 
+/* Aplica estos estilos al bloque '.footer-grid'. */
   .footer-grid {
     grid-template-columns: 1fr;
   }
 
+/* Aplica estos estilos al bloque '.sidebar'. */
   .sidebar {
     grid-template-columns: 1fr 1fr;
   }
 
+/* Aplica estos estilos al bloque '.nav-actions'. */
   .nav-actions {
     gap: 5px;
   }
 
+/* Aplica estos estilos al bloque '.icon-btn'. */
   .icon-btn {
     width: 38px;
     height: 38px;
   }
 
+/* Aplica estos estilos al bloque '.product-art'. */
   .product-art {
     height: 230px;
   }
 }
 
 @media (min-width: 781px) {
+/* Aplica estos estilos al bloque '.site-header .container'. */
   .site-header .container {
     width: 92%;
     max-width: none;
   }
 
+/* Aplica estos estilos al bloque '.navbar'. */
   .navbar {
     min-height: 78px;
     gap: 18px;
   }
 
+/* Aplica estos estilos al bloque '.brand img'. */
   .brand img {
     width: 154px;
     height: 62px;
   }
 
+/* Aplica estos estilos al bloque '.navlinks'. */
   .navlinks {
     gap: 21px;
   }
 
+/* Aplica estos estilos al bloque '.navlinks a'. */
   .navlinks a {
     font-size: 0.9rem;
   }
 
+/* Aplica estos estilos al bloque '.nav-actions'. */
   .nav-actions {
     gap: 8px;
     margin-left: auto;
   }
 
+/* Aplica estos estilos al bloque '.icon-btn'. */
   .icon-btn {
     width: 42px;
     height: 42px;
@@ -320,6 +386,7 @@
     font-size: 1rem;
   }
 
+/* Aplica estos estilos al bloque '.icon-btn sup'. */
   .icon-btn sup {
     top: -6px;
     right: -5px;
@@ -328,6 +395,7 @@
     font-size: 11px;
   }
 
+/* Aplica estos estilos al bloque '.nav-actions .btn'. */
   .nav-actions .btn {
     display: inline-flex;
     padding: 11px 16px;
@@ -336,36 +404,43 @@
 }
 
 @media (min-width: 1400px) {
+/* Aplica estos estilos al bloque '.navlinks'. */
   .navlinks {
     margin-left: clamp(180px, 15vw, 290px);
   }
 }
 
 @media (min-width: 1600px) {
+/* Aplica estos estilos al bloque '.site-header .container'. */
   .site-header .container {
     width: calc(100% - 152px);
   }
 
+/* Aplica estos estilos al bloque '.navbar'. */
   .navbar {
     min-height: 118px;
     gap: 18px;
   }
 
+/* Aplica estos estilos al bloque '.brand img'. */
   .brand img {
     width: 200px;
     height: 90px;
   }
 
+/* Aplica estos estilos al bloque '.navlinks'. */
   .navlinks {
     gap: 25px;
     margin-left: clamp(205px, 13.2vw, 255px);
   }
 
+/* Aplica estos estilos al bloque '.navlinks a'. */
   .navlinks a {
     font-size: 1.18rem;
     font-weight: 750;
   }
 
+/* Aplica estos estilos al bloque '.header-search'. */
   .header-search {
     flex: 0 1 345px;
     max-width: 345px;
@@ -375,15 +450,18 @@
     font-size: 1.3rem;
   }
 
+/* Aplica estos estilos al bloque '.header-search input'. */
   .header-search input {
     font-size: 1.05rem;
   }
 
+/* Aplica estos estilos al bloque '.nav-actions'. */
   .nav-actions {
     gap: 8px;
     margin-left: 0;
   }
 
+/* Aplica estos estilos al bloque '.icon-btn'. */
   .icon-btn {
     width: 65px;
     height: 65px;
@@ -391,6 +469,7 @@
     font-size: 1.25rem;
   }
 
+/* Aplica estos estilos al bloque '.icon-btn sup'. */
   .icon-btn sup {
     top: -8px;
     right: -6px;
@@ -399,6 +478,7 @@
     font-size: 0.82rem;
   }
 
+/* Aplica estos estilos al bloque '.nav-actions .btn'. */
   .nav-actions .btn {
     min-height: 65px;
     padding: 0 20px;
@@ -406,46 +486,56 @@
     font-size: 1.18rem;
   }
 
+/* Aplica estos estilos al bloque '.nav-actions .btn-primary'. */
   .nav-actions .btn-primary {
     padding-right: 24px;
     padding-left: 24px;
   }
 }
 
+/* Aplica estos estilos al bloque '@media (min-width: 781px) and (max-width: 1399px)'. */
 @media (min-width: 781px) and (max-width: 1399px) {
+/* Aplica estos estilos al bloque '.site-header .container'. */
   .site-header .container {
     width: 94%;
   }
 
+/* Aplica estos estilos al bloque '.navbar'. */
   .navbar {
     min-height: 58px;
     gap: 12px;
   }
 
+/* Aplica estos estilos al bloque '.brand img'. */
   .brand img {
     width: 120px;
     height: 48px;
   }
 
+/* Aplica estos estilos al bloque '.navlinks'. */
   .navlinks {
     margin-left: auto;
     gap: 12px;
   }
 
+/* Aplica estos estilos al bloque '.navlinks a'. */
   .navlinks a {
     font-size: 0.7rem;
   }
 
+/* Aplica estos estilos al bloque '.nav-actions'. */
   .nav-actions {
     margin-left: 0;
     gap: 5px;
   }
 
+/* Aplica estos estilos al bloque '.icon-btn'. */
   .icon-btn {
     width: 36px;
     height: 36px;
   }
 
+/* Aplica estos estilos al bloque '.nav-actions .btn'. */
   .nav-actions .btn {
     padding: 9px 11px;
     font-size: 0.75rem;

@@ -1,7 +1,10 @@
+
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
     <form method="post"
         action="{{ route('management.purchases.store') }}"
         class="form-card compras-form"
         data-purchase-form>
+{{-- proteccion CSRF que valida el origen del formulario. --}}
         @csrf
         <input type="hidden" name="compra_token" value="{{ session('compra_token') }}">
 
@@ -19,6 +22,7 @@
                 <label>Proveedor
                     <select name="proveedor_id" required>
                         <option value="">Seleccionar proveedor</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                         @foreach ($suppliers as $supplier)
                     <option value="{{ $supplier->id }}">{{ $supplier->nombre }}@if ($supplier->ruc) · {{ $supplier->ruc }}@endif</option>
                         @endforeach
@@ -43,6 +47,7 @@
         <section class="compras-form-section">
             <div class="compras-form-section-heading"><h3>2. Detalle de productos</h3><button class="compras-secondary-button" type="button" data-purchase-add><i class="bi bi-plus-lg" aria-hidden="true"></i> Agregar producto</button></div>
             <div class="compras-items" data-purchase-items>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @forelse (collect([null]) as $index => $detail)
                     <article class="compras-item" data-purchase-item>
                         <header><strong>Ítem <span data-purchase-item-number>{{ $index + 1 }}</span></strong><button type="button" class="compras-item-remove" data-purchase-remove>Quitar</button></header>
@@ -50,6 +55,7 @@
                             <label>Producto
                                 <select name="items[{{ $index }}][producto_id]" required data-purchase-product>
                                     <option value="">Seleccionar producto</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                                     @foreach ($products as $product)
                                         <option value="{{ $product->id }}" @selected((string) ($detail?->producto_id ?? '') === (string) $product->id)>{{ $product->nombre }}</option>
                                     @endforeach
@@ -58,7 +64,9 @@
                             <label>Variante
                                 <select name="items[{{ $index }}][variante_id]" data-purchase-variant>
                                     <option value="">Sin variante</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                                     @foreach ($products as $product)
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                                         @foreach ($product->variants->where('estado', 'activo') as $variant)
                                             <option value="{{ $variant->id }}" data-product-id="{{ $product->id }}" @selected((string) ($detail?->variante_id ?? '') === (string) $variant->id)>{{ $product->nombre }} · {{ $variant->nombre_color }}@if ($variant->codigo_sku) · SKU {{ $variant->codigo_sku }}@endif</option>
                                         @endforeach

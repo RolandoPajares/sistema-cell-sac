@@ -18,6 +18,7 @@ class GuardarClienteRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return $this->user() !== null && app(ServicioAutorizacion::class)->allowsRoute($this);
@@ -28,16 +29,25 @@ class GuardarClienteRequest extends FormRequest
      *
      * @return array Resultado de la operación.
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         return [
+            // Valida el campo 'tipo' con las reglas definidas en la instruccion siguiente.
             'tipo' => ['required', Rule::in(['minorista', 'mayorista'])],
+            // Valida el campo 'tipo_documento' con las reglas definidas en la instruccion siguiente.
             'tipo_documento' => ['nullable', Rule::in(['dni', 'ruc'])],
+            // Valida el campo 'documento' con las reglas definidas en la instruccion siguiente.
             'documento' => ['required', 'string', 'max:20', Rule::unique('clientes', 'documento')],
+            // Valida el campo 'razon_social' con las reglas definidas en la instruccion siguiente.
             'razon_social' => [Rule::requiredIf(fn (): bool => $this->input('tipo_documento') === 'ruc'), 'nullable', 'string', 'max:160'],
+            // Valida el campo 'nombre_contacto' con las reglas definidas en la instruccion siguiente.
             'nombre_contacto' => ['required', 'string', 'max:160'],
+            // Valida el campo 'correo' con las reglas definidas en la instruccion siguiente.
             'correo' => ['required', 'email', 'max:160'],
+            // Valida el campo 'telefono' con las reglas definidas en la instruccion siguiente.
             'telefono' => ['nullable', 'string', 'max:30'],
+            // Valida el campo 'ciudad' con las reglas definidas en la instruccion siguiente.
             'ciudad' => ['nullable', 'string', 'max:80'],
         ];
     }
@@ -57,7 +67,9 @@ class GuardarClienteRequest extends FormRequest
     public function messages(): array
     {
         return [
+            // Muestra el mensaje del campo 'tipo_documento' cuando falla la regla 'in'.
             'tipo_documento.in' => 'El tipo de documento seleccionado no es válido.',
+            // Muestra el mensaje del campo 'documento' cuando falla la regla 'unique'.
             'documento.unique' => 'El documento ya está registrado.',
         ];
     }

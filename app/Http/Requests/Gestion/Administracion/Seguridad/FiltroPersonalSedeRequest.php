@@ -19,6 +19,7 @@ final class FiltroPersonalSedeRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         $usuario = $this->user();
@@ -39,9 +40,13 @@ final class FiltroPersonalSedeRequest extends FormRequest
             : [];
 
         return [
+            // Valida el campo 'buscar' con las reglas definidas en la instruccion siguiente.
             'buscar' => ['nullable', 'string', 'max:120'],
+            // Valida el campo 'sede_id' con las reglas definidas en la instruccion siguiente.
             'sede_id' => ['nullable', 'integer', Rule::in($sedesAutorizadas)],
+            // Valida el campo 'estado' con las reglas definidas en la instruccion siguiente.
             'estado' => ['nullable', Rule::in(['vigente', 'no_vigente'])],
+            // Valida el campo 'por_pagina' con las reglas definidas en la instruccion siguiente.
             'por_pagina' => ['nullable', 'integer', Rule::in([15, 30, 50])],
         ];
     }

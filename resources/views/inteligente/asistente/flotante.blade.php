@@ -1,3 +1,4 @@
+
 <aside class="assistant-float" data-admin-assistant aria-label="Asistente IA" hidden>
     <button class="assistant-float-launcher" type="button" data-admin-assistant-toggle aria-controls="adminAssistantPanel" aria-expanded="false">
         <span class="assistant-float-launcher-icon"><i class="bi bi-stars" aria-hidden="true"></i></span>
@@ -26,6 +27,7 @@
             <button type="button" data-admin-assistant-prompt="¿Qué funciones tiene el asistente?"><i class="bi bi-question-circle" aria-hidden="true"></i> ¿Qué puedes hacer?</button>
             <button type="button" data-admin-assistant-prompt="Ayuda con mi módulo"><i class="bi bi-person-workspace" aria-hidden="true"></i> Ayuda con mi módulo</button>
         </div>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
         <form class="assistant-float-form" data-admin-assistant-form>
             <input type="text" name="consulta" maxlength="300" placeholder="Escribe tu consulta..." aria-label="Escribe tu consulta" autocomplete="off">
             <button type="submit" aria-label="Enviar consulta"><i class="bi bi-send-fill" aria-hidden="true"></i></button>

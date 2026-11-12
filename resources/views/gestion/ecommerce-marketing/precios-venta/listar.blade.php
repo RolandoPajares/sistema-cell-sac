@@ -1,6 +1,10 @@
 @extends('layouts.panel.principal')
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Precios minoristas y mayoristas')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-ecommerce-marketing')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section class="tc-em" data-ecommerce-precios>
     <header class="tc-em__header">
@@ -10,6 +14,7 @@
         </div>
         <div class="tc-em__actions">@if ($preciosMayoristasDisponibles && $puedeActualizarPrecioMayorista)<button type="button" class="tc-em__button tc-em__button--primary" data-em-open="masiva"><i class="bi bi-upload"></i> Importar precios CSV</button>@endif</div>
     </header>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if (session('status'))<div class="tc-em__notice" role="status"><i class="bi bi-check-circle"></i><strong>Operación registrada</strong><span>{{ session('status') }}</span></div>@endif @if ($errors->any())<div class="tc-em__notice" role="alert"><i class="bi bi-exclamation-circle"></i><strong>No se guardó el precio</strong><span>{{ $errors->first() }}</span></div>@endif <div class="tc-em__notice"><i class="bi bi-info-circle"></i><strong>Precios de MariaDB</strong><span>La base define precio y precio de oferta. {{ $preciosMayoristasDisponibles ? 'Los precios mayoristas proceden de MariaDB.' : 'No contiene un precio mayorista separado.' }}</span><a href="{{ route('management.products') }}">Abrir gestión de productos <i class="bi bi-arrow-right"></i></a></div>
     <div class="tc-em__metrics">
         <article><i class="bi bi-box-seam"></i><span>Productos consultados<strong>{{ number_format($productosConPrecio) }}</strong><small>Alcance autorizado</small></span></article>
@@ -19,6 +24,7 @@
     </div>
     <div class="tc-em__card tc-em__prices-panel">
         <div class="tc-em__tabs" role="tablist" aria-label="Canal de precios"><button type="button" role="tab" aria-selected="true" class="is-active" data-em-price-tab="minorista"><i class="bi bi-people"></i> Precio registrado</button><button type="button" role="tab" aria-selected="false" data-em-price-tab="mayorista" @disabled(! $preciosMayoristasDisponibles) title="{{ $preciosMayoristasDisponibles ? 'Consultar precios vigentes guardados en MariaDB' : 'Precio mayorista requiere la estructura SQL propuesta' }}"><i class="bi bi-shop"></i> {{ $preciosMayoristasDisponibles ? 'Precio mayorista' : 'Precio mayorista no definido' }}</button></div>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
         <form class="tc-em__filters" method="GET" action="{{ url()->current() }}"><label class="tc-em__search"><i class="bi bi-search"></i><input type="search" name="buscar" value="{{ $filtros['buscar'] ?? '' }}" data-em-price-search placeholder="Buscar producto por nombre, SKU o código…" aria-label="Buscar productos"></label><label>Categoría<select name="categoria" data-em-price-filter="categoria">
                     <option value="">Todas</option>@foreach ($categorias as $categoria)<option value="{{ $categoria->id }}" @selected((string) ($filtros['categoria'] ?? '' )===(string) $categoria->id)>{{ $categoria->nombre }}</option>@endforeach
                 </select></label><label>Marca<select name="marca" data-em-price-filter="marca">
@@ -74,6 +80,7 @@
         <p class="tc-em__empty" data-em-price-empty hidden>No hay productos que coincidan con los filtros.</p>
         <div>{{ $paginacion->links() }}</div>
     </div>
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
     @include('gestion.ecommerce-marketing.componentes.modal-precios')
 </section>
 @endsection

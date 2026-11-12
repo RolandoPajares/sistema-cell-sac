@@ -36,12 +36,17 @@ class CategoriaController extends Controller
      */
     public function index(Request $request, ServicioInventario $inventario, ServicioPresentacionCategorias $presentacion): View
     {
+        // Guarda en $alcance el resultado necesario para continuar esta operacion.
         $alcance = $this->alcanceActual($request, $inventario);
+        // Guarda en $filtros el resultado necesario para continuar esta operacion.
         $filtros = $this->filtros($request);
+        // Guarda en $resumen el resultado necesario para continuar esta operacion.
         $resumen = $this->resumenCategorias($alcance['empresa_id']);
 
+        // Guarda en $categories el resultado necesario para continuar esta operacion.
         $categories = $this->consultaCategorias($filtros, $alcance['empresa_id'])->paginate(7)->withQueryString();
 
+        // Devuelve la vista 'gestion.inventario-logistica.categorias.listar' con los datos preparados por este controlador.
         return view('gestion.inventario-logistica.categorias.listar', [
             'categories' => $categories,
             'categoryIcons' => $categories->getCollection()->mapWithKeys(fn (Categoria $category): array => [$category->id => $presentacion->icono($category)])->all(),
@@ -65,10 +70,15 @@ class CategoriaController extends Controller
      */
     public function export(Request $request, ServicioInventario $inventario, ExportadorTabular $exporter, RegistradorAuditoria $audit): Response|StreamedResponse
     {
+        // Guarda en $alcance el resultado necesario para continuar esta operacion.
         $alcance = $this->alcanceActual($request, $inventario);
+        // Guarda en $format el resultado necesario para continuar esta operacion.
         $format = (string) ($request->route('format') ?: 'csv');
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
+        // Guarda en $filters el resultado necesario para continuar esta operacion.
         $filters = $this->filtros($request);
+        // Guarda en $categorias el resultado necesario para continuar esta operacion.
         $categorias = $this->consultaCategorias($filters, $alcance['empresa_id'])->limit(5000)->get();
         $rows = $categorias->map(static fn (Categoria $categoria): array => [
             $categoria->id,
@@ -78,6 +88,7 @@ class CategoriaController extends Controller
             $categoria->activo ? 'Activa' : 'Inactiva',
             $categoria->creado_en?->format('Y-m-d H:i:s'),
         ])->all();
+        // Guarda en $response el resultado necesario para continuar esta operacion.
         $response = $exporter->download($format, 'categorias',
             ['ID', 'Nombre', 'Descripción', 'Productos', 'Estado', 'Registrada'],
             $rows,
@@ -107,7 +118,9 @@ class CategoriaController extends Controller
      */
     public function store(GuardarCategoriaRequest $request, ServicioInventario $inventario, RegistradorAuditoria $auditoria): RedirectResponse
     {
+        // Guarda en $alcance el resultado necesario para continuar esta operacion.
         $alcance = $this->alcanceActual($request, $inventario);
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $categoria = Categoria::create($request->validated() + [
             'activo' => true,
             'creado_en' => now(),
@@ -115,6 +128,7 @@ class CategoriaController extends Controller
         ]);
         $auditoria->record($request->user()->id, 'category.created', 'categorias', $categoria->id, null, $categoria->only(['nombre', 'descripcion']), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Categoría registrada.');
     }
 
@@ -129,13 +143,18 @@ class CategoriaController extends Controller
      */
     public function update(ActualizarCategoriaRequest $request, Categoria $category, ServicioInventario $inventario, RegistradorAuditoria $auditoria): RedirectResponse
     {
+        // Guarda en $alcance el resultado necesario para continuar esta operacion.
         $alcance = $this->alcanceActual($request, $inventario);
+        // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
         $this->verificarEmpresa($category, $alcance['empresa_id']);
 
+        // Guarda en $antes el resultado necesario para continuar esta operacion.
         $antes = $category->only(['nombre', 'descripcion', 'activo']);
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $category->update($request->validated());
         $auditoria->record($request->user()->id, 'category.updated', 'categorias', $category->id, $antes, $category->only(array_keys($antes)), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Categoría actualizada.');
     }
 
@@ -150,14 +169,18 @@ class CategoriaController extends Controller
      */
     public function deactivate(Request $request, Categoria $category, ServicioInventario $inventario, RegistradorAuditoria $auditoria): RedirectResponse
     {
+        // Guarda en $alcance el resultado necesario para continuar esta operacion.
         $alcance = $this->alcanceActual($request, $inventario);
+        // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
         $this->verificarEmpresa($category, $alcance['empresa_id']);
 
+        // Comprueba la condicion $category->activo antes de ejecutar este bloque.
         if ($category->activo) {
             $category->update(['activo' => false]);
             $auditoria->record($request->user()->id, 'category.deactivated', 'categorias', $category->id, ['activo' => true], ['activo' => false], $request->ip());
         }
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Categoría desactivada.');
     }
 
@@ -189,8 +212,11 @@ class CategoriaController extends Controller
      */
     private function filtros(Request $request): array
     {
+        // Guarda en $busqueda el resultado necesario para continuar esta operacion.
         $busqueda = trim((string) $request->input('buscar', ''));
+        // Guarda en $estado el resultado necesario para continuar esta operacion.
         $estado = trim((string) $request->input('estado', ''));
+        // Guarda en $orden el resultado necesario para continuar esta operacion.
         $orden = trim((string) $request->input('orden', 'nombre_asc'));
 
         return [
@@ -205,6 +231,7 @@ class CategoriaController extends Controller
      */
     private function resumenCategorias(int $empresaId): array
     {
+        // Prepara en $resumen la consulta que obtiene o modifica los registros necesarios.
         $resumen = Categoria::query()
             ->where('empresa_id', $empresaId)
             ->selectRaw('COUNT(*) AS total')
@@ -224,10 +251,14 @@ class CategoriaController extends Controller
      */
     private function alcanceActual(Request $request, ServicioInventario $inventario): array
     {
+        // Obtiene en $usuario la informacion de la solicitud o del usuario actual.
         $usuario = $request->user();
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($usuario instanceof User, 403);
 
+        // Guarda en $permiso el resultado necesario para continuar esta operacion.
         $permiso = app(ServicioAutorizacion::class)->permissionForRoute($request);
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($permiso !== null, 403);
 
         return $inventario->alcanceConsulta($usuario, $permiso);
@@ -242,6 +273,7 @@ class CategoriaController extends Controller
      */
     private function verificarEmpresa(Categoria $categoria, int $empresaId): void
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless((int) $categoria->empresa_id === $empresaId, 404);
     }
 }

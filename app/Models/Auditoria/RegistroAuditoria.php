@@ -13,8 +13,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class RegistroAuditoria extends Model
 {
+    // Usa la tabla 'registros_auditoria' como origen de los registros de este modelo.
     protected $table = 'registros_auditoria';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = [
         'usuario_id', 'accion', 'entidad', 'entidad_id', 'valores_anteriores',
         'valores_nuevos', 'direccion_ip', 'creado_en',

@@ -41,14 +41,20 @@ class ProveedorController extends Controller
      */
     public function index(Request $request, ServicioInventario $inventario): View
     {
+        // Guarda en $alcance el resultado necesario para continuar esta operacion.
         $alcance = $this->alcanceActual($request, $inventario);
+        // Guarda en $filtros el resultado necesario para continuar esta operacion.
         $filtros = $this->filtros($request);
+        // Guarda en $alcanceProductos el resultado necesario para continuar esta operacion.
         $alcanceProductos = $alcance;
+        // Guarda en $empresaId el resultado necesario para continuar esta operacion.
         $empresaId = $alcance['empresa_id'];
+        // Guarda en $consultaProveedores el resultado necesario para continuar esta operacion.
         $consultaProveedores = $this->consultaProveedores($filtros, $alcance);
         $consultaProductosProveedor = fn (Builder|BelongsToMany $consulta): Builder|BelongsToMany => $consulta->where('productos.empresa_id', $empresaId);
         $consultaComprasAlcance = fn (Builder $consulta): Builder => $this->filtrarComprasPorAlcance($consulta, $alcance);
 
+        // Guarda en $proveedores el resultado necesario para continuar esta operacion.
         $proveedores = $consultaProveedores
             ->with([
                 'products' => fn (BelongsToMany $consulta): mixed => $consultaProductosProveedor($consulta)
@@ -66,10 +72,13 @@ class ProveedorController extends Controller
             ->paginate($filtros['por_pagina'])
             ->withQueryString();
 
+        // Guarda en $proveedorSeleccionadoId el resultado necesario para continuar esta operacion.
         $proveedorSeleccionadoId = $request->integer('proveedor') ?: $proveedores->first()?->id;
+        // Guarda en $proveedorSeleccionado el resultado necesario para continuar esta operacion.
         $proveedorSeleccionado = $proveedorSeleccionadoId
             ? $this->detalleProveedor((int) $proveedorSeleccionadoId, $alcance)
             : null;
+        // Guarda en $estadosCompra el resultado necesario para continuar esta operacion.
         $estadosCompra = $proveedorSeleccionado
             ? $this->comprasPorAlcance($alcance)
                 ->where('compras.proveedor_id', $proveedorSeleccionado->id)
@@ -79,6 +88,7 @@ class ProveedorController extends Controller
                 ->orderByDesc('total')
                 ->get()
             : collect();
+        // Guarda en $supplierPresentation el resultado necesario para continuar esta operacion.
         $supplierPresentation = $proveedores->getCollection()
             ->mapWithKeys(fn (Proveedor $supplier): array => [$supplier->id => [
                 'categories' => $this->categoriasProveedor($supplier)->all(),
@@ -86,6 +96,7 @@ class ProveedorController extends Controller
                 'is_selected' => $proveedorSeleccionado?->id === $supplier->id,
             ]])
             ->all();
+        // Guarda en $selectedSupplierPresentation el resultado necesario para continuar esta operacion.
         $selectedSupplierPresentation = $this->presentacionProveedorSeleccionado($proveedorSeleccionado, $estadosCompra);
         $productosSinExistencias = $inventario->productosParaConsulta($alcanceProductos, ['stock' => 'sin_stock'], true)
             ->whereHas('suppliers', fn (Builder $consulta): Builder => $consulta->where('proveedores.empresa_id', $empresaId))
@@ -95,6 +106,7 @@ class ProveedorController extends Controller
             ->limit(4)
             ->get();
 
+        // Devuelve la vista 'gestion.comercial.proveedores.listar' con los datos preparados por este controlador.
         return view('gestion.comercial.proveedores.listar', [
             'suppliers' => $proveedores,
             'selectedSupplier' => $proveedorSeleccionado,
@@ -124,9 +136,13 @@ class ProveedorController extends Controller
      */
     public function export(Request $request, ServicioInventario $inventario, ExportadorTabular $exporter, RegistradorAuditoria $audit): Response|StreamedResponse
     {
+        // Guarda en $alcance el resultado necesario para continuar esta operacion.
         $alcance = $this->alcanceActual($request, $inventario);
+        // Guarda en $format el resultado necesario para continuar esta operacion.
         $format = (string) ($request->route('format') ?: 'csv');
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
+        // Guarda en $proveedores el resultado necesario para continuar esta operacion.
         $proveedores = $this->consultaProveedores($this->filtros($request), $alcance)
             ->withCount(['products' => fn (Builder $consulta): Builder => $consulta->where('productos.empresa_id', $alcance['empresa_id'])])
             ->orderBy('proveedores.nombre')->limit(5000)->get();
@@ -141,7 +157,9 @@ class ProveedorController extends Controller
             $proveedor->activo ? 'Activo' : 'Inactivo',
             $proveedor->creado_en?->format('Y-m-d H:i:s'),
         ])->all();
+        // Guarda en $filters el resultado necesario para continuar esta operacion.
         $filters = $this->filtros($request);
+        // Guarda en $response el resultado necesario para continuar esta operacion.
         $response = $exporter->download($format, 'proveedores',
             ['ID', 'Nombre', 'RUC', 'Correo', 'Teléfono', 'Ciudad', 'Productos asociados', 'Estado', 'Registrado'],
             $rows,
@@ -171,7 +189,9 @@ class ProveedorController extends Controller
      */
     public function store(GuardarProveedorRequest $request, ServicioInventario $inventario, RegistradorAuditoria $auditoria): RedirectResponse
     {
+        // Guarda en $alcance el resultado necesario para continuar esta operacion.
         $alcance = $this->alcanceActual($request, $inventario);
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $proveedor = Proveedor::create($request->validated() + [
             'activo' => true,
             'creado_en' => now(),
@@ -179,6 +199,7 @@ class ProveedorController extends Controller
         ]);
         $auditoria->record($request->user()->id, 'supplier.created', 'proveedores', $proveedor->id, null, $proveedor->only(['nombre', 'ruc', 'correo', 'ciudad']), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Proveedor registrado.');
     }
 
@@ -193,13 +214,18 @@ class ProveedorController extends Controller
      */
     public function update(ActualizarProveedorRequest $request, Proveedor $supplier, ServicioInventario $inventario, RegistradorAuditoria $auditoria): RedirectResponse
     {
+        // Guarda en $alcance el resultado necesario para continuar esta operacion.
         $alcance = $this->alcanceActual($request, $inventario);
+        // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
         $this->verificarEmpresa($supplier, $alcance['empresa_id']);
 
+        // Guarda en $antes el resultado necesario para continuar esta operacion.
         $antes = $supplier->only(['nombre', 'ruc', 'correo', 'telefono', 'ciudad', 'activo']);
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $supplier->update($request->validated());
         $auditoria->record($request->user()->id, 'supplier.updated', 'proveedores', $supplier->id, $antes, $supplier->only(array_keys($antes)), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Proveedor actualizado.');
     }
 
@@ -214,14 +240,18 @@ class ProveedorController extends Controller
      */
     public function deactivate(Request $request, Proveedor $supplier, ServicioInventario $inventario, RegistradorAuditoria $auditoria): RedirectResponse
     {
+        // Guarda en $alcance el resultado necesario para continuar esta operacion.
         $alcance = $this->alcanceActual($request, $inventario);
+        // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
         $this->verificarEmpresa($supplier, $alcance['empresa_id']);
 
+        // Comprueba la condicion $supplier->activo antes de ejecutar este bloque.
         if ($supplier->activo) {
             $supplier->update(['activo' => false]);
             $auditoria->record($request->user()->id, 'supplier.deactivated', 'proveedores', $supplier->id, ['activo' => true], ['activo' => false], $request->ip());
         }
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Proveedor desactivado.');
     }
 
@@ -257,9 +287,13 @@ class ProveedorController extends Controller
      */
     private function filtros(Request $request): array
     {
+        // Guarda en $busqueda el resultado necesario para continuar esta operacion.
         $busqueda = trim($request->string('buscar')->toString());
+        // Guarda en $estado el resultado necesario para continuar esta operacion.
         $estado = trim($request->string('estado')->toString());
+        // Guarda en $ciudad el resultado necesario para continuar esta operacion.
         $ciudad = trim($request->string('ciudad')->toString());
+        // Guarda en $porPagina el resultado necesario para continuar esta operacion.
         $porPagina = $request->integer('por_pagina', 10);
 
         return [
@@ -318,6 +352,7 @@ class ProveedorController extends Controller
      */
     private function presentacionProveedorSeleccionado(?Proveedor $supplier, Collection $purchaseStatusCounts): array
     {
+        // Comprueba la condicion ! $supplier antes de ejecutar este bloque.
         if (! $supplier) {
             return [
                 'categories' => [],
@@ -328,7 +363,9 @@ class ProveedorController extends Controller
             ];
         }
 
+        // Guarda en $purchaseCount el resultado necesario para continuar esta operacion.
         $purchaseCount = (int) ($supplier->purchases_count ?? 0);
+        // Guarda en $receivedPurchases el resultado necesario para continuar esta operacion.
         $receivedPurchases = (int) ($purchaseStatusCounts->firstWhere('estado', 'Recibida')?->total ?? 0);
 
         return [
@@ -368,7 +405,9 @@ class ProveedorController extends Controller
      */
     private function actividadReciente(array $alcance): Collection
     {
+        // Prepara en $idsProveedores la consulta que obtiene o modifica los registros necesarios.
         $idsProveedores = Proveedor::query()->where('empresa_id', $alcance['empresa_id'])->pluck('id');
+        // Guarda en $auditorias el resultado necesario para continuar esta operacion.
         $auditorias = $idsProveedores->isEmpty()
             ? collect()
             : RegistroAuditoria::query()
@@ -377,13 +416,16 @@ class ProveedorController extends Controller
                 ->latest('creado_en')
                 ->limit(5)
                 ->get(['id', 'accion', 'entidad_id', 'creado_en']);
+        // Guarda en $compras el resultado necesario para continuar esta operacion.
         $compras = $this->comprasPorAlcance($alcance)
             ->with('supplier:id,nombre')
             ->latest('compras.creado_en')
             ->limit(5)
             ->get(['compras.id', 'compras.proveedor_id', 'compras.total', 'compras.fecha_compra', 'compras.creado_en']);
+        // Guarda en $actividades el resultado necesario para continuar esta operacion.
         $actividades = collect();
 
+        // Recorre $auditorias as $auditoria y procesa cada elemento de la coleccion.
         foreach ($auditorias as $auditoria) {
             $actividades->push([
                 'icon' => match ($auditoria->accion) {
@@ -406,6 +448,7 @@ class ProveedorController extends Controller
             ]);
         }
 
+        // Recorre $compras as $compra y procesa cada elemento de la coleccion.
         foreach ($compras as $compra) {
             $actividades->push([
                 'icon' => 'cart-plus',
@@ -424,10 +467,14 @@ class ProveedorController extends Controller
      */
     private function alcanceActual(Request $request, ServicioInventario $inventario): array
     {
+        // Obtiene en $usuario la informacion de la solicitud o del usuario actual.
         $usuario = $request->user();
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($usuario instanceof User, 403);
 
+        // Guarda en $permiso el resultado necesario para continuar esta operacion.
         $permiso = app(ServicioAutorizacion::class)->permissionForRoute($request);
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($permiso !== null, 403);
 
         return $inventario->alcanceConsulta($usuario, $permiso);
@@ -442,6 +489,7 @@ class ProveedorController extends Controller
      */
     private function verificarEmpresa(Proveedor $proveedor, int $empresaId): void
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless((int) $proveedor->empresa_id === $empresaId, 404);
     }
 }

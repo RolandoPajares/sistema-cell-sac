@@ -12,10 +12,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  */
 class SegmentoCliente extends Model
 {
+    // Usa la tabla 'segmentos_clientes' como origen de los registros de este modelo.
     protected $table = 'segmentos_clientes';
 
     public $timestamps = false;
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['nombre', 'tipo', 'criterios', 'activo'];
 
     /**

@@ -58,45 +58,68 @@ class VentaController extends Controller
      */
     public function index(FiltroVentaRequest $request): View
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $filtros = $this->filtros($request->validated());
+        // Prepara en $query la consulta que obtiene o modifica los registros necesarios.
         $query = $this->ventas->query($request->user(), $filtros);
         $estados = $this->ventas->query($request->user(), array_replace($filtros, ['estado' => null]))
             ->select('ventas.estado')->distinct()->orderBy('ventas.estado')->pluck('estado');
+        // Guarda en $customers el resultado necesario para continuar esta operacion.
         $customers = collect();
+        // Guarda en $products el resultado necesario para continuar esta operacion.
         $products = collect();
+        // Guarda en $canCreate el resultado necesario para continuar esta operacion.
         $canCreate = false;
+        // Obtiene en $canUpdate la informacion de la solicitud o del usuario actual.
         $canUpdate = $this->autorizacion->allows($request->user(), 'gestion.ventas.actualizar');
+        // Guarda en $editOrder el resultado necesario para continuar esta operacion.
         $editOrder = null;
+        // Comprueba la condicion Schema::hasColumns('ventas', ['canal', 'observaciones'] antes de ejecutar este bloque.
         if (Schema::hasColumns('ventas', ['canal', 'observaciones'])
             && ($this->autorizacion->allows($request->user(), 'gestion.ventas.crear') || $canUpdate)) {
+            // Ejecuta la operacion dentro de un bloque controlado para atender posibles excepciones.
             try {
+                // Obtiene en $ubicacion la informacion de la solicitud o del usuario actual.
                 $ubicacion = $this->autorizacion->operationLocation($request->user());
                 $ubicacionValida = $ubicacion['empresa_id'] !== null && $ubicacion['sede_id'] !== null && $ubicacion['almacen_id'] !== null;
+                // Obtiene en $canCreate la informacion de la solicitud o del usuario actual.
                 $canCreate = $ubicacionValida && $this->autorizacion->allows($request->user(), 'gestion.ventas.crear')
                     && $this->autorizacion->allowsRecord($request->user(), 'gestion.ventas.crear', $ubicacion['empresa_id'], $ubicacion['sede_id']);
+                // Guarda en $canUpdate el resultado necesario para continuar esta operacion.
                 $canUpdate = $ubicacionValida && $canUpdate
                     && $this->autorizacion->allowsRecord($request->user(), 'gestion.ventas.actualizar', $ubicacion['empresa_id'], $ubicacion['sede_id']);
             } catch (HttpExceptionInterface) {
+                // Guarda en $canCreate el resultado necesario para continuar esta operacion.
                 $canCreate = false;
+                // Guarda en $canUpdate el resultado necesario para continuar esta operacion.
                 $canUpdate = false;
             }
+            // Comprueba la condicion $canCreate || $canUpdate antes de ejecutar este bloque.
             if ($canCreate || $canUpdate) {
+                // Prepara en $customers la consulta que obtiene o modifica los registros necesarios.
                 $customers = Cliente::query()->where('empresa_id', $ubicacion['empresa_id'])->where('activo', true)->orderBy('razon_social')->orderBy('id')->get();
+                // Prepara en $saldos la consulta que obtiene o modifica los registros necesarios.
                 $saldos = DB::table('existencias_almacen')->where('empresa_id', $ubicacion['empresa_id'])
                     ->where('sede_id', $ubicacion['sede_id'])->where('almacen_id', $ubicacion['almacen_id'])
                     ->selectRaw('producto_id, MIN(cantidad_fisica - cantidad_reservada) AS disponible')
                     ->groupBy('producto_id')->havingRaw('COUNT(*) = 1')->get()->keyBy('producto_id');
+                // Prepara en $products la consulta que obtiene o modifica los registros necesarios.
                 $products = Producto::query()->active()->where('empresa_id', $ubicacion['empresa_id'])
                     ->whereIn('id', $saldos->keys())->orderBy('nombre')->get();
                 $products->each(static function (Producto $producto) use ($saldos): void {
                     $producto->existencias = max(0, (int) floor((float) $saldos->get($producto->id)->disponible));
                 });
+                // Comprueba la condicion $canCreate && ! is_string($request->session()->get('venta_token')) antes de ejecutar este bloque.
                 if ($canCreate && ! is_string($request->session()->get('venta_token'))) {
                     $request->session()->put('venta_token', bin2hex(random_bytes(32)));
                 }
+                // Comprueba la condicion $request->filled('editar') antes de ejecutar este bloque.
                 if ($request->filled('editar')) {
+                    // Detiene la solicitud si se cumple la validacion de seguridad indicada.
                     abort_unless(Schema::hasColumns('ventas', ['pedido_id', 'descuento', 'impuestos']), 404);
+                    // Detiene la solicitud si se cumple la validacion de seguridad indicada.
                     abort_unless($canUpdate && ctype_digit((string) $request->query('editar')), 404);
+                    // Guarda en $editOrder el resultado necesario para continuar esta operacion.
                     $editOrder = $this->autorizacion->scopeRecordsFor(
                         Venta::query()->whereKey((int) $request->query('editar'))->where('ventas.estado', 'borrador')
                             ->where('ventas.canal', 'presencial')->whereNull('ventas.pedido_id')
@@ -104,18 +127,24 @@ class VentaController extends Controller
                         $request->user(), 'gestion.ventas.actualizar',
                     )->where('ventas.empresa_id', $ubicacion['empresa_id'])->where('ventas.sede_id', $ubicacion['sede_id'])
                         ->where('ventas.almacen_id', $ubicacion['almacen_id'])->with(['detalles.producto', 'cliente', 'usuario'])->first();
+                    // Detiene la solicitud si se cumple la validacion de seguridad indicada.
                     abort_unless($editOrder !== null, 404);
                 }
             }
         }
 
+        // Guarda en $orders el resultado necesario para continuar esta operacion.
         $orders = (clone $query)->with(['cliente', 'pedido:id,canal', 'detalles'])->withCount('detalles')
             ->orderByDesc('ventas.fecha_venta')->orderByDesc('ventas.id')->paginate(10)->withQueryString();
+        // Guarda en $cancelables el resultado necesario para continuar esta operacion.
         $cancelables = $this->autorizacion->scopeRecordsFor(
             Venta::query()->whereIn('ventas.id', $orders->getCollection()->modelKeys()), $request->user(), 'gestion.ventas.anular',
         )->pluck('ventas.id')->all();
+        // Agrupa en $editables los datos que se utilizaran en la siguiente operacion.
         $editables = [];
+        // Comprueba la condicion Schema::hasColumns('ventas', ['canal', 'pedido_id', 'descuento', 'impuestos']) antes de ejecutar este bloque.
         if (Schema::hasColumns('ventas', ['canal', 'pedido_id', 'descuento', 'impuestos'])) {
+            // Guarda en $editables el resultado necesario para continuar esta operacion.
             $editables = $this->autorizacion->scopeRecordsFor(
                 Venta::query()->whereIn('ventas.id', $orders->getCollection()->modelKeys())->where('ventas.estado', 'borrador')
                     ->where('ventas.canal', 'presencial')->whereNull('ventas.pedido_id')
@@ -123,24 +152,33 @@ class VentaController extends Controller
                 $request->user(), 'gestion.ventas.actualizar',
             )->pluck('ventas.id')->all();
         }
+        // Agrupa en $confirmables los datos que se utilizaran en la siguiente operacion.
         $confirmables = [];
+        // Comprueba la condicion $this->autorizacion->allows($request->user(), 'gestion.ventas.crear' antes de ejecutar este bloque.
         if ($this->autorizacion->allows($request->user(), 'gestion.ventas.crear')
             && Schema::hasColumns('ventas', ['pedido_id', 'canal'])) {
+            // Guarda en $confirmables el resultado necesario para continuar esta operacion.
             $confirmables = $this->autorizacion->scopeRecordsFor(
                 Venta::query()->whereIn('ventas.id', $orders->getCollection()->modelKeys())
                     ->where('ventas.estado', 'borrador')->whereNotNull('ventas.pedido_id')->where('ventas.canal', 'presencial'),
                 $request->user(), 'gestion.ventas.crear',
             )->pluck('ventas.id')->all();
         }
+        // Guarda en $dispositivosPorDetalle el resultado necesario para continuar esta operacion.
         $dispositivosPorDetalle = collect();
+        // Comprueba la condicion $confirmables !== [] && Schema::hasColumns('dispositivos', ['id', 'producto_id', 'variante_id', 'almacen_actual_id', 'estado']) antes de ejecutar este bloque.
         if ($confirmables !== [] && Schema::hasColumns('dispositivos', ['id', 'producto_id', 'variante_id', 'almacen_actual_id', 'estado'])) {
+            // Recorre $orders->getCollection()->whereIn('id', $confirmables) as $ventaPendiente y procesa cada elemento de la coleccion.
             foreach ($orders->getCollection()->whereIn('id', $confirmables) as $ventaPendiente) {
+                // Recorre $ventaPendiente->detalles as $detalle y procesa cada elemento de la coleccion.
                 foreach ($ventaPendiente->detalles as $detalle) {
                     $varianteId = $detalle->variante_id === null ? null : (int) $detalle->variante_id;
+                    // Prepara en $dispositivosDisponibles la consulta que obtiene o modifica los registros necesarios.
                     $dispositivosDisponibles = DB::table('dispositivos')->where('producto_id', $detalle->producto_id)
                         ->when($varianteId === null, fn ($consulta) => $consulta->whereNull('variante_id'), fn ($consulta) => $consulta->where('variante_id', $varianteId))
                         ->where('almacen_actual_id', $ventaPendiente->almacen_id)->where('estado', 'disponible')
                         ->orderBy('id')->get(['id', 'imei', 'numero_serie']);
+                    // Prepara en $requiereDispositivos la consulta que obtiene o modifica los registros necesarios.
                     $requiereDispositivos = DB::table('dispositivos')->where('producto_id', $detalle->producto_id)
                         ->when($varianteId === null, fn ($consulta) => $consulta->whereNull('variante_id'), fn ($consulta) => $consulta->where('variante_id', $varianteId))->exists()
                         || ($varianteId !== null
@@ -151,7 +189,9 @@ class VentaController extends Controller
                 }
             }
         }
+        // Guarda en $salesPresentation el resultado necesario para continuar esta operacion.
         $salesPresentation = $orders->getCollection()->mapWithKeys(function (Venta $order): array {
+            // Guarda en $customerName el resultado necesario para continuar esta operacion.
             $customerName = $order->cliente?->razon_social ?: $order->cliente?->nombre_contacto;
 
             return [$order->id => [
@@ -159,8 +199,11 @@ class VentaController extends Controller
                 'status' => $this->estadoPresentacion($order->estado),
             ]];
         });
+        // Guarda en $devicesUnavailable el resultado necesario para continuar esta operacion.
         $devicesUnavailable = $orders->getCollection()->mapWithKeys(function (Venta $order) use ($dispositivosPorDetalle): array {
+            // Guarda en $unavailable el resultado necesario para continuar esta operacion.
             $unavailable = $order->detalles->contains(function ($detail) use ($dispositivosPorDetalle): bool {
+                // Guarda en $configuration el resultado necesario para continuar esta operacion.
                 $configuration = $dispositivosPorDetalle->get($detail->getKey());
 
                 return ($configuration['requiere'] ?? false)
@@ -170,11 +213,14 @@ class VentaController extends Controller
             return [$order->id => $unavailable];
         });
         $filtrosDisponibles = array_replace($filtros, ['cliente_id' => null, 'sede_id' => null]);
+        // Prepara en $clientesDisponibles la consulta que obtiene o modifica los registros necesarios.
         $clientesDisponibles = Cliente::query()->whereIn('id', $this->ventas->query($request->user(), $filtrosDisponibles)->select('ventas.cliente_id'))
             ->orderBy('razon_social')->orderBy('id')->get(['id', 'razon_social', 'nombre_contacto']);
+        // Prepara en $sedesDisponibles la consulta que obtiene o modifica los registros necesarios.
         $sedesDisponibles = Sede::query()->whereIn('id', $this->ventas->query($request->user(), $filtrosDisponibles)->select('ventas.sede_id'))
             ->orderBy('nombre')->orderBy('id')->get(['id', 'nombre']);
 
+        // Devuelve la vista 'gestion.comercial.ventas.listar' con los datos preparados por este controlador.
         return view('gestion.comercial.ventas.listar', [
             ...$this->ventas->resumen($request->user(), $filtros),
             'filters' => $filtros,
@@ -207,6 +253,7 @@ class VentaController extends Controller
 
     private function inicialesPara(?string $name): string
     {
+        // Guarda en $parts el resultado necesario para continuar esta operacion.
         $parts = preg_split('/\s+/', trim((string) $name), -1, PREG_SPLIT_NO_EMPTY);
 
         return collect(array_slice($parts ?: ['CL'], 0, 2))
@@ -262,10 +309,13 @@ class VentaController extends Controller
      */
     private function panelPorTipoCliente(Request $request, string $tipoCliente): View
     {
+        // Obtiene en $usuarioActual la informacion de la solicitud o del usuario actual.
         $usuarioActual = $request->user();
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($usuarioActual !== null, 403);
         $this->autorizacion->assertAllowed($usuarioActual, 'gestion.ventas.consultar');
 
+        // Guarda en $filtros el resultado necesario para continuar esta operacion.
         $filtros = $request->validate([
             'buscar' => ['nullable', 'string', 'max:120'],
             'estado' => ['nullable', 'string', 'max:30'],
@@ -274,38 +324,58 @@ class VentaController extends Controller
         ]);
         $consultaBase = $this->ventas->query($usuarioActual, [])->whereHas('cliente', fn ($consulta) => $consulta->where('tipo', $tipoCliente));
         $consultaFiltrada = $this->ventas->query($usuarioActual, $filtros)->whereHas('cliente', fn ($consulta) => $consulta->where('tipo', $tipoCliente));
+        // Comprueba la condicion isset($filtros['pago']) antes de ejecutar este bloque.
         if (isset($filtros['pago'])) {
             $consultaFiltrada->whereHas('pagos', fn ($consulta) => $consulta->where('medio_pago_id', $filtros['pago']));
         }
+        // Guarda en $ventasDelMes el resultado necesario para continuar esta operacion.
         $ventasDelMes = (clone $consultaBase)->whereBetween('ventas.fecha_venta', [now()->startOfMonth(), now()->endOfMonth()]);
+        // Guarda en $cantidadDelMes el resultado necesario para continuar esta operacion.
         $cantidadDelMes = (clone $ventasDelMes)->count();
+        // Guarda en $ventasDelMesEnSoles el resultado necesario para continuar esta operacion.
         $ventasDelMesEnSoles = (clone $ventasDelMes)->where('ventas.moneda', 'PEN');
+        // Guarda en $cantidadVentasDelMesEnSoles el resultado necesario para continuar esta operacion.
         $cantidadVentasDelMesEnSoles = (clone $ventasDelMesEnSoles)->count();
+        // Guarda en $importeDelMes el resultado necesario para continuar esta operacion.
         $importeDelMes = (float) (clone $ventasDelMesEnSoles)->sum('ventas.total');
+        // Guarda en $importeMesAnterior el resultado necesario para continuar esta operacion.
         $importeMesAnterior = (float) (clone $consultaBase)->where('ventas.moneda', 'PEN')
             ->whereBetween('ventas.fecha_venta', [now()->subMonthNoOverflow()->startOfMonth(), now()->subMonthNoOverflow()->endOfMonth()])->sum('ventas.total');
+        // Guarda en $ventasMesAnterior el resultado necesario para continuar esta operacion.
         $ventasMesAnterior = (clone $consultaBase)->whereBetween('ventas.fecha_venta', [now()->subMonthNoOverflow()->startOfMonth(), now()->subMonthNoOverflow()->endOfMonth()])->count();
+        // Guarda en $tendenciaImporte el resultado necesario para continuar esta operacion.
         $tendenciaImporte = $importeMesAnterior > 0 ? round((($importeDelMes - $importeMesAnterior) / $importeMesAnterior) * 100, 1).'%' : 'Sin comparación';
+        // Guarda en $tendenciaCantidad el resultado necesario para continuar esta operacion.
         $tendenciaCantidad = $ventasMesAnterior > 0 ? round((($cantidadDelMes - $ventasMesAnterior) / $ventasMesAnterior) * 100, 1).'%' : 'Sin comparación';
 
+        // Guarda en $ventas el resultado necesario para continuar esta operacion.
         $ventas = (clone $consultaFiltrada)->with(['cliente', 'usuario', 'pedido', 'pagos.medioPago'])
             ->orderByDesc('ventas.fecha_venta')->orderByDesc('ventas.id')->limit(10)->get();
+        // Guarda en $estados el resultado necesario para continuar esta operacion.
         $estados = (clone $consultaBase)->select('ventas.estado')->distinct()->orderBy('ventas.estado')->pluck('estado');
         $mediosPago = MedioPago::query()->whereHas('pagos', fn ($consulta) => $consulta->whereIn('venta_id', (clone $consultaBase)->select('ventas.id')))
             ->orderBy('nombre')->get(['id', 'nombre']);
+        // Guarda en $canales el resultado necesario para continuar esta operacion.
         $canales = collect();
+        // Comprueba la condicion Schema::hasColumn('ventas', 'canal') antes de ejecutar este bloque.
         if (Schema::hasColumn('ventas', 'canal')) {
+            // Guarda en $canales el resultado necesario para continuar esta operacion.
             $canales = (clone $consultaBase)->whereNotNull('ventas.canal')->distinct()->orderBy('ventas.canal')->pluck('ventas.canal');
         } elseif (Schema::hasColumn('pedidos', 'canal')) {
             $canales = (clone $consultaBase)->whereHas('pedido', fn ($consulta) => $consulta->whereNotNull('canal'))
                 ->join('pedidos', 'pedidos.id', '=', 'ventas.pedido_id')->distinct()->orderBy('pedidos.canal')->pluck('pedidos.canal');
         }
+        // Guarda en $consultaCanales el resultado necesario para continuar esta operacion.
         $consultaCanales = (clone $consultaBase)->leftJoin('pedidos', 'pedidos.id', '=', 'ventas.pedido_id');
+        // Guarda en $campoCanal el resultado necesario para continuar esta operacion.
         $campoCanal = Schema::hasColumn('ventas', 'canal') ? 'COALESCE(ventas.canal, pedidos.canal)' : 'pedidos.canal';
+        // Guarda en $resumenCanales el resultado necesario para continuar esta operacion.
         $resumenCanales = $consultaCanales->selectRaw($campoCanal.' AS canal, COUNT(*) AS cantidad')
             ->groupByRaw($campoCanal)->orderByDesc('cantidad')->get();
+        // Guarda en $conteosEstado el resultado necesario para continuar esta operacion.
         $conteosEstado = (clone $consultaBase)->select('ventas.estado')->selectRaw('COUNT(*) AS cantidad')
             ->groupBy('ventas.estado')->orderBy('ventas.estado')->get();
+        // Prepara en $ventasPorCliente la consulta que obtiene o modifica los registros necesarios.
         $ventasPorCliente = DB::table('ventas')->join('clientes', 'clientes.id', '=', 'ventas.cliente_id')
             ->whereIn('ventas.id', (clone $consultaBase)->select('ventas.id'))
             ->select('clientes.razon_social', 'clientes.nombre_contacto', 'ventas.moneda')
@@ -313,6 +383,7 @@ class VentaController extends Controller
             ->groupBy('clientes.id', 'clientes.razon_social', 'clientes.nombre_contacto', 'ventas.moneda')
             ->orderByDesc('importe')->limit(5)->get();
 
+        // Agrupa en $datos los datos que se utilizaran en la siguiente operacion.
         $datos = [
             'titulo' => $tipoCliente === 'mayorista' ? 'Ventas mayoristas' : 'Ventas minoristas', 'icono' => $tipoCliente === 'mayorista' ? 'bi-people' : 'bi-shop',
             'descripcion' => 'Consulta las ventas registradas para clientes '.($tipoCliente === 'mayorista' ? 'mayoristas.' : 'minoristas.'),
@@ -334,8 +405,11 @@ class VentaController extends Controller
             'total' => (clone $consultaFiltrada)->count(),
             'columnas' => ['Venta', 'Empresa / cliente', 'Asesor', 'Fecha', 'Total', 'Medio de pago', 'Estado'],
             'filas' => $ventas->map(static function (Venta $venta): array {
+                // Guarda en $cliente el resultado necesario para continuar esta operacion.
                 $cliente = $venta->cliente?->razon_social ?: $venta->cliente?->nombre_contacto ?: 'Sin cliente asociado';
+                // Guarda en $estado el resultado necesario para continuar esta operacion.
                 $estado = (string) $venta->estado;
+                // Guarda en $canal el resultado necesario para continuar esta operacion.
                 $canal = $venta->canal ?? $venta->pedido?->canal ?? '';
 
                 return [
@@ -362,6 +436,7 @@ class VentaController extends Controller
             ? 'gestion.comercial.ventas.mayoristas.listar'
             : 'gestion.comercial.ventas.minoristas.listar';
 
+        // Devuelve la vista con los datos preparados por el controlador.
         return view($vista, compact('datos', 'filtros'));
     }
 
@@ -373,15 +448,20 @@ class VentaController extends Controller
      */
     public function store(GuardarVentaRequest $request): RedirectResponse
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(Schema::hasColumns('ventas', ['canal', 'observaciones']), 503, 'La migración de canal y observaciones está pendiente de autorización y aplicación.');
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $datos = $request->validated();
+        // Obtiene en $venta la informacion de la solicitud o del usuario actual.
         $venta = $this->registro->registrarFisica($datos, $request->user(), $datos['venta_token'], $request->ip());
         $request->session()->forget('venta_token');
 
+        // Guarda en $mensajePago el resultado necesario para continuar esta operacion.
         $mensajePago = isset($datos['medio_pago_id'])
             ? ' y pago registrado.'
             : '. No se registró ningún pago.';
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return redirect()->route('management.sales')->with('status', 'Venta '.$venta->codigo.' confirmada'.$mensajePago);
     }
 
@@ -394,8 +474,10 @@ class VentaController extends Controller
      */
     public function convertirCotizacion(ConvertirCotizacionRequest $request, Cotizacion $quotation): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $venta = $this->cotizaciones->convertirAventa($quotation, (int) $request->validated('almacen_id'), $request->user(), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return redirect()->route('management.sales')->with('status', 'La cotizacion se convirtio en la venta '.$venta->codigo.' como borrador. No se descontaron existencias.');
     }
 
@@ -408,13 +490,16 @@ class VentaController extends Controller
      */
     public function confirmarBorrador(ConfirmarVentaCotizacionRequest $request, Venta $venta): RedirectResponse
     {
+        // Guarda en $ventaConfirmada el resultado necesario para continuar esta operacion.
         $ventaConfirmada = $this->registro->confirmarBorradorCotizacion(
             $venta,
             $request->user(),
             $request->ip(),
+            // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
             $request->validated('dispositivos') ?? [],
         );
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return redirect()->route('management.sales')->with('status', 'La venta '.$ventaConfirmada->codigo.' fue confirmada y sus existencias se descontaron una sola vez. No se registro pago.');
     }
 
@@ -427,8 +512,10 @@ class VentaController extends Controller
      */
     public function update(ActualizarVentaRequest $request, Venta $order): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $venta = $this->registro->actualizarBorrador($order, $request->validated(), $request->user(), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return redirect()->route('management.sales')->with('status', 'Se actualizaron los datos de la venta '.$venta->codigo.'.');
     }
 
@@ -441,8 +528,10 @@ class VentaController extends Controller
      */
     public function cancel(AnularVentaRequest $request, Venta $venta): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $this->registro->anular($venta, $request->user(), $request->validated('motivo'), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return redirect()->route('management.sales')->with('status', 'La venta está anulada.');
     }
 
@@ -457,10 +546,13 @@ class VentaController extends Controller
      */
     public function export(FiltroVentaRequest $request, string $format = 'csv', ?ExportadorTabular $exporter = null, ?RegistradorAuditoria $audit = null): Response|StreamedResponse
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $ventas = $this->ventas->query($request->user(), $this->filtros($request->validated()))
             ->with(['cliente:id,razon_social,nombre_contacto', 'pedido:id,canal'])
             ->orderBy('ventas.fecha_venta')->orderBy('ventas.id')->limit(5000)->get();
+        // Guarda en $safe el resultado necesario para continuar esta operacion.
         $safe = static function (?string $value): string {
             $value ??= '';
 
@@ -475,7 +567,9 @@ class VentaController extends Controller
             $safe($venta->estado),
             $safe($venta->canal ?: $venta->pedido?->canal),
         ])->all();
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $filters = $this->filtros($request->validated());
+        // Guarda en $response el resultado necesario para continuar esta operacion.
         $response = ($exporter ?? app(ExportadorTabular::class))->download($format, 'ventas-'.now()->format('Ymd'),
             ['Código', 'Fecha', 'Cliente', 'Total', 'Moneda', 'Estado', 'Canal'],
             $rows,
@@ -503,13 +597,20 @@ class VentaController extends Controller
      */
     private function filtros(array $input): array
     {
+        // Guarda en $today el resultado necesario para continuar esta operacion.
         $today = CarbonImmutable::today();
+        // Guarda en $to el resultado necesario para continuar esta operacion.
         $to = $this->convertirFecha((string) ($input['hasta'] ?? ''), $today);
+        // Guarda en $defaultFrom el resultado necesario para continuar esta operacion.
         $defaultFrom = filled($input['hasta'] ?? null) ? $to->subDays(29) : $today->subDays(29);
+        // Guarda en $from el resultado necesario para continuar esta operacion.
         $from = $this->convertirFecha((string) ($input['desde'] ?? ''), $defaultFrom);
+        // Comprueba la condicion $from->greaterThan($to) && filled($input['desde'] ?? null) antes de ejecutar este bloque.
         if ($from->greaterThan($to) && filled($input['desde'] ?? null)) {
+            // Guarda en $to el resultado necesario para continuar esta operacion.
             $to = $from;
         }
+        // Guarda en $canal el resultado necesario para continuar esta operacion.
         $canal = (string) ($input['canal'] ?? '');
 
         return [
@@ -532,10 +633,13 @@ class VentaController extends Controller
      */
     private function convertirFecha(string $value, CarbonImmutable $fallback): CarbonImmutable
     {
+        // Comprueba la condicion ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) antes de ejecutar este bloque.
         if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
             return $fallback;
         }
+        // Ejecuta la operacion dentro de un bloque controlado para atender posibles excepciones.
         try {
+            // Guarda en $date el resultado necesario para continuar esta operacion.
             $date = CarbonImmutable::createFromFormat('!Y-m-d', $value);
         } catch (\Throwable) {
             return $fallback;

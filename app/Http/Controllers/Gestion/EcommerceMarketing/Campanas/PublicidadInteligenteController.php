@@ -28,6 +28,7 @@ class PublicidadInteligenteController extends Controller
      */
     public function ads(): View
     {
+        // Devuelve la vista 'gestion.ecommerce-marketing.campanas.publicidad-inteligente' con los datos preparados por este controlador.
         return view('gestion.ecommerce-marketing.campanas.publicidad-inteligente', $this->servicioInteligencia->resumenPublicidad());
     }
 }

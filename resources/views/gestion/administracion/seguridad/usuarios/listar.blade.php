@@ -1,8 +1,12 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Usuarios y roles')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-usuarios')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 {{-- Panel principal con filtros, indicadores y listado de usuarios. --}}
 <section class="usuarios-page" data-usuarios-page data-open-create-dialog="{{ $errors->any() ? 'true' : 'false' }}">
@@ -35,6 +39,7 @@
         </article>
     </section>
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
     <form class="usuarios-filters" method="get" action="{{ route('management.users') }}">
         <label class="usuarios-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar usuarios</span><input type="search" name="buscar" value="{{ $filters['buscar'] ?? '' }}" placeholder="Buscar por nombre, correo, rol o razón social..."></label>
         <button class="usuarios-filter-button" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i> Filtros</button>
@@ -56,6 +61,7 @@
                     <option value="ultimos_30" @selected(($filters['fecha'] ?? null)==='ultimos_30' )>Últimos 30 días</option>
                     <option value="ultimos_90" @selected(($filters['fecha'] ?? null)==='ultimos_90' )>Últimos 90 días</option>
                 </select></label>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if ($hasFilters)<a class="usuarios-clear-button" href="{{ route('management.users') }}"><i class="bi bi-arrow-clockwise" aria-hidden="true"></i> Limpiar filtros</a>@else<button class="usuarios-clear-button" type="submit"><i class="bi bi-arrow-clockwise" aria-hidden="true"></i> Aplicar filtros</button>@endif
         </div>
     </form>
@@ -83,6 +89,7 @@
                     </tr>
                 </thead>
                 <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @forelse ($users as $user)
                     <tr>
                         <td class="usuarios-index">{{ ($users->firstItem() ?? 1) + $loop->index }}.</td>
@@ -106,6 +113,7 @@
         </div>
         <footer class="usuarios-pagination"><span>Mostrando {{ $users->firstItem() ?? 0 }} a {{ $users->lastItem() ?? 0 }} de {{ number_format($users->total()) }} usuarios</span>
             <div class="usuarios-pagination-controls">{{ $users->onEachSide(1)->links() }}
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                 <form method="get" action="{{ route('management.users') }}" class="usuarios-per-page">@foreach ($paginationQuery as $key => $value) @if (is_scalar($value))<input type="hidden" name="{{ $key }}" value="{{ $value }}">@endif @endforeach<select name="por_pagina" aria-label="Usuarios por página" data-users-per-page>@foreach ($pageSizes as $option)<option value="{{ $option }}" @selected(($filters['por_pagina'] ?? 10) === $option)>{{ $option }}</option>@endforeach</select><span>por página</span></form>
             </div>
         </footer>
@@ -148,6 +156,7 @@
     </div>
 </dialog>
 
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
 @foreach ($users as $user)
 <dialog class="usuarios-dialog usuarios-view-dialog" id="ver-usuario-{{ $user->id }}" aria-labelledby="usuario-detalle-titulo-{{ $user->id }}">
     <div class="usuarios-dialog-card">
@@ -184,6 +193,7 @@
                     <p>Actualiza datos sin cambiar las asignaciones RBAC.</p>
                 </span></div><button type="button" class="usuarios-dialog-close" data-close-user-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
         </header>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
         <form method="POST" action="{{ route('management.users.update', $user) }}" class="usuarios-dialog-body">@csrf @method('PUT')<label>Nombre completo<input name="nombre" value="{{ $user->nombre }}" maxlength="120" required></label><label>Correo electrónico<input type="email" name="correo" value="{{ $user->correo }}" maxlength="160" required inputmode="email"></label><label>Nueva contraseña <small>(opcional)</small><input type="password" name="password" minlength="12" autocomplete="new-password"></label><label>Confirmar contraseña<input type="password" name="password_confirmation" minlength="12" autocomplete="new-password"></label>
             <footer class="usuarios-dialog-footer"><button class="usuarios-cancel-button" type="button" data-close-user-dialog>Cancelar</button><button class="usuarios-primary-button" type="submit">Guardar cambios</button></footer>
         </form>
@@ -192,6 +202,7 @@
 @endforeach
 @endsection
 {{-- Carga el comportamiento interactivo desde un archivo JavaScript externo. --}}
+{{-- bloque de estilos o scripts para el lugar reservado por la plantilla. --}}
 @push('scripts')
 @vite('resources/js/gestion/administracion/seguridad/usuarios/listar.js')
 @endpush

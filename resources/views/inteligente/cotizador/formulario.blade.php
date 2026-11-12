@@ -1,8 +1,12 @@
 @extends('layouts.tienda.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Optimizador de compra')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-optimizador')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
     <section class="smart-page">
         <div class="container">
@@ -12,6 +16,7 @@
                 <p>El sistema arma automáticamente una propuesta de compra respetando tu presupuesto y objetivo comercial.</p>
             </div>
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form class="smart-form panel" method="get">
                 <label>
                     Presupuesto
@@ -38,6 +43,7 @@
                 <button class="btn btn-primary" type="submit">Generar propuesta</button>
             </form>
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if ($proposal)
                 <div class="panel proposal">
                     <div class="proposal-kpis">
@@ -49,6 +55,7 @@
                         <table class="table">
                             <thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th></tr></thead>
                             <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                                 @forelse ($proposal['items'] as $item)
                                     <tr>
                                         <td>{{ $item['product']->marca }} {{ $item['product']->nombre }}</td>

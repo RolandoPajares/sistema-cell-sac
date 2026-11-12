@@ -1,3 +1,4 @@
+
 <section class="tc-oc" data-ventas-diseno>
     <header class="tc-oc__header">
         <div><span class="tc-oc__breadcrumb"><i class="bi bi-house" aria-hidden="true"></i> Operaciones Comerciales <i class="bi bi-chevron-right" aria-hidden="true"></i> {{ $datos['titulo'] }}</span>
@@ -6,20 +7,25 @@
         </div>
         <div class="tc-oc__header-actions">@foreach ($datos['acciones'] as $accion)@if (!empty($accion['ruta']))<a class="tc-oc__button {{ ($accion['primaria'] ?? false) ? 'tc-oc__button--primary' : '' }}" href="{{ $accion['ruta'] }}"><i class="bi {{ $accion['icono'] }}" aria-hidden="true"></i>{{ $accion['texto'] }}</a>@elseif (!empty($accion['modal']))<button type="button" class="tc-oc__button {{ ($accion['primaria'] ?? false) ? 'tc-oc__button--primary' : '' }}" data-oc-open-modal="{{ $accion['modal'] }}"><i class="bi {{ $accion['icono'] }}" aria-hidden="true"></i>{{ $accion['texto'] }}</button>@else<button type="button" class="tc-oc__button {{ ($accion['primaria'] ?? false) ? 'tc-oc__button--primary' : '' }}" disabled title="Esta operación no cuenta con una gestión real disponible"><i class="bi {{ $accion['icono'] }}" aria-hidden="true"></i>{{ $accion['texto'] }}</button>@endif @endforeach</div>
     </header>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if (!empty($datos['datos_reales']))
     <div class="tc-oc__notice" role="status"><i class="bi bi-database-check" aria-hidden="true"></i><strong>Datos reales</strong><span>Listado e indicadores consultados desde MariaDB. No hay condición de pago registrada para estas ventas.</span><a href="{{ route('management.sales') }}">Abrir gestión de ventas <i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
     @else
     <div class="tc-oc__notice" role="status"><i class="bi bi-eye" aria-hidden="true"></i><strong>Vista de diseño</strong><span>Las cifras y ventas son ejemplos; los formularios no guardan operaciones.</span><a href="{{ route('management.sales') }}">Abrir gestión de ventas actual <i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
     @endif
     <div class="tc-oc__metrics">@foreach ($datos['metricas'] as $metrica)<article class="tc-oc__metric tc-oc__metric--{{ $metrica['tono'] ?? 'azul' }}"><span class="tc-oc__metric-icon"><i class="bi {{ $metrica['icono'] }}" aria-hidden="true"></i></span>
             <div><small>{{ $metrica['titulo'] }}</small><strong>{{ $metrica['valor'] }}</strong></div><span class="tc-oc__metric-trend">{{ $metrica['tendencia'] }}</span>
         </article>@endforeach</div>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if (!empty($datos['datos_reales']))
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
     <form class="tc-oc__filters" method="GET" action="{{ request()->url() }}"><label class="tc-oc__search"><i class="bi bi-search" aria-hidden="true"></i><input type="search" name="buscar" value="{{ $filtros['buscar'] ?? '' }}" data-oc-search placeholder="{{ $datos['buscar'] }}" aria-label="{{ $datos['buscar'] }}"></label>
         <div class="tc-oc__filter-fields">@foreach ($datos['filtros'] as $filtro)<label><span>{{ $filtro['titulo'] }}</span><select name="{{ $filtro['campo'] }}" data-oc-filter="{{ $filtro['campo'] }}">
                     <option value="">{{ $filtro['todos'] }}</option>@foreach ($filtro['opciones'] as $opcion)<option value="{{ is_array($opcion) ? $opcion['valor'] : $opcion }}" @selected((string) ($filtros[$filtro['campo']] ?? '' )===(string) (is_array($opcion) ? $opcion['valor'] : $opcion))>{{ is_array($opcion) ? $opcion['etiqueta'] : $opcion }}</option>@endforeach
                 </select></label>@endforeach<button type="submit" class="tc-oc__button tc-oc__button--primary"><i class="bi bi-funnel" aria-hidden="true"></i>Aplicar filtros</button></div>
     </form>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
     @else
     <div class="tc-oc__filters"><label class="tc-oc__search"><i class="bi bi-search" aria-hidden="true"></i><input type="search" data-oc-search placeholder="{{ $datos['buscar'] }}" aria-label="{{ $datos['buscar'] }}"></label>
         <div class="tc-oc__filter-fields">@foreach ($datos['filtros'] as $filtro)<label><span>{{ $filtro['titulo'] }}</span><select data-oc-filter="{{ $filtro['campo'] }}">
@@ -78,6 +84,7 @@
             <div class="tc-oc__ranking">@foreach ($datos['ranking']['filas'] as $fila)<div><b>{{ $loop->iteration }}</b><span>{{ $fila[0] }}</span><strong>{{ $fila[1] }}</strong></div>@endforeach</div>
         </article>
     </div>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if (($datos['titulo'] ?? '') === 'Ventas minoristas' && empty($datos['datos_reales']))
     <dialog class="tc-oc__dialog" data-oc-visual-dialog="apertura-caja" aria-labelledby="tc-oc-cash-title">
         <header class="tc-oc__dialog-header"><span class="tc-oc__dialog-icon"><i class="bi bi-cash-stack" aria-hidden="true"></i></span>
@@ -98,6 +105,7 @@
     </dialog>
     @endif
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if (($datos['titulo'] ?? '') === 'Ventas mayoristas' && empty($datos['datos_reales']))
     <dialog class="tc-oc__dialog" data-oc-visual-dialog="condiciones-mayoristas" aria-labelledby="tc-oc-terms-title">
         <header class="tc-oc__dialog-header"><span class="tc-oc__dialog-icon"><i class="bi bi-card-checklist" aria-hidden="true"></i></span>
@@ -135,6 +143,7 @@
 
 </section>
 
+{{-- bloque de estilos o scripts para el lugar reservado por la plantilla. --}}
 @push('scripts')
 @vite('resources/js/gestion/comercial/ventas/operaciones-ventas.js')
 @endpush

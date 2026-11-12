@@ -1,3 +1,6 @@
+/* Define los estilos visuales del modulo o componente 'checkout'. */
+
+/* Aplica estos estilos al bloque 'body.modulo-checkout .auth-wrap'. */
 body.modulo-checkout .auth-wrap {
   width: min(920px, 100%);
   margin: 0 auto;
@@ -8,6 +11,7 @@ body.modulo-checkout .auth-wrap {
   box-shadow: 0 18px 48px rgb(18 56 104 / 10%);
 }
 
+/* Aplica estos estilos al bloque 'body.modulo-checkout .auth-wrap h1'. */
 body.modulo-checkout .auth-wrap h1 {
   margin: 0 0 8px;
   color: #132b5c;
@@ -15,11 +19,13 @@ body.modulo-checkout .auth-wrap h1 {
   font-weight: 800;
 }
 
+/* Aplica estos estilos al bloque 'body.modulo-checkout .auth-wrap > p'. */
 body.modulo-checkout .auth-wrap > p {
   margin: 0 0 24px;
   color: #6c83a5;
 }
 
+/* Aplica estos estilos al bloque 'body.modulo-checkout .checkout-guest-fields'. */
 body.modulo-checkout .checkout-guest-fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -31,6 +37,7 @@ body.modulo-checkout .checkout-guest-fields {
   background: linear-gradient(145deg, #f8fbff, #eef6ff);
 }
 
+/* Aplica estos estilos al bloque 'body.modulo-checkout .checkout-guest-fields legend'. */
 body.modulo-checkout .checkout-guest-fields legend {
   grid-column: 1 / -1;
   float: none;
@@ -42,6 +49,7 @@ body.modulo-checkout .checkout-guest-fields legend {
   font-weight: 800;
 }
 
+/* Aplica estos estilos al bloque 'body.modulo-checkout .checkout-field'. */
 body.modulo-checkout .checkout-field {
   display: grid;
   gap: 7px;
@@ -50,12 +58,14 @@ body.modulo-checkout .checkout-field {
   font-weight: 750;
 }
 
+/* Aplica estos estilos al bloque 'body.modulo-checkout .checkout-field--wide'. */
 body.modulo-checkout .checkout-field--wide {
   grid-column: 1 / -1;
 }
 
 body.modulo-checkout .checkout-field input,
 body.modulo-checkout .checkout-field textarea,
+/* Aplica estos estilos al bloque 'body.modulo-checkout #medio_pago_id'. */
 body.modulo-checkout #medio_pago_id {
   width: 100%;
   min-height: 48px;
@@ -70,12 +80,14 @@ body.modulo-checkout #medio_pago_id {
   transition: border-color .18s ease, box-shadow .18s ease;
 }
 
+/* Aplica estos estilos al bloque 'body.modulo-checkout .checkout-field textarea'. */
 body.modulo-checkout .checkout-field textarea {
   min-height: 92px;
   resize: vertical;
 }
 
 body.modulo-checkout .checkout-field input::placeholder,
+/* Aplica estos estilos al bloque 'body.modulo-checkout .checkout-field textarea::placeholder'. */
 body.modulo-checkout .checkout-field textarea::placeholder {
   color: #91a4bd;
 }
@@ -87,6 +99,7 @@ body.modulo-checkout #medio_pago_id:focus {
   box-shadow: 0 0 0 4px rgb(22 120 238 / 14%);
 }
 
+/* Aplica estos estilos al bloque 'body.modulo-checkout .checkout-payment-label'. */
 body.modulo-checkout .checkout-payment-label {
   display: grid;
   gap: 7px;
@@ -96,6 +109,7 @@ body.modulo-checkout .checkout-payment-label {
   font-weight: 750;
 }
 
+/* Aplica estos estilos al bloque 'body.modulo-checkout .checkout-submit'. */
 body.modulo-checkout .checkout-submit {
   width: 100%;
   min-height: 54px;
@@ -107,17 +121,20 @@ body.modulo-checkout .checkout-submit {
 }
 
 @media (max-width: 680px) {
+/* Aplica estos estilos al bloque 'body.modulo-checkout .auth-wrap'. */
   body.modulo-checkout .auth-wrap {
     padding: 22px 16px;
     border-radius: 18px;
   }
 
+/* Aplica estos estilos al bloque 'body.modulo-checkout .checkout-guest-fields'. */
   body.modulo-checkout .checkout-guest-fields {
     grid-template-columns: 1fr;
     padding: 16px;
   }
 
   body.modulo-checkout .checkout-field--wide,
+/* Aplica estos estilos al bloque 'body.modulo-checkout .checkout-guest-fields legend'. */
   body.modulo-checkout .checkout-guest-fields legend {
     grid-column: auto;
   }

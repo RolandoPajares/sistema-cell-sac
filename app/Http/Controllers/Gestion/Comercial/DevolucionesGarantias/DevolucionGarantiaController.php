@@ -45,24 +45,30 @@ class DevolucionGarantiaController extends Controller
      */
     public function index(Request $request): View
     {
+        // Guarda en $filters el resultado necesario para continuar esta operacion.
         $filters = $this->filtros($request);
+        // Guarda en $returnsQuery el resultado necesario para continuar esta operacion.
         $returnsQuery = $this->aplicarFiltros($this->authorization->scopeRecordsFor(
             DevolucionGarantia::query()->where('activo', true),
             $request->user(),
             'gestion.devoluciones.consultar',
         ), $filters);
+        // Guarda en $returns el resultado necesario para continuar esta operacion.
         $returns = (clone $returnsQuery)
             ->with(['customer:id,nombre_contacto,razon_social', 'product:id,nombre', 'order:id', 'sale:id,codigo'])
             ->when($filters['orden'] === 'antiguos', fn (Builder $query): Builder => $query->orderBy('fecha_solicitud')->orderBy('id'))
             ->when($filters['orden'] !== 'antiguos', fn (Builder $query): Builder => $query->latest('fecha_solicitud')->latest('id'))
             ->paginate(8)
             ->withQueryString();
+        // Guarda en $allReturns el resultado necesario para continuar esta operacion.
         $allReturns = $this->authorization->scopeRecordsFor(
             DevolucionGarantia::query()->where('activo', true),
             $request->user(),
             'gestion.devoluciones.consultar',
         );
+        // Guarda en $module el resultado necesario para continuar esta operacion.
         $module = require config_path('gestion/inventario/devoluciones-garantias.php');
+        // Prepara en $pedidosFormulario la consulta que obtiene o modifica los registros necesarios.
         $pedidosFormulario = $this->authorization->scopeRecordsFor(Pedido::query(), $request->user(), 'gestion.pedidos.consultar')
             ->whereNotNull('cliente_id')->with(['user:id,nombre', 'details:pedido_id,producto_id'])
             ->latest('creado_en')->latest('id')->limit(100)
@@ -101,10 +107,13 @@ class DevolucionGarantiaController extends Controller
             ->whereNotNull('fecha_limite')
             ->whereDate('fecha_limite', '<', today())
             ->count();
+        // Guarda en $priorityCount el resultado necesario para continuar esta operacion.
         $priorityCount = (clone $allReturns)->whereNotIn('estado', ['Resuelta', 'Rechazada'])
             ->whereNotNull('fecha_limite')->whereDate('fecha_limite', '<', today())->count();
+        // Guarda en $upcomingCount el resultado necesario para continuar esta operacion.
         $upcomingCount = (clone $allReturns)->whereNotIn('estado', ['Resuelta', 'Rechazada'])
             ->whereNotNull('fecha_limite')->whereBetween('fecha_limite', [today(), today()->addDays(30)])->count();
+        // Guarda en $resolvedCount el resultado necesario para continuar esta operacion.
         $resolvedCount = (clone $allReturns)->where('estado', 'Resuelta')->count();
         $module['operacion_ui']['panels'][0]['empty'] = $priorityCount > 0
             ? $priorityCount.' solicitud(es) fuera de plazo requieren atención.'
@@ -117,6 +126,7 @@ class DevolucionGarantiaController extends Controller
             : 'No hay casos resueltos registrados.';
         $module['operacion_ui']['rows'] = $returns->getCollection()->map(fn (DevolucionGarantia $return): array => $this->filaTabla($return))->all();
 
+        // Devuelve la vista 'gestion.comercial.devoluciones-garantias.listar' con los datos preparados por este controlador.
         return view('gestion.comercial.devoluciones-garantias.listar', compact('module'));
     }
 
@@ -129,10 +139,14 @@ class DevolucionGarantiaController extends Controller
      */
     public function store(GuardarDevolucionGarantiaRequest $request, RegistradorAuditoria $audit): RedirectResponse
     {
+        // Prepara en $order la consulta que obtiene o modifica los registros necesarios.
         $order = Pedido::query()->findOrFail($request->integer('pedido_id'));
+        // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
         $this->comprobarPedidoEnAlcance($request, $order, 'gestion.devoluciones.crear');
 
+        // Ejecuta la consulta o modificacion de base de datos indicada en la instruccion siguiente.
         DB::transaction(function () use ($request, $order, $audit): void {
+            // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
             $returnRequest = DevolucionGarantia::create($request->validated() + [
                 'creado_por_usuario_id' => $request->user()->id,
                 'activo' => true,
@@ -142,6 +156,7 @@ class DevolucionGarantiaController extends Controller
             $audit->record($request->user()->id, 'return.created', 'devoluciones_garantias', $returnRequest->id, null, $returnRequest->only(['codigo', 'pedido_id', 'cliente_id', 'producto_id', 'tipo', 'estado']), $request->ip());
         }, 3);
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return redirect()->route('management.returns')->with('status', 'Solicitud registrada correctamente.');
     }
 
@@ -155,22 +170,30 @@ class DevolucionGarantiaController extends Controller
      */
     public function update(ActualizarDevolucionGarantiaRequest $request, DevolucionGarantia $devolucionGarantia, RegistradorAuditoria $audit): RedirectResponse
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($this->authorization->allowsRecord(
             $request->user(),
             'gestion.devoluciones.actualizar',
             is_numeric($devolucionGarantia->empresa_id) ? (int) $devolucionGarantia->empresa_id : null,
             is_numeric($devolucionGarantia->sede_id) ? (int) $devolucionGarantia->sede_id : null,
         ), 403);
+        // Prepara en $order la consulta que obtiene o modifica los registros necesarios.
         $order = Pedido::query()->findOrFail($request->integer('pedido_id'));
+        // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
         $this->comprobarPedidoEnAlcance($request, $order, 'gestion.devoluciones.actualizar');
 
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($devolucionGarantia->activo, 404);
+        // Ejecuta la consulta o modificacion de base de datos indicada en la instruccion siguiente.
         DB::transaction(function () use ($request, $order, $devolucionGarantia, $audit): void {
+            // Guarda en $before el resultado necesario para continuar esta operacion.
             $before = $devolucionGarantia->only(['codigo', 'pedido_id', 'cliente_id', 'producto_id', 'tipo', 'motivo', 'estado', 'fecha_solicitud', 'fecha_limite', 'resolucion']);
+            // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
             $devolucionGarantia->update($request->validated() + ['empresa_id' => $order->empresa_id, 'sede_id' => $order->sede_id]);
             $audit->record($request->user()->id, 'return.updated', 'devoluciones_garantias', $devolucionGarantia->id, $before, $devolucionGarantia->only(array_keys($before)), $request->ip());
         }, 3);
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return redirect()->route('management.returns')->with('status', 'Solicitud actualizada correctamente.');
     }
 
@@ -184,6 +207,7 @@ class DevolucionGarantiaController extends Controller
      */
     public function destroy(Request $request, DevolucionGarantia $devolucionGarantia, RegistradorAuditoria $audit): RedirectResponse
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($this->authorization->allowsRecord(
             $request->user(),
             'gestion.devoluciones.eliminar',
@@ -191,13 +215,17 @@ class DevolucionGarantiaController extends Controller
             is_numeric($devolucionGarantia->sede_id) ? (int) $devolucionGarantia->sede_id : null,
         ), 403);
 
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($devolucionGarantia->activo, 404);
+        // Ejecuta la consulta o modificacion de base de datos indicada en la instruccion siguiente.
         DB::transaction(function () use ($request, $devolucionGarantia, $audit): void {
+            // Guarda en $before el resultado necesario para continuar esta operacion.
             $before = $devolucionGarantia->only(['codigo', 'pedido_id', 'cliente_id', 'producto_id', 'tipo', 'estado', 'activo']);
             $devolucionGarantia->update(['activo' => false]);
             $audit->record($request->user()->id, 'return.deactivated', 'devoluciones_garantias', $devolucionGarantia->id, $before, ['activo' => false], $request->ip());
         }, 3);
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return redirect()->route('management.returns')->with('status', 'Solicitud desactivada correctamente.');
     }
 
@@ -212,7 +240,9 @@ class DevolucionGarantiaController extends Controller
      */
     public function export(Request $request, ExportadorTabular $exporter, RegistradorAuditoria $audit, string $format = 'csv'): Response|StreamedResponse
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
+        // Guarda en $returns el resultado necesario para continuar esta operacion.
         $returns = $this->aplicarFiltros($this->authorization->scopeRecordsFor(
             DevolucionGarantia::query()->where('activo', true),
             $request->user(),
@@ -232,6 +262,7 @@ class DevolucionGarantiaController extends Controller
             $returnRequest->fecha_solicitud?->format('d/m/Y'),
             $returnRequest->fecha_limite?->format('d/m/Y'),
         ])->all();
+        // Guarda en $response el resultado necesario para continuar esta operacion.
         $response = $exporter->download($format, 'devoluciones-garantias',
             ['Código', 'Cliente', 'Venta', 'Producto', 'Tipo', 'Estado', 'Fecha de solicitud', 'Fecha límite'],
             $rows,
@@ -252,6 +283,7 @@ class DevolucionGarantiaController extends Controller
      */
     private function comprobarPedidoEnAlcance(Request $request, Pedido $order, string $permission): void
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($this->authorization->allowsRecord(
             $request->user(),
             $permission,
@@ -259,9 +291,12 @@ class DevolucionGarantiaController extends Controller
             is_numeric($order->sede_id) ? (int) $order->sede_id : null,
         ), 403);
 
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($order->cliente_id !== null && (int) $order->cliente_id === $request->integer('cliente_id'), 422, 'El cliente no corresponde al pedido.');
 
+        // Comprueba la condicion $request->filled('producto_id') antes de ejecutar este bloque.
         if ($request->filled('producto_id')) {
+            // Detiene la solicitud si se cumple la validacion de seguridad indicada.
             abort_unless($order->details()->where('producto_id', $request->integer('producto_id'))->exists(), 422, 'El producto no corresponde al pedido.');
         }
     }
@@ -271,16 +306,22 @@ class DevolucionGarantiaController extends Controller
      */
     private function filtros(Request $request): array
     {
+        // Guarda en $period el resultado necesario para continuar esta operacion.
         $period = $request->string('periodo')->toString();
+        // Guarda en $today el resultado necesario para continuar esta operacion.
         $today = CarbonImmutable::today();
         [$from, $to] = match ($period) {
             'Esta semana' => [$today->startOfWeek(), $today->endOfWeek()],
             'Últimos 90 días' => [$today->subDays(89), $today],
             default => [$today->startOfMonth(), $today],
         };
+        // Guarda en $search el resultado necesario para continuar esta operacion.
         $search = trim($request->string('buscar')->toString());
+        // Guarda en $type el resultado necesario para continuar esta operacion.
         $type = trim($request->string('tipo')->toString());
+        // Guarda en $status el resultado necesario para continuar esta operacion.
         $status = trim($request->string('estado')->toString());
+        // Guarda en $order el resultado necesario para continuar esta operacion.
         $order = trim($request->string('orden')->toString());
 
         return [
@@ -310,6 +351,7 @@ class DevolucionGarantiaController extends Controller
                             ->orWhere('razon_social', 'like', '%'.$search.'%'))
                         ->orWhereHas('product', fn (Builder $productQuery): Builder => $productQuery->where('nombre', 'like', '%'.$search.'%'));
 
+                    // Comprueba la condicion ctype_digit($search) antes de ejecutar este bloque.
                     if (ctype_digit($search)) {
                         $searchQuery->orWhere('pedido_id', (int) $search);
                     }
@@ -325,6 +367,7 @@ class DevolucionGarantiaController extends Controller
      */
     private function filaTabla(DevolucionGarantia $returnRequest): array
     {
+        // Agrupa en $record los datos que se utilizaran en la siguiente operacion.
         $record = [
             'id' => $returnRequest->id,
             'codigo' => $returnRequest->codigo,

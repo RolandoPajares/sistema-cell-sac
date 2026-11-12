@@ -22,8 +22,10 @@ class Pago extends Model
     /** @use HasFactory<PagoFactory> */
     use HasFactory;
 
+    // Usa la tabla 'pagos' como origen de los registros de este modelo.
     protected $table = 'pagos';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = [
         'empresa_id', 'sede_id', 'codigo', 'tipo', 'estado', 'medio_pago_id', 'sesion_caja_id',
         'cuenta_bancaria_id', 'usuario_id', 'pedido_id', 'venta_id', 'compra_id', 'moneda',

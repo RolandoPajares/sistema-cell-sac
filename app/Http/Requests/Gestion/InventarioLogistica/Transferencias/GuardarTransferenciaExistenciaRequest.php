@@ -16,6 +16,7 @@ class GuardarTransferenciaExistenciaRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return $this->user() !== null && app(ServicioAutorizacion::class)->allowsRoute($this);
@@ -26,16 +27,25 @@ class GuardarTransferenciaExistenciaRequest extends FormRequest
      *
      * @return array Resultado de la operación.
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         return [
+            // Valida el campo 'clave_idempotencia' con las reglas definidas en la instruccion siguiente.
             'clave_idempotencia' => ['required', 'uuid'],
+            // Valida el campo 'almacen_origen_id' con las reglas definidas en la instruccion siguiente.
             'almacen_origen_id' => ['required', 'integer', 'exists:almacenes,id'],
+            // Valida el campo 'almacen_destino_id' con las reglas definidas en la instruccion siguiente.
             'almacen_destino_id' => ['required', 'integer', 'different:almacen_origen_id', 'exists:almacenes,id'],
+            // Valida el campo 'observaciones' con las reglas definidas en la instruccion siguiente.
             'observaciones' => ['nullable', 'string', 'max:500'],
+            // Valida el campo 'items' con las reglas definidas en la instruccion siguiente.
             'items' => ['required', 'array', 'min:1', 'max:100'],
+            // Valida el campo 'items.*.producto_id' con las reglas definidas en la instruccion siguiente.
             'items.*.producto_id' => ['required', 'integer', 'exists:productos,id'],
+            // Valida el campo 'items.*.variante_id' con las reglas definidas en la instruccion siguiente.
             'items.*.variante_id' => ['nullable', 'integer', 'exists:variantes_productos,id'],
+            // Valida el campo 'items.*.cantidad' con las reglas definidas en la instruccion siguiente.
             'items.*.cantidad' => ['required', 'integer', 'min:1', 'max:1000000'],
         ];
     }
@@ -46,6 +56,7 @@ class GuardarTransferenciaExistenciaRequest extends FormRequest
      * @param  Validator  $validator  Validador al que se agregan comprobaciones de origen, destino y cantidades.
      * @return void Registra errores adicionales sobre el validador cuando corresponde.
      */
+    // Agrega validaciones adicionales despues de aplicar las reglas principales.
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {
@@ -85,8 +96,11 @@ class GuardarTransferenciaExistenciaRequest extends FormRequest
     public function messages(): array
     {
         return [
+            // Muestra el mensaje del campo 'almacen_destino_id' cuando falla la regla 'different'.
             'almacen_destino_id.different' => 'El almacen de destino debe ser distinto del almacen de origen.',
+            // Muestra el mensaje del campo 'items' cuando falla la regla 'required'.
             'items.required' => 'Agrega al menos un producto a la transferencia.',
+            // Muestra el mensaje del campo 'items' cuando falla la regla '*.cantidad.integer'.
             'items.*.cantidad.integer' => 'Las transferencias se registran en unidades enteras.',
         ];
     }

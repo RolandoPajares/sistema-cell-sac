@@ -1,8 +1,16 @@
+/**
+ * GUIA DE EXPOSICION JAVASCRIPT
+ * Archivo: resources/js/layouts/panel/menu-lateral-desplegable.js
+ * Este modulo contiene comportamiento de interfaz, eventos, validaciones y/o
+ * comunicacion con el backend. Los comentarios explican el flujo sin cambiar la logica.
+ */
+
 // ==========================================
 // MÓDULO: MENÚ DESPLEGABLE DE ADMINISTRACIÓN
 // ==========================================
 const menuAdministrador = document.querySelector('[data-admin-menu-desplegable]');
 
+// Condicional: evalua "menuAdministrador && menuAdministrador.dataset.adminMenuInicializado !== 'true'" para decidir si ejecuta el bloque siguiente.
 if (menuAdministrador && menuAdministrador.dataset.adminMenuInicializado !== 'true') {
     // Marcar el menú como inicializado para evitar duplicar eventos
     menuAdministrador.dataset.adminMenuInicializado = 'true';
@@ -11,6 +19,7 @@ if (menuAdministrador && menuAdministrador.dataset.adminMenuInicializado !== 'tr
     // 1. CONSTANTES Y SELECTORES INICIALES
     // ------------------------------------------
     const grupos = [...menuAdministrador.querySelectorAll('[data-admin-menu-group]')];
+    // Recorrido: usa map para procesar cada elemento y obtener o actualizar datos.
     const botonesGrupo = grupos.map((grupo) => grupo.querySelector('[data-admin-menu-toggle]')).filter(Boolean);
     const recordarEstado = document.body.dataset.panelRole === 'administrador';
 
@@ -23,6 +32,7 @@ if (menuAdministrador && menuAdministrador.dataset.adminMenuInicializado !== 'tr
      * @param {HTMLElement} grupo - Elemento contenedor del grupo de menú.
      * @returns {string|null} Clave única o null si no posee ID.
      */
+    // Funcion: claveGrupo concentra una tarea reutilizable del modulo.
     const claveGrupo = (grupo) => {
         const submenu = grupo.querySelector('[data-admin-menu-submenu]');
         return submenu?.id ? `technology-cell-admin-menu:${submenu.id}` : null;
@@ -33,9 +43,11 @@ if (menuAdministrador && menuAdministrador.dataset.adminMenuInicializado !== 'tr
      * @param {HTMLElement} grupo - Elemento contenedor del grupo de menú.
      * @returns {string|null} Estado guardado ('abierto'/'cerrado') o null.
      */
+    // Funcion: estadoGuardado concentra una tarea reutilizable del modulo.
     const estadoGuardado = (grupo) => {
         const clave = claveGrupo(grupo);
 
+        // Condicional: evalua "!recordarEstado || !clave" para decidir si ejecuta el bloque siguiente.
         if (!recordarEstado || !clave) {
             return null;
         }
@@ -52,9 +64,11 @@ if (menuAdministrador && menuAdministrador.dataset.adminMenuInicializado !== 'tr
      * @param {HTMLElement} grupo - Elemento contenedor del grupo de menú.
      * @param {boolean} abierto - Indica si el menú está abierto.
      */
+    // Funcion: guardarEstado concentra una tarea reutilizable del modulo.
     const guardarEstado = (grupo, abierto) => {
         const clave = claveGrupo(grupo);
 
+        // Condicional: evalua "!recordarEstado || !clave" para decidir si ejecuta el bloque siguiente.
         if (!recordarEstado || !clave) {
             return;
         }
@@ -75,10 +89,12 @@ if (menuAdministrador && menuAdministrador.dataset.adminMenuInicializado !== 'tr
      * @param {HTMLElement} grupo - Elemento contenedor del grupo de menú.
      * @param {boolean} abierto - Indica si debe mostrarse abierto.
      */
+    // Funcion: actualizarGrupo concentra una tarea reutilizable del modulo.
     const actualizarGrupo = (grupo, abierto) => {
         const boton = grupo.querySelector('[data-admin-menu-toggle]');
         const submenu = grupo.querySelector('[data-admin-menu-submenu]');
 
+        // Condicional: evalua "!boton || !submenu" para decidir si ejecuta el bloque siguiente.
         if (!boton || !submenu) {
             return;
         }
@@ -91,9 +107,11 @@ if (menuAdministrador && menuAdministrador.dataset.adminMenuInicializado !== 'tr
     // ------------------------------------------
     // 4. CONFIGURACIÓN E INICIALIZACIÓN DE EVENTOS
     // ------------------------------------------
+    // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
     grupos.forEach((grupo) => {
         const boton = grupo.querySelector('[data-admin-menu-toggle]');
 
+        // Condicional: evalua "!boton" para decidir si ejecuta el bloque siguiente.
         if (!boton) {
             return;
         }
@@ -106,14 +124,16 @@ if (menuAdministrador && menuAdministrador.dataset.adminMenuInicializado !== 'tr
 
         actualizarGrupo(grupo, estadoInicial);
 
-        // Evento: Clic para desplegar / contraer
+        // Evento: escucha una interaccion del usuario o del navegador y ejecuta la funcion asociada cuando ocurre.
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         boton.addEventListener('click', () => {
             const abierto = boton.getAttribute('aria-expanded') !== 'true';
             actualizarGrupo(grupo, abierto);
             guardarEstado(grupo, abierto);
         });
 
-        // Evento: Navegación por teclado (Accesibilidad con flechas, Home y End)
+        // Evento: escucha una interaccion del usuario o del navegador y ejecuta la funcion asociada cuando ocurre.
+        // Evento: escucha el evento keydown y ejecuta la funcion asociada cuando ocurre.
         boton.addEventListener('keydown', (event) => {
             const currentIndex = botonesGrupo.indexOf(boton);
             let nextIndex = null;
@@ -133,6 +153,7 @@ if (menuAdministrador && menuAdministrador.dataset.adminMenuInicializado !== 'tr
                     break;
             }
 
+            // Condicional: evalua "nextIndex === null" para decidir si ejecuta el bloque siguiente.
             if (nextIndex === null) {
                 return;
             }
@@ -149,6 +170,7 @@ if (menuAdministrador && menuAdministrador.dataset.adminMenuInicializado !== 'tr
         .closest('.admin-sidebar')
         ?.querySelector('.admin-sidebar-footer a[href*="/gestion/cuenta"]');
 
+    // Condicional: evalua "linkConfiguracionAntiguo" para decidir si ejecuta el bloque siguiente.
     if (linkConfiguracionAntiguo) {
         linkConfiguracionAntiguo.hidden = true;
         linkConfiguracionAntiguo.setAttribute('aria-hidden', 'true');

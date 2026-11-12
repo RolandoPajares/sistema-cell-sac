@@ -52,6 +52,7 @@ class CompraController extends Controller
      */
     public function index(Request $request): View
     {
+        // Guarda en $filters el resultado necesario para continuar esta operacion.
         $filters = $request->validate([
             'buscar' => ['nullable', 'string', 'max:160'],
             'proveedor' => ['nullable', 'integer'],
@@ -62,10 +63,14 @@ class CompraController extends Controller
         $activePurchases = fn (): Builder => $this->authorization
             ->scopeRecordsFor(Compra::query(), $request->user(), 'gestion.compras.consultar')
             ->where('activo', true);
+        // Guarda en $applyFilters el resultado necesario para continuar esta operacion.
         $applyFilters = static function (Builder $query) use ($filters): Builder {
+            // Comprueba la condicion ($filters['buscar'] ?? '') !== '' antes de ejecutar este bloque.
             if (($filters['buscar'] ?? '') !== '') {
+                // Guarda en $search el resultado necesario para continuar esta operacion.
                 $search = trim($filters['buscar']);
                 $query->where(function (Builder $query) use ($search): void {
+                    // Comprueba la condicion ctype_digit($search) antes de ejecutar este bloque.
                     if (ctype_digit($search)) {
                         $query->where('id', (int) $search)
                             ->orWhereHas('supplier', fn (Builder $supplierQuery) => $supplierQuery->where('nombre', 'like', "%{$search}%"))
@@ -79,18 +84,22 @@ class CompraController extends Controller
                 });
             }
 
+            // Comprueba la condicion ($filters['proveedor'] ?? '') !== '' antes de ejecutar este bloque.
             if (($filters['proveedor'] ?? '') !== '') {
                 $query->where('proveedor_id', $filters['proveedor']);
             }
 
+            // Comprueba la condicion ($filters['estado'] ?? '') !== '' antes de ejecutar este bloque.
             if (($filters['estado'] ?? '') !== '') {
                 $query->where('estado', $filters['estado']);
             }
 
+            // Comprueba la condicion ($filters['desde'] ?? '') !== '' antes de ejecutar este bloque.
             if (($filters['desde'] ?? '') !== '') {
                 $query->whereDate('fecha_compra', '>=', $filters['desde']);
             }
 
+            // Comprueba la condicion ($filters['hasta'] ?? '') !== '' antes de ejecutar este bloque.
             if (($filters['hasta'] ?? '') !== '') {
                 $query->whereDate('fecha_compra', '<=', $filters['hasta']);
             }
@@ -98,6 +107,7 @@ class CompraController extends Controller
             return $query;
         };
 
+        // Guarda en $purchases el resultado necesario para continuar esta operacion.
         $purchases = $applyFilters($activePurchases())
             ->with(['supplier', 'details.product', 'details.variante'])
             ->withCount('details')
@@ -105,9 +115,13 @@ class CompraController extends Controller
             ->latest('id')
             ->paginate(8)
             ->withQueryString();
+        // Guarda en $idsComprasPagina el resultado necesario para continuar esta operacion.
         $idsComprasPagina = $purchases->getCollection()->modelKeys();
+        // Guarda en $cantidadesRecibidas el resultado necesario para continuar esta operacion.
         $cantidadesRecibidas = collect();
+        // Comprueba la condicion $idsComprasPagina !== [] antes de ejecutar este bloque.
         if ($idsComprasPagina !== []) {
+            // Prepara en $cantidadesRecibidas la consulta que obtiene o modifica los registros necesarios.
             $cantidadesRecibidas = DB::table('movimientos_inventario as movimiento')
                 ->join('compras', function ($join): void {
                     $join->on('compras.id', '=', 'movimiento.documento_id')
@@ -127,10 +141,14 @@ class CompraController extends Controller
                     (string) $movimiento->documento_id.':'.(int) $movimiento->producto_id.':'.($movimiento->variante_id === null ? 'base' : (int) $movimiento->variante_id) => (int) $movimiento->cantidad_recibida,
                 ]);
         }
+        // Recorre $purchases as $purchase y procesa cada elemento de la coleccion.
         foreach ($purchases as $purchase) {
+            // Guarda en $cantidadTotalRecibida el resultado necesario para continuar esta operacion.
             $cantidadTotalRecibida = 0;
+            // Recorre $purchase->details as $detail y procesa cada elemento de la coleccion.
             foreach ($purchase->details as $detail) {
                 $claveRecepcion = (int) $purchase->id.':'.(int) $detail->producto_id.':'.($detail->variante_id === null ? 'base' : (int) $detail->variante_id);
+                // Guarda en $cantidadRecibida el resultado necesario para continuar esta operacion.
                 $cantidadRecibida = (int) $cantidadesRecibidas->get($claveRecepcion, 0);
                 $detail->setAttribute('cantidad_recibida', $cantidadRecibida);
                 $detail->setAttribute('cantidad_pendiente', max(0, (int) $detail->cantidad - $cantidadRecibida));
@@ -138,14 +156,18 @@ class CompraController extends Controller
             }
             $purchase->setAttribute('cantidad_recibida_total', $cantidadTotalRecibida);
         }
+        // Guarda en $allPurchases el resultado necesario para continuar esta operacion.
         $allPurchases = $activePurchases();
+        // Guarda en $statusSummary el resultado necesario para continuar esta operacion.
         $statusSummary = (clone $allPurchases)
             ->select('estado')
             ->selectRaw('COUNT(*) as cantidad')
             ->groupBy('estado')
             ->orderByDesc('cantidad')
             ->get();
+        // Guarda en $totalPurchases el resultado necesario para continuar esta operacion.
         $totalPurchases = (clone $allPurchases)->count();
+        // Guarda en $recentPurchases el resultado necesario para continuar esta operacion.
         $recentPurchases = (clone $allPurchases)
             ->with('supplier')
             ->withCount('details')
@@ -153,6 +175,7 @@ class CompraController extends Controller
             ->latest('id')
             ->limit(4)
             ->get();
+        // Guarda en $pendingPurchaseRecords el resultado necesario para continuar esta operacion.
         $pendingPurchaseRecords = (clone $allPurchases)
             ->whereIn('estado', ['Pendiente', 'En proceso', 'Aprobada'])
             ->with('supplier')
@@ -161,9 +184,11 @@ class CompraController extends Controller
             ->latest('id')
             ->limit(4)
             ->get();
+        // Guarda en $visiblePurchaseIds el resultado necesario para continuar esta operacion.
         $visiblePurchaseIds = $this->authorization
             ->scopeRecordsFor(Compra::query(), $request->user(), 'gestion.compras.consultar')
             ->select('compras.id');
+        // Prepara en $mostPurchasedProducts la consulta que obtiene o modifica los registros necesarios.
         $mostPurchasedProducts = DB::table('movimientos_inventario as movimiento')
             ->join('compras', function ($join): void {
                 $join->on('compras.id', '=', 'movimiento.documento_id')
@@ -183,28 +208,47 @@ class CompraController extends Controller
             ->limit(4)
             ->get();
 
+        // Prepara en $proveedoresVisibles la consulta que obtiene o modifica los registros necesarios.
         $proveedoresVisibles = Proveedor::query()->whereIn('id', (clone $activePurchases())->select('compras.proveedor_id'))->orderBy('nombre')->get();
+        // Guarda en $suppliers el resultado necesario para continuar esta operacion.
         $suppliers = collect();
+        // Guarda en $products el resultado necesario para continuar esta operacion.
         $products = collect();
+        // Obtiene en $canCreatePermission la informacion de la solicitud o del usuario actual.
         $canCreatePermission = $this->authorization->allows($request->user(), 'gestion.compras.crear');
+        // Obtiene en $canExport la informacion de la solicitud o del usuario actual.
         $canExport = $this->authorization->allows($request->user(), 'gestion.compras.exportar');
+        // Guarda en $canImport el resultado necesario para continuar esta operacion.
         $canImport = false;
+        // Guarda en $canCreateLocation el resultado necesario para continuar esta operacion.
         $canCreateLocation = false;
+        // Guarda en $canCreate el resultado necesario para continuar esta operacion.
         $canCreate = false;
+        // Agrupa en $editables los datos que se utilizaran en la siguiente operacion.
         $editables = [];
+        // Comprueba la condicion Schema::hasColumn('registros_auditoria', 'identificador_universal_evento') && $canCreatePermission antes de ejecutar este bloque.
         if (Schema::hasColumn('registros_auditoria', 'identificador_universal_evento') && $canCreatePermission) {
+            // Ejecuta la operacion dentro de un bloque controlado para atender posibles excepciones.
             try {
+                // Obtiene en $ubicacion la informacion de la solicitud o del usuario actual.
                 $ubicacion = $this->authorization->operationLocation($request->user());
                 $canCreateLocation = $ubicacion['empresa_id'] !== null && $ubicacion['sede_id'] !== null && $ubicacion['almacen_id'] !== null
                     && $this->authorization->allowsRecord($request->user(), 'gestion.compras.crear', $ubicacion['empresa_id'], $ubicacion['sede_id']);
+                // Guarda en $canImport el resultado necesario para continuar esta operacion.
                 $canImport = $canCreateLocation;
             } catch (HttpExceptionInterface) {
+                // Guarda en $canCreateLocation el resultado necesario para continuar esta operacion.
                 $canCreateLocation = false;
+                // Guarda en $canImport el resultado necesario para continuar esta operacion.
                 $canImport = false;
             }
+            // Comprueba la condicion $canCreateLocation antes de ejecutar este bloque.
             if ($canCreateLocation) {
+                // Prepara en $suppliers la consulta que obtiene o modifica los registros necesarios.
                 $suppliers = Proveedor::query()->where('empresa_id', $ubicacion['empresa_id'])->where('activo', true)->orderBy('nombre')->get();
+                // Prepara en $products la consulta que obtiene o modifica los registros necesarios.
                 $products = Producto::query()->active()->where('empresa_id', $ubicacion['empresa_id'])->with('variants:id,producto_id,nombre_color,codigo_sku,estado')->orderBy('nombre')->get();
+                // Comprueba la condicion ! is_string($request->session()->get('compra_token')) antes de ejecutar este bloque.
                 if (! is_string($request->session()->get('compra_token'))) {
                     $request->session()->put('compra_token', bin2hex(random_bytes(32)));
                 }
@@ -214,42 +258,59 @@ class CompraController extends Controller
                 $canCreate = true;
             }
         }
+        // Guarda en $editables el resultado necesario para continuar esta operacion.
         $editables = $this->authorization
             ->scopeRecordsFor(Compra::query()->whereIn('compras.id', $purchases->getCollection()->modelKeys())->where('estado', 'Pendiente'), $request->user(), 'gestion.compras.actualizar')
             ->pluck('compras.id')
             ->all();
+        // Guarda en $editables el resultado necesario para continuar esta operacion.
         $editables = array_values(array_filter($editables, function (int $purchaseId): bool {
+            // Comprueba la condicion DB::table('movimientos_inventario')->where('documento_tipo', 'compra')->where('documento_id', (string) $purchaseId)->exists() antes de ejecutar este bloque.
             if (DB::table('movimientos_inventario')->where('documento_tipo', 'compra')->where('documento_id', (string) $purchaseId)->exists()) {
                 return false;
             }
+            // Comprueba la condicion Schema::hasTable('pagos') && DB::table('pagos')->where('compra_id', $purchaseId)->exists() antes de ejecutar este bloque.
             if (Schema::hasTable('pagos') && DB::table('pagos')->where('compra_id', $purchaseId)->exists()) {
                 return false;
             }
 
             return ! Schema::hasTable('cuentas_pagar') || ! DB::table('cuentas_pagar')->where('compra_id', $purchaseId)->exists();
         }));
+        // Guarda en $idsPendientes el resultado necesario para continuar esta operacion.
         $idsPendientes = array_values(array_unique([...$pendingPurchaseRecords->modelKeys(), ...$purchases->getCollection()->modelKeys()]));
+        // Prepara en $aprobables la consulta que obtiene o modifica los registros necesarios.
         $aprobables = $this->authorization->scopeRecordsFor(Compra::query()->whereIn('compras.id', $idsPendientes), $request->user(), 'gestion.compras.aprobar')->pluck('compras.id')->all();
+        // Prepara en $anulables la consulta que obtiene o modifica los registros necesarios.
         $anulables = $this->authorization->scopeRecordsFor(Compra::query()->whereIn('compras.id', $idsPendientes)->where('estado', 'Pendiente'), $request->user(), 'gestion.compras.anular')->pluck('compras.id')->all();
+        // Prepara en $recibibles la consulta que obtiene o modifica los registros necesarios.
         $recibibles = $this->authorization->scopeRecordsFor(Compra::query()->whereIn('compras.id', $idsPendientes), $request->user(), 'gestion.compras.recibir')->pluck('compras.id')->all();
+        // Agrupa en $tokensRecepcion los datos que se utilizaran en la siguiente operacion.
         $tokensRecepcion = [];
+        // Recorre $purchases as $purchase y procesa cada elemento de la coleccion.
         foreach ($purchases as $purchase) {
+            // Comprueba la condicion $purchase->estado !== 'Aprobada' || ! in_array($purchase->id, $recibibles, true) antes de ejecutar este bloque.
             if ($purchase->estado !== 'Aprobada' || ! in_array($purchase->id, $recibibles, true)) {
                 continue;
             }
+            // Guarda en $claveToken el resultado necesario para continuar esta operacion.
             $claveToken = 'compra_recepcion_tokens.'.$purchase->id;
+            // Guarda en $tokenExistente el resultado necesario para continuar esta operacion.
             $tokenExistente = $request->session()->get($claveToken);
+            // Comprueba la condicion ! is_string($tokenExistente) || preg_match('/\A[a-f0-9]{64}\z/', $tokenExistente) !== 1 antes de ejecutar este bloque.
             if (! is_string($tokenExistente) || preg_match('/\A[a-f0-9]{64}\z/', $tokenExistente) !== 1) {
+                // Guarda en $tokenExistente el resultado necesario para continuar esta operacion.
                 $tokenExistente = bin2hex(random_bytes(32));
                 $request->session()->put($claveToken, $tokenExistente);
             }
             $tokensRecepcion[$purchase->id] = $tokenExistente;
         }
+        // Guarda en $purchasePresentation el resultado necesario para continuar esta operacion.
         $purchasePresentation = $purchases->getCollection()
             ->concat($pendingPurchaseRecords)
             ->concat($recentPurchases)
             ->unique('id')
             ->mapWithKeys(function (Compra $purchase): array {
+                // Guarda en $status el resultado necesario para continuar esta operacion.
                 $status = (string) $purchase->estado;
                 $receptionStatus = $purchase->estado === 'Aprobada' && (int) $purchase->cantidad_recibida_total > 0
                     ? 'Parcial'
@@ -265,6 +326,7 @@ class CompraController extends Controller
             })
             ->all();
 
+        // Devuelve la vista 'gestion.comercial.compras.listar' con los datos preparados por este controlador.
         return view('gestion.comercial.compras.listar', [
             'purchases' => $purchases,
             'suppliers' => $suppliers,
@@ -336,7 +398,9 @@ class CompraController extends Controller
      */
     public function export(Request $request, string $format, ExportadorTabular $exporter, RegistradorAuditoria $audit): Response|StreamedResponse
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
+        // Guarda en $filters el resultado necesario para continuar esta operacion.
         $filters = $request->validate([
             'buscar' => ['nullable', 'string', 'max:160'],
             'proveedor' => ['nullable', 'integer'],
@@ -344,12 +408,15 @@ class CompraController extends Controller
             'desde' => ['nullable', 'date_format:Y-m-d'],
             'hasta' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:desde'],
         ]);
+        // Prepara en $query la consulta que obtiene o modifica los registros necesarios.
         $query = $this->authorization->scopeRecordsFor(Compra::query(), $request->user(), 'gestion.compras.consultar')
             ->where('activo', true)
             ->with('supplier')
             ->when(($filters['buscar'] ?? '') !== '', function (Builder $builder) use ($filters): void {
+                // Guarda en $search el resultado necesario para continuar esta operacion.
                 $search = trim((string) $filters['buscar']);
                 $builder->where(function (Builder $nested) use ($search): void {
+                    // Comprueba la condicion ctype_digit($search) antes de ejecutar este bloque.
                     if (ctype_digit($search)) {
                         $nested->where('id', (int) $search)
                             ->orWhereHas('supplier', fn (Builder $supplier): Builder => $supplier->where('nombre', 'like', '%'.$search.'%'));
@@ -365,6 +432,7 @@ class CompraController extends Controller
             ->when(($filters['desde'] ?? '') !== '', fn (Builder $builder): Builder => $builder->whereDate('fecha_compra', '>=', $filters['desde']))
             ->when(($filters['hasta'] ?? '') !== '', fn (Builder $builder): Builder => $builder->whereDate('fecha_compra', '<=', $filters['hasta']))
             ->orderByDesc('fecha_compra')->orderByDesc('id')->limit(5000);
+        // Guarda en $purchases el resultado necesario para continuar esta operacion.
         $purchases = $query->get();
         $rows = $purchases->map(static fn (Compra $purchase): array => [
             $purchase->id,
@@ -373,6 +441,7 @@ class CompraController extends Controller
             $purchase->estado,
             $purchase->total,
         ])->all();
+        // Guarda en $response el resultado necesario para continuar esta operacion.
         $response = $exporter->download($format, 'compras-'.now()->format('Ymd'),
             ['ID', 'Proveedor', 'Fecha', 'Estado', 'Total'],
             $rows,
@@ -400,10 +469,12 @@ class CompraController extends Controller
      */
     public function store(GuardarCompraRequest $request): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $datos = $request->validated();
         $this->purchaseService->registrar($datos, $request->user(), $datos['compra_token'], $request->ip());
         $request->session()->forget('compra_token');
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Compra registrada como pendiente; aún no se ha recibido mercadería.');
     }
 
@@ -418,13 +489,16 @@ class CompraController extends Controller
      */
     public function update(ActualizarCompraRequest $request, Compra $compra): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $this->purchaseService->actualizar($compra, $request->validated(), $request->user(), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'La compra fue actualizada correctamente.');
     }
 
     public function importTemplate(ExportadorTabular $exportador): Response|StreamedResponse
     {
+        // Agrupa en $columns los datos que se utilizaran en la siguiente operacion.
         $columns = ['proveedor_id', 'fecha_compra', 'producto_id', 'variante_id', 'cantidad', 'costo_unitario'];
 
         return $exportador->download('excel', 'plantilla-importacion-compras', $columns, [array_fill(0, count($columns), null)], [
@@ -435,66 +509,92 @@ class CompraController extends Controller
 
     public function import(ImportarComprasRequest $request): RedirectResponse
     {
+        // Agrupa en $expected los datos que se utilizaran en la siguiente operacion.
         $expected = ['proveedor_id', 'fecha_compra', 'producto_id', 'variante_id', 'cantidad', 'costo_unitario'];
+        // Guarda en $temporaryCsv el resultado necesario para continuar esta operacion.
         $temporaryCsv = null;
+        // Guarda en $file el resultado necesario para continuar esta operacion.
         $file = $request->file('archivo');
+        // Guarda en $path el resultado necesario para continuar esta operacion.
         $path = $file->getRealPath();
+        // Comprueba la condicion strtolower($file->getClientOriginalExtension()) === 'xlsx' antes de ejecutar este bloque.
         if (strtolower($file->getClientOriginalExtension()) === 'xlsx') {
+            // Guarda en $temporaryCsv el resultado necesario para continuar esta operacion.
             $temporaryCsv = tempnam(sys_get_temp_dir(), 'tc-import-');
+            // Detiene la solicitud si se cumple la validacion de seguridad indicada.
             abort_if($temporaryCsv === false, 422, 'No se pudo preparar el archivo Excel.');
+            // Guarda en $output el resultado necesario para continuar esta operacion.
             $output = fopen($temporaryCsv, 'wb');
+            // Detiene la solicitud si se cumple la validacion de seguridad indicada.
             abort_if($output === false, 422, 'No se pudo preparar el archivo Excel.');
             fputcsv($output, $expected);
+            // Recorre $this->leerFilasXlsx($file) as $row y procesa cada elemento de la coleccion.
             foreach ($this->leerFilasXlsx($file) as $row) {
                 fputcsv($output, $row);
             }
             fclose($output);
+            // Guarda en $path el resultado necesario para continuar esta operacion.
             $path = $temporaryCsv;
         }
+        // Guarda en $handle el resultado necesario para continuar esta operacion.
         $handle = fopen($path, 'rb');
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($handle !== false, 422, 'No se pudo leer el archivo CSV.');
+        // Guarda en $header el resultado necesario para continuar esta operacion.
         $header = fgetcsv($handle);
         $header = is_array($header) ? array_map(static fn ($value): string => trim((string) $value), $header) : [];
+        // Comprueba la condicion $header !== $expected antes de ejecutar este bloque.
         if ($header !== $expected) {
             fclose($handle);
             throw ValidationException::withMessages(['archivo' => 'El CSV debe contener exactamente: '.implode(',', $expected).'.']);
         }
+        // Agrupa en $rows los datos que se utilizaran en la siguiente operacion.
         $rows = [];
         while (($row = fgetcsv($handle)) !== false) {
+            // Comprueba la condicion $row === [] || collect($row)->every(static fn ($value): bool => trim((string) $value) === '') antes de ejecutar este bloque.
             if ($row === [] || collect($row)->every(static fn ($value): bool => trim((string) $value) === '')) {
                 continue;
             }
+            // Comprueba la condicion count($row) !== count($expected) antes de ejecutar este bloque.
             if (count($row) !== count($expected)) {
                 fclose($handle);
                 throw ValidationException::withMessages(['archivo' => 'El CSV contiene una fila con columnas inválidas.']);
             }
             $data = array_combine($expected, array_map(static fn ($value): string => trim((string) $value), $row));
+            // Guarda en $validator el resultado necesario para continuar esta operacion.
             $validator = validator($data, [
                 'proveedor_id' => ['required', 'integer', 'min:1'], 'fecha_compra' => ['required', 'date_format:Y-m-d'],
                 'producto_id' => ['required', 'integer', 'min:1'], 'variante_id' => ['nullable', 'integer', 'min:1'],
                 'cantidad' => ['required', 'integer', 'min:1', 'max:1000'], 'costo_unitario' => ['required', 'regex:/\A\d{1,8}(?:\.\d{1,2})?\z/'],
             ]);
+            // Comprueba la condicion $validator->fails() antes de ejecutar este bloque.
             if ($validator->fails()) {
                 fclose($handle);
                 throw ValidationException::withMessages(['archivo' => 'Fila inválida: '.implode(' ', $validator->errors()->all())]);
             }
             $rows[] = $data;
+            // Comprueba la condicion count($rows) > 100 antes de ejecutar este bloque.
             if (count($rows) > 100) {
                 fclose($handle);
                 throw ValidationException::withMessages(['archivo' => 'El archivo no puede superar 100 líneas.']);
             }
         }
         fclose($handle);
+        // Comprueba la condicion $rows === [] antes de ejecutar este bloque.
         if ($rows === []) {
             throw ValidationException::withMessages(['archivo' => 'El CSV no contiene líneas de compra.']);
         }
 
+        // Comprueba la condicion $temporaryCsv !== null && file_exists($temporaryCsv) antes de ejecutar este bloque.
         if ($temporaryCsv !== null && file_exists($temporaryCsv)) {
             unlink($temporaryCsv);
         }
 
+        // Ejecuta la consulta o modificacion de base de datos indicada en la instruccion siguiente.
         DB::transaction(function () use ($rows, $request): void {
+            // Recorre $rows as $data y procesa cada elemento de la coleccion.
             foreach ($rows as $data) {
+                // Guarda en $token el resultado necesario para continuar esta operacion.
                 $token = bin2hex(random_bytes(32));
                 $request->session()->put('compra_token', $token);
                 $this->purchaseService->registrar([
@@ -508,6 +608,7 @@ class CompraController extends Controller
             }
         }, 3);
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', count($rows).' compra(s) importada(s) correctamente.');
     }
 
@@ -522,6 +623,7 @@ class CompraController extends Controller
     {
         $this->purchaseService->aprobar($compra, $request->user(), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'La compra está aprobada; aún no se ha recibido mercadería.');
     }
 
@@ -536,6 +638,7 @@ class CompraController extends Controller
     {
         $this->purchaseService->recibir($compra, $request->user(), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'La compra está recibida.');
     }
 
@@ -550,6 +653,7 @@ class CompraController extends Controller
     {
         $this->purchaseService->anular($compra, $request->user(), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'La compra pendiente fue anulada y quedó conservada en auditoría.');
     }
 
@@ -562,6 +666,7 @@ class CompraController extends Controller
      */
     public function recibirParcial(RegistrarRecepcionParcialCompraRequest $request, Compra $compra): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $datos = $request->validated();
         $this->purchaseService->registrarRecepcionParcial(
             $compra,
@@ -572,8 +677,10 @@ class CompraController extends Controller
             $request->ip(),
         );
         $request->session()->put('compra_recepcion_tokens.'.$compra->id, bin2hex(random_bytes(32)));
+        // Guarda en $compraActualizada el resultado necesario para continuar esta operacion.
         $compraActualizada = $compra->fresh();
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', $compraActualizada?->estado === 'Recibida'
             ? 'La recepción completó la compra y actualizó las existencias.'
             : 'La recepción parcial quedó registrada y la discrepancia se agregó a la auditoría.');
@@ -582,24 +689,40 @@ class CompraController extends Controller
     /** @return array<int, array<int, string>> */
     private function leerFilasXlsx(UploadedFile $file): array
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(class_exists(ZipArchive::class), 422, 'El servidor no tiene habilitada la lectura de archivos Excel.');
+        // Guarda en $zip el resultado necesario para continuar esta operacion.
         $zip = new ZipArchive;
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($zip->open($file->getRealPath()) === true, 422, 'El archivo Excel no se puede abrir.');
+        // Guarda en $sheet el resultado necesario para continuar esta operacion.
         $sheet = $zip->getFromName('xl/worksheets/sheet1.xml');
         $zip->close();
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(is_string($sheet), 422, 'La plantilla Excel no contiene una hoja válida.');
+        // Guarda en $dom el resultado necesario para continuar esta operacion.
         $dom = new \DOMDocument;
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(@$dom->loadXML($sheet) === true, 422, 'La hoja Excel no tiene un formato válido.');
+        // Guarda en $namespace el resultado necesario para continuar esta operacion.
         $namespace = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
+        // Agrupa en $rows los datos que se utilizaran en la siguiente operacion.
         $rows = [];
+        // Recorre $dom->getElementsByTagNameNS($namespace, 'row') as $rowNode y procesa cada elemento de la coleccion.
         foreach ($dom->getElementsByTagNameNS($namespace, 'row') as $rowNode) {
+            // Agrupa en $values los datos que se utilizaran en la siguiente operacion.
             $values = [];
+            // Recorre $rowNode->getElementsByTagNameNS($namespace, 'c') as $cell y procesa cada elemento de la coleccion.
             foreach ($rowNode->getElementsByTagNameNS($namespace, 'c') as $cell) {
                 preg_match('/^([A-Z]+)/', (string) $cell->getAttribute('r'), $match);
+                // Guarda en $column el resultado necesario para continuar esta operacion.
                 $column = 0;
+                // Recorre str_split($match[1] ?? 'A') as $letter y procesa cada elemento de la coleccion.
                 foreach (str_split($match[1] ?? 'A') as $letter) {
+                    // Guarda en $column el resultado necesario para continuar esta operacion.
                     $column = ($column * 26) + ord($letter) - 64;
                 }
+                // Guarda en $valueNode el resultado necesario para continuar esta operacion.
                 $valueNode = $cell->getElementsByTagNameNS($namespace, 't')->item(0)
                     ?: $cell->getElementsByTagNameNS($namespace, 'v')->item(0);
                 $values[$column - 1] = $valueNode?->textContent ?? '';

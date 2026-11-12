@@ -1,4 +1,7 @@
+
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
 <form method="post" class="form-card proveedores-form proveedores-form-redisenado" action="{{ route('management.suppliers.store') }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
     @csrf
     <header class="proveedores-form-heading proveedores-form-heading-modern">
         <div><span>Compras y logística</span><h2>Nuevo proveedor</h2><p>Completa la información del proveedor para registrarlo en el sistema.</p></div>

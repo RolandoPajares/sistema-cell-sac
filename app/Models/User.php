@@ -20,6 +20,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 
+// Declara los atributos permitidos para asignacion masiva en este modelo.
 #[Fillable(['nombre', 'correo', 'password', 'resumen_contrasena', 'rol', 'foto_perfil', 'preferencias', 'activo', 'bloqueado_hasta', 'acceso_controlado'])]
 #[Hidden(['password', 'resumen_contrasena', 'remember_token', 'token_recordatorio'])]
 /**
@@ -36,6 +37,7 @@ class User extends Authenticatable
 
     public const UPDATED_AT = 'actualizado_en';
 
+    // Usa la tabla 'usuarios' como origen de los registros de este modelo.
     protected $table = 'usuarios';
 
     protected $rememberTokenName = 'token_recordatorio';
@@ -165,11 +167,13 @@ class User extends Authenticatable
         return $this->hasOne(Cliente::class, 'usuario_id');
     }
 
+    // Define la relacion 'valoresPerfil' entre este modelo y los registros relacionados.
     public function valoresPerfil(): HasMany
     {
         return $this->hasMany(UsuarioPerfilCampo::class, 'usuario_id');
     }
 
+    // Define la relacion 'perfil' entre este modelo y los registros relacionados.
     public function perfil(): HasOne
     {
         return $this->hasOne(PerfilUsuario::class, 'usuario_id');

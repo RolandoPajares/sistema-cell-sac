@@ -1,3 +1,4 @@
+
 <header class="admin-topbar">
     <a class="admin-topbar-brand" href="{{ route($panelBrandRoute) }}" title="MD Technology Digital Cell">
         <img class="admin-topbar-logo" src="{{ asset('assets/cell-legacy/img/marca/logoadmin.png') }}" alt="TECHNOLOGY CELL">
@@ -10,12 +11,15 @@
         <input type="search" data-admin-global-search placeholder="Buscar productos, clientes, campañas..." aria-label="Buscar productos, clientes o campañas">
     </label>
     <button class="admin-ai-button" type="button" data-admin-assistant-toggle aria-controls="adminAssistantPanel" aria-expanded="false"><i class="bi bi-stars" aria-hidden="true"></i><span>Asistente IA</span></button>
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
     @include('layouts.panel.notificaciones')
     <button class="admin-topbar-icon" type="button" aria-label="Ayuda"><i class="bi bi-question-circle" aria-hidden="true"></i></button>
     <details class="admin-user-menu">
         <summary class="admin-user" aria-label="Abrir menú de usuario">
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if ($panelUser?->foto_perfil)
                 <img class="admin-avatar admin-avatar--photo" src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($panelUser->foto_perfil) }}" alt="">
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
             @else
                 <span class="admin-avatar">{{ $panelUserInitials }}</span>
             @endif
@@ -24,6 +28,7 @@
         </summary>
         <div class="admin-user-menu-panel">
             <a href="{{ route($panelAccountRoute) }}"><i class="bi bi-person-circle" aria-hidden="true"></i><span>Mi perfil</span></a>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if ($panelIsAdministrator)
                 <a href="{{ route('management.account.preferences') }}"><i class="bi bi-sliders" aria-hidden="true"></i><span>Preferencias</span></a>
                 <a href="{{ route('management.account.security') }}"><i class="bi bi-shield-lock" aria-hidden="true"></i><span>Seguridad de la cuenta</span></a>
@@ -31,7 +36,9 @@
                 <a href="{{ route('management.account.notifications') }}"><i class="bi bi-bell" aria-hidden="true"></i><span>Mis notificaciones</span></a>
                 <a href="{{ route('management.account.activity') }}"><i class="bi bi-clock-history" aria-hidden="true"></i><span>Mi actividad reciente</span></a>
             @endif
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form method="post" action="{{ route('logout') }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                 @csrf
                 <button type="submit"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>Cerrar sesión</span></button>
             </form>

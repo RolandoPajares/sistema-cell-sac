@@ -1,5 +1,7 @@
 
+
 !<form class="ventas-modal-form" method="post" action="{{ route('management.sales.store') }}" data-sales-form>
+{{-- proteccion CSRF que valida el origen del formulario. --}}
     @csrf
     <input type="hidden" name="venta_token" value="{{ session('venta_token') }}">
 
@@ -18,6 +20,7 @@
                 <span>Cliente <b>*</b></span>
                 <select name="cliente_id" required data-sales-customer>
                     <option value="">Buscar cliente...</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach ($customers as $customer)
                         <option value="{{ $customer->id }}" @selected((string) old('cliente_id') === (string) $customer->id)>{{ $customer->razon_social ?: $customer->nombre_contacto }} · {{ $customer->correo }}</option>
                     @endforeach
@@ -41,6 +44,7 @@
                 <span>Medio de pago</span>
                 <select name="medio_pago_id">
                     <option value="">Sin pago registrado</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach ($paymentMethods as $paymentMethod)
                         <option value="{{ $paymentMethod->id }}" data-payment-code="{{ $paymentMethod->codigo }}" @selected((string) old('medio_pago_id') === (string) $paymentMethod->id)>{{ $paymentMethod->nombre }}</option>
                     @endforeach
@@ -64,6 +68,7 @@
             <label class="ventas-modal-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar producto</span><input type="search" placeholder="Buscar producto por nombre, código o categoría..." data-sales-product-search></label>
             <select class="ventas-product-select" aria-label="Producto para agregar" data-sales-product-picker>
                 <option value="">Selecciona un producto</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @foreach ($products as $product)
                     <option value="{{ $product->id }}" data-price="{{ number_format((float) $product->effective_price, 2, '.', '') }}" data-stock="{{ $product->existencias }}">{{ $product->nombre }} · S/ {{ number_format((float) $product->effective_price, 2) }} · Stock {{ $product->existencias }}</option>
                 @endforeach

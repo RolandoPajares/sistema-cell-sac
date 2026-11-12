@@ -1,6 +1,14 @@
+/**
+ * GUIA DE EXPOSICION JAVASCRIPT
+ * Archivo: resources/js/componentes/comunes/confirmacion.js
+ * Este modulo contiene comportamiento de interfaz, eventos, validaciones y/o
+ * comunicacion con el backend. Los comentarios explican el flujo sin cambiar la logica.
+ */
+
 /** Confirmaciones accesibles y reutilizables para acciones administrativas. */
 const confirmables = [...document.querySelectorAll('[data-confirm]')];
 
+// Condicional: evalua "confirmables.length > 0" para decidir si ejecuta el bloque siguiente.
 if (confirmables.length > 0) {
     const dialog = document.createElement('dialog');
     dialog.className = 'tc-confirm-dialog';
@@ -10,7 +18,9 @@ if (confirmables.length > 0) {
     const message = dialog.querySelector('.tc-confirm-dialog__message');
     let pending = null;
 
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     confirmables.forEach((element) => element.addEventListener('click', (event) => {
+        // Condicional: evalua "element.dataset.confirmed === '1'" para decidir si ejecuta el bloque siguiente.
         if (element.dataset.confirmed === '1') {
             delete element.dataset.confirmed;
             return;
@@ -22,7 +32,9 @@ if (confirmables.length > 0) {
         dialog.showModal();
     }));
 
+    // Evento: escucha el evento submit y ejecuta la funcion asociada cuando ocurre.
     form.addEventListener('submit', (event) => {
+        // Condicional: evalua "event.submitter?.value !== 'confirm'" para decidir si ejecuta el bloque siguiente.
         if (event.submitter?.value !== 'confirm') {
             pending = null;
             return;
@@ -32,9 +44,12 @@ if (confirmables.length > 0) {
         const element = pending;
         pending = null;
         dialog.close();
+        // Condicional: evalua "!element" para decidir si ejecuta el bloque siguiente.
         if (!element) return;
         element.dataset.confirmed = '1';
+        // Condicional: evalua "element.matches('form')) element.requestSubmit(" para decidir si ejecuta el bloque siguiente.
         if (element.matches('form')) element.requestSubmit();
+        // Caso alternativo: atiende la situacion en la que ninguna condicion anterior resulto verdadera.
         else element.click();
     });
 }

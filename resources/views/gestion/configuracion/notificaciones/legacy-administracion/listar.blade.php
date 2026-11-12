@@ -1,10 +1,15 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Notificaciones')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-notificaciones')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 {{-- Presentación del módulo usando la configuración preparada fuera de Blade. --}}
+{{-- logica auxiliar de la vista que prepara valores para la presentacion. --}}
 @php($module = config('gestion.administracion.notificaciones'))
 
 {{-- Este permiso controla la visibilidad; la autorización real permanece en el backend. --}}
@@ -23,6 +28,7 @@
 
     {{-- Indicadores resumidos preparados por la capa de datos del módulo. --}}
     <section class="admin-system-kpis" aria-label="Indicadores de {{ $module['content']['title'] }}">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
         @foreach ($module['kpis'] ?? [] as $kpi)
         <article class="admin-system-kpi admin-system-kpi--{{ $kpi['tone'] ?? 'blue' }}"><span class="admin-system-kpi-icon"><i class="bi {{ $kpi['icon'] }}" aria-hidden="true"></i></span>
             <div><small>{{ $kpi['label'] }}</small><strong>{{ $kpi['value'] ?? '—' }}</strong><span>{{ $kpi['helper'] ?? 'Sin datos integrados' }}</span></div><i class="admin-system-kpi-spark" aria-hidden="true"></i>
@@ -31,6 +37,7 @@
     </section>
 
     {{-- Filtros visuales para buscar y clasificar registros reales. --}}
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
     <form class="admin-system-filters" data-pending-form><label class="admin-system-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar {{ $module['record_plural'] ?? 'registros' }}</span><input type="search" placeholder="Buscar {{ $module['record_singular'] ?? 'registro' }}, módulo o permiso..." data-pending-search></label><label><span class="visually-hidden">Tipo</span><select data-pending-filter>
                 <option>Tipo: Todos</option>
                 <option>Interno</option>
@@ -89,6 +96,7 @@
             <div class="admin-system-summary-empty"><i class="bi bi-bar-chart-line" aria-hidden="true"></i><strong>Sin datos integrados</strong><span>La información aparecerá aquí.</span></div>
         </article>@endforeach</section>
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if (($module['mode'] ?? 'consult') === 'crud')
     <dialog class="admin-system-dialog gestion-pendiente-modal" data-pending-modal="crear" aria-labelledby="{{ $module['key'] }}-crear-title">@include('gestion.administracion.' . $module['key'] . '.crear', ['module' => $module])</dialog>
     <dialog class="admin-system-dialog gestion-pendiente-modal" data-pending-modal="editar" aria-labelledby="{{ $module['key'] }}-editar-title">@include('gestion.administracion.' . $module['key'] . '.editar', ['module' => $module])</dialog>
@@ -110,6 +118,7 @@
                     </div>
                 </div>
                 <div class="gestion-pendiente-detail-grid">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach (($module['fields'] ?? []) as $field)
                     <div><small>{{ $field['label'] }}</small><strong>—</strong></div>
                     @endforeach
@@ -143,6 +152,7 @@
     <div class="gestion-pendiente-feedback" data-pending-feedback role="status" aria-live="polite" hidden></div>
 </section>
 
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
 @else
 {{-- Estado alternativo para módulos pendientes de integración con datos reales. --}}
 <section class="gestion-pendiente-page gestion-pendiente-page--{{ $module['key'] }}" data-pending-module="{{ $module['key'] }}">
@@ -154,11 +164,13 @@
         </div>
         <div class="gestion-pendiente-hero-actions">
             <span class="gestion-pendiente-status"><i class="bi bi-link-45deg" aria-hidden="true"></i> Pendiente de integración</span>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if (($module['mode'] ?? 'consult') === 'crud')
             <button class="gestion-pendiente-primary" type="button" data-pending-open="crear">
                 <i class="bi bi-plus-lg" aria-hidden="true"></i>
                 Nuevo {{ $module['record_singular'] ?? 'registro' }}
             </button>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
             @else
             <button class="gestion-pendiente-secondary" type="button" data-pending-notice="La exportación quedará habilitada cuando este módulo tenga una fuente de datos integrada.">
                 <i class="bi bi-download" aria-hidden="true"></i>
@@ -169,6 +181,7 @@
     </header>
 
     <div class="gestion-pendiente-kpis">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
         @foreach ($module['kpis'] ?? [] as $kpi)
         <article class="gestion-pendiente-kpi gestion-pendiente-kpi--{{ $kpi['tone'] ?? 'blue' }}">
             <span class="gestion-pendiente-kpi-icon"><i class="bi {{ $kpi['icon'] }}" aria-hidden="true"></i></span>
@@ -182,8 +195,10 @@
     </div>
 
     {{-- Bloque analítico únicamente visual; no consulta ni modifica datos. --}}
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if ($module['analytics'] ?? [] !== [])
     <section class="gestion-pendiente-analytics" aria-label="Análisis visual de {{ $module['title'] }}">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
         @foreach ($module['analytics'] ?? [] as $module['analytics'] ?? []Card)
         <article class="gestion-pendiente-analytics-card">
             <header class="gestion-pendiente-analytics-header">
@@ -197,17 +212,20 @@
                 <span class="gestion-pendiente-chart-status">Sin datos</span>
             </header>
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if (($module['analytics'] ?? []Card['type'] ?? 'line') === 'donut')
             <div class="gestion-pendiente-donut-layout">
                 <div class="gestion-pendiente-donut" role="img" aria-label="Gráfica pendiente de {{ $module['analytics'] ?? []Card['title'] }}">
                     <div><strong>—</strong><span>Sin datos</span></div>
                 </div>
                 <div class="gestion-pendiente-chart-legend">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach (($module['analytics'] ?? []Card['legend'] ?? []) as $legendItem)
                     <div><span class="gestion-pendiente-legend-dot gestion-pendiente-legend-dot--{{ $loop->index % 4 }}"></span><span>{{ $legendItem }}</span><strong>—</strong></div>
                     @endforeach
                 </div>
             </div>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
             @else
             <div class="gestion-pendiente-line-chart" role="img" aria-label="Gráfica pendiente de {{ $module['analytics'] ?? []Card['title'] }}">
                 <div class="gestion-pendiente-chart-y-axis"><span>—</span><span>—</span><span>—</span><span>—</span></div>
@@ -218,6 +236,7 @@
                     <div class="gestion-pendiente-chart-empty"><i class="bi bi-bar-chart-line" aria-hidden="true"></i><strong>Sin datos integrados</strong><span>La tendencia aparecerá aquí.</span></div>
                 </div>
                 <div class="gestion-pendiente-chart-x-axis">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach (($module['analytics'] ?? []Card['labels'] ?? ['Periodo 1', 'Periodo 2', 'Periodo 3', 'Periodo 4', 'Periodo 5']) as $label)
                     <span>{{ $label }}</span>
                     @endforeach
@@ -267,9 +286,11 @@
                 <table class="gestion-pendiente-table">
                     <thead>
                         <tr>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                             @foreach ($module['columns'] ?? [] as $column)
                             <th>{{ $column }}</th>
                             @endforeach
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                             @if (($module['mode'] ?? 'consult') === 'crud')
                             <th>Acciones</th>
                             @endif
@@ -313,6 +334,7 @@
                 <div class="gestion-pendiente-integration-row"><i class="bi bi-check2-circle" aria-hidden="true"></i><span>Diseño responsive preparado</span></div>
                 <div class="gestion-pendiente-integration-row"><i class="bi bi-hourglass-split" aria-hidden="true"></i><span>Conexión de datos pendiente</span></div>
             </div>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if (($module['mode'] ?? 'consult') === 'crud')
             <div class="gestion-pendiente-capabilities">
                 <h3>Interfaces preparadas</h3>
@@ -321,6 +343,7 @@
                 <button type="button" data-pending-open="editar"><i class="bi bi-pencil-square" aria-hidden="true"></i> Editar registro</button>
                 <button type="button" data-pending-open="eliminar"><i class="bi bi-trash3" aria-hidden="true"></i> Confirmar eliminación</button>
             </div>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
             @else
             <button class="gestion-pendiente-secondary gestion-pendiente-secondary--full" type="button" data-pending-notice="La consulta quedará habilitada cuando exista el origen de datos correspondiente.">
                 <i class="bi bi-bar-chart-line" aria-hidden="true"></i>
@@ -330,11 +353,14 @@
         </aside>
     </div>
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if (($module['mode'] ?? 'consult') === 'crud')
     <dialog class="gestion-pendiente-modal" data-pending-modal="crear" aria-labelledby="{{ $module['key'] }}-crear-title">
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
         @include('gestion.' . $module['key'] . '.crear', ['module' => $module])
     </dialog>
     <dialog class="gestion-pendiente-modal" data-pending-modal="editar" aria-labelledby="{{ $module['key'] }}-editar-title">
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
         @include('gestion.' . $module['key'] . '.editar', ['module' => $module])
     </dialog>
     <dialog class="gestion-pendiente-modal" data-pending-modal="ver" aria-labelledby="{{ $module['key'] }}-ver-title">
@@ -355,6 +381,7 @@
                     </div>
                 </div>
                 <div class="gestion-pendiente-detail-grid">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach (($module['fields'] ?? []) as $field)
                     <div><small>{{ $field['label'] }}</small><strong>—</strong></div>
                     @endforeach

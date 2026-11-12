@@ -1,12 +1,17 @@
+
 {{-- Formulario de creación de una cuenta de usuario. --}}
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
 <form method="POST" action="{{ route('management.users.store') }}" class="form-card usuarios-form" data-user-form>
+{{-- proteccion CSRF que valida el origen del formulario. --}}
     @csrf
 
     {{-- Errores generales y errores específicos devueltos por la validación del servidor. --}}
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if ($errors->any())
     <div class="admin-alert admin-alert--error usuarios-form-errors" role="alert">
         <strong>No se pudo registrar la cuenta.</strong>
         <ul>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @foreach ($errors->all() as $error)
             <li>{{ $error }}</li>
             @endforeach

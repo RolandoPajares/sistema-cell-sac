@@ -30,8 +30,10 @@ final class DispositivosController extends Controller
      */
     public function mostrar(ListadoDispositivosRequest $solicitud): View
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $datos = $this->dispositivos->listar($solicitud->user(), $solicitud->validated());
 
+        // Devuelve la vista 'gestion.inventario-logistica.series.listar' con los datos preparados por este controlador.
         return view('gestion.inventario-logistica.series.listar', $datos);
     }
 }

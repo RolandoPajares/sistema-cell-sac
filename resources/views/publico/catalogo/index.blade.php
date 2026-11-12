@@ -1,8 +1,12 @@
 @extends('layouts.tienda.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-catalog')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Catálogo | MD Technology Cell')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section class="catalog-page">
     <div class="catalog-reference-hero">
@@ -21,6 +25,7 @@
                     <h2>Categorías</h2>
                     <nav class="catalog-filter-list" aria-label="Categorías">
                         <a class="{{ $selectedCategory ? '' : 'is-active' }}" href="{{ route('catalog.index', collect($baseFilters)->except('categoria')->all()) }}">Todas las categorías</a>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                         @foreach($categories as $category)
                         <a class="{{ (string) $selectedCategory === (string) $category->id ? 'is-active' : '' }}" href="{{ route('catalog.index', array_merge($baseFilters, ['categoria' => $category->id])) }}">{{ $category->nombre }}</a>
                         @endforeach
@@ -31,12 +36,14 @@
                     <h2>Marca</h2>
                     <nav class="catalog-filter-list" aria-label="Marcas">
                         <a class="{{ $selectedBrand ? '' : 'is-active' }}" href="{{ route('catalog.index', collect($baseFilters)->except('marca')->all()) }}">Todas las marcas</a>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                         @foreach($brands as $brand)
                         <a class="{{ $selectedBrand === $brand ? 'is-active' : '' }}" href="{{ route('catalog.index', array_merge($baseFilters, ['marca' => $brand])) }}">{{ $brand }}</a>
                         @endforeach
                     </nav>
                 </section>
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                 <form class="catalog-price-filter" method="get" action="{{ route('catalog.index') }}">
                     <h2>Rango de precio</h2>
                     <input type="hidden" name="q" value="{{ $query }}">
@@ -80,18 +87,25 @@
                         <h1>{{ $selectedCategory ? $categories->firstWhere('id', (int) $selectedCategory)?->nombre : 'Catálogo' }}</h1>
                         <p>Encuentra el celular ideal para ti.</p>
                     </div>
+
+                 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                     <form id="catalog-search-form" class="catalog-search" method="get" action="{{ route('catalog.index') }}" role="search">
                         <input type="hidden" name="marca" value="{{ $selectedBrand }}">
                         <input type="hidden" name="categoria" value="{{ $selectedCategory }}">
                         <input type="hidden" name="min" value="{{ request('min') }}">
                         <input type="hidden" name="max" value="{{ request('max') }}">
                         <label class="visually-hidden" for="catalog-search-input">Buscar productos</label>
+                        
+                        
                         <input class="input" id="catalog-search-input" name="q"
                             value="{{ $query }}"
                             placeholder="Buscar celulares, marcas o modelos...">
                         <button class="btn btn-primary" type="submit" aria-label="Buscar">
                             <i class="bi bi-search" aria-hidden="true"></i>
                         </button>
+                        
+                        
                         <label class="visually-hidden" for="catalog-sort">Ordenar por</label>
                         <select id="catalog-sort" name="orden" data-catalog-sort>
                             <option value="nuevo" @selected(request('orden')==='nuevo' )>Más recientes</option>
@@ -102,11 +116,15 @@
                     </form>
                 </div>
 
+                
                 <div class="product-grid catalog-product-grid">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @forelse($products as $product)
                     <article class="product-card catalog-product-card">
                         <div class="product-art catalog-product-art">
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                             @if($product->etiqueta || $product->catalog_discount > 0)<span class="badge">{{ $product->etiqueta ?: 'Oferta' }}</span>@endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                             @if($product->url_imagen_principal)<img class="catalog-product-photo" src="{{ $product->url_imagen_principal }}" alt="{{ $product->marca }} {{ $product->nombre }}" loading="lazy">@else<div class="catalog-accessory-shape" role="img" aria-label="Imagen no disponible"><i class="bi bi-box-seam"></i></div>@endif
                         </div>
                         <div class="product-body catalog-product-body">
@@ -118,7 +136,9 @@
                             <div class="stock catalog-product-stock">{{ $product->existencias_disponibles > 0 ? $product->existencias_disponibles.' unidades disponibles' : 'Agotado' }}</div>
                             <div class="catalog-product-actions">
                                 @auth
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                                     <form action="{{ route('cart.add', $product) }}" method="post">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                                         @csrf
                                         <input type="hidden" name="cantidad" value="1">
                                         <button class="btn btn-primary catalog-buy-button" type="submit" @disabled($product->existencias_disponibles <= 0)>
@@ -126,13 +146,17 @@
                                             {{ $product->existencias_disponibles > 0 ? 'Comprar' : 'Agotado' }}
                                         </button>
                                     </form>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                                 @else
                                     <details class="catalog-buy-choice">
                                         <summary class="btn btn-primary catalog-buy-button" @if($product->existencias_disponibles <= 0) aria-disabled="true" @endif><i class="bi bi-cart3" aria-hidden="true"></i> {{ $product->existencias_disponibles > 0 ? 'Comprar' : 'Agotado' }}</summary>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                         @if($product->existencias_disponibles > 0)
                                             <div class="catalog-buy-choice-options">
                                                 <a class="btn btn-ghost" href="{{ route('login') }}">Iniciar sesión</a>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                                                 <form action="{{ route('cart.add', $product) }}" method="post">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                                                     @csrf
                                                     <input type="hidden" name="cantidad" value="1">
                                                     <button class="btn btn-primary" type="submit">Continuar como invitado</button>

@@ -12,8 +12,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class ImagenProducto extends Model
 {
+    // Usa la tabla 'referencias_imagenes_productos' como origen de los registros de este modelo.
     protected $table = 'referencias_imagenes_productos';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['producto_id', 'ruta_imagen', 'orden', 'actualizado_en'];
 
     public $timestamps = false;

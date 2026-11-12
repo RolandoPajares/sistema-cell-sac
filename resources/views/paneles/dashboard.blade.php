@@ -1,9 +1,14 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', $dashboardTitle ?? 'Panel')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', $dashboardBodyClass ?? 'modulo-dashboard')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
 @if (($dashboardKind ?? 'management') === 'account')
 <section class="cuenta-fondo">
     <div class="container cuenta-migas"><a href="{{ route('dashboard') }}">Panel</a><i class="bi bi-chevron-right"></i><span>Mi cuenta</span></div>
@@ -42,7 +47,9 @@
                     <h2>Pedidos recientes</h2><a href="{{ route('orders.index') }}">Ver todos <i class="bi bi-chevron-right"></i></a>
                 </div>
                 <div class="lista-pedidos-cuenta">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @forelse($orders->take(5) as $order)
+{{-- logica auxiliar de la vista que prepara valores para la presentacion. --}}
                     @php($firstProduct = $order->details->first()?->product)
                     <article>
                         <div class="pedido-codigo"><b>#{{ $order->id }}</b><small>{{ $order->creado_en?->format('d/m/Y') }}</small></div>
@@ -87,6 +94,7 @@
     </div>
 </section>
 
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
 @else
 <section class="dashboard-page" data-admin-dashboard>
     <header class="dashboard-hero">
@@ -111,8 +119,10 @@
             <div>
                 <small>Ventas del mes</small>
                 <strong>S/ {{ number_format($salesThisMonth, 2) }}</strong>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                 @if ($salesTrendPercent !== null)
                 <span class="dashboard-trend {{ $salesTrendPercent >= 0 ? 'is-positive' : 'is-negative' }}"><i class="bi bi-arrow-{{ $salesTrendPercent >= 0 ? 'up' : 'down' }}" aria-hidden="true"></i> {{ number_format(abs($salesTrendPercent), 1) }}% <em>vs. mes anterior</em></span>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                 @else
                 <span class="dashboard-trend is-neutral">Sin periodo anterior</span>
                 @endif
@@ -124,8 +134,10 @@
             <div>
                 <small>Pedidos</small>
                 <strong>{{ number_format($ordersCount) }}</strong>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                 @if ($ordersTrendPercent !== null)
                 <span class="dashboard-trend {{ $ordersTrendPercent >= 0 ? 'is-positive' : 'is-negative' }}"><i class="bi bi-arrow-{{ $ordersTrendPercent >= 0 ? 'up' : 'down' }}" aria-hidden="true"></i> {{ number_format(abs($ordersTrendPercent), 1) }}% <em>vs. mes anterior</em></span>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                 @else
                 <span class="dashboard-trend is-neutral">{{ number_format($ordersThisMonth) }} este mes</span>
                 @endif
@@ -155,8 +167,10 @@
             <div>
                 <small>Clientes nuevos</small>
                 <strong>{{ number_format($newCustomers) }}</strong>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                 @if ($newCustomersTrendPercent !== null)
                 <span class="dashboard-trend {{ $newCustomersTrendPercent >= 0 ? 'is-positive' : 'is-negative' }}"><i class="bi bi-arrow-{{ $newCustomersTrendPercent >= 0 ? 'up' : 'down' }}" aria-hidden="true"></i> {{ number_format(abs($newCustomersTrendPercent), 1) }}% <em>vs. mes anterior</em></span>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                 @else
                 <span class="dashboard-trend is-neutral">Sin periodo anterior</span>
                 @endif
@@ -195,10 +209,13 @@
                         <polyline data-dashboard-sales-line points="0,150 1000,150"></polyline>
                     </svg>
                     <div class="dashboard-chart-bars">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                         @foreach ($monthlySales as $month)
+{{-- logica auxiliar de la vista que prepara valores para la presentacion. --}}
                         @php($barHeight = $salesChartMax > 0 ? max(4, round(($month['value'] / $salesChartMax) * 100, 2)) : 4)
                         <div class="dashboard-chart-column" data-sales-month data-value="{{ $month['value'] }}" data-month-key="{{ $month['key'] }}" title="{{ $month['label'] }}: S/ {{ number_format($month['value'], 2) }}">
                             <span class="dashboard-chart-bar" style="--bar-height: {{ $barHeight }}%"></span>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                             @if ($month['key'] === $dashboardNow->format('Y-m'))
                             <span class="dashboard-chart-tooltip"><b>{{ $month['label'] }} {{ $dashboardNow->format('Y') }}</b><strong>S/ {{ number_format($month['value'], 2) }}</strong></span>
                             @endif
@@ -225,6 +242,7 @@
                     <div><strong>{{ number_format($orderStatusTotal) }}</strong><span>Pedidos<br>totales</span></div>
                 </div>
                 <ul class="dashboard-status-list">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @forelse ($orderStatuses as $status)
                     <li><span class="dashboard-status-dot" style="--status-color: {{ $status['color'] }}"></span><b>{{ $status['label'] }}</b><strong>{{ number_format($status['total']) }}</strong><small>({{ $orderStatusTotal > 0 ? number_format(($status['total'] / $orderStatusTotal) * 100, 1) : '0.0' }}%)</small></li>
                     @empty
@@ -244,6 +262,7 @@
                 </div>
             </header>
             <div class="dashboard-quick-grid">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @foreach ($quickLinks ?? [] as $quickLink)
                 <a href="{{ route($quickLink['route']) }}"><span><i class="bi {{ $quickLink['icon'] }}" aria-hidden="true"></i></span><b>{{ $quickLink['label'] }}</b></a>
                 @endforeach
@@ -274,6 +293,7 @@
                         </tr>
                     </thead>
                     <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                         @forelse ($recentOrders as $order)
                         <tr>
                             <td><strong>#{{ $order->id }}</strong></td>
@@ -303,10 +323,13 @@
                 </div><a href="{{ route('management.inventory') }}">Ver todos</a>
             </header>
             <div class="dashboard-product-list">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @forelse ($lowStockProducts as $product)
                 <a href="{{ route('management.inventory') }}" class="dashboard-product-row">
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                     @if ($product->url_imagen)
                     <img src="{{ \Illuminate\Support\Str::startsWith($product->url_imagen, ['http://', 'https://']) ? $product->url_imagen : asset($product->url_imagen) }}" alt="{{ $product->nombre }}">
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                     @else
                     <span class="dashboard-product-placeholder"><i class="bi bi-phone" aria-hidden="true"></i></span>
                     @endif
@@ -329,10 +352,13 @@
                 </div><a href="{{ route('management.reports') }}">Ver todos</a>
             </header>
             <ol class="dashboard-ranking-list">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @forelse ($topProducts as $index => $venta)
                 <li><span class="dashboard-ranking-number">{{ $index + 1 }}</span>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                     @if ($venta->producto?->url_imagen)
                     <img src="{{ \Illuminate\Support\Str::startsWith($venta->producto->url_imagen, ['http://', 'https://']) ? $venta->producto->url_imagen : asset($venta->producto->url_imagen) }}" alt="{{ $venta->producto->nombre }}">
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                     @else
                     <span class="dashboard-product-placeholder"><i class="bi bi-phone" aria-hidden="true"></i></span>
                     @endif
@@ -356,7 +382,9 @@
                 </div><a href="{{ route('management.campaigns') }}">Ver todas</a>
             </header>
             <div class="dashboard-campaign-list">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @forelse ($campaigns as $campaign)
+{{-- logica auxiliar de la vista que prepara valores para la presentacion. --}}
                 @php($campaignProgress = min(100, round(((int) $campaign->vistas / $campaignMaxViews) * 100)))
                 <div class="dashboard-campaign-row"><span><b>{{ $campaign->nombre }}</b><small>{{ number_format((int) $campaign->vistas) }} vistas · {{ number_format((int) $campaign->clics) }} clics</small></span>
                     <div class="dashboard-progress"><span data-dashboard-progress style="--progress: {{ $campaignProgress }}%"></span></div><strong>{{ $campaign->vistas > 0 ? number_format(($campaign->clics / $campaign->vistas) * 100, 1) : '0.0' }}%</strong>
@@ -377,6 +405,7 @@
                 </div><a href="{{ route('management.audit') }}">Ver todas</a>
             </header>
             <div class="dashboard-activity-list">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @forelse ($recentActivity as $activity)
                 <article><span class="dashboard-activity-dot"><i class="bi bi-{{ $activity->entidad === 'pedidos' ? 'cart-check' : ($activity->entidad === 'productos' ? 'box-seam' : 'person') }}" aria-hidden="true"></i></span>
                     <div><b>{{ $activity->accion }}</b><small>{{ $activity->user?->nombre ?? 'Sistema' }} · {{ $activity->entidad }}{{ $activity->entidad_id ? ' #'.$activity->entidad_id : '' }}</small></div><time datetime="{{ $activity->creado_en?->toIso8601String() }}">{{ $activity->creado_en?->diffForHumans() }}</time>
@@ -397,6 +426,7 @@
                 </div>
             </header>
             <ul class="dashboard-task-list">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @forelse ($reminders as $reminder)
                 <li class="dashboard-task dashboard-task--{{ $reminder['tone'] }}"><span class="dashboard-task-check" aria-hidden="true"><i class="bi bi-square"></i></span><span class="dashboard-task-icon"><i class="bi {{ $reminder['icon'] }}" aria-hidden="true"></i></span>
                     <div><b>{{ $reminder['title'] }}</b><small>{{ $reminder['detail'] }}</small></div>

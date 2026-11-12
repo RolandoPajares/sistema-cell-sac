@@ -34,10 +34,13 @@ class CuentaController extends Controller
      */
     public function dashboard(Request $request): View
     {
+        // Obtiene en $user la informacion de la solicitud o del usuario actual.
         $user = $request->user();
 
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($user instanceof User, 403);
 
+        // Devuelve la vista 'paneles.dashboard' con los datos preparados por este controlador.
         return view('paneles.dashboard', $this->panelService->roleDashboard(
             $user,
             (array) $request->session()->get('cart', []),
@@ -55,25 +58,39 @@ class CuentaController extends Controller
      */
     public function profile(Request $request, ServicioPerfil $perfil): View
     {
+        // Obtiene en $user la informacion de la solicitud o del usuario actual.
         $user = $request->user();
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($user instanceof User, 403);
         $user->loadMissing('customer');
+        // Guarda en $roles el resultado necesario para continuar esta operacion.
         $roles = $perfil->rolesPara($user);
+        // Guarda en $dynamicFields el resultado necesario para continuar esta operacion.
         $dynamicFields = $perfil->camposPara($user);
+        // Guarda en $dynamicValues el resultado necesario para continuar esta operacion.
         $dynamicValues = $perfil->valoresPara($user, $dynamicFields);
+        // Guarda en $roleLabel el resultado necesario para continuar esta operacion.
         $roleLabel = $roles->pluck('nombre')->filter()->unique()->implode(' · ') ?: 'Usuario autorizado';
+        // Guarda en $functions el resultado necesario para continuar esta operacion.
         $functions = $perfil->funcionesPara($user);
 
+        // Guarda en $isAdministrator el resultado necesario para continuar esta operacion.
         $isAdministrator = $user->can('gestion.seguridad.consultar');
+        // Guarda en $preferences el resultado necesario para continuar esta operacion.
         $preferences = (array) ($user->preferencias ?? []);
+        // Guarda en $profile el resultado necesario para continuar esta operacion.
         $profile = Schema::hasTable('usuarios_perfiles') ? $user->perfil : null;
+        // Guarda en $customer el resultado necesario para continuar esta operacion.
         $customer = $user->customer;
+        // Agrupa en $profileValues los datos que se utilizaran en la siguiente operacion.
         $profileValues = [$user->nombre, $user->correo, $profile?->telefono, $profile?->documento, $user->foto_perfil, $preferences['idioma'] ?? null, ...array_values($dynamicValues)];
+        // Guarda en $initials el resultado necesario para continuar esta operacion.
         $initials = mb_strtoupper(collect(preg_split('/\s+/', trim((string) $user->nombre)) ?: [])
             ->map(static fn (string $part): string => mb_substr($part, 0, 1))
             ->take(2)
             ->implode(''));
 
+        // Devuelve la vista 'cuenta.perfil.mostrar' con los datos preparados por este controlador.
         return view('cuenta.perfil.mostrar', [
             'userName' => (string) $user->nombre,
             'user' => $user,

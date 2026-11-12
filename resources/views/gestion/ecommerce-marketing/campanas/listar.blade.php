@@ -1,8 +1,12 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Campañas')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-campanias')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 
     <section class="campanias-page" data-campanias-page data-campanias-reopen="{{ $errors->any() || request('abrir') === 'crear' ? 'crear' : '' }}">
@@ -24,11 +28,13 @@
             <span class="campanias-tab"><i class="bi bi-bar-chart-fill" aria-hidden="true"></i> Análisis y métricas</span>
         </nav>
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
         <form class="campanias-toolbar" method="get" action="{{ route('management.campaigns') }}">
             <label class="campanias-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar campañas</span><input type="search" name="buscar" value="{{ $filters['buscar'] ?? '' }}" placeholder="Buscar campañas..."></label>
             <label><span class="visually-hidden">Filtrar por ubicación</span><select name="ubicacion"><option value="">Todas las ubicaciones</option>@foreach ($locationLabels as $value => $label)<option value="{{ $value }}" @selected(($filters['ubicacion'] ?? null) === $value)>{{ $label }}</option>@endforeach</select></label>
             <label><span class="visually-hidden">Filtrar por estado</span><select name="estado"><option value="">Todos los estados</option><option value="activa" @selected(($filters['estado'] ?? null) === 'activa')>Activas</option><option value="inactiva" @selected(($filters['estado'] ?? null) === 'inactiva')>Inactivas</option></select></label>
             <button class="campanias-toolbar-button" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i> Filtrar</button>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if (($filters['buscar'] ?? null) || ($filters['ubicacion'] ?? null) || ($filters['estado'] ?? null))
                 <a class="campanias-clear-button" href="{{ route('management.campaigns') }}">Limpiar filtros</a>
             @endif
@@ -48,6 +54,7 @@
                     <table class="campanias-table">
                         <thead><tr><th><span class="campanias-checkbox" aria-hidden="true"></span></th><th>Imagen</th><th>Campaña</th><th>Estado</th><th>Vistas</th><th>Clics</th><th>CTR</th><th>Ubicación</th><th>Acciones</th></tr></thead>
                         <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                             @forelse ($campaigns as $campaign)
                                 <tr>
                                     <td><span class="campanias-checkbox" aria-hidden="true"></span></td>
@@ -85,6 +92,7 @@
         <div class="campanias-dialog-card"><header class="campanias-dialog-header"><div><span class="campanias-dialog-icon"><i class="bi bi-send" aria-hidden="true"></i></span><span><small>Marketing Center</small><h2 id="campania-crear-titulo">Nueva campaña</h2><p>Completa la información de una nueva campaña.</p></span></div><button type="button" class="campanias-dialog-close" data-close-campaign-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="campanias-dialog-body">@include('gestion.ecommerce-marketing.campanas.registrar', ['segments' => $segments, 'locationLabels' => $locationLabels, 'campaignDestinations' => $campaignDestinations])</div></div>
     </dialog>
 
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
     @foreach ($campaigns as $campaign)
         <dialog class="campanias-dialog" id="editar-campania-{{ $campaign->id }}" aria-labelledby="campania-editar-titulo-{{ $campaign->id }}"><div class="campanias-dialog-card"><header class="campanias-dialog-header"><div><span class="campanias-dialog-icon"><i class="bi bi-pencil-square" aria-hidden="true"></i></span><span><small>Marketing Center</small><h2 id="campania-editar-titulo-{{ $campaign->id }}">Editar campaña</h2><p>Actualiza la información de {{ $campaign->nombre }}.</p></span></div><button type="button" class="campanias-dialog-close" data-close-campaign-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="campanias-dialog-body">@include('gestion.ecommerce-marketing.campanas.editar', ['campaign' => $campaign, 'segments' => $segments, 'campaignImage' => $campaignImages[$campaign->id] ?? null, 'selectedSegments' => $campaignSegmentIds[$campaign->id] ?? []])</div></div></dialog>
         <dialog class="campanias-dialog campanias-view-dialog" id="campania-detalle-{{ $campaign->id }}" aria-labelledby="campania-detalle-titulo-{{ $campaign->id }}"><div class="campanias-dialog-card"><header class="campanias-dialog-header"><div><span class="campanias-dialog-icon"><i class="bi bi-eye" aria-hidden="true"></i></span><span><small>Marketing Center</small><h2 id="campania-detalle-titulo-{{ $campaign->id }}">{{ $campaign->nombre }}</h2><p>Detalle y rendimiento de la campaña.</p></span></div><button type="button" class="campanias-dialog-close" data-close-campaign-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="campanias-view-body"><div class="campanias-view-banner">@if ($campaignImages[$campaign->id])<img src="{{ $campaignImages[$campaign->id] }}" alt="{{ $campaign->titulo }}">@else<span><i class="bi bi-megaphone" aria-hidden="true"></i></span>@endif<div><span class="campanias-status campanias-status--{{ $campaignStatuses[$campaign->id]['class'] }}">{{ $campaignStatuses[$campaign->id]['label'] }}</span><h3>{{ $campaign->titulo }}</h3><p>{{ $campaign->descripcion ?: 'Sin descripción registrada.' }}</p></div></div><div class="campanias-view-stats"><div><small>Vistas</small><strong>{{ number_format($campaign->vistas) }}</strong></div><div><small>Clics</small><strong>{{ number_format($campaign->clics) }}</strong></div><div><small>CTR</small><strong>{{ $campaign->vistas > 0 ? number_format(($campaign->clics / $campaign->vistas) * 100, 1) : '0.0' }}%</strong></div><div><small>Ubicación</small><strong>{{ $locationLabels[$campaign->ubicacion] ?? $campaign->ubicacion }}</strong></div></div></div></div></dialog>
@@ -92,7 +100,9 @@
 
     <dialog class="campanias-dialog" id="importar-campanias" aria-labelledby="campania-importar-titulo">
         <div class="campanias-dialog-card"><header class="campanias-dialog-header"><div><span class="campanias-dialog-icon"><i class="bi bi-upload" aria-hidden="true"></i></span><span><small>Marketing Center</small><h2 id="campania-importar-titulo">Importar campañas</h2><p>Carga campañas reales mediante un CSV validado.</p></span></div><button type="button" class="campanias-dialog-close" data-close-campaign-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="campanias-dialog-body">
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form method="POST" action="{{ route('management.campaigns.import') }}" class="form-card" enctype="multipart/form-data">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                 @csrf
                 <p>Columnas exactas: <code>nombre,ubicacion,titulo,descripcion,texto_boton,url_boton,inicia_en,finaliza_en,activo,segmentos</code>. En segmentos usa IDs separados por <code>|</code>.</p>
                 <label>Archivo CSV<input type="file" name="archivo" accept=".csv,text/csv" required></label>

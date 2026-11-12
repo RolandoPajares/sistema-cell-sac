@@ -1,8 +1,12 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Detalle de pago')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-pagos')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section class="admin-finance-module admin-finance-module--pagos" data-finance-module="pagos">
     <header class="admin-finance-header">
@@ -20,7 +24,9 @@
             <div class="admin-finance-actions"><a class="admin-finance-button admin-finance-button--secondary" href="{{ route('management.payments') }}">Volver al listado</a></div>
         </div>
     </header>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if (session('status')) <p class="alert alert-success" role="status">{{ session('status') }}</p> @endif
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
     @foreach ($errors->all() as $error) <p class="text-danger" role="alert">{{ $error }}</p> @endforeach
     <section class="admin-finance-table-card">
         <header class="admin-finance-card-header"><div><span class="admin-finance-card-icon"><i class="bi bi-receipt" aria-hidden="true"></i></span><div><h2>Datos del registro</h2><p>Información guardada en pagos.</p></div></div></header>
@@ -41,13 +47,17 @@
             </table>
         </div>
     </section>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if ($record->estado === 'pendiente' && $record->medioPago?->requiere_banco)
         <p class="alert alert-warning" role="status">Transferencia declarada. La referencia debe verificarse y conciliarse administrativamente antes de confirmar dinero recibido o enviado.</p>
     @endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if ($canConfirmCash)
         <section class="admin-finance-table-card">
             <header class="admin-finance-card-header"><div><h2>Verificación manual de efectivo</h2><p>La sesión debe permanecer abierta. Esta acción registrará una entrada o salida real de caja.</p></div></header>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form method="POST" action="{{ route('management.payments.cash.update', $record) }}" class="admin-finance-filters">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                 @csrf @method('PATCH')
                 <label>Importe contado (S/) *<input type="text" name="importe_contado" inputmode="decimal" value="{{ old('importe_contado') }}" required></label>
                 <label>Observación de verificación *<input type="text" name="observacion" value="{{ old('observacion') }}" maxlength="500" required></label>
@@ -55,11 +65,15 @@
             </form>
         </section>
     @endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if ($canCancel)
         <section class="admin-finance-table-card">
             <header class="admin-finance-card-header"><div><h2>Anular solicitud pendiente</h2></div></header>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form method="POST" action="{{ route('management.payments.cancel', $record) }}" class="admin-finance-filters">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                 @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
                 @method('PATCH')
                 <label>Motivo de anulación
                     <input type="text" name="motivo" value="{{ old('motivo') }}" minlength="10" maxlength="500" required>
@@ -74,6 +88,7 @@
             <table class="admin-finance-table">
                 <thead><tr><th>Fecha</th><th>Acción</th><th>Usuario</th></tr></thead>
                 <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @forelse ($history as $event)
                         <tr><td>{{ $event->creado_en?->format('d/m/Y H:i') }}</td><td>{{ $event->accion }}</td><td>{{ $event->user?->nombre ?? 'Usuario no disponible' }}</td></tr>
                     @empty

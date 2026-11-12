@@ -31,22 +31,30 @@ final class DashboardGlobalSedesController extends Controller
      */
     public function index(Request $request, ServicioAutorizacion $authorization): View
     {
+        // Guarda en $filters el resultado necesario para continuar esta operacion.
         $filters = $this->filtros($request);
+        // Guarda en $sites el resultado necesario para continuar esta operacion.
         $sites = $this->sedes();
+        // Guarda en $results el resultado necesario para continuar esta operacion.
         $results = $this->resultados($filters, $sites);
+        // Guarda en $totalOrders el resultado necesario para continuar esta operacion.
         $totalOrders = $results->sum('pedidos');
+        // Guarda en $totalIncome el resultado necesario para continuar esta operacion.
         $totalIncome = $results->sum('ingresos');
+        // Guarda en $maxIncome el resultado necesario para continuar esta operacion.
         $maxIncome = max(1, (float) $results->max('ingresos'));
         $siteBars = $results->take(8)->map(static fn ($site): array => [
             'etiqueta' => $site->nombre,
             'valor' => 'S/ '.number_format($site->ingresos, 2),
             'altura' => $site->ingresos > 0 ? max(4, round($site->ingresos / $maxIncome * 100)) : 0,
         ])->values();
+        // Guarda en $exportParameters el resultado necesario para continuar esta operacion.
         $exportParameters = array_filter([
             'periodo' => $filters['periodo'],
             'sede' => $filters['sede'],
             'canal' => $filters['canal'],
         ]);
+        // Guarda en $metrics el resultado necesario para continuar esta operacion.
         $metrics = collect([
             ['titulo' => 'Sedes registradas', 'icono' => 'bi-shop', 'valor' => number_format($results->count()), 'detalle' => 'Sedes incluidas en el filtro'],
             ['titulo' => 'Importe de pedidos', 'icono' => 'bi-coin', 'tono' => 'verde', 'valor' => 'S/ '.number_format($totalIncome, 2), 'detalle' => 'Pedidos no cancelados del período'],
@@ -56,6 +64,7 @@ final class DashboardGlobalSedesController extends Controller
             ['titulo' => 'Cumplimiento', 'icono' => 'bi-check-circle', 'tono' => 'verde', 'valor' => '—', 'detalle' => 'Sin metas por sede configuradas'],
         ]);
 
+        // Devuelve la vista 'gestion.analitica.dashboard-global.sedes.listar' con los datos preparados por este controlador.
         return view('gestion.analitica.dashboard-global.sedes.listar', [
             'filters' => $filters,
             'sites' => $sites,
@@ -92,9 +101,12 @@ final class DashboardGlobalSedesController extends Controller
     public function export(Request $request, string $format, ExportadorTabular $exporter, ServicioAutorizacion $authorization, RegistradorAuditoria $auditor): Response|StreamedResponse
     {
         $authorization->assertAllowed($request->user(), 'gestion.analitica.reportes.exportar');
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(in_array($format, ['pdf', 'excel', 'csv'], true), 404);
 
+        // Guarda en $filters el resultado necesario para continuar esta operacion.
         $filters = $this->filtros($request);
+        // Guarda en $results el resultado necesario para continuar esta operacion.
         $results = $this->resultados($filters, $this->sedes());
         $rows = $results->map(static fn (object $site): array => [
             $site->id,
@@ -103,9 +115,11 @@ final class DashboardGlobalSedesController extends Controller
             number_format($site->ingresos, 2, '.', ''),
         ])->all();
 
+        // Agrupa en $columns los datos que se utilizaran en la siguiente operacion.
         $columns = ['Sede ID', 'Sede', 'Pedidos', 'Importe nominal de pedidos PEN (no cobro)'];
         $totalOrders = array_sum(array_map(static fn (array $row): int => (int) ($row[2] ?? 0), $rows));
         $nominalOrderAmount = array_sum(array_map(static fn (array $row): float => (float) ($row[3] ?? 0), $rows));
+        // Agrupa en $report los datos que se utilizaran en la siguiente operacion.
         $report = [
             'title' => 'REPORTE DE PEDIDOS POR SEDE',
             'subtitle' => 'Resumen por sede de pedidos no anulados dentro del período consultado.',
@@ -132,6 +146,7 @@ final class DashboardGlobalSedesController extends Controller
             ],
             'observations' => ['El importe suma los totales de pedidos elegibles y no acredita cobros recibidos.'],
         ];
+        // Guarda en $response el resultado necesario para continuar esta operacion.
         $response = $exporter->download($format, 'pedidos-por-sede-'.$filters['periodo'].'-dias', $columns, $rows, $report);
         $auditor->record((int) $request->user()->getKey(), 'exportar', 'sedes', null, null, [
             'formato' => $format,
@@ -146,6 +161,7 @@ final class DashboardGlobalSedesController extends Controller
     /** @return array{periodo:int,sede:?int,canal:?string} */
     private function filtros(Request $request): array
     {
+        // Guarda en $data el resultado necesario para continuar esta operacion.
         $data = $request->validate([
             'periodo' => ['nullable', 'integer', Rule::in([7, 30, 90])],
             'sede' => ['nullable', 'integer', 'min:1'],
@@ -172,10 +188,12 @@ final class DashboardGlobalSedesController extends Controller
      */
     private function resultados(array $filters, Collection $sites): Collection
     {
+        // Comprueba la condicion ! $this->tieneSede() antes de ejecutar este bloque.
         if (! $this->tieneSede()) {
             return collect();
         }
 
+        // Prepara en $totals la consulta que obtiene o modifica los registros necesarios.
         $totals = DB::table('pedidos')
             ->select('sede_id')
             ->selectRaw('COUNT(*) AS pedidos, SUM(total) AS ingresos')
@@ -190,6 +208,7 @@ final class DashboardGlobalSedesController extends Controller
 
         return $sites->when($filters['sede'], static fn (Collection $items, int $siteId) => $items->where('id', $siteId))
             ->map(static function (object $site) use ($totals): object {
+                // Guarda en $total el resultado necesario para continuar esta operacion.
                 $total = $totals->get($site->id);
 
                 return (object) [

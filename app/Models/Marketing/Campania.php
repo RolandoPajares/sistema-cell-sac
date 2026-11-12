@@ -13,8 +13,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Campania extends Model
 {
+    // Usa la tabla 'campanas_publicitarias' como origen de los registros de este modelo.
     protected $table = 'campanas_publicitarias';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = [
         'nombre', 'ubicacion', 'titulo', 'descripcion', 'texto_boton', 'url_boton',
         'url_imagen', 'precio_anterior', 'precio_oferta', 'inicia_en', 'finaliza_en',

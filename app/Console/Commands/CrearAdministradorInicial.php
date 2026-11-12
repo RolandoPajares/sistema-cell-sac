@@ -16,15 +16,19 @@ use RuntimeException;
 #[Description('Crea el único administrador inicial de cell_sac_limpia mediante credenciales interactivas.')]
 class CrearAdministradorInicial extends Command
 {
+    // Coordina el proceso completo que ejecuta este comando de consola.
     public function handle(): int
     {
+        // Comprueba la condicion DB::connection()->getDatabaseName() !== 'cell_sac_limpia' antes de continuar.
         if (DB::connection()->getDatabaseName() !== 'cell_sac_limpia') {
             $this->error('Comando detenido: la base configurada no es cell_sac_limpia.');
 
             return self::FAILURE;
         }
 
+        // Recorre ['usuarios', 'roles', 'empresas', 'sedes', 'usuarios_roles'] as $table para validar o procesar cada elemento.
         foreach (['usuarios', 'roles', 'empresas', 'sedes', 'usuarios_roles'] as $table) {
+            // Comprueba la condicion ! Schema::hasTable($table) antes de continuar.
             if (! Schema::hasTable($table)) {
                 $this->error('Falta la tabla requerida: '.$table.'.');
 
@@ -32,12 +36,14 @@ class CrearAdministradorInicial extends Command
             }
         }
 
+        // Comprueba la condicion DB::table('usuarios')->exists() antes de continuar.
         if (DB::table('usuarios')->exists()) {
             $this->error('Ya existe un usuario. No se creará un segundo administrador.');
 
             return self::FAILURE;
         }
 
+        // Reune los datos ingresados por el operador para validarlos y guardarlos.
         $data = [
             'nombre' => trim((string) $this->ask('Nombre del administrador')),
             'correo' => mb_strtolower(trim((string) $this->ask('Correo del administrador'))),
@@ -45,13 +51,16 @@ class CrearAdministradorInicial extends Command
             'password_confirmation' => (string) $this->secret('Repite la contraseña'),
         ];
 
+        // Crea el validador que comprueba los datos capturados en la consola.
         $validator = Validator::make($data, [
             'nombre' => ['required', 'string', 'max:120'],
             'correo' => ['required', 'email', 'max:160'],
             'password' => ['required', 'confirmed', Password::min(12)->letters()->numbers()],
         ]);
 
+        // Comprueba la condicion $validator->fails() antes de continuar.
         if ($validator->fails()) {
+            // Recorre $validator->errors()->all() as $error para validar o procesar cada elemento.
             foreach ($validator->errors()->all() as $error) {
                 $this->error($error);
             }
@@ -60,20 +69,25 @@ class CrearAdministradorInicial extends Command
         }
 
         $this->line('Base: cell_sac_limpia; se creará un solo usuario con rol administrador.');
+        // Comprueba la condicion ! $this->confirm('¿Confirmas la creación?', false) antes de continuar.
         if (! $this->confirm('¿Confirmas la creación?', false)) {
             $this->info('Operación cancelada.');
 
             return self::FAILURE;
         }
 
+        // Ejecuta la operacion dentro de un bloque controlado para atender posibles errores.
         try {
+            // Agrupa las inserciones para confirmar todo o revertirlo si ocurre un error.
             DB::transaction(function () use ($data): void {
+                // Comprueba la condicion DB::table('usuarios')->exists() antes de continuar.
                 if (DB::table('usuarios')->exists()) {
                     throw new RuntimeException('La base dejó de estar vacía durante la operación.');
                 }
 
                 $companyId = DB::table('empresas')->where('activo', true)->orderBy('id')->value('id');
                 $roleId = DB::table('roles')->where('codigo', 'administrador')->where('activo', true)->value('id');
+                // Comprueba la condicion $companyId === null || ! DB::table('sedes')->where('activa', true)->exists() || $roleId === null antes de continuar.
                 if ($companyId === null || ! DB::table('sedes')->where('activa', true)->exists() || $roleId === null) {
                     throw new RuntimeException('Faltan empresa, sede o rol administrador inicial.');
                 }

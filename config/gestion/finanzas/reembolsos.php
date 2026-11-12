@@ -1,5 +1,6 @@
 <?php
 
+// Devuelve la configuracion que describe este modulo y sus elementos visuales.
 return [
     'key' => 'reembolsos',
     'area' => 'Finanzas',
@@ -9,17 +10,21 @@ return [
     'record_singular' => 'reembolso',
     'record_plural' => 'reembolsos',
     'mode' => 'crud',
+    // Define las tarjetas de indicadores que resumen el estado del modulo.
     'kpis' => [
         ['label' => 'Solicitados', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-inbox', 'tone' => 'blue'],
         ['label' => 'En revisión', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-search', 'tone' => 'purple'],
         ['label' => 'Aprobados', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-check2-circle', 'tone' => 'green'],
         ['label' => 'Procesados', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-cash-coin', 'tone' => 'orange'],
     ],
+    // Define los graficos y datos resumidos que se muestran en el analisis del modulo.
     'analytics' => [
         ['title' => 'Flujo de reembolsos', 'icon' => 'bi-arrow-repeat', 'description' => 'Solicitudes y resoluciones por periodo.', 'type' => 'line', 'labels' => ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4', 'Semana 5']],
         ['title' => 'Reembolsos por estado', 'icon' => 'bi-pie-chart', 'description' => 'Distribución del proceso financiero.', 'type' => 'donut', 'legend' => ['Solicitados', 'En revisión', 'Aprobados', 'Procesados']],
     ],
+    // Define los encabezados de la tabla principal.
     'columns' => ['Referencia', 'Venta', 'Cliente', 'Importe', 'Motivo', 'Estado'],
+    // Define los campos y reglas visuales del formulario del modulo.
     'fields' => [
         ['label' => 'Referencia', 'type' => 'text', 'placeholder' => 'Código del reembolso', 'required' => true, 'wide' => false],
         ['label' => 'Venta relacionada', 'type' => 'text', 'placeholder' => 'Número de venta', 'required' => true, 'wide' => false],

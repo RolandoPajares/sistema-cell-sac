@@ -23,8 +23,10 @@ class Rol extends Model
 
     public const UPDATED_AT = 'actualizado_en';
 
+    // Usa la tabla 'roles' como origen de los registros de este modelo.
     protected $table = 'roles';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['codigo', 'nombre', 'descripcion', 'alcance_permitido', 'es_sistema', 'activo'];
 
     /**
@@ -72,6 +74,7 @@ class Rol extends Model
             ->withPivot(['asignado_por_usuario_id', 'asignado_en', 'vigente_hasta', 'activo']);
     }
 
+    // Define la relacion 'camposPerfil' entre este modelo y los registros relacionados.
     public function camposPerfil(): BelongsToMany
     {
         return $this->belongsToMany(PerfilCampo::class, 'roles_perfil_campos', 'rol_id', 'perfil_campo_id')

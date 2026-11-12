@@ -12,10 +12,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class LogisticaMayorista extends Model
 {
+    // Usa la tabla 'logistica_mayorista' como origen de los registros de este modelo.
     protected $table = 'logistica_mayorista';
 
     protected $primaryKey = 'pedido_id';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = [
         'pedido_id', 'exportador', 'direccion_exportador', 'contacto_exportador',
         'direccion_consignatario', 'contacto_consignatario', 'factura_numero',

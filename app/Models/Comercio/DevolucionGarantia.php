@@ -15,8 +15,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class DevolucionGarantia extends Model
 {
+    // Usa la tabla 'devoluciones_garantias' como origen de los registros de este modelo.
     protected $table = 'devoluciones_garantias';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = [
         'codigo',
         'pedido_id',

@@ -1,8 +1,12 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Cajas, aperturas y cierres')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-finanzas-facturacion')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section class="tc-ff" data-cajas-operativas data-cajas-reopen="{{ old('_form') === 'crear' && $errors->any() ? 'crear' : '' }}">
     <header class="tc-ff__header">
@@ -12,6 +16,7 @@
             <p>Sesiones reales de las cajas autorizadas, con saldos y movimientos auditados.</p>
         </div>
         <div class="tc-ff__header-actions">
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if ($canOpen)
                 <button type="button" class="tc-ff__button tc-ff__button--primary" data-box-open="crear"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nueva apertura</button>
             @endif
@@ -19,7 +24,9 @@
         </div>
     </header>
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if (session('status')) <p class="alert alert-success" role="status">{{ session('status') }}</p> @endif
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
     @foreach ($errors->all() as $error) <p class="text-danger" role="alert">{{ $error }}</p> @endforeach
 
     <div class="tc-ff__metrics">
@@ -29,6 +36,7 @@
         <article class="tc-ff__metric tc-ff__metric--ambar"><span class="tc-ff__metric-icon"><i class="bi bi-cash-stack" aria-hidden="true"></i></span><div><small>Cajas disponibles</small><strong>{{ $boxes->count() }}</strong><span>Sin sesión abierta</span></div></article>
     </div>
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
     <form class="tc-ff__filters" method="GET" action="{{ route('management.payments.preview.cash_sessions') }}">
         <label class="tc-ff__search"><i class="bi bi-search" aria-hidden="true"></i><input type="search" name="buscar" value="{{ $filters['buscar'] ?? '' }}" maxlength="120" placeholder="Buscar caja por código o nombre" aria-label="Buscar sesiones"></label>
         <div class="tc-ff__filter-fields">
@@ -48,6 +56,7 @@
                 <table>
                     <thead><tr><th>Caja</th><th>Sede</th><th>Responsable</th><th>Saldo inicial</th><th>Apertura</th><th>Cierre</th><th>Estado</th><th>Acción</th></tr></thead>
                     <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                         @forelse ($sessions as $session)
                             <tr>
                                 <td>{{ $session->caja?->codigo }}</td>
@@ -65,6 +74,7 @@
                     </tbody>
                 </table>
             </div>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if ($sessions->hasPages())
                 <div class="tc-ff__card-heading"><small>Página {{ $sessions->currentPage() }} de {{ $sessions->lastPage() }}</small><div class="tc-ff__header-actions">@if ($sessions->previousPageUrl()) <a class="tc-ff__button" href="{{ $sessions->previousPageUrl() }}">Anterior</a> @endif @if ($sessions->nextPageUrl()) <a class="tc-ff__button" href="{{ $sessions->nextPageUrl() }}">Siguiente</a> @endif</div></div>
             @endif
@@ -76,9 +86,12 @@
         </aside>
     </div>
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if ($canOpen)
         <dialog class="tc-ff__dialog" data-box-dialog="crear" aria-labelledby="cash-open-title">
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form class="tc-ff__dialog-card" method="POST" action="{{ route('management.payments.cash_sessions.store') }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                 @csrf
                 <input type="hidden" name="_form" value="crear">
                 <input type="hidden" name="token" value="{{ (string) \Illuminate\Support\Str::uuid() }}">

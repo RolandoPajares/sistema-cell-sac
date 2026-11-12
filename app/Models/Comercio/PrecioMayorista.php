@@ -15,8 +15,10 @@ class PrecioMayorista extends Model
 
     public const UPDATED_AT = null;
 
+    // Usa la tabla 'precios_mayoristas' como origen de los registros de este modelo.
     protected $table = 'precios_mayoristas';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = [
         'empresa_id', 'producto_id', 'variante_id', 'precio', 'vigente_desde', 'vigente_hasta', 'motivo', 'creado_por_usuario_id',
     ];

@@ -1,3 +1,6 @@
+/* Define los estilos visuales del modulo o componente 'flotante'. */
+
+/* Aplica estos estilos al bloque '.assistant-float'. */
 .assistant-float {
     position: fixed;
     right: 24px;
@@ -5,9 +8,13 @@
     z-index: 1200;
     font-family: inherit;
 }
+/* Aplica estos estilos al bloque '.assistant-float.is-positioned'. */
 .assistant-float.is-positioned { right: auto; bottom: auto; }
+/* Aplica estos estilos al bloque '.assistant-float.is-dragging'. */
 .assistant-float.is-dragging { user-select: none; }
+/* Aplica estos estilos al bloque '.assistant-float.is-dragging .assistant-float-launcher'. */
 .assistant-float.is-dragging .assistant-float-launcher { cursor: grabbing; transform: none; }
+/* Aplica estos estilos al bloque '.assistant-float-launcher'. */
 .assistant-float-launcher {
     display: inline-flex;
     align-items: center;
@@ -24,13 +31,18 @@
     touch-action: none;
 }
 .assistant-float-launcher:hover { transform: translateY(-2px); box-shadow: 0 16px 34px rgba(0, 91, 201, .34); }
+/* Aplica estos estilos al bloque '.assistant-float-launcher-icon, .assistant-float-avatar'. */
 .assistant-float-launcher-icon, .assistant-float-avatar {
     display: grid; place-items: center; flex: 0 0 40px; width: 40px; height: 40px;
     border-radius: 13px; color: #0876f9; background: #e4f2ff; font-size: 1.2rem;
 }
+/* Aplica estos estilos al bloque '.assistant-float-launcher strong, .assistant-float-launcher small, .assistant-float-title strong, .assistant-float-title small'. */
 .assistant-float-launcher strong, .assistant-float-launcher small, .assistant-float-title strong, .assistant-float-title small { display: block; }
+/* Aplica estos estilos al bloque '.assistant-float-launcher strong'. */
 .assistant-float-launcher strong { font-size: .9rem; }
+/* Aplica estos estilos al bloque '.assistant-float-launcher small'. */
 .assistant-float-launcher small { margin-top: 2px; opacity: .82; font-size: .68rem; }
+/* Aplica estos estilos al bloque '.assistant-float-panel'. */
 .assistant-float-panel {
     width: min(430px, calc(100vw - 32px));
     min-width: 360px;
@@ -45,6 +57,7 @@
     box-shadow: 0 22px 60px rgba(10, 52, 108, .23);
     animation: assistantFloatIn .2s ease-out;
 }
+/* Aplica estos estilos al bloque '.admin-theme .assistant-float-panel'. */
 .admin-theme .assistant-float-panel {
     position: fixed;
     top: calc(var(--reference-header-height) + 18px);
@@ -59,48 +72,89 @@
     flex-direction: column;
     animation: assistantFloatSlideIn .24s ease-out;
 }
+/* Aplica estos estilos al bloque '.admin-theme .assistant-float-panel.is-moved'. */
 .admin-theme .assistant-float-panel.is-moved { right: auto; bottom: auto; }
+/* Aplica estos estilos al bloque '.admin-theme .assistant-float-panel.is-dragging'. */
 .admin-theme .assistant-float-panel.is-dragging { user-select: none; }
+/* Aplica estos estilos al bloque '.admin-theme .assistant-float-panel.is-dragging .assistant-float-header'. */
 .admin-theme .assistant-float-panel.is-dragging .assistant-float-header { cursor: grabbing; }
+/* Aplica estos estilos al bloque '.admin-theme .assistant-float-header'. */
 .admin-theme .assistant-float-header { cursor: grab; }
+/* Aplica estos estilos al bloque '.assistant-float-resizer'. */
 .assistant-float-resizer { position: absolute; z-index: 3; display: block; }
+/* Aplica estos estilos al bloque '.assistant-float-resizer--e, .assistant-float-resizer--w'. */
 .assistant-float-resizer--e, .assistant-float-resizer--w { top: 18px; bottom: 18px; width: 8px; cursor: ew-resize; }
+/* Aplica estos estilos al bloque '.assistant-float-resizer--e'. */
 .assistant-float-resizer--e { right: -4px; }
+/* Aplica estos estilos al bloque '.assistant-float-resizer--w'. */
 .assistant-float-resizer--w { left: -4px; }
+/* Aplica estos estilos al bloque '.assistant-float-resizer--s, .assistant-float-resizer--n'. */
 .assistant-float-resizer--s, .assistant-float-resizer--n { left: 18px; right: 18px; height: 8px; cursor: ns-resize; }
+/* Aplica estos estilos al bloque '.assistant-float-resizer--s'. */
 .assistant-float-resizer--s { bottom: -4px; }
+/* Aplica estos estilos al bloque '.assistant-float-resizer--n'. */
 .assistant-float-resizer--n { top: -4px; }
+/* Aplica estos estilos al bloque '.assistant-float-resizer--se'. */
 .assistant-float-resizer--se { right: -5px; bottom: -5px; width: 16px; height: 16px; cursor: nwse-resize; }
+/* Aplica estos estilos al bloque '.admin-theme .assistant-float-messages'. */
 .admin-theme .assistant-float-messages { flex: 1 1 auto; min-height: 150px; max-height: none; height: auto; }
+/* Aplica estos estilos al bloque '.assistant-float-panel[hidden]'. */
 .assistant-float-panel[hidden] { display: none; }
+/* Aplica estos estilos al bloque '.assistant-float-header'. */
 .assistant-float-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 18px 14px; background: linear-gradient(135deg, #f9fcff, #edf7ff); }
+/* Aplica estos estilos al bloque '.assistant-float-title'. */
 .assistant-float-title { display: flex; align-items: center; gap: 11px; min-width: 0; }
+/* Aplica estos estilos al bloque '.assistant-float-title strong'. */
 .assistant-float-title strong { color: #102b61; font-size: 1.12rem; }
+/* Aplica estos estilos al bloque '.assistant-float-title small'. */
 .assistant-float-title small { margin-top: 3px; color: #10885c; font-size: .7rem; font-weight: 700; }
+/* Aplica estos estilos al bloque '.assistant-float-title small i'. */
 .assistant-float-title small i { margin-right: 4px; font-size: .5rem; }
+/* Aplica estos estilos al bloque '.assistant-float-actions'. */
 .assistant-float-actions { display: flex; gap: 4px; }
+/* Aplica estos estilos al bloque '.assistant-float-actions button'. */
 .assistant-float-actions button { width: 32px; height: 32px; border: 0; border-radius: 8px; color: #55729d; background: transparent; cursor: pointer; }
 .assistant-float-actions button:hover { color: #086de8; background: #e5f2ff; }
+/* Aplica estos estilos al bloque '.assistant-float-context'. */
 .assistant-float-context { display: inline-flex; align-items: center; gap: 7px; margin: 0 18px 10px; padding: 8px 12px; border-radius: 999px; color: #214d88; background: #e7f3ff; font-size: .72rem; font-weight: 750; }
+/* Aplica estos estilos al bloque '.assistant-float-messages'. */
 .assistant-float-messages { display: grid; gap: 10px; max-height: 290px; min-height: 180px; overflow-y: auto; padding: 14px 18px; background: #fbfdff; }
+/* Aplica estos estilos al bloque '.assistant-float-messages article'. */
 .assistant-float-messages article { display: flex; align-items: flex-start; gap: 10px; }
+/* Aplica estos estilos al bloque '.assistant-float-messages article > span'. */
 .assistant-float-messages article > span { display: grid; flex: 0 0 34px; width: 34px; height: 34px; place-items: center; border-radius: 11px; color: #0876f9; background: #e3f1ff; }
+/* Aplica estos estilos al bloque '.assistant-float-messages p'. */
 .assistant-float-messages p { margin: 0; padding: 11px 13px; border: 1px solid #dceaf7; border-radius: 5px 15px 15px 15px; color: #183b70; background: #eef7ff; font-size: .8rem; line-height: 1.5; }
+/* Aplica estos estilos al bloque '.assistant-float-prompts'. */
 .assistant-float-prompts { display: grid; gap: 7px; padding: 11px 18px 4px; }
+/* Aplica estos estilos al bloque '.assistant-float-prompts button'. */
 .assistant-float-prompts button { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid #b9d8f7; border-radius: 12px; color: #17396e; background: #fff; cursor: pointer; font-size: .76rem; font-weight: 700; text-align: left; }
 .assistant-float-prompts button:hover { border-color: #0876f9; background: #f2f8ff; }
+/* Aplica estos estilos al bloque '.assistant-float-prompts i'. */
 .assistant-float-prompts i { color: #0876f9; }
+/* Aplica estos estilos al bloque '.assistant-float-form'. */
 .assistant-float-form { display: grid; grid-template-columns: 1fr 44px; gap: 8px; margin: 12px 18px 18px; padding: 5px; border: 1px solid #cfe1f4; border-radius: 14px; }
+/* Aplica estos estilos al bloque '.assistant-float-form input'. */
 .assistant-float-form input { min-width: 0; border: 0; outline: 0; padding: 8px 9px; color: #17396e; background: transparent; font-size: .8rem; }
+/* Aplica estos estilos al bloque '.assistant-float-form button'. */
 .assistant-float-form button { border: 0; border-radius: 10px; color: #fff; background: #0876ed; cursor: pointer; }
+/* Aplica estos estilos al bloque '@keyframes assistantFloatIn'. */
 @keyframes assistantFloatIn { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+/* Aplica estos estilos al bloque '@keyframes assistantFloatSlideIn'. */
 @keyframes assistantFloatSlideIn { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: translateX(0); } }
 @media (max-width: 650px) {
+/* Aplica estos estilos al bloque '.assistant-float'. */
     .assistant-float { right: 12px; bottom: 12px; left: 12px; }
+/* Aplica estos estilos al bloque '.assistant-float-launcher'. */
     .assistant-float-launcher { width: 100%; justify-content: center; }
+/* Aplica estos estilos al bloque '.assistant-float-panel'. */
     .assistant-float-panel { width: 100%; min-width: 0; max-height: min(620px, calc(100vh - 24px)); resize: none; }
+/* Aplica estos estilos al bloque '.assistant-float-messages'. */
     .assistant-float-messages { max-height: 34vh; }
+/* Aplica estos estilos al bloque '.admin-theme .assistant-float-panel'. */
     .admin-theme .assistant-float-panel { top: auto; right: 12px; bottom: 12px; left: 12px; width: auto; height: min(620px, calc(100vh - 24px)); min-width: 0; min-height: 0; max-width: none; max-height: calc(100vh - 24px); resize: none; }
+/* Aplica estos estilos al bloque '.admin-theme .assistant-float-messages'. */
     .admin-theme .assistant-float-messages { height: auto; max-height: 34vh; }
+/* Aplica estos estilos al bloque '.admin-theme .assistant-float-resizer'. */
     .admin-theme .assistant-float-resizer { display: none; }
 }

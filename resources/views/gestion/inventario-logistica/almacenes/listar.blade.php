@@ -1,10 +1,15 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Almacenes')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-organizacion')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section class="tc-org" data-organizacion="almacenes" data-org-create-route="{{ route('management.company_settings.warehouses.store') }}">
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
     @include('gestion.administracion.organizacion.componentes.cabecera', [
         'titulo' => 'Almacenes',
         'icono' => 'bi-box-seam',
@@ -14,26 +19,34 @@
             : [],
     ])
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if (session('status'))
         <div class="tc-org__alert tc-org__alert--success" role="status">{{ session('status') }}</div>
     @endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if ($errors->any())
         <div class="tc-org__alert tc-org__alert--error" role="alert">
             <strong>No se pudo guardar el almacén.</strong>
             <ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
         </div>
     @endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if ($sedesActivas->isEmpty())
         <div class="tc-org__alert" role="status">No hay sedes activas autorizadas. Registra o activa una sede antes de crear un almacén.</div>
     @endif
 
     <div class="tc-org__metrics">
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
         @include('gestion.administracion.organizacion.componentes.metrica', ['titulo' => 'Almacenes registrados', 'valor' => $resumen['total'], 'icono' => 'bi-box-seam', 'detalle' => 'Dentro de las sedes autorizadas'])
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
         @include('gestion.administracion.organizacion.componentes.metrica', ['titulo' => 'Almacenes activos', 'valor' => $resumen['activos'], 'icono' => 'bi-check-circle', 'tono' => 'verde', 'detalle' => $resumen['habilitados_venta'].' habilitan ventas'])
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
         @include('gestion.administracion.organizacion.componentes.metrica', ['titulo' => 'Existencias físicas', 'valor' => number_format($resumen['unidades_fisicas'], 2, '.', ','), 'icono' => 'bi-boxes', 'tono' => 'violeta', 'detalle' => $resumen['productos_con_existencias'].' productos con saldo'])
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
         @include('gestion.administracion.organizacion.componentes.metrica', ['titulo' => 'Sedes con almacenes', 'valor' => $resumen['sedes_con_almacenes'], 'icono' => 'bi-buildings', 'detalle' => 'De '.$sedes->count().' sedes autorizadas'])
     </div>
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
     <form class="tc-org__filters" method="get" action="{{ route('management.company_settings.warehouses') }}">
         <div class="tc-org__filter-top">
             <label class="tc-org__search"><i class="bi bi-search" aria-hidden="true"></i><input type="search" name="buscar" value="{{ $filtros['buscar'] ?? '' }}" placeholder="Buscar por almacén, código o sede" aria-label="Buscar almacenes"></label>
@@ -51,6 +64,7 @@
         <div class="tc-org__card-title"><div><h2>Almacenes registrados ({{ $almacenes->total() }})</h2><p>Mostrando {{ $almacenes->count() }} registros consultados en MariaDB.</p></div></div>
         <div class="tc-org__table-wrap"><table><thead><tr><th>#</th><th>Almacén</th><th>Código</th><th>Sede</th><th>Tipo</th><th>Existencias físicas</th><th>Productos con saldo</th><th>Permite ventas</th><th>Estado</th><th>Acciones</th></tr></thead>
             <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @forelse ($almacenes as $almacen)
                     <tr data-org-row
                         data-org-nombre="{{ $almacen->nombre }}"
@@ -72,6 +86,7 @@
                         <td>{{ $almacen->activo ? 'Activo' : 'Inactivo' }}</td>
                         <td class="tc-org__row-actions">
                             <button type="button" data-org-open="detalle" aria-label="Ver {{ $almacen->nombre }}"><i class="bi bi-eye" aria-hidden="true"></i></button>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                             @if ($puedeEditar)
                                 <button type="button" data-org-open="editar" aria-label="Editar {{ $almacen->nombre }}"><i class="bi bi-pencil" aria-hidden="true"></i></button>
                                 <button type="button" data-org-open="estado" aria-label="Cambiar estado de {{ $almacen->nombre }}"><i class="bi bi-three-dots-vertical" aria-hidden="true"></i></button>
@@ -83,6 +98,7 @@
                 @endforelse
             </tbody>
         </table></div>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
         @if ($almacenes->hasPages())
             <nav class="pagination" aria-label="Paginación de almacenes">{{ $almacenes->links() }}</nav>
         @endif
@@ -90,13 +106,16 @@
 
     <div class="tc-org__grid tc-org__grid--thirds">
         <article class="tc-org__card"><h2 class="tc-org__section-heading"><i class="bi bi-boxes" aria-hidden="true"></i> Existencias físicas por almacén</h2><p class="tc-org__section-copy">Saldo operativo sumado desde existencias_almacen.</p>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if ($barrasAlmacenes->isEmpty())
                 <p class="tc-org__no-results">Todavía no hay almacenes para resumir.</p>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
             @else
                 <div class="tc-org__bar-list">@foreach ($barrasAlmacenes as $barra)<div><span>{{ $barra['nombre'] }}</span><i><b style="width: {{ $barra['porcentaje_relativo'] }}%"></b></i><strong>{{ number_format($barra['unidades_fisicas'], 2, '.', ',') }}</strong></div>@endforeach</div>
             @endif
         </article>
         <article class="tc-org__card"><h2 class="tc-org__section-heading"><i class="bi bi-buildings" aria-hidden="true"></i> Almacenes por sede</h2><p class="tc-org__section-copy">Conteo y saldo físico para sedes autorizadas.</p>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @forelse ($resumenSedes as $sede)
                 <div class="tc-org__key-list"><div><span>{{ $sede['nombre'] }} · {{ $sede['almacenes'] }} almacenes</span><strong>{{ number_format($sede['unidades_fisicas'], 2, '.', ',') }} u.</strong></div></div>
             @empty
@@ -106,6 +125,7 @@
         <article class="tc-org__card"><h2 class="tc-org__section-heading"><i class="bi bi-info-circle" aria-hidden="true"></i> Datos del almacén</h2><p class="tc-org__section-copy">La tabla real no contiene capacidad ni responsable asignado; no se muestran estimaciones para esos campos.</p><p>Para consultar movimientos y el kardex, abre Inventario.</p></article>
     </div>
 
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
     @include('gestion.administracion.organizacion.componentes.modales', ['tipo' => 'almacenes'])
 </section>
 @endsection

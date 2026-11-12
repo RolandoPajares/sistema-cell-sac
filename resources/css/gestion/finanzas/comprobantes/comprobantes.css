@@ -1,8 +1,12 @@
+/* Define los estilos visuales del modulo o componente 'comprobantes'. */
+
+/* Aplica estos estilos al bloque '.admin-finance-module--facturacion .admin-finance-card-icon'. */
 .admin-finance-module--facturacion .admin-finance-card-icon { background: #e8f2ff; color: #0875ed; }
 .admin-finance-module--facturacion .admin-finance-summary-card:first-child { background: linear-gradient(145deg, #fff, #fffaf0); }
 .admin-finance-module--facturacion .admin-finance-summary-card:nth-child(2) { background: linear-gradient(145deg, #fff, #f7fbff); }
 .admin-finance-module--facturacion .admin-finance-summary-card:nth-child(3) { background: linear-gradient(145deg, #fff, #f4fff9); }
 
+/* Aplica estos estilos al bloque '.admin-finance-module--facturacion .tc-invoice-demo'. */
 .admin-finance-module--facturacion .tc-invoice-demo {
     display: flex;
     width: 100%;
@@ -10,29 +14,50 @@
     flex-direction: column;
 }
 
+/* Aplica estos estilos al bloque '.admin-finance-module--facturacion .tc-invoice-demo [hidden]'. */
 .admin-finance-module--facturacion .tc-invoice-demo [hidden] { display: none !important; }
+/* Aplica estos estilos al bloque '.admin-finance-module--facturacion .tc-invoice-demo .tc-finance-demo__body'. */
 .admin-finance-module--facturacion .tc-invoice-demo .tc-finance-demo__body { max-height: 62vh; overflow-y: auto; }
+/* Aplica estos estilos al bloque '.admin-finance-module--facturacion .tc-finance-steps'. */
 .admin-finance-module--facturacion .tc-finance-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 16px 0; }
+/* Aplica estos estilos al bloque '.admin-finance-module--facturacion .tc-finance-steps span'. */
 .admin-finance-module--facturacion .tc-finance-steps span { border-bottom: 3px solid #dce6f2; padding: 0 4px 9px; color: #687994; font-size: .76rem; text-align: center; }
+/* Aplica estos estilos al bloque '.admin-finance-module--facturacion .tc-finance-steps span.is-current'. */
 .admin-finance-module--facturacion .tc-finance-steps span.is-current { border-color: #1674dc; color: #075cc4; font-weight: 700; }
+/* Aplica estos estilos al bloque '.admin-finance-module--facturacion .tc-finance-form-grid'. */
 .admin-finance-module--facturacion .tc-finance-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
+/* Aplica estos estilos al bloque '.admin-finance-module--facturacion .tc-finance-field'. */
 .admin-finance-module--facturacion .tc-finance-field { display: grid; gap: 7px; color: #25466f; font-size: .82rem; font-weight: 650; }
 .admin-finance-module--facturacion .tc-finance-field input,
 .admin-finance-module--facturacion .tc-finance-field select,
+/* Aplica estos estilos al bloque '.admin-finance-module--facturacion .tc-finance-field textarea'. */
 .admin-finance-module--facturacion .tc-finance-field textarea { width: 100%; min-width: 0; border: 1px solid #d5e1ef; border-radius: 9px; padding: 10px 11px; color: #26364b; background: #fff; font: inherit; font-weight: 450; }
+/* Aplica estos estilos al bloque '.admin-finance-module--facturacion .tc-finance-field :is(input, select, textarea):focus'. */
 .admin-finance-module--facturacion .tc-finance-field :is(input, select, textarea):focus { outline: 3px solid rgb(29 120 226 / 15%); border-color: #3288e6; }
+/* Aplica estos estilos al bloque '.admin-finance-module--facturacion .tc-finance-field [aria-invalid="true"]'. */
 .admin-finance-module--facturacion .tc-finance-field [aria-invalid="true"] { border-color: #d83b49; }
+/* Aplica estos estilos al bloque '.admin-finance-module--facturacion .tc-finance-field--wide'. */
 .admin-finance-module--facturacion .tc-finance-field--wide { grid-column: 1 / -1; }
+/* Aplica estos estilos al bloque '.admin-finance-module--facturacion .tc-finance-warning'. */
 .admin-finance-module--facturacion .tc-finance-warning { margin: 15px 0 0; border-left: 3px solid #efa91b; padding: 8px 11px; color: #75510d; background: #fff9e9; font-size: .77rem; }
+/* Aplica estos estilos al bloque '.admin-finance-module--facturacion .tc-finance-review-list'. */
 .admin-finance-module--facturacion .tc-finance-review-list { display: grid; grid-template-columns: minmax(120px, .6fr) minmax(0, 1fr); gap: 10px 16px; margin: 15px 0; }
+/* Aplica estos estilos al bloque '.admin-finance-module--facturacion .tc-finance-review-list dt'. */
 .admin-finance-module--facturacion .tc-finance-review-list dt { color: #62738a; font-size: .79rem; }
+/* Aplica estos estilos al bloque '.admin-finance-module--facturacion .tc-finance-review-list dd'. */
 .admin-finance-module--facturacion .tc-finance-review-list dd { margin: 0; color: #243c5b; font-size: .82rem; font-weight: 650; overflow-wrap: anywhere; }
+/* Aplica estos estilos al bloque '.admin-finance-module--facturacion .tc-finance-check'. */
 .admin-finance-module--facturacion .tc-finance-check { display: flex; align-items: flex-start; gap: 9px; color: #344e70; font-size: .81rem; }
+/* Aplica estos estilos al bloque '.admin-finance-module--facturacion .tc-finance-demo__error'. */
 .admin-finance-module--facturacion .tc-finance-demo__error { margin: 12px 0 0; color: #b42332; font-size: .82rem; }
+/* Aplica estos estilos al bloque '.admin-finance-module--facturacion .tc-finance-demo__feedback'. */
 .admin-finance-module--facturacion .tc-finance-demo__feedback { margin: 12px 0 0; border-radius: 9px; padding: 11px 13px; color: #155b39; background: #eaf8f0; font-size: .82rem; }
 
 @media (max-width: 640px) {
+/* Aplica estos estilos al bloque '.admin-finance-module--facturacion .tc-finance-form-grid'. */
     .admin-finance-module--facturacion .tc-finance-form-grid { grid-template-columns: minmax(0, 1fr); }
+/* Aplica estos estilos al bloque '.admin-finance-module--facturacion .tc-finance-field--wide'. */
     .admin-finance-module--facturacion .tc-finance-field--wide { grid-column: auto; }
+/* Aplica estos estilos al bloque '.admin-finance-module--facturacion .tc-finance-steps span'. */
     .admin-finance-module--facturacion .tc-finance-steps span { font-size: .65rem; }
 }

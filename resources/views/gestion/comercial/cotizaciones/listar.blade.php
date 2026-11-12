@@ -1,9 +1,14 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Gestión de cotizaciones')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-cotizaciones')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
 @if (isset($totalQuotations))
     <section class="cotizaciones-page">
         <header class="cotizaciones-hero">
@@ -52,6 +57,7 @@
             </article>
         </section>
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
         <form class="cotizaciones-filters" method="GET" action="{{ route('management.quotations') }}">
             <label class="cotizaciones-search">
                 <i class="bi bi-search" aria-hidden="true"></i>
@@ -60,6 +66,7 @@
             <label>
                 <select name="cliente" aria-label="Cliente mayorista">
                     <option value="">Cliente: todos</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach ($customers as $customer)
                         <option value="{{ $customer->id }}" @selected((string) ($filters['cliente'] ?? '') === (string) $customer->id)>{{ $customer->nombre_contacto }}</option>
                     @endforeach
@@ -68,6 +75,7 @@
             <label>
                 <select name="estado" aria-label="Estado de cotización">
                     <option value="">Estado: todos</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach ($statusSummary as $status)
                         <option value="{{ $status['label'] }}" @selected(($filters['estado'] ?? '') === $status['label'])>{{ $status['label'] }}</option>
                     @endforeach
@@ -102,6 +110,7 @@
                         </tr>
                     </thead>
                     <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                         @forelse ($quotations as $quotation)
                             <tr>
                                 <td><strong class="cotizaciones-code">{{ $quotationPresentation[$quotation->id]['reference'] }}</strong></td>
@@ -118,29 +127,38 @@
                                             <strong>Detalle de la cotización</strong>
                                             <span>{{ $quotationPresentation[$quotation->id]['customer_name'] }} · {{ $quotation->creado_en?->format('d/m/Y H:i') ?? 'Fecha no disponible' }}</span>
                                             <ul>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                                                 @foreach ($quotation->details as $detail)
                                                     <li><span>{{ $detail->product?->nombre ?? 'Producto no disponible' }} × {{ $detail->cantidad }}</span><b>S/ {{ number_format((float) $detail->precio_unitario * (int) $detail->cantidad, 2) }}</b></li>
                                                 @endforeach
                                             </ul>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                             @if ($quotation->notas)
                                                 <p>{{ $quotation->notas }}</p>
                                             @endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                             @if (in_array($quotationPresentation[$quotation->id]['status'], ['Borrador', 'Pendiente'], true) && $puedeEnviar)
                                                 <details class="cotizaciones-edit-details">
                                                     <summary>Editar cotización</summary>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                                                     <form method="POST" action="{{ route('management.quotations.update', $quotation) }}" class="cotizaciones-edit-form">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                                                         @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
                                                         @method('PUT')
                                                         <label>Cliente
                                                             <select name="cliente_id" required>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                                                                 @foreach ($customers as $customer)
                                                                     <option value="{{ $customer->id }}" @selected((int) $customer->id === (int) $quotation->cliente_id)>{{ $customer->nombre_contacto }} · {{ $customer->documento }}</option>
                                                                 @endforeach
                                                             </select>
                                                         </label>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                                                         @foreach ($quotation->details as $index => $detail)
                                                             <label>Producto {{ $index + 1 }}
                                                                 <select name="items[{{ $index }}][producto_id]" required>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                                                                     @foreach ($products as $product)
                                                                         <option value="{{ $product->id }}" @selected((int) $product->id === (int) $detail->producto_id)>{{ $product->nombre }}</option>
                                                                     @endforeach
@@ -156,29 +174,42 @@
                                                 </details>
                                             @endif
                                             <div class="cotizaciones-demo-actions" aria-label="Acciones de cotizacion">
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if (in_array($quotationPresentation[$quotation->id]['status'], ['Borrador', 'Pendiente'], true))
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
         @if ($puedeEnviar && $puedeDescargar && filled($quotation->customer?->correo))
             <button type="button" data-quotation-action="enviar" data-reference="{{ $quotationPresentation[$quotation->id]['reference'] }}" data-customer="{{ $quotationPresentation[$quotation->id]['customer_name'] }}" data-recipient="{{ $quotation->customer->correo }}" data-download="{{ route('management.quotations.export', $quotation) }}" data-send="{{ route('management.quotations.update.send', $quotation) }}">Enviar cotizacion</button>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
         @else
             <button type="button" disabled title="Se requieren permisos de actualizacion y exportacion, y un correo valido del cliente">Enviar cotizacion</button>
         @endif
     @endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if (in_array($quotation->id, $aprobables, true))
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
         <form method="POST" action="{{ route('management.quotations.approve', $quotation) }}" style="display: contents">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
             @csrf
             <button type="submit">Aprobar cotizacion</button>
         </form>
     @endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if ($puedeEnviar && in_array($quotationPresentation[$quotation->id]['status'], ['Borrador', 'Pendiente'], true))
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
         <form method="POST" action="{{ route('management.quotations.deactivate', $quotation) }}" style="display: contents" data-confirm="¿Desactivar esta cotización? Se conservará el historial.">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
             @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
             @method('DELETE')
             <button type="submit">Desactivar cotizacion</button>
         </form>
     @endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if ($quotationPresentation[$quotation->id]['status'] === 'Aprobada')
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
         @if ($puedeCrearVenta)
             <button type="button" data-quotation-action="convertir" data-reference="{{ $quotationPresentation[$quotation->id]['reference'] }}" data-customer="{{ $quotationPresentation[$quotation->id]['customer_name'] }}" data-convert="{{ route('management.sales.convert_quotation', $quotation) }}" data-site-id="{{ $quotation->sede_id }}">Convertir en venta</button>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
         @else
             <button type="button" disabled title="Se requiere el permiso de creacion de ventas">Convertir en venta</button>
         @endif
@@ -196,8 +227,10 @@
             </div>
             <footer class="cotizaciones-table-footer">
                 <span>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                     @if ($quotations->total() > 0)
                         Mostrando {{ $quotations->firstItem() }}–{{ $quotations->lastItem() }} de {{ $quotations->total() }} cotizaciones
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                     @else
                         Sin registros
                     @endif
@@ -209,6 +242,7 @@
         <div class="cotizaciones-bottom-grid">
             <section class="cotizaciones-summary-card">
                 <header><span class="cotizaciones-summary-icon"><i class="bi bi-activity" aria-hidden="true"></i></span><div><h2>Actividad comercial reciente</h2><p>Últimas cotizaciones registradas</p></div></header>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @forelse ($recentQuotations as $recent)
                     <div class="cotizaciones-recent-row">
                         <span class="cotizaciones-recent-dot"></span>
@@ -222,6 +256,7 @@
 
             <section class="cotizaciones-summary-card">
                 <header><span class="cotizaciones-summary-icon cotizaciones-summary-icon--green"><i class="bi bi-pie-chart" aria-hidden="true"></i></span><div><h2>Cotizaciones por estado</h2><p>Distribución de los registros activos</p></div></header>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @forelse ($statusSummary as $status)
                     <div class="cotizaciones-status-row">
                         <div><span>{{ $status['label'] }}</span><strong>{{ number_format($status['count']) }}</strong></div>
@@ -239,8 +274,11 @@
                 <button class="admin-dialog-close" type="button" data-admin-dialog-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
             </header>
             <div class="admin-dialog-body">
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                 @if ($customers->isNotEmpty() && $products->isNotEmpty())
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
                     @include('gestion.comercial.cotizaciones.registrar', ['customers' => $customers, 'products' => $products])
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                 @else
                     <p class="cotizaciones-summary-empty">Para guardar una cotización, primero registra un cliente mayorista y al menos un producto activo. Los datos se cargarán desde esta base de datos.</p>
                 @endif
@@ -257,16 +295,21 @@
                 <div data-manual-send hidden>
                     <a class="cotizaciones-filter-button" data-quotation-download href="#" download>Descargar PDF</a>
                     <a class="cotizaciones-filter-button" data-quotation-mailto href="#">Abrir correo para envio manual</a>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                     <form id="confirmar-envio-cotizacion" method="POST" action="#" data-manual-send-form>
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                         @csrf
                         <label><input type="checkbox" name="confirmar_envio_manual" value="1" required> Confirmo que envie manualmente el PDF al destinatario indicado.</label>
                     </form>
                 </div>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                 <form id="convertir-cotizacion" method="POST" action="#" data-conversion-form hidden>
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                     @csrf
                     <label for="almacen-conversion-cotizacion">Almacén autorizado para la venta</label>
                     <select id="almacen-conversion-cotizacion" name="almacen_id" required>
                         <option value="">Seleccionar almacén...</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                         @foreach ($almacenesVenta as $almacen)
                             <option value="{{ $almacen->id }}" data-site-id="{{ $almacen->sede_id }}">{{ $almacen->sede_nombre }} · {{ $almacen->nombre }}</option>
                         @endforeach
@@ -281,12 +324,15 @@
             </footer>
         </dialog>
     </section>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
 @else
 
 {{-- Listado de cotizaciones del cliente autenticado. --}}
 <section class="container content-page">
     <h1>Cotizaciones</h1>
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
     @include('gestion.comercial.cotizaciones.registrar', ['customers' => $customers, 'products' => $products])
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
     @forelse ($quotations as $quotation)
         <article class="data-row">
             <div>

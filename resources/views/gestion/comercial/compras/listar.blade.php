@@ -1,8 +1,12 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Gestión de compras')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-compras')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section class="compras-page">
     <header class="compras-hero">
@@ -19,11 +23,13 @@
         </div>
         <div class="compras-hero-actions">
             <button class="compras-secondary-button" type="button" data-admin-dialog-open="importar-compras" @disabled(! $canImport) title="{{ $canImport ? 'Importar compras con permiso de creación' : 'Requiere permiso de creación y una ubicación autorizada' }}"><i class="bi bi-upload" aria-hidden="true"></i> Importar</button>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if ($canExport)
             <details class="compras-export-menu">
                 <summary class="compras-secondary-button"><i class="bi bi-download" aria-hidden="true"></i> Exportar <i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
                 <div class="compras-export-options"><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'excel'])) }}"><i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i> Excel (.xlsx)</a><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'pdf'])) }}"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i> PDF (.pdf)</a><a href="{{ route('management.purchases.export', array_merge(request()->query(), ['format' => 'csv'])) }}"><i class="bi bi-filetype-csv" aria-hidden="true"></i> CSV (.csv)</a></div>
             </details>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
             @else
             <button class="compras-secondary-button" type="button" disabled title="Requiere el permiso de exportación de compras"><i class="bi bi-download" aria-hidden="true"></i> Exportar</button>
             @endif
@@ -52,6 +58,7 @@
         </article>
     </section>
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
     <form class="compras-filters" method="GET" action="{{ route('management.purchases') }}">
         <label class="compras-search">
             <i class="bi bi-search" aria-hidden="true"></i>
@@ -60,6 +67,7 @@
         <label>
             <select name="proveedor" aria-label="Filtrar por proveedor">
                 <option value="">Proveedor: todos</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @foreach ($supplierFilters as $supplier)
                 <option value="{{ $supplier->id }}" @selected((string) ($filters['proveedor'] ?? '' )===(string) $supplier->id)>{{ $supplier->nombre }}</option>
                 @endforeach
@@ -68,6 +76,7 @@
         <label>
             <select name="estado" aria-label="Filtrar por estado">
                 <option value="">Estado: todos</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @foreach ($statusSummary as $status)
                 <option value="{{ $status['label'] }}" @selected(($filters['estado'] ?? '' )===$status['label'])>{{ $status['label'] }}</option>
                 @endforeach
@@ -104,6 +113,7 @@
                     </tr>
                 </thead>
                 <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @forelse ($purchases as $purchase)
                     <tr>
                         <td><strong class="compras-code">OC-{{ $purchase->fecha_compra?->format('y') ?? now()->format('y') }}-{{ str_pad((string) $purchase->id, 5, '0', STR_PAD_LEFT) }}</strong></td>
@@ -114,6 +124,7 @@
                         <td><span class="compras-status compras-status--{{ $purchasePresentation[$purchase->id]['status_class'] }}"><i class="bi bi-circle-fill" aria-hidden="true"></i>{{ $purchase->estado }}</span></td>
                         <td><span class="compras-reception compras-reception--{{ $purchasePresentation[$purchase->id]['reception_class'] }}"><i class="bi bi-box-seam" aria-hidden="true"></i>{{ $purchasePresentation[$purchase->id]['reception_label'] }}</span></td>
                         <td>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                             @if (in_array($purchase->id, $editables, true))
                             <button class="compras-reception-open" type="button" data-admin-dialog-open="editar-compra-{{ $purchase->id }}"><i class="bi bi-pencil" aria-hidden="true"></i> Editar</button>
                             @endif
@@ -123,23 +134,30 @@
                                     <strong>Orden de compra</strong>
                                     <span>{{ $purchasePresentation[$purchase->id]['supplier_name'] }} · {{ $purchase->fecha_compra?->format('d/m/Y') ?? 'Fecha no disponible' }}</span>
                                     <ul>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                                         @foreach ($purchase->details as $detail)
                                         <li><span>{{ $detail->product?->nombre ?? 'Producto no disponible' }} × {{ $detail->cantidad }}<small>Recibidas: {{ $detail->cantidad_recibida }} · Pendientes: {{ $detail->cantidad_pendiente }}</small></span><b>S/ {{ number_format((float) $detail->costo_unitario * (int) $detail->cantidad, 2) }}</b></li>
                                         @endforeach
                                     </ul>
                                     <p>Total <b>S/ {{ number_format((float) $purchase->total, 2) }}</b></p>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                     @if ($purchase->estado === 'Aprobada' && in_array($purchase->id, $recibibles, true) && isset($tokensRecepcion[$purchase->id]) && $purchase->details->contains(fn ($detail) => $detail->cantidad_pendiente > 0))
                                     <details class="compras-partial-reception" id="recepcion-parcial-{{ $purchase->id }}">
                                         <summary>Registrar recepción parcial</summary>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                                         <form method="post" action="{{ route('management.purchases.receive_partial', $purchase) }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                                             @csrf
                                             <input type="hidden" name="token_recepcion" value="{{ $tokensRecepcion[$purchase->id] }}">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                                             @foreach ($purchase->details as $indice => $detail)
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                             @if ($detail->cantidad_pendiente > 0)
                                             <label>
                                                 {{ $detail->product?->nombre ?? 'Producto no disponible' }} · pendiente {{ $detail->cantidad_pendiente }}
                                                 <input type="hidden" name="items[{{ $indice }}][detalle_compra_id]" value="{{ $detail->id }}">
                                                 <input type="number" name="items[{{ $indice }}][cantidad]" min="0" max="{{ $detail->cantidad_pendiente }}" value="0" required>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                                 @if ($detail->variante?->controla_serie)
                                                 <textarea name="items[{{ $indice }}][identificadores]" maxlength="30000" rows="3" placeholder="Un equipo por línea: IMEI:15dígitos, SERIE:valor o IMEI:15dígitos|SERIE:valor"></textarea>
                                                 @endif
@@ -153,12 +171,18 @@
                                     @endif
                                 </div>
                             </details>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                             @if ($purchase->estado === 'Pendiente' && in_array($purchase->id, $aprobables))
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                             <form method="post" action="{{ route('management.purchases.approve', $purchase) }}">@csrf <button class="compras-reception-open" type="submit">Aprobar</button></form>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                             @if (in_array($purchase->id, $anulables, true))<form method="post" action="{{ route('management.purchases.cancel', $purchase) }}">@csrf <button class="compras-reception-open" type="submit" data-confirm="¿Anular esta compra pendiente? Se conservará la auditoría.">Anular</button></form>@endif
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                             @elseif ($purchase->estado === 'Aprobada' && in_array($purchase->id, $recibibles, true) && $purchase->details->contains(fn ($detail) => $detail->cantidad_pendiente > 0 && $detail->variante?->controla_serie))
                             <button class="compras-reception-open" type="button" data-purchase-reception-open="{{ $purchase->id }}">Recibir</button>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                             @elseif ($purchase->estado === 'Aprobada' && in_array($purchase->id, $recibibles, true))
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                             <form method="post" action="{{ route('management.purchases.receive', $purchase) }}">@csrf <button class="compras-reception-open" type="submit" data-confirm="¿Confirmas la recepción completa de esta compra?">Recibir</button></form>
                             @endif
                         </td>
@@ -173,8 +197,10 @@
         </div>
         <footer class="compras-table-footer">
             <span>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                 @if ($purchases->total() > 0)
                 Mostrando {{ $purchases->firstItem() }}–{{ $purchases->lastItem() }} de {{ $purchases->total() }} compras
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                 @else
                 Sin registros
                 @endif
@@ -191,15 +217,21 @@
                     <p>Órdenes que requieren recepción</p>
                 </div>
             </header>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @forelse ($pendingPurchaseRecords as $pending)
             <div class="compras-recent-row">
                 <span class="compras-recent-dot compras-recent-dot--orange"></span>
                 <div><strong>{{ $purchasePresentation[$pending->id]['reference'] }} · {{ $purchasePresentation[$pending->id]['supplier_name'] }}</strong><small>{{ $pending->details_count }} {{ $pending->details_count === 1 ? 'producto' : 'productos' }} · S/ {{ number_format((float) $pending->total, 2) }}</small></div>
                 <span class="compras-status compras-status--{{ $purchasePresentation[$pending->id]['status_class'] }}">{{ $pending->estado }}</span>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                 @if ($pending->estado === 'Pendiente' && in_array($pending->id, $aprobables))
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                 <form method="post" action="{{ route('management.purchases.approve', $pending) }}">@csrf <button class="compras-reception-open" type="submit">Aprobar</button></form>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                 @if (in_array($pending->id, $anulables, true))<form method="post" action="{{ route('management.purchases.cancel', $pending) }}">@csrf <button class="compras-reception-open" type="submit" data-confirm="¿Anular esta compra pendiente? Se conservará la auditoría.">Anular</button></form>@endif
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                 @elseif ($pending->estado === 'Aprobada' && in_array($pending->id, $recibibles))
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                 <form method="post" action="{{ route('management.purchases.receive', $pending) }}">@csrf <button class="compras-reception-open" type="submit" data-confirm="¿Confirmas la recepción completa de esta compra?">Recibir mercadería</button></form>
                 @endif
             </div>
@@ -215,6 +247,7 @@
                     <p>Unidades registradas en recepciones</p>
                 </div>
             </header>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @forelse ($mostPurchasedProducts as $product)
             <div class="compras-product-row"><span class="compras-product-icon"><i class="bi bi-phone" aria-hidden="true"></i></span><strong>{{ $product->nombre }}</strong><span>{{ number_format((int) $product->cantidad) }} unid.</span></div>
             @empty
@@ -229,6 +262,7 @@
                     <p>Últimas órdenes registradas</p>
                 </div>
             </header>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @forelse ($recentPurchases as $recent)
             <div class="compras-recent-row">
                 <span class="compras-recent-dot"></span>
@@ -250,6 +284,7 @@
             <button class="admin-dialog-close" type="button" data-admin-dialog-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
         </header>
         <div class="admin-dialog-body">
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
             @include('gestion.comercial.compras.registrar', ['suppliers' => $suppliers, 'products' => $products])
         </div>
         <dialog class="compras-product-dialog" data-purchase-product-dialog aria-labelledby="agregar-producto-compra-titulo">
@@ -283,7 +318,9 @@
         </dialog>
     </dialog>
 
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
     @foreach ($purchases as $purchase)
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if (in_array($purchase->id, $editables, true))
     <dialog class="admin-dialog compras-create-dialog" id="editar-compra-{{ $purchase->id }}" aria-labelledby="editar-compra-title-{{ $purchase->id }}">
         <header class="admin-dialog-header">
@@ -302,6 +339,7 @@
         <div class="compras-import-modal">
             <header class="compras-import-header"><div class="compras-import-brand"><i class="bi bi-cart3" aria-hidden="true"></i></div><div><span>Compras y logística</span><h2 id="importar-compras-title">Importar compras</h2><p>Importa líneas reales con validación y transacción.</p></div><button class="compras-import-close" type="button" data-admin-dialog-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
             <div class="compras-import-steps" aria-label="Pasos de importación"><span><i class="bi bi-download" aria-hidden="true"></i><b>1. Descargar plantilla</b></span><i class="bi bi-chevron-right" aria-hidden="true"></i><span><i class="bi bi-table" aria-hidden="true"></i><b>2. Completar datos</b></span><i class="bi bi-chevron-right" aria-hidden="true"></i><span><i class="bi bi-upload" aria-hidden="true"></i><b>3. Subir e importar</b></span></div>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form method="post" action="{{ route('management.purchases.import') }}" enctype="multipart/form-data" class="compras-import-form">@csrf
                 <p class="compras-import-lead">Descarga la plantilla Excel, completa una fila por línea de compra y vuelve a cargarla. Los identificadores deben corresponder a proveedores, productos y variantes existentes.</p>
                 <div class="compras-import-columns"><i class="bi bi-layers" aria-hidden="true"></i><strong>Columnas requeridas:</strong><span>Usa la plantilla oficial para ver la estructura de columnas.</span></div>
@@ -316,10 +354,12 @@
 </section>
 @endsection
 
+{{-- bloque de estilos o scripts para el lugar reservado por la plantilla. --}}
 @push('styles')
     @vite('resources/css/gestion/comercial/compras/compras.css')
 @endpush
 
+{{-- bloque de estilos o scripts para el lugar reservado por la plantilla. --}}
 @push('scripts')
     @vite('resources/js/gestion/comercial/compras/index.js')
 @endpush

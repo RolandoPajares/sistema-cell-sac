@@ -16,6 +16,7 @@ class AplicarCuponRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return true;
@@ -26,6 +27,7 @@ class AplicarCuponRequest extends FormRequest
      *
      * @return array Resultado de la operación.
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         return ['codigo' => ['required', 'string', 'max:50']];

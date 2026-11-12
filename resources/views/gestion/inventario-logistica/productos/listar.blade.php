@@ -1,9 +1,13 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Gestión de productos')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-productos')
 
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section
     class="productos-page"
@@ -60,6 +64,7 @@
         </article>
     </div>
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
     <form class="productos-filters" id="lista-productos" method="get" action="{{ route('management.products') }}">
         <label class="productos-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar producto</span><input type="search" name="buscar" value="{{ $filters['buscar'] ?? '' }}" placeholder="Buscar producto, SKU o marca..."></label>
         <label><span class="visually-hidden">Filtrar por categoría</span><select name="categoria">
@@ -76,6 +81,7 @@
                 <option value="inactivo" @selected(($filters['estado'] ?? null)==='inactivo' )>Inactivos</option>
             </select></label>
         <button class="productos-filter-reset" type="submit"><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Aplicar filtros</button>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
         @if (($filters['buscar'] ?? null) || ($filters['categoria'] ?? null) || ($filters['stock'] ?? null) || ($filters['estado'] ?? null) || ($filters['oferta'] ?? false))
         <a class="productos-filter-clear" href="{{ route('management.products') }}">Limpiar filtros</a>
         @endif
@@ -110,11 +116,13 @@
                         </tr>
                     </thead>
                     <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                         @forelse ($products as $product)
                         
                                 <tr>
                                 <td><span class="productos-checkbox" aria-hidden="true"></span></td>
                                 <td>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                     @if ($productPresentation[$product->id]['image'])<img class="productos-image" src="{{ $productPresentation[$product->id]['image'] }}" alt="{{ $product->nombre }}">@else<span class="productos-image productos-image--placeholder"><i class="bi bi-phone" aria-hidden="true"></i></span>@endif
                                 </td>
                                 <td class="productos-name"><strong>{{ $product->nombre }}</strong><small>{{ $product->marca }} {{ $product->nombre }} · {{ $product->categoria ?: 'Sin categoría' }}</small></td>
@@ -126,6 +134,7 @@
                                 <td class="productos-actions-cell">
                                     <button class="productos-action" type="button" title="Ver producto" aria-label="Ver {{ $product->nombre }}" data-open-product-view data-product-view-dialog="ver-producto-{{ $product->id }}"><i class="bi bi-eye" aria-hidden="true"></i></button>
                                     <button class="productos-action" type="button" title="Editar producto" aria-label="Editar {{ $product->nombre }}" data-open-product-edit data-product-dialog="editar-producto-{{ $product->id }}"><i class="bi bi-pencil" aria-hidden="true"></i></button>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                     @if ($product->activo)<form method="post" action="{{ route('management.products.deactivate', $product) }}">@csrf @method('DELETE')<button class="productos-action productos-action--danger" type="submit" title="Desactivar producto" aria-label="Desactivar {{ $product->nombre }}" data-confirm="¿Desactivar este producto? La operación real existente recibirá la confirmación."><i class="bi bi-trash3" aria-hidden="true"></i></button></form>@endif
                                 </td>
                                 </tr>
@@ -138,14 +147,18 @@
                 </table>
             </div>
             <footer class="productos-pagination">
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                 <form class="productos-per-page-form" method="get" action="{{ route('management.products') }}">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach (request()->except(['page', 'por_pagina']) as $key => $value)
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                     @if (is_scalar($value))
                     <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                     @endif
                     @endforeach
                     <label for="productos-por-pagina">Mostrar</label>
                     <select id="productos-por-pagina" name="por_pagina" onchange="this.form.submit()" aria-label="Productos por página">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                         @foreach ([8, 10, 20, 50] as $option)
                         <option value="{{ $option }}" @selected(($filters['por_pagina'] ?? 8)===$option)>{{ $option }}</option>
                         @endforeach
@@ -207,6 +220,7 @@
             </div>
             <button type="button" class="productos-dialog-close" data-close-product-create aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
         </header>
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
         @include('gestion.inventario-logistica.productos.registrar', ['categories' => $categories, 'brands' => $brands, 'suppliers' => $suppliers])
     </div>
 </dialog>
@@ -214,10 +228,13 @@
 <dialog class="productos-dialog" id="importar-productos" aria-labelledby="productos-importar-titulo">
     <div class="productos-dialog-card">
         <header class="productos-import-header"><div class="productos-import-brand"><i class="bi bi-file-earmark-excel" aria-hidden="true"></i></div><div><h2 id="productos-importar-titulo">Importar productos desde Excel</h2><p>Carga masiva de productos de forma rápida y segura.</p></div><button type="button" class="productos-dialog-close" data-close-product-import aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
         <form class="productos-import-form" method="post" action="{{ route('management.products.import') }}" enctype="multipart/form-data">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
             @csrf
             <section class="productos-import-step"><div class="productos-import-step-heading"><span><i class="bi bi-download" aria-hidden="true"></i></span><div><h3>1. Descarga la plantilla</h3><p>Utiliza la plantilla oficial con la estructura correcta y los campos compatibles con el sistema.</p></div></div><a href="{{ route('management.products.import_template') }}" class="productos-import-template"><i class="bi bi-file-earmark-excel" aria-hidden="true"></i><span><strong>Descargar plantilla de productos.xlsx</strong><small>Estructura oficial del sistema</small></span><i class="bi bi-download" aria-hidden="true"></i></a></section>
             <section class="productos-import-step"><div class="productos-import-step-heading"><span><i class="bi bi-upload" aria-hidden="true"></i></span><div><h3>2. Sube tu archivo</h3><p>Selecciona el archivo completado (formato .xlsx o .csv).</p></div></div><label class="productos-import-drop"><input type="file" name="archivo" accept=".xlsx,.csv,.txt,text/csv" required><i class="bi bi-file-earmark-excel" aria-hidden="true"></i><strong>Arrastra y suelta tu archivo aquí</strong><em>o</em><span><i class="bi bi-folder2-open" aria-hidden="true"></i> Seleccionar archivo</span><small data-product-import-file-name>Ningún archivo seleccionado</small></label><div class="productos-import-meta"><span><i class="bi bi-file-earmark" aria-hidden="true"></i> Formatos permitidos: .xlsx, .csv</span><span><i class="bi bi-database" aria-hidden="true"></i> Tamaño máximo: 50 MB</span><strong><i class="bi bi-layers" aria-hidden="true"></i> Máximo: 10,000 productos</strong></div></section>
+{{-- mensaje de validacion para el campo que contiene errores. --}}
             @error('archivo')<small class="form-error">{{ $message }}</small>@enderror
             <p class="productos-import-note"><i class="bi bi-info-circle" aria-hidden="true"></i> Se validarán marcas, categorías, proveedores y formatos antes de importar.</p>
             <footer class="productos-import-footer"><button class="productos-create-cancel" type="button" data-close-product-import>Cancelar</button><button class="productos-create-submit" type="submit"><i class="bi bi-upload" aria-hidden="true"></i> Importar productos</button></footer>
@@ -226,6 +243,7 @@
 </dialog>
 
 
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
 @foreach ($products as $product)
 <dialog class="productos-dialog productos-edit-dialog" id="editar-producto-{{ $product->id }}" aria-labelledby="producto-editar-titulo-{{ $product->id }}">
     <div class="productos-dialog-card">
@@ -239,11 +257,13 @@
             </div>
             <button type="button" class="productos-dialog-close" data-close-product-edit aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
         </header>
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
         @include('gestion.inventario-logistica.productos.editar', ['product' => $product, 'categories' => $categories, 'brands' => $brands, 'suppliers' => $suppliers])
     </div>
 </dialog>
 @endforeach
 
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
 @foreach ($products as $product)
     
     <dialog class="productos-dialog productos-view-dialog" id="ver-producto-{{ $product->id }}" aria-labelledby="producto-detalle-titulo-{{ $product->id }}">
@@ -259,6 +279,7 @@
             </header>
             <div class="productos-view-body">
                 <div class="productos-view-identity">
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                     @if ($productPresentation[$product->id]['image'])<img class="productos-view-image" src="{{ $productPresentation[$product->id]['image'] }}" alt="{{ $product->nombre }}">@else<span class="productos-view-image productos-image--placeholder"><i class="bi bi-box-seam" aria-hidden="true"></i></span>@endif
                     <div><span class="productos-eyebrow">{{ $product->marca }}</span>
                         <h3>{{ $product->nombre }}</h3>
@@ -280,6 +301,7 @@
     </dialog>
     @endforeach
 
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
     @foreach ($products as $product)
     <dialog class="productos-dialog productos-variants-dialog" id="variantes-producto-{{ $product->id }}" aria-labelledby="variantes-titulo-{{ $product->id }}">
         <div class="productos-dialog-card">
@@ -293,7 +315,9 @@
                 <button type="button" class="productos-dialog-close" data-close-product-variants aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
             </header>
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form class="productos-create-form" method="post" action="{{ route('management.products.variants.store', $product) }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                 @csrf
                 <input type="hidden" name="producto_modal_id" value="{{ $product->id }}">
                 <div class="productos-create-fields">
@@ -303,9 +327,13 @@
                     <label class="productos-create-field"><span>Código de color</span><input class="productos-create-input" name="codigo_color" value="{{ old('codigo_color') }}" maxlength="20"></label>
                     <label class="productos-create-field productos-create-field--status"><span>Control de serie / IMEI</span><span><input type="hidden" name="controla_serie" value="0"><input type="checkbox" name="controla_serie" value="1" @checked(old('controla_serie', false))> Exigir serie o IMEI</span></label>
                 </div>
+{{-- mensaje de validacion para el campo que contiene errores. --}}
                 @error('nombre_color')<small class="form-error">{{ $message }}</small>@enderror
+{{-- mensaje de validacion para el campo que contiene errores. --}}
                 @error('codigo_sku')<small class="form-error">{{ $message }}</small>@enderror
+{{-- mensaje de validacion para el campo que contiene errores. --}}
                 @error('codigo_barras')<small class="form-error">{{ $message }}</small>@enderror
+{{-- mensaje de validacion para el campo que contiene errores. --}}
                 @error('controla_serie')<small class="form-error">{{ $message }}</small>@enderror
                 <footer class="productos-create-footer"><span></span><button class="productos-create-submit" type="submit"><i class="bi bi-plus-lg" aria-hidden="true"></i> Registrar variante</button></footer>
             </form>
@@ -323,6 +351,7 @@
                         </tr>
                     </thead>
                     <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                         @forelse ($product->variants as $variante)
                         <tr>
                             <td class="productos-name"><strong>{{ $variante->nombre_color }}</strong><small>{{ $variante->codigo_color ?: 'Sin código de color' }}</small></td>
@@ -332,9 +361,13 @@
                             <td><span class="productos-status productos-status--{{ $variante->estado === 'activo' ? 'success' : 'muted' }}">{{ $variante->estado === 'activo' ? 'Activa' : 'Inactiva' }}</span></td>
                             <td class="productos-actions-cell">
                                 <button class="productos-action" type="button" data-open-variant-edit="editar-variante-{{ $variante->id }}" title="Editar variante" aria-label="Editar {{ $variante->nombre_color }}"><i class="bi bi-pencil" aria-hidden="true"></i></button>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                 @if ($variante->estado === 'activo')
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                                 <form method="post" action="{{ route('management.products.variants.deactivate', ['product' => $product, 'variante' => $variante]) }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                                     @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
                                     @method('DELETE')
                                     <button class="productos-action productos-action--danger" type="submit" data-confirm="¿Desactivar esta variante? Sus existencias e historial se conservarán." title="Desactivar variante" aria-label="Desactivar {{ $variante->nombre_color }}"><i class="bi bi-trash3" aria-hidden="true"></i></button>
                                 </form>
@@ -352,6 +385,7 @@
         </div>
     </dialog>
 
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
     @foreach ($product->variants as $variante)
     <dialog class="productos-dialog productos-variant-edit-dialog" id="editar-variante-{{ $variante->id }}" aria-labelledby="editar-variante-titulo-{{ $variante->id }}">
         <div class="productos-dialog-card">
@@ -363,8 +397,11 @@
                     </div>
                 </div><button type="button" class="productos-dialog-close" data-close-variant-edit aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
             </header>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form class="productos-create-form" method="post" action="{{ route('management.products.variants.update', ['product' => $product, 'variante' => $variante]) }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                 @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
                 @method('PUT')
                 <input type="hidden" name="producto_modal_id" value="{{ $product->id }}">
                 <input type="hidden" name="variante_modal_id" value="{{ $variante->id }}">
@@ -379,14 +416,20 @@
                             <option value="inactivo" @selected(old('estado', $variante->estado) === 'inactivo')>Inactiva</option>
                         </select></label>
                 </div>
+{{-- mensaje de validacion para el campo que contiene errores. --}}
                 @error('nombre_color')<small class="form-error">{{ $message }}</small>@enderror
+{{-- mensaje de validacion para el campo que contiene errores. --}}
                 @error('codigo_sku')<small class="form-error">{{ $message }}</small>@enderror
+{{-- mensaje de validacion para el campo que contiene errores. --}}
                 @error('codigo_barras')<small class="form-error">{{ $message }}</small>@enderror
+{{-- mensaje de validacion para el campo que contiene errores. --}}
                 @error('controla_serie')<small class="form-error">{{ $message }}</small>@enderror
                 <footer class="productos-create-footer"><button class="productos-create-cancel" type="button" data-close-variant-edit>Cancelar</button><button class="productos-create-submit" type="submit"><i class="bi bi-save" aria-hidden="true"></i> Guardar cambios</button></footer>
             </form>
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form class="productos-create-form" method="post" enctype="multipart/form-data" action="{{ route('management.products.variants.images.store', ['product' => $product, 'variante' => $variante]) }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                 @csrf
                 <input type="hidden" name="producto_modal_id" value="{{ $product->id }}">
                 <input type="hidden" name="variante_modal_id" value="{{ $variante->id }}">
@@ -394,6 +437,7 @@
                     <label class="productos-create-field productos-create-field--wide"><span>Imagen de la variante <b>*</b></span><input class="productos-create-input" type="file" name="imagen" accept="image/jpeg,image/png,image/webp" required></label>
                     <label class="productos-create-field productos-create-field--compact"><span>Imagen principal</span><span><input type="checkbox" name="imagen_principal" value="1" @checked(old('imagen_principal', $variante->images->isEmpty()))> Usar como principal</span></label>
                 </div>
+{{-- mensaje de validacion para el campo que contiene errores. --}}
                 @error('imagen')<small class="form-error">{{ $message }}</small>@enderror
                 <footer class="productos-create-footer"><span></span><button class="productos-create-submit" type="submit"><i class="bi bi-upload" aria-hidden="true"></i> Cargar imagen</button></footer>
             </form>
@@ -409,14 +453,18 @@
                         </tr>
                     </thead>
                     <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                         @forelse ($variante->images as $imagen)
                         <tr>
                             <td>@if ($productPresentation[$product->id]['images'][$imagen->id] ?? null)<img class="productos-image" src="{{ $productPresentation[$product->id]['images'][$imagen->id] }}" alt="Imagen de {{ $variante->nombre_color }}">@else<span class="productos-image productos-image--placeholder"><i class="bi bi-image" aria-hidden="true"></i></span>@endif</td>
                             <td>{{ $imagen->orden }}</td>
                             <td><span class="productos-status productos-status--{{ $imagen->imagen_principal ? 'success' : 'muted' }}">{{ $imagen->imagen_principal ? 'Principal' : 'Secundaria' }}</span></td>
                             <td class="productos-actions-cell">
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                                 <form method="post" action="{{ route('management.products.variants.images.delete', ['product' => $product, 'variante' => $variante, 'imagen' => $imagen->id]) }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                                     @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
                                     @method('DELETE')
                                     <input type="hidden" name="producto_modal_id" value="{{ $product->id }}">
                                     <input type="hidden" name="variante_modal_id" value="{{ $variante->id }}">

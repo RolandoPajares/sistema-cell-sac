@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="es">
     <head>
@@ -11,18 +12,24 @@
     </head>
     <body class="admin-body admin-theme @yield('body_class')">
         <div class="admin-layout admin-app" data-admin-app data-user-compact-menu="{{ array_key_exists('menu_compacto', $panelUserPreferences) ? ($panelUserPreferences['menu_compacto'] ? '1' : '0') : '' }}">
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
             @include('layouts.panel.menu-dinamico', ['links' => $sidebarLinks ?? []])
             <div class="admin-shell admin-content-shell">
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
                 @include('layouts.panel.encabezado')
                 <main class="admin-main">
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                     @if (session('status'))<div class="admin-alert admin-alert--success" role="status">{{ session('status') }}</div>@endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                     @if ($errors->any())<div class="admin-alert admin-alert--error" role="alert">{{ $errors->first() }}</div>@endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                     @if (session('error'))<div class="admin-alert admin-alert--error" role="alert">{{ session('error') }}</div>@endif
                     @yield('content')
                 </main>
             </div>
         </div>
         <div class="sidebar-overlay admin-sidebar-backdrop" data-sidebar-close data-admin-sidebar-close></div>
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
         @include('inteligente.asistente.flotante')
 
         @stack('scripts')

@@ -1,9 +1,13 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Categorías')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-categorias')
 
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
     <section class="categorias-page" data-categorias-page>
         <header class="categorias-hero">
@@ -44,6 +48,7 @@
             </article>
         </div>
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
         <form class="categorias-filters" method="get" action="{{ route('management.categories') }}">
             <label class="categorias-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar categorías</span><input type="search" name="buscar" value="{{ $filters['buscar'] ?? '' }}" placeholder="Buscar categorías..."></label>
             <label><span>Estado</span><select name="estado"><option value="">Todos</option><option value="activa" @selected(($filters['estado'] ?? null) === 'activa')>Activas</option><option value="inactiva" @selected(($filters['estado'] ?? null) === 'inactiva')>Inactivas</option></select></label>
@@ -58,6 +63,7 @@
                         <tr><th>#</th><th>Imagen</th><th>Nombre</th><th>Descripción</th><th>Productos</th><th>Estado</th><th>Fecha de creación</th><th>Acciones</th></tr>
                     </thead>
                     <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                         @forelse ($categories as $category)
                             <tr>
                                 <td>{{ (($categories->currentPage() - 1) * $categories->perPage()) + $loop->iteration }}</td>
@@ -73,9 +79,13 @@
                                         <div class="categorias-edit-popover">@include('gestion.inventario-logistica.categorias.editar', ['category' => $category])</div>
                                     </details>
                                     <button class="categorias-icon-button" type="button" title="Ver información" aria-label="Ver información de {{ $category->nombre }}" data-open-category-view data-category-view-dialog="ver-categoria-{{ $category->id }}"><i class="bi bi-eye" aria-hidden="true"></i></button>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                     @if ($category->activo)
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                                         <form method="post" action="{{ route('management.categories.deactivate', $category) }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                                             @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
                                             @method('DELETE')
                                             <button class="categorias-icon-button categorias-icon-button--danger" type="submit" title="Desactivar categoría" aria-label="Desactivar {{ $category->nombre }}" data-confirm="¿Desactivar esta categoría?"><i class="bi bi-trash3" aria-hidden="true"></i></button>
                                         </form>
@@ -83,8 +93,10 @@
                                 </td>
                             </tr>
                         @empty
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                             @if (!($filters['buscar'] || $filters['estado']))
                                 <tr><td class="categorias-empty" colspan="8"><i class="bi bi-inbox" aria-hidden="true"></i><strong>No hay categorías registradas.</strong><span>Registra la primera categoría para organizar tus productos.</span></td></tr>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                             @else
                             <tr><td class="categorias-empty" colspan="8"><i class="bi bi-inbox" aria-hidden="true"></i><strong>No hay categorías que coincidan con los filtros.</strong><span>Prueba con otros criterios de búsqueda.</span></td></tr>
                             @endif
@@ -100,15 +112,18 @@
         </section>
     </section>
 
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
     @foreach ($categories as $category)
         <dialog class="categorias-dialog categorias-edit-dialog" id="editar-categoria-{{ $category->id }}" aria-labelledby="categoria-editar-titulo-{{ $category->id }}">
             <div class="categorias-dialog-card">
                 <header class="categorias-dialog-header"><div><span class="categorias-eyebrow">Catálogo</span><h2 id="categoria-editar-titulo-{{ $category->id }}">Editar categoría</h2><p>Actualiza la información de {{ $category->nombre }}.</p></div><button class="categorias-dialog-close" type="button" data-close-category-edit aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
                 @include('gestion.inventario-logistica.categorias.editar', ['category' => $category])
             </div>
         </dialog>
     @endforeach
 
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
     @foreach ($categories as $category)
         <dialog class="categorias-dialog categorias-view-dialog" id="ver-categoria-{{ $category->id }}" aria-labelledby="categoria-detalle-titulo-{{ $category->id }}">
             <div class="categorias-dialog-card">
@@ -126,6 +141,7 @@
     <dialog class="categorias-dialog" id="nueva-categoria" aria-labelledby="categoria-crear-titulo">
         <div class="categorias-dialog-card">
             <header class="categorias-dialog-header"><div><span class="categorias-eyebrow">Catálogo</span><h2 id="categoria-crear-titulo">Nueva categoría</h2><p>Registra una categoría para organizar tus productos.</p></div><button class="categorias-dialog-close" type="button" data-close-category-create aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
             @include('gestion.inventario-logistica.categorias.registrar')
         </div>
     </dialog>
