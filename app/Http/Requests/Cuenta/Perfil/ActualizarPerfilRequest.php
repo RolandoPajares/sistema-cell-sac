@@ -34,12 +34,14 @@ class ActualizarPerfilRequest extends FormRequest
         $rules = [
             'nombre' => ['required', 'string', 'max:120'],
             'correo' => ['required', 'email', 'max:160', Rule::unique('usuarios', 'correo')->ignore($this->user())],
+            'telefono' => ['nullable', 'string', 'max:30'],
+            'documento' => ['nullable', 'string', 'max:20'],
         ];
 
         $user = $this->user();
         if ($user instanceof User) {
             $rules['perfil'] = ['sometimes', 'array'];
-            $rules = array_merge($rules, app(ServicioPerfil::class)->editableFieldRules($user));
+            $rules = array_merge($rules, app(ServicioPerfil::class)->reglasCamposEditables($user));
         }
 
         return $rules;

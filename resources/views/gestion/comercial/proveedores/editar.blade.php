@@ -25,7 +25,7 @@
         <legend>2. Contacto</legend>
         <div class="proveedores-form-grid">
             <label class="proveedores-form-field"><span>Teléfono</span><input name="telefono" maxlength="30" placeholder="Número" value="{{ old('telefono', $supplier->telefono) }}"></label>
-            <label class="proveedores-form-field"><span>Correo electrónico <b>*</b></span><input type="email" name="correo" required maxlength="160" placeholder="proveedor@correo.com" value="{{ old('correo', $supplier->correo) }}"></label>
+            <label class="proveedores-form-field"><span>Correo electrónico <b>*</b></span><input type="email" name="correo" required maxlength="160" inputmode="email" placeholder="proveedor@correo.com" value="{{ old('correo', $supplier->correo) }}"></label>
         </div>
         <label class="proveedores-form-field proveedores-form-field--full"><span>Dirección</span><input name="ciudad" maxlength="80" placeholder="Dirección del proveedor" value="{{ old('ciudad', $supplier->ciudad) }}"></label>
     </fieldset>

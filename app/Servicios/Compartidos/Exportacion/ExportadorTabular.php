@@ -96,7 +96,7 @@ final class ExportadorTabular
             abort_unless($zip->open($temporaryFile, ZipArchive::OVERWRITE) === true, 500, 'No se pudo crear el archivo Excel.');
 
             $context = $this->contextoReporte($filename, $report, count($columns));
-            $logo = $this->logoBytes();
+            $logo = $this->bytesLogo();
             $worksheet = $this->construirHojaCalculo($columns, $rows, $context, $logo !== null);
             $logoContentTypes = $logo === null ? '' : '<Default Extension="png" ContentType="image/png"/><Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>';
 
@@ -110,7 +110,7 @@ final class ExportadorTabular
             if ($logo !== null) {
                 $zip->addFromString('xl/media/technology-cell-logo.png', $logo);
                 $zip->addFromString('xl/worksheets/_rels/sheet1.xml.rels', '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing1.xml"/></Relationships>');
-                $zip->addFromString('xl/drawings/drawing1.xml', $this->drawingXml());
+                $zip->addFromString('xl/drawings/drawing1.xml', $this->xmlDibujo());
                 $zip->addFromString('xl/drawings/_rels/drawing1.xml.rels', '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/technology-cell-logo.png"/></Relationships>');
             }
 
@@ -142,7 +142,7 @@ final class ExportadorTabular
     private function generarExcelSinZip(string $filename, array $columns, array $rows, array $report): Response
     {
         $context = $this->contextoReporte($filename, $report, count($columns));
-        $logo = $this->logoBytes();
+        $logo = $this->bytesLogo();
         $worksheet = $this->construirHojaCalculo($columns, $rows, $context, $logo !== null);
         $logoContentTypes = $logo === null
             ? ''
@@ -160,7 +160,7 @@ final class ExportadorTabular
         if ($logo !== null) {
             $entries['xl/media/technology-cell-logo.png'] = $logo;
             $entries['xl/worksheets/_rels/sheet1.xml.rels'] = '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing1.xml"/></Relationships>';
-            $entries['xl/drawings/drawing1.xml'] = $this->drawingXml();
+            $entries['xl/drawings/drawing1.xml'] = $this->xmlDibujo();
             $entries['xl/drawings/_rels/drawing1.xml.rels'] = '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/technology-cell-logo.png"/></Relationships>';
         }
 
@@ -580,7 +580,7 @@ final class ExportadorTabular
      *
      * @return string Resultado de la operación.
      */
-    private function drawingXml(): string
+    private function xmlDibujo(): string
     {
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><xdr:twoCellAnchor editAs="oneCell"><xdr:from><xdr:col>0</xdr:col><xdr:colOff>50000</xdr:colOff><xdr:row>0</xdr:row><xdr:rowOff>30000</xdr:rowOff></xdr:from><xdr:to><xdr:col>2</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>4</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to><xdr:pic><xdr:nvPicPr><xdr:cNvPr id="2" name="Technology CELL"/><xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId1"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor></xdr:wsDr>';
     }
@@ -1145,7 +1145,7 @@ final class ExportadorTabular
      */
     private function objetosLogoPdf(int $firstId): array
     {
-        $image = $this->decodePng($this->logoBytes());
+        $image = $this->decodificarPng($this->bytesLogo());
         if ($image === null) {
             return ['image_id' => null, 'objects' => []];
         }
@@ -1174,7 +1174,7 @@ final class ExportadorTabular
     /**
      * @return array{width:int,height:int,rgb:string,alpha:?string}|null
      */
-    private function decodePng(?string $png): ?array
+    private function decodificarPng(?string $png): ?array
     {
         if ($png === null || ! str_starts_with($png, "\x89PNG\r\n\x1a\n")) {
             return null;
@@ -1221,7 +1221,7 @@ final class ExportadorTabular
                     1 => $left,
                     2 => $up,
                     3 => intdiv($left + $up, 2),
-                    4 => $this->paethPredictor($left, $up, $upperLeft),
+                    4 => $this->predictorPaeth($left, $up, $upperLeft),
                     default => 0,
                 };
                 $filtered[$index] = ($filtered[$index] + $predictor) & 255;
@@ -1247,7 +1247,7 @@ final class ExportadorTabular
      * @param  mixed  $upperLeft  Parámetro recibido por la operación.
      * @return int Resultado de la operación.
      */
-    private function paethPredictor(int $left, int $up, int $upperLeft): int
+    private function predictorPaeth(int $left, int $up, int $upperLeft): int
     {
         $estimate = $left + $up - $upperLeft;
         $leftDistance = abs($estimate - $left);
@@ -1557,7 +1557,7 @@ final class ExportadorTabular
      *
      * @return mixed Resultado de la operación.
      */
-    private function logoBytes(): ?string
+    private function bytesLogo(): ?string
     {
         $path = base_path(self::LOGO_PATH);
 

@@ -112,9 +112,9 @@ class RolesPermisosController extends Controller
         $roles = $ready ? Rol::query()->where('activo', true)->with(['permisos' => fn ($query) => $query->where('permisos.activo', true)->orderBy('modulo_id')->orderBy('accion')])->orderBy('nombre')->get() : collect();
         $selectedRoleId = (int) request()->integer('rol', (int) $roles->first()?->getKey());
         $selectedRole = $roles->firstWhere('id', $selectedRoleId) ?: $roles->first();
-        $matrixModules = $ready ? $this->matrixModules() : collect();
-        $matrixGroups = $ready ? $this->matrixGroups($matrixModules) : collect();
-        $previewItems = $ready && $selectedRole ? $this->previewCatalog((int) $selectedRole->getKey()) : collect();
+        $matrixModules = $ready ? $this->modulosMatriz() : collect();
+        $matrixGroups = $ready ? $this->gruposMatriz($matrixModules) : collect();
+        $previewItems = $ready && $selectedRole ? $this->catalogoVistaPrevia((int) $selectedRole->getKey()) : collect();
         $allPermissions = $matrixModules->flatMap(fn (array $module): array => array_merge(
             $module['permissions']->all(),
             $module['screens']->flatMap(fn (array $screen): array => $screen['permissions']->all())->all(),
@@ -147,7 +147,7 @@ class RolesPermisosController extends Controller
      * @param  int  $roleId  Identificador del rol cuya navegación se previsualiza.
      * @return Collection<int, object> Elementos de menú catalogados.
      */
-    private function previewCatalog(int $roleId): Collection
+    private function catalogoVistaPrevia(int $roleId): Collection
     {
         return DB::table('roles_menus')
             ->join('menus', 'menus.id', '=', 'roles_menus.menu_id')
@@ -169,7 +169,7 @@ class RolesPermisosController extends Controller
      *
      * @return mixed Resultado de la operación.
      */
-    private function matrixModules(): Collection
+    private function modulosMatriz(): Collection
     {
         return Modulo::query()
             ->where('habilitado', true)
@@ -205,7 +205,7 @@ class RolesPermisosController extends Controller
      * @param  Collection<int, array<string, mixed>>  $modules
      * @return Collection<int, array{id: int, codigo: string, nombre: string, items: Collection<int, array<string, mixed>>}>
      */
-    private function matrixGroups(Collection $modules): Collection
+    private function gruposMatriz(Collection $modules): Collection
     {
         $menuId = DB::table('menus')
             ->where('codigo', 'administrador.sidebar')
@@ -384,6 +384,8 @@ class RolesPermisosController extends Controller
                 ]);
             }
 
+            $this->sincronizarMenusDelRol((int) $role->getKey());
+
             $after = DB::table('roles_permisos')->join('permisos', 'permisos.id', '=', 'roles_permisos.permiso_id')
                 ->where('roles_permisos.rol_id', $role->getKey())
                 ->get(['permisos.codigo', 'roles_permisos.alcance'])->map(static fn ($row): array => ['codigo' => $row->codigo, 'alcance' => $row->alcance])->all();
@@ -466,6 +468,7 @@ class RolesPermisosController extends Controller
             foreach ($permissionIds as $permissionId) {
                 DB::table('roles_permisos')->insert(['rol_id' => $lockedRole->getKey(), 'permiso_id' => $permissionId, 'alcance' => $scope, 'creado_en' => now()]);
             }
+            $this->sincronizarMenusDelRol((int) $lockedRole->getKey());
             $after = DB::table('roles_permisos')->join('permisos', 'permisos.id', '=', 'roles_permisos.permiso_id')
                 ->where('roles_permisos.rol_id', $lockedRole->getKey())->where('roles_permisos.alcance', $scope)
                 ->whereIn('roles_permisos.permiso_id', $screenPermissionIds)->get(['permisos.codigo', 'roles_permisos.alcance'])
@@ -556,5 +559,46 @@ class RolesPermisosController extends Controller
             ->where('permisos.codigo', 'gestion.seguridad.actualizar')
             ->wherePivot('alcance', 'empresa')
             ->exists();
+    }
+
+    /**
+     * Vincula al rol los menús que contienen opciones habilitadas para sus permisos vigentes.
+     *
+     * La asociación es deliberadamente aditiva: roles_menus también contiene asignaciones
+     * administrativas explícitas y el servicio del menú filtra cada opción con autorización
+     * efectiva. La clave primaria rol/menú evita duplicados sin conceder permisos adicionales.
+     */
+    private function sincronizarMenusDelRol(int $roleId): void
+    {
+        $permissionIds = DB::table('roles_permisos as asignacion')
+            ->join('permisos', 'permisos.id', '=', 'asignacion.permiso_id')
+            ->where('asignacion.rol_id', $roleId)
+            ->where('permisos.activo', true)
+            ->pluck('asignacion.permiso_id')
+            ->map(static fn (mixed $permissionId): int => (int) $permissionId)
+            ->unique()
+            ->values();
+
+        if ($permissionIds->isEmpty()) {
+            return;
+        }
+
+        $menuIds = DB::table('elementos_menu as elemento')
+            ->join('menus', 'menus.id', '=', 'elemento.menu_id')
+            ->whereIn('elemento.permiso_id', $permissionIds->all())
+            ->where('elemento.habilitado', true)
+            ->where('menus.habilitado', true)
+            ->where('menus.contexto', 'sidebar')
+            ->distinct()
+            ->pluck('elemento.menu_id')
+            ->map(static fn (mixed $menuId): int => (int) $menuId);
+
+        foreach ($menuIds as $menuId) {
+            DB::table('roles_menus')->insertOrIgnore([
+                'rol_id' => $roleId,
+                'menu_id' => $menuId,
+                'creado_en' => now(),
+            ]);
+        }
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Servicios\Compartidos\Seguridad\ServicioMenuDinamico;
 use Illuminate\Support\Facades\DB;
 use Tests\SpanishAccessFixture;
 
@@ -117,6 +118,102 @@ it('actualiza desde el modal solo los permisos de la pantalla seleccionada', fun
 
     expect(DB::table('roles_permisos')->where('rol_id', $marketingRoleId)->where('permiso_id', $permissionId)->where('alcance', 'sede')->exists())->toBeFalse()
         ->and(DB::table('roles_permisos')->where('rol_id', $marketingRoleId)->where('permiso_id', $unrelatedPermissionId)->exists())->toBeTrue();
+});
+
+it('sincroniza el menu al conceder y oculta la opcion al retirar permisos desde la matriz completa', function (): void {
+    $administrador = SpanishAccessFixture::user('administrador');
+    $marketing = SpanishAccessFixture::user('marketing');
+    $roleId = (int) DB::table('roles')->where('codigo', 'marketing')->value('id');
+    $menuId = (int) DB::table('menus')->where('codigo', 'marketing.sidebar')->value('id');
+    $permissionId = (int) DB::table('elementos_menu as elemento')
+        ->join('menus', 'menus.id', '=', 'elemento.menu_id')
+        ->where('menus.id', $menuId)
+        ->where('elemento.codigo', 'item.admin.campaigns')
+        ->value('elemento.permiso_id');
+    $modulePermissionId = (int) DB::table('permisos')
+        ->where('codigo', 'gestion.campanias.consultar')
+        ->value('id');
+
+    DB::table('roles_menus')->where('rol_id', $roleId)->where('menu_id', $menuId)->delete();
+    DB::table('roles_permisos')->where('rol_id', $roleId)->delete();
+
+    $this->actingAs($administrador)
+        ->putJson(route('management.roles_permissions.permissions', $roleId), [
+            'alcance' => 'sede',
+            'permisos' => [$modulePermissionId, $permissionId],
+        ])
+        ->assertOk();
+
+    $routesAfterGrant = collect(app(ServicioMenuDinamico::class)->paraUsuario($marketing)['grupos'])
+        ->flatMap(fn (array $group): array => $group['items'])
+        ->pluck('route');
+
+    expect(DB::table('roles_menus')->where('rol_id', $roleId)->where('menu_id', $menuId)->count())->toBe(1)
+        ->and($routesAfterGrant)->toContain('management.campaigns');
+
+    $this->actingAs($administrador)
+        ->putJson(route('management.roles_permissions.permissions', $roleId), [
+            'alcance' => 'sede',
+            'permisos' => [$modulePermissionId, $permissionId],
+        ])
+        ->assertOk();
+
+    expect(DB::table('roles_menus')->where('rol_id', $roleId)->where('menu_id', $menuId)->count())->toBe(1);
+
+    $this->actingAs($administrador)
+        ->putJson(route('management.roles_permissions.permissions', $roleId), [
+            'alcance' => 'sede',
+            'permisos' => [],
+        ])
+        ->assertOk();
+
+    $routes = collect(app(ServicioMenuDinamico::class)->paraUsuario($marketing)['grupos'])
+        ->flatMap(fn (array $group): array => $group['items'])
+        ->pluck('route');
+
+    expect($routes)->not->toContain('management.campaigns')
+        ->and(DB::table('roles_menus')->where('rol_id', $roleId)->where('menu_id', $menuId)->count())->toBe(1);
+});
+
+it('sincroniza el menu al conceder y oculta la opcion al retirar permisos desde una pantalla', function (): void {
+    $administrador = SpanishAccessFixture::user('administrador');
+    $marketing = SpanishAccessFixture::user('marketing');
+    $roleId = (int) DB::table('roles')->where('codigo', 'marketing')->value('id');
+    $menuId = (int) DB::table('menus')->where('codigo', 'marketing.sidebar')->value('id');
+    $screen = DB::table('pantallas')->where('codigo', 'admin.campaigns')->first(['id', 'modulo_id']);
+    $permissionId = (int) DB::table('permisos')->where('pantalla_id', $screen->id)->where('accion', 'consultar')->value('id');
+
+    DB::table('roles_menus')->where('rol_id', $roleId)->where('menu_id', $menuId)->delete();
+    DB::table('roles_permisos')->where('rol_id', $roleId)->where('permiso_id', $permissionId)->delete();
+
+    $this->actingAs($administrador)
+        ->putJson(route('management.roles_permissions.screen_permissions', $roleId), [
+            'modulo_id' => $screen->modulo_id,
+            'pantalla_id' => $screen->id,
+            'alcance' => 'sede',
+            'permisos' => [$permissionId],
+        ])
+        ->assertOk();
+
+    expect(DB::table('roles_menus')->where('rol_id', $roleId)->where('menu_id', $menuId)->count())->toBe(1)
+        ->and(collect(app(ServicioMenuDinamico::class)->paraUsuario($marketing)['grupos'])
+            ->flatMap(fn (array $group): array => $group['items'])
+            ->pluck('route'))
+        ->toContain('management.campaigns');
+
+    $this->actingAs($administrador)
+        ->putJson(route('management.roles_permissions.screen_permissions', $roleId), [
+            'modulo_id' => $screen->modulo_id,
+            'pantalla_id' => $screen->id,
+            'alcance' => 'sede',
+            'permisos' => [],
+        ])
+        ->assertOk();
+
+    expect(collect(app(ServicioMenuDinamico::class)->paraUsuario($marketing)['grupos'])
+        ->flatMap(fn (array $group): array => $group['items'])
+        ->pluck('route'))
+        ->not->toContain('management.campaigns');
 });
 
 it('propone plantillas ecommerce sin conceder permisos administrativos a clientes', function (): void {

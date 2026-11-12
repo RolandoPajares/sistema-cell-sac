@@ -94,7 +94,17 @@
                                     </button>
                                 </form>
                             @else
-                                <a class="btn btn-primary home-product-action" href="{{ route('login') }}"><i class="bi bi-cart3" aria-hidden="true"></i> Comprar</a>
+                                <details class="home-product-buy-choice">
+                                    <summary class="btn btn-primary home-product-action"><i class="bi bi-cart3" aria-hidden="true"></i> Comprar</summary>
+                                    <div class="home-product-buy-options">
+                                        <a class="btn btn-ghost" href="{{ route('login') }}">Iniciar sesión</a>
+                                        <form action="{{ route('cart.add', $producto) }}" method="post">
+                                            @csrf
+                                            <input type="hidden" name="cantidad" value="1">
+                                            <button class="btn btn-primary" type="submit">Continuar como invitado</button>
+                                        </form>
+                                    </div>
+                                </details>
                             @endauth
                             <a class="btn btn-ghost home-product-details" href="{{ route('catalog.show', $producto) }}"><i class="bi bi-eye" aria-hidden="true"></i> Ver detalles</a>
                         </div>

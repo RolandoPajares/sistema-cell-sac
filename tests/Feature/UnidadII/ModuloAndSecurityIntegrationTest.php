@@ -932,20 +932,24 @@ it('completes the supplier lifecycle for purchasing roles', function (): void {
 
     $this->actingAs($purchasing)
         ->post(route('management.suppliers.store'), [
-            'nombre' => 'Proveedor Integración',
-            'ruc' => 'RUC-30001',
+            'tipo_persona' => 'juridica',
+            'tipo_documento' => 'ruc',
+            'razon_social' => 'Proveedor Integración S.A.C.',
+            'ruc' => '20123456789',
             'correo' => 'proveedor.integracion@example.test',
             'telefono' => '999777888',
             'ciudad' => 'Lima',
         ])
         ->assertRedirect();
 
-    $supplier = Proveedor::query()->where('ruc', 'RUC-30001')->firstOrFail();
+    $supplier = Proveedor::query()->where('ruc', '20123456789')->firstOrFail();
 
     $this->actingAs($purchasing)
         ->put(route('management.suppliers.update', $supplier), [
             'nombre' => 'Proveedor Actualizado',
-            'ruc' => 'RUC-30001',
+            'tipo_persona' => 'juridica',
+            'tipo_documento' => 'ruc',
+            'ruc' => '20123456789',
             'correo' => 'proveedor.actualizado@example.test',
             'telefono' => '999777999',
             'ciudad' => 'Cusco',
@@ -965,6 +969,29 @@ it('completes the supplier lifecycle for purchasing roles', function (): void {
         'id' => $supplier->id,
         'nombre' => 'Proveedor Actualizado',
         'activo' => 0,
+    ]);
+});
+
+it('registers a natural supplier from the visible form fields', function (): void {
+    $purchasing = SpanishAccessFixture::user('compras_logistica');
+
+    $this->actingAs($purchasing)
+        ->post(route('management.suppliers.store'), [
+            'tipo_persona' => 'natural',
+            'tipo_documento' => 'dni',
+            'nombres' => 'Ana',
+            'apellidos' => 'Proveedor',
+            'ruc' => '12345678',
+            'correo' => 'ana.proveedor@example.test',
+            'telefono' => '999111222',
+            'ciudad' => 'Lima',
+        ])
+        ->assertRedirect();
+
+    $this->assertDatabaseHas('proveedores', [
+        'nombre' => 'Ana Proveedor',
+        'ruc' => '12345678',
+        'correo' => 'ana.proveedor@example.test',
     ]);
 });
 

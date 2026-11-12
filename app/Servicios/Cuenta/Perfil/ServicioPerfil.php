@@ -33,7 +33,7 @@ final class ServicioPerfil
     }
 
     /** @return Collection<int, Rol> */
-    public function rolesFor(User $user): Collection
+    public function rolesPara(User $user): Collection
     {
         $roleIds = $user->rolesVigentes()->pluck('roles.id')
             ->merge($user->rolesPorSedeVigentes()->pluck('roles.id'))
@@ -50,7 +50,7 @@ final class ServicioPerfil
         return Rol::query()->whereIn('id', $roleIds->unique())->orderBy('nombre')->get();
     }
 
-    public function primarySiteFor(User $user): ?string
+    public function sedePrincipalPara(User $user): ?string
     {
         if (! Schema::hasTable('sedes')) {
             return null;
@@ -64,13 +64,13 @@ final class ServicioPerfil
     }
 
     /** @return Collection<int, PerfilCampo> */
-    public function fieldsFor(User $user): Collection
+    public function camposPara(User $user): Collection
     {
         if (! $this->dynamicFieldsAvailable()) {
             return new Collection;
         }
 
-        $roleIds = $this->rolesFor($user)->modelKeys();
+        $roleIds = $this->rolesPara($user)->modelKeys();
         if ($roleIds === []) {
             return new Collection;
         }
@@ -96,7 +96,7 @@ final class ServicioPerfil
     }
 
     /** @return array<int|string, string|null> */
-    public function valuesFor(User $user, Collection $fields): array
+    public function valoresPara(User $user, Collection $fields): array
     {
         if (! $this->dynamicFieldsAvailable() || $fields->isEmpty()) {
             return [];
@@ -110,7 +110,7 @@ final class ServicioPerfil
     }
 
     /** @return Collection<int, object> */
-    public function functionsFor(User $user): Collection
+    public function funcionesPara(User $user): Collection
     {
         if (! Schema::hasTable('roles_permisos') || ! Schema::hasTable('permisos')) {
             return new Collection;
@@ -121,7 +121,7 @@ final class ServicioPerfil
         return Permiso::query()
             ->where('permisos.activo', true)
             ->whereHas('roles', function ($query) use ($user): void {
-                $query->whereIn('roles.id', $this->rolesFor($user)->modelKeys())
+                $query->whereIn('roles.id', $this->rolesPara($user)->modelKeys())
                     ->where('roles.activo', true)
                     ->where('roles_permisos.alcance', '!=', 'ninguno');
             })
@@ -133,10 +133,10 @@ final class ServicioPerfil
     }
 
     /** @return array<string, array<int, mixed>> */
-    public function editableFieldRules(User $user): array
+    public function reglasCamposEditables(User $user): array
     {
         $rules = [];
-        foreach ($this->fieldsFor($user)->filter(fn (PerfilCampo $field): bool => (bool) $field->perfil_editable) as $field) {
+        foreach ($this->camposPara($user)->filter(fn (PerfilCampo $field): bool => (bool) $field->perfil_editable) as $field) {
             $fieldRules = [$field->perfil_requerido ? 'required' : 'nullable', 'string', 'max:5000'];
             if ($field->tipo === 'email') {
                 $fieldRules[] = 'email';
@@ -158,7 +158,7 @@ final class ServicioPerfil
     }
 
     /** @param array<int|string, mixed> $values */
-    public function saveValues(User $user, Collection $fields, array $values): void
+    public function guardarValores(User $user, Collection $fields, array $values): void
     {
         $editableFields = $fields->filter(fn (PerfilCampo $field): bool => (bool) $field->perfil_editable);
         $now = now();

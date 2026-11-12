@@ -105,25 +105,25 @@ class PedidoController extends Controller
             ->latest('id')
             ->paginate($filters['por_pagina'])
             ->withQueryString();
-        $statusCounts = $this->scopedOrders($request)
+        $statusCounts = $this->pedidosEnAlcance($request)
             ->selectRaw('estado, COUNT(*) as total')
             ->groupBy('estado')
             ->pluck('total', 'estado');
         $totalOrders = (int) $statusCounts->sum();
-        $todayOrders = $this->scopedOrders($request)->whereDate('creado_en', today())->count();
-        $yesterdayOrders = $this->scopedOrders($request)->whereDate('creado_en', today()->subDay())->count();
+        $todayOrders = $this->pedidosEnAlcance($request)->whereDate('creado_en', today())->count();
+        $yesterdayOrders = $this->pedidosEnAlcance($request)->whereDate('creado_en', today()->subDay())->count();
         $paidOrders = null;
         $pendingOrders = $this->contarEstados($statusCounts, ['Pendiente']);
         $shippingOrders = $this->contarEstados($statusCounts, ['Enviado']);
         $deliveredOrders = $this->contarEstados($statusCounts, ['Entregado']);
         $cancelledOrders = $this->contarEstados($statusCounts, ['Cancelado']);
-        $staleOrders = $this->scopedOrders($request)
+        $staleOrders = $this->pedidosEnAlcance($request)
             ->whereNotIn('estado', ['Entregado', 'Cancelado'])
             ->where('creado_en', '<', now()->subHours(48))
             ->count();
         $statusSummary = $this->resumenEstados($statusCounts, $totalOrders);
         $resumenCliente = $this->resumenCliente($request, $totalOrders);
-        $recentOrders = $this->scopedOrders($request)
+        $recentOrders = $this->pedidosEnAlcance($request)
             ->with(['user:id,nombre,correo', 'details.product:id,nombre,marca,url_imagen'])
             ->latest('creado_en')
             ->latest('id')
@@ -151,10 +151,10 @@ class PedidoController extends Controller
             'statusSummary' => $statusSummary,
             'customerSummary' => $resumenCliente,
             'presentationOrders' => $presentationOrders,
-            'donutStyle' => $this->donutStyle($statusSummary),
-            'alerts' => $this->alerts($pendingOrders, $cancelledOrders, $staleOrders),
+            'donutStyle' => $this->estiloDonut($statusSummary),
+            'alerts' => $this->alertas($pendingOrders, $cancelledOrders, $staleOrders),
             'recentOrders' => $recentOrders,
-            'staleOrders' => $this->scopedOrders($request)
+            'staleOrders' => $this->pedidosEnAlcance($request)
                 ->whereNotIn('estado', ['Entregado', 'Cancelado'])
                 ->where('creado_en', '<', now()->subHours(48))
                 ->count(),
@@ -240,7 +240,7 @@ class PedidoController extends Controller
     }
 
     /** @param array<int, array{label:string,count:int,percent:float,color:string,key:string}> $summary */
-    private function donutStyle(array $summary): string
+    private function estiloDonut(array $summary): string
     {
         $palette = ['yellow' => '#f5a900', 'blue' => '#2b8df3', 'purple' => '#7137e8', 'green' => '#08a66b', 'red' => '#ef334f'];
         $segments = [];
@@ -256,7 +256,7 @@ class PedidoController extends Controller
     }
 
     /** @return array<int, array{show:bool,icon:string,class:string,title:string,detail:string}> */
-    private function alerts(int $pendingOrders, int $cancelledOrders, int $staleOrders): array
+    private function alertas(int $pendingOrders, int $cancelledOrders, int $staleOrders): array
     {
         return [
             ['show' => $pendingOrders > 0, 'icon' => 'exclamation-triangle', 'class' => 'warning', 'title' => number_format($pendingOrders).' pedidos pendientes', 'detail' => 'Requieren atención inmediata.'],
@@ -344,7 +344,7 @@ class PedidoController extends Controller
     {
         $order->loadMissing('user');
         $this->authorize('updateStatus', $order);
-        $this->orderService->updateStatus($order, $request->user(), $request->validated('estado'), $request->ip());
+        $this->orderService->actualizarEstado($order, $request->user(), $request->validated('estado'), $request->ip());
 
         return back()->with('status', 'Estado de pedido actualizado.');
     }
@@ -355,7 +355,7 @@ class PedidoController extends Controller
      */
     private function consultaPedidosAdministracion(Request $request, array $filters): Builder
     {
-        return $this->scopedOrders($request)
+        return $this->pedidosEnAlcance($request)
             ->when($filters['buscar'], function (Builder $query, string $search): void {
                 $query->where(function (Builder $searchQuery) use ($search): void {
                     $searchQuery
@@ -437,8 +437,8 @@ class PedidoController extends Controller
      */
     private function resumenCliente(Request $request, int $totalOrders): array
     {
-        $minoristOrders = $this->scopedOrders($request)->whereHas('user.rolesVigentes', fn (Builder $query): Builder => $query->where('codigo', 'cliente_minorista'))->count();
-        $mayoristOrders = $this->scopedOrders($request)->whereHas('user.rolesVigentes', fn (Builder $query): Builder => $query->where('codigo', 'cliente_mayorista'))->count();
+        $minoristOrders = $this->pedidosEnAlcance($request)->whereHas('user.rolesVigentes', fn (Builder $query): Builder => $query->where('codigo', 'cliente_minorista'))->count();
+        $mayoristOrders = $this->pedidosEnAlcance($request)->whereHas('user.rolesVigentes', fn (Builder $query): Builder => $query->where('codigo', 'cliente_mayorista'))->count();
 
         return array_map(
             static fn (string $label, int $count, string $color): array => [
@@ -454,7 +454,7 @@ class PedidoController extends Controller
     }
 
     /** @return Builder<Pedido> */
-    private function scopedOrders(Request $request): Builder
+    private function pedidosEnAlcance(Request $request): Builder
     {
         return $this->authorization->scopeRecordsFor(Pedido::query(), $request->user(), 'gestion.pedidos.consultar', 'usuario_id');
     }

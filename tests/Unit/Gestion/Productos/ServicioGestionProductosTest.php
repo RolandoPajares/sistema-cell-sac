@@ -71,7 +71,7 @@ it('centraliza el alta y revierte la transacción cuando falla la auditoría', f
     $authorization = Mockery::mock(AlcanceProductos::class);
     $authorization->shouldReceive('atributosDeAlcance')->twice()->andReturn(['empresa_id' => 4]);
     $inventory = Mockery::mock(ServicioInventario::class);
-    $inventory->shouldReceive('registerNewProduct')->twice();
+    $inventory->shouldReceive('registrarProductoNuevo')->twice();
     $stock = new ServicioStockProducto($inventory);
     $catalog = Mockery::mock(ServicioCatalogo::class);
     $catalog->shouldReceive('sincronizarImagenPortada')->times(3);

@@ -43,7 +43,7 @@ final class IsolatedMariaDatabase
             throw new RuntimeException('No se pudo leer el SQL de referencia.');
         }
         $import = new Process([
-            $client, '--no-defaults', '--protocol=pipe', '--socket='.$pipe, '-uroot',
+            $client, '--no-defaults', '--protocol=pipe', '--socket=\\\\.\\pipe\\'.$pipe, '-uroot',
             '--default-character-set=utf8mb4', '--database='.$database,
         ], base_path(), null, $sql, 180);
         $import->run();

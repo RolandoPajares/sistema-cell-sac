@@ -100,7 +100,7 @@ it('comprueba checkout cancelacion y transferencia parcial en MariaDB aislado', 
         $order = Pedido::query()->where('usuario_id', $customer->id)->sole();
         expect((int) DB::table('existencias_almacen')->where('producto_id', $product->id)->value('cantidad_fisica'))->toBe(4)
             ->and($order->estado)->toBe('Pendiente')
-            ->and(app(ServicioPedidos::class)->checkout($customer, [$product->id => 1], null, null, $checkoutToken)->id)->toBe($order->id)
+            ->and(app(ServicioPedidos::class)->finalizarCompra($customer, [$product->id => 1], null, null, $checkoutToken)->id)->toBe($order->id)
             ->and(Pedido::query()->where('usuario_id', $customer->id)->count())->toBe(1);
 
         $this->actingAs($administrator)->patch(route('orders.status', $order), ['estado' => 'Cancelado'])->assertRedirect();

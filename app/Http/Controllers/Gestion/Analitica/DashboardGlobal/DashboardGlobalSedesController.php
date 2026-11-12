@@ -33,7 +33,7 @@ final class DashboardGlobalSedesController extends Controller
     {
         $filters = $this->filtros($request);
         $sites = $this->sedes();
-        $results = $this->results($filters, $sites);
+        $results = $this->resultados($filters, $sites);
         $totalOrders = $results->sum('pedidos');
         $totalIncome = $results->sum('ingresos');
         $maxIncome = max(1, (float) $results->max('ingresos'));
@@ -95,7 +95,7 @@ final class DashboardGlobalSedesController extends Controller
         abort_unless(in_array($format, ['pdf', 'excel', 'csv'], true), 404);
 
         $filters = $this->filtros($request);
-        $results = $this->results($filters, $this->sedes());
+        $results = $this->resultados($filters, $this->sedes());
         $rows = $results->map(static fn (object $site): array => [
             $site->id,
             $site->nombre,
@@ -170,7 +170,7 @@ final class DashboardGlobalSedesController extends Controller
      * @param  Collection<int, object>  $sites
      * @return Collection<int, object>
      */
-    private function results(array $filters, Collection $sites): Collection
+    private function resultados(array $filters, Collection $sites): Collection
     {
         if (! $this->tieneSede()) {
             return collect();

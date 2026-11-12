@@ -341,7 +341,7 @@ it('denies a legacy administrator when RBAC is not initialized', function (): vo
         ->and($authorization->allowsGlobal($user, 'gestion.pedidos.consultar'))->toBeFalse();
 
     $this->actingAs($user)->get(route('orders.index'))->assertForbidden();
-    expect(fn () => app(ServicioPedidos::class)->checkout($user, [1 => 1], null, null, str_repeat('a', 64)))
+    expect(fn () => app(ServicioPedidos::class)->finalizarCompra($user, [1 => 1], null, null, str_repeat('a', 64)))
         ->toThrow(HttpException::class);
 });
 
@@ -1100,24 +1100,24 @@ it('adjusts the warehouse balance to zero atomically without fabricating variant
         ['rol_id' => 1, 'permiso_id' => 2, 'alcance' => 'sede'],
         ['rol_id' => 1, 'permiso_id' => 3, 'alcance' => 'sede'],
     ]);
-    $order = app(ServicioPedidos::class)->checkout($user, [2 => 1], null, null, str_repeat('a', 64));
+    $order = app(ServicioPedidos::class)->finalizarCompra($user, [2 => 1], null, null, str_repeat('a', 64));
     expect($order->canal)->toBe('ecommerce')
         ->and($order->estado)->toBe('Pendiente')
         ->and((int) DB::table('existencias_almacen')->where('producto_id', 2)->value('cantidad_fisica'))->toBe(2);
 
-    $replayedOrder = app(ServicioPedidos::class)->checkout($user, [2 => 1], null, null, str_repeat('a', 64));
+    $replayedOrder = app(ServicioPedidos::class)->finalizarCompra($user, [2 => 1], null, null, str_repeat('a', 64));
     expect($replayedOrder->id)->toBe($order->id)
         ->and(DB::table('pedidos')->count())->toBe(1)
         ->and((int) DB::table('existencias_almacen')->where('producto_id', 2)->value('cantidad_fisica'))->toBe(2);
 
-    app(ServicioPedidos::class)->updateStatus($order, $user, 'Cancelado', null);
-    app(ServicioPedidos::class)->updateStatus($order, $user, 'Cancelado', null);
+    app(ServicioPedidos::class)->actualizarEstado($order, $user, 'Cancelado', null);
+    app(ServicioPedidos::class)->actualizarEstado($order, $user, 'Cancelado', null);
     expect((int) DB::table('existencias_almacen')->where('producto_id', 2)->value('cantidad_fisica'))->toBe(3)
         ->and(DB::table('movimientos_inventario')->count())->toBe(4);
 
     DB::table('existencias_almacen')->where('producto_id', 2)->update(['cantidad_fisica' => 1]);
     expect((int) DB::table('productos')->where('id', 2)->value('existencias'))->toBe(3)
-        ->and(fn () => app(ServicioPedidos::class)->checkout($user, [2 => 2], null, null, str_repeat('f', 64)))
+        ->and(fn () => app(ServicioPedidos::class)->finalizarCompra($user, [2 => 2], null, null, str_repeat('f', 64)))
         ->toThrow(HttpException::class);
     $this->actingAs($user)->postJson(route('cart.add', 2), ['cantidad' => 2])->assertStatus(422);
     Schema::create('campanas_publicitarias', function (Blueprint $table): void {
@@ -1154,7 +1154,7 @@ it('adjusts the warehouse balance to zero atomically without fabricating variant
     expect(DB::table('pedidos')->count())->toBe(1);
     $this->post(route('checkout'), ['checkout_token' => $token])->assertRedirect();
     $this->postJson(route('checkout'), ['checkout_token' => $token])->assertStatus(422);
-    app(ServicioPedidos::class)->checkout($user, [2 => 1], 'PRUEBA', null, $token);
+    app(ServicioPedidos::class)->finalizarCompra($user, [2 => 1], 'PRUEBA', null, $token);
     expect(DB::table('pedidos')->count())->toBe(2)
         ->and((int) DB::table('existencias_almacen')->where('producto_id', 2)->value('cantidad_fisica'))->toBe(2)
         ->and((int) DB::table('cupones')->where('codigo', 'PRUEBA')->value('usos'))->toBe(1);
@@ -1164,12 +1164,12 @@ it('adjusts the warehouse balance to zero atomically without fabricating variant
         $table->unsignedBigInteger('pedido_id');
     });
     DB::table('pagos')->insert(['pedido_id' => 2]);
-    expect(fn () => app(ServicioPedidos::class)->updateStatus(Pedido::findOrFail(2), $user, 'Cancelado', null))
+    expect(fn () => app(ServicioPedidos::class)->actualizarEstado(Pedido::findOrFail(2), $user, 'Cancelado', null))
         ->toThrow(HttpException::class);
     expect((int) DB::table('existencias_almacen')->where('producto_id', 2)->value('cantidad_fisica'))->toBe(2);
     DB::table('pagos')->where('pedido_id', 2)->delete();
     DB::table('movimientos_inventario')->where('documento_tipo', 'pedido')->where('documento_id', '2')->update(['documento_tipo' => 'historico']);
-    expect(fn () => app(ServicioPedidos::class)->updateStatus(Pedido::findOrFail(2), $user, 'Cancelado', null))
+    expect(fn () => app(ServicioPedidos::class)->actualizarEstado(Pedido::findOrFail(2), $user, 'Cancelado', null))
         ->toThrow(HttpException::class);
     expect((int) DB::table('existencias_almacen')->where('producto_id', 2)->value('cantidad_fisica'))->toBe(2);
     DB::table('movimientos_inventario')->where('documento_tipo', 'historico')->where('documento_id', '2')->update(['documento_tipo' => 'pedido']);
@@ -1177,7 +1177,7 @@ it('adjusts the warehouse balance to zero atomically without fabricating variant
     Schema::table('variantes_productos', fn (Blueprint $table) => $table->boolean('controla_serie')->default(false));
     DB::table('variantes_productos')->insert(['id' => 2, 'producto_id' => 2, 'controla_serie' => true]);
     DB::table('existencias_almacen')->where('producto_id', 2)->update(['variante_id' => 2]);
-    expect(fn () => app(ServicioPedidos::class)->checkout($user, [2 => 1], null, null, str_repeat('e', 64)))
+    expect(fn () => app(ServicioPedidos::class)->finalizarCompra($user, [2 => 1], null, null, str_repeat('e', 64)))
         ->toThrow(HttpException::class);
     $this->postJson(route('cart.add', 2), ['cantidad' => 1])->assertStatus(422);
     $this->withSession(['cart' => [2 => 1]])->get(route('checkout.form'))

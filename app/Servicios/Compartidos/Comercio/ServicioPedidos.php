@@ -40,7 +40,7 @@ class ServicioPedidos
     /**
      * @param  array<int|string, mixed>  $cart
      */
-    public function checkout(User $user, array $cart, ?string $couponCode, ?string $ip, string $checkoutToken): Pedido
+    public function finalizarCompra(User $user, array $cart, ?string $couponCode, ?string $ip, string $checkoutToken): Pedido
     {
         if (! $user->can('gestion.cotizaciones.consultar') && ! $user->can('gestion.pedidos.consultar')) {
             abort_unless(
@@ -155,7 +155,7 @@ class ServicioPedidos
      *
      * @param  array{nombre:string,correo:string,telefono?:string|null,direccion:string,referencia?:string|null}  $guest
      */
-    public function checkoutGuest(array $cart, ?string $couponCode, ?string $ip, array $guest): Pedido
+    public function finalizarCompraInvitado(array $cart, ?string $couponCode, ?string $ip, array $guest): Pedido
     {
         $cart = $this->cartService->normalizar($cart);
         $checkoutToken = (string) request()->session()->get('checkout_token');
@@ -198,7 +198,7 @@ class ServicioPedidos
             ]);
             $this->asegurarEnvio($order, $location, null);
             foreach ($items as [$product, $variantId, $quantity, $priceCents]) {
-                $movement = $this->inventoryService->changeLockedProductInPublicWarehouse($product, $variantId, 'salida', $quantity, 'Salida por pedido #'.$order->id, 'pedido', (string) $order->id);
+                $movement = $this->inventoryService->cambiarProductoBloqueadoEnAlmacenPublico($product, $variantId, 'salida', $quantity, 'Salida por pedido #'.$order->id, 'pedido', (string) $order->id);
                 $order->details()->create(['producto_id' => $product->id, 'variante_id' => $movement->variante_id, 'cantidad' => $quantity, 'precio_unitario' => $priceCents / 100]);
             }
             DB::table('carritos')->where('id', $checkout->id)->update(['pedido_id' => $order->id, 'estado' => 'convertido', 'actualizado_en' => now()]);
@@ -217,7 +217,7 @@ class ServicioPedidos
      * @param  mixed  $ip  Parámetro recibido por la operación.
      * @return void Resultado de la operación.
      */
-    public function updateStatus(Pedido $order, User $user, string $status, ?string $ip): void
+    public function actualizarEstado(Pedido $order, User $user, string $status, ?string $ip): void
     {
         abort_unless($this->authorization->allowsRecord(
             $user,
@@ -261,7 +261,7 @@ class ServicioPedidos
         }, 3);
     }
 
-    public function registerPendingPayment(Pedido $order, ?int $paymentMethodId, ?int $userId): void
+    public function registrarPagoPendiente(Pedido $order, ?int $paymentMethodId, ?int $userId): void
     {
         if ($paymentMethodId === null || ! Schema::hasTable('pagos')) {
             return;
@@ -295,6 +295,7 @@ class ServicioPedidos
             [
                 ...$location, 'codigo' => 'ENV-'.str_pad((string) $order->getKey(), 8, '0', STR_PAD_LEFT),
                 'modalidad' => 'domicilio', 'estado' => 'pendiente', 'moneda' => 'PEN',
+                'destino_historico' => $location,
                 'creado_por_usuario_id' => $createdBy, 'creado_en' => now(),
             ],
         );

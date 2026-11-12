@@ -21,7 +21,7 @@
         </header>
         <div class="usuarios-form-grid">
             <label><span>Nombre completo <b>*</b></span><input type="text" name="nombre" required maxlength="120" value="{{ old('nombre') }}" placeholder="Ej. Juan Pérez García" autocomplete="name" @error('nombre') aria-invalid="true" @enderror>@error('nombre')<small class="usuarios-field-error">{{ $message }}</small>@enderror</label>
-            <label><span>Correo electrónico <b>*</b></span><input type="email" name="correo" required maxlength="160" value="{{ old('correo') }}" placeholder="usuario@empresa.com" autocomplete="email" @error('correo') aria-invalid="true" @enderror>@error('correo')<small class="usuarios-field-error">{{ $message }}</small>@enderror</label>
+            <label><span>Correo electrónico <b>*</b></span><input type="email" name="correo" required maxlength="160" value="{{ old('correo') }}" placeholder="usuario@empresa.com" autocomplete="email" inputmode="email" @error('correo') aria-invalid="true" @enderror>@error('correo')<small class="usuarios-field-error">{{ $message }}</small>@enderror</label>
             <label><span>Rol del usuario <b>*</b></span><select name="rol" required data-user-role @error('rol') aria-invalid="true" @enderror>
                     <option value="">Seleccionar rol configurable</option>@foreach ($roles as $role)<option value="{{ $role }}" data-scope="{{ $roleScopes[$role] ?? '' }}" @selected(old('rol')===$role)>{{ $roleLabels[$role] ?? str_replace('_', ' ', $role) }}</option>@endforeach
                 </select>@error('rol')<small class="usuarios-field-error">{{ $message }}</small>@enderror</label>

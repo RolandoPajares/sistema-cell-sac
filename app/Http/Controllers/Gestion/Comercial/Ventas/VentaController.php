@@ -189,7 +189,7 @@ class VentaController extends Controller
             'queryWithoutPage' => $request->except(['page']),
             'periodStartLabel' => CarbonImmutable::parse($filtros['desde'])->format('d/m/Y'),
             'periodEndLabel' => CarbonImmutable::parse($filtros['hasta'])->format('d/m/Y'),
-            'hasActiveFilters' => $this->hasActiveFilters($filtros),
+            'hasActiveFilters' => $this->tieneFiltrosActivos($filtros),
             'clientesDisponibles' => $clientesDisponibles,
             'sedesDisponibles' => $sedesDisponibles,
             'latestSales' => (clone $query)->with('cliente')->orderByDesc('ventas.fecha_venta')->orderByDesc('ventas.id')->limit(5)->get(),
@@ -220,7 +220,7 @@ class VentaController extends Controller
         return ['label' => $status ?: 'Sin estado', 'class' => 'muted'];
     }
 
-    private function hasActiveFilters(array $filters): bool
+    private function tieneFiltrosActivos(array $filters): bool
     {
         return (bool) (($filters['buscar'] ?? null)
             || ($filters['estado'] ?? null)

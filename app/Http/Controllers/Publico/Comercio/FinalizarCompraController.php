@@ -98,11 +98,11 @@ class FinalizarCompraController extends Controller
         abort_if($cart === [], 422, 'El carrito está vacío.');
 
         $order = $request->user() !== null
-            ? $this->orderService->checkout($request->user(), $cart, $request->session()->get('coupon_code'), $request->ip(), $request->validated('checkout_token'))
-            : $this->orderService->checkoutGuest($cart, $request->session()->get('coupon_code'), $request->ip(), $request->validated());
+            ? $this->orderService->finalizarCompra($request->user(), $cart, $request->session()->get('coupon_code'), $request->ip(), $request->validated('checkout_token'))
+            : $this->orderService->finalizarCompraInvitado($cart, $request->session()->get('coupon_code'), $request->ip(), $request->validated());
 
         $request->session()->forget(['cart', 'coupon_code', 'checkout_token']);
-        $this->orderService->registerPendingPayment($order, $request->validated('medio_pago_id'), $request->user()?->getKey());
+        $this->orderService->registrarPagoPendiente($order, $request->validated('medio_pago_id'), $request->user()?->getKey());
 
         if ($request->user() === null) {
             return redirect()->route('orders.tracking', [$order, 'token' => $request->validated('checkout_token')])

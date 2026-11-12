@@ -10,15 +10,23 @@
         const money = (value) =>
             `${currency === "USD" ? "$" : "S/"} ${value.toFixed(2)}`;
 
-        const dialogoProducto = form.closest("dialog")?.querySelector("[data-purchase-product-dialog]");
-        const selectorProducto = dialogoProducto?.querySelector("[data-purchase-picker-product]");
-        const selectorVariante = dialogoProducto?.querySelector("[data-purchase-picker-variant]");
+        const dialogoProducto = form
+            .closest("dialog")
+            ?.querySelector("[data-purchase-product-dialog]");
+        const selectorProducto = dialogoProducto?.querySelector(
+            "[data-purchase-picker-product]",
+        );
+        const selectorVariante = dialogoProducto?.querySelector(
+            "[data-purchase-picker-variant]",
+        );
 
         const filtrarVariantesDialogo = () => {
             const producto = selectorProducto?.value || "";
-            selectorVariante?.querySelectorAll("option[data-product-id]").forEach((option) => {
-                option.hidden = option.dataset.productId !== producto;
-            });
+            selectorVariante
+                ?.querySelectorAll("option[data-product-id]")
+                .forEach((option) => {
+                    option.hidden = option.dataset.productId !== producto;
+                });
             if (selectorVariante?.selectedOptions[0]?.hidden) {
                 selectorVariante.value = "";
             }
@@ -30,7 +38,11 @@
             if (selectorVariante) selectorVariante.value = "";
             dialogoProducto?.querySelectorAll("input").forEach((input) => {
                 if (input.dataset.purchasePickerQuantity) input.value = "1";
-                if (input.dataset.purchasePickerDiscount || input.dataset.purchasePickerTax) input.value = "0";
+                if (
+                    input.dataset.purchasePickerDiscount ||
+                    input.dataset.purchasePickerTax
+                )
+                    input.value = "0";
                 if (input.dataset.purchasePickerCost) input.value = "";
             });
             filtrarVariantesDialogo();
@@ -39,24 +51,36 @@
         const agregarFilaDesdeDialogo = () => {
             if (!dialogoProducto || !template) return;
             const producto = selectorProducto?.value || "";
-            const cantidad = dialogoProducto.querySelector("[data-purchase-picker-quantity]")?.value || "1";
-            const costo = dialogoProducto.querySelector("[data-purchase-picker-cost]")?.value || "";
+            const cantidad =
+                dialogoProducto.querySelector("[data-purchase-picker-quantity]")
+                    ?.value || "1";
+            const costo =
+                dialogoProducto.querySelector("[data-purchase-picker-cost]")
+                    ?.value || "";
             if (!producto || !costo || Number(cantidad) <= 0) {
                 selectorProducto?.focus();
                 return;
             }
             const index = items.querySelectorAll("[data-purchase-item]").length;
             const wrapper = document.createElement("div");
-            wrapper.innerHTML = template.innerHTML.replaceAll("__INDEX__", String(index)).replaceAll("__INDEX_NUMBER__", String(index + 1));
+            wrapper.innerHTML = template.innerHTML
+                .replaceAll("__INDEX__", String(index))
+                .replaceAll("__INDEX_NUMBER__", String(index + 1));
             const nuevaFila = wrapper.firstElementChild;
             items.append(nuevaFila);
             bindItem(nuevaFila);
             nuevaFila.querySelector("[data-purchase-product]").value = producto;
-            nuevaFila.querySelector("[data-purchase-variant]").value = selectorVariante?.value || "";
-            nuevaFila.querySelector("[data-purchase-quantity]").value = cantidad;
+            nuevaFila.querySelector("[data-purchase-variant]").value =
+                selectorVariante?.value || "";
+            nuevaFila.querySelector("[data-purchase-quantity]").value =
+                cantidad;
             nuevaFila.querySelector("[data-purchase-cost]").value = costo;
-            nuevaFila.querySelector("[data-purchase-discount]").value = dialogoProducto.querySelector("[data-purchase-picker-discount]")?.value || "0";
-            nuevaFila.querySelector("[data-purchase-tax]").value = dialogoProducto.querySelector("[data-purchase-picker-tax]")?.value || "0";
+            nuevaFila.querySelector("[data-purchase-discount]").value =
+                dialogoProducto.querySelector("[data-purchase-picker-discount]")
+                    ?.value || "0";
+            nuevaFila.querySelector("[data-purchase-tax]").value =
+                dialogoProducto.querySelector("[data-purchase-picker-tax]")
+                    ?.value || "0";
             filterVariants(nuevaFila);
             refresh();
             cerrarDialogoProducto();
@@ -140,8 +164,13 @@
             "change",
             refresh,
         );
-        form.querySelector("[data-purchase-add]")?.addEventListener("click", () => {
-                if (dialogoProducto && typeof dialogoProducto.showModal === "function") {
+        form.querySelector("[data-purchase-add]")?.addEventListener(
+            "click",
+            () => {
+                if (
+                    dialogoProducto &&
+                    typeof dialogoProducto.showModal === "function"
+                ) {
                     dialogoProducto.showModal();
                     filtrarVariantesDialogo();
                     return;
@@ -157,32 +186,52 @@
                 items.append(newItem);
                 bindItem(newItem);
                 refresh();
-            });
+            },
+        );
 
         selectorProducto?.addEventListener("change", filtrarVariantesDialogo);
-        dialogoProducto?.querySelector("[data-purchase-product-add]")?.addEventListener("click", agregarFilaDesdeDialogo);
-        dialogoProducto?.querySelector("[data-purchase-product-close]")?.addEventListener("click", cerrarDialogoProducto);
+        dialogoProducto
+            ?.querySelector("[data-purchase-product-add]")
+            ?.addEventListener("click", agregarFilaDesdeDialogo);
+        dialogoProducto
+            ?.querySelector("[data-purchase-product-close]")
+            ?.addEventListener("click", cerrarDialogoProducto);
         dialogoProducto?.addEventListener("click", (event) => {
             if (event.target === dialogoProducto) cerrarDialogoProducto();
         });
-        dialogoProducto?.querySelectorAll("[data-purchase-product-tab]").forEach((tab) => {
-            tab.addEventListener("click", () => {
-                const selected = tab.dataset.purchaseProductTab;
-                dialogoProducto.querySelectorAll("[data-purchase-product-tab]").forEach((item) => item.classList.toggle("is-active", item === tab));
-                dialogoProducto.querySelectorAll("[data-purchase-product-panel]").forEach((panel) => {
-                    panel.hidden = panel.dataset.purchaseProductPanel !== selected;
+        dialogoProducto
+            ?.querySelectorAll("[data-purchase-product-tab]")
+            .forEach((tab) => {
+                tab.addEventListener("click", () => {
+                    const selected = tab.dataset.purchaseProductTab;
+                    dialogoProducto
+                        .querySelectorAll("[data-purchase-product-tab]")
+                        .forEach((item) =>
+                            item.classList.toggle("is-active", item === tab),
+                        );
+                    dialogoProducto
+                        .querySelectorAll("[data-purchase-product-panel]")
+                        .forEach((panel) => {
+                            panel.hidden =
+                                panel.dataset.purchaseProductPanel !== selected;
+                        });
                 });
             });
-        });
         items.querySelectorAll("[data-purchase-item]").forEach(bindItem);
         refresh();
     });
 })();
 
-document.querySelectorAll('.compras-import-file input[type="file"]').forEach((input) => {
-    input.addEventListener('change', () => {
-        const fileName = input.closest('.compras-import-file')?.querySelector('strong');
-        const selected = input.files?.[0];
-        if (fileName) fileName.textContent = selected?.name || 'Ningún archivo seleccionado';
+document
+    .querySelectorAll('.compras-import-file input[type="file"]')
+    .forEach((input) => {
+        input.addEventListener("change", () => {
+            const fileName = input
+                .closest(".compras-import-file")
+                ?.querySelector("strong");
+            const selected = input.files?.[0];
+            if (fileName)
+                fileName.textContent =
+                    selected?.name || "Ningún archivo seleccionado";
+        });
     });
-});

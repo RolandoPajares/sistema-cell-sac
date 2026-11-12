@@ -453,6 +453,34 @@
     color: #60799d;
     background: #f8fbff;
 }
+.tc-profile-form-feedback,
+.tc-profile-form-error {
+    margin: 0 0 12px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 0.76rem;
+}
+.tc-profile-form-feedback {
+    color: #147a45;
+    background: #e9f8ef;
+}
+.tc-profile-form-error {
+    color: #a12936;
+    background: #fff0f1;
+}
+.tc-profile-form-error ul {
+    margin: 4px 0 0 18px;
+    padding: 0;
+}
+.tc-profile-field-error {
+    display: block;
+    margin-top: 4px;
+    color: #b02a37;
+    font-size: 0.68rem;
+}
+.tc-profile-fields input[aria-invalid="true"] {
+    border-color: #d33b4c;
+}
 .tc-profile-field--full {
     grid-column: 1 / -1;
 }

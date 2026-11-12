@@ -27,7 +27,7 @@
 
         {{-- Panel contenedor del formulario (Lado derecho) --}}
         <div class="auth-wrap panel">
-            
+
             {{-- Logo de la empresa --}}
             <div class="auth-brand">
                 <img src="{{ asset('assets/cell-legacy/img/marca/logo.jpeg') }}" alt="Logo Technology Cell">
@@ -40,6 +40,9 @@
                 <div class="alert alert-error" role="alert">{{ $errors->first() }}</div>
             @endif
 
+
+
+
             {{-- Formulario principal de inicio de sesión con token CSRF --}}
             <form method="POST" action="{{ route('login.store') }}" novalidate>
                 @csrf
@@ -47,7 +50,7 @@
                 {{-- Campo de entrada para el correo electrónico --}}
                 <div class="form-group">
                     <label for="correo">Correo electrónico</label>
-                    <input id="correo" class="input" type="email" name="correo" value="{{ old('correo') }}" maxlength="160" required autocomplete="email" placeholder="ejemplo@correo.com">
+                <input id="correo" class="input" type="email" name="correo" value="{{ old('correo') }}" maxlength="160" required autocomplete="email" inputmode="email" placeholder="ejemplo@correo.com">
                 </div>
 
                 {{-- Campo de entrada para la contraseña con botón para toggle visibilidad --}}

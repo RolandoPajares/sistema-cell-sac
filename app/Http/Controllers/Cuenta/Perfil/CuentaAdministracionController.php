@@ -39,7 +39,7 @@ class CuentaAdministracionController extends Controller
     public function updateProfile(ActualizarPerfilRequest $request, RegistradorAuditoria $audit, ServicioPerfil $perfil): RedirectResponse
     {
         $user = $request->user();
-        $fields = $perfil->fieldsFor($user);
+        $fields = $perfil->camposPara($user);
         $dynamicValues = $request->validated('perfil', []);
         $before = ['campos' => array_values(array_filter(['nombre', 'correo'], fn (string $field): bool => $user->getAttribute($field) !== ($field === 'correo' ? mb_strtolower($request->validated($field)) : $request->validated($field))))];
         DB::transaction(function () use ($user, $request, $audit, $before, $perfil, $fields, $dynamicValues): void {
@@ -47,7 +47,13 @@ class CuentaAdministracionController extends Controller
                 'nombre' => $request->validated('nombre'),
                 'correo' => mb_strtolower($request->validated('correo')),
             ]);
-            $perfil->saveValues($user, $fields, $dynamicValues);
+            if (Schema::hasTable('usuarios_perfiles')) {
+                $user->perfil()->updateOrCreate([], [
+                    'telefono' => $request->validated('telefono'),
+                    'documento' => $request->validated('documento'),
+                ]);
+            }
+            $perfil->guardarValores($user, $fields, $dynamicValues);
             $audit->record($user->getKey(), 'actualizar_perfil', 'usuarios', $user->getKey(), $before, ['campos' => $before['campos'], 'campos_dinamicos' => array_keys($dynamicValues)], $request->ip());
         });
 

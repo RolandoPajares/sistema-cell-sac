@@ -70,7 +70,8 @@ if (paginaProveedores) {
 
         const sincronizarNombre = () => {
             if (!nombres && !apellidos && !razonSocial) return;
-            if (nombre) nombre.value = juridica ? (razonSocial?.value || '') : `${nombres?.value || ''} ${apellidos?.value || ''}`.trim();
+                const nombreDerivado = juridica ? (razonSocial?.value || '') : `${nombres?.value || ''} ${apellidos?.value || ''}`.trim();
+                if (nombre && nombreDerivado) nombre.value = nombreDerivado;
         };
 
         if (tipoDocumento) {
@@ -96,6 +97,7 @@ if (paginaProveedores) {
         }
         actualizarCamposIdentificacion(formulario);
         tipoPersona?.addEventListener('change', () => actualizarCamposIdentificacion(formulario));
+        formulario.addEventListener('submit', () => actualizarCamposIdentificacion(formulario));
     });
 
     const abrirDialogo = (dialogo) => {

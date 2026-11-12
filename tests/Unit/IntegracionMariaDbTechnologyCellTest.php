@@ -161,6 +161,10 @@ it('keeps ecommerce checkout and the three stock balances synchronized', functio
     $checkoutToken = bin2hex(random_bytes(32));
     $this->actingAs($customer)->withSession([
         'cart' => [$product->id => 1], 'checkout_token' => $checkoutToken,
+    ])->post(route('checkout'), ['checkout_token' => $checkoutToken])->assertUnprocessable();
+
+    $this->actingAs($customer)->withSession([
+        'cart' => [$product->id => ['cantidad' => 1, 'variante_id' => $variantId]], 'checkout_token' => $checkoutToken,
     ])->post(route('checkout'), ['checkout_token' => $checkoutToken])->assertRedirect();
 
     $order = Pedido::query()->where('usuario_id', $customer->id)->sole();

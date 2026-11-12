@@ -189,7 +189,7 @@ class SoporteReclamoController extends Controller
     public function export(Request $request, ExportadorTabular $exporter, RegistradorAuditoria $audit, string $format = 'csv'): Response|StreamedResponse
     {
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
-        $siteIds = $this->authorizationSites($request, 'gestion.soporte.exportar');
+        $siteIds = $this->sedesAutorizadas($request, 'gestion.soporte.exportar');
         $query = CasoSoporte::query()->with('cliente:id,nombre_contacto,razon_social');
         $query->whereIn('sede_id', $siteIds);
         $search = trim($request->string('buscar')->toString());
@@ -211,7 +211,7 @@ class SoporteReclamoController extends Controller
     }
 
     /** @return array<int, int> */
-    private function authorizationSites(Request $request, string $permission): array
+    private function sedesAutorizadas(Request $request, string $permission): array
     {
         return app(ServicioAutorizacion::class)->authorizedSiteIds($request->user(), $permission);
     }

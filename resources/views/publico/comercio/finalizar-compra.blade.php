@@ -23,15 +23,15 @@
                     @guest
                         <fieldset class="checkout-guest-fields">
                             <legend>Datos de entrega</legend>
-                            <input name="nombre" value="{{ old('nombre') }}" required maxlength="160" placeholder="Nombre completo">
-                            <input type="email" name="correo" value="{{ old('correo') }}" required maxlength="160" placeholder="Correo electrónico">
-                            <input name="telefono" value="{{ old('telefono') }}" maxlength="30" placeholder="Teléfono">
-                            <input name="direccion" value="{{ old('direccion') }}" required maxlength="255" placeholder="Dirección de entrega">
-                            <textarea name="referencia" maxlength="500" placeholder="Referencia (opcional)">{{ old('referencia') }}</textarea>
+                            <label class="checkout-field">Nombre completo<input name="nombre" value="{{ old('nombre') }}" required maxlength="160" placeholder="Ingresa tu nombre completo" autocomplete="name"></label>
+                            <label class="checkout-field">Correo electrónico<input type="email" name="correo" value="{{ old('correo') }}" required maxlength="160" inputmode="email" placeholder="correo@ejemplo.com" autocomplete="email"></label>
+                            <label class="checkout-field">Teléfono<input name="telefono" value="{{ old('telefono') }}" maxlength="30" placeholder="Número de contacto" autocomplete="tel"></label>
+                            <label class="checkout-field">Dirección de entrega<input name="direccion" value="{{ old('direccion') }}" required maxlength="255" placeholder="Av., calle o referencia principal" autocomplete="street-address"></label>
+                            <label class="checkout-field checkout-field--wide">Referencia <small>(opcional)</small><textarea name="referencia" maxlength="500" placeholder="Número, piso, urbanización u otra indicación">{{ old('referencia') }}</textarea></label>
                         </fieldset>
                     @endguest
                     @if ($paymentMethods->isNotEmpty())
-                        <label for="medio_pago_id">Medio de pago</label>
+                        <label class="checkout-payment-label" for="medio_pago_id">Medio de pago</label>
                         <select id="medio_pago_id" name="medio_pago_id">
                             <option value="">Coordinar pago</option>
                             @foreach ($paymentMethods as $paymentMethod)
@@ -39,7 +39,7 @@
                             @endforeach
                         </select>
                     @endif
-                    <button class="btn btn-primary" style="width:100%" @disabled(! $puedeConfirmar)>
+                    <button class="btn btn-primary checkout-submit" @disabled(! $puedeConfirmar)>
                         Confirmar pedido
                     </button>
                 </form>

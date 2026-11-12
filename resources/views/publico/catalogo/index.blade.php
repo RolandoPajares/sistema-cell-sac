@@ -118,16 +118,28 @@
                             <div class="stock catalog-product-stock">{{ $product->existencias_disponibles > 0 ? $product->existencias_disponibles.' unidades disponibles' : 'Agotado' }}</div>
                             <div class="catalog-product-actions">
                                 @auth
-                                <form action="{{ route('cart.add', $product) }}" method="post">
-                                    @csrf
-                                    <input type="hidden" name="cantidad" value="1">
-                                    <button class="btn btn-primary catalog-buy-button" type="submit" @disabled($product->existencias_disponibles <= 0)>
-                                        <i class="bi bi-cart3" aria-hidden="true"></i>
-                                        {{ $product->existencias_disponibles > 0 ? 'Comprar' : 'Agotado' }}
-                                    </button>
-                                </form>
+                                    <form action="{{ route('cart.add', $product) }}" method="post">
+                                        @csrf
+                                        <input type="hidden" name="cantidad" value="1">
+                                        <button class="btn btn-primary catalog-buy-button" type="submit" @disabled($product->existencias_disponibles <= 0)>
+                                            <i class="bi bi-cart3" aria-hidden="true"></i>
+                                            {{ $product->existencias_disponibles > 0 ? 'Comprar' : 'Agotado' }}
+                                        </button>
+                                    </form>
                                 @else
-                                <a class="btn btn-primary catalog-buy-button" href="{{ route('login') }}"><i class="bi bi-cart3" aria-hidden="true"></i> Comprar</a>
+                                    <details class="catalog-buy-choice">
+                                        <summary class="btn btn-primary catalog-buy-button" @if($product->existencias_disponibles <= 0) aria-disabled="true" @endif><i class="bi bi-cart3" aria-hidden="true"></i> {{ $product->existencias_disponibles > 0 ? 'Comprar' : 'Agotado' }}</summary>
+                                        @if($product->existencias_disponibles > 0)
+                                            <div class="catalog-buy-choice-options">
+                                                <a class="btn btn-ghost" href="{{ route('login') }}">Iniciar sesión</a>
+                                                <form action="{{ route('cart.add', $product) }}" method="post">
+                                                    @csrf
+                                                    <input type="hidden" name="cantidad" value="1">
+                                                    <button class="btn btn-primary" type="submit">Continuar como invitado</button>
+                                                </form>
+                                            </div>
+                                        @endif
+                                    </details>
                                 @endauth
                                 <a class="btn btn-ghost catalog-details-button" href="{{ route('catalog.show', $product) }}">Ver detalles</a>
                             </div>

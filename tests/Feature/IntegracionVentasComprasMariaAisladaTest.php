@@ -68,7 +68,10 @@ it('tests the migration and commercial transactions exclusively on an isolated M
         $saleService = app(ServicioVentas::class);
         expect(fn () => $saleService->anular(Venta::findOrFail(1), $user, 'Prueba de ámbito', null))->toThrow(HttpException::class);
         $sale = $saleService->registrarFisica($saleData, $user, str_repeat('a', 64), null);
-        expect($sale->estado)->toBe('confirmada')->and((float) $sale->total)->toBe(24.70)
+        expect($sale->estado)->toBe('confirmada')
+            ->and((float) $sale->subtotal)->toBe(24.70)
+            ->and((float) $sale->impuestos)->toBe(4.45)
+            ->and((float) $sale->total)->toBe(29.15)
             ->and((int) DB::table('existencias_almacen')->where('producto_id', $productId)->value('cantidad_fisica'))->toBe(3);
         expect($saleService->registrarFisica($saleData, $user, str_repeat('a', 64), null)->id)->toBe($sale->id);
         $saleService->anular($sale, $user, 'Prueba de anulación', null);

@@ -67,7 +67,7 @@ class GestionUsuariosController extends Controller
             'roleDistribution' => $this->prepararDistribucionRoles($distribucionRoles),
             'recentUsers' => $recentUsers,
             'filters' => $filters,
-            'hasFilters' => $this->hasFilters($filters),
+            'hasFilters' => $this->tieneFiltros($filters),
             'userPresentation' => $this->prepararPresentacionUsuarios($users->getCollection()),
             'recentUserPresentation' => $this->prepararPresentacionUsuarios($recentUsers),
             'exportUrls' => [
@@ -351,7 +351,7 @@ class GestionUsuariosController extends Controller
         foreach ($accounts->values() as $index => $account) {
             $presentation[$account->getKey()] = [
                 'initials' => $this->inicialesPara($account->nombre),
-                'roles' => $this->formatRoles($account),
+                'roles' => $this->formatearRoles($account),
                 'avatarIndex' => $index % 5,
                 'roleIndex' => $index % 7,
             ];
@@ -379,7 +379,7 @@ class GestionUsuariosController extends Controller
     }
 
     /** @param array{buscar:?string,rol:?string,estado:?string,ciudad:?string,fecha:?string,por_pagina:int} $filters */
-    private function hasFilters(array $filters): bool
+    private function tieneFiltros(array $filters): bool
     {
         return filled($filters['buscar'])
             || filled($filters['rol'])
@@ -388,7 +388,7 @@ class GestionUsuariosController extends Controller
             || filled($filters['fecha']);
     }
 
-    private function formatRoles(User $account): string
+    private function formatearRoles(User $account): string
     {
         return $account->rolesVigentes
             ->concat($account->rolesPorSedeVigentes)

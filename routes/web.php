@@ -85,6 +85,7 @@ Route::get('/optimizador', [InteligenciaComercialController::class, 'optimizer']
 Route::get('/asistente', [AsistenteController::class, 'index'])->name('assistant');
 Route::post('/asistente', [AsistenteController::class, 'ask'])->middleware('throttle:10,1')->name('assistant.ask');
 
+// ruta de inicio de sesión, registro y cierre de sesión
 Route::middleware('guest')->group(function (): void {
     Route::get('/iniciar-sesion', [AutenticacionController::class, 'loginForm'])->name('login');
     Route::post('/iniciar-sesion', [AutenticacionController::class, 'login'])->middleware('throttle:login')->name('login.store');

@@ -1,0 +1,1929 @@
+﻿diff --git a/app/Http/Controllers/Cuenta/Perfil/CuentaAdministracionController.php b/app/Http/Controllers/Cuenta/Perfil/CuentaAdministracionController.php
+index 509ed0b8..d1603509 100644
+--- a/app/Http/Controllers/Cuenta/Perfil/CuentaAdministracionController.php
++++ b/app/Http/Controllers/Cuenta/Perfil/CuentaAdministracionController.php
+@@ -39,7 +39,7 @@ class CuentaAdministracionController extends Controller
+     public function updateProfile(ActualizarPerfilRequest $request, RegistradorAuditoria $audit, ServicioPerfil $perfil): RedirectResponse
+     {
+         $user = $request->user();
+-        $fields = $perfil->fieldsFor($user);
++        $fields = $perfil->camposPara($user);
+         $dynamicValues = $request->validated('perfil', []);
+         $before = ['campos' => array_values(array_filter(['nombre', 'correo'], fn (string $field): bool => $user->getAttribute($field) !== ($field === 'correo' ? mb_strtolower($request->validated($field)) : $request->validated($field))))];
+         DB::transaction(function () use ($user, $request, $audit, $before, $perfil, $fields, $dynamicValues): void {
+@@ -47,7 +47,7 @@ public function updateProfile(ActualizarPerfilRequest $request, RegistradorAudit
+                 'nombre' => $request->validated('nombre'),
+                 'correo' => mb_strtolower($request->validated('correo')),
+             ]);
+-            $perfil->saveValues($user, $fields, $dynamicValues);
++            $perfil->guardarValores($user, $fields, $dynamicValues);
+             $audit->record($user->getKey(), 'actualizar_perfil', 'usuarios', $user->getKey(), $before, ['campos' => $before['campos'], 'campos_dinamicos' => array_keys($dynamicValues)], $request->ip());
+         });
+ 
+diff --git a/app/Http/Controllers/Cuenta/Perfil/CuentaController.php b/app/Http/Controllers/Cuenta/Perfil/CuentaController.php
+index 40084947..5e72c09d 100644
+--- a/app/Http/Controllers/Cuenta/Perfil/CuentaController.php
++++ b/app/Http/Controllers/Cuenta/Perfil/CuentaController.php
+@@ -57,11 +57,11 @@ public function profile(Request $request, ServicioPerfil $perfil): View
+         $user = $request->user();
+         abort_unless($user instanceof User, 403);
+         $user->loadMissing('customer');
+-        $roles = $perfil->rolesFor($user);
+-        $dynamicFields = $perfil->fieldsFor($user);
+-        $dynamicValues = $perfil->valuesFor($user, $dynamicFields);
++        $roles = $perfil->rolesPara($user);
++        $dynamicFields = $perfil->camposPara($user);
++        $dynamicValues = $perfil->valoresPara($user, $dynamicFields);
+         $roleLabel = $roles->pluck('nombre')->filter()->unique()->implode(' · ') ?: 'Usuario autorizado';
+-        $functions = $perfil->functionsFor($user);
++        $functions = $perfil->funcionesPara($user);
+ 
+         $isAdministrator = $user->can('gestion.seguridad.consultar');
+         $preferences = (array) ($user->preferencias ?? []);
+@@ -87,7 +87,7 @@ public function profile(Request $request, ServicioPerfil $perfil): View
+             'preferences' => $preferences,
+             'phone' => $customer?->telefono ?: 'No registrado',
+             'document' => $customer?->documento ?: 'No registrado',
+-            'primarySite' => $perfil->primarySiteFor($user) ?: 'No registrada',
++            'primarySite' => $perfil->sedePrincipalPara($user) ?: 'No registrada',
+             'photoUrl' => $user->foto_perfil ? Storage::disk('public')->url($user->foto_perfil) : null,
+             'avatarRoute' => 'management.account.avatar',
+             'avatarDeleteRoute' => 'management.account.avatar.delete',
+diff --git a/app/Http/Controllers/Gestion/Administracion/Seguridad/GestionUsuariosController.php b/app/Http/Controllers/Gestion/Administracion/Seguridad/GestionUsuariosController.php
+index 2f62e5ae..80350ab8 100644
+--- a/app/Http/Controllers/Gestion/Administracion/Seguridad/GestionUsuariosController.php
++++ b/app/Http/Controllers/Gestion/Administracion/Seguridad/GestionUsuariosController.php
+@@ -67,7 +67,7 @@ public function index(Request $request): View
+             'roleDistribution' => $this->prepararDistribucionRoles($distribucionRoles),
+             'recentUsers' => $recentUsers,
+             'filters' => $filters,
+-            'hasFilters' => $this->hasFilters($filters),
++            'hasFilters' => $this->tieneFiltros($filters),
+             'userPresentation' => $this->prepararPresentacionUsuarios($users->getCollection()),
+             'recentUserPresentation' => $this->prepararPresentacionUsuarios($recentUsers),
+             'exportUrls' => [
+@@ -351,7 +351,7 @@ private function prepararPresentacionUsuarios(Collection $accounts): array
+         foreach ($accounts->values() as $index => $account) {
+             $presentation[$account->getKey()] = [
+                 'initials' => $this->inicialesPara($account->nombre),
+-                'roles' => $this->formatRoles($account),
++                'roles' => $this->formatearRoles($account),
+                 'avatarIndex' => $index % 5,
+                 'roleIndex' => $index % 7,
+             ];
+@@ -379,7 +379,7 @@ private function prepararDistribucionRoles(Collection $distribution): array
+     }
+ 
+     /** @param array{buscar:?string,rol:?string,estado:?string,ciudad:?string,fecha:?string,por_pagina:int} $filters */
+-    private function hasFilters(array $filters): bool
++    private function tieneFiltros(array $filters): bool
+     {
+         return filled($filters['buscar'])
+             || filled($filters['rol'])
+@@ -388,7 +388,7 @@ private function hasFilters(array $filters): bool
+             || filled($filters['fecha']);
+     }
+ 
+-    private function formatRoles(User $account): string
++    private function formatearRoles(User $account): string
+     {
+         return $account->rolesVigentes
+             ->concat($account->rolesPorSedeVigentes)
+diff --git a/app/Http/Controllers/Gestion/Administracion/Seguridad/RolesPermisosController.php b/app/Http/Controllers/Gestion/Administracion/Seguridad/RolesPermisosController.php
+index 94bd3881..dd6dfe83 100644
+--- a/app/Http/Controllers/Gestion/Administracion/Seguridad/RolesPermisosController.php
++++ b/app/Http/Controllers/Gestion/Administracion/Seguridad/RolesPermisosController.php
+@@ -112,9 +112,9 @@ public function matrix(ServicioAutorizacion $autorizacion): View
+         $roles = $ready ? Rol::query()->where('activo', true)->with(['permisos' => fn ($query) => $query->where('permisos.activo', true)->orderBy('modulo_id')->orderBy('accion')])->orderBy('nombre')->get() : collect();
+         $selectedRoleId = (int) request()->integer('rol', (int) $roles->first()?->getKey());
+         $selectedRole = $roles->firstWhere('id', $selectedRoleId) ?: $roles->first();
+-        $matrixModules = $ready ? $this->matrixModules() : collect();
+-        $matrixGroups = $ready ? $this->matrixGroups($matrixModules) : collect();
+-        $previewItems = $ready && $selectedRole ? $this->previewCatalog((int) $selectedRole->getKey()) : collect();
++        $matrixModules = $ready ? $this->modulosMatriz() : collect();
++        $matrixGroups = $ready ? $this->gruposMatriz($matrixModules) : collect();
++        $previewItems = $ready && $selectedRole ? $this->catalogoVistaPrevia((int) $selectedRole->getKey()) : collect();
+         $allPermissions = $matrixModules->flatMap(fn (array $module): array => array_merge(
+             $module['permissions']->all(),
+             $module['screens']->flatMap(fn (array $screen): array => $screen['permissions']->all())->all(),
+@@ -147,7 +147,7 @@ public function matrix(ServicioAutorizacion $autorizacion): View
+      * @param  int  $roleId  Identificador del rol cuya navegación se previsualiza.
+      * @return Collection<int, object> Elementos de menú catalogados.
+      */
+-    private function previewCatalog(int $roleId): Collection
++    private function catalogoVistaPrevia(int $roleId): Collection
+     {
+         return DB::table('roles_menus')
+             ->join('menus', 'menus.id', '=', 'roles_menus.menu_id')
+@@ -169,7 +169,7 @@ private function previewCatalog(int $roleId): Collection
+      *
+      * @return mixed Resultado de la operación.
+      */
+-    private function matrixModules(): Collection
++    private function modulosMatriz(): Collection
+     {
+         return Modulo::query()
+             ->where('habilitado', true)
+@@ -205,7 +205,7 @@ private function matrixModules(): Collection
+      * @param  Collection<int, array<string, mixed>>  $modules
+      * @return Collection<int, array{id: int, codigo: string, nombre: string, items: Collection<int, array<string, mixed>>}>
+      */
+-    private function matrixGroups(Collection $modules): Collection
++    private function gruposMatriz(Collection $modules): Collection
+     {
+         $menuId = DB::table('menus')
+             ->where('codigo', 'administrador.sidebar')
+diff --git a/app/Http/Controllers/Gestion/Analitica/DashboardGlobal/DashboardGlobalSedesController.php b/app/Http/Controllers/Gestion/Analitica/DashboardGlobal/DashboardGlobalSedesController.php
+index 674913b3..bb24ec4a 100644
+--- a/app/Http/Controllers/Gestion/Analitica/DashboardGlobal/DashboardGlobalSedesController.php
++++ b/app/Http/Controllers/Gestion/Analitica/DashboardGlobal/DashboardGlobalSedesController.php
+@@ -33,7 +33,7 @@ public function index(Request $request, ServicioAutorizacion $authorization): Vi
+     {
+         $filters = $this->filtros($request);
+         $sites = $this->sedes();
+-        $results = $this->results($filters, $sites);
++        $results = $this->resultados($filters, $sites);
+         $totalOrders = $results->sum('pedidos');
+         $totalIncome = $results->sum('ingresos');
+         $maxIncome = max(1, (float) $results->max('ingresos'));
+@@ -95,7 +95,7 @@ public function export(Request $request, string $format, ExportadorTabular $expo
+         abort_unless(in_array($format, ['pdf', 'excel', 'csv'], true), 404);
+ 
+         $filters = $this->filtros($request);
+-        $results = $this->results($filters, $this->sedes());
++        $results = $this->resultados($filters, $this->sedes());
+         $rows = $results->map(static fn (object $site): array => [
+             $site->id,
+             $site->nombre,
+@@ -170,7 +170,7 @@ private function sedes(): Collection
+      * @param  Collection<int, object>  $sites
+      * @return Collection<int, object>
+      */
+-    private function results(array $filters, Collection $sites): Collection
++    private function resultados(array $filters, Collection $sites): Collection
+     {
+         if (! $this->tieneSede()) {
+             return collect();
+diff --git a/app/Http/Controllers/Gestion/Comercial/Ventas/VentaController.php b/app/Http/Controllers/Gestion/Comercial/Ventas/VentaController.php
+index d1cf5253..744a5fa1 100644
+--- a/app/Http/Controllers/Gestion/Comercial/Ventas/VentaController.php
++++ b/app/Http/Controllers/Gestion/Comercial/Ventas/VentaController.php
+@@ -189,7 +189,7 @@ public function index(FiltroVentaRequest $request): View
+             'queryWithoutPage' => $request->except(['page']),
+             'periodStartLabel' => CarbonImmutable::parse($filtros['desde'])->format('d/m/Y'),
+             'periodEndLabel' => CarbonImmutable::parse($filtros['hasta'])->format('d/m/Y'),
+-            'hasActiveFilters' => $this->hasActiveFilters($filtros),
++            'hasActiveFilters' => $this->tieneFiltrosActivos($filtros),
+             'clientesDisponibles' => $clientesDisponibles,
+             'sedesDisponibles' => $sedesDisponibles,
+             'latestSales' => (clone $query)->with('cliente')->orderByDesc('ventas.fecha_venta')->orderByDesc('ventas.id')->limit(5)->get(),
+@@ -220,7 +220,7 @@ private function estadoPresentacion(?string $status): array
+         return ['label' => $status ?: 'Sin estado', 'class' => 'muted'];
+     }
+ 
+-    private function hasActiveFilters(array $filters): bool
++    private function tieneFiltrosActivos(array $filters): bool
+     {
+         return (bool) (($filters['buscar'] ?? null)
+             || ($filters['estado'] ?? null)
+diff --git a/app/Http/Controllers/Gestion/Soporte/Reclamos/SoporteReclamoController.php b/app/Http/Controllers/Gestion/Soporte/Reclamos/SoporteReclamoController.php
+index 8ff49258..2a1c22ef 100644
+--- a/app/Http/Controllers/Gestion/Soporte/Reclamos/SoporteReclamoController.php
++++ b/app/Http/Controllers/Gestion/Soporte/Reclamos/SoporteReclamoController.php
+@@ -189,7 +189,7 @@ private function comprobarClienteEnAlcance(Request $request, ?int $customerId, i
+     public function export(Request $request, ExportadorTabular $exporter, RegistradorAuditoria $audit, string $format = 'csv'): Response|StreamedResponse
+     {
+         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
+-        $siteIds = $this->authorizationSites($request, 'gestion.soporte.exportar');
++        $siteIds = $this->sedesAutorizadas($request, 'gestion.soporte.exportar');
+         $query = CasoSoporte::query()->with('cliente:id,nombre_contacto,razon_social');
+         $query->whereIn('sede_id', $siteIds);
+         $search = trim($request->string('buscar')->toString());
+@@ -211,7 +211,7 @@ public function export(Request $request, ExportadorTabular $exporter, Registrado
+     }
+ 
+     /** @return array<int, int> */
+-    private function authorizationSites(Request $request, string $permission): array
++    private function sedesAutorizadas(Request $request, string $permission): array
+     {
+         return app(ServicioAutorizacion::class)->authorizedSiteIds($request->user(), $permission);
+     }
+diff --git a/app/Http/Controllers/Publico/Comercio/FinalizarCompraController.php b/app/Http/Controllers/Publico/Comercio/FinalizarCompraController.php
+index 4cd8930e..8f24fc0a 100644
+--- a/app/Http/Controllers/Publico/Comercio/FinalizarCompraController.php
++++ b/app/Http/Controllers/Publico/Comercio/FinalizarCompraController.php
+@@ -98,11 +98,11 @@ public function store(FinalizarCompraRequest $request): RedirectResponse
+         abort_if($cart === [], 422, 'El carrito está vacío.');
+ 
+         $order = $request->user() !== null
+-            ? $this->orderService->checkout($request->user(), $cart, $request->session()->get('coupon_code'), $request->ip(), $request->validated('checkout_token'))
+-            : $this->orderService->checkoutGuest($cart, $request->session()->get('coupon_code'), $request->ip(), $request->validated());
++            ? $this->orderService->finalizarCompra($request->user(), $cart, $request->session()->get('coupon_code'), $request->ip(), $request->validated('checkout_token'))
++            : $this->orderService->finalizarCompraInvitado($cart, $request->session()->get('coupon_code'), $request->ip(), $request->validated());
+ 
+         $request->session()->forget(['cart', 'coupon_code', 'checkout_token']);
+-        $this->orderService->registerPendingPayment($order, $request->validated('medio_pago_id'), $request->user()?->getKey());
++        $this->orderService->registrarPagoPendiente($order, $request->validated('medio_pago_id'), $request->user()?->getKey());
+ 
+         if ($request->user() === null) {
+             return redirect()->route('orders.tracking', [$order, 'token' => $request->validated('checkout_token')])
+diff --git a/app/Http/Controllers/Publico/Comercio/PedidoController.php b/app/Http/Controllers/Publico/Comercio/PedidoController.php
+index 3543763e..ac50d3fc 100644
+--- a/app/Http/Controllers/Publico/Comercio/PedidoController.php
++++ b/app/Http/Controllers/Publico/Comercio/PedidoController.php
+@@ -105,25 +105,25 @@ private function indiceAdministracion(Request $request): View
+             ->latest('id')
+             ->paginate($filters['por_pagina'])
+             ->withQueryString();
+-        $statusCounts = $this->scopedOrders($request)
++        $statusCounts = $this->pedidosEnAlcance($request)
+             ->selectRaw('estado, COUNT(*) as total')
+             ->groupBy('estado')
+             ->pluck('total', 'estado');
+         $totalOrders = (int) $statusCounts->sum();
+-        $todayOrders = $this->scopedOrders($request)->whereDate('creado_en', today())->count();
+-        $yesterdayOrders = $this->scopedOrders($request)->whereDate('creado_en', today()->subDay())->count();
++        $todayOrders = $this->pedidosEnAlcance($request)->whereDate('creado_en', today())->count();
++        $yesterdayOrders = $this->pedidosEnAlcance($request)->whereDate('creado_en', today()->subDay())->count();
+         $paidOrders = null;
+         $pendingOrders = $this->contarEstados($statusCounts, ['Pendiente']);
+         $shippingOrders = $this->contarEstados($statusCounts, ['Enviado']);
+         $deliveredOrders = $this->contarEstados($statusCounts, ['Entregado']);
+         $cancelledOrders = $this->contarEstados($statusCounts, ['Cancelado']);
+-        $staleOrders = $this->scopedOrders($request)
++        $staleOrders = $this->pedidosEnAlcance($request)
+             ->whereNotIn('estado', ['Entregado', 'Cancelado'])
+             ->where('creado_en', '<', now()->subHours(48))
+             ->count();
+         $statusSummary = $this->resumenEstados($statusCounts, $totalOrders);
+         $resumenCliente = $this->resumenCliente($request, $totalOrders);
+-        $recentOrders = $this->scopedOrders($request)
++        $recentOrders = $this->pedidosEnAlcance($request)
+             ->with(['user:id,nombre,correo', 'details.product:id,nombre,marca,url_imagen'])
+             ->latest('creado_en')
+             ->latest('id')
+@@ -151,10 +151,10 @@ private function indiceAdministracion(Request $request): View
+             'statusSummary' => $statusSummary,
+             'customerSummary' => $resumenCliente,
+             'presentationOrders' => $presentationOrders,
+-            'donutStyle' => $this->donutStyle($statusSummary),
+-            'alerts' => $this->alerts($pendingOrders, $cancelledOrders, $staleOrders),
++            'donutStyle' => $this->estiloDonut($statusSummary),
++            'alerts' => $this->alertas($pendingOrders, $cancelledOrders, $staleOrders),
+             'recentOrders' => $recentOrders,
+-            'staleOrders' => $this->scopedOrders($request)
++            'staleOrders' => $this->pedidosEnAlcance($request)
+                 ->whereNotIn('estado', ['Entregado', 'Cancelado'])
+                 ->where('creado_en', '<', now()->subHours(48))
+                 ->count(),
+@@ -240,7 +240,7 @@ private function fechaPedido(?Carbon $date): string
+     }
+ 
+     /** @param array<int, array{label:string,count:int,percent:float,color:string,key:string}> $summary */
+-    private function donutStyle(array $summary): string
++    private function estiloDonut(array $summary): string
+     {
+         $palette = ['yellow' => '#f5a900', 'blue' => '#2b8df3', 'purple' => '#7137e8', 'green' => '#08a66b', 'red' => '#ef334f'];
+         $segments = [];
+@@ -256,7 +256,7 @@ private function donutStyle(array $summary): string
+     }
+ 
+     /** @return array<int, array{show:bool,icon:string,class:string,title:string,detail:string}> */
+-    private function alerts(int $pendingOrders, int $cancelledOrders, int $staleOrders): array
++    private function alertas(int $pendingOrders, int $cancelledOrders, int $staleOrders): array
+     {
+         return [
+             ['show' => $pendingOrders > 0, 'icon' => 'exclamation-triangle', 'class' => 'warning', 'title' => number_format($pendingOrders).' pedidos pendientes', 'detail' => 'Requieren atención inmediata.'],
+@@ -344,7 +344,7 @@ public function updateStatus(ActualizarEstadoPedidoRequest $request, Pedido $ord
+     {
+         $order->loadMissing('user');
+         $this->authorize('updateStatus', $order);
+-        $this->orderService->updateStatus($order, $request->user(), $request->validated('estado'), $request->ip());
++        $this->orderService->actualizarEstado($order, $request->user(), $request->validated('estado'), $request->ip());
+ 
+         return back()->with('status', 'Estado de pedido actualizado.');
+     }
+@@ -355,7 +355,7 @@ public function updateStatus(ActualizarEstadoPedidoRequest $request, Pedido $ord
+      */
+     private function consultaPedidosAdministracion(Request $request, array $filters): Builder
+     {
+-        return $this->scopedOrders($request)
++        return $this->pedidosEnAlcance($request)
+             ->when($filters['buscar'], function (Builder $query, string $search): void {
+                 $query->where(function (Builder $searchQuery) use ($search): void {
+                     $searchQuery
+@@ -437,8 +437,8 @@ private function resumenEstados(Collection $statusCounts, int $totalOrders): arr
+      */
+     private function resumenCliente(Request $request, int $totalOrders): array
+     {
+-        $minoristOrders = $this->scopedOrders($request)->whereHas('user.rolesVigentes', fn (Builder $query): Builder => $query->where('codigo', 'cliente_minorista'))->count();
+-        $mayoristOrders = $this->scopedOrders($request)->whereHas('user.rolesVigentes', fn (Builder $query): Builder => $query->where('codigo', 'cliente_mayorista'))->count();
++        $minoristOrders = $this->pedidosEnAlcance($request)->whereHas('user.rolesVigentes', fn (Builder $query): Builder => $query->where('codigo', 'cliente_minorista'))->count();
++        $mayoristOrders = $this->pedidosEnAlcance($request)->whereHas('user.rolesVigentes', fn (Builder $query): Builder => $query->where('codigo', 'cliente_mayorista'))->count();
+ 
+         return array_map(
+             static fn (string $label, int $count, string $color): array => [
+@@ -454,7 +454,7 @@ private function resumenCliente(Request $request, int $totalOrders): array
+     }
+ 
+     /** @return Builder<Pedido> */
+-    private function scopedOrders(Request $request): Builder
++    private function pedidosEnAlcance(Request $request): Builder
+     {
+         return $this->authorization->scopeRecordsFor(Pedido::query(), $request->user(), 'gestion.pedidos.consultar', 'usuario_id');
+     }
+diff --git a/app/Http/Requests/Cuenta/Perfil/ActualizarPerfilRequest.php b/app/Http/Requests/Cuenta/Perfil/ActualizarPerfilRequest.php
+index 5fe98c34..a290bddc 100644
+--- a/app/Http/Requests/Cuenta/Perfil/ActualizarPerfilRequest.php
++++ b/app/Http/Requests/Cuenta/Perfil/ActualizarPerfilRequest.php
+@@ -39,7 +39,7 @@ public function rules(): array
+         $user = $this->user();
+         if ($user instanceof User) {
+             $rules['perfil'] = ['sometimes', 'array'];
+-            $rules = array_merge($rules, app(ServicioPerfil::class)->editableFieldRules($user));
++            $rules = array_merge($rules, app(ServicioPerfil::class)->reglasCamposEditables($user));
+         }
+ 
+         return $rules;
+diff --git a/app/Models/Marketing/SegmentoCliente.php b/app/Models/Marketing/SegmentoCliente.php
+index 4e5a754e..aea76f7f 100644
+--- a/app/Models/Marketing/SegmentoCliente.php
++++ b/app/Models/Marketing/SegmentoCliente.php
+@@ -14,6 +14,8 @@ class SegmentoCliente extends Model
+ {
+     protected $table = 'segmentos_clientes';
+ 
++    public $timestamps = false;
++
+     protected $fillable = ['nombre', 'tipo', 'criterios', 'activo'];
+ 
+     /**
+diff --git a/app/Servicios/Compartidos/Comercio/ServicioPedidos.php b/app/Servicios/Compartidos/Comercio/ServicioPedidos.php
+index 561dfb9b..b48629b9 100644
+--- a/app/Servicios/Compartidos/Comercio/ServicioPedidos.php
++++ b/app/Servicios/Compartidos/Comercio/ServicioPedidos.php
+@@ -40,7 +40,7 @@ public function __construct(
+     /**
+      * @param  array<int|string, mixed>  $cart
+      */
+-    public function checkout(User $user, array $cart, ?string $couponCode, ?string $ip, string $checkoutToken): Pedido
++    public function finalizarCompra(User $user, array $cart, ?string $couponCode, ?string $ip, string $checkoutToken): Pedido
+     {
+         if (! $user->can('gestion.cotizaciones.consultar') && ! $user->can('gestion.pedidos.consultar')) {
+             abort_unless(
+@@ -155,7 +155,7 @@ public function checkout(User $user, array $cart, ?string $couponCode, ?string $
+      *
+      * @param  array{nombre:string,correo:string,telefono?:string|null,direccion:string,referencia?:string|null}  $guest
+      */
+-    public function checkoutGuest(array $cart, ?string $couponCode, ?string $ip, array $guest): Pedido
++    public function finalizarCompraInvitado(array $cart, ?string $couponCode, ?string $ip, array $guest): Pedido
+     {
+         $cart = $this->cartService->normalizar($cart);
+         $checkoutToken = (string) request()->session()->get('checkout_token');
+@@ -198,7 +198,7 @@ public function checkoutGuest(array $cart, ?string $couponCode, ?string $ip, arr
+             ]);
+             $this->asegurarEnvio($order, $location, null);
+             foreach ($items as [$product, $variantId, $quantity, $priceCents]) {
+-                $movement = $this->inventoryService->changeLockedProductInPublicWarehouse($product, $variantId, 'salida', $quantity, 'Salida por pedido #'.$order->id, 'pedido', (string) $order->id);
++                $movement = $this->inventoryService->cambiarProductoBloqueadoEnAlmacenPublico($product, $variantId, 'salida', $quantity, 'Salida por pedido #'.$order->id, 'pedido', (string) $order->id);
+                 $order->details()->create(['producto_id' => $product->id, 'variante_id' => $movement->variante_id, 'cantidad' => $quantity, 'precio_unitario' => $priceCents / 100]);
+             }
+             DB::table('carritos')->where('id', $checkout->id)->update(['pedido_id' => $order->id, 'estado' => 'convertido', 'actualizado_en' => now()]);
+@@ -217,7 +217,7 @@ public function checkoutGuest(array $cart, ?string $couponCode, ?string $ip, arr
+      * @param  mixed  $ip  Parámetro recibido por la operación.
+      * @return void Resultado de la operación.
+      */
+-    public function updateStatus(Pedido $order, User $user, string $status, ?string $ip): void
++    public function actualizarEstado(Pedido $order, User $user, string $status, ?string $ip): void
+     {
+         abort_unless($this->authorization->allowsRecord(
+             $user,
+@@ -261,7 +261,7 @@ public function updateStatus(Pedido $order, User $user, string $status, ?string
+         }, 3);
+     }
+ 
+-    public function registerPendingPayment(Pedido $order, ?int $paymentMethodId, ?int $userId): void
++    public function registrarPagoPendiente(Pedido $order, ?int $paymentMethodId, ?int $userId): void
+     {
+         if ($paymentMethodId === null || ! Schema::hasTable('pagos')) {
+             return;
+diff --git a/app/Servicios/Compartidos/Exportacion/ExportadorTabular.php b/app/Servicios/Compartidos/Exportacion/ExportadorTabular.php
+index 24f5cbaa..dae31c17 100644
+--- a/app/Servicios/Compartidos/Exportacion/ExportadorTabular.php
++++ b/app/Servicios/Compartidos/Exportacion/ExportadorTabular.php
+@@ -96,7 +96,7 @@ private function generarExcel(string $filename, array $columns, array $rows, arr
+             abort_unless($zip->open($temporaryFile, ZipArchive::OVERWRITE) === true, 500, 'No se pudo crear el archivo Excel.');
+ 
+             $context = $this->contextoReporte($filename, $report, count($columns));
+-            $logo = $this->logoBytes();
++            $logo = $this->bytesLogo();
+             $worksheet = $this->construirHojaCalculo($columns, $rows, $context, $logo !== null);
+             $logoContentTypes = $logo === null ? '' : '<Default Extension="png" ContentType="image/png"/><Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>';
+ 
+@@ -110,7 +110,7 @@ private function generarExcel(string $filename, array $columns, array $rows, arr
+             if ($logo !== null) {
+                 $zip->addFromString('xl/media/technology-cell-logo.png', $logo);
+                 $zip->addFromString('xl/worksheets/_rels/sheet1.xml.rels', '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing1.xml"/></Relationships>');
+-                $zip->addFromString('xl/drawings/drawing1.xml', $this->drawingXml());
++                $zip->addFromString('xl/drawings/drawing1.xml', $this->xmlDibujo());
+                 $zip->addFromString('xl/drawings/_rels/drawing1.xml.rels', '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/technology-cell-logo.png"/></Relationships>');
+             }
+ 
+@@ -142,7 +142,7 @@ private function generarExcel(string $filename, array $columns, array $rows, arr
+     private function generarExcelSinZip(string $filename, array $columns, array $rows, array $report): Response
+     {
+         $context = $this->contextoReporte($filename, $report, count($columns));
+-        $logo = $this->logoBytes();
++        $logo = $this->bytesLogo();
+         $worksheet = $this->construirHojaCalculo($columns, $rows, $context, $logo !== null);
+         $logoContentTypes = $logo === null
+             ? ''
+@@ -160,7 +160,7 @@ private function generarExcelSinZip(string $filename, array $columns, array $row
+         if ($logo !== null) {
+             $entries['xl/media/technology-cell-logo.png'] = $logo;
+             $entries['xl/worksheets/_rels/sheet1.xml.rels'] = '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing1.xml"/></Relationships>';
+-            $entries['xl/drawings/drawing1.xml'] = $this->drawingXml();
++            $entries['xl/drawings/drawing1.xml'] = $this->xmlDibujo();
+             $entries['xl/drawings/_rels/drawing1.xml.rels'] = '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/technology-cell-logo.png"/></Relationships>';
+         }
+ 
+@@ -580,7 +580,7 @@ private function xmlLibroTrabajo(string $lastColumn, int $lastRow, int $headerRo
+      *
+      * @return string Resultado de la operación.
+      */
+-    private function drawingXml(): string
++    private function xmlDibujo(): string
+     {
+         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><xdr:twoCellAnchor editAs="oneCell"><xdr:from><xdr:col>0</xdr:col><xdr:colOff>50000</xdr:colOff><xdr:row>0</xdr:row><xdr:rowOff>30000</xdr:rowOff></xdr:from><xdr:to><xdr:col>2</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>4</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to><xdr:pic><xdr:nvPicPr><xdr:cNvPr id="2" name="Technology CELL"/><xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId1"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor></xdr:wsDr>';
+     }
+@@ -1145,7 +1145,7 @@ private function barraProgresoPdf(float $x, float $y, float $width, float $heigh
+      */
+     private function objetosLogoPdf(int $firstId): array
+     {
+-        $image = $this->decodePng($this->logoBytes());
++        $image = $this->decodificarPng($this->bytesLogo());
+         if ($image === null) {
+             return ['image_id' => null, 'objects' => []];
+         }
+@@ -1174,7 +1174,7 @@ private function objetosLogoPdf(int $firstId): array
+     /**
+      * @return array{width:int,height:int,rgb:string,alpha:?string}|null
+      */
+-    private function decodePng(?string $png): ?array
++    private function decodificarPng(?string $png): ?array
+     {
+         if ($png === null || ! str_starts_with($png, "\x89PNG\r\n\x1a\n")) {
+             return null;
+@@ -1221,7 +1221,7 @@ private function decodePng(?string $png): ?array
+                     1 => $left,
+                     2 => $up,
+                     3 => intdiv($left + $up, 2),
+-                    4 => $this->paethPredictor($left, $up, $upperLeft),
++                    4 => $this->predictorPaeth($left, $up, $upperLeft),
+                     default => 0,
+                 };
+                 $filtered[$index] = ($filtered[$index] + $predictor) & 255;
+@@ -1247,7 +1247,7 @@ private function decodePng(?string $png): ?array
+      * @param  mixed  $upperLeft  Parámetro recibido por la operación.
+      * @return int Resultado de la operación.
+      */
+-    private function paethPredictor(int $left, int $up, int $upperLeft): int
++    private function predictorPaeth(int $left, int $up, int $upperLeft): int
+     {
+         $estimate = $left + $up - $upperLeft;
+         $leftDistance = abs($estimate - $left);
+@@ -1557,7 +1557,7 @@ private function letraColumna(int $index): string
+      *
+      * @return mixed Resultado de la operación.
+      */
+-    private function logoBytes(): ?string
++    private function bytesLogo(): ?string
+     {
+         $path = base_path(self::LOGO_PATH);
+ 
+diff --git a/app/Servicios/Cuenta/Perfil/ServicioPerfil.php b/app/Servicios/Cuenta/Perfil/ServicioPerfil.php
+index 109658e0..f4c342e7 100644
+--- a/app/Servicios/Cuenta/Perfil/ServicioPerfil.php
++++ b/app/Servicios/Cuenta/Perfil/ServicioPerfil.php
+@@ -33,7 +33,7 @@ public function dynamicFieldsAvailable(): bool
+     }
+ 
+     /** @return Collection<int, Rol> */
+-    public function rolesFor(User $user): Collection
++    public function rolesPara(User $user): Collection
+     {
+         $roleIds = $user->rolesVigentes()->pluck('roles.id')
+             ->merge($user->rolesPorSedeVigentes()->pluck('roles.id'))
+@@ -50,7 +50,7 @@ public function rolesFor(User $user): Collection
+         return Rol::query()->whereIn('id', $roleIds->unique())->orderBy('nombre')->get();
+     }
+ 
+-    public function primarySiteFor(User $user): ?string
++    public function sedePrincipalPara(User $user): ?string
+     {
+         if (! Schema::hasTable('sedes')) {
+             return null;
+@@ -64,13 +64,13 @@ public function primarySiteFor(User $user): ?string
+     }
+ 
+     /** @return Collection<int, PerfilCampo> */
+-    public function fieldsFor(User $user): Collection
++    public function camposPara(User $user): Collection
+     {
+         if (! $this->dynamicFieldsAvailable()) {
+             return new Collection;
+         }
+ 
+-        $roleIds = $this->rolesFor($user)->modelKeys();
++        $roleIds = $this->rolesPara($user)->modelKeys();
+         if ($roleIds === []) {
+             return new Collection;
+         }
+@@ -96,7 +96,7 @@ public function fieldsFor(User $user): Collection
+     }
+ 
+     /** @return array<int|string, string|null> */
+-    public function valuesFor(User $user, Collection $fields): array
++    public function valoresPara(User $user, Collection $fields): array
+     {
+         if (! $this->dynamicFieldsAvailable() || $fields->isEmpty()) {
+             return [];
+@@ -110,7 +110,7 @@ public function valuesFor(User $user, Collection $fields): array
+     }
+ 
+     /** @return Collection<int, object> */
+-    public function functionsFor(User $user): Collection
++    public function funcionesPara(User $user): Collection
+     {
+         if (! Schema::hasTable('roles_permisos') || ! Schema::hasTable('permisos')) {
+             return new Collection;
+@@ -121,7 +121,7 @@ public function functionsFor(User $user): Collection
+         return Permiso::query()
+             ->where('permisos.activo', true)
+             ->whereHas('roles', function ($query) use ($user): void {
+-                $query->whereIn('roles.id', $this->rolesFor($user)->modelKeys())
++                $query->whereIn('roles.id', $this->rolesPara($user)->modelKeys())
+                     ->where('roles.activo', true)
+                     ->where('roles_permisos.alcance', '!=', 'ninguno');
+             })
+@@ -133,10 +133,10 @@ public function functionsFor(User $user): Collection
+     }
+ 
+     /** @return array<string, array<int, mixed>> */
+-    public function editableFieldRules(User $user): array
++    public function reglasCamposEditables(User $user): array
+     {
+         $rules = [];
+-        foreach ($this->fieldsFor($user)->filter(fn (PerfilCampo $field): bool => (bool) $field->perfil_editable) as $field) {
++        foreach ($this->camposPara($user)->filter(fn (PerfilCampo $field): bool => (bool) $field->perfil_editable) as $field) {
+             $fieldRules = [$field->perfil_requerido ? 'required' : 'nullable', 'string', 'max:5000'];
+             if ($field->tipo === 'email') {
+                 $fieldRules[] = 'email';
+@@ -158,7 +158,7 @@ public function editableFieldRules(User $user): array
+     }
+ 
+     /** @param array<int|string, mixed> $values */
+-    public function saveValues(User $user, Collection $fields, array $values): void
++    public function guardarValores(User $user, Collection $fields, array $values): void
+     {
+         $editableFields = $fields->filter(fn (PerfilCampo $field): bool => (bool) $field->perfil_editable);
+         $now = now();
+diff --git a/resources/css/layouts/panel/principal.css b/resources/css/layouts/panel/principal.css
+index d7bca56b..9f8bc066 100644
+--- a/resources/css/layouts/panel/principal.css
++++ b/resources/css/layouts/panel/principal.css
+@@ -1,77 +1,77 @@
+-@import 'bootstrap/dist/css/bootstrap.min.css';
+-@import '../../app.css';
+-@import '../../base/variables.css';
+-@import '../../base/reinicio.css';
+-@import '../../base/tipografia.css';
+-@import '../../componentes/comunes/botones.css';
+-@import '../../componentes/comunes/formularios.css';
+-@import '../../componentes/comunes/precios.css';
+-@import '../../componentes/comunes/tarjetas.css';
+-@import '../../componentes/comunes/alertas.css';
+-@import '../../componentes/comunes/confirmacion.css';
+-@import '../../componentes/comunes/badges.css';
+-@import '../../componentes/comunes/estados.css';
+-@import '../../componentes/comunes/tablas.css';
+-@import '../../base/utilidades.css';
+-@import '../../inteligente/asistente/flotante.css';
++@import "bootstrap/dist/css/bootstrap.min.css";
++@import "../../app.css";
++@import "../../base/variables.css";
++@import "../../base/reinicio.css";
++@import "../../base/tipografia.css";
++@import "../../componentes/comunes/botones.css";
++@import "../../componentes/comunes/formularios.css";
++@import "../../componentes/comunes/precios.css";
++@import "../../componentes/comunes/tarjetas.css";
++@import "../../componentes/comunes/alertas.css";
++@import "../../componentes/comunes/confirmacion.css";
++@import "../../componentes/comunes/badges.css";
++@import "../../componentes/comunes/estados.css";
++@import "../../componentes/comunes/tablas.css";
++@import "../../base/utilidades.css";
++@import "../../inteligente/asistente/flotante.css";
+ 
+-@import '../administracion.css';
+-@import '../responsive.css';
+-@import '../../gestion/reportes/reportes.css';
+-@import '../../gestion/comercial/cotizaciones/cotizaciones.css';
+-@import '../../gestion/comercial/compras/compras.css';
+-@import '../../modulos/pedidos.css';
+-@import '../../gestion/inventario-logistica/productos/productos.css';
+-@import '../../gestion/inventario/inventario.css';
+-@import '../../gestion/comercial/pedidos/pedidos.css';
+-@import '../../gestion/comercial/clientes/clientes.css';
+-@import '../../gestion/comercial/proveedores/proveedores.css';
+-@import '../../gestion/administracion/seguridad/usuarios.css';
+-@import '../../modulos/seguridad-delegacion.css';
+-@import '../../modulos/seguridad-delegacion-extra.css';
+-@import '../../modulos/seguridad-rbac-overrides.css';
+-@import '../../gestion/ecommerce-marketing/campanas.css';
+-@import '../../gestion/ecommerce-marketing/publicidad-inteligente.css';
+-@import '../../cuenta/perfil/perfil.css';
+-@import '../../publico/cuenta/cuenta.css';
+-@import './menu-lateral-desplegable.css';
+-@import '../../gestion/analitica/dashboard-global/dashboard-global.css';
+-@import '../../gestion/administracion/organizacion/organizacion.css';
+-@import '../../gestion/comercial/ventas/operaciones-ventas.css';
+-@import '../../gestion/inventario-logistica/inventario-logistica.css';
+-@import '../../gestion/finanzas/finanzas-facturacion/finanzas-facturacion.css';
+-@import '../../gestion/ecommerce-marketing/ecommerce-marketing.css';
+-@import '../../gestion/analitica/analisis-auditoria/analisis-auditoria.css';
+-@import '../../gestion/configuracion/configuracion-sistema.css';
+-@import '../../gestion/comercial/ventas/ventas.css';
+-@import '../../gestion/modulos-pendientes.css';
+-@import '../../gestion/soporte/reclamos/reclamos.css';
+-@import '../../gestion/marketing-modulos.css';
+-@import '../../gestion/finanzas-modulos.css';
+-@import '../../gestion/finanzas/pagos-cobros/pagos-cobros.css';
+-@import '../../gestion/finanzas/comprobantes/comprobantes.css';
+-@import '../../gestion/finanzas/reembolsos/reembolsos.css';
+-@import '../../gestion/administracion-modulos.css';
+-@import '../../gestion/administracion/seguridad/roles-permisos.css';
+-@import '../../gestion/administracion/notificaciones/notificaciones.css';
+-@import '../../gestion/administracion/integraciones/integraciones.css';
+-@import '../../gestion/administracion/respaldos-mantenimiento/respaldos-mantenimiento.css';
+-@import '../../gestion/configuracion-modulos.css';
+-@import '../../gestion/analisis-modulos.css';
+-@import '../../gestion/analitica/reportes/reportes.css';
+-@import '../../gestion/analitica/reportes-financieros/reportes-financieros.css';
+-@import '../../gestion/analitica/clientes/clientes.css';
+-@import '../../gestion/analitica/metricas-marketing/metricas-marketing.css';
+-@import '../../gestion/configuracion/empresa/empresa.css';
+-@import '../../gestion/configuracion/comercial/comercial.css';
+-@import '../../gestion/configuracion/seguridad/seguridad.css';
+-@import '../../gestion/configuracion/general/general.css';
+-@import '../../paneles/dashboard.css';
++@import "../administracion.css";
++@import "../responsive.css";
++@import "../../gestion/reportes/reportes.css";
++@import "../../gestion/comercial/cotizaciones/cotizaciones.css";
++@import "../../gestion/comercial/compras/compras.css";
++@import "../../modulos/pedidos.css";
++@import "../../gestion/inventario-logistica/productos/productos.css";
++@import "../../gestion/inventario/inventario.css";
++@import "../../gestion/comercial/pedidos/pedidos.css";
++@import "../../gestion/comercial/clientes/clientes.css";
++@import "../../gestion/comercial/proveedores/proveedores.css";
++@import "../../gestion/administracion/seguridad/usuarios.css";
++@import "../../modulos/seguridad-delegacion.css";
++@import "../../modulos/seguridad-delegacion-extra.css";
++@import "../../modulos/seguridad-rbac-overrides.css";
++@import "../../gestion/ecommerce-marketing/campanas.css";
++@import "../../gestion/ecommerce-marketing/publicidad-inteligente.css";
++@import "../../cuenta/perfil/perfil.css";
++@import "../../publico/cuenta/cuenta.css";
++@import "./menu-lateral-desplegable.css";
++@import "../../gestion/analitica/dashboard-global/dashboard-global.css";
++@import "../../gestion/administracion/organizacion/organizacion.css";
++@import "../../gestion/comercial/ventas/operaciones-ventas.css";
++@import "../../gestion/inventario-logistica/inventario-logistica.css";
++@import "../../gestion/finanzas/finanzas-facturacion/finanzas-facturacion.css";
++@import "../../gestion/ecommerce-marketing/ecommerce-marketing.css";
++@import "../../gestion/analitica/analisis-auditoria/analisis-auditoria.css";
++@import "../../gestion/configuracion/configuracion-sistema.css";
++@import "../../gestion/comercial/ventas/ventas.css";
++@import "../../gestion/modulos-pendientes.css";
++@import "../../gestion/soporte/reclamos/reclamos.css";
++@import "../../gestion/marketing-modulos.css";
++@import "../../gestion/finanzas-modulos.css";
++@import "../../gestion/finanzas/pagos-cobros/pagos-cobros.css";
++@import "../../gestion/finanzas/comprobantes/comprobantes.css";
++@import "../../gestion/finanzas/reembolsos/reembolsos.css";
++@import "../../gestion/administracion-modulos.css";
++@import "../../gestion/administracion/seguridad/roles-permisos.css";
++@import "../../gestion/administracion/notificaciones/notificaciones.css";
++@import "../../gestion/administracion/integraciones/integraciones.css";
++@import "../../gestion/administracion/respaldos-mantenimiento/respaldos-mantenimiento.css";
++@import "../../gestion/configuracion-modulos.css";
++@import "../../gestion/analisis-modulos.css";
++@import "../../gestion/analitica/reportes/reportes.css";
++@import "../../gestion/analitica/reportes-financieros/reportes-financieros.css";
++@import "../../gestion/analitica/clientes/clientes.css";
++@import "../../gestion/analitica/metricas-marketing/metricas-marketing.css";
++@import "../../gestion/configuracion/empresa/empresa.css";
++@import "../../gestion/configuracion/comercial/comercial.css";
++@import "../../gestion/configuracion/seguridad/seguridad.css";
++@import "../../gestion/configuracion/general/general.css";
++@import "../../paneles/dashboard.css";
+ 
+ /* Estilos de módulos y roles del panel. */
+-@import './menu-dinamico.css';
+-@import './encabezado.css';
+-@import './notificaciones.css';
++@import "./menu-dinamico.css";
++@import "./encabezado.css";
++@import "./notificaciones.css";
+ 
+ /* Patrón compartido de exportación para Productos, Categorías y Logística. */
+ .productos-export-menu {
+@@ -91,7 +91,7 @@ .productos-export-menu > summary {
+     border-radius: 9px;
+     color: #17376b;
+     background: #fff;
+-    font-size: .78rem;
++    font-size: 0.78rem;
+     font-weight: 800;
+     cursor: pointer;
+     list-style: none;
+@@ -103,7 +103,7 @@ .productos-export-menu > summary::-webkit-details-marker {
+ 
+ .productos-export-menu > summary i:last-child {
+     margin-left: 4px;
+-    font-size: .68rem;
++    font-size: 0.68rem;
+ }
+ 
+ .productos-export-options {
+@@ -118,7 +118,7 @@ .productos-export-options {
+     border: 1px solid #d8e6f4;
+     border-radius: 11px;
+     background: #fff;
+-    box-shadow: 0 15px 35px rgba(12, 57, 120, .18);
++    box-shadow: 0 15px 35px rgba(12, 57, 120, 0.18);
+ }
+ 
+ .productos-export-options a {
+@@ -128,7 +128,7 @@ .productos-export-options a {
+     padding: 9px;
+     border-radius: 8px;
+     color: #17376b;
+-    font-size: .74rem;
++    font-size: 0.74rem;
+     font-weight: 800;
+     text-decoration: none;
+ }
+@@ -152,12 +152,29 @@ .productos-export-options a > i {
+     font-size: 1rem;
+ }
+ 
+-.productos-export-options a:nth-child(1) > i { color: #e33449; background: #ffe8e9; }
+-.productos-export-options a:nth-child(2) > i { color: #0b9b65; background: #dff8ec; }
+-.productos-export-options a span { display: grid; gap: 2px; }
+-.productos-export-options small { color: #7588aa; font-size: .61rem; font-weight: 500; }
++.productos-export-options a:nth-child(1) > i {
++    color: #e33449;
++    background: #ffe8e9;
++}
++.productos-export-options a:nth-child(2) > i {
++    color: #0b9b65;
++    background: #dff8ec;
++}
++.productos-export-options a span {
++    display: grid;
++    gap: 2px;
++}
++.productos-export-options small {
++    color: #7588aa;
++    font-size: 0.61rem;
++    font-weight: 500;
++}
+ 
+ @media (max-width: 800px) {
+-    .productos-export-menu > summary { width: 100%; }
+-    .productos-export-options { width: min(218px, calc(100vw - 32px)); }
++    .productos-export-menu > summary {
++        width: 100%;
++    }
++    .productos-export-options {
++        width: min(218px, calc(100vw - 32px));
++    }
+ }
+diff --git a/resources/js/gestion/inventario-logistica/productos/listar.js b/resources/js/gestion/inventario-logistica/productos/listar.js
+index 7f359b0f..2743ba88 100644
+--- a/resources/js/gestion/inventario-logistica/productos/listar.js
++++ b/resources/js/gestion/inventario-logistica/productos/listar.js
+@@ -1,49 +1,61 @@
+-document.addEventListener('DOMContentLoaded', () => {
+-    const dialog = document.querySelector('#nuevo-producto');
+-    const importDialog = document.querySelector('#importar-productos');
+-    const page = document.querySelector('[data-product-page]');
++document.addEventListener("DOMContentLoaded", () => {
++    const dialog = document.querySelector("#nuevo-producto");
++    const importDialog = document.querySelector("#importar-productos");
++    const page = document.querySelector("[data-product-page]");
+ 
+     if (!dialog || !page) {
+         return;
+     }
+ 
+-    page.querySelectorAll('[data-open-product-create]').forEach((button) => {
+-        button.addEventListener('click', () => dialog.showModal());
++    page.querySelectorAll("[data-open-product-create]").forEach((button) => {
++        button.addEventListener("click", () => dialog.showModal());
+     });
+ 
+-    page.querySelectorAll('[data-open-product-import]').forEach((button) => {
+-        button.addEventListener('click', () => importDialog?.showModal());
++    page.querySelectorAll("[data-open-product-import]").forEach((button) => {
++        button.addEventListener("click", () => importDialog?.showModal());
+     });
+ 
+-    importDialog?.querySelectorAll('[data-close-product-import]').forEach((button) => {
+-        button.addEventListener('click', () => importDialog.close());
+-    });
++    importDialog
++        ?.querySelectorAll("[data-close-product-import]")
++        .forEach((button) => {
++            button.addEventListener("click", () => importDialog.close());
++        });
+ 
+-    importDialog?.querySelector('input[type="file"]')?.addEventListener('change', (event) => {
+-        const selected = event.currentTarget.files?.[0];
+-        const label = importDialog.querySelector('[data-product-import-file-name]');
+-        if (label) label.textContent = selected?.name || 'Ningún archivo seleccionado';
+-    });
++    importDialog
++        ?.querySelector('input[type="file"]')
++        ?.addEventListener("change", (event) => {
++            const selected = event.currentTarget.files?.[0];
++            const label = importDialog.querySelector(
++                "[data-product-import-file-name]",
++            );
++            if (label)
++                label.textContent =
++                    selected?.name || "Ningún archivo seleccionado";
++        });
+ 
+-    importDialog?.addEventListener('click', (event) => {
++    importDialog?.addEventListener("click", (event) => {
+         if (event.target === importDialog) {
+             importDialog.close();
+         }
+     });
+ 
+-    dialog.querySelector('[data-close-product-create]')?.addEventListener('click', () => dialog.close());
+-    dialog.addEventListener('click', (event) => {
++    dialog
++        .querySelector("[data-close-product-create]")
++        ?.addEventListener("click", () => dialog.close());
++    dialog.addEventListener("click", (event) => {
+         if (event.target === dialog) {
+             dialog.close();
+         }
+     });
+ 
+-    const imageInput = dialog.querySelector('[data-product-image-input]');
+-    const imagePreview = dialog.querySelector('[data-product-image-preview]');
+-    const imagePreviewImage = dialog.querySelector('[data-product-image-preview-image]');
+-    const clearImage = dialog.querySelector('[data-product-image-clear]');
++    const imageInput = dialog.querySelector("[data-product-image-input]");
++    const imagePreview = dialog.querySelector("[data-product-image-preview]");
++    const imagePreviewImage = dialog.querySelector(
++        "[data-product-image-preview-image]",
++    );
++    const clearImage = dialog.querySelector("[data-product-image-clear]");
+ 
+-    imageInput?.addEventListener('change', () => {
++    imageInput?.addEventListener("change", () => {
+         const [file] = imageInput.files ?? [];
+ 
+         if (!file || !imagePreview || !imagePreviewImage) {
+@@ -54,43 +66,55 @@ document.addEventListener('DOMContentLoaded', () => {
+         imagePreview.hidden = false;
+     });
+ 
+-    clearImage?.addEventListener('click', () => {
++    clearImage?.addEventListener("click", () => {
+         if (imageInput) {
+-            imageInput.value = '';
++            imageInput.value = "";
+         }
+         if (imagePreviewImage) {
+-            imagePreviewImage.src = '';
++            imagePreviewImage.src = "";
+         }
+         if (imagePreview) {
+             imagePreview.hidden = true;
+         }
+     });
+ 
+-    document.querySelectorAll('[data-open-product-edit]').forEach((button) => {
+-        const editDialog = document.getElementById(button.dataset.productDialog);
++    document.querySelectorAll("[data-open-product-edit]").forEach((button) => {
++        const editDialog = document.getElementById(
++            button.dataset.productDialog,
++        );
+ 
+-        button.addEventListener('click', () => editDialog?.showModal());
++        button.addEventListener("click", () => editDialog?.showModal());
+     });
+ 
+-    document.querySelectorAll('.productos-edit-dialog').forEach((editDialog) => {
+-        editDialog.querySelector('[data-close-product-edit]')?.addEventListener('click', () => editDialog.close());
+-        editDialog.addEventListener('click', (event) => {
+-            if (event.target === editDialog) {
+-                editDialog.close();
+-            }
++    document
++        .querySelectorAll(".productos-edit-dialog")
++        .forEach((editDialog) => {
++            editDialog
++                .querySelector("[data-close-product-edit]")
++                ?.addEventListener("click", () => editDialog.close());
++            editDialog.addEventListener("click", (event) => {
++                if (event.target === editDialog) {
++                    editDialog.close();
++                }
++            });
+         });
+-    });
+ 
+     const productEditId = Number(page.dataset.productEditId || 0);
+     if (productEditId > 0) {
+-        document.getElementById(`editar-producto-${productEditId}`)?.showModal();
++        document
++            .getElementById(`editar-producto-${productEditId}`)
++            ?.showModal();
+     }
+ 
+-    page.querySelectorAll('[data-open-product-view]').forEach((button) => {
+-        const viewDialog = document.getElementById(button.dataset.productViewDialog);
+-        const editDialog = document.getElementById(button.dataset.productDialog);
++    page.querySelectorAll("[data-open-product-view]").forEach((button) => {
++        const viewDialog = document.getElementById(
++            button.dataset.productViewDialog,
++        );
++        const editDialog = document.getElementById(
++            button.dataset.productDialog,
++        );
+ 
+-        button.addEventListener('click', () => {
++        button.addEventListener("click", () => {
+             if (viewDialog) {
+                 viewDialog.showModal();
+             } else if (editDialog) {
+@@ -99,74 +123,114 @@ document.addEventListener('DOMContentLoaded', () => {
+         });
+     });
+ 
+-    document.querySelectorAll('.productos-view-dialog').forEach((viewDialog) => {
+-        viewDialog.querySelectorAll('[data-close-product-view]').forEach((button) => button.addEventListener('click', () => viewDialog.close()));
+-        viewDialog.addEventListener('click', (event) => {
+-            if (event.target === viewDialog) {
+-                viewDialog.close();
+-            }
++    document
++        .querySelectorAll(".productos-view-dialog")
++        .forEach((viewDialog) => {
++            viewDialog
++                .querySelectorAll("[data-close-product-view]")
++                .forEach((button) =>
++                    button.addEventListener("click", () => viewDialog.close()),
++                );
++            viewDialog.addEventListener("click", (event) => {
++                if (event.target === viewDialog) {
++                    viewDialog.close();
++                }
++            });
+         });
+-    });
+ 
+-    document.querySelectorAll('[data-open-product-variants]').forEach((button) => {
+-        const variantsDialog = document.getElementById(button.dataset.productVariantsDialog);
+-
+-        button.addEventListener('click', () => {
+-            button.closest('.productos-view-dialog')?.close();
+-            variantsDialog?.showModal();
++    document
++        .querySelectorAll("[data-open-product-variants]")
++        .forEach((button) => {
++            const variantsDialog = document.getElementById(
++                button.dataset.productVariantsDialog,
++            );
++
++            button.addEventListener("click", () => {
++                button.closest(".productos-view-dialog")?.close();
++                variantsDialog?.showModal();
++            });
+         });
+-    });
+ 
+-    document.querySelectorAll('.productos-variants-dialog').forEach((variantsDialog) => {
+-        variantsDialog.querySelector('[data-close-product-variants]')?.addEventListener('click', () => variantsDialog.close());
+-        variantsDialog.querySelectorAll('[data-open-variant-edit]').forEach((button) => {
+-            const editDialog = document.getElementById(button.dataset.openVariantEdit);
+-
+-            button.addEventListener('click', () => editDialog?.showModal());
+-        });
+-        variantsDialog.addEventListener('click', (event) => {
+-            if (event.target === variantsDialog) {
+-                variantsDialog.close();
+-            }
++    document
++        .querySelectorAll(".productos-variants-dialog")
++        .forEach((variantsDialog) => {
++            variantsDialog
++                .querySelector("[data-close-product-variants]")
++                ?.addEventListener("click", () => variantsDialog.close());
++            variantsDialog
++                .querySelectorAll("[data-open-variant-edit]")
++                .forEach((button) => {
++                    const editDialog = document.getElementById(
++                        button.dataset.openVariantEdit,
++                    );
++
++                    button.addEventListener("click", () =>
++                        editDialog?.showModal(),
++                    );
++                });
++            variantsDialog.addEventListener("click", (event) => {
++                if (event.target === variantsDialog) {
++                    variantsDialog.close();
++                }
++            });
+         });
+-    });
+ 
+-    document.querySelectorAll('.productos-variant-edit-dialog').forEach((editDialog) => {
+-        editDialog.querySelectorAll('[data-close-variant-edit]').forEach((button) => button.addEventListener('click', () => editDialog.close()));
+-        editDialog.addEventListener('click', (event) => {
+-            if (event.target === editDialog) {
+-                editDialog.close();
+-            }
++    document
++        .querySelectorAll(".productos-variant-edit-dialog")
++        .forEach((editDialog) => {
++            editDialog
++                .querySelectorAll("[data-close-variant-edit]")
++                .forEach((button) =>
++                    button.addEventListener("click", () => editDialog.close()),
++                );
++            editDialog.addEventListener("click", (event) => {
++                if (event.target === editDialog) {
++                    editDialog.close();
++                }
++            });
+         });
+-    });
+ 
+-    const variantManagerProductId = Number(page.dataset.variantManagerProductId || 0);
++    const variantManagerProductId = Number(
++        page.dataset.variantManagerProductId || 0,
++    );
+     const variantEditorId = Number(page.dataset.variantEditorId || 0);
+     if (variantManagerProductId > 0) {
+-        document.getElementById(`variantes-producto-${variantManagerProductId}`)?.showModal();
++        document
++            .getElementById(`variantes-producto-${variantManagerProductId}`)
++            ?.showModal();
+ 
+         if (variantEditorId > 0) {
+-            document.getElementById(`editar-variante-${variantEditorId}`)?.showModal();
++            document
++                .getElementById(`editar-variante-${variantEditorId}`)
++                ?.showModal();
+         }
+     }
+ 
+-    const hasErrors = page.dataset.hasErrors === '1';
++    const hasErrors = page.dataset.hasErrors === "1";
+     if (hasErrors) {
+-        const productErrorModalId = Number(page.dataset.productErrorModalId || 0);
+-        const variantErrorModalId = Number(page.dataset.variantErrorModalId || 0);
++        const productErrorModalId = Number(
++            page.dataset.productErrorModalId || 0,
++        );
++        const variantErrorModalId = Number(
++            page.dataset.variantErrorModalId || 0,
++        );
+ 
+         if (productErrorModalId > 0) {
+-            document.getElementById(`variantes-producto-${productErrorModalId}`)?.showModal();
++            document
++                .getElementById(`variantes-producto-${productErrorModalId}`)
++                ?.showModal();
+ 
+             if (variantErrorModalId > 0) {
+-                document.getElementById(`editar-variante-${variantErrorModalId}`)?.showModal();
++                document
++                    .getElementById(`editar-variante-${variantErrorModalId}`)
++                    ?.showModal();
+             }
+         } else {
+             dialog.showModal();
+         }
+     }
+ 
+-    if (page.dataset.openProductModal === '1') {
++    if (page.dataset.openProductModal === "1") {
+         dialog.showModal();
+     }
+ });
+diff --git a/resources/views/auth/login.blade.php b/resources/views/auth/login.blade.php
+index ed216d0c..8da53201 100644
+--- a/resources/views/auth/login.blade.php
++++ b/resources/views/auth/login.blade.php
+@@ -40,6 +40,9 @@
+                 <div class="alert alert-error" role="alert">{{ $errors->first() }}</div>
+             @endif
+ 
++
++
++            
+             {{-- Formulario principal de inicio de sesión con token CSRF --}}
+             <form method="POST" action="{{ route('login.store') }}" novalidate>
+                 @csrf
+diff --git a/resources/views/gestion/inventario-logistica/productos/registrar.blade.php b/resources/views/gestion/inventario-logistica/productos/registrar.blade.php
+index 45c72f71..2cb514cd 100644
+--- a/resources/views/gestion/inventario-logistica/productos/registrar.blade.php
++++ b/resources/views/gestion/inventario-logistica/productos/registrar.blade.php
+@@ -1,140 +1,144 @@
+ <!DOCTYPE html>
+ <html lang="en">
++
+ <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Registro de Producto</title>
+ </head>
+-<body>
+-    
+-
+-<form class="productos-create-form" method="post" action="{{ route('management.products.store') }}" enctype="multipart/form-data">
+-    @csrf
+-
+-    <div class="productos-create-layout">
+-        <section class="productos-create-main">
+-            <div class="productos-form-section">
+-                <header class="productos-form-section-header">
+-                    <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+-                    <h3>Información básica</h3>
+-                </header>
+-
+-                <div class="productos-create-fields">
+-                    <label class="productos-create-field productos-create-field--wide">
+-                        <span>Nombre del producto <b>*</b></span>
+-                        <input class="productos-create-input" name="nombre" value="{{ old('nombre') }}" placeholder="Ej. iPhone 15 Pro 128GB" maxlength="160" required>
+-                        <small>Máximo 160 caracteres</small>
+-                    </label>
+-
+-                    <label class="productos-create-field productos-create-field--sku">
+-                        <span>Etiqueta del producto</span>
+-                        <input class="productos-create-input" name="etiqueta" value="{{ old('etiqueta') }}" maxlength="80">
+-                    </label>
+ 
+-                    <label class="productos-create-field">
+-                        <span>Categoría <b>*</b></span>
+-                        <select class="productos-create-input" name="categoria_id" required>
+-                            <option value="">Selecciona una categoría</option>
+-                            @foreach ($categories as $category)
+-                                <option value="{{ $category->id }}" @selected((string) old('categoria_id') === (string) $category->id)>{{ $category->nombre }}</option>
+-                            @endforeach
+-                        </select>
+-                    </label>
++<body>
+ 
+-                    <label class="productos-create-field">
+-                        <span>Marca <b>*</b></span>
+-                        <select class="productos-create-input" name="marca" required>
+-                            <option value="">Selecciona una marca</option>
+-                            @foreach (($brands ?? collect()) as $brand)
+-                                <option value="{{ $brand }}" @selected(old('marca') === $brand)>{{ $brand }}</option>
+-                            @endforeach
+-                            @if (old('marca') && !($brands ?? collect())->contains(old('marca')))
++    <form class="productos-create-form" method="post" action="{{ route('management.products.store') }}" enctype="multipart/form-data">
++        @csrf
++
++        <div class="productos-create-layout">
++            <section class="productos-create-main">
++                <div class="productos-form-section">
++                    <header class="productos-form-section-header">
++                        <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
++                        <h3>Información básica</h3>
++                    </header>
++
++                    <div class="productos-create-fields">
++                        <label class="productos-create-field productos-create-field--wide">
++                            <span>Nombre del producto <b>*</b></span>
++                            <input class="productos-create-input" name="nombre" value="{{ old('nombre') }}" placeholder="Ej. iPhone 15 Pro 128GB" maxlength="160" required>
++                            <small>Máximo 160 caracteres</small>
++                        </label>
++
++                        <label class="productos-create-field productos-create-field--sku">
++                            <span>Etiqueta del producto</span>
++                            <input class="productos-create-input" name="etiqueta" value="{{ old('etiqueta') }}" maxlength="80">
++                        </label>
++
++                        <label class="productos-create-field">
++                            <span>Categoría <b>*</b></span>
++                            <select class="productos-create-input" name="categoria_id" required>
++                                <option value="">Selecciona una categoría</option>
++                                @foreach ($categories as $category)
++                                <option value="{{ $category->id }}" @selected((string) old('categoria_id')===(string) $category->id)>{{ $category->nombre }}</option>
++                                @endforeach
++                            </select>
++                        </label>
++
++                        <label class="productos-create-field">
++                            <span>Marca <b>*</b></span>
++                            <select class="productos-create-input" name="marca" required>
++                                <option value="">Selecciona una marca</option>
++                                @foreach (($brands ?? collect()) as $brand)
++                                <option value="{{ $brand }}" @selected(old('marca')===$brand)>{{ $brand }}</option>
++                                @endforeach
++                                @if (old('marca') && !($brands ?? collect())->contains(old('marca')))
+                                 <option value="{{ old('marca') }}" selected>{{ old('marca') }}</option>
+-                            @endif
+-                        </select>
+-                    </label>
+-
+-                    <label class="productos-create-field productos-create-field--compact">
+-                        <span>Precio de venta <b>*</b></span>
+-                        <span class="productos-money-input"><b>S/</b><input class="productos-create-input" name="precio" type="number" min="0" step="0.01" value="{{ old('precio') }}" placeholder="0.00" required></span>
+-                    </label>
++                                @endif
++                            </select>
++                        </label>
++
++                        <label class="productos-create-field productos-create-field--compact">
++                            <span>Precio de venta <b>*</b></span>
++                            <span class="productos-money-input"><b>S/</b><input class="productos-create-input" name="precio" type="number" min="0" step="0.01" value="{{ old('precio') }}" placeholder="0.00" required></span>
++                        </label>
++
++                        <label class="productos-create-field productos-create-field--compact">
++                            <span>Precio de costo</span>
++                            <span class="productos-money-input"><b>S/</b><input class="productos-create-input" name="precio_original" type="number" min="0" step="0.01" value="{{ old('precio_original') }}" placeholder="0.00"></span>
++                        </label>
++
++                        <label class="productos-create-field productos-create-field--compact">
++                            <span>Stock inicial <b>*</b></span>
++                            <input class="productos-create-input" name="existencias" type="number" min="0" step="1" value="{{ old('existencias', 0) }}" required aria-describedby="stock-inicial-ayuda">
++                            <small id="stock-inicial-ayuda">Se registrará en el almacén autorizado y quedará auditado como movimiento inicial.</small>
++                        </label>
++
++                        <label class="productos-create-field productos-create-field--status">
++                            <span>Estado <b>*</b></span>
++                            <span class="productos-status-select"><i class="bi bi-circle-fill" aria-hidden="true"></i><select class="productos-create-input" aria-label="Estado del producto" disabled>
++                                    <option>Activo</option>
++                                </select></span>
++                        </label>
++
++                        <label class="productos-create-field productos-create-field--provider">
++                            <span>Proveedor</span>
++                            <select class="productos-create-input" name="proveedor_id">
++                                <option value="">Selecciona un proveedor</option>
++                                @foreach (($suppliers ?? collect()) as $supplier)
++                                <option value="{{ $supplier->id }}" @selected((string) old('proveedor_id')===(string) $supplier->id)>{{ $supplier->nombre }}</option>
++                                @endforeach
++                            </select>
++                        </label>
++                    </div>
++                </div>
+ 
+-                    <label class="productos-create-field productos-create-field--compact">
+-                        <span>Precio de costo</span>
+-                        <span class="productos-money-input"><b>S/</b><input class="productos-create-input" name="precio_original" type="number" min="0" step="0.01" value="{{ old('precio_original') }}" placeholder="0.00"></span>
++                <div class="productos-form-section">
++                    <header class="productos-form-section-header">
++                        <i class="bi bi-card-text" aria-hidden="true"></i>
++                        <h3>Descripción</h3>
++                    </header>
++                    <label class="productos-create-field">
++                        <span class="visually-hidden">Descripción del producto</span>
++                        <textarea class="productos-create-input productos-create-textarea" name="descripcion" maxlength="1000" placeholder="Describe las características del producto, especificaciones, contenido de la caja, etc.">{{ old('descripcion') }}</textarea>
++                        <small>Máximo 1000 caracteres</small>
+                     </label>
+-
+-                    <label class="productos-create-field productos-create-field--compact">
+-                        <span>Stock inicial <b>*</b></span>
+-                        <input class="productos-create-input" name="existencias" type="number" min="0" step="1" value="{{ old('existencias', 0) }}" required aria-describedby="stock-inicial-ayuda">
+-                        <small id="stock-inicial-ayuda">Se registrará en el almacén autorizado y quedará auditado como movimiento inicial.</small>
++                </div>
++            </section>
++
++            <aside class="productos-create-media">
++                <div class="productos-form-section productos-form-section--media">
++                    <header class="productos-form-section-header">
++                        <i class="bi bi-image" aria-hidden="true"></i>
++                        <h3>Imagen del producto</h3>
++                    </header>
++
++                    <label class="productos-image-uploader">
++                        <input type="file" name="imagen" accept="image/jpeg,image/png,image/webp" data-product-image-input>
++                        <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>
++                        <strong>Subir imagen</strong>
++                        <small>Arrastra una imagen aquí o haz clic para seleccionar</small>
++                        <small>Formatos: JPG, PNG, WEBP (máx. 5 MB)</small>
++                        <span class="productos-image-select"><i class="bi bi-image" aria-hidden="true"></i> Seleccionar imagen</span>
+                     </label>
+ 
+-                    <label class="productos-create-field productos-create-field--status">
+-                        <span>Estado <b>*</b></span>
+-                        <span class="productos-status-select"><i class="bi bi-circle-fill" aria-hidden="true"></i><select class="productos-create-input" aria-label="Estado del producto" disabled><option>Activo</option></select></span>
+-                    </label>
++                    <div class="productos-image-preview" data-product-image-preview hidden>
++                        <img src="" alt="Vista previa de la imagen del producto" data-product-image-preview-image>
++                        <button type="button" data-product-image-clear aria-label="Quitar imagen"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
++                    </div>
+ 
+-                    <label class="productos-create-field productos-create-field--provider">
+-                        <span>Proveedor</span>
+-                        <select class="productos-create-input" name="proveedor_id">
+-                            <option value="">Selecciona un proveedor</option>
+-                            @foreach (($suppliers ?? collect()) as $supplier)
+-                                <option value="{{ $supplier->id }}" @selected((string) old('proveedor_id') === (string) $supplier->id)>{{ $supplier->nombre }}</option>
+-                            @endforeach
+-                        </select>
++                    <label class="productos-create-field productos-url-image-field">
++                        <span>O registra una URL de imagen</span>
++                        <input class="productos-create-input" name="url_imagen" value="{{ old('url_imagen') }}" maxlength="255" placeholder="https://...">
+                     </label>
+                 </div>
+-            </div>
+-
+-            <div class="productos-form-section">
+-                <header class="productos-form-section-header">
+-                    <i class="bi bi-card-text" aria-hidden="true"></i>
+-                    <h3>Descripción</h3>
+-                </header>
+-                <label class="productos-create-field">
+-                    <span class="visually-hidden">Descripción del producto</span>
+-                    <textarea class="productos-create-input productos-create-textarea" name="descripcion" maxlength="1000" placeholder="Describe las características del producto, especificaciones, contenido de la caja, etc.">{{ old('descripcion') }}</textarea>
+-                    <small>Máximo 1000 caracteres</small>
+-                </label>
+-            </div>
+-        </section>
+-
+-        <aside class="productos-create-media">
+-            <div class="productos-form-section productos-form-section--media">
+-                <header class="productos-form-section-header">
+-                    <i class="bi bi-image" aria-hidden="true"></i>
+-                    <h3>Imagen del producto</h3>
+-                </header>
+-
+-                <label class="productos-image-uploader">
+-                    <input type="file" name="imagen" accept="image/jpeg,image/png,image/webp" data-product-image-input>
+-                    <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>
+-                    <strong>Subir imagen</strong>
+-                    <small>Arrastra una imagen aquí o haz clic para seleccionar</small>
+-                    <small>Formatos: JPG, PNG, WEBP (máx. 5 MB)</small>
+-                    <span class="productos-image-select"><i class="bi bi-image" aria-hidden="true"></i> Seleccionar imagen</span>
+-                </label>
+-
+-                <div class="productos-image-preview" data-product-image-preview hidden>
+-                    <img src="" alt="Vista previa de la imagen del producto" data-product-image-preview-image>
+-                    <button type="button" data-product-image-clear aria-label="Quitar imagen"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+-                </div>
++            </aside>
++        </div>
+ 
+-                <label class="productos-create-field productos-url-image-field">
+-                    <span>O registra una URL de imagen</span>
+-                    <input class="productos-create-input" name="url_imagen" value="{{ old('url_imagen') }}" maxlength="255" placeholder="https://...">
+-                </label>
+-            </div>
+-        </aside>
+-    </div>
+-
+-
+-    <footer class="productos-create-footer">
+-        <button class="productos-create-cancel" type="button" data-close-product-create>Cancelar</button>
+-        <button class="productos-create-secondary" type="submit" name="continue" value="1"><i class="bi bi-plus-circle" aria-hidden="true"></i> Guardar y registrar otro</button>
+-        <button class="productos-create-submit" type="submit"><i class="bi bi-save" aria-hidden="true"></i> Guardar producto</button>
+-    </footer>
+-</form>
++
++        <footer class="productos-create-footer">
++            <button class="productos-create-cancel" type="button" data-close-product-create>Cancelar</button>
++            <button class="productos-create-secondary" type="submit" name="continue" value="1"><i class="bi bi-plus-circle" aria-hidden="true"></i> Guardar y registrar otro</button>
++            <button class="productos-create-submit" type="submit"><i class="bi bi-save" aria-hidden="true"></i> Guardar producto</button>
++        </footer>
++    </form>
+ </body>
+-</html>
++
++</html>
+\ No newline at end of file
+diff --git a/routes/web.php b/routes/web.php
+index 0166ac92..4af212dc 100644
+--- a/routes/web.php
++++ b/routes/web.php
+@@ -85,6 +85,7 @@
+ Route::get('/asistente', [AsistenteController::class, 'index'])->name('assistant');
+ Route::post('/asistente', [AsistenteController::class, 'ask'])->middleware('throttle:10,1')->name('assistant.ask');
+ 
++// ruta de inicio de sesión, registro y cierre de sesión
+ Route::middleware('guest')->group(function (): void {
+     Route::get('/iniciar-sesion', [AutenticacionController::class, 'loginForm'])->name('login');
+     Route::post('/iniciar-sesion', [AutenticacionController::class, 'login'])->middleware('throttle:login')->name('login.store');
+@@ -196,6 +197,10 @@
+     Route::put('/cotizaciones/{quotation}', [CotizacionController::class, 'update'])->whereNumber('quotation')->name('quotations.update');
+     Route::delete('/cotizaciones/{quotation}', [CotizacionController::class, 'deactivate'])->whereNumber('quotation')->name('quotations.deactivate');
+ 
++
++
++
++    
+     Route::get('/productos', [GestionProductosController::class, 'index'])->name('products');
+     Route::get('/ecommerce/diseno/precios', [GestionProductosController::class, 'preciosCanales'])
+         ->middleware('permiso:ruta')->name('products.preview.prices');
+@@ -226,6 +231,22 @@
+     Route::put('/productos/{product}', [GestionProductosController::class, 'update'])->whereNumber('product')->name('products.update');
+     Route::delete('/productos/{product}', [GestionProductosController::class, 'deactivate'])->whereNumber('product')->name('products.deactivate');
+ 
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
+     Route::get('/usuarios', [GestionUsuariosController::class, 'index'])->name('users');
+     Route::get('/usuarios/exportar/{format}', [GestionUsuariosController::class, 'export'])
+         ->whereIn('format', ['pdf', 'excel', 'csv'])->name('users.export');
+diff --git a/tests/Feature/UnidadII/ModuloAndSecurityIntegrationTest.php b/tests/Feature/UnidadII/ModuloAndSecurityIntegrationTest.php
+index 1d9404b6..a01d7156 100644
+--- a/tests/Feature/UnidadII/ModuloAndSecurityIntegrationTest.php
++++ b/tests/Feature/UnidadII/ModuloAndSecurityIntegrationTest.php
+@@ -933,19 +933,23 @@ function prepararEsquemaDispositivosRecepcionCompra(): void
+     $this->actingAs($purchasing)
+         ->post(route('management.suppliers.store'), [
+             'nombre' => 'Proveedor Integración',
+-            'ruc' => 'RUC-30001',
++            'tipo_persona' => 'juridica',
++            'tipo_documento' => 'ruc',
++            'ruc' => '20123456789',
+             'correo' => 'proveedor.integracion@example.test',
+             'telefono' => '999777888',
+             'ciudad' => 'Lima',
+         ])
+         ->assertRedirect();
+ 
+-    $supplier = Proveedor::query()->where('ruc', 'RUC-30001')->firstOrFail();
++    $supplier = Proveedor::query()->where('ruc', '20123456789')->firstOrFail();
+ 
+     $this->actingAs($purchasing)
+         ->put(route('management.suppliers.update', $supplier), [
+             'nombre' => 'Proveedor Actualizado',
+-            'ruc' => 'RUC-30001',
++            'tipo_persona' => 'juridica',
++            'tipo_documento' => 'ruc',
++            'ruc' => '20123456789',
+             'correo' => 'proveedor.actualizado@example.test',
+             'telefono' => '999777999',
+             'ciudad' => 'Cusco',
+diff --git a/tests/RefreshSpanishTestDatabase.php b/tests/RefreshSpanishTestDatabase.php
+index 71ee1e4a..dc46443e 100644
+--- a/tests/RefreshSpanishTestDatabase.php
++++ b/tests/RefreshSpanishTestDatabase.php
+@@ -31,6 +31,140 @@ protected function migrateDatabases()
+             return;
+         }
+ 
++        if (! Schema::hasTable('modulos')) {
++            Schema::create('modulos', function (Blueprint $table): void {
++                $table->bigIncrements('id');
++                $table->string('codigo', 80)->unique();
++                $table->string('nombre', 140);
++                $table->string('descripcion', 255)->nullable();
++                $table->string('icono', 100)->nullable();
++                $table->unsignedInteger('orden')->default(0);
++                $table->boolean('habilitado')->default(true);
++                $table->timestamp('creado_en')->nullable();
++                $table->timestamp('actualizado_en')->nullable();
++            });
++        }
++        if (! Schema::hasTable('pantallas')) {
++            Schema::create('pantallas', function (Blueprint $table): void {
++                $table->bigIncrements('id');
++                $table->unsignedBigInteger('modulo_id');
++                $table->string('codigo', 120)->unique();
++                $table->string('nombre', 160);
++                $table->string('ruta', 160)->nullable();
++                $table->string('icono', 100)->nullable();
++                $table->boolean('habilitada')->default(true);
++                $table->timestamp('creado_en')->nullable();
++                $table->timestamp('actualizado_en')->nullable();
++            });
++        }
++        if (! Schema::hasTable('roles')) {
++            Schema::create('roles', function (Blueprint $table): void {
++                $table->bigIncrements('id');
++                $table->string('codigo', 40)->unique();
++                $table->string('nombre', 120);
++                $table->string('descripcion', 255)->nullable();
++                $table->string('alcance_permitido', 20)->default('sede');
++                $table->boolean('es_sistema')->default(false);
++                $table->boolean('activo')->default(true);
++                $table->timestamp('creado_en')->nullable();
++                $table->timestamp('actualizado_en')->nullable();
++            });
++        }
++        if (! Schema::hasTable('menus')) {
++            Schema::create('menus', function (Blueprint $table): void {
++                $table->bigIncrements('id');
++                $table->string('codigo', 80)->unique();
++                $table->string('nombre', 140);
++                $table->string('contexto', 40)->default('sidebar');
++                $table->boolean('habilitado')->default(true);
++                $table->timestamp('creado_en')->nullable();
++                $table->timestamp('actualizado_en')->nullable();
++            });
++        }
++        if (! Schema::hasTable('permisos')) {
++            Schema::create('permisos', function (Blueprint $table): void {
++                $table->bigIncrements('id');
++                $table->unsignedBigInteger('modulo_id');
++                $table->unsignedBigInteger('pantalla_id')->nullable();
++                $table->string('codigo', 160)->unique();
++                $table->string('accion', 60);
++                $table->string('nombre', 160);
++                $table->boolean('es_sistema')->default(true);
++                $table->boolean('activo')->default(true);
++                $table->timestamp('creado_en')->nullable();
++                $table->timestamp('actualizado_en')->nullable();
++            });
++        }
++        if (! Schema::hasTable('elementos_menu')) {
++            Schema::create('elementos_menu', function (Blueprint $table): void {
++                $table->bigIncrements('id');
++                $table->unsignedBigInteger('menu_id');
++                $table->unsignedBigInteger('padre_id')->nullable();
++                $table->unsignedBigInteger('pantalla_id')->nullable();
++                $table->unsignedBigInteger('permiso_id')->nullable();
++                $table->string('codigo', 100);
++                $table->string('etiqueta', 160);
++                $table->string('icono', 100)->nullable();
++                $table->string('tipo', 20)->default('pantalla');
++                $table->unsignedInteger('orden')->default(0);
++                $table->boolean('habilitado')->default(true);
++                $table->timestamp('creado_en')->nullable();
++                $table->timestamp('actualizado_en')->nullable();
++            });
++        }
++        if (! Schema::hasTable('roles_menus')) {
++            Schema::create('roles_menus', function (Blueprint $table): void {
++                $table->unsignedBigInteger('rol_id');
++                $table->unsignedBigInteger('menu_id');
++                $table->timestamp('creado_en')->useCurrent();
++                $table->primary(['rol_id', 'menu_id']);
++            });
++        }
++
++        if (! Schema::hasTable('segmentos_clientes')) {
++            Schema::create('segmentos_clientes', function (Blueprint $table): void {
++                $table->bigIncrements('id');
++                $table->string('nombre', 120)->unique();
++                $table->string('tipo', 30);
++                $table->text('criterios');
++                $table->boolean('activo')->default(true);
++                $table->timestamp('creado_en')->nullable();
++                $table->timestamp('actualizado_en')->nullable();
++                $table->index('activo');
++            });
++        }
++
++        if (! Schema::hasTable('registros_auditoria')) {
++            Schema::create('registros_auditoria', function (Blueprint $table): void {
++                $table->bigIncrements('id');
++                $table->unsignedBigInteger('usuario_id')->nullable();
++                $table->string('accion', 80);
++                $table->string('entidad', 80);
++                $table->unsignedBigInteger('entidad_id')->nullable();
++                $table->text('valores_anteriores')->nullable();
++                $table->text('valores_nuevos')->nullable();
++                $table->string('direccion_ip', 45)->nullable();
++                $table->timestamp('creado_en')->useCurrent();
++                $table->char('identificador_universal_evento', 36)->nullable()->unique();
++                $table->string('rol_codigo', 40)->nullable();
++                $table->unsignedBigInteger('empresa_id')->nullable();
++                $table->unsignedBigInteger('sede_id')->nullable();
++                $table->string('modulo', 80)->nullable();
++                $table->string('resultado', 20)->nullable();
++                $table->text('agente_usuario')->nullable();
++                $table->string('correlacion_id', 64)->nullable();
++                $table->text('observaciones')->nullable();
++                $table->dateTime('ocurrido_en')->nullable();
++                $table->string('tabla_afectada', 100)->nullable();
++                $table->string('identificador_entidad', 128)->nullable();
++                $table->text('cambios')->nullable();
++                $table->string('origen', 20)->default('laravel');
++                $table->index(['usuario_id', 'creado_en']);
++                $table->index(['entidad', 'entidad_id']);
++                $table->index(['sede_id', 'creado_en']);
++            });
++        }
++
+         if (! Schema::hasTable('pedidos')) {
+             Schema::create('pedidos', function (Blueprint $table): void {
+                 $table->increments('id');
+@@ -246,6 +380,183 @@ protected function migrateDatabases()
+             });
+         }
+ 
++        if (! Schema::hasTable('cupones')) {
++            Schema::create('cupones', function (Blueprint $table): void {
++                $table->bigIncrements('id');
++                $table->unsignedBigInteger('empresa_id');
++                $table->string('codigo', 50);
++                $table->string('tipo_descuento', 20);
++                $table->decimal('valor', 10, 2);
++                $table->decimal('minimo_compra', 10, 2)->default(0);
++                $table->unsignedInteger('limite_usos')->nullable();
++                $table->unsignedInteger('usos')->default(0);
++                $table->dateTime('inicia_en');
++                $table->dateTime('finaliza_en');
++                $table->boolean('activo')->default(true);
++                $table->timestamp('creado_en')->nullable();
++                $table->timestamp('actualizado_en')->nullable();
++                $table->unique(['empresa_id', 'codigo'], 'un_cupones_empresa_codigo');
++                $table->unique(['id', 'empresa_id'], 'un_cupones_id_empresa');
++                $table->index(['activo', 'inicia_en', 'finaliza_en'], 'ind_cupones_vigencia');
++                $table->index('activo', 'ind_cupones_activo');
++                $table->index(['empresa_id', 'activo', 'inicia_en', 'finaliza_en'], 'ind_cupones_empresa_vigencia');
++            });
++        }
++
++        if (! Schema::hasTable('campanas_publicitarias')) {
++            Schema::create('campanas_publicitarias', function (Blueprint $table): void {
++                $table->increments('id');
++                $table->string('nombre', 120);
++                $table->string('ubicacion', 30)->default('emergente')->index();
++                $table->string('titulo', 160);
++                $table->string('descripcion', 500)->nullable();
++                $table->string('texto_boton', 80)->default('Ver oferta');
++                $table->string('url_boton', 255)->default('catalog');
++                $table->string('url_imagen')->nullable();
++                $table->decimal('precio_anterior', 10, 2)->nullable();
++                $table->decimal('precio_oferta', 10, 2)->nullable();
++                $table->dateTime('inicia_en')->index();
++                $table->dateTime('finaliza_en')->index();
++                $table->boolean('activo')->default(true)->index();
++                $table->unsignedInteger('vistas')->default(0);
++                $table->unsignedInteger('clics')->default(0);
++                $table->timestamp('creado_en')->useCurrent();
++                $table->timestamp('actualizado_en')->nullable();
++                $table->unsignedBigInteger('empresa_id')->nullable();
++            });
++        }
++
++        if (! Schema::hasTable('eventos_campana')) {
++            Schema::create('eventos_campana', function (Blueprint $table): void {
++                $table->id();
++                $table->unsignedInteger('campana_id');
++                $table->foreignId('usuario_id')->nullable()->constrained('usuarios')->nullOnDelete();
++                $table->string('tipo', 20)->index();
++                $table->string('sesion_hash', 64)->nullable()->index();
++                $table->timestamp('creado_en')->useCurrent();
++                $table->index(['campana_id', 'tipo', 'creado_en']);
++            });
++        }
++
++        if (! Schema::hasTable('campana_segmento')) {
++            Schema::create('campana_segmento', function (Blueprint $table): void {
++                $table->unsignedInteger('campana_id');
++                $table->unsignedBigInteger('segmento_id');
++                $table->primary(['campana_id', 'segmento_id']);
++            });
++        }
++
++        if (! Schema::hasTable('mensajes_contacto')) {
++            Schema::create('mensajes_contacto', function (Blueprint $table): void {
++                $table->increments('id');
++                $table->string('nombre', 120);
++                $table->string('contacto', 160);
++                $table->text('mensaje');
++                $table->string('estado', 30)->default('Nuevo')->index();
++                $table->timestamp('creado_en')->useCurrent();
++            });
++        }
++
++        if (! Schema::hasTable('movimientos_inventario')) {
++            Schema::create('movimientos_inventario', function (Blueprint $table): void {
++                $table->bigIncrements('id');
++                $table->unsignedInteger('producto_id');
++                $table->unsignedBigInteger('usuario_id')->nullable();
++                $table->string('tipo_movimiento', 30);
++                $table->decimal('cantidad', 18, 6);
++                $table->string('notas', 500);
++                $table->dateTime('creado_en')->useCurrent();
++                $table->unsignedBigInteger('empresa_id')->nullable();
++                $table->unsignedBigInteger('sede_id')->nullable();
++                $table->unsignedBigInteger('almacen_id')->nullable();
++                $table->unsignedInteger('variante_id')->nullable();
++                $table->string('documento_tipo', 60)->nullable();
++                $table->string('documento_id', 80)->nullable();
++                $table->index(['producto_id', 'creado_en'], 'ind_movimientos_producto_fecha');
++                $table->index('usuario_id', 'ind_movimientos_usuario');
++                $table->index(['sede_id', 'creado_en'], 'ind_movimientos_sede_fecha');
++                $table->index(['almacen_id', 'variante_id', 'creado_en'], 'ind_movimientos_almacen_variante_fecha');
++                $table->index(['documento_tipo', 'documento_id'], 'ind_movimientos_documento');
++                $table->index('variante_id', 'ind_movimientos_variante');
++            });
++        }
++
++        if (! Schema::hasTable('productos_favoritos')) {
++            Schema::create('productos_favoritos', function (Blueprint $table): void {
++                $table->id();
++                $table->unsignedInteger('producto_id');
++                $table->unsignedBigInteger('usuario_id');
++                $table->timestamp('creado_en')->useCurrent();
++                $table->unique(['producto_id', 'usuario_id']);
++            });
++        }
++
++        if (! Schema::hasTable('productos_resenas')) {
++            Schema::create('productos_resenas', function (Blueprint $table): void {
++                $table->id();
++                $table->unsignedInteger('producto_id');
++                $table->unsignedBigInteger('usuario_id');
++                $table->unsignedTinyInteger('valoracion');
++                $table->text('comentario')->nullable();
++                $table->timestamp('creado_en')->useCurrent();
++                $table->timestamp('actualizado_en')->useCurrent();
++                $table->unique(['producto_id', 'usuario_id']);
++                $table->index(['producto_id', 'valoracion']);
++            });
++        }
++
++        if (! Schema::hasTable('perfiles_inteligentes_productos')) {
++            Schema::create('perfiles_inteligentes_productos', function (Blueprint $table): void {
++                $table->unsignedInteger('producto_id')->primary();
++                $table->unsignedTinyInteger('puntuacion_rendimiento')->default(70);
++                $table->unsignedTinyInteger('puntuacion_camara')->default(70);
++                $table->unsignedTinyInteger('puntuacion_bateria')->default(70);
++                $table->unsignedTinyInteger('puntuacion_valor')->default(70);
++                $table->timestamp('actualizado_en')->nullable();
++            });
++        }
++
++        if (! Schema::hasTable('perfil_campos')) {
++            Schema::create('perfil_campos', function (Blueprint $table): void {
++                $table->id();
++                $table->string('codigo', 80)->unique();
++                $table->string('etiqueta', 120);
++                $table->string('tipo', 30)->default('text');
++                $table->json('opciones')->nullable();
++                $table->unsignedInteger('orden')->default(0);
++                $table->boolean('activo')->default(true);
++                $table->dateTime('creado_en')->useCurrent();
++                $table->dateTime('actualizado_en')->useCurrent();
++                $table->index(['activo', 'orden']);
++            });
++        }
++
++        if (! Schema::hasTable('roles_perfil_campos')) {
++            Schema::create('roles_perfil_campos', function (Blueprint $table): void {
++                $table->foreignId('rol_id')->constrained('roles')->cascadeOnDelete();
++                $table->foreignId('perfil_campo_id')->constrained('perfil_campos')->cascadeOnDelete();
++                $table->boolean('visible')->default(true);
++                $table->boolean('editable')->default(false);
++                $table->boolean('requerido')->default(false);
++                $table->dateTime('creado_en')->useCurrent();
++                $table->dateTime('actualizado_en')->useCurrent();
++                $table->primary(['rol_id', 'perfil_campo_id']);
++                $table->index(['perfil_campo_id', 'visible']);
++            });
++        }
++
++        if (! Schema::hasTable('usuarios_perfil_campos')) {
++            Schema::create('usuarios_perfil_campos', function (Blueprint $table): void {
++                $table->id();
++                $table->foreignId('usuario_id')->constrained('usuarios')->cascadeOnDelete();
++                $table->foreignId('perfil_campo_id')->constrained('perfil_campos')->cascadeOnDelete();
++                $table->text('valor')->nullable();
++                $table->dateTime('creado_en')->useCurrent();
++                $table->dateTime('actualizado_en')->useCurrent();
++                $table->unique(['usuario_id', 'perfil_campo_id']);
++            });
++        }
++
+         foreach (['categorias', 'productos', 'clientes', 'proveedores'] as $table) {
+             if (! Schema::hasColumn($table, 'empresa_id')) {
+                 Schema::table($table, function (Blueprint $blueprint): void {
+diff --git a/tests/Unit/EsquemaEspanolRbacTest.php b/tests/Unit/EsquemaEspanolRbacTest.php
+index c96ddf70..81670b7c 100644
+--- a/tests/Unit/EsquemaEspanolRbacTest.php
++++ b/tests/Unit/EsquemaEspanolRbacTest.php
+@@ -341,7 +341,7 @@
+         ->and($authorization->allowsGlobal($user, 'gestion.pedidos.consultar'))->toBeFalse();
+ 
+     $this->actingAs($user)->get(route('orders.index'))->assertForbidden();
+-    expect(fn () => app(ServicioPedidos::class)->checkout($user, [1 => 1], null, null, str_repeat('a', 64)))
++    expect(fn () => app(ServicioPedidos::class)->finalizarCompra($user, [1 => 1], null, null, str_repeat('a', 64)))
+         ->toThrow(HttpException::class);
+ });
+ 
+@@ -1100,24 +1100,24 @@
+         ['rol_id' => 1, 'permiso_id' => 2, 'alcance' => 'sede'],
+         ['rol_id' => 1, 'permiso_id' => 3, 'alcance' => 'sede'],
+     ]);
+-    $order = app(ServicioPedidos::class)->checkout($user, [2 => 1], null, null, str_repeat('a', 64));
++    $order = app(ServicioPedidos::class)->finalizarCompra($user, [2 => 1], null, null, str_repeat('a', 64));
+     expect($order->canal)->toBe('ecommerce')
+         ->and($order->estado)->toBe('Pendiente')
+         ->and((int) DB::table('existencias_almacen')->where('producto_id', 2)->value('cantidad_fisica'))->toBe(2);
+ 
+-    $replayedOrder = app(ServicioPedidos::class)->checkout($user, [2 => 1], null, null, str_repeat('a', 64));
++    $replayedOrder = app(ServicioPedidos::class)->finalizarCompra($user, [2 => 1], null, null, str_repeat('a', 64));
+     expect($replayedOrder->id)->toBe($order->id)
+         ->and(DB::table('pedidos')->count())->toBe(1)
+         ->and((int) DB::table('existencias_almacen')->where('producto_id', 2)->value('cantidad_fisica'))->toBe(2);
+ 
+-    app(ServicioPedidos::class)->updateStatus($order, $user, 'Cancelado', null);
+-    app(ServicioPedidos::class)->updateStatus($order, $user, 'Cancelado', null);
++    app(ServicioPedidos::class)->actualizarEstado($order, $user, 'Cancelado', null);
++    app(ServicioPedidos::class)->actualizarEstado($order, $user, 'Cancelado', null);
+     expect((int) DB::table('existencias_almacen')->where('producto_id', 2)->value('cantidad_fisica'))->toBe(3)
+         ->and(DB::table('movimientos_inventario')->count())->toBe(4);
+ 
+     DB::table('existencias_almacen')->where('producto_id', 2)->update(['cantidad_fisica' => 1]);
+     expect((int) DB::table('productos')->where('id', 2)->value('existencias'))->toBe(3)
+-        ->and(fn () => app(ServicioPedidos::class)->checkout($user, [2 => 2], null, null, str_repeat('f', 64)))
++        ->and(fn () => app(ServicioPedidos::class)->finalizarCompra($user, [2 => 2], null, null, str_repeat('f', 64)))
+         ->toThrow(HttpException::class);
+     $this->actingAs($user)->postJson(route('cart.add', 2), ['cantidad' => 2])->assertStatus(422);
+     Schema::create('campanas_publicitarias', function (Blueprint $table): void {
+@@ -1154,7 +1154,7 @@
+     expect(DB::table('pedidos')->count())->toBe(1);
+     $this->post(route('checkout'), ['checkout_token' => $token])->assertRedirect();
+     $this->postJson(route('checkout'), ['checkout_token' => $token])->assertStatus(422);
+-    app(ServicioPedidos::class)->checkout($user, [2 => 1], 'PRUEBA', null, $token);
++    app(ServicioPedidos::class)->finalizarCompra($user, [2 => 1], 'PRUEBA', null, $token);
+     expect(DB::table('pedidos')->count())->toBe(2)
+         ->and((int) DB::table('existencias_almacen')->where('producto_id', 2)->value('cantidad_fisica'))->toBe(2)
+         ->and((int) DB::table('cupones')->where('codigo', 'PRUEBA')->value('usos'))->toBe(1);
+@@ -1164,12 +1164,12 @@
+         $table->unsignedBigInteger('pedido_id');
+     });
+     DB::table('pagos')->insert(['pedido_id' => 2]);
+-    expect(fn () => app(ServicioPedidos::class)->updateStatus(Pedido::findOrFail(2), $user, 'Cancelado', null))
++    expect(fn () => app(ServicioPedidos::class)->actualizarEstado(Pedido::findOrFail(2), $user, 'Cancelado', null))
+         ->toThrow(HttpException::class);
+     expect((int) DB::table('existencias_almacen')->where('producto_id', 2)->value('cantidad_fisica'))->toBe(2);
+     DB::table('pagos')->where('pedido_id', 2)->delete();
+     DB::table('movimientos_inventario')->where('documento_tipo', 'pedido')->where('documento_id', '2')->update(['documento_tipo' => 'historico']);
+-    expect(fn () => app(ServicioPedidos::class)->updateStatus(Pedido::findOrFail(2), $user, 'Cancelado', null))
++    expect(fn () => app(ServicioPedidos::class)->actualizarEstado(Pedido::findOrFail(2), $user, 'Cancelado', null))
+         ->toThrow(HttpException::class);
+     expect((int) DB::table('existencias_almacen')->where('producto_id', 2)->value('cantidad_fisica'))->toBe(2);
+     DB::table('movimientos_inventario')->where('documento_tipo', 'historico')->where('documento_id', '2')->update(['documento_tipo' => 'pedido']);
+@@ -1177,7 +1177,7 @@
+     Schema::table('variantes_productos', fn (Blueprint $table) => $table->boolean('controla_serie')->default(false));
+     DB::table('variantes_productos')->insert(['id' => 2, 'producto_id' => 2, 'controla_serie' => true]);
+     DB::table('existencias_almacen')->where('producto_id', 2)->update(['variante_id' => 2]);
+-    expect(fn () => app(ServicioPedidos::class)->checkout($user, [2 => 1], null, null, str_repeat('e', 64)))
++    expect(fn () => app(ServicioPedidos::class)->finalizarCompra($user, [2 => 1], null, null, str_repeat('e', 64)))
+         ->toThrow(HttpException::class);
+     $this->postJson(route('cart.add', 2), ['cantidad' => 1])->assertStatus(422);
+     $this->withSession(['cart' => [2 => 1]])->get(route('checkout.form'))
+diff --git a/tests/Unit/Gestion/Productos/ServicioGestionProductosTest.php b/tests/Unit/Gestion/Productos/ServicioGestionProductosTest.php
+index 2c50c6f3..f9a9d545 100644
+--- a/tests/Unit/Gestion/Productos/ServicioGestionProductosTest.php
++++ b/tests/Unit/Gestion/Productos/ServicioGestionProductosTest.php
+@@ -71,7 +71,7 @@ function usuarioGestionProductos(): User
+     $authorization = Mockery::mock(AlcanceProductos::class);
+     $authorization->shouldReceive('atributosDeAlcance')->twice()->andReturn(['empresa_id' => 4]);
+     $inventory = Mockery::mock(ServicioInventario::class);
+-    $inventory->shouldReceive('registerNewProduct')->twice();
++    $inventory->shouldReceive('registrarProductoNuevo')->twice();
+     $stock = new ServicioStockProducto($inventory);
+     $catalog = Mockery::mock(ServicioCatalogo::class);
+     $catalog->shouldReceive('sincronizarImagenPortada')->times(3);
+diff --git a/tests/Unit/MariaPedidosTransferenciasAisladaTest.php b/tests/Unit/MariaPedidosTransferenciasAisladaTest.php
+index 68001b73..f8cdda6d 100644
+--- a/tests/Unit/MariaPedidosTransferenciasAisladaTest.php
++++ b/tests/Unit/MariaPedidosTransferenciasAisladaTest.php
+@@ -100,7 +100,7 @@
+         $order = Pedido::query()->where('usuario_id', $customer->id)->sole();
+         expect((int) DB::table('existencias_almacen')->where('producto_id', $product->id)->value('cantidad_fisica'))->toBe(4)
+             ->and($order->estado)->toBe('Pendiente')
+-            ->and(app(ServicioPedidos::class)->checkout($customer, [$product->id => 1], null, null, $checkoutToken)->id)->toBe($order->id)
++            ->and(app(ServicioPedidos::class)->finalizarCompra($customer, [$product->id => 1], null, null, $checkoutToken)->id)->toBe($order->id)
+             ->and(Pedido::query()->where('usuario_id', $customer->id)->count())->toBe(1);
+ 
+         $this->actingAs($administrator)->patch(route('orders.status', $order), ['estado' => 'Cancelado'])->assertRedirect();
