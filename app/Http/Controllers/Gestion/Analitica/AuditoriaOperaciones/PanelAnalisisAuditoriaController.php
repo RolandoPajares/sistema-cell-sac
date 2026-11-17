@@ -66,9 +66,12 @@ final class PanelAnalisisAuditoriaController extends Controller
      */
     public function mostrar(Request $request, string $tipo, ServicioAutorizacion $autorizacion): View
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(in_array($tipo, ['globales', 'operaciones'], true), 404);
 
+        // Obtiene en $usuario la informacion de la solicitud o del usuario actual.
         $usuario = $request->user();
+        // Guarda en $filtros el resultado necesario para continuar esta operacion.
         $filtros = $request->validate([
             'desde' => ['nullable', 'date'],
             'hasta' => ['nullable', 'date', 'after_or_equal:desde'],
@@ -86,13 +89,18 @@ final class PanelAnalisisAuditoriaController extends Controller
 
         $filtros['reporte'] = $filtros['reporte'] ?? 'ventas';
 
+        // Guarda en $pagina el resultado necesario para continuar esta operacion.
         $pagina = $this->estructura($tipo);
+        // Comprueba la condicion $tipo === 'globales' antes de ejecutar este bloque.
         if ($tipo === 'globales') {
+            // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
             $this->cargarReporte($pagina, $tipo, $usuario, $autorizacion, $filtros);
         } else {
+            // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
             $this->cargarAuditoria($pagina, $tipo, $usuario, $autorizacion, $filtros);
         }
 
+        // Devuelve la vista con los datos preparados por el controlador.
         return view($this->vista($tipo), [
             'pagina' => $pagina,
             'tipo' => $tipo,
@@ -120,9 +128,12 @@ final class PanelAnalisisAuditoriaController extends Controller
      */
     public function exportar(Request $request, string $tipo, ServicioAutorizacion $autorizacion, ExportadorTabular $exportador, RegistradorAuditoria $auditoria, string $format = 'csv'): Response|StreamedResponse
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(in_array($tipo, ['globales', 'operaciones'], true), 404);
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
         $autorizacion->assertAllowed($request->user(), $tipo === 'globales' ? 'gestion.analitica.reportes.exportar' : 'gestion.auditoria.exportar');
+        // Guarda en $filtros el resultado necesario para continuar esta operacion.
         $filtros = $request->validate([
             'desde' => ['nullable', 'date'],
             'hasta' => ['nullable', 'date', 'after_or_equal:desde'],
@@ -138,12 +149,18 @@ final class PanelAnalisisAuditoriaController extends Controller
             'buscar' => ['nullable', 'string', 'max:120'],
         ]);
 
+        // Comprueba la condicion $tipo === 'globales' && ($filtros['reporte'] ?? 'ventas') !== 'ventas' antes de ejecutar este bloque.
         if ($tipo === 'globales' && ($filtros['reporte'] ?? 'ventas') !== 'ventas') {
+            // Guarda en $pagina el resultado necesario para continuar esta operacion.
             $pagina = $this->estructura('globales');
+            // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
             $this->cargarReportePorTipo($pagina, (string) $filtros['reporte'], $request->user(), $autorizacion, $filtros);
+            // Guarda en $columnas el resultado necesario para continuar esta operacion.
             $columnas = $pagina['columnas'];
+            // Guarda en $filas el resultado necesario para continuar esta operacion.
             $filas = $pagina['filas'];
         } elseif ($tipo === 'globales') {
+            // Prepara en $consulta la consulta que obtiene o modifica los registros necesarios.
             $consulta = $autorizacion->scopeRecordsFor(Venta::query()->where('estado', 'confirmada'), $request->user(), 'gestion.ventas.consultar')
                 ->when(isset($filtros['desde']), fn (Builder $q) => $q->whereDate('fecha_venta', '>=', $filtros['desde']))
                 ->when(isset($filtros['hasta']), fn (Builder $q) => $q->whereDate('fecha_venta', '<=', $filtros['hasta']))
@@ -151,13 +168,16 @@ final class PanelAnalisisAuditoriaController extends Controller
                 ->when(isset($filtros['estado']), fn (Builder $q) => $q->where('estado', $filtros['estado']))
                 ->when(isset($filtros['canal']), fn (Builder $q) => $q->whereHas('pedido', fn (Builder $pedido) => $pedido->where('canal', $filtros['canal'])))
                 ->select(['id', 'codigo', 'empresa_id', 'sede_id', 'total', 'estado', 'fecha_venta']);
+            // Guarda en $registros el resultado necesario para continuar esta operacion.
             $registros = $consulta->get();
+            // Agrupa en $columnas los datos que se utilizaran en la siguiente operacion.
             $columnas = ['Id', 'Código', 'Empresa', 'Sede', 'Total', 'Estado', 'Fecha'];
             $filas = $registros->map(static fn (Venta $venta): array => [
                 $venta->id, $venta->codigo, $venta->empresa_id, $venta->sede_id,
                 $venta->total, $venta->estado, $venta->fecha_venta,
             ])->all();
         } else {
+            // Prepara en $consulta la consulta que obtiene o modifica los registros necesarios.
             $consulta = $autorizacion->scopeRecordsFor(RegistroAuditoria::query(), $request->user(), 'gestion.auditoria.consultar')
                 ->when(isset($filtros['desde']), fn (Builder $q) => $q->whereDate('creado_en', '>=', $filtros['desde']))
                 ->when(isset($filtros['hasta']), fn (Builder $q) => $q->whereDate('creado_en', '<=', $filtros['hasta']))
@@ -167,7 +187,9 @@ final class PanelAnalisisAuditoriaController extends Controller
                 ->when(isset($filtros['resultado']), fn (Builder $q) => $q->where('resultado', $filtros['resultado']))
                 ->when(isset($filtros['rol_codigo']), fn (Builder $q) => $q->where('rol_codigo', $filtros['rol_codigo']))
                 ->select(['id', 'usuario_id', 'modulo', 'accion', 'entidad', 'entidad_id', 'resultado', 'direccion_ip', 'creado_en']);
+            // Guarda en $registros el resultado necesario para continuar esta operacion.
             $registros = $consulta->get();
+            // Agrupa en $columnas los datos que se utilizaran en la siguiente operacion.
             $columnas = ['Id', 'Usuario ID', 'Módulo', 'Acción', 'Entidad', 'Entidad ID', 'Resultado', 'Dirección IP', 'Fecha'];
             $filas = $registros->map(static fn (RegistroAuditoria $registro): array => [
                 $registro->id, $registro->usuario_id, $registro->modulo, $registro->accion,
@@ -176,6 +198,7 @@ final class PanelAnalisisAuditoriaController extends Controller
             ])->all();
         }
 
+        // Guarda en $respuesta el resultado necesario para continuar esta operacion.
         $respuesta = $exportador->download($format, 'analisis-auditoria-'.$tipo, $columnas, $filas, [
             'title' => mb_strtoupper((string) $tipo).' — ANÁLISIS Y AUDITORÍA',
             'subtitle' => 'Datos reales consultados desde MariaDB.',
@@ -203,6 +226,7 @@ final class PanelAnalisisAuditoriaController extends Controller
     /** @param array<string, mixed> $pagina @param array<string, mixed> $filtros */
     private function cargarReporte(array &$pagina, string $tipo, User $usuario, ServicioAutorizacion $autorizacion, array $filtros): void
     {
+        // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
         $this->cargarReportePorTipo($pagina, (string) ($filtros['reporte'] ?? 'ventas'), $usuario, $autorizacion, $filtros);
 
     }
@@ -211,6 +235,7 @@ final class PanelAnalisisAuditoriaController extends Controller
     private function cargarReportePorTipo(array &$pagina, string $reporte, User $usuario, ServicioAutorizacion $autorizacion, array $filtros): void
     {
         $reporte = array_key_exists($reporte, ['ventas' => true, 'pedidos' => true, 'clientes' => true, 'productos' => true, 'inventario' => true, 'compras' => true, 'campanas' => true]) ? $reporte : 'ventas';
+        // Guarda en $consulta el resultado necesario para continuar esta operacion.
         $consulta = match ($reporte) {
             'ventas' => $autorizacion->scopeRecordsFor(Venta::query()->where('estado', 'confirmada'), $usuario, 'gestion.ventas.consultar'),
             'pedidos' => $autorizacion->scopeRecordsFor(Pedido::query()->whereNotIn('estado', ['Cancelado', 'Cancelada']), $usuario, 'gestion.pedidos.consultar'),
@@ -225,6 +250,7 @@ final class PanelAnalisisAuditoriaController extends Controller
             ->when(isset($filtros['hasta']), fn (Builder $query) => $query->whereDate($campoFecha, '<=', $filtros['hasta']))
             ->when(isset($filtros['estado']) && in_array($reporte, ['ventas', 'pedidos', 'clientes', 'compras'], true), fn (Builder $query) => $query->where('estado', $filtros['estado']));
         $pagina['opcionesFiltros'] = ['estado' => (clone $consulta)->whereNotNull('estado')->distinct()->orderBy('estado')->pluck('estado', 'estado')];
+        // Guarda en $registros el resultado necesario para continuar esta operacion.
         $registros = $consulta->latest($campoFecha)->latest('id')->paginate(15)->withQueryString();
         $pagina['paginacion'] = $registros;
         $pagina['tabla'] = match ($reporte) {
@@ -254,11 +280,14 @@ final class PanelAnalisisAuditoriaController extends Controller
         $pagina['metricas'][1][1] = in_array($reporte, ['ventas', 'pedidos', 'compras'], true) ? number_format((float) (clone $consulta)->sum('total'), 2) : (string) $registros->count();
         $pagina['metricas'][2][1] = $reporte === 'ventas' ? (string) (clone $consulta)->whereNotNull('cliente_id')->distinct()->count('cliente_id') : '—';
         $pagina['metricas'][3][1] = $reporte === 'productos' ? (string) (clone $consulta)->where('activo', true)->count() : '—';
+        // Guarda en $agrupados el resultado necesario para continuar esta operacion.
         $agrupados = $registros->getCollection()->groupBy(function (object $registro): string {
+            // Guarda en $estado el resultado necesario para continuar esta operacion.
             $estado = method_exists($registro, 'getAttribute') ? $registro->getAttribute('estado') : null;
 
             return filled($estado) ? (string) $estado : 'Registros visibles';
         })->map->count()->sortDesc()->take(5);
+        // Guarda en $maximo el resultado necesario para continuar esta operacion.
         $maximo = max(1, (int) $agrupados->max());
         $pagina['barras'] = $agrupados->map(fn (int $cantidad, string $etiqueta): array => [$etiqueta, (int) round(($cantidad / $maximo) * 100), (string) $cantidad])->values()->all();
         $pagina['grafico'] = 'Distribución del reporte';
@@ -269,6 +298,7 @@ final class PanelAnalisisAuditoriaController extends Controller
     /** @param array<string, mixed> $pagina @param array<string, mixed> $filtros */
     private function cargarAuditoria(array &$pagina, string $tipo, User $usuario, ServicioAutorizacion $autorizacion, array $filtros): void
     {
+        // Prepara en $consultaBase la consulta que obtiene o modifica los registros necesarios.
         $consultaBase = $autorizacion->scopeRecordsFor(RegistroAuditoria::query(), $usuario, 'gestion.auditoria.consultar');
         $pagina['opcionesFiltros'] = [
             'usuario_id' => User::query()->whereIn('id', (clone $consultaBase)->whereNotNull('usuario_id')->distinct()->pluck('usuario_id'))->orderBy('nombre')->pluck('nombre', 'id'),
@@ -277,6 +307,7 @@ final class PanelAnalisisAuditoriaController extends Controller
             'rol_codigo' => (clone $consultaBase)->whereNotNull('rol_codigo')->distinct()->orderBy('rol_codigo')->pluck('rol_codigo', 'rol_codigo'),
             'resultado' => (clone $consultaBase)->whereNotNull('resultado')->distinct()->orderBy('resultado')->pluck('resultado', 'resultado'),
         ];
+        // Prepara en $consulta la consulta que obtiene o modifica los registros necesarios.
         $consulta = $autorizacion->scopeRecordsFor(RegistroAuditoria::query()->with('user'), $usuario, 'gestion.auditoria.consultar')
             ->when(isset($filtros['desde']), fn (Builder $q) => $q->whereDate('creado_en', '>=', $filtros['desde']))
             ->when(isset($filtros['hasta']), fn (Builder $q) => $q->whereDate('creado_en', '<=', $filtros['hasta']))
@@ -290,11 +321,14 @@ final class PanelAnalisisAuditoriaController extends Controller
                     ->orWhere('observaciones', 'like', '%'.$filtros['buscar'].'%');
             }));
 
+        // Guarda en $registros el resultado necesario para continuar esta operacion.
         $registros = $consulta->latest('creado_en')->latest('id')->paginate(10)->withQueryString();
         $pagina['filas'] = $registros->map(fn (RegistroAuditoria $registro): array => [
             $registro->creado_en?->format('Y-m-d H:i:s') ?? '—',
             $registro->user?->nombre ?? '—',
+            // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
             $this->etiquetaAuditoria($registro->accion),
+            // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
             $this->etiquetaAuditoria($registro->modulo ?? $registro->entidad),
             $registro->observaciones ?? $registro->entidad,
             $registro->direccion_ip ?? '—',
@@ -323,13 +357,16 @@ final class PanelAnalisisAuditoriaController extends Controller
         $pagina['metricas'][2][1] = (string) (clone $consulta)->whereIn('resultado', ['denegado', 'fallo', 'fallido'])->count();
         $pagina['metricas'][3][0] = 'Usuarios activos';
         $pagina['metricas'][3][1] = (string) User::query()->where('activo', true)->count();
+        // Guarda en $conteosResultado el resultado necesario para continuar esta operacion.
         $conteosResultado = (clone $consulta)->reorder()->selectRaw("COALESCE(resultado, 'registrado') AS resultado, COUNT(*) AS cantidad")
             ->groupBy('resultado')->pluck('cantidad', 'resultado');
         $pagina['metricas'][1][1] = (string) $conteosResultado->filter(fn ($cantidad, $resultado): bool => in_array(mb_strtolower((string) $resultado), ['exito', 'exitoso'], true))->sum();
         $pagina['metricas'][2][1] = (string) $conteosResultado->filter(fn ($cantidad, $resultado): bool => in_array(mb_strtolower((string) $resultado), ['advertencia', 'revertido'], true))->sum();
         $pagina['metricas'][3][1] = (string) $conteosResultado->filter(fn ($cantidad, $resultado): bool => in_array(mb_strtolower((string) $resultado), ['fallo', 'fallido', 'denegado'], true))->sum();
+        // Guarda en $conteosModulo el resultado necesario para continuar esta operacion.
         $conteosModulo = (clone $consulta)->reorder()->selectRaw('COALESCE(modulo, entidad) AS grupo, COUNT(*) AS cantidad')
             ->groupBy('grupo')->orderByDesc('cantidad')->limit(6)->get();
+        // Guarda en $maximo el resultado necesario para continuar esta operacion.
         $maximo = max(1, (int) $conteosModulo->max('cantidad'));
         $pagina['barras'] = $conteosModulo->map(fn (object $fila): array => [$fila->grupo, (int) round(((int) $fila->cantidad / $maximo) * 100), (string) $fila->cantidad])->all();
         $pagina['resumen_filas'] = $conteosResultado->map(fn (mixed $cantidad, string $resultado): array => [$resultado, (string) $cantidad])->all();
@@ -339,24 +376,29 @@ final class PanelAnalisisAuditoriaController extends Controller
     /** @return array<string, mixed> */
     private function estructura(string $tipo): array
     {
+        // Agrupa en $titulos los datos que se utilizaran en la siguiente operacion.
         $titulos = [
             'globales' => ['Reportes globales', 'bi-bar-chart-line', 'Indicadores y resultados calculados desde registros reales de MariaDB.'],
             'operaciones' => ['Auditoría de operaciones', 'bi-shield-check', 'Eventos de operaciones persistidos en el registro append-only de MariaDB.'],
         ];
         [$titulo, $icono, $descripcion] = $titulos[$tipo];
         $reporte = $tipo === 'globales';
+        // Guarda en $columnas el resultado necesario para continuar esta operacion.
         $columnas = $reporte
             ? ['Indicador', 'Origen', 'Valor real']
             : ['Fecha y hora', 'Usuario', 'Módulo', 'Acción', 'Detalle', 'Dirección IP', 'Resultado'];
+        // Guarda en $metricas el resultado necesario para continuar esta operacion.
         $metricas = match ($tipo) {
             'globales' => [['Ventas registradas', '0', 'bi-cart3', 'azul'], ['Transacciones', '0', 'bi-receipt', 'verde'], ['Clientes', '0', 'bi-people', 'violeta'], ['Productos activos', '0', 'bi-box-seam', 'ambar']],
             default => [['Registros encontrados', '0', 'bi-list-check', 'azul'], ['Exitosos', '0', 'bi-check-lg', 'verde'], ['Advertencias', '0', 'bi-exclamation-triangle', 'ambar'], ['Fallidos', '0', 'bi-shield-exclamation', 'rojo']],
         };
 
+        // Guarda en $acciones el resultado necesario para continuar esta operacion.
         $acciones = match ($tipo) {
             'globales' => [['Exportar reporte', 'bi-download', 'exportar']],
             default => [],
         };
+        // Guarda en $filtros el resultado necesario para continuar esta operacion.
         $filtros = match ($tipo) {
             'globales' => [['Tipo de reporte', 'reporte', 'Seleccionar reporte'], ['Estado', 'estado', 'Todos los estados'], ['Desde', 'desde', 'fecha'], ['Hasta', 'hasta', 'fecha']],
             default => [['Desde', 'desde', 'fecha'], ['Hasta', 'hasta', 'fecha'], ['Usuario', 'usuario_id', 'Todos los usuarios'], ['Módulo', 'modulo', 'Todos los módulos'], ['Tipo de operación', 'accion', 'Todas las acciones'], ['Resultado', 'resultado', 'Todos los resultados']],
@@ -380,7 +422,9 @@ final class PanelAnalisisAuditoriaController extends Controller
      */
     private function etiquetaAuditoria(?string $valor): string
     {
+        // Guarda en $valor el resultado necesario para continuar esta operacion.
         $valor = trim((string) $valor);
+        // Agrupa en $etiquetas los datos que se utilizaran en la siguiente operacion.
         $etiquetas = [
             'inicio_sesion' => 'Inicio de sesión',
             'inicio_sesion_fallido' => 'Inicio de sesión fallido',

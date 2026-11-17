@@ -22,8 +22,10 @@ class ElementoMenu extends Model
     /** @use HasFactory<ElementoMenuFactory> */
     use HasFactory;
 
+    // Usa la tabla 'elementos_menu' como origen de los registros de este modelo.
     protected $table = 'elementos_menu';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['menu_id', 'padre_id', 'pantalla_id', 'permiso_id', 'codigo', 'etiqueta', 'icono', 'tipo', 'orden', 'habilitado'];
 
     /**

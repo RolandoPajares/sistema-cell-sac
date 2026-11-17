@@ -22,8 +22,10 @@ class Sede extends Model
     /** @use HasFactory<SedeFactory> */
     use HasFactory;
 
+    // Usa la tabla 'sedes' como origen de los registros de este modelo.
     protected $table = 'sedes';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['empresa_id', 'codigo', 'nombre', 'direccion', 'telefono', 'zona_horaria', 'activa'];
 
     /**

@@ -1,3 +1,4 @@
+
 <header class="site-header">
     <nav class="navbar container">
         <a class="brand" href="{{ route('home') }}">
@@ -20,6 +21,7 @@
             <a class="{{ request()->routeIs('pages.about') ? 'active' : '' }}" href="{{ route('pages.about') }}">Nosotros</a>
             <a class="{{ request()->routeIs('pages.contact*') ? 'active' : '' }}" href="{{ route('pages.contact') }}">Contacto</a>
         </div>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
         <form class="header-search" method="get" action="{{ route('catalog.index') }}" role="search">
             <i class="bi bi-search" aria-hidden="true"></i>
             <input
@@ -35,16 +37,21 @@
                 <i class="bi bi-cart3" aria-hidden="true"></i>
                 <sup>{{ collect((array) session('cart', []))->sum(fn (mixed $linea): int => is_array($linea) ? (int) ($linea['cantidad'] ?? 0) : (int) $linea) }}</sup>
             </a>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if ($headerAuthenticated)
                 <a class="header-account" href="{{ route('dashboard') }}">
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                     @if ($headerUserPhotoUrl)
                         <img class="header-account-avatar" src="{{ $headerUserPhotoUrl }}" alt="">
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                     @else
                         <i class="bi bi-person-circle" aria-hidden="true"></i>
                     @endif
                     <span><b>Mi cuenta</b><small>{{ $headerUser->nombre }}</small></span>
                 </a>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                 <form method="post" action="{{ route('logout') }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                     @csrf
                     <button
                         class="icon-btn"
@@ -55,6 +62,7 @@
                         <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
                     </button>
                 </form>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
             @else
                 <a class="btn btn-ghost" href="{{ route('login') }}">Ingresar</a>
                 <a class="btn btn-primary" href="{{ route('register') }}">Registrarme</a>

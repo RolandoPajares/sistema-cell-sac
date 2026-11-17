@@ -1,12 +1,17 @@
+/* Define los estilos visuales del modulo o componente 'tienda'. */
+
+/* Aplica estos estilos al bloque '.container'. */
 .container {
   width: min(1180px, 92%);
   margin: auto;
 }
 
+/* Aplica estos estilos al bloque 'section'. */
 section {
   padding: 64px 0;
 }
 
+/* Aplica estos estilos al bloque '.detail-grid'. */
 .detail-grid {
   display: grid;
   grid-template-columns: 0.9fr 1.1fr;

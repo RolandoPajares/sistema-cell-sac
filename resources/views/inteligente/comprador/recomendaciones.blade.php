@@ -1,8 +1,12 @@
 @extends('layouts.tienda.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-recomendador')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'SmartMatch')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
     <section class="smartmatch-hero smartmatch-reference-hero">
         <div class="container smartmatch-hero-grid">
@@ -23,6 +27,7 @@
     </section>
 
     <section class="container smartmatch-contenido">
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
         <form class="smartmatch-form" method="get" id="buscar">
             <div class="smartmatch-form-titulo">
                 <i class="bi bi-sliders"></i>
@@ -82,18 +87,19 @@
             <p>Ordenados de mayor a menor coincidencia.</p>
         </div>
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
         @if ($products->isNotEmpty())
             <div class="smartmatch-resultados">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @foreach ($products as $product)
+{{-- logica auxiliar de la vista que prepara valores para la presentacion. --}}
                     @php
-                        $path = $product->images->first()?->ruta_imagen ?: $product->url_imagen;
-                        $path = ltrim((string) preg_replace('~^assets/~', '', $path ?: 'img/marca/logo.jpeg'), '/');
                         $position = $loop->iteration;
                     @endphp
 
                     <article class="smartmatch-tarjeta">
                         <span class="smartmatch-puesto">#{{ $position }}</span>
-                        <img class="smartmatch-product-photo" src="{{ asset('assets/cell-legacy/'.$path) }}" alt="{{ $product->marca }} {{ $product->nombre }}" loading="lazy">
+                        <img class="smartmatch-product-photo" src="{{ $product->recommendation_image_url }}" alt="{{ $product->marca }} {{ $product->nombre }}" loading="lazy">
                         <div class="smartmatch-tarjeta-arriba">
                             <div>
                                 <small>{{ $product->marca ?: 'CELL SAC' }}</small>
@@ -114,6 +120,7 @@
                     </article>
                 @endforeach
             </div>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
         @else
             <div class="smartmatch-vacio">
                 <i class="bi bi-emoji-neutral"></i>

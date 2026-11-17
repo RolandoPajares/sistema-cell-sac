@@ -11,8 +11,10 @@ use Illuminate\Database\Eloquent\Model;
  */
 class MensajeContacto extends Model
 {
+    // Usa la tabla 'mensajes_contacto' como origen de los registros de este modelo.
     protected $table = 'mensajes_contacto';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['nombre', 'contacto', 'mensaje', 'estado', 'creado_en'];
 
     public $timestamps = false;

@@ -1,8 +1,12 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Gestión de ventas')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-ventas')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section class="ventas-page" data-sales-page>
     <header class="ventas-hero">
@@ -49,8 +53,10 @@
                 </div>
                 <span class="ventas-period-label">{{ $periodStartLabel }} - {{ $periodEndLabel }}</span>
             </header>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if ($monedasMultiples)
             <p>La gráfica de importes no está disponible para ventas en monedas diferentes.</p>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
             @else
             <div class="ventas-chart-legend"><span><i class="ventas-dot ventas-dot--blue" aria-hidden="true"></i> Importes registrados</span><span><i class="ventas-dot ventas-dot--green" aria-hidden="true"></i> N.º ventas</span><strong data-sales-chart-value>{{ $totalSalesLabel }}</strong></div>
             <div class="ventas-chart" aria-label="Gráfico de ventas y número de ventas">
@@ -58,6 +64,7 @@
                 <div class="ventas-chart-plot">
                     <div class="ventas-chart-grid-lines" aria-hidden="true"><span></span><span></span><span></span></div>
                     <div class="ventas-chart-bars">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                         @foreach ($salesTrend as $point)
                         <div class="ventas-chart-point">
                             <div class="ventas-bar-group" title="{{ $point['label'] }}: {{ $point['sales_label'] }} · {{ $point['orders'] }} ventas">
@@ -83,6 +90,7 @@
             <div class="ventas-channel-content">
                 <div class="ventas-donut" data-sales-donut="{{ $channelDonut }}"><span><strong>{{ $totalSalesLabel }}</strong><small>Total</small></span></div>
                 <div class="ventas-channel-list">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach ($channelSummary as $channel)
                     <div><span><i class="ventas-dot" data-channel-color="{{ $channel['color'] }}" aria-hidden="true"></i>{{ $channel['label'] }}</span><strong>{{ number_format($channel['percent'], 1) }}%</strong><small>{{ number_format($channel['count']) }}</small></div>
                     @endforeach
@@ -93,6 +101,7 @@
 
     <div class="ventas-layout-grid">
         <div class="ventas-content-column">
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form class="ventas-filters" method="get" action="{{ route('management.sales') }}">
                 <label class="ventas-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar venta</span><input type="search" name="buscar" value="{{ $filters['buscar'] ?? '' }}" placeholder="Buscar por cliente, número de venta, producto..."></label>
                 <label><span class="visually-hidden">Desde</span><input type="date" name="desde" value="{{ $filters['desde'] }}" aria-label="Fecha desde"></label>
@@ -113,6 +122,7 @@
                     </select></label>
                 <button class="ventas-filter-button" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i> Filtros</button>
                 <button class="ventas-primary-button ventas-filter-submit" type="submit"><i class="bi bi-search" aria-hidden="true"></i> Buscar</button>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                 @if ($hasActiveFilters)
                 <a class="ventas-clear-link" href="{{ route('management.sales') }}">Limpiar</a>
                 @endif
@@ -141,6 +151,7 @@
                             </tr>
                         </thead>
                         <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                             @forelse ($orders as $order)
                             <tr>
                                 <td><strong class="ventas-order-number">{{ $order->codigo }}</strong></td>
@@ -152,11 +163,15 @@
                                 <td><span class="ventas-status ventas-status--{{ $salesPresentation[$order->id]['status']['class'] }}"><i class="bi bi-circle-fill" aria-hidden="true"></i>{{ $salesPresentation[$order->id]['status']['label'] }}</span></td>
                                 <td><span class="ventas-receipt">No consultado</span></td>
                                 <td><span class="ventas-row-actions"><button class="ventas-action-button" type="button" data-sales-details="{{ $order->id }}" title="Ver detalle" aria-label="Ver detalle de venta {{ $order->codigo }}"><i class="bi bi-eye" aria-hidden="true"></i></button>@if (in_array($order->id, $editables, true))<a class="ventas-action-button" href="{{ route('management.sales', ['editar' => $order->id]) }}" title="Editar borrador" aria-label="Editar venta {{ $order->codigo }}"><i class="bi bi-pencil" aria-hidden="true"></i></a>@else<button class="ventas-action-button" type="button" disabled title="Solo se editan borradores autorizados sin movimientos asociados" aria-label="Editar venta no disponible"><i class="bi bi-pencil" aria-hidden="true"></i></button>@endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                         @if (in_array($order->id, $confirmables, true) && $order->estado === 'borrador' && $order->pedido_id !== null)
                                         <button class="ventas-action-button" type="button" data-open-sales-confirm="confirmar-venta-{{ $order->id }}" title="Confirmar venta y descontar existencias" aria-label="Confirmar venta {{ $order->codigo }}"><i class="bi bi-check-circle" aria-hidden="true"></i></button>
                                         @endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                         @if (in_array($order->id, $cancelables) && $order->estado === 'confirmada' && $order->canal === 'presencial' && $order->pedido_id === null)
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                                         <form method="post" action="{{ route('management.sales.cancel', $order) }}" data-sales-cancel>
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                                             @csrf
                                             <input type="hidden" name="motivo">
                                             <button class="ventas-action-button" type="submit" title="Anular venta" aria-label="Anular venta {{ $order->codigo }}"><i class="bi bi-x-circle" aria-hidden="true"></i></button>
@@ -172,19 +187,26 @@
                         </tbody>
                     </table>
                 </div>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @foreach ($orders as $order)
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                 @if (in_array($order->id, $confirmables, true) && $order->estado === 'borrador' && $order->pedido_id !== null)
                 <dialog class="ventas-dialog" id="confirmar-venta-{{ $order->id }}" aria-labelledby="confirmar-venta-titulo-{{ $order->id }}">
                     <div class="ventas-dialog-card">
                         <header class="ventas-dialog-header"><div><h2 id="confirmar-venta-titulo-{{ $order->id }}">Confirmar venta {{ $order->codigo }}</h2><p>Se validarán las existencias y los identificadores antes de descontar inventario.</p></div><button class="ventas-dialog-close" type="button" data-close-sales-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                         <form class="ventas-modal-form" method="post" action="{{ route('management.sales.confirm', $order) }}" data-sales-confirm>
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                             @csrf
                             <section class="ventas-modal-section">
                                 <div class="ventas-modal-section-header"><i class="bi bi-phone" aria-hidden="true"></i><h3>IMEI y números de serie</h3></div>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                             @foreach ($order->detalles as $detalle)
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                 @if (($dispositivosPorDetalle->get($detalle->getKey())['requiere'] ?? false))
                                 <label class="ventas-modal-field"><span>{{ $detalle->descripcion_historica }} — {{ number_format((float) $detalle->cantidad, 0) }} unidad(es) serializadas</span>
                                     <select name="dispositivos[{{ $detalle->getKey() }}][]" multiple required size="{{ min(5, max(2, (int) $detalle->cantidad)) }}">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                                         @foreach (($dispositivosPorDetalle->get($detalle->getKey())['dispositivos'] ?? collect()) as $dispositivo)
                                             <option value="{{ $dispositivo->id }}">{{ $dispositivo->imei ?: $dispositivo->numero_serie ?: 'Dispositivo '.$dispositivo->id }}</option>
                                         @endforeach
@@ -192,6 +214,7 @@
                                 </label>
                                 @endif
                             @endforeach
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                 @if ($devicesUnavailable->get($order->id, false))
                                     <p role="status">No hay suficientes IMEI o series disponibles en el almacén asociado. Registra o recibe las unidades antes de confirmar.</p>
                                 @endif
@@ -221,6 +244,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                                     @forelse ($order->detalles as $detalle)
                                     <tr>
                                         <td>{{ $detalle->descripcion_historica }}</td>
@@ -237,6 +261,7 @@
                                 </tbody>
                             </table>
                         </div>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                         @if ($order->observaciones)<p>{{ $order->observaciones }}</p>@endif
                         <p>Total: {{ $order->moneda }} {{ number_format((float) $order->total, 2) }}</p>
                     </div>
@@ -268,6 +293,7 @@
                     <h2>Últimas ventas</h2><a href="{{ route('management.sales') }}">Ver todas</a>
                 </header>
                 <div class="ventas-recent-list">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @forelse ($latestSales as $sale)
                     <div class="ventas-recent-row"><span class="ventas-recent-avatar"><i class="bi bi-person" aria-hidden="true"></i></span><span><strong>{{ $sale->cliente?->razon_social ?: $sale->cliente?->nombre_contacto ?: 'Sin cliente asociado' }}</strong><small><i class="bi bi-circle-fill" aria-hidden="true"></i> {{ $sale->fecha_venta?->format('d/m/Y H:i') }}</small></span><b>{{ $sale->moneda }} {{ number_format((float) $sale->total, 2) }}</b></div>
                     @empty
@@ -281,6 +307,7 @@
                     <h2>Productos más vendidos</h2><a href="{{ route('management.products') }}">Ver todos</a>
                 </header>
                 <div class="ventas-product-list">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @forelse ($monedasMultiples ? [] : $topProducts as $index => $product)
                     <div class="ventas-product-row"><span class="ventas-product-rank">{{ $index + 1 }}</span><span class="ventas-product-image">@if ($product['image'])<img src="{{ $product['image'] }}" alt="">@else<i class="bi bi-box-seam" aria-hidden="true"></i>@endif</span><span><strong>{{ $product['name'] }}</strong><small>{{ rtrim(rtrim(number_format($product['units'], 6, '.', ''), '0'), '.') }} unidades</small></span><b>{{ $product['revenue_label'] }}</b></div>
                     @empty
@@ -300,10 +327,12 @@
                     </span></div>
                 <button class="ventas-dialog-close" type="button" data-close-sales-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
             </header>
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
             @include('gestion.comercial.ventas.registrar', ['customers' => $customers, 'products' => $products, 'paymentMethods' => $paymentMethods])
         </div>
     </dialog>
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if ($editOrder)
     <dialog class="ventas-dialog" id="editar-venta-{{ $editOrder->id }}" data-sales-auto-open="1" aria-labelledby="editar-venta-titulo-{{ $editOrder->id }}">
         <div class="ventas-dialog-card">
@@ -314,6 +343,7 @@
                     </span></div>
                 <button class="ventas-dialog-close" type="button" data-close-sales-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
             </header>
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
             @include('gestion.comercial.ventas.editar', ['order' => $editOrder, 'customers' => $customers, 'products' => $products])
         </div>
     </dialog>
@@ -321,6 +351,7 @@
 </section>
 @endsection
 
+{{-- bloque de estilos o scripts para el lugar reservado por la plantilla. --}}
 @push('scripts')
 @vite('resources/js/gestion/comercial/ventas/index.js')
 @endpush

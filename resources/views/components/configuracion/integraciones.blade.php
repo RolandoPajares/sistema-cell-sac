@@ -1,3 +1,5 @@
+
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
 <form method="GET" class="tc-cs__toolbar">
     <label>
         <i class="bi bi-search" aria-hidden="true"></i>
@@ -24,7 +26,9 @@
             <a href="{{ route('management.integrations') }}" aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></a>
         </header>
         <div class="tc-cs__dialog-body">
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form method="POST" action="{{ route('management.integrations.store') }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                 @csrf
                 <label>Código<input name="codigo" maxlength="80" value="{{ old('codigo') }}" required></label>
                 <label>Nombre<input name="nombre" maxlength="140" value="{{ old('nombre') }}" required></label>
@@ -36,6 +40,7 @@
 </dialog>
 
 <div class="tc-cs__integrations">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
     @forelse ($integraciones as $integracion)
         <article class="tc-cs__card tc-cs__integration">
             <div class="tc-cs__integration-head">
@@ -48,14 +53,18 @@
                 <div><dt>Responsable</dt><dd>No registrado en la tabla de integraciones</dd></div>
             </dl>
             <div class="tc-cs__integration-actions">
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                 <form method="POST" action="{{ route('management.integrations.status.update', $integracion->id) }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                     @csrf @method('PATCH')
                     <input type="hidden" name="activa" value="{{ $integracion->activa ? 0 : 1 }}">
                     <button type="submit"><i class="bi bi-{{ $integracion->activa ? 'pause-circle' : 'play-circle' }}" aria-hidden="true"></i> {{ $integracion->activa ? 'Desactivar' : 'Activar' }}</button>
                 </form>
                 <details>
                     <summary><i class="bi bi-pencil" aria-hidden="true"></i> Editar datos</summary>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                     <form method="POST" action="{{ route('management.integrations.update', $integracion->id) }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                         @csrf @method('PUT')
                         <label>Código<input name="codigo" maxlength="80" value="{{ $integracion->codigo }}" required></label>
                         <label>Nombre<input name="nombre" maxlength="140" value="{{ $integracion->nombre }}" required></label>
@@ -80,6 +89,7 @@
         <table>
             <thead><tr><th>Integración</th><th>Dirección</th><th>Estado</th><th>Inicio</th></tr></thead>
             <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @forelse ($eventos as $evento)
                     <tr><td>{{ $evento->nombre }}</td><td>{{ $evento->direccion }}</td><td>{{ $evento->estado }}</td><td>{{ $evento->iniciado_en }}</td></tr>
                 @empty

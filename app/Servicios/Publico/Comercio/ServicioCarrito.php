@@ -17,17 +17,25 @@ final class ServicioCarrito
      */
     public function normalizar(array $carrito): array
     {
+        // Limpia identificadores y cantidades antes de usar el carrito en el checkout.
+        // Agrupa en $normalizado los datos que se utilizaran en el siguiente paso.
         $normalizado = [];
 
+        // Recorre los elementos recibidos para validar o procesar cada registro.
+        // Recorre cada linea para conservar solo productos y cantidades validas.
         foreach ($carrito as $productoId => $linea) {
+            // Guarda en $id el resultado necesario para continuar la operacion.
             $id = filter_var($productoId, FILTER_VALIDATE_INT);
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if ($id === false || $id < 1) {
                 continue;
             }
 
+            // Guarda en $cantidad el resultado necesario para continuar la operacion.
             $cantidad = is_array($linea)
                 ? filter_var($linea['cantidad'] ?? $linea['quantity'] ?? null, FILTER_VALIDATE_INT)
                 : filter_var($linea, FILTER_VALIDATE_INT);
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if ($cantidad === false || $cantidad < 1) {
                 continue;
             }

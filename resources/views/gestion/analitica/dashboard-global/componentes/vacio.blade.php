@@ -1,3 +1,4 @@
+
 {{-- Componente de analitica: dashboard-global\componentes\vacio.blade.php. Renderiza un bloque visual reutilizable. --}}
 {{-- Bloque visual: muestra un estado vacío cuando no existen datos para presentar. --}}
 <div class="tc-dg__empty">

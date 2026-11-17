@@ -15,8 +15,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Cotizacion extends Model
 {
+    // Usa la tabla 'cotizaciones' como origen de los registros de este modelo.
     protected $table = 'cotizaciones';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['cliente_id', 'creado_por_usuario_id', 'total', 'estado', 'notas', 'activo', 'creado_en', 'empresa_id', 'sede_id'];
 
     public $timestamps = false;

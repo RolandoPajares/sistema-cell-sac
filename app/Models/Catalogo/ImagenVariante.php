@@ -12,8 +12,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class ImagenVariante extends Model
 {
+    // Usa la tabla 'imagenes_variantes' como origen de los registros de este modelo.
     protected $table = 'imagenes_variantes';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['variante_id', 'ruta_imagen', 'imagen_principal', 'orden', 'fecha_creacion'];
 
     public $timestamps = false;

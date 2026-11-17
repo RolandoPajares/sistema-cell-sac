@@ -21,6 +21,7 @@ final class Notificacion extends Model
 
     public const UPDATED_AT = 'actualizado_en';
 
+    // Usa la tabla 'notificaciones' como origen de los registros de este modelo.
     protected $table = 'notificaciones';
 
     protected $primaryKey = 'id';
@@ -29,6 +30,7 @@ final class Notificacion extends Model
 
     protected $keyType = 'string';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = [
         'tipo', 'tipo_notificable', 'notificable_id', 'datos', 'leido_en',
     ];

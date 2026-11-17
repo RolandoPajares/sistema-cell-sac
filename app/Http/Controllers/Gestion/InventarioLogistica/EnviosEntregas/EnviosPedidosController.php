@@ -40,8 +40,10 @@ final class EnviosPedidosController extends Controller
      */
     public function mostrar(ListadoEnviosPedidosRequest $solicitud): View
     {
+        // Devuelve la vista con los datos preparados por el controlador.
         return view(
             'gestion.inventario-logistica.envios-entregas.envios.listar',
+            // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
             $this->envios->listar($solicitud->user(), $solicitud->validated()),
         );
     }
@@ -55,8 +57,10 @@ final class EnviosPedidosController extends Controller
      */
     public function actualizarEstado(ActualizarEstadoEnvioPedidoRequest $solicitud, EnvioPedido $envioPedido): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $this->envios->actualizarEstado($envioPedido, $solicitud->validated(), $solicitud->user(), $solicitud->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Estado de envío actualizado y evento registrado.');
     }
 
@@ -69,11 +73,14 @@ final class EnviosPedidosController extends Controller
      */
     public function detalle(Request $request, EnvioPedido $envio): View
     {
+        // Obtiene en $sedesAutorizadas la informacion de la solicitud o del usuario actual.
         $sedesAutorizadas = $this->autorizacion->authorizedSiteIds($request->user(), 'gestion.inventario.consultar');
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(in_array((int) $envio->sede_id, $sedesAutorizadas, true), 404);
 
         $envio->load(['pedido:id,numero_referencia,cliente_id', 'almacen.sede', 'eventos' => static fn ($query) => $query->orderByDesc('ocurrido_en')->orderByDesc('id')]);
 
+        // Devuelve la vista 'gestion.inventario-logistica.envios-entregas.envios.detalle' con los datos preparados por este controlador.
         return view('gestion.inventario-logistica.envios-entregas.envios.detalle', compact('envio'));
     }
 
@@ -88,9 +95,12 @@ final class EnviosPedidosController extends Controller
      */
     public function exportar(ListadoEnviosPedidosRequest $solicitud, ExportadorTabular $exporter, RegistradorAuditoria $audit, string $format = 'csv'): Response|StreamedResponse
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $records = $this->envios->consultaExportacion($solicitud->user(), $solicitud->validated())->get();
         $rows = $records->map(static fn ($envio): array => [$envio->codigo, $envio->pedido_id, $envio->almacen?->nombre, $envio->almacen?->sede?->nombre, $envio->transportista, $envio->servicio, $envio->numero_seguimiento, $envio->estado, $envio->ultimoEvento?->ocurrido_en?->toDateTimeString()])->all();
+        // Guarda en $response el resultado necesario para continuar esta operacion.
         $response = $exporter->download($format, 'envios-pedidos', ['Código', 'Pedido', 'Almacén', 'Sede', 'Transportista', 'Servicio', 'Seguimiento', 'Estado', 'Último evento'], $rows, [
             'title' => 'REPORTE DE ENVÍOS Y ENTREGAS', 'module' => 'Inventario y Logística', 'report_name' => 'Envíos de pedidos', 'generated_by' => (string) $solicitud->user()->nombre,
             'indicators' => [['label' => 'Envíos incluidos', 'value' => count($rows)]], 'column_types' => ['text', 'integer', 'text', 'text', 'text', 'text', 'text', 'text', 'datetime'],

@@ -21,8 +21,10 @@ class Modulo extends Model
     /** @use HasFactory<ModuloFactory> */
     use HasFactory;
 
+    // Usa la tabla 'modulos' como origen de los registros de este modelo.
     protected $table = 'modulos';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['codigo', 'nombre', 'descripcion', 'icono', 'orden', 'habilitado'];
 
     /**
@@ -45,6 +47,7 @@ class Modulo extends Model
         return $this->hasMany(Pantalla::class, 'modulo_id')->orderBy('nombre');
     }
 
+    // Define la relacion 'permisos' entre este modelo y los registros relacionados.
     public function permisos(): HasMany
     {
         return $this->hasMany(Permiso::class, 'modulo_id');

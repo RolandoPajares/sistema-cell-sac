@@ -21,8 +21,10 @@ class Empresa extends Model
     /** @use HasFactory<EmpresaFactory> */
     use HasFactory;
 
+    // Usa la tabla 'empresas' como origen de los registros de este modelo.
     protected $table = 'empresas';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['codigo', 'razon_social', 'nombre_comercial', 'ruc', 'moneda_base', 'activo'];
 
     /**

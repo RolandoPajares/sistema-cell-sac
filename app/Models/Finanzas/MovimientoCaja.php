@@ -18,8 +18,10 @@ class MovimientoCaja extends Model
     /** @use HasFactory<MovimientoCajaFactory> */
     use HasFactory;
 
+    // Usa la tabla 'movimientos_caja' como origen de los registros de este modelo.
     protected $table = 'movimientos_caja';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = [
         'sesion_caja_id', 'pago_id', 'tipo', 'direccion', 'importe',
         'descripcion', 'creado_por_usuario_id', 'creado_en',

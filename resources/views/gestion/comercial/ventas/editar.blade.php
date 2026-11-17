@@ -1,5 +1,9 @@
+
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
 <form class="ventas-modal-form" method="post" action="{{ route('management.sales.update', $order) }}" data-sales-form>
+{{-- proteccion CSRF que valida el origen del formulario. --}}
     @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
     @method('PUT')
 
     <div class="ventas-modal-steps" aria-label="Pasos de edición">
@@ -16,6 +20,7 @@
             <label class="ventas-modal-field">
                 <span>Cliente <b>*</b></span>
                 <select name="cliente_id" required data-sales-customer>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach ($customers as $customer)
                         <option value="{{ $customer->id }}" @selected($customer->id === $order->cliente_id)>{{ ($customer->razon_social ?: $customer->nombre_contacto) }} · {{ $customer->correo }}</option>
                     @endforeach
@@ -48,6 +53,7 @@
             <label class="ventas-modal-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar producto</span><input type="search" placeholder="Buscar producto por nombre, código o categoría..." data-sales-product-search></label>
             <select class="ventas-product-select" aria-label="Producto para agregar" data-sales-product-picker>
                 <option value="">Selecciona un producto</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @foreach ($products as $product)
                     <option value="{{ $product->id }}" data-price="{{ number_format((float) $product->effective_price, 2, '.', '') }}" data-stock="{{ $product->existencias }}">{{ $product->nombre }} · S/ {{ number_format((float) $product->effective_price, 2) }} · Stock {{ $product->existencias }}</option>
                 @endforeach
@@ -58,6 +64,7 @@
             <table class="ventas-modal-table">
                 <thead><tr><th>#</th><th>Producto</th><th>Precio (S/)</th><th>Cantidad</th><th>Subtotal (S/)</th><th>Acciones</th></tr></thead>
                 <tbody data-sales-lines>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach ($order->detalles as $index => $detail)
                         <tr class="ventas-modal-line" data-sales-line data-product-id="{{ $detail->producto?->id }}" data-price="{{ number_format((float) ($detail->precio_unitario ?? $detail->producto?->effective_price ?? 0), 2, '.', '') }}">
                             <td class="ventas-modal-line-number">{{ $index + 1 }}</td>

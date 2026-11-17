@@ -17,6 +17,7 @@ class GuardarCotizacionRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return $this->user() !== null
@@ -28,13 +29,19 @@ class GuardarCotizacionRequest extends FormRequest
      *
      * @return array Resultado de la operación.
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         return [
+            // Valida el campo 'cliente_id' con las reglas definidas en la instruccion siguiente.
             'cliente_id' => ['nullable', 'integer', 'exists:clientes,id'],
+            // Valida el campo 'notas' con las reglas definidas en la instruccion siguiente.
             'notas' => ['nullable', 'string', 'max:500'],
+            // Valida el campo 'items' con las reglas definidas en la instruccion siguiente.
             'items' => ['required', 'array', 'min:1'],
+            // Valida el campo 'items.*.producto_id' con las reglas definidas en la instruccion siguiente.
             'items.*.producto_id' => ['required', 'integer', 'exists:productos,id'],
+            // Valida el campo 'items.*.cantidad' con las reglas definidas en la instruccion siguiente.
             'items.*.cantidad' => ['required', 'integer', 'min:1'],
         ];
     }

@@ -1,8 +1,12 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Clientes')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-clientes')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
     <section class="clientes-page" data-client-page data-open-on-load="{{ $errors->any() ? 'true' : 'false' }}">
         <header class="clientes-hero">
@@ -23,12 +27,14 @@
 
         <div class="clientes-layout">
             <main>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                 <form class="clientes-filters" method="get" action="{{ route('management.customers') }}">
                     <label class="clientes-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar clientes</span><input type="search" name="buscar" value="{{ $filters['buscar'] ?? '' }}" placeholder="Buscar clientes por nombre, documento, correo o teléfono..."></label>
                     <label><span class="visually-hidden">Filtrar por tipo</span><select name="tipo"><option value="">Tipo: Todos</option><option value="mayorista" @selected(($filters['tipo'] ?? null) === 'mayorista')>Mayorista</option><option value="minorista" @selected(($filters['tipo'] ?? null) === 'minorista')>Minorista</option></select></label>
                     <label><span class="visually-hidden">Filtrar por estado</span><select name="estado"><option value="">Estado: Todos</option><option value="activo" @selected(($filters['estado'] ?? null) === 'activo')>Activos</option><option value="inactivo" @selected(($filters['estado'] ?? null) === 'inactivo')>Inactivos</option></select></label>
                     <label><span class="visually-hidden">Filtrar por ciudad</span><select name="ciudad"><option value="">Ciudad: Todas</option>@foreach ($cities as $city)<option value="{{ $city }}" @selected(($filters['ciudad'] ?? null) === $city)>{{ $city }}</option>@endforeach</select></label>
                     <button class="clientes-filter-button" type="submit"><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Aplicar filtros</button>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                     @if (($filters['buscar'] ?? null) || ($filters['tipo'] ?? null) || ($filters['estado'] ?? null) || ($filters['ciudad'] ?? null))<a class="clientes-clear-button" href="{{ route('management.customers') }}">Limpiar filtros</a>@endif
                 </form>
 
@@ -38,6 +44,7 @@
                         <table class="clientes-table">
                             <thead><tr><th><span class="clientes-checkbox" aria-hidden="true"></span></th><th>#</th><th>Cliente</th><th>Tipo</th><th>Documento</th><th>Correo</th><th>Teléfono</th><th>Ciudad</th><th>Estado</th><th>Última compra</th><th>Acciones</th></tr></thead>
                             <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                                 @forelse ($customers as $customer)
                                     <tr>
                                         <td><span class="clientes-checkbox" aria-hidden="true"></span></td>
@@ -79,7 +86,9 @@
                 <div class="clientes-import-heading"><span class="clientes-import-icon"><i class="bi bi-file-earmark-arrow-up" aria-hidden="true"></i></span><div><span class="clientes-eyebrow">CRM · Importación masiva</span><h2 id="clientes-import-title">Importar clientes</h2><p>Valida una plantilla y revisa las filas antes de guardarlas en MariaDB.</p></div></div>
                 <button class="clientes-dialog-close" type="button" data-close-client-dialog aria-label="Cerrar importación"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
             </header>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form method="post" action="{{ route('management.customers.import') }}" enctype="multipart/form-data" data-client-import-form>
+{{-- proteccion CSRF que valida el origen del formulario. --}}
             @csrf
             <div class="clientes-import-body">
                 <div class="clientes-import-demo-note"><i class="bi bi-database-check" aria-hidden="true"></i><span>El CSV se valida en el servidor y se guarda en MariaDB dentro de una transacción. No se crean cuentas de usuario.</span></div>
@@ -110,16 +119,19 @@
             </form>
         </div>
     </dialog>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
     @foreach ($customers as $customer)
         <dialog class="clientes-dialog" id="cliente-editar-{{ $customer->id }}" aria-labelledby="cliente-editar-titulo-{{ $customer->id }}"><div class="clientes-dialog-card"><header class="clientes-dialog-header"><div><span class="clientes-eyebrow">CRM</span><h2 id="cliente-editar-titulo-{{ $customer->id }}">Editar cliente</h2><p>Actualiza la información de {{ $customer->nombre_contacto }}.</p></div><button class="clientes-dialog-close" type="button" data-close-client-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>@include('gestion.comercial.clientes.editar', ['customer' => $customer])</div></dialog>
         <dialog class="clientes-dialog clientes-view-dialog" id="cliente-{{ $customer->id }}" aria-labelledby="cliente-detalle-titulo-{{ $customer->id }}"><div class="clientes-dialog-card"><header class="clientes-dialog-header"><div><span class="clientes-eyebrow">{{ $customerPresentation[$customer->id]['type']['label'] }}</span><h2 id="cliente-detalle-titulo-{{ $customer->id }}">{{ $customer->nombre_contacto }}</h2><p>{{ $customer->correo }} · {{ $customer->ciudad ?: 'Ciudad no registrada' }}</p></div><button class="clientes-dialog-close" type="button" data-close-client-dialog aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header><div class="clientes-view-body"><div class="clientes-view-identity"><b class="clientes-avatar clientes-avatar--{{ $customerPresentation[$customer->id]['type']['class'] }}">{{ $customerPresentation[$customer->id]['initials'] }}</b><div><h3>{{ $customer->nombre_contacto }}</h3><p>{{ $customer->razon_social ?: 'Perfil de cliente registrado en el sistema.' }}</p></div></div><div class="clientes-view-grid"><div><small>Tipo</small><strong>{{ $customerPresentation[$customer->id]['type']['label'] }}</strong></div><div><small>Documento</small><strong>{{ $customer->documento }}</strong></div><div><small>Teléfono</small><strong>{{ $customer->telefono ?: 'No registrado' }}</strong></div><div><small>Estado</small><span class="clientes-status clientes-status--{{ $customer->activo ? 'active' : 'inactive' }}">{{ $customer->activo ? 'Activo' : 'Inactivo' }}</span></div></div><div class="clientes-view-contact"><small>Dirección comercial</small><p>{{ $customer->ciudad ?: 'Ciudad no registrada' }}</p></div></div><footer class="clientes-dialog-footer"><button class="clientes-cancel-button" type="button" data-close-client-dialog>Cerrar</button><button class="clientes-primary-button" type="button" data-open-client-edit="cliente-editar-{{ $customer->id }}"><i class="bi bi-pencil" aria-hidden="true"></i> Editar cliente</button></footer></div></dialog>
     @endforeach
 @endsection
 
+{{-- bloque de estilos o scripts para el lugar reservado por la plantilla. --}}
 @push('scripts')
     @vite('resources/js/gestion/comercial/clientes/index.js')
 @endpush
 
+{{-- bloque de estilos o scripts para el lugar reservado por la plantilla. --}}
 @push('styles')
     @vite('resources/css/gestion/comercial/clientes/clientes.css')
 @endpush

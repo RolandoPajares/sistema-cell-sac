@@ -10,7 +10,10 @@ final class ServicioPresentacionReembolsos
      */
     public function preparar(array $module): array
     {
+        // Organiza los datos del modulo de reembolsos para su presentacion.
+        // Guarda en $formOptions el resultado necesario para continuar la operacion.
         $formOptions = $module['form_options'] ?? [];
+        // Guarda en $moduleKey el resultado necesario para continuar la operacion.
         $moduleKey = (string) ($module['key'] ?? 'reembolsos');
 
         $module['module_key'] = $moduleKey;

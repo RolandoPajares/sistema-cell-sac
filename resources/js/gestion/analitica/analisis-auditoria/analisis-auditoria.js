@@ -1,17 +1,29 @@
+/**
+ * GUIA DE EXPOSICION JAVASCRIPT
+ * Archivo: resources/js/gestion/analitica/analisis-auditoria/analisis-auditoria.js
+ * Este modulo contiene comportamiento de interfaz, eventos, validaciones y/o
+ * comunicacion con el backend. Los comentarios explican el flujo sin cambiar la logica.
+ */
+
+// Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
 document.querySelectorAll('[data-analisis-auditoria]').forEach((panel) => {
     const configuracion = JSON.parse(atob(panel.dataset.aaConfig ?? 'e30='));
     const dialogo = panel.querySelector('[data-aa-dialog]');
     const detalle = panel.querySelector('[data-aa-detail-data]');
 
+    // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
     panel.querySelectorAll('[data-aa-detail]').forEach((boton) => {
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         boton.addEventListener('click', () => {
             const indice = Number(boton.dataset.aaDetail);
             const fila = configuracion.filas?.[indice];
+            // Condicional: evalua "!Array.isArray(fila)" para decidir si ejecuta el bloque siguiente.
             if (!Array.isArray(fila)) {
                 return;
             }
 
             detalle.replaceChildren();
+            // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
             configuracion.columnas.forEach((columna, posicion) => {
                 const elemento = document.createElement('label');
                 const etiqueta = document.createElement('span');
@@ -28,15 +40,19 @@ document.querySelectorAll('[data-analisis-auditoria]').forEach((panel) => {
         });
     });
 
+    // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
     panel.querySelectorAll('[data-aa-close]').forEach((boton) => {
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         boton.addEventListener('click', () => dialogo.close());
     });
 });
 
+// Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
 document.querySelectorAll('[data-auditoria-operaciones]').forEach((panel) => {
     const configuracion = JSON.parse(atob(panel.dataset.auditConfig ?? 'W10='));
     const modal = panel.querySelector('[data-audit-modal]');
     const detalleContenido = panel.querySelector('[data-audit-detail-content]');
+    // Recorrido: usa map para procesar cada elemento y obtener o actualizar datos.
     const filas = new Map(configuracion.map((evento) => [String(evento.id), evento]));
 
 /**
@@ -46,7 +62,9 @@ document.querySelectorAll('[data-auditoria-operaciones]').forEach((panel) => {
  *
  * @returns {*} Resultado de la operación.
  */
+    // Funcion: renderizar concentra una tarea reutilizable del modulo.
     const renderizar = (evento) => {
+        // Condicional: evalua "!evento" para decidir si ejecuta el bloque siguiente.
         if (!evento) {
             return;
         }
@@ -65,6 +83,7 @@ document.querySelectorAll('[data-auditoria-operaciones]').forEach((panel) => {
             Observaciones: evento.observaciones,
             'Fecha y hora': evento.fecha,
         };
+        // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
         Object.entries(campos).forEach(([etiqueta, valor]) => {
             const item = document.createElement('tr');
             const titulo = document.createElement('th');
@@ -75,19 +94,26 @@ document.querySelectorAll('[data-auditoria-operaciones]').forEach((panel) => {
             item.append(titulo, contenido);
             detalleContenido.append(item);
         });
+        // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
         panel.querySelectorAll('[data-audit-row]').forEach((fila) => fila.classList.toggle('is-selected', fila.dataset.auditId === String(evento.id)));
         modal.showModal();
     };
 
+    // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
     panel.querySelectorAll('[data-audit-detail]').forEach((boton) => {
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         boton.addEventListener('click', () => renderizar(filas.get(String(boton.dataset.auditDetail))));
     });
 
+    // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
     panel.querySelectorAll('[data-audit-close]').forEach((boton) => {
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         boton.addEventListener('click', () => modal.close());
     });
 
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     modal.addEventListener('click', (evento) => {
+        // Condicional: evalua "evento.target === modal" para decidir si ejecuta el bloque siguiente.
         if (evento.target === modal) {
             modal.close();
         }

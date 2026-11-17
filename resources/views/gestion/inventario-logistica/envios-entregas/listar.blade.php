@@ -1,13 +1,19 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Envíos y entregas')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-envios-entregas')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section class="gestion-pendiente-page gestion-operacion-page gestion-operacion-page--{{ $module['key'] }}" data-pending-module="{{ $module['key'] }}">
     <header class="gestion-operacion-header">
         <nav class="gestion-operacion-breadcrumb" aria-label="Ruta de navegación">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @foreach ($module['operacion_ui']['breadcrumb'] as $breadcrumb)
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                 @if (!$loop->first)<i class="bi bi-chevron-right" aria-hidden="true"></i>@endif
                 <span class="{{ $loop->last ? 'is-current' : '' }}">{{ $breadcrumb }}</span>
             @endforeach
@@ -19,13 +25,18 @@
                 <p>{{ $module['operacion_ui']['description'] }}</p>
             </div>
             <div class="gestion-operacion-actions">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @foreach ($module['operacion_ui']['actions'] as $action)
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                     @if (isset($action['route']) && isset($action['formats']))
                         <details class="gestion-pendiente-export-menu"><summary class="gestion-pendiente-secondary"><i class="bi {{ $action['icon'] }}" aria-hidden="true"></i> {{ $action['label'] }} <i class="bi bi-chevron-down" aria-hidden="true"></i></summary><div class="gestion-pendiente-export-options">@foreach ($action['formats'] as $format)<a href="{{ route($action['route'], array_merge(request()->query(), ['format' => $format])) }}"><i class="bi {{ $format === 'excel' ? 'bi-file-earmark-spreadsheet' : ($format === 'pdf' ? 'bi-file-earmark-pdf' : 'bi-filetype-csv') }}" aria-hidden="true"></i> {{ strtoupper($format) }} (.{{ $format === 'excel' ? 'xlsx' : $format }})</a>@endforeach</div></details>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                     @elseif (isset($action['route']))
                         <a class="gestion-pendiente-secondary" href="{{ route($action['route'], request()->query()) }}"><i class="bi {{ $action['icon'] }}" aria-hidden="true"></i> {{ $action['label'] }}</a>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                     @elseif (($action['modal'] ?? null) === 'crear')
                         <button class="gestion-pendiente-primary" type="button" data-pending-open="crear"><i class="bi {{ $action['icon'] }}" aria-hidden="true"></i> {{ $action['label'] }}</button>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                     @else
                         <button class="gestion-pendiente-secondary" type="button" data-pending-notice="{{ $action['notice'] }}"><i class="bi {{ $action['icon'] }}" aria-hidden="true"></i> {{ $action['label'] }}</button>
                     @endif
@@ -34,14 +45,17 @@
         </div>
     </header>
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if (session('status'))
         <div class="gestion-operacion-feedback gestion-operacion-feedback--success" role="status"><i class="bi bi-check-circle" aria-hidden="true"></i>{{ session('status') }}</div>
     @endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if ($errors->any())
         <div class="gestion-operacion-feedback gestion-operacion-feedback--error" role="alert"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i>{{ $errors->first() }}</div>
     @endif
 
     <section class="gestion-operacion-kpis" aria-label="Indicadores del módulo">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
         @foreach ($module['operacion_ui']['kpis'] as $kpi)
             <article class="gestion-operacion-kpi gestion-operacion-kpi--{{ $kpi['tone'] }}">
                 <span class="gestion-operacion-kpi-icon"><i class="bi {{ $kpi['icon'] }}" aria-hidden="true"></i></span>
@@ -51,14 +65,18 @@
         @endforeach
     </section>
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
     <form class="gestion-operacion-filters" method="GET" @if (($module['operacion_ui']['backend'] ?? false) === true) action="{{ $module['operacion_ui']['filter_action'] }}" @else data-pending-form @endif>
         <label class="gestion-operacion-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">{{ $module['operacion_ui']['search_label'] }}</span><input name="buscar" type="search" value="{{ $module['operacion_ui']['filter_values']['buscar'] ?? '' }}" placeholder="{{ $module['operacion_ui']['search_placeholder'] }}" data-pending-search></label>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
         @foreach ($module['operacion_ui']['filters'] as $filter)
             <label><span class="visually-hidden">{{ $filter['label'] }}</span><select name="{{ $filter['name'] ?? 'filtro_'.$loop->index }}" data-pending-filter><option value="">{{ $filter['placeholder'] }}</option>@foreach ($filter['options'] as $option)<option value="{{ $option }}" @selected(($module['operacion_ui']['filter_values'][$filter['name'] ?? ''] ?? '') === $option)>{{ $option }}</option>@endforeach</select></label>
         @endforeach
         <button class="gestion-operacion-filter-button" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i> Filtrar</button>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
         @if (($module['operacion_ui']['backend'] ?? false) === true && !empty($module['operacion_ui']['clear_action']))
             <a class="gestion-operacion-clear-button" href="{{ $module['operacion_ui']['clear_action'] }}">Limpiar filtros</a>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
         @else
             <button class="gestion-operacion-clear-button" type="button" data-pending-notice="Los filtros se podrán limpiar cuando exista una fuente de datos integrada.">Limpiar filtros</button>
         @endif
@@ -67,8 +85,10 @@
     <section class="gestion-operacion-control-card">
         <header class="gestion-operacion-card-header">
             <div><i class="bi {{ $module['operacion_ui']['table_icon'] }}" aria-hidden="true"></i><h2>{{ $module['operacion_ui']['table_title'] }}</h2><span>{{ $module['operacion_ui']['table_count'] }}</span></div>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if (($module['operacion_ui']['backend'] ?? false) === true && !empty($module['operacion_ui']['sort_options']))
                 <details class="gestion-operacion-sort-menu"><summary class="gestion-operacion-sort">Ordenar por <strong>{{ $module['operacion_ui']['sort_options'][$module['operacion_ui']['filter_values']['orden'] ?? 'recientes'] ?? 'Más recientes' }}</strong><i class="bi bi-chevron-down" aria-hidden="true"></i></summary><div class="gestion-operacion-sort-options">@foreach ($module['operacion_ui']['sort_options'] as $sortKey => $sortLabel)<a href="{{ route($module['operacion_ui']['filter_route'], array_merge(request()->query(), ['orden' => $sortKey, 'page' => 1])) }}">{{ $sortLabel }}</a>@endforeach</div></details>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
             @else
                 <button class="gestion-operacion-sort" type="button" data-pending-notice="El ordenamiento quedará habilitado cuando exista una fuente de datos integrada.">Ordenar por <strong>Más recientes</strong><i class="bi bi-chevron-down" aria-hidden="true"></i></button>
             @endif
@@ -77,12 +97,16 @@
             <table class="gestion-operacion-table">
                 <thead><tr>@foreach ($module['operacion_ui']['table_columns'] as $column)<th>{{ $column }}</th>@endforeach</tr></thead>
                 <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @forelse ($module['operacion_ui']['rows'] as $row)
                         <tr>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                             @foreach ($row['cells'] as $cell)
                                 <td>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                     @if (is_array($cell))
                                         <span class="gestion-operacion-badge gestion-operacion-badge--{{ $cell['tone'] }}">{{ $cell['value'] }}</span>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                                     @else
                                         {{ $cell }}
                                     @endif
@@ -103,16 +127,21 @@
         <footer class="gestion-operacion-table-footer">
             <span>{{ $module['operacion_ui']['table_footer'] }}</span>
             <div class="gestion-operacion-pagination" aria-label="Paginación">
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                 @if (is_array($module['operacion_ui']['pagination']))
                     <a href="{{ $module['operacion_ui']['pagination']['previous'] ?: '#' }}" @if (!$module['operacion_ui']['pagination']['previous']) aria-disabled="true" @endif aria-label="Página anterior"><i class="bi bi-chevron-left" aria-hidden="true"></i></a>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @for ($page = 1; $page <= $module['operacion_ui']['pagination']['last']; $page++)
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                         @if ($page <= 5 || $page === $module['operacion_ui']['pagination']['last'])
                             <a href="{{ route($module['operacion_ui']['filter_route'], array_merge(request()->query(), ['page' => $page])) }}" class="{{ $page === $module['operacion_ui']['pagination']['current'] ? 'is-active' : '' }}">{{ $page }}</a>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                         @elseif ($page === 6)
                             <span class="gestion-operacion-pagination-more">…</span>
                         @endif
                     @endfor
                     <a href="{{ $module['operacion_ui']['pagination']['next'] ?: '#' }}" @if (!$module['operacion_ui']['pagination']['next']) aria-disabled="true" @endif aria-label="Página siguiente"><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                 @else
                     <button type="button" disabled aria-label="Página anterior"><i class="bi bi-chevron-left" aria-hidden="true"></i></button><button type="button" class="is-active" disabled>1</button><button type="button" disabled aria-label="Página siguiente"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
                 @endif
@@ -121,11 +150,14 @@
     </section>
 
     <section class="gestion-operacion-bottom-grid" aria-label="Resumen del módulo">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
         @foreach ($module['operacion_ui']['panels'] as $panel)
             <article class="gestion-operacion-summary-card{{ ($panel['type'] ?? 'empty') === 'performance' ? ' gestion-operacion-performance-card' : '' }}">
                 <header><div><span class="gestion-operacion-summary-icon gestion-operacion-summary-icon--{{ $panel['tone'] }}"><i class="bi {{ $panel['icon'] }}" aria-hidden="true"></i></span><div><h2>{{ $panel['title'] }}</h2><p>{{ $panel['subtitle'] }}</p></div></div><button type="button" data-pending-notice="{{ $panel['notice'] }}">{{ $panel['link'] }} <i class="bi bi-arrow-right" aria-hidden="true"></i></button></header>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                 @if (($panel['type'] ?? 'empty') === 'performance')
                     <div class="gestion-operacion-performance-empty"><strong>—</strong><span>{{ $panel['metric'] }}</span><div class="gestion-operacion-performance-bar"><span></span></div><small>{{ $panel['empty'] }}</small></div>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                 @else
                     <div class="gestion-operacion-summary-empty"><i class="bi {{ $panel['empty_icon'] ?? 'bi-inbox' }}" aria-hidden="true"></i><strong>{{ $panel['empty_title'] }}</strong><span>{{ $panel['empty'] }}</span></div>
                 @endif
@@ -143,6 +175,7 @@
     <div class="gestion-pendiente-modal-body">
         <div class="gestion-pendiente-modal-notice"><i class="bi bi-info-circle" aria-hidden="true"></i><div><strong>Vista preparada para integración</strong><p>No hay un registro real seleccionado. El detalle se poblará desde el backend cuando se conecte este módulo.</p></div></div>
         <div class="gestion-pendiente-detail-grid">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @foreach (($module['fields'] ?? []) as $field)
                 <div><small>{{ $field['label'] }}</small><strong>—</strong></div>
             @endforeach

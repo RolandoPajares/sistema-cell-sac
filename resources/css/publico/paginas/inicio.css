@@ -408,6 +408,20 @@
   color: #b76d00;
   background: #ffefc8;
 }
+.smart-blue > span {
+  color: #0875ed;
+  background: #e4f1ff;
+}
+.smart-tile > div {
+  min-width: 0;
+  overflow: hidden;
+}
+.smart-tile b {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
 .smart-assistant {
   border-color: #7ab2ff;
   background: linear-gradient(135deg, #f8fbff, #ddedff);

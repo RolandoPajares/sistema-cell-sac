@@ -1,8 +1,12 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Publicidad inteligente')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-publicidad-inteligente')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section class="publicidad-ia-fondo">
     <div class="container publicidad-ia-layout">

@@ -1,8 +1,12 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Cajas, aperturas y cierres')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-finanzas-facturacion')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section class="tc-ff" data-cajas-operativas data-cajas-reopen="{{ old('_form') === 'crear' && $errors->any() ? 'crear' : '' }}">
     <header class="tc-ff__header">
@@ -12,13 +16,16 @@
             <p>Consulta y administra cajas de las sedes de la empresa activa.</p>
         </div>
         <div class="tc-ff__header-actions">
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if ($canCreate)
                 <button class="tc-ff__button tc-ff__button--primary" type="button" data-box-open="crear"><i class="bi bi-plus-lg" aria-hidden="true"></i>Nueva caja</button>
             @endif
         </div>
     </header>
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if (session('status')) <p class="alert alert-success" role="status">{{ session('status') }}</p> @endif
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
     @foreach ($errors->all() as $error) <p class="text-danger" role="alert">{{ $error }}</p> @endforeach
 
     <div class="tc-ff__metrics">
@@ -28,6 +35,7 @@
         <article class="tc-ff__metric tc-ff__metric--azul"><span class="tc-ff__metric-icon"><i class="bi bi-safe" aria-hidden="true"></i></span><div><small>Sesiones abiertas</small><strong>{{ $openSessions }}</strong><span>Registradas en sesiones_caja</span></div></article>
     </div>
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
     <form class="tc-ff__filters" method="GET" action="{{ route('management.payments.preview.cash_registers') }}">
         <label class="tc-ff__search"><i class="bi bi-search" aria-hidden="true"></i><input type="search" name="buscar" value="{{ $filters['buscar'] ?? '' }}" maxlength="120" placeholder="Buscar por código o nombre" aria-label="Buscar cajas"></label>
         <div class="tc-ff__filter-fields">
@@ -45,6 +53,7 @@
                 <table>
                     <thead><tr><th>Código</th><th>Sede</th><th>Nombre</th><th>Estado</th><th>Sesiones abiertas</th><th>Creación</th><th>Acciones</th></tr></thead>
                     <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                         @forelse ($boxes as $box)
                             <tr>
                                 <td>{{ $box->codigo }}</td>
@@ -55,14 +64,19 @@
                                 <td>{{ $box->creado_en?->format('d/m/Y H:i') }}</td>
                                 <td>
                                     <div class="tc-ff__row-actions">
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                         @if ($canUpdate && in_array($box->sede_id, $editableSiteIds, true))
                                             <button type="button" data-box-edit data-box-edit-url="{{ route('management.payments.cash_registers.update', $box) }}" data-box-code="{{ $box->codigo }}" data-box-name="{{ $box->nombre }}" data-box-site-id="{{ $box->sede_id }}" data-box-site-name="{{ $box->sede?->nombre }}" title="Editar caja" aria-label="Editar caja {{ $box->codigo }}"><i class="bi bi-pencil" aria-hidden="true"></i></button>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                                             <form method="POST" action="{{ route('management.payments.cash_registers.status.update', $box) }}" data-box-status>
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                                                 @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
                                                 @method('PATCH')
                                                 <input type="hidden" name="activa" value="{{ $box->activa ? '0' : '1' }}">
                                                 <button type="submit" data-box-status-label="{{ $box->activa ? 'desactivar' : 'activar' }}" title="{{ $box->activa ? 'Desactivar' : 'Activar' }} caja" aria-label="{{ $box->activa ? 'Desactivar' : 'Activar' }} caja {{ $box->codigo }}"><i class="bi {{ $box->activa ? 'bi-pause-circle' : 'bi-play-circle' }}" aria-hidden="true"></i></button>
                                             </form>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                                         @else
                                             <span>Solo consulta</span>
                                         @endif
@@ -75,11 +89,14 @@
                     </tbody>
                 </table>
             </div>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if ($boxes->hasPages())
                 <div class="tc-ff__card-heading">
                     <small>Página {{ $boxes->currentPage() }} de {{ $boxes->lastPage() }}</small>
                     <div class="tc-ff__header-actions">
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                         @if ($boxes->previousPageUrl()) <a class="tc-ff__button" href="{{ $boxes->previousPageUrl() }}">Anterior</a> @endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                         @if ($boxes->nextPageUrl()) <a class="tc-ff__button" href="{{ $boxes->nextPageUrl() }}">Siguiente</a> @endif
                     </div>
                 </div>
@@ -90,6 +107,7 @@
             <p>Distribución de los registros activos e inactivos en la empresa.</p>
             <div class="tc-ff__summary">
                 <strong>{{ $totalBoxes }} cajas</strong>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @forelse ($sites as $site)
                     <div><span>{{ $site->nombre }}</span><b>{{ $siteCounts[$site->id] ?? 0 }}</b></div>
                 @empty
@@ -105,9 +123,12 @@
         <article class="tc-ff__card"><div class="tc-ff__card-heading"><h2><i class="bi bi-shield-check" aria-hidden="true"></i>Control operativo</h2></div><p>Una caja con sesión abierta no puede editarse ni desactivarse.</p></article>
     </div>
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if ($canCreate)
         <dialog class="tc-ff__dialog" data-box-dialog="crear" aria-labelledby="box-create-title">
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form class="tc-ff__dialog-card" method="POST" action="{{ route('management.payments.cash_registers.store') }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                 @csrf
                 <input type="hidden" name="_form" value="crear">
                 <header class="tc-ff__dialog-header"><div><span class="tc-ff__dialog-icon"><i class="bi bi-cash-stack" aria-hidden="true"></i></span><div><h2 id="box-create-title">Nueva caja</h2><p>Registro administrativo de una caja real.</p></div></div><button type="button" class="tc-ff__dialog-close" data-box-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
@@ -120,10 +141,14 @@
             </form>
         </dialog>
     @endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if ($canUpdate)
         <dialog class="tc-ff__dialog" data-box-dialog="editar" aria-labelledby="box-edit-title">
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form class="tc-ff__dialog-card" method="POST" data-box-edit-form>
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                 @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
                 @method('PUT')
                 <header class="tc-ff__dialog-header"><div><span class="tc-ff__dialog-icon"><i class="bi bi-pencil" aria-hidden="true"></i></span><div><h2 id="box-edit-title">Editar caja</h2><p>La sede original no puede cambiarse.</p></div></div><button type="button" class="tc-ff__dialog-close" data-box-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
                 <div class="tc-ff__dialog-body"><div class="tc-ff__field-grid">

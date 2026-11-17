@@ -27,10 +27,13 @@ final class ServicioResponsablesOrganizacionales
      */
     public function listar(array $idsSede): Collection
     {
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! Schema::hasTable('responsables_organizacionales')) {
             return new Collection;
         }
 
+        // Devuelve el resultado obtenido mediante el modelo correspondiente.
+        // ORM: este servicio aplica ORM para consultar o modificar datos en la base de datos.
         return ResponsableOrganizacional::query()
             ->with(['responsable:id,nombre', 'sede:id,nombre', 'almacen:id,nombre'])
             ->whereIn('sede_id', $idsSede)
@@ -40,17 +43,25 @@ final class ServicioResponsablesOrganizacionales
     /** @param array{sede_id:int,tipo_recurso:string,almacen_id?:?int,responsable_usuario_id:int,cargo:string,vigente_desde:string,vigente_hasta?:?string,motivo:string} $datos */
     public function reasignar(User $actor, array $datos, RegistradorAuditoria $auditoria, ?string $ip): ResponsableOrganizacional
     {
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! Schema::hasTable('responsables_organizacionales')) {
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort(503, 'La estructura de responsables aún no está instalada. Revise el archivo SQL aprobado.');
         }
 
+        // Ejecuta los cambios dentro de una transaccion para evitar datos incompletos.
         return DB::transaction(function () use ($actor, $datos, $auditoria, $ip): ResponsableOrganizacional {
+            // Prepara en $sede la consulta que obtiene o modifica los datos necesarios.
             $sede = DB::table('sedes')->where('id', $datos['sede_id'])->lockForUpdate()->first();
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_if($sede === null, 404);
 
+            // Guarda en $idsSedeAutorizados el resultado necesario para continuar la operacion.
             $idsSedeAutorizados = app(ServicioAutorizacion::class)->authorizedSiteIds($actor, 'gestion.organizacion.actualizar');
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless(in_array((int) $sede->id, $idsSedeAutorizados, true), 403);
 
+            // Prepara en $usuarioValido la consulta que obtiene o modifica los datos necesarios.
             $usuarioValido = DB::table('usuarios_sedes_roles as asignacion')
                 ->join('roles as rol', 'rol.id', '=', 'asignacion.rol_id')
                 ->where('asignacion.usuario_id', $datos['responsable_usuario_id'])
@@ -59,16 +70,23 @@ final class ServicioResponsablesOrganizacionales
                 ->where(fn ($consulta) => $consulta->whereNull('asignacion.vigente_hasta')->orWhere('asignacion.vigente_hasta', '>', now()))
                 ->whereExists(fn ($consulta) => $consulta->selectRaw('1')->from('usuarios')->whereColumn('usuarios.id', 'asignacion.usuario_id')->where('usuarios.activo', true))
                 ->exists();
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($usuarioValido, 422, 'Selecciona un usuario activo.');
 
+            // Guarda en $tipo el resultado necesario para continuar la operacion.
             $tipo = $datos['tipo_recurso'];
             $almacenId = $tipo === 'almacen' ? (int) $datos['almacen_id'] : null;
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if ($almacenId !== null) {
+                // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
                 abort_unless(DB::table('almacenes')->where('id', $almacenId)->where('sede_id', $sede->id)->where('activo', true)->exists(), 422, 'El almacén debe pertenecer a la sede seleccionada y estar activo.');
             }
 
+            // Guarda en $inicio el resultado necesario para continuar la operacion.
             $inicio = Carbon::createFromFormat('Y-m-d', $datos['vigente_desde'])->startOfDay();
+            // Guarda en $fin el resultado necesario para continuar la operacion.
             $fin = filled($datos['vigente_hasta'] ?? null) ? Carbon::createFromFormat('Y-m-d', (string) $datos['vigente_hasta'])->endOfDay() : null;
+            // Prepara en $vigentesSolapados la consulta que obtiene o modifica los datos necesarios.
             $vigentesSolapados = ResponsableOrganizacional::query()
                 ->where('empresa_id', $sede->empresa_id)->where('sede_id', $sede->id)
                 ->where('tipo_recurso', $tipo)->where('cargo', trim($datos['cargo']))
@@ -78,18 +96,23 @@ final class ServicioResponsablesOrganizacionales
                 ->where(fn ($consulta) => $consulta->whereNull('vigente_hasta')->orWhereDate('vigente_hasta', '>=', $inicio->toDateString()))
                 ->lockForUpdate()->get();
 
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if ($vigentesSolapados->count() > 1) {
                 throw ValidationException::withMessages(['vigente_desde' => 'Existen vigencias superpuestas que deben corregirse antes de reasignar.']);
             }
 
+            // Guarda en $anterior el resultado de la consulta ejecutada.
             $anterior = $vigentesSolapados->first();
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if ($anterior !== null) {
+                // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
                 if ($inicio->toDateString() <= $anterior->vigente_desde->toDateString()) {
                     throw ValidationException::withMessages(['vigente_desde' => 'La nueva vigencia debe iniciar después del comienzo de la asignación que reemplaza.']);
                 }
                 $anterior->vigente_hasta = $inicio->copy()->subDay()->toDateString();
                 $anterior->save();
             }
+            // Prepara en $asignacionPrevia la consulta que obtiene o modifica los datos necesarios.
             $asignacionPrevia = $anterior ?? ResponsableOrganizacional::query()
                 ->where('empresa_id', $sede->empresa_id)->where('sede_id', $sede->id)
                 ->where('tipo_recurso', $tipo)->where('cargo', trim($datos['cargo']))
@@ -98,6 +121,7 @@ final class ServicioResponsablesOrganizacionales
                 ->whereNotNull('vigente_hasta')->whereDate('vigente_hasta', '<', $inicio->toDateString())
                 ->orderByDesc('vigente_desde')->orderByDesc('id')->lockForUpdate()->first();
 
+            // Prepara en $responsable la consulta que obtiene o modifica los datos necesarios.
             $responsable = ResponsableOrganizacional::query()->create([
                 'empresa_id' => (int) $sede->empresa_id,
                 'sede_id' => (int) $sede->id,

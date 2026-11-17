@@ -1,3 +1,4 @@
+
 <section class="tc-cs" data-configuracion-sistema data-cs-type="{{ $tipo }}">
     <nav class="tc-cs__breadcrumb" aria-label="Ruta de navegación">
         <i class="bi bi-house" aria-hidden="true"></i>
@@ -15,22 +16,29 @@
             </div>
         </div>
         <div class="tc-cs__actions">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @foreach ($pagina['acciones'] as $accion)
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                 @if ($accion['tipo'] === 'nueva')
                     <button type="button" class="tc-cs__button tc-cs__button--primary" data-cs-open-integration>
                         <i class="bi {{ $accion['icono'] }}" aria-hidden="true"></i>{{ $accion['texto'] }}
                     </button>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                 @elseif ($accion['tipo'] === 'crear')
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                     <form method="post" action="{{ route('management.backups.store') }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                         @csrf
                         <button type="submit" class="tc-cs__button tc-cs__button--primary">
                             <i class="bi {{ $accion['icono'] }}" aria-hidden="true"></i>{{ $accion['texto'] }}
                         </button>
                     </form>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                 @elseif ($accion['tipo'] === 'empresa')
                     <a class="tc-cs__button tc-cs__button--primary" href="{{ route('management.company_settings.data') }}">
                         <i class="bi {{ $accion['icono'] }}" aria-hidden="true"></i>{{ $accion['texto'] }}
                     </a>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                 @elseif ($accion['tipo'] === 'sesiones')
                     <a class="tc-cs__button tc-cs__button--primary" href="{{ route('management.security_sessions') }}">
                         <i class="bi {{ $accion['icono'] }}" aria-hidden="true"></i>{{ $accion['texto'] }}
@@ -47,6 +55,7 @@
     </div>
 
     <div class="tc-cs__metrics">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
         @foreach ($metricas as $metrica)
             <article class="tc-cs__metric tc-cs__metric--{{ $metrica['tono'] }}">
                 <span><i class="bi {{ $metrica['icono'] }}" aria-hidden="true"></i></span>
@@ -59,6 +68,7 @@
         @endforeach
     </div>
 
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
     @include('components.configuracion.' . $tipo)
 
     <dialog class="tc-cs__dialog" data-cs-dialog aria-labelledby="tc-cs-dialog-title" aria-describedby="tc-cs-dialog-description">

@@ -23,6 +23,7 @@ final class AdaptadorAuditoriaProductos implements AuditoriaProductos
     /** @param array<string, mixed>|null $antes @param array<string, mixed>|null $despues */
     public function registrar(?int $usuarioId, string $accion, string $entidad, ?int $entidadId, ?array $antes, ?array $despues, ?string $ip): void
     {
+        // Delega en el registrador comun la trazabilidad de cambios sobre productos.
         $this->auditoria->record($usuarioId, $accion, $entidad, $entidadId, $antes, $despues, $ip);
     }
 }

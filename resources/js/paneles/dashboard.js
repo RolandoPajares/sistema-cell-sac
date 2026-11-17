@@ -1,3 +1,10 @@
+/**
+ * GUIA DE EXPOSICION JAVASCRIPT
+ * Archivo: resources/js/paneles/dashboard.js
+ * Este modulo contiene comportamiento de interfaz, eventos, validaciones y/o
+ * comunicacion con el backend. Los comentarios explican el flujo sin cambiar la logica.
+ */
+
 import '../../css/paneles/dashboard.css';
 import '../layouts/panel/menu-lateral-desplegable.js';
 import '../gestion/administracion/organizacion/organizacion.js';
@@ -17,6 +24,7 @@ import '../modulos/gestion/modulos-pendientes.js';
 
 const dashboard = document.querySelector('[data-admin-dashboard]');
 
+// Condicional: evalua "dashboard" para decidir si ejecuta el bloque siguiente.
 if (dashboard) {
     const salesChart = dashboard.querySelector('[data-dashboard-sales-chart]');
     const rangeSelect = dashboard.querySelector('[data-dashboard-range]');
@@ -28,15 +36,20 @@ if (dashboard) {
  *
  * @returns {*} Resultado de la operación.
  */
+    // Funcion: renderSalesLine concentra una tarea reutilizable del modulo.
     const renderSalesLine = () => {
+        // Condicional: evalua "!salesChart || !salesLine || salesColumns.length === 0" para decidir si ejecuta el bloque siguiente.
         if (!salesChart || !salesLine || salesColumns.length === 0) {
             return;
         }
 
+        // Recorrido: usa filter para procesar cada elemento y obtener o actualizar datos.
         const visibleColumns = salesColumns.filter((column) => !column.hidden);
+        // Recorrido: usa map para procesar cada elemento y obtener o actualizar datos.
         const values = visibleColumns.map((column) => Number(column.dataset.value ?? 0));
         const maximum = Number(salesChart.dataset.chartMax ?? Math.max(...values, 1));
         const step = visibleColumns.length > 1 ? 960 / (visibleColumns.length - 1) : 0;
+        // Recorrido: usa map para procesar cada elemento y obtener o actualizar datos.
         const points = visibleColumns.map((column, index) => {
             const x = 20 + (step * index);
             const y = 145 - ((Number(column.dataset.value ?? 0) / maximum) * 120);
@@ -45,8 +58,10 @@ if (dashboard) {
         });
 
         salesLine.setAttribute('points', points.join(' '));
+        // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
         salesChart.querySelectorAll('[data-dashboard-line-point]').forEach((point) => point.remove());
 
+        // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
         visibleColumns.forEach((column, index) => {
             const point = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             const value = Number(column.dataset.value ?? 0);
@@ -67,10 +82,12 @@ if (dashboard) {
  *
  * @returns {*} Resultado de la operación.
  */
+    // Funcion: applySalesRange concentra una tarea reutilizable del modulo.
     const applySalesRange = () => {
         const range = Number(rangeSelect?.value ?? salesColumns.length);
         const firstVisibleIndex = Math.max(0, salesColumns.length - range);
 
+        // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
         salesColumns.forEach((column, index) => {
             column.hidden = index < firstVisibleIndex;
         });
@@ -78,10 +95,13 @@ if (dashboard) {
         renderSalesLine();
     };
 
+    // Evento: escucha el evento change y ejecuta la funcion asociada cuando ocurre.
     rangeSelect?.addEventListener('change', applySalesRange);
+    // Evento: escucha el evento resize y ejecuta la funcion asociada cuando ocurre.
     window.addEventListener('resize', renderSalesLine, { passive: true });
     applySalesRange();
 
+    // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
     dashboard.querySelectorAll('[data-dashboard-progress]').forEach((progress) => {
         const width = progress.style.getPropertyValue('--progress');
 

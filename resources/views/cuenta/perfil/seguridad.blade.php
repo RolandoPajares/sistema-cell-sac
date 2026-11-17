@@ -1,10 +1,14 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Seguridad de la cuenta')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
     {{-- Resumen de seguridad y enlaces de administración de la cuenta. --}}
     <section class="admin-page">
         <header class="admin-page-head"><div><span class="eyebrow">Cuenta personal</span><h1>Seguridad de la cuenta</h1><p>Revisa el estado de tu cuenta y controla las sesiones abiertas.</p></div></header>
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
         @include('cuenta.perfil.navegacion')
         {{-- Estado de contraseña y sesiones abiertas. --}}
         <div class="two-column">

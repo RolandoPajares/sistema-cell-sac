@@ -1,19 +1,25 @@
 @extends('layouts.auth.principal')
 
+
 {{-- Configuración general del layout de autenticación --}}
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-autenticacion')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Crear cuenta')
 
 {{-- Recursos CSS exclusivos del formulario de registro --}}
+{{-- bloque de estilos o scripts para el lugar reservado por la plantilla. --}}
 @push('styles')
     @vite('resources/css/auth/register.css')
 @endpush
 
 {{-- Recursos JavaScript para los campos dinámicos del registro --}}
+{{-- bloque de estilos o scripts para el lugar reservado por la plantilla. --}}
 @push('scripts')
     @vite('resources/js/auth/register.js')
 @endpush
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 {{-- Contenedor principal de la página de registro --}}
 <div class="auth-register-page">
@@ -23,12 +29,15 @@
         <p>El registro público crea una cuenta de cliente. El acceso administrativo se concede según el rol autorizado.</p>
 
         {{-- Alerta general de errores de validación enviados por el servidor --}}
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
         @if ($errors->any())
             <div class="alert alert-error" role="alert">{{ $errors->first() }}</div>
         @endif
 
         {{-- Formulario público para la creación de cuenta con protección CSRF --}}
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
         <form method="POST" action="{{ route('register.store') }}" novalidate>
+{{-- proteccion CSRF que valida el origen del formulario. --}}
             @csrf
 
             {{-- Selector del tipo de cliente (determina si se solicita el RUC) --}}

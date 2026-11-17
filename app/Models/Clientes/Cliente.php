@@ -16,8 +16,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Cliente extends Model
 {
+    // Usa la tabla 'clientes' como origen de los registros de este modelo.
     protected $table = 'clientes';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = [
         'usuario_id', 'empresa_id', 'tipo', 'tipo_documento', 'documento', 'razon_social', 'nombre_contacto',
         'correo', 'telefono', 'ciudad', 'activo', 'creado_en',
@@ -45,6 +47,7 @@ class Cliente extends Model
         return $this->belongsTo(User::class, 'usuario_id');
     }
 
+    // Define la relacion 'empresa' entre este modelo y los registros relacionados.
     public function empresa(): BelongsTo
     {
         return $this->belongsTo(Empresa::class, 'empresa_id');

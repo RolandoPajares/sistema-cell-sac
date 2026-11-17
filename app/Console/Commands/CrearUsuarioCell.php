@@ -17,6 +17,10 @@ use Illuminate\Console\Command;
 class CrearUsuarioCell extends Command
 {
     /**
+     * Solicita los datos de una cuenta, valida sus credenciales y la registra
+     * utilizando el rol RBAC elegido por el operador de consola.
+     */
+    /**
      * Ejecuta la operación principal asignada al componente.
      *
      * @return int Resultado de la operación.
@@ -28,6 +32,8 @@ class CrearUsuarioCell extends Command
         $role = $this->choice('Rol', User::availableRoleCodes(), 'cliente_minorista');
         $password = (string) $this->secret('Contraseña (mínimo 12 caracteres)');
 
+        // Detiene el proceso si faltan datos, el correo no tiene formato valido
+        // o la contrasena no cumple la longitud minima solicitada.
         if ($name === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($password) < 12) {
             $this->error('Datos inválidos o contraseña corta.');
 
@@ -40,6 +46,8 @@ class CrearUsuarioCell extends Command
             return self::FAILURE;
         }
 
+        // Crea la cuenta usando el modelo User, que aplica sus casts y reglas
+        // de almacenamiento de la contrasena antes de guardar los datos.
         User::query()->create([
             'nombre' => $name,
             'correo' => $email,

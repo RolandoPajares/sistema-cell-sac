@@ -1,5 +1,6 @@
 <?php
 
+// Devuelve la configuracion que describe este modulo y sus elementos visuales.
 return [
     'key' => 'pagos',
     'area' => 'Finanzas',
@@ -9,17 +10,21 @@ return [
     'record_singular' => 'pago',
     'record_plural' => 'pagos',
     'mode' => 'crud',
+    // Define las tarjetas de indicadores que resumen el estado del modulo.
     'kpis' => [
         ['label' => 'Recibidos', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-check2-circle', 'tone' => 'green'],
         ['label' => 'Pendientes', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-hourglass-split', 'tone' => 'orange'],
         ['label' => 'Rechazados', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-x-circle', 'tone' => 'red'],
         ['label' => 'Reembolsados', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-arrow-repeat', 'tone' => 'purple'],
     ],
+    // Define los graficos y datos resumidos que se muestran en el analisis del modulo.
     'analytics' => [
         ['title' => 'Comportamiento de pagos', 'icon' => 'bi-credit-card', 'description' => 'Recibidos y conciliados por periodo.', 'type' => 'line', 'labels' => ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4', 'Semana 5']],
         ['title' => 'Pagos por método', 'icon' => 'bi-pie-chart', 'description' => 'Distribución por medio de pago.', 'type' => 'donut', 'legend' => ['Transferencia', 'Tarjeta', 'Efectivo', 'Otros']],
     ],
+    // Define los encabezados de la tabla principal.
     'columns' => ['Referencia', 'Cliente', 'Método', 'Importe', 'Estado', 'Fecha'],
+    // Define los campos y reglas visuales del formulario del modulo.
     'fields' => [
         ['label' => 'Referencia', 'type' => 'text', 'placeholder' => 'Código de operación', 'required' => true, 'wide' => false],
         ['label' => 'Cliente', 'type' => 'text', 'placeholder' => 'Nombre del cliente', 'required' => true, 'wide' => false],

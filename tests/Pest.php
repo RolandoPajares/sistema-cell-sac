@@ -3,6 +3,41 @@
 use Tests\RefreshSpanishTestDatabase;
 use Tests\TestCase;
 
+// Mantiene la suite aislada de la configuración real y de variables heredadas del proceso.
+putenv('APP_ENV=testing');
+putenv('DB_CONNECTION=sqlite');
+putenv('DB_DATABASE=:memory:');
+putenv('DB_URL=');
+putenv('CACHE_STORE=array');
+putenv('MAIL_MAILER=array');
+putenv('QUEUE_CONNECTION=sync');
+putenv('SESSION_DRIVER=array');
+putenv('LOG_CHANNEL=stderr');
+putenv('LOG_STACK=stderr');
+putenv('GEMINI_API_KEY=');
+$_ENV['APP_ENV'] = 'testing';
+$_ENV['DB_CONNECTION'] = 'sqlite';
+$_ENV['DB_DATABASE'] = ':memory:';
+$_ENV['DB_URL'] = '';
+$_ENV['CACHE_STORE'] = 'array';
+$_ENV['MAIL_MAILER'] = 'array';
+$_ENV['QUEUE_CONNECTION'] = 'sync';
+$_ENV['SESSION_DRIVER'] = 'array';
+$_ENV['LOG_CHANNEL'] = 'stderr';
+$_ENV['LOG_STACK'] = 'stderr';
+$_ENV['GEMINI_API_KEY'] = '';
+$_SERVER['APP_ENV'] = 'testing';
+$_SERVER['DB_CONNECTION'] = 'sqlite';
+$_SERVER['DB_DATABASE'] = ':memory:';
+$_SERVER['DB_URL'] = '';
+$_SERVER['CACHE_STORE'] = 'array';
+$_SERVER['MAIL_MAILER'] = 'array';
+$_SERVER['QUEUE_CONNECTION'] = 'sync';
+$_SERVER['SESSION_DRIVER'] = 'array';
+$_SERVER['LOG_CHANNEL'] = 'stderr';
+$_SERVER['LOG_STACK'] = 'stderr';
+$_SERVER['GEMINI_API_KEY'] = '';
+
 /*
 |--------------------------------------------------------------------------
 | Test Case

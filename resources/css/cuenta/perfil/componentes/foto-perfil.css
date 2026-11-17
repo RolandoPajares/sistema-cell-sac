@@ -1,14 +1,19 @@
+/* Define los estilos visuales del modulo o componente 'foto-perfil'. */
+
+/* Aplica estos estilos al bloque '.tc-profile-photo-actions'. */
 .tc-profile-photo-actions {
     display: grid;
     justify-items: end;
     gap: 8px;
 }
 
+/* Aplica estos estilos al bloque '.tc-profile-photo-delete-form'. */
 .tc-profile-photo-delete-form {
     margin: 0;
 }
 
 @media (max-width: 1100px) {
+/* Aplica estos estilos al bloque '.tc-profile-photo-actions'. */
     .tc-profile-photo-actions {
         justify-items: start;
     }

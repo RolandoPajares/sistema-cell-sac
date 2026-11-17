@@ -10,6 +10,7 @@ class GuardarMarcaRequest extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return $this->user() !== null;
@@ -20,6 +21,7 @@ class GuardarMarcaRequest extends FormRequest
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         return ['nombre' => ['required', 'string', 'max:120'], 'descripcion' => ['nullable', 'string', 'max:500'], 'activo' => ['sometimes', 'boolean']];

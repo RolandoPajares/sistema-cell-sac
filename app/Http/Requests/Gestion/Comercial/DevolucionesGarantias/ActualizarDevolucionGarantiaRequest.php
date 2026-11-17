@@ -17,6 +17,7 @@ class ActualizarDevolucionGarantiaRequest extends GuardarDevolucionGarantiaReque
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return $this->user() !== null
@@ -28,11 +29,13 @@ class ActualizarDevolucionGarantiaRequest extends GuardarDevolucionGarantiaReque
      *
      * @return array Resultado de la operación.
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         $returnRequest = $this->route('devolucionGarantia');
 
         return array_replace(parent::rules(), [
+            // Valida el campo 'codigo' con las reglas definidas en la instruccion siguiente.
             'codigo' => [
                 'required',
                 'string',

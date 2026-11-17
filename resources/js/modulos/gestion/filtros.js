@@ -1,3 +1,10 @@
+/**
+ * GUIA DE EXPOSICION JAVASCRIPT
+ * Archivo: resources/js/modulos/gestion/filtros.js
+ * Este modulo contiene comportamiento de interfaz, eventos, validaciones y/o
+ * comunicacion con el backend. Los comentarios explican el flujo sin cambiar la logica.
+ */
+
 import { exportarTablaVisible } from '../../componentes/gestion/tabla-datos.js';
 
 /**
@@ -7,7 +14,9 @@ import { exportarTablaVisible } from '../../componentes/gestion/tabla-datos.js';
  *
  * @returns {*} Resultado de la operación.
  */
+// Funcion: abrirSelectorFecha concentra una tarea reutilizable del modulo.
 const abrirSelectorFecha = (input) => {
+    // Condicional: evalua "typeof input?.showPicker === 'function'" para decidir si ejecuta el bloque siguiente.
     if (typeof input?.showPicker === 'function') {
         input.showPicker();
         return;
@@ -23,17 +32,21 @@ const abrirSelectorFecha = (input) => {
  *
  * @returns {*} Resultado de la operación.
  */
+// Funcion: formatearFecha concentra una tarea reutilizable del modulo.
 const formatearFecha = (valor) => new Date(`${valor}T12:00:00`).toLocaleDateString('es-PE', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
 });
 
+// Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
 document.querySelectorAll('[data-module-date]').forEach((inputFecha) => {
     const contenedorBoton = inputFecha.closest('.boton-fecha');
     const etiquetaTexto = contenedorBoton?.querySelector('[data-module-date-label]');
 
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     contenedorBoton?.addEventListener('click', (evento) => {
+        // Condicional: evalua "evento.target === inputFecha" para decidir si ejecuta el bloque siguiente.
         if (evento.target === inputFecha) {
             return;
         }
@@ -42,7 +55,9 @@ document.querySelectorAll('[data-module-date]').forEach((inputFecha) => {
         abrirSelectorFecha(inputFecha);
     });
 
+    // Evento: escucha el evento change y ejecuta la funcion asociada cuando ocurre.
     inputFecha.addEventListener('change', () => {
+        // Condicional: evalua "inputFecha.value && etiquetaTexto" para decidir si ejecuta el bloque siguiente.
         if (inputFecha.value && etiquetaTexto) {
             etiquetaTexto.textContent = formatearFecha(inputFecha.value);
         }
@@ -52,6 +67,7 @@ document.querySelectorAll('[data-module-date]').forEach((inputFecha) => {
 const filtrosContenedor = document.querySelector('[data-module-filters]');
 const tablaFiltro = document.querySelector('[data-filter-table]');
 
+// Condicional: evalua "tablaFiltro" para decidir si ejecuta el bloque siguiente.
 if (tablaFiltro) {
     const campoBusqueda = filtrosContenedor?.querySelector('[data-filter-search]');
     const selectorEstado = filtrosContenedor?.querySelector('[data-filter-status]');
@@ -59,7 +75,9 @@ if (tablaFiltro) {
     const etiquetaFechaFiltro = filtrosContenedor?.querySelector('[data-filter-date-label]');
     const contenedorFiltroFecha = filtrosContenedor?.querySelector('.module-filter-date');
 
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     contenedorFiltroFecha?.addEventListener('click', (evento) => {
+        // Condicional: evalua "evento.target === campoFechaFiltro" para decidir si ejecuta el bloque siguiente.
         if (evento.target === campoFechaFiltro) {
             return;
         }
@@ -68,7 +86,9 @@ if (tablaFiltro) {
         abrirSelectorFecha(campoFechaFiltro);
     });
 
+    // Evento: escucha el evento change y ejecuta la funcion asociada cuando ocurre.
     campoFechaFiltro?.addEventListener('change', () => {
+        // Condicional: evalua "campoFechaFiltro.value && etiquetaFechaFiltro" para decidir si ejecuta el bloque siguiente.
         if (campoFechaFiltro.value && etiquetaFechaFiltro) {
             etiquetaFechaFiltro.textContent = formatearFecha(campoFechaFiltro.value);
         }
@@ -79,11 +99,13 @@ if (tablaFiltro) {
  *
  * @returns {*} Resultado de la operación.
  */
+    // Funcion: aplicarFiltros concentra una tarea reutilizable del modulo.
     const aplicarFiltros = () => {
         const textoBusqueda = (campoBusqueda?.value || '').trim().toLowerCase();
         const estadoSeleccionado = (selectorEstado?.value || '').toLowerCase();
         let filasVisibles = 0;
 
+        // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
         tablaFiltro.querySelectorAll('[data-filter-row]').forEach((fila) => {
             const contenidoFila = fila.textContent.toLowerCase();
             const cumpleBusqueda = !textoBusqueda || contenidoFila.includes(textoBusqueda);
@@ -91,6 +113,7 @@ if (tablaFiltro) {
 
             fila.hidden = !(cumpleBusqueda && cumpleEstado);
 
+            // Condicional: evalua "!fila.hidden" para decidir si ejecuta el bloque siguiente.
             if (!fila.hidden) {
                 filasVisibles += 1;
             }
@@ -98,23 +121,30 @@ if (tablaFiltro) {
 
         const mensajeVacio = tablaFiltro.querySelector('[data-filter-empty]');
 
+        // Condicional: evalua "mensajeVacio" para decidir si ejecuta el bloque siguiente.
         if (mensajeVacio) {
             mensajeVacio.hidden = filasVisibles !== 0;
         }
     };
 
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     filtrosContenedor?.querySelector('[data-apply-filters]')?.addEventListener('click', aplicarFiltros);
+    // Evento: escucha el evento input y ejecuta la funcion asociada cuando ocurre.
     campoBusqueda?.addEventListener('input', aplicarFiltros);
+    // Evento: escucha el evento change y ejecuta la funcion asociada cuando ocurre.
     selectorEstado?.addEventListener('change', aplicarFiltros);
 
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     tablaFiltro.querySelector('[data-close-detail]')?.addEventListener('click', () => {
         const detalleTablaFlotante = tablaFiltro.querySelector('.detalle-mockup');
 
+        // Condicional: evalua "detalleTablaFlotante" para decidir si ejecuta el bloque siguiente.
         if (detalleTablaFlotante) {
             detalleTablaFlotante.hidden = true;
         }
     });
 
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     tablaFiltro.querySelector('[data-export-table]')?.addEventListener('click', () => {
         exportarTablaVisible(tablaFiltro);
     });

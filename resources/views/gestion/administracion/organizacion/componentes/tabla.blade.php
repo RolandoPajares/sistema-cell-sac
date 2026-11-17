@@ -1,10 +1,13 @@
+
 <article class="tc-org__card tc-org__table-card">
     <div class="tc-org__card-title"><div><h2>{{ $titulo }} ({{ $total ?? count($filas) }})</h2><p>Mostrando {{ count($filas) }} registros de ejemplo. No corresponden a datos reales.</p></div></div>
     <div class="tc-org__table-wrap"><table><thead><tr><th>#</th>@foreach ($columnas as $columna)<th>{{ $columna }}</th>@endforeach<th>Acciones</th></tr></thead>
         <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @foreach ($filas as $fila)
                 <tr data-org-row @foreach ($fila['filtros'] ?? [] as $campo => $valor) data-org-{{ $campo }}="{{ $valor }}" @endforeach>
                     <td>{{ $loop->iteration }}</td>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach ($fila['celdas'] as $celda)
                         <td>{{ $celda }}</td>
                     @endforeach

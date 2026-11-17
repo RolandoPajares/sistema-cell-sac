@@ -21,8 +21,10 @@ class Permiso extends Model
 
     public const UPDATED_AT = 'actualizado_en';
 
+    // Usa la tabla 'permisos' como origen de los registros de este modelo.
     protected $table = 'permisos';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['modulo_id', 'pantalla_id', 'codigo', 'accion', 'nombre', 'activo'];
 
     /**

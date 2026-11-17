@@ -1,5 +1,8 @@
+
 {{-- Formulario completo e independiente para registrar una categoría. --}}
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
 <form class="categorias-modal-form" method="post" action="{{ route('management.categories.store') }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
     @csrf
 
     {{-- Datos principales que serán validados y almacenados por el controlador. --}}

@@ -1,8 +1,12 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Envíos y entregas')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-inventario-logistica')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section class="tc-il">
     <header class="tc-il__header">
@@ -23,8 +27,10 @@
 
     <div class="tc-il__notice" role="status">
         <i class="bi bi-info-circle" aria-hidden="true"></i>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
         @if (Route::has('management.inventory.shipments.status.update'))
         <span>Los cambios de estado registran un evento histórico y quedan limitados a las sedes autorizadas.</span>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
         @else
         <span>La consulta está operativa. La actualización de estados quedará disponible cuando el integrador conecte su ruta RBAC.</span>
         @endif
@@ -45,6 +51,7 @@
         </article>
     </div>
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
     <form class="tc-il__filters" method="GET" action="{{ route('management.inventory.preview.shipments') }}">
         <label class="tc-il__search">
             <i class="bi bi-search" aria-hidden="true"></i>
@@ -55,6 +62,7 @@
                 <span>Estado</span>
                 <select name="estado">
                     <option value="">Todos los estados registrados</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach ($estados as $estado)
                     <option value="{{ $estado }}" @selected(request('estado')===$estado)>{{ $estado }}</option>
                     @endforeach
@@ -64,12 +72,14 @@
                 <span>Modalidad</span>
                 <select name="modalidad">
                     <option value="">Todas las modalidades registradas</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach ($modalidades as $modalidad)
                     <option value="{{ $modalidad }}" @selected(request('modalidad')===$modalidad)>{{ $modalidad }}</option>
                     @endforeach
                 </select>
             </label>
             <button type="submit" class="tc-il__button tc-il__button--primary"><i class="bi bi-funnel" aria-hidden="true"></i> Aplicar filtros</button>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if (request()->hasAny(['buscar', 'estado', 'modalidad']))
             <a class="tc-il__button" href="{{ route('management.inventory.preview.shipments') }}">Limpiar filtros</a>
             @endif
@@ -97,6 +107,7 @@
                         </tr>
                     </thead>
                     <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                         @forelse ($envios as $envio)
                         <tr>
                             <td>{{ $envio->codigo }}</td>
@@ -106,23 +117,30 @@
                             <td>{{ $envio->numero_seguimiento ?: '—' }}</td>
                             <td><span class="tc-il__pill">{{ $envio->estado }}</span></td>
                             <td>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                 @if ($envio->ultimoEvento)
                                 {{ $envio->ultimoEvento->estado }}@if ($envio->ultimoEvento->descripcion) — {{ $envio->ultimoEvento->descripcion }}@endif
                                 <small>{{ $envio->ultimoEvento->ocurrido_en?->format('d/m/Y H:i') }}</small>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                                 @else
                                 Sin eventos registrados
                                 @endif
                             </td>
                             <td>
                                 <a class="tc-il__button" href="{{ route('management.inventory.preview.shipments.show', $envio) }}" aria-label="Ver detalle de {{ $envio->codigo }}"><i class="bi bi-eye" aria-hidden="true"></i> Ver detalle</a>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                 @if (Route::has('management.inventory.shipments.status.update'))
                                 <details>
                                     <summary class="tc-il__button">Actualizar</summary>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                                     <form method="POST" action="{{ route('management.inventory.shipments.status.update', $envio) }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                                         @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
                                         @method('PATCH')
                                         <label>Estado
                                             <select name="estado" required>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                                                 @foreach (['pendiente' => 'Pendiente', 'preparando' => 'Preparando', 'despachado' => 'Despachado', 'en_transito' => 'En tránsito', 'entregado' => 'Entregado', 'incidencia' => 'Incidencia', 'cancelado' => 'Cancelado'] as $status => $label)
                                                 <option value="{{ $status }}" @selected($envio->estado === $status)>{{ $label }}</option>
                                                 @endforeach
@@ -134,6 +152,7 @@
                                         <button type="submit" class="tc-il__button tc-il__button--primary">Registrar estado</button>
                                     </form>
                                 </details>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                                 @else
                                 <span aria-label="Actualización pendiente de integración">Pendiente de ruta</span>
                                 @endif
@@ -142,8 +161,10 @@
                         @empty
                         <tr>
                             <td colspan="8" class="tc-il__empty">
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                 @if ($resumen['total'] === 0)
                                 No hay envíos registrados para las sedes autorizadas.
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                                 @else
                                 No se encontraron envíos con los filtros seleccionados.
                                 @endif
@@ -153,6 +174,7 @@
                     </tbody>
                 </table>
             </div>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if ($envios->hasPages())
             <div class="tc-il__pagination">{{ $envios->links() }}</div>
             @endif
@@ -162,6 +184,7 @@
             <div class="tc-il__card-heading">
                 <h2><i class="bi bi-pie-chart" aria-hidden="true"></i> Envíos por estado</h2>
             </div>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @forelse ($distribucion as $grupo)
             <div class="tc-il__card-heading"><span>{{ $grupo['estado'] }}</span><strong>{{ number_format($grupo['cantidad'], 0, ',', ' ') }}</strong></div>
             @empty

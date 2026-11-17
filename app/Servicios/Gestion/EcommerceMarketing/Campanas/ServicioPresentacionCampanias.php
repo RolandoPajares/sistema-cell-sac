@@ -12,6 +12,8 @@ final class ServicioPresentacionCampanias
      */
     public function preparar(array $data): array
     {
+        // Convierte los datos de campanas en valores listos para la vista.
+        // Guarda en $campaigns el resultado necesario para continuar la operacion.
         $campaigns = $data['campaigns'] ?? collect();
         $data['locationLabels'] = [
             'emergente' => 'Emergente',
@@ -24,9 +26,11 @@ final class ServicioPresentacionCampanias
             'products' => 'Productos',
             'offers' => 'Ofertas',
         ];
+        // Guarda en $campaignRecords el resultado necesario para continuar la operacion.
         $campaignRecords = method_exists($campaigns, 'getCollection')
             ? $campaigns->getCollection()
             : collect($campaigns);
+        // Guarda en $allCampaigns el resultado necesario para continuar la operacion.
         $allCampaigns = $campaignRecords
             ->concat($data['topCampaigns'] ?? [])
             ->filter(static fn (mixed $campaign): bool => is_object($campaign))
@@ -37,6 +41,7 @@ final class ServicioPresentacionCampanias
         $data['viewsTrendLabel'] = $this->etiquetaTendencia($data['viewsTrend'] ?? null);
         $data['clicksTrendLabel'] = $this->etiquetaTendencia($data['clicksTrend'] ?? null);
         $data['distributionTotal'] = max(1, (int) $this->suma($data['distribution'] ?? []));
+        // Guarda en $firstDistribution el resultado de la consulta ejecutada.
         $firstDistribution = collect($data['distribution'] ?? [])->first();
         $data['distributionAngle'] = min(360, (($firstDistribution?->total ?? 0) / $data['distributionTotal']) * 360);
         $data['perPageOptions'] = [10, 20, 50];
@@ -48,8 +53,11 @@ final class ServicioPresentacionCampanias
     /** @param iterable<int, object> $campaigns */
     private function estados(iterable $campaigns): array
     {
+        // Calcula el estado visual de cada campana.
+        // Agrupa en $statuses los datos que se utilizaran en el siguiente paso.
         $statuses = [];
 
+        // Recorre los elementos recibidos para validar o procesar cada registro.
         foreach ($campaigns as $campaign) {
             $statuses[$campaign->id] = ! $campaign->activo
                 ? ['label' => 'Pausada', 'class' => 'paused']
@@ -66,9 +74,13 @@ final class ServicioPresentacionCampanias
     /** @param iterable<int, object> $campaigns */
     private function imagenes(iterable $campaigns): array
     {
+        // Resuelve las imagenes publicas asociadas a las campanas.
+        // Agrupa en $images los datos que se utilizaran en el siguiente paso.
         $images = [];
 
+        // Recorre los elementos recibidos para validar o procesar cada registro.
         foreach ($campaigns as $campaign) {
+            // Guarda en $path el resultado necesario para continuar la operacion.
             $path = $campaign->url_imagen;
             $images[$campaign->id] = $path
                 ? (str_starts_with($path, 'http') ? $path : asset(ltrim($path, '/')))
@@ -81,8 +93,11 @@ final class ServicioPresentacionCampanias
     /** @param iterable<int, object> $campaigns */
     private function idsSegmentos(iterable $campaigns): array
     {
+        // Extrae los identificadores de segmentos usados por las campanas.
+        // Agrupa en $segmentIds los datos que se utilizaran en el siguiente paso.
         $segmentIds = [];
 
+        // Recorre los elementos recibidos para validar o procesar cada registro.
         foreach ($campaigns as $campaign) {
             $segmentIds[$campaign->id] = $campaign->segments->modelKeys();
         }
@@ -92,6 +107,7 @@ final class ServicioPresentacionCampanias
 
     private function etiquetaTendencia(?float $trend): string
     {
+        // Traduce la variacion numerica a una etiqueta comprensible.
         return $trend === null
             ? 'Sin periodo anterior'
             : ($trend >= 0 ? '+' : '').number_format($trend, 1).'% vs. mes anterior';
@@ -99,6 +115,7 @@ final class ServicioPresentacionCampanias
 
     private function suma(iterable $values): float|int
     {
+        // Acumula valores numericos ignorando entradas no validas.
         return $values instanceof Collection ? $values->sum('total') : collect($values)->sum('total');
     }
 }

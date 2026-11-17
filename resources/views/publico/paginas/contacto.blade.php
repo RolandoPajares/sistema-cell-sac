@@ -1,8 +1,12 @@
 @extends('layouts.tienda.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Contacto | MD Technology Cell')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-contacto')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
     <section class="contacto-banner">
         <div class="container contacto-banner-grid">
@@ -27,7 +31,9 @@
     <section class="container contacto-seccion" id="formulario">
         <div class="contacto-formulario">
             <div class="contacto-formulario-titulo"><i class="bi bi-chat-square-text"></i><div><h2>Envíanos tu consulta</h2><p>Cuéntanos qué producto buscas o en qué te podemos ayudar.</p></div></div>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form method="post" action="{{ route('pages.contact.store') }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                 @csrf
                 <div class="contacto-dos-campos">
                     <div class="form-group">

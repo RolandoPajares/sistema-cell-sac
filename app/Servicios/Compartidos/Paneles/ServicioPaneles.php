@@ -32,6 +32,7 @@ final class ServicioPaneles
      */
     public function administratorSummary(): array
     {
+        // Prepara los indicadores y accesos que vera el administrador en su panel.
         return [
             'products' => Producto::count(),
             'lowStock' => Producto::where('existencias', '<=', 5)->count(),
@@ -46,7 +47,10 @@ final class ServicioPaneles
      */
     public function roleDashboard(User $user, array $cart): array
     {
+        // Selecciona el contenido del dashboard segun el usuario y su carrito actual.
+        // Guarda en $orders el resultado necesario para continuar la operacion.
         $orders = $this->pedidosDelCliente($user);
+        // Guarda en $menu el resultado necesario para continuar la operacion.
         $menu = $this->menus->paraUsuario($user);
         $links = collect($menu['grupos'])->flatMap(fn (array $group): array => $group['items'])
             ->filter(fn (array $item): bool => $item['enabled'])
@@ -71,11 +75,14 @@ final class ServicioPaneles
      */
     private function pedidosDelCliente(User $user): Collection
     {
+        // Consulta solo los pedidos que pertenecen al cliente autenticado.
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! $this->autorizacion->allows($user, 'gestion.pedidos.consultar')) {
             return collect();
         }
 
         return $this->autorizacion->scopeRecordsFor(
+            // ORM: este servicio aplica ORM para consultar o modificar datos en la base de datos.
             Pedido::query()->where('usuario_id', $user->getKey()),
             $user,
             'gestion.pedidos.consultar',

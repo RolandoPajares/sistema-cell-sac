@@ -16,6 +16,7 @@ class InicioSesionRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return true;
@@ -26,11 +27,15 @@ class InicioSesionRequest extends FormRequest
      *
      * @return array Resultado de la operación.
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         return [
+            // Valida el campo 'correo' con las reglas definidas en la instruccion siguiente.
             'correo' => ['required', 'email', 'max:160'],
+            // Valida el campo 'password' con las reglas definidas en la instruccion siguiente.
             'password' => ['required', 'string'],
+            // Valida el campo 'remember' con las reglas definidas en la instruccion siguiente.
             'remember' => ['sometimes', 'boolean'],
         ];
     }

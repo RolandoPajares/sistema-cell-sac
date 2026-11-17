@@ -1,8 +1,12 @@
 {{-- Analitica: analisis-auditoria\reportes-globales\listar.blade.php. Presenta datos preparados por el controlador. --}}
 {{-- Bloque principal: presenta filtros, métricas y resultados del análisis global. --}}
 @extends('layouts.panel.principal')
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Reportes globales')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-analisis-auditoria')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section class="tc-aa tc-aa--globales" data-analisis-auditoria data-aa-config="{{ $aaConfig }}">
     <nav class="tc-aa__breadcrumb" aria-label="Ruta de navegación"><i class="bi bi-house"></i><span>Análisis y Auditoría</span><i class="bi bi-chevron-right"></i><strong>{{ $pagina['titulo'] }}</strong></nav>
@@ -21,6 +25,7 @@
     <div class="tc-aa__metrics">@foreach ($pagina['metricas'] as $metrica)<article class="tc-aa__metric tc-aa__metric--{{ $metrica[3] }}"><span class="tc-aa__metric-icon"><i class="bi {{ $metrica[2] }}"></i></span>
             <div><span>{{ $metrica[0] }}</span><strong>{{ $metrica[1] }}</strong><small>Fuente: MariaDB</small></div>
         </article>@endforeach</div>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
     <form method="GET" class="tc-aa__card tc-aa__filters" aria-label="Filtros de consulta">
         <h2><i class="bi bi-funnel"></i> Filtros de consulta</h2>
         <div class="tc-aa__filter-grid">@foreach ($pagina['filtros'] as [$etiqueta, $nombreCampo, $marcador])<label>{{ $etiqueta }}@if ($marcador === 'fecha')<input type="date" name="{{ $nombreCampo }}" value="{{ $filtros[$nombreCampo] ?? '' }}">@elseif ($marcador === 'text')<input type="search" name="{{ $nombreCampo }}" value="{{ $filtros[$nombreCampo] ?? '' }}" maxlength="120">@else<select name="{{ $nombreCampo }}" @disabled(in_array($nombreCampo, $pagina['filtrosBloqueados'], true))>
@@ -44,6 +49,7 @@
             </table>
         </div>
         <p class="tc-aa__empty" data-aa-empty @if (count($pagina['filas'])> 0) hidden @endif>No hay registros para los filtros aplicados.</p>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
         @if ($pagina['paginacion'])<footer class="tc-aa__card-heading"><span>Página {{ $pagina['paginacion']->currentPage() }} de {{ $pagina['paginacion']->lastPage() }}</span>
             <nav aria-label="Paginación">@if ($pagina['paginacion']->previousPageUrl())<a href="{{ $pagina['paginacion']->previousPageUrl() }}">Anterior</a>@endif @if ($pagina['paginacion']->nextPageUrl())<a href="{{ $pagina['paginacion']->nextPageUrl() }}">Siguiente</a>@endif</nav>
         </footer>@endif

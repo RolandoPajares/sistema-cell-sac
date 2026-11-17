@@ -1,13 +1,19 @@
+
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
 <form method="post" action="{{ route($profileRoute) }}" class="tc-profile-card tc-profile-card--personal">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
     @csrf @method('PUT')
     <header class="tc-profile-card-heading"><i class="bi bi-person" aria-hidden="true"></i><div><h2>Datos personales</h2><p>Actualiza únicamente los datos personales autorizados para tu cuenta.</p></div></header>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if (session('status'))
         <p class="tc-profile-form-feedback" role="status">{{ session('status') }}</p>
     @endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if ($errors->any())
         <div class="tc-profile-form-error" role="alert">
             <strong>No se pudieron guardar los cambios.</strong>
             <ul>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -21,6 +27,7 @@
         <label><span><i class="bi bi-card-text" aria-hidden="true"></i>Documento</span><input name="documento" value="{{ old('documento', $document === 'No registrado' ? '' : $document) }}" maxlength="20" placeholder="Ingresa tu documento" @error('documento') aria-invalid="true" @enderror>@error('documento')<small class="tc-profile-field-error">{{ $message }}</small>@enderror</label>
         <label class="tc-profile-field--full"><span><i class="bi bi-building" aria-hidden="true"></i>Sede principal</span><input value="{{ $primarySite ?? 'No registrada' }}" readonly></label>
     </div>
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
     @include('cuenta.perfil.componentes.campos-dinamicos')
     <footer class="tc-profile-card-actions"><button class="tc-profile-primary" type="submit"><i class="bi bi-save" aria-hidden="true"></i> Guardar cambios</button><a class="tc-profile-secondary" href="{{ route($accountHomeRoute) }}">Cancelar</a></footer>
 </form>

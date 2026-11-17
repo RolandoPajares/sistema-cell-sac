@@ -1,19 +1,26 @@
+/* Define los estilos visuales del modulo o componente 'formulario'. */
+
+/* Aplica estos estilos al bloque '.smart-page'. */
 .smart-page {
   padding: 54px 0 80px;
 }
+/* Aplica estos estilos al bloque '.smart-hero'. */
 .smart-hero {
   max-width: 780px;
   margin-bottom: 26px;
 }
+/* Aplica estos estilos al bloque '.smart-hero h1'. */
 .smart-hero h1 {
   font-size: clamp(2rem, 5vw, 3.5rem);
   margin: 0.35rem 0;
 }
+/* Aplica estos estilos al bloque '.smart-hero p'. */
 .smart-hero p {
   color: var(--muted);
   font-size: 1.05rem;
   line-height: 1.65;
 }
+/* Aplica estos estilos al bloque '.smart-form'. */
 .smart-form {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
@@ -21,31 +28,37 @@
   align-items: end;
   margin-bottom: 30px;
 }
+/* Aplica estos estilos al bloque '.smart-form label'. */
 .smart-form label {
   display: grid;
   gap: 7px;
   font-weight: 700;
 }
 .smart-form select,
+/* Aplica estos estilos al bloque '.smart-form input'. */
 .smart-form input {
   width: 100%;
 }
 @media (max-width: 900px) {
+/* Aplica estos estilos al bloque '.smart-form'. */
   .smart-form {
     grid-template-columns: 1fr 1fr;
   }
 }
 @media (max-width: 650px) {
+/* Aplica estos estilos al bloque '.smart-form'. */
   .smart-form {
     grid-template-columns: 1fr;
   }
 }
+/* Aplica estos estilos al bloque '.proposal-kpis'. */
 .proposal-kpis {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 14px;
   margin-bottom: 22px;
 }
+/* Aplica estos estilos al bloque '.proposal-kpis > div'. */
 .proposal-kpis > div {
   padding: 18px;
   border: 1px solid var(--line);
@@ -53,13 +66,16 @@
   display: grid;
   gap: 6px;
 }
+/* Aplica estos estilos al bloque '.proposal-kpis span'. */
 .proposal-kpis span {
   color: var(--muted);
 }
+/* Aplica estos estilos al bloque '.proposal-kpis strong'. */
 .proposal-kpis strong {
   font-size: 1.5rem;
 }
 @media (max-width: 650px) {
+/* Aplica estos estilos al bloque '.proposal-kpis'. */
   .proposal-kpis {
     grid-template-columns: 1fr;
   }

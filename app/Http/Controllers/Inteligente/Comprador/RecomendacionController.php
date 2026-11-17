@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Inteligente\Comprador;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Inteligente\Comprador\RecomendacionRequest;
+use App\Models\Catalogo\Producto;
 use App\Servicios\Inteligente\Comprador\ServicioRecomendaciones;
 use Illuminate\View\View;
 
@@ -30,13 +31,16 @@ class RecomendacionController extends Controller
      */
     public function index(RecomendacionRequest $request): View
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $products = $this->servicioRecomendaciones->recomendar($request->validated());
         $products->each(function ($product): void {
+            // Guarda en $path el resultado necesario para continuar esta operacion.
             $path = $product->images->first()?->ruta_imagen ?: $product->url_imagen;
-            $path = ltrim((string) preg_replace('~^assets/~', '', $path ?: 'img/marca/logo.jpeg'), '/');
-            $product->recommendation_image_url = asset('assets/cell-legacy/'.$path);
+            $product->recommendation_image_url = Producto::urlPublicaDeImagen($path)
+                ?: asset('assets/cell-legacy/img/marca/logo.jpeg');
         });
 
+        // Devuelve la vista 'inteligente.comprador.recomendaciones' con los datos preparados por este controlador.
         return view('inteligente.comprador.recomendaciones', [
             'products' => $products,
         ]);

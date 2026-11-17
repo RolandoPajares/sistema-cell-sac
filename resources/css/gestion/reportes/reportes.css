@@ -1,8 +1,12 @@
+/* Define los estilos visuales del modulo o componente 'reportes'. */
+
+/* Aplica estos estilos al bloque '.modulo-reportes .admin-main'. */
 .modulo-reportes .admin-main {
   min-height: calc(100vh - var(--reference-header-height));
   background: linear-gradient(135deg, #eef8ff 0%, #f7fbff 54%, #eaf5ff 100%);
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-page'. */
 .modulo-reportes .reportes-page {
   width: 100%;
   max-width: 1500px;
@@ -10,6 +14,7 @@
   color: #102550;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-hero'. */
 .modulo-reportes .reportes-hero {
   display: flex;
   align-items: flex-start;
@@ -18,6 +23,7 @@
   margin-bottom: 22px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-eyebrow'. */
 .modulo-reportes .reportes-eyebrow {
   display: inline-flex;
   align-items: center;
@@ -31,6 +37,7 @@
   letter-spacing: 0.01em;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-hero h1'. */
 .modulo-reportes .reportes-hero h1 {
   display: flex;
   align-items: center;
@@ -42,18 +49,21 @@
   letter-spacing: -0.05em;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-hero h1 i'. */
 .modulo-reportes .reportes-hero h1 i {
   color: #0878f9;
   font-size: 0.78em;
 }
 
 .modulo-reportes .reportes-hero p,
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-card-header p'. */
 .modulo-reportes .reportes-card-header p {
   margin: 0;
   color: #7188ac;
   font-size: 0.91rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-export-button'. */
 .modulo-reportes .reportes-export-button {
   display: inline-flex;
   align-items: center;
@@ -74,6 +84,7 @@
   background: #075fcf;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-toolbar'. */
 .modulo-reportes .reportes-toolbar {
   display: flex;
   align-items: stretch;
@@ -87,6 +98,7 @@
   box-shadow: 0 8px 24px rgba(29, 84, 150, 0.06);
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-tabs'. */
 .modulo-reportes .reportes-tabs {
   display: flex;
   align-items: stretch;
@@ -95,6 +107,7 @@
   overflow-x: auto;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-tabs button'. */
 .modulo-reportes .reportes-tabs button {
   display: inline-flex;
   align-items: center;
@@ -112,11 +125,13 @@
   cursor: pointer;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-tabs button i'. */
 .modulo-reportes .reportes-tabs button i {
   color: #6c8dbb;
   font-size: 1rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-tabs button.is-active'. */
 .modulo-reportes .reportes-tabs button.is-active {
   border-radius: 8px 8px 0 0;
   border-bottom-color: #0878f9;
@@ -124,10 +139,12 @@
   color: #fff;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-tabs button.is-active i'. */
 .modulo-reportes .reportes-tabs button.is-active i {
   color: #fff;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-period-filter'. */
 .modulo-reportes .reportes-period-filter {
   display: flex;
   align-items: center;
@@ -136,6 +153,7 @@
   color: #6e86aa;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-period-filter select'. */
 .modulo-reportes .reportes-period-filter select {
   width: 100%;
   min-height: 46px;
@@ -152,6 +170,7 @@
   font-size: 0.7rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-kpi-grid'. */
 .modulo-reportes .reportes-kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -159,6 +178,7 @@
   margin-bottom: 18px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-kpi'. */
 .modulo-reportes .reportes-kpi {
   display: flex;
   align-items: center;
@@ -174,6 +194,7 @@
   box-shadow: 0 7px 21px rgba(32, 85, 145, 0.07);
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-kpi-icon'. */
 .modulo-reportes .reportes-kpi-icon {
   display: grid;
   width: 50px;
@@ -183,6 +204,7 @@
   font-size: 1.5rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-kpi > div'. */
 .modulo-reportes .reportes-kpi > div {
   min-width: 0;
   text-align: center;
@@ -190,16 +212,19 @@
 
 .modulo-reportes .reportes-kpi small,
 .modulo-reportes .reportes-kpi strong,
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-kpi span'. */
 .modulo-reportes .reportes-kpi span {
   display: block;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-kpi small'. */
 .modulo-reportes .reportes-kpi small {
   color: #47658e;
   font-size: 0.76rem;
   font-weight: 800;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-kpi strong'. */
 .modulo-reportes .reportes-kpi strong {
   margin-top: 2px;
   color: #0a1d4e;
@@ -208,6 +233,7 @@
   letter-spacing: -0.04em;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-kpi span'. */
 .modulo-reportes .reportes-kpi span {
   margin-top: 5px;
   color: #6d84a7;
@@ -215,61 +241,80 @@
   white-space: nowrap;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-export-menu'. */
 .modulo-reportes .reportes-export-menu { position: relative; }
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-export-menu > summary'. */
 .modulo-reportes .reportes-export-menu > summary { cursor: pointer; list-style: none; }
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-export-menu > summary::-webkit-details-marker'. */
 .modulo-reportes .reportes-export-menu > summary::-webkit-details-marker { display: none; }
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-export-options'. */
 .modulo-reportes .reportes-export-options { position: absolute; z-index: 30; top: calc(100% + 8px); right: 0; display: grid; width: 255px; gap: 4px; padding: 8px; border: 1px solid #d8e6f4; border-radius: 12px; background: #fff; box-shadow: 0 15px 35px rgba(12, 57, 120, .18); }
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-export-options a'. */
 .modulo-reportes .reportes-export-options a { display: flex; align-items: center; gap: 10px; padding: 9px; border-radius: 8px; color: #17376b; text-decoration: none; }
 .modulo-reportes .reportes-export-options a:hover { background: #edf5ff; }
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-export-options a > i'. */
 .modulo-reportes .reportes-export-options a > i { display: grid; flex: 0 0 32px; width: 32px; height: 32px; place-items: center; border-radius: 8px; color: #0873ed; background: #e5f2ff; font-size: 1.05rem; }
 .modulo-reportes .reportes-export-options a:nth-child(1) > i { color: #e33449; background: #ffe8e9; }
 .modulo-reportes .reportes-export-options a:nth-child(2) > i { color: #0b9b65; background: #dff8ec; }
 .modulo-reportes .reportes-export-options a:nth-child(3) > i { color: #0873ed; background: #e5f2ff; }
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-export-options a span'. */
 .modulo-reportes .reportes-export-options a span { display: grid; gap: 2px; }
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-export-options strong'. */
 .modulo-reportes .reportes-export-options strong { font-size: .75rem; }
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-export-options small'. */
 .modulo-reportes .reportes-export-options small { color: #7588aa; font-size: .63rem; font-weight: 500; }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-kpi span i'. */
 .modulo-reportes .reportes-kpi span i {
   color: #14a86f;
   font-weight: 900;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-kpi--green'. */
 .modulo-reportes .reportes-kpi--green {
   background: linear-gradient(130deg, #fff, #f2fff9);
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-kpi--green .reportes-kpi-icon'. */
 .modulo-reportes .reportes-kpi--green .reportes-kpi-icon {
   background: #dcf9ec;
   color: #08a86f;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-kpi--blue'. */
 .modulo-reportes .reportes-kpi--blue {
   background: linear-gradient(130deg, #fff, #f3f8ff);
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-kpi--blue .reportes-kpi-icon'. */
 .modulo-reportes .reportes-kpi--blue .reportes-kpi-icon {
   background: #e1efff;
   color: #0878f9;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-kpi--violet'. */
 .modulo-reportes .reportes-kpi--violet {
   background: linear-gradient(130deg, #fff, #fbf7ff);
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-kpi--violet .reportes-kpi-icon'. */
 .modulo-reportes .reportes-kpi--violet .reportes-kpi-icon {
   background: #eee4ff;
   color: #7d42eb;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-kpi--orange'. */
 .modulo-reportes .reportes-kpi--orange {
   background: linear-gradient(130deg, #fff, #fff8ed);
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-kpi--orange .reportes-kpi-icon'. */
 .modulo-reportes .reportes-kpi--orange .reportes-kpi-icon {
   background: #ffedd5;
   color: #ee8e00;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-grid'. */
 .modulo-reportes .reportes-grid {
   display: grid;
   gap: 18px;
@@ -277,10 +322,12 @@
 }
 
 .modulo-reportes .reportes-grid--main,
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-grid--secondary'. */
 .modulo-reportes .reportes-grid--secondary {
   grid-template-columns: minmax(0, 1.35fr) minmax(360px, 1fr);
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-card'. */
 .modulo-reportes .reportes-card {
   min-width: 0;
   border: 1px solid #deebf8;
@@ -289,6 +336,7 @@
   box-shadow: 0 8px 24px rgba(31, 85, 145, 0.07);
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-card-header'. */
 .modulo-reportes .reportes-card-header {
   display: flex;
   align-items: flex-start;
@@ -297,6 +345,7 @@
   padding: 18px 20px 10px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-card-header h2'. */
 .modulo-reportes .reportes-card-header h2 {
   margin: 0 0 4px;
   color: #0d2455;
@@ -304,6 +353,7 @@
   letter-spacing: -0.02em;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-card-header a'. */
 .modulo-reportes .reportes-card-header a {
   display: inline-flex;
   align-items: center;
@@ -314,6 +364,7 @@
   white-space: nowrap;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-card-period'. */
 .modulo-reportes .reportes-card-period {
   display: inline-flex;
   align-items: center;
@@ -328,15 +379,18 @@
   white-space: nowrap;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-card-period i'. */
 .modulo-reportes .reportes-card-period i {
   color: #7a96bd;
   font-size: 0.65rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-chart-card'. */
 .modulo-reportes .reportes-chart-card {
   min-height: 350px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-chart-legend'. */
 .modulo-reportes .reportes-chart-legend {
   display: flex;
   align-items: center;
@@ -346,12 +400,14 @@
   font-size: 0.73rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-chart-legend span'. */
 .modulo-reportes .reportes-chart-legend span {
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-legend-dot'. */
 .modulo-reportes .reportes-legend-dot {
   display: inline-block;
   width: 9px;
@@ -359,14 +415,17 @@
   border-radius: 50%;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-legend-dot--blue'. */
 .modulo-reportes .reportes-legend-dot--blue {
   background: #217df3;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-legend-dot--green'. */
 .modulo-reportes .reportes-legend-dot--green {
   background: #17b98a;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-chart'. */
 .modulo-reportes .reportes-chart {
   display: grid;
   grid-template-columns: 58px minmax(0, 1fr);
@@ -374,6 +433,7 @@
   margin: 8px 20px 16px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-chart-scale'. */
 .modulo-reportes .reportes-chart-scale {
   display: flex;
   flex-direction: column;
@@ -384,6 +444,7 @@
   text-align: right;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-chart-plot'. */
 .modulo-reportes .reportes-chart-plot {
   position: relative;
   min-width: 0;
@@ -393,22 +454,26 @@
 
 .modulo-reportes .reportes-chart-lines,
 .modulo-reportes .reportes-bars,
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-orders-line'. */
 .modulo-reportes .reportes-orders-line {
   position: absolute;
   inset: 9px 0 31px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-chart-lines'. */
 .modulo-reportes .reportes-chart-lines {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-chart-lines span'. */
 .modulo-reportes .reportes-chart-lines span {
   display: block;
   border-top: 1px solid #e8eff8;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-bars'. */
 .modulo-reportes .reportes-bars {
   display: grid;
   grid-template-columns: repeat(31, minmax(4px, 1fr));
@@ -417,6 +482,7 @@
   overflow: hidden;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-bar-column'. */
 .modulo-reportes .reportes-bar-column {
   position: relative;
   display: flex;
@@ -426,6 +492,7 @@
   min-width: 0;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-bar'. */
 .modulo-reportes .reportes-bar {
   display: block;
   width: min(65%, 20px);
@@ -435,6 +502,7 @@
   opacity: 0.88;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-bar-column small'. */
 .modulo-reportes .reportes-bar-column small {
   position: absolute;
   bottom: -25px;
@@ -449,6 +517,7 @@
   white-space: nowrap;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-orders-line'. */
 .modulo-reportes .reportes-orders-line {
   z-index: 2;
   width: 100%;
@@ -457,6 +526,7 @@
   pointer-events: none;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-orders-line polyline'. */
 .modulo-reportes .reportes-orders-line polyline {
   fill: none;
   stroke: #17b98a;
@@ -466,6 +536,7 @@
   vector-effect: non-scaling-stroke;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-orders-line circle'. */
 .modulo-reportes .reportes-orders-line circle {
   fill: #fff;
   stroke: #17b98a;
@@ -473,10 +544,12 @@
   vector-effect: non-scaling-stroke;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-donut-card'. */
 .modulo-reportes .reportes-donut-card {
   min-height: 350px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-donut-layout'. */
 .modulo-reportes .reportes-donut-layout {
   display: grid;
   grid-template-columns: 175px minmax(0, 1fr);
@@ -485,6 +558,7 @@
   padding: 18px 20px 24px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-donut'. */
 .modulo-reportes .reportes-donut {
   display: grid;
   width: 172px;
@@ -494,6 +568,7 @@
   background: var(--donut-gradient);
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-donut::before'. */
 .modulo-reportes .reportes-donut::before {
   content: '';
   position: absolute;
@@ -503,10 +578,12 @@
   background: #fff;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-donut'. */
 .modulo-reportes .reportes-donut {
   position: relative;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-donut > div'. */
 .modulo-reportes .reportes-donut > div {
   position: relative;
   z-index: 1;
@@ -515,16 +592,19 @@
   text-align: center;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-donut strong'. */
 .modulo-reportes .reportes-donut strong {
   color: #10244d;
   font-size: 1.14rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-donut span'. */
 .modulo-reportes .reportes-donut span {
   color: #6b82a6;
   font-size: 0.7rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-legend-list'. */
 .modulo-reportes .reportes-legend-list {
   display: grid;
   gap: 8px;
@@ -533,6 +613,7 @@
   list-style: none;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-legend-list li'. */
 .modulo-reportes .reportes-legend-list li {
   display: flex;
   align-items: center;
@@ -543,6 +624,7 @@
   font-size: 0.75rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-legend-list li > span'. */
 .modulo-reportes .reportes-legend-list li > span {
   display: inline-flex;
   align-items: center;
@@ -553,6 +635,7 @@
   white-space: nowrap;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-legend-list li i'. */
 .modulo-reportes .reportes-legend-list li i {
   display: inline-block;
   flex: 0 0 10px;
@@ -561,20 +644,24 @@
   border-radius: 50%;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-legend-list b'. */
 .modulo-reportes .reportes-legend-list b {
   color: #163563;
   font-size: 0.73rem;
   white-space: nowrap;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-legend-empty'. */
 .modulo-reportes .reportes-legend-empty {
   color: #8499b8 !important;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-product-list'. */
 .modulo-reportes .reportes-product-list {
   padding: 0 20px 14px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-product-row'. */
 .modulo-reportes .reportes-product-row {
   display: grid;
   grid-template-columns: 27px 43px minmax(0, 1fr) auto;
@@ -588,6 +675,7 @@
   border-bottom: 0;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-rank'. */
 .modulo-reportes .reportes-rank {
   display: grid;
   width: 22px;
@@ -600,11 +688,15 @@
   font-weight: 850;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-rank--1'. */
 .modulo-reportes .reportes-rank--1 { background: #dcecff; }
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-rank--2'. */
 .modulo-reportes .reportes-rank--2 { background: #dcf8ef; color: #0a9c70; }
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-rank--3'. */
 .modulo-reportes .reportes-rank--3 { background: #fff0d1; color: #e99508; }
 
 .modulo-reportes .reportes-product-row img,
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-product-placeholder'. */
 .modulo-reportes .reportes-product-placeholder {
   display: grid;
   width: 38px;
@@ -618,12 +710,14 @@
   object-fit: contain;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-product-name'. */
 .modulo-reportes .reportes-product-name {
   display: grid;
   min-width: 0;
   gap: 4px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-product-name strong'. */
 .modulo-reportes .reportes-product-name strong {
   overflow: hidden;
   color: #193661;
@@ -632,37 +726,44 @@
   white-space: nowrap;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-product-name small'. */
 .modulo-reportes .reportes-product-name small {
   color: #7790b3;
   font-size: 0.69rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-product-row > b'. */
 .modulo-reportes .reportes-product-row > b {
   color: #0c2a5e;
   font-size: 0.76rem;
   white-space: nowrap;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-inventory-card .reportes-card-header'. */
 .modulo-reportes .reportes-inventory-card .reportes-card-header {
   padding-bottom: 0;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-donut-layout--inventory'. */
 .modulo-reportes .reportes-donut-layout--inventory {
   grid-template-columns: 164px minmax(0, 1fr);
   padding-top: 13px;
   padding-bottom: 13px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-donut--inventory'. */
 .modulo-reportes .reportes-donut--inventory {
   width: 150px;
   height: 150px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-donut--inventory::before'. */
 .modulo-reportes .reportes-donut--inventory::before {
   width: 98px;
   height: 98px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-inventory-alert'. */
 .modulo-reportes .reportes-inventory-alert {
   display: flex;
   align-items: center;
@@ -674,6 +775,7 @@
   background: #fbfdff;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-inventory-alert > span'. */
 .modulo-reportes .reportes-inventory-alert > span {
   display: grid;
   flex: 0 0 28px;
@@ -685,22 +787,26 @@
   color: #f03345;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-inventory-alert > div'. */
 .modulo-reportes .reportes-inventory-alert > div {
   display: grid;
   min-width: 0;
   gap: 2px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-inventory-alert strong'. */
 .modulo-reportes .reportes-inventory-alert strong {
   color: #c54836;
   font-size: 0.72rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-inventory-alert small'. */
 .modulo-reportes .reportes-inventory-alert small {
   color: #7a90b1;
   font-size: 0.66rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-inventory-alert a'. */
 .modulo-reportes .reportes-inventory-alert a {
   margin-left: auto;
   padding: 7px 9px;
@@ -712,23 +818,27 @@
   white-space: nowrap;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-orders-card'. */
 .modulo-reportes .reportes-orders-card {
   overflow: hidden;
   margin-bottom: 18px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-orders-table-wrap'. */
 .modulo-reportes .reportes-orders-table-wrap {
   width: 100%;
   overflow-x: auto;
   padding: 0 20px 16px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-orders-table'. */
 .modulo-reportes .reportes-orders-table {
   width: 100%;
   min-width: 760px;
   border-collapse: collapse;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-orders-table th'. */
 .modulo-reportes .reportes-orders-table th {
   padding: 10px 12px;
   background: #eff6fd;
@@ -747,6 +857,7 @@
   border-radius: 0 7px 7px 0;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-orders-table td'. */
 .modulo-reportes .reportes-orders-table td {
   padding: 13px 12px;
   border-bottom: 1px solid #edf2f8;
@@ -759,10 +870,12 @@
   border-bottom: 0;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-orders-table td strong'. */
 .modulo-reportes .reportes-orders-table td strong {
   color: #183660;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-status'. */
 .modulo-reportes .reportes-status {
   display: inline-flex;
   align-items: center;
@@ -773,11 +886,16 @@
   font-weight: 800;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-status--completed'. */
 .modulo-reportes .reportes-status--completed { background: #d9f8e9; color: #0a9c68; }
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-status--processing'. */
 .modulo-reportes .reportes-status--processing { background: #e4f1ff; color: #1871df; }
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-status--pending'. */
 .modulo-reportes .reportes-status--pending { background: #fff1d3; color: #dc8c00; }
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-status--cancelled'. */
 .modulo-reportes .reportes-status--cancelled { background: #ffe0e2; color: #e83245; }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-view-button'. */
 .modulo-reportes .reportes-view-button {
   display: inline-grid;
   width: 30px;
@@ -788,6 +906,7 @@
   color: #0875ed;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-table-empty'. */
 .modulo-reportes .reportes-table-empty {
   height: 120px;
   text-align: center !important;
@@ -795,26 +914,31 @@
 
 .modulo-reportes .reportes-table-empty i,
 .modulo-reportes .reportes-table-empty strong,
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-table-empty span'. */
 .modulo-reportes .reportes-table-empty span {
   display: block;
   margin: 0 auto 5px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-table-empty i'. */
 .modulo-reportes .reportes-table-empty i {
   color: #9bb6d8;
   font-size: 1.4rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-table-empty strong'. */
 .modulo-reportes .reportes-table-empty strong {
   color: #3f5e89;
   font-size: 0.8rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-table-empty span'. */
 .modulo-reportes .reportes-table-empty span {
   color: #8399b8;
   font-size: 0.7rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-empty'. */
 .modulo-reportes .reportes-empty {
   display: grid;
   min-height: 230px;
@@ -825,24 +949,29 @@
   text-align: center;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-empty i'. */
 .modulo-reportes .reportes-empty i {
   color: #9ab9df;
   font-size: 2rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-empty strong'. */
 .modulo-reportes .reportes-empty strong {
   color: #3c5a85;
   font-size: 0.84rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-empty span'. */
 .modulo-reportes .reportes-empty span {
   font-size: 0.74rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-empty--compact'. */
 .modulo-reportes .reportes-empty--compact {
   min-height: 245px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-footer-note'. */
 .modulo-reportes .reportes-footer-note {
   display: flex;
   align-items: center;
@@ -852,14 +981,17 @@
   font-size: 0.7rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-footer-note > i'. */
 .modulo-reportes .reportes-footer-note > i {
   color: #6e9ed5;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-footer-note strong'. */
 .modulo-reportes .reportes-footer-note strong {
   color: #3d5f8c;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-footer-campaigns'. */
 .modulo-reportes .reportes-footer-campaigns {
   margin-left: auto;
   color: #7890b0;
@@ -867,41 +999,49 @@
 }
 
 @media (max-width: 1250px) {
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-kpi-grid'. */
   .modulo-reportes .reportes-kpi-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .modulo-reportes .reportes-grid--main,
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-grid--secondary'. */
   .modulo-reportes .reportes-grid--secondary {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 860px) {
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-hero'. */
   .modulo-reportes .reportes-hero {
     display: grid;
   }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-export-button'. */
   .modulo-reportes .reportes-export-button {
     justify-self: start;
   }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-toolbar'. */
   .modulo-reportes .reportes-toolbar {
     display: grid;
     gap: 0;
     padding: 0 10px;
   }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-period-filter'. */
   .modulo-reportes .reportes-period-filter {
     border-top: 1px solid #e7eff8;
   }
 
   .modulo-reportes .reportes-donut-layout,
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-donut-layout--inventory'. */
   .modulo-reportes .reportes-donut-layout--inventory {
     grid-template-columns: 150px minmax(0, 1fr);
   }
 
   .modulo-reportes .reportes-donut,
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-donut--inventory'. */
   .modulo-reportes .reportes-donut--inventory {
     width: 140px;
     height: 140px;
@@ -909,77 +1049,95 @@
 }
 
 @media (max-width: 600px) {
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-kpi-grid'. */
   .modulo-reportes .reportes-kpi-grid {
     grid-template-columns: 1fr;
   }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-kpi'. */
   .modulo-reportes .reportes-kpi {
     min-height: 106px;
   }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-card-header'. */
   .modulo-reportes .reportes-card-header {
     display: grid;
   }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-chart-legend'. */
   .modulo-reportes .reportes-chart-legend {
     padding-left: 20px;
   }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-chart'. */
   .modulo-reportes .reportes-chart {
     grid-template-columns: 45px minmax(0, 1fr);
     margin-right: 10px;
     margin-left: 10px;
   }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-chart-scale'. */
   .modulo-reportes .reportes-chart-scale {
     font-size: 0.57rem;
   }
 
   .modulo-reportes .reportes-donut-layout,
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-donut-layout--inventory'. */
   .modulo-reportes .reportes-donut-layout--inventory {
     grid-template-columns: 1fr;
     justify-items: center;
   }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-legend-list'. */
   .modulo-reportes .reportes-legend-list {
     width: 100%;
   }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-inventory-alert'. */
   .modulo-reportes .reportes-inventory-alert {
     align-items: flex-start;
     flex-wrap: wrap;
   }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-inventory-alert a'. */
   .modulo-reportes .reportes-inventory-alert a {
     margin-left: 38px;
   }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-footer-note'. */
   .modulo-reportes .reportes-footer-note {
     align-items: flex-start;
     flex-wrap: wrap;
     padding-bottom: 10px;
   }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-footer-campaigns'. */
   .modulo-reportes .reportes-footer-campaigns {
     width: 100%;
     margin-left: 22px;
   }
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-tab-panel[hidden]'. */
 .modulo-reportes .reportes-tab-panel[hidden] {
   display: none;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-tab-panel.is-active'. */
 .modulo-reportes .reportes-tab-panel.is-active {
   animation: reportes-panel-in 0.18s ease-out;
 }
 
+/* Aplica estos estilos al bloque '@keyframes reportes-panel-in'. */
 @keyframes reportes-panel-in {
+/* Aplica estos estilos al bloque 'from'. */
   from { opacity: 0; transform: translateY(4px); }
+/* Aplica estos estilos al bloque 'to'. */
   to { opacity: 1; transform: translateY(0); }
 }
 
 .modulo-reportes .reportes-inline-link,
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-alert-link'. */
 .modulo-reportes .reportes-alert-link {
   border: 0;
   background: transparent;
@@ -990,6 +1148,7 @@
   cursor: pointer;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-view-header'. */
 .modulo-reportes .reportes-view-header {
   display: flex;
   align-items: flex-end;
@@ -998,6 +1157,7 @@
   margin: 0 0 18px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-view-header h2'. */
 .modulo-reportes .reportes-view-header h2 {
   margin: 9px 0 4px;
   color: #0a2052;
@@ -1005,12 +1165,14 @@
   letter-spacing: -0.035em;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-view-header p'. */
 .modulo-reportes .reportes-view-header p {
   margin: 0;
   color: #7188ac;
   font-size: 0.85rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-mini-kpi-grid'. */
 .modulo-reportes .reportes-mini-kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1018,6 +1180,7 @@
   margin-bottom: 18px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-mini-kpi-grid article'. */
 .modulo-reportes .reportes-mini-kpi-grid article {
   display: flex;
   align-items: center;
@@ -1030,21 +1193,25 @@
   box-shadow: 0 7px 20px rgba(31, 85, 145, 0.06);
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-mini-kpi-grid article > div'. */
 .modulo-reportes .reportes-mini-kpi-grid article > div {
   min-width: 0;
 }
 
 .modulo-reportes .reportes-mini-kpi-grid small,
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-mini-kpi-grid strong'. */
 .modulo-reportes .reportes-mini-kpi-grid strong {
   display: block;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-mini-kpi-grid small'. */
 .modulo-reportes .reportes-mini-kpi-grid small {
   color: #6a82a8;
   font-size: 0.7rem;
   font-weight: 750;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-mini-kpi-grid strong'. */
 .modulo-reportes .reportes-mini-kpi-grid strong {
   margin-top: 4px;
   overflow: hidden;
@@ -1055,6 +1222,7 @@
   white-space: nowrap;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-mini-icon'. */
 .modulo-reportes .reportes-mini-icon {
   display: grid;
   flex: 0 0 42px;
@@ -1065,23 +1233,31 @@
   font-size: 1.15rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-mini-icon--blue'. */
 .modulo-reportes .reportes-mini-icon--blue { background: #e4f1ff; color: #0878f9; }
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-mini-icon--green'. */
 .modulo-reportes .reportes-mini-icon--green { background: #dcf8ec; color: #08a971; }
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-mini-icon--violet'. */
 .modulo-reportes .reportes-mini-icon--violet { background: #eee5ff; color: #7644e8; }
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-mini-icon--orange'. */
 .modulo-reportes .reportes-mini-icon--orange { background: #ffefd4; color: #e99508; }
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-mini-icon--red'. */
 .modulo-reportes .reportes-mini-icon--red { background: #ffe2e5; color: #ef3d52; }
 
 .modulo-reportes .reportes-detail-card,
 .modulo-reportes .reportes-status-card,
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-table-card'. */
 .modulo-reportes .reportes-table-card {
   overflow: hidden;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-data-list'. */
 .modulo-reportes .reportes-data-list {
   display: grid;
   padding: 0 20px 18px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-data-list > div'. */
 .modulo-reportes .reportes-data-list > div {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -1095,6 +1271,7 @@
   border-bottom: 0;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-data-list span'. */
 .modulo-reportes .reportes-data-list span {
   overflow: hidden;
   color: #34557f;
@@ -1104,11 +1281,13 @@
   white-space: nowrap;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-data-list span i'. */
 .modulo-reportes .reportes-data-list span i {
   margin-right: 7px;
   color: #4d90e9;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-data-list b'. */
 .modulo-reportes .reportes-data-list b {
   color: #173761;
   font-size: 0.74rem;
@@ -1116,18 +1295,21 @@
   white-space: nowrap;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-data-list small'. */
 .modulo-reportes .reportes-data-list small {
   grid-column: 1 / -1;
   color: #8298b7;
   font-size: 0.66rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-status-list'. */
 .modulo-reportes .reportes-status-list {
   display: grid;
   gap: 16px;
   padding: 14px 20px 22px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-status-list > div'. */
 .modulo-reportes .reportes-status-list > div {
   display: grid;
   grid-template-columns: 125px minmax(90px, 1fr) 38px 54px;
@@ -1135,6 +1317,7 @@
   align-items: center;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-status-list span'. */
 .modulo-reportes .reportes-status-list span {
   display: inline-flex;
   align-items: center;
@@ -1146,6 +1329,7 @@
   white-space: nowrap;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-status-list span i'. */
 .modulo-reportes .reportes-status-list span i {
   flex: 0 0 10px;
   width: 10px;
@@ -1153,6 +1337,7 @@
   border-radius: 50%;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-progress'. */
 .modulo-reportes .reportes-progress {
   height: 8px;
   overflow: hidden;
@@ -1160,6 +1345,7 @@
   background: #e7eff8;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-progress i'. */
 .modulo-reportes .reportes-progress i {
   display: block;
   height: 100%;
@@ -1168,6 +1354,7 @@
 }
 
 .modulo-reportes .reportes-status-list b,
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-status-list small'. */
 .modulo-reportes .reportes-status-list small {
   color: #173862;
   font-size: 0.72rem;
@@ -1175,22 +1362,26 @@
   white-space: nowrap;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-status-list small'. */
 .modulo-reportes .reportes-status-list small {
   color: #7890b0;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-simple-table-wrap'. */
 .modulo-reportes .reportes-simple-table-wrap {
   width: 100%;
   overflow-x: auto;
   padding: 0 20px 18px;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-simple-table'. */
 .modulo-reportes .reportes-simple-table {
   width: 100%;
   min-width: 620px;
   border-collapse: collapse;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-simple-table th'. */
 .modulo-reportes .reportes-simple-table th {
   padding: 10px 11px;
   background: #eff6fd;
@@ -1209,6 +1400,7 @@
   border-radius: 0 7px 7px 0;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-simple-table td'. */
 .modulo-reportes .reportes-simple-table td {
   padding: 11px;
   border-bottom: 1px solid #edf2f8;
@@ -1222,43 +1414,53 @@
 }
 
 .modulo-reportes .reportes-simple-table td strong,
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-simple-table td small'. */
 .modulo-reportes .reportes-simple-table td small {
   display: block;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-simple-table td strong'. */
 .modulo-reportes .reportes-simple-table td strong {
   color: #1a3b69;
   font-size: 0.74rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-simple-table td small'. */
 .modulo-reportes .reportes-simple-table td small {
   margin-top: 3px;
   color: #8196b5;
   font-size: 0.65rem;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-stock-number'. */
 .modulo-reportes .reportes-stock-number {
   font-weight: 800;
 }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-stock-number.is-critical'. */
 .modulo-reportes .reportes-stock-number.is-critical { color: #e8394d; }
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-stock-number.is-warning'. */
 .modulo-reportes .reportes-stock-number.is-warning { color: #d88b00; }
 
 @media (max-width: 1050px) {
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-mini-kpi-grid'. */
   .modulo-reportes .reportes-mini-kpi-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 600px) {
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-view-header'. */
   .modulo-reportes .reportes-view-header {
     display: block;
   }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-mini-kpi-grid'. */
   .modulo-reportes .reportes-mini-kpi-grid {
     grid-template-columns: 1fr;
   }
 
+/* Aplica estos estilos al bloque '.modulo-reportes .reportes-status-list > div'. */
   .modulo-reportes .reportes-status-list > div {
     grid-template-columns: minmax(100px, 1fr) minmax(70px, 1fr) 30px 45px;
     gap: 7px;

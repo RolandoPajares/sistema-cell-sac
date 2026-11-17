@@ -1,3 +1,6 @@
+/* Define los estilos visuales del modulo o componente 'confirmacion'. */
+
+/* Aplica estos estilos al bloque '.tc-confirm-dialog'. */
 .tc-confirm-dialog {
     width: min(430px, calc(100vw - 24px));
     padding: 0;
@@ -5,14 +8,17 @@
     border-radius: 16px;
     box-shadow: 0 24px 80px #0b275c55;
 }
+/* Aplica estos estilos al bloque '.tc-confirm-dialog::backdrop'. */
 .tc-confirm-dialog::backdrop {
     background: #071b3e80;
     backdrop-filter: blur(2px);
 }
+/* Aplica estos estilos al bloque '.tc-confirm-dialog__card'. */
 .tc-confirm-dialog__card {
     overflow: hidden;
     background: #fff;
 }
+/* Aplica estos estilos al bloque '.tc-confirm-dialog__card header'. */
 .tc-confirm-dialog__card header {
     display: flex;
     align-items: center;
@@ -21,6 +27,7 @@
     color: #fff;
     background: linear-gradient(135deg, #074fca, #087cf2);
 }
+/* Aplica estos estilos al bloque '.tc-confirm-dialog__icon'. */
 .tc-confirm-dialog__icon {
     display: grid;
     place-items: center;
@@ -29,14 +36,17 @@
     border-radius: 10px;
     background: #ffffff25;
 }
+/* Aplica estos estilos al bloque '.tc-confirm-dialog__card small'. */
 .tc-confirm-dialog__card small {
     opacity: 0.8;
     font-size: 0.68rem;
 }
+/* Aplica estos estilos al bloque '.tc-confirm-dialog__card h2'. */
 .tc-confirm-dialog__card h2 {
     margin: 3px 0 0;
     font-size: 1.08rem;
 }
+/* Aplica estos estilos al bloque '.tc-confirm-dialog__message'. */
 .tc-confirm-dialog__message {
     margin: 0;
     padding: 20px 18px;
@@ -44,6 +54,7 @@
     font-size: 0.84rem;
     line-height: 1.5;
 }
+/* Aplica estos estilos al bloque '.tc-confirm-dialog__card footer'. */
 .tc-confirm-dialog__card footer {
     display: flex;
     justify-content: flex-end;
@@ -51,6 +62,7 @@
     padding: 12px 18px;
     border-top: 1px solid #e1ebf4;
 }
+/* Aplica estos estilos al bloque '.tc-confirm-dialog__card button'. */
 .tc-confirm-dialog__card button {
     min-height: 38px;
     padding: 0 14px;
@@ -60,18 +72,22 @@
     font-weight: 800;
     cursor: pointer;
 }
+/* Aplica estos estilos al bloque '.tc-confirm-dialog__cancel'. */
 .tc-confirm-dialog__cancel {
     color: #294d7e;
     background: #eef4fb;
 }
+/* Aplica estos estilos al bloque '.tc-confirm-dialog__accept'. */
 .tc-confirm-dialog__accept {
     color: #fff;
     background: #0874ed;
 }
 @media (max-width: 560px) {
+/* Aplica estos estilos al bloque '.tc-confirm-dialog__card footer'. */
     .tc-confirm-dialog__card footer {
         flex-direction: column;
     }
+/* Aplica estos estilos al bloque '.tc-confirm-dialog__card button'. */
     .tc-confirm-dialog__card button {
         width: 100%;
     }

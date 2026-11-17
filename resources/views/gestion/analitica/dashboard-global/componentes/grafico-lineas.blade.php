@@ -1,3 +1,4 @@
+
 {{-- Componente de analitica: dashboard-global\componentes\grafico-lineas.blade.php. Renderiza un bloque visual reutilizable. --}}
 {{-- Bloque visual: dibuja la serie de líneas con los puntos entregados por el controlador. --}}
 <div class="tc-dg__line-chart" role="img" aria-label="{{ $descripcion }}">

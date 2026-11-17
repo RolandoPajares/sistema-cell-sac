@@ -18,6 +18,7 @@ class RegistrarRecepcionParcialCompraRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return $this->user() !== null && app(ServicioAutorizacion::class)->allowsRoute($this);
@@ -28,6 +29,7 @@ class RegistrarRecepcionParcialCompraRequest extends FormRequest
      *
      * @return array Resultado de la operación.
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         $compra = $this->route('compra');
@@ -35,16 +37,22 @@ class RegistrarRecepcionParcialCompraRequest extends FormRequest
         $claveSesion = 'compra_recepcion_tokens.'.(is_numeric($compraId) ? (int) $compraId : 0);
 
         return [
+            // Valida el campo 'token_recepcion' con las reglas definidas en la instruccion siguiente.
             'token_recepcion' => ['required', 'string', 'size:64', 'regex:/\A[a-f0-9]{64}\z/', function (string $atributo, mixed $valor, Closure $fallar) use ($claveSesion): void {
                 $tokenSesion = $this->session()->get($claveSesion);
                 if (! is_string($valor) || ! is_string($tokenSesion) || ! hash_equals($tokenSesion, $valor)) {
                     $fallar('La solicitud de recepción venció; vuelve a abrir la orden.');
                 }
             }],
+            // Valida el campo 'items' con las reglas definidas en la instruccion siguiente.
             'items' => ['required', 'array', 'min:1', 'max:100'],
+            // Valida el campo 'items.*.detalle_compra_id' con las reglas definidas en la instruccion siguiente.
             'items.*.detalle_compra_id' => ['required', 'integer', 'distinct', 'exists:detalles_compras,id'],
+            // Valida el campo 'items.*.cantidad' con las reglas definidas en la instruccion siguiente.
             'items.*.cantidad' => ['required', 'integer', 'min:0', 'max:1000'],
+            // Valida el campo 'items.*.identificadores' con las reglas definidas en la instruccion siguiente.
             'items.*.identificadores' => ['nullable', 'string', 'max:30000'],
+            // Valida el campo 'observaciones' con las reglas definidas en la instruccion siguiente.
             'observaciones' => ['nullable', 'string', 'max:500'],
         ];
     }

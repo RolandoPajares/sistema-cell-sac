@@ -2,22 +2,30 @@
 {{-- Bloque principal: muestra el comportamiento de pedidos e ingresos por sede. --}}
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Indicadores por sede')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-dashboard-global')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 {{-- El controlador entrega los totales, barras y parámetros de exportación preparados. --}}
 <section class="tc-dg" data-dashboard-global="sedes">
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
     @include('gestion.analitica.dashboard-global.componentes.cabecera')
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
     <form class="tc-dg__filters tc-dg__filters--four" method="GET" action="{{ route('management.dashboard.sites') }}">
         <label><span><i class="bi bi-calendar3"></i> Rango de fechas</span><select name="periodo">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @foreach ($periodOptions as $days => $label)
                 <option value="{{ $days }}" @selected($filters['periodo'] === $days)>{{ $label }}</option>
             @endforeach
         </select></label>
         <label><span><i class="bi bi-shop"></i> Sede</span><select name="sede" @disabled(! $hasSite)>
             <option value="">Todas las sedes</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @foreach ($sites as $site)
                 <option value="{{ $site->id }}" @selected($filters['sede'] == $site->id)>{{ $site->nombre }}</option>
             @endforeach
@@ -25,6 +33,7 @@
         <label><span><i class="bi bi-geo-alt"></i> Región</span><select disabled title="Las sedes aún no registran región"><option>Región no registrada</option></select></label>
         <label><span><i class="bi bi-share"></i> Canal de venta</span><select name="canal" @disabled(! $hasChannel)>
             <option value="">Todos los canales</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @foreach ($channels as $channel)
                 <option value="{{ $channel }}" @selected($filters['canal'] === $channel)>{{ $channel }}</option>
             @endforeach
@@ -33,16 +42,21 @@
     </form>
 
     <div class="tc-dg__metrics tc-dg__metrics--six">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
         @foreach ($metrics as $metric)
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
             @include('gestion.analitica.dashboard-global.componentes.metrica', $metric)
         @endforeach
     </div>
 
     <div class="tc-dg__grid tc-dg__grid--halves">
         <article class="tc-dg__card"><div class="tc-dg__card-head"><i class="bi bi-bar-chart"></i><div><h2>Pedidos por sede (comparativo)</h2><p>Importe de pedidos no cancelados en el período.</p></div></div><div class="tc-dg__chart tc-dg__chart--large">
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if ($results->isEmpty())
                 <p class="tc-dg__empty">No hay sedes con pedidos asociados.</p>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
             @else
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
                 @include('gestion.analitica.dashboard-global.componentes.grafico-barras', $siteChart)
             @endif
         </div></article>
@@ -52,6 +66,7 @@
     <div class="tc-dg__grid tc-dg__grid--sedes-bottom">
         <article class="tc-dg__card"><div class="tc-dg__card-head"><i class="bi bi-geo-alt"></i><div><h2>Distribución por ciudad</h2><p>Participación de ingresos por ciudad.</p></div></div><p class="tc-dg__empty">Las sedes aún no tienen ciudad registrada.</p></article>
         <article class="tc-dg__card"><div class="tc-dg__card-head"><i class="bi bi-trophy"></i><div><h2>Ranking de sedes</h2><p>Importe de pedidos no cancelados por sede.</p></div></div><div class="tc-dg__table-wrap"><table><thead><tr><th>#</th><th>Sede</th><th>Pedidos</th><th>Importe de pedidos</th></tr></thead><tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @forelse ($results as $site)
                 <tr><td>{{ $loop->iteration }}</td><td>{{ $site->nombre }}</td><td>{{ number_format($site->pedidos) }}</td><td>S/ {{ number_format($site->ingresos, 2) }}</td></tr>
             @empty

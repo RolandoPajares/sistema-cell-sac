@@ -32,8 +32,10 @@ final class Dispositivo extends Model
         return DispositivoFactory::new();
     }
 
+    // Usa la tabla 'dispositivos' como origen de los registros de este modelo.
     protected $table = 'dispositivos';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = [
         'producto_id', 'variante_id', 'imei', 'numero_serie', 'detalle_compra_id',
         'almacen_actual_id', 'estado', 'fecha_ingreso', 'fecha_salida',

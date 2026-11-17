@@ -1,10 +1,14 @@
+
 <div class="gestion-pendiente-modal-shell">
     <header class="gestion-pendiente-modal-header">
         <div><span class="gestion-pendiente-modal-icon"><i class="bi bi-pencil-square" aria-hidden="true"></i></span><div><span class="gestion-pendiente-eyebrow">Operaciones comerciales</span><h2 id="devoluciones-garantias-editar-title">Editar solicitud</h2><p>Actualiza los datos y el estado del caso seleccionado.</p></div></div>
         <button type="button" class="gestion-pendiente-close" data-pending-close aria-label="Cerrar ventana"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
     </header>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
     <form method="POST" action="#" data-pending-backend-form>
+{{-- proteccion CSRF que valida el origen del formulario. --}}
         @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
         @method('PUT')
         <div class="gestion-pendiente-modal-body">
             {{-- Explica el propósito del formulario de actualización y conserva la trazabilidad. --}}

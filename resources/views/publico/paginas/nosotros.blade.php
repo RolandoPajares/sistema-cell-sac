@@ -1,8 +1,12 @@
 @extends('layouts.tienda.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Nosotros | MD Technology Cell')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-about')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
     <section class="about-reference-hero">
         <div class="container about-reference-hero__inner">

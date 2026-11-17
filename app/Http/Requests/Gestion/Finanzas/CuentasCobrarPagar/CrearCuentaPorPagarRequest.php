@@ -17,6 +17,7 @@ class CrearCuentaPorPagarRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return $this->user() !== null && app(ServicioAutorizacion::class)->allowsRoute($this);
@@ -27,10 +28,13 @@ class CrearCuentaPorPagarRequest extends FormRequest
      *
      * @return array Resultado de la operación.
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         return [
+            // Valida el campo 'compra_id' con las reglas definidas en la instruccion siguiente.
             'compra_id' => ['required', 'integer', 'exists:compras,id'],
+            // Valida el campo 'vence_en' con las reglas definidas en la instruccion siguiente.
             'vence_en' => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
         ];
     }

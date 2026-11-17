@@ -1,2 +1,6 @@
+/* Define los estilos visuales del modulo o componente 'empresa'. */
+
+/* Aplica estos estilos al bloque '.admin-settings-page--configuracion-empresa .admin-settings-card-icon'. */
 .admin-settings-page--configuracion-empresa .admin-settings-card-icon { background: #e7f2ff; }
+/* Aplica estos estilos al bloque '.admin-settings-page--configuracion-empresa .admin-settings-brand-bar'. */
 .admin-settings-page--configuracion-empresa .admin-settings-brand-bar { box-shadow: 0 .4rem .9rem rgba(8,117,237,.15); }

@@ -29,18 +29,27 @@ final class ResponsableOrganizacionalController extends Controller
      */
     public function index(ServicioAutorizacion $autorizacion, ServicioResponsablesOrganizacionales $servicio): View
     {
+        // Obtiene en $usuario la informacion de la solicitud o del usuario actual.
         $usuario = request()->user();
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($usuario instanceof User, 403);
+        // Guarda en $idsSede el resultado necesario para continuar esta operacion.
         $idsSede = $autorizacion->authorizedSiteIds($usuario, 'gestion.organizacion.consultar');
+        // Guarda en $estructuraDisponible el resultado necesario para continuar esta operacion.
         $estructuraDisponible = Schema::hasTable('responsables_organizacionales');
+        // Guarda en $responsables el resultado necesario para continuar esta operacion.
         $responsables = $estructuraDisponible ? $servicio->listar($idsSede) : collect();
+        // Prepara en $sedes la consulta que obtiene o modifica los registros necesarios.
         $sedes = DB::table('sedes')->whereIn('id', $idsSede)->where('activa', true)->orderBy('nombre')->get(['id', 'empresa_id', 'nombre', 'codigo']);
+        // Prepara en $almacenes la consulta que obtiene o modifica los registros necesarios.
         $almacenes = DB::table('almacenes')->whereIn('sede_id', $idsSede)->where('activo', true)->orderBy('nombre')->get(['id', 'sede_id', 'nombre', 'codigo']);
+        // Prepara en $usuarios la consulta que obtiene o modifica los registros necesarios.
         $usuarios = DB::table('usuarios_sedes_roles as asignacion')->join('usuarios', 'usuarios.id', '=', 'asignacion.usuario_id')
             ->whereIn('asignacion.sede_id', $idsSede)->where('asignacion.activo', true)->where('usuarios.activo', true)
             ->where(fn ($consulta) => $consulta->whereNull('asignacion.vigente_hasta')->orWhere('asignacion.vigente_hasta', '>', now()))
             ->select('usuarios.id', 'usuarios.nombre', 'asignacion.sede_id')->distinct()->orderBy('usuarios.nombre')->get();
 
+        // Devuelve la vista 'gestion.administracion.seguridad.responsables.listar' con los datos preparados por este controlador.
         return view('gestion.administracion.seguridad.responsables.listar', [
             'responsables' => $responsables,
             'sedes' => $sedes,
@@ -63,10 +72,14 @@ final class ResponsableOrganizacionalController extends Controller
      */
     public function store(GuardarResponsableOrganizacionalRequest $request, ServicioResponsablesOrganizacionales $servicio, RegistradorAuditoria $auditoria): RedirectResponse
     {
+        // Obtiene en $usuario la informacion de la solicitud o del usuario actual.
         $usuario = $request->user();
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($usuario instanceof User, 403);
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $servicio->reasignar($usuario, $request->validated(), $auditoria, $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'La asignación del responsable fue registrada y auditada.');
     }
 }

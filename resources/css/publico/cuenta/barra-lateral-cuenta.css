@@ -1,7 +1,11 @@
+/* Define los estilos visuales del modulo o componente 'barra-lateral-cuenta'. */
+
+/* Aplica estos estilos al bloque '.modulo-cuenta .cuenta-fondo'. */
 .modulo-cuenta .cuenta-fondo {
     background: #eef7ff;
 }
 
+/* Aplica estos estilos al bloque '.modulo-cuenta .site-header'. */
 .modulo-cuenta .site-header {
     background: linear-gradient(110deg, #0756cf 0%, #0649bd 58%, #0a83f7 100%);
     border-bottom-color: rgba(255, 255, 255, 0.22);
@@ -9,40 +13,48 @@
 
 .modulo-cuenta .site-header .navlinks a,
 .modulo-cuenta .site-header .header-account,
+/* Aplica estos estilos al bloque '.modulo-cuenta .site-header .header-account small'. */
 .modulo-cuenta .site-header .header-account small {
     color: rgba(255, 255, 255, 0.92);
 }
 
 .modulo-cuenta .site-header .navlinks a:hover,
 .modulo-cuenta .site-header .navlinks a.active,
+/* Aplica estos estilos al bloque '.modulo-cuenta .site-header .header-account > i'. */
 .modulo-cuenta .site-header .header-account > i {
     color: #fff;
 }
 
+/* Aplica estos estilos al bloque '.modulo-cuenta .site-header .navlinks a.active::after'. */
 .modulo-cuenta .site-header .navlinks a.active::after {
     background: #fff;
 }
 
+/* Aplica estos estilos al bloque '.modulo-cuenta .site-header .header-search'. */
 .modulo-cuenta .site-header .header-search {
     background: rgba(255, 255, 255, 0.13);
     border-color: rgba(255, 255, 255, 0.35);
     color: rgba(255, 255, 255, 0.88);
 }
 
+/* Aplica estos estilos al bloque '.modulo-cuenta .site-header .header-search input'. */
 .modulo-cuenta .site-header .header-search input {
     color: #fff;
 }
 
+/* Aplica estos estilos al bloque '.modulo-cuenta .site-header .header-search input::placeholder'. */
 .modulo-cuenta .site-header .header-search input::placeholder {
     color: rgba(255, 255, 255, 0.8);
 }
 
+/* Aplica estos estilos al bloque '.modulo-cuenta .site-header .icon-btn'. */
 .modulo-cuenta .site-header .icon-btn {
     border-color: rgba(255, 255, 255, 0.28);
     color: #fff;
     background: rgba(255, 255, 255, 0.12);
 }
 
+/* Aplica estos estilos al bloque '.modulo-cuenta .cuenta-lateral'. */
 .modulo-cuenta .cuenta-lateral {
     color: #fff;
     border-color: transparent;
@@ -50,32 +62,39 @@
     box-shadow: 10px 0 30px rgba(0, 49, 139, 0.14);
 }
 
+/* Aplica estos estilos al bloque '.modulo-cuenta .cuenta-identidad'. */
 .modulo-cuenta .cuenta-identidad {
     border-bottom-color: rgba(255, 255, 255, 0.24);
 }
 
+/* Aplica estos estilos al bloque '.modulo-cuenta .cuenta-identidad > span'. */
 .modulo-cuenta .cuenta-identidad > span {
     background: rgba(255, 255, 255, 0.16);
     color: #fff;
 }
 
+/* Aplica estos estilos al bloque '.modulo-cuenta .cuenta-identidad small'. */
 .modulo-cuenta .cuenta-identidad small {
     color: rgba(255, 255, 255, 0.78);
 }
 
+/* Aplica estos estilos al bloque '.modulo-cuenta .cuenta-identidad em'. */
 .modulo-cuenta .cuenta-identidad em {
     color: #b8f7d9;
 }
 
+/* Aplica estos estilos al bloque '.modulo-cuenta .cuenta-lateral nav a'. */
 .modulo-cuenta .cuenta-lateral nav a {
     color: rgba(255, 255, 255, 0.9);
 }
 
+/* Aplica estos estilos al bloque '.modulo-cuenta .cuenta-lateral nav a i'. */
 .modulo-cuenta .cuenta-lateral nav a i {
     color: #fff;
 }
 
 .modulo-cuenta .cuenta-lateral nav a:hover,
+/* Aplica estos estilos al bloque '.modulo-cuenta .cuenta-lateral nav a.activo'. */
 .modulo-cuenta .cuenta-lateral nav a.activo {
     color: #fff;
     border-left-color: transparent;
@@ -84,14 +103,17 @@
 }
 
 .modulo-cuenta .cuenta-lateral nav a:hover i,
+/* Aplica estos estilos al bloque '.modulo-cuenta .cuenta-lateral nav a.activo i'. */
 .modulo-cuenta .cuenta-lateral nav a.activo i {
     color: #fff;
 }
 
+/* Aplica estos estilos al bloque '.modulo-cuenta .cuenta-lateral form'. */
 .modulo-cuenta .cuenta-lateral form {
     border-top-color: rgba(255, 255, 255, 0.24);
 }
 
+/* Aplica estos estilos al bloque '.modulo-cuenta .cuenta-lateral form button'. */
 .modulo-cuenta .cuenta-lateral form button {
     color: #fff;
     background: rgba(255, 255, 255, 0.13);

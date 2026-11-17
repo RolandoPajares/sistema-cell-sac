@@ -1,5 +1,9 @@
+
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
 <form method="post" class="form-card proveedores-form" action="{{ route('management.suppliers.update', $supplier) }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
     @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
     @method('PUT')
 
     {{-- Encabezado y contexto del formulario de edición. --}}

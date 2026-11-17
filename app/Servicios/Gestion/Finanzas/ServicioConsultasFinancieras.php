@@ -40,6 +40,7 @@ class ServicioConsultasFinancieras
     {
         $this->authorization->assertAllowed($actor, 'gestion.pagos.consultar');
 
+        // ORM: este servicio aplica ORM para consultar o modificar datos en la base de datos.
         return $this->authorization->scopeRecordsFor(Pago::query(), $actor, 'gestion.pagos.consultar')
             ->with([
                 'medioPago:id,nombre',
@@ -55,6 +56,7 @@ class ServicioConsultasFinancieras
                 $query->where(static function (Builder $searchQuery) use ($search): void {
                     $searchQuery->where('codigo', 'like', '%'.$search.'%')
                         ->orWhere('referencia', 'like', '%'.$search.'%');
+                    // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
                     if (ctype_digit($search)) {
                         $searchQuery->orWhere('pedido_id', (int) $search)
                             ->orWhere('venta_id', (int) $search)
@@ -76,6 +78,7 @@ class ServicioConsultasFinancieras
     {
         $this->authorization->assertAllowed($actor, 'gestion.reembolsos.consultar');
 
+        // Devuelve el resultado obtenido mediante el modelo correspondiente.
         return Reembolso::query()
             ->with([
                 'pago:id,codigo,empresa_id,sede_id',
@@ -89,6 +92,7 @@ class ServicioConsultasFinancieras
                 $query->where(static function (Builder $searchQuery) use ($search): void {
                     $searchQuery->whereHas('pago', static fn (Builder $paymentQuery): Builder => $paymentQuery->where('codigo', 'like', '%'.$search.'%'))
                         ->orWhereHas('devolucion', static fn (Builder $returnQuery): Builder => $returnQuery->where('codigo', 'like', '%'.$search.'%'));
+                    // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
                     if (ctype_digit($search)) {
                         $searchQuery->orWhere('id', (int) $search);
                     }
@@ -102,21 +106,30 @@ class ServicioConsultasFinancieras
     /** @return array{medios:Collection,documentos:Collection,sesiones:Collection,cuentas:Collection} */
     public function opcionesPago(User $actor): array
     {
+        // Guarda en $permission el resultado necesario para continuar la operacion.
         $permission = 'gestion.pagos.crear';
+        // Guarda en $location el resultado necesario para continuar la operacion.
         $location = $this->sedeParaFormulario($actor);
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($location['empresa_id'] === null || $location['sede_id'] === null
             || ! $this->authorization->allowsRecord($actor, $permission, $location['empresa_id'], $location['sede_id'])) {
             return ['medios' => collect(), 'documentos' => collect(), 'sesiones' => collect(), 'cuentas' => collect()];
         }
+        // Guarda en $companyId el resultado necesario para continuar la operacion.
         $companyId = $location['empresa_id'];
+        // Guarda en $siteId el resultado necesario para continuar la operacion.
         $siteId = $location['sede_id'];
+        // Prepara en $methods la consulta que obtiene o modifica los datos necesarios.
         $methods = MedioPago::query()->where('activo', true)->orderBy('nombre')
             ->get(['id', 'nombre', 'requiere_caja', 'requiere_banco']);
+        // Prepara en $sessions la consulta que obtiene o modifica los datos necesarios.
         $sessions = SesionCaja::query()->where('estado', 'abierta')
             ->whereHas('caja', static fn (Builder $box): Builder => $box->where('sede_id', $siteId)->where('activa', true))
             ->with('caja:id,codigo')->orderByDesc('id')->limit(50)->get(['id', 'caja_id']);
+        // Prepara en $accounts la consulta que obtiene o modifica los datos necesarios.
         $accounts = CuentaBancaria::query()->where('empresa_id', $companyId)->where('activa', true)
             ->orderBy('codigo')->get(['id', 'codigo', 'banco', 'moneda']);
+        // Prepara en $orders la consulta que obtiene o modifica los datos necesarios.
         $orders = Pedido::query()->where('empresa_id', $companyId)->where('sede_id', $siteId)
             ->whereNotIn('estado', ['Anulado', 'Anulada', 'Cancelado', 'Cancelada', 'Rechazada'])
             ->whereNotIn('id', Venta::query()->whereNotNull('pedido_id')->select('pedido_id'))
@@ -125,6 +138,7 @@ class ServicioConsultasFinancieras
                 'value' => 'pedido:'.$order->id,
                 'label' => 'Pedido #'.$order->id.' · PEN '.$order->total,
             ]);
+        // Prepara en $sales la consulta que obtiene o modifica los datos necesarios.
         $sales = Venta::query()->where('empresa_id', $companyId)->where('sede_id', $siteId)
             ->whereNotIn('estado', ['anulado', 'anulada', 'cancelado', 'cancelada'])
             ->orderByDesc('id')->limit(50)->get(['id', 'codigo', 'total', 'moneda'])
@@ -132,6 +146,7 @@ class ServicioConsultasFinancieras
                 'value' => 'venta:'.$sale->id,
                 'label' => 'Venta '.$sale->codigo.' · '.$sale->moneda.' '.$sale->total,
             ]);
+        // Prepara en $purchases la consulta que obtiene o modifica los datos necesarios.
         $purchases = Compra::query()->where('empresa_id', $companyId)->where('sede_id', $siteId)
             ->where('activo', true)->whereNotIn('estado', ['Anulada', 'Cancelada', 'Rechazada'])
             ->orderByDesc('id')->limit(50)->get(['id', 'numero_referencia', 'total', 'moneda'])
@@ -147,13 +162,18 @@ class ServicioConsultasFinancieras
     /** @return array{devoluciones:Collection,cobros:Collection} */
     public function opcionesReembolso(User $actor): array
     {
+        // Guarda en $permission el resultado necesario para continuar la operacion.
         $permission = 'gestion.reembolsos.crear';
+        // Guarda en $location el resultado necesario para continuar la operacion.
         $location = $this->sedeParaFormulario($actor);
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($location['empresa_id'] === null || $location['sede_id'] === null
             || ! $this->authorization->allowsRecord($actor, $permission, $location['empresa_id'], $location['sede_id'])) {
             return ['devoluciones' => collect(), 'cobros' => collect()];
         }
+        // Guarda en $companyId el resultado necesario para continuar la operacion.
         $companyId = $location['empresa_id'];
+        // Guarda en $siteId el resultado necesario para continuar la operacion.
         $siteId = $location['sede_id'];
 
         return [
@@ -172,6 +192,7 @@ class ServicioConsultasFinancieras
         try {
             return $this->authorization->operationSite($actor);
         } catch (HttpException $exception) {
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if ($exception->getStatusCode() !== 403) {
                 throw $exception;
             }

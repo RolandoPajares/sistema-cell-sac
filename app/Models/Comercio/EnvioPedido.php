@@ -15,8 +15,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 final class EnvioPedido extends Model
 {
+    // Usa la tabla 'envios_pedidos' como origen de los registros de este modelo.
     protected $table = 'envios_pedidos';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = [
         'empresa_id', 'sede_id', 'pedido_id', 'almacen_id', 'guia_remision_id', 'codigo', 'modalidad',
         'transportista', 'servicio', 'numero_seguimiento', 'estado', 'moneda', 'costo_envio',

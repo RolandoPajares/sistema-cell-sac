@@ -10,6 +10,7 @@ class CheckoutInvitadoRequest extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return false;
@@ -20,6 +21,7 @@ class CheckoutInvitadoRequest extends FormRequest
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         return [

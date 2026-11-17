@@ -1,8 +1,13 @@
+
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
 @if ($canUpdateConfiguration)
     <article class="tc-cs__card tc-cs__section">
         <h2><i class="bi bi-sliders" aria-hidden="true"></i> Parámetros generales persistidos</h2>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
         <form method="post" action="{{ route('management.configuration.update') }}" class="tc-cs__dialog-fields">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
             @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
             @method('PUT')
             <input type="hidden" name="grupo" value="general">
             <input type="hidden" name="alcance" value="global">

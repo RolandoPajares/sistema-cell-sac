@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="es">
     <head>
@@ -12,9 +13,12 @@
         @stack('styles')
     </head>
     <body class="@yield('body_class')">
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
         @include('layouts.auth.encabezado')
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
         @unless(request()->routeIs('home'))
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
 @if($principalCampaign)
     <div class="publicidad-dinamica publicidad-{{ $advertisingContext }}" id="publicidadDinamica" data-contexto="{{ $advertisingContext }}" data-perfil="visitante" data-limite="4" data-espera="12000">
         <div class="publicidad-modal-fondo js-publicidad-modal" hidden>
@@ -29,6 +33,7 @@
                     <span class="publicidad-etiqueta"><i class="bi bi-lightning-charge-fill"></i> {{ $principalCampaign->nombre }}</span>
                     <h2 id="publicidadTitulo">{{ $principalCampaign->titulo }}</h2>
                     <p>{{ $principalCampaign->descripcion }}</p>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                     @if($principalCampaign->precio_oferta)
                         <div class="publicidad-precio"><del>S/ {{ number_format((float) $principalCampaign->precio_anterior, 2) }}</del><strong>S/ {{ number_format((float) $principalCampaign->precio_oferta, 2) }}</strong></div>
                     @endif
@@ -39,6 +44,7 @@
             </section>
         </div>
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
         @if($contextualCampaign)
             <aside class="publicidad-contextual js-publicidad-contextual" aria-live="polite" hidden>
                 <button class="publicidad-cerrar js-contextual-cerrar" type="button" aria-label="Cerrar promoción"><i class="bi bi-x-lg"></i></button>
@@ -46,6 +52,7 @@
                 <div><small>{{ $contextualCampaign->nombre }}</small><b>{{ $contextualCampaign->titulo }}</b><p>{{ $contextualCampaign->descripcion }}</p></div>
                 <a class="btn btn-primary" href="{{ route('catalog.index') }}">{{ $contextualCampaign->texto_boton }}</a>
             </aside>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
         @else
             <aside class="publicidad-contextual js-publicidad-contextual" aria-live="polite" hidden></aside>
         @endif
@@ -56,12 +63,15 @@
 
         @endunless
 
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
         @include('layouts.auth.mensajes')
 
         <main>@yield('content')</main>
 
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
         @include('layouts.tienda.pie-pagina')
         <button id="toTop" class="to-top" aria-label="Subir"><i class="bi bi-arrow-up" aria-hidden="true"></i></button>
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
         @include('inteligente.asistente.flotante')
 
         @stack('scripts')

@@ -1,5 +1,6 @@
 <?php
 
+// Devuelve la configuracion que describe este modulo y sus elementos visuales.
 return [
     'key' => 'envios-entregas',
     'area' => 'Operaciones comerciales',
@@ -9,17 +10,21 @@ return [
     'record_singular' => 'envío',
     'record_plural' => 'envíos',
     'mode' => 'crud',
+    // Define las tarjetas de indicadores que resumen el estado del modulo.
     'kpis' => [
         ['label' => 'Pendientes', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-hourglass-split', 'tone' => 'blue'],
         ['label' => 'En tránsito', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-box-seam', 'tone' => 'purple'],
         ['label' => 'Entregados', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-check2-circle', 'tone' => 'green'],
         ['label' => 'Incidencias', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-exclamation-triangle', 'tone' => 'orange'],
     ],
+    // Define los graficos y datos resumidos que se muestran en el analisis del modulo.
     'analytics' => [
         ['title' => 'Tendencia de envíos', 'icon' => 'bi-truck', 'description' => 'Preparación y entregas por periodo.', 'type' => 'line', 'labels' => ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4', 'Semana 5']],
         ['title' => 'Estado de entregas', 'icon' => 'bi-pie-chart', 'description' => 'Distribución por estado operativo.', 'type' => 'donut', 'legend' => ['Pendientes', 'En tránsito', 'Entregados', 'Incidencias']],
     ],
+    // Define los encabezados de la tabla principal.
     'columns' => ['Código', 'Pedido', 'Destino', 'Transportista', 'Estado', 'Entrega prevista'],
+    // Define los campos y reglas visuales del formulario del modulo.
     'fields' => [
         ['label' => 'Código de envío', 'type' => 'text', 'placeholder' => 'Ej. ENV-0001', 'required' => true, 'wide' => false],
         ['label' => 'Pedido asociado', 'type' => 'text', 'placeholder' => 'Número de pedido', 'required' => true, 'wide' => false],
@@ -28,23 +33,27 @@ return [
         ['label' => 'Fecha prevista', 'type' => 'date', 'placeholder' => '', 'required' => false, 'wide' => false],
         ['label' => 'Observaciones', 'type' => 'textarea', 'placeholder' => 'Información adicional del envío', 'required' => false, 'wide' => true],
     ],
+    // Configura la interfaz operativa: titulo, filtros, acciones, tabla y paneles.
     'operacion_ui' => [
         'breadcrumb' => ['Administración', 'Operaciones comerciales', 'Envíos y entregas'],
         'title' => 'Gestión de envíos y entregas',
         'description' => 'Supervisa despachos, transportistas, seguimiento y cumplimiento de entregas.',
         'search_label' => 'Buscar envíos',
         'search_placeholder' => 'Buscar pedido, guía o cliente...',
+        // Define los botones disponibles y la accion que representa cada uno.
         'actions' => [
             ['label' => 'Exportar', 'icon' => 'bi-download', 'notice' => 'La exportación se habilitará cuando exista una fuente de datos integrada.'],
             ['label' => 'Generar guías', 'icon' => 'bi-file-earmark-text', 'notice' => 'La generación de guías se habilitará cuando exista una fuente de datos integrada.'],
             ['label' => 'Nuevo envío', 'icon' => 'bi-plus-lg', 'modal' => 'crear'],
         ],
+        // Define las tarjetas de indicadores que resumen el estado del modulo.
         'kpis' => [
             ['label' => 'Por despachar', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-truck', 'tone' => 'blue'],
             ['label' => 'En tránsito', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-truck', 'tone' => 'orange'],
             ['label' => 'Entregados hoy', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-check-circle', 'tone' => 'green'],
             ['label' => 'Con incidencias', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-exclamation-triangle', 'tone' => 'red'],
         ],
+        // Define los filtros que puede utilizar el usuario para consultar registros.
         'filters' => [
             ['label' => 'Fecha', 'placeholder' => 'Fecha: Esta semana', 'options' => ['Esta semana', 'Este mes', 'Últimos 90 días']],
             ['label' => 'Transportista', 'placeholder' => 'Transportista: Todos', 'options' => ['Olva Courier', 'Shalom', 'Urbano']],
@@ -57,6 +66,7 @@ return [
         'empty_title' => 'No hay envíos para mostrar',
         'empty_description' => 'Los envíos aparecerán cuando el módulo esté conectado con los pedidos y la logística.',
         'table_footer' => 'Sin registros disponibles',
+        // Define los paneles secundarios con alertas, resumenes o estados vacios.
         'panels' => [
             ['title' => 'Alertas de entrega', 'subtitle' => 'Incidencias que requieren seguimiento.', 'link' => 'Ver todas', 'icon' => 'bi-exclamation-triangle', 'tone' => 'danger', 'empty_icon' => 'bi-check-circle', 'empty_title' => 'Sin alertas de entrega', 'empty' => 'La operación logística está al día.', 'notice' => 'Las alertas se mostrarán cuando exista una fuente de datos integrada.'],
             ['title' => 'Próximos despachos', 'subtitle' => 'Planificación de salidas.', 'link' => 'Ver todos', 'icon' => 'bi-calendar-event', 'tone' => 'blue', 'empty_icon' => 'bi-calendar-check', 'empty_title' => 'Sin despachos programados', 'empty' => 'Los próximos despachos aparecerán aquí.', 'notice' => 'El calendario se habilitará con los registros reales.'],

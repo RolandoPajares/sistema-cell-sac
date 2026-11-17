@@ -30,26 +30,35 @@ class SegmentoClienteController extends Controller
      */
     public function index(Request $request, ServicioAutorizacion $authorization): View
     {
+        // Guarda en $search el resultado necesario para continuar esta operacion.
         $search = trim((string) request('buscar', ''));
+        // Guarda en $tipo el resultado necesario para continuar esta operacion.
         $tipo = request('tipo');
+        // Guarda en $estado el resultado necesario para continuar esta operacion.
         $estado = request('estado');
+        // Prepara en $query la consulta que obtiene o modifica los registros necesarios.
         $query = SegmentoCliente::query()->orderBy('nombre');
 
+        // Comprueba la condicion $search !== '' antes de ejecutar este bloque.
         if ($search !== '') {
             $query->where(function ($builder) use ($search): void {
                 $builder->where('nombre', 'like', "%{$search}%")
                     ->orWhere('tipo', 'like', "%{$search}%");
             });
         }
+        // Comprueba la condicion $tipo === 'roles' antes de ejecutar este bloque.
         if ($tipo === 'roles') {
             $query->where('tipo', $tipo);
         }
+        // Comprueba la condicion in_array($estado, ['activo', 'inactivo'], true) antes de ejecutar este bloque.
         if (in_array($estado, ['activo', 'inactivo'], true)) {
             $query->where('activo', $estado === 'activo');
         }
 
+        // Prepara en $allSegments la consulta que obtiene o modifica los registros necesarios.
         $allSegments = SegmentoCliente::query();
 
+        // Devuelve la vista 'gestion.ecommerce-marketing.segmentos.listar' con los datos preparados por este controlador.
         return view('gestion.ecommerce-marketing.segmentos.listar', [
             'segments' => $query->paginate(30)->withQueryString(),
             'activeSegments' => (clone $allSegments)->where('activo', true)->count(),
@@ -68,7 +77,9 @@ class SegmentoClienteController extends Controller
      */
     public function store(GuardarSegmentoClienteRequest $request, RegistradorAuditoria $audit): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $data = $request->validated();
+        // Crea y guarda en $segment el registro correspondiente mediante el modelo.
         $segment = SegmentoCliente::create([
             'nombre' => $data['nombre'],
             'tipo' => 'roles',
@@ -77,6 +88,7 @@ class SegmentoClienteController extends Controller
         ]);
         $audit->record($request->user()->id, 'segment.created', 'segmentos_clientes', (int) $segment->id, null, ['nombre' => $segment->nombre, 'criterios' => $segment->criterios], $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Segmento creado. Sus campañas se mostrarán a los roles seleccionados.');
     }
 
@@ -90,12 +102,16 @@ class SegmentoClienteController extends Controller
      */
     public function export(Request $request, ExportadorTabular $exporter, RegistradorAuditoria $audit): Response|StreamedResponse
     {
+        // Guarda en $format el resultado necesario para continuar esta operacion.
         $format = (string) ($request->route('format') ?: $request->string('format', 'csv')->toString());
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
+        // Prepara en $query la consulta que obtiene o modifica los registros necesarios.
         $query = SegmentoCliente::query()->orderBy('nombre')
             ->when($request->filled('buscar'), fn ($q) => $q->where(fn ($terms) => $terms->where('nombre', 'like', '%'.$request->string('buscar')->toString().'%')->orWhere('tipo', 'like', '%'.$request->string('buscar')->toString().'%')))
             ->when($request->string('tipo')->toString() === 'roles', fn ($q) => $q->where('tipo', 'roles'))
             ->when(in_array($request->string('estado')->toString(), ['activo', 'inactivo'], true), fn ($q) => $q->where('activo', $request->string('estado')->toString() === 'activo'));
+        // Guarda en $segments el resultado necesario para continuar esta operacion.
         $segments = $query->limit(5000)->get();
         $rows = $segments->map(fn (SegmentoCliente $segment): array => [
             $segment->nombre,
@@ -104,6 +120,7 @@ class SegmentoClienteController extends Controller
             implode(', ', $segment->criterios['roles'] ?? []),
             $segment->created_at?->format('Y-m-d H:i:s'),
         ])->all();
+        // Guarda en $response el resultado necesario para continuar esta operacion.
         $response = $exporter->download($format, 'segmentos-clientes-'.now()->format('Ymd'),
             ['Segmento', 'Tipo', 'Estado', 'Roles', 'Creado'], $rows, [
                 'title' => 'REPORTE DE SEGMENTOS DE CLIENTES',
@@ -129,7 +146,9 @@ class SegmentoClienteController extends Controller
      */
     public function update(ActualizarSegmentoClienteRequest $request, SegmentoCliente $segment, RegistradorAuditoria $audit): RedirectResponse
     {
+        // Guarda en $before el resultado necesario para continuar esta operacion.
         $before = $segment->getAttributes();
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $data = $request->validated();
         $segment->update([
             'nombre' => $data['nombre'],
@@ -138,6 +157,7 @@ class SegmentoClienteController extends Controller
         ]);
         $audit->record($request->user()->id, 'segment.updated', 'segmentos_clientes', (int) $segment->id, $before, $segment->fresh()->getAttributes(), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Segmento actualizado correctamente.');
     }
 
@@ -151,10 +171,12 @@ class SegmentoClienteController extends Controller
      */
     public function deactivate(Request $request, SegmentoCliente $segment, RegistradorAuditoria $audit): RedirectResponse
     {
+        // Guarda en $before el resultado necesario para continuar esta operacion.
         $before = $segment->getAttributes();
         $segment->update(['activo' => false]);
         $audit->record($request->user()->id, 'segment.deactivated', 'segmentos_clientes', (int) $segment->id, $before, $segment->fresh()->getAttributes(), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Segmento desactivado correctamente.');
     }
 }

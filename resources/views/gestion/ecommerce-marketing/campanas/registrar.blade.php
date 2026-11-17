@@ -1,4 +1,7 @@
+
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
 <form method="POST" action="{{ route('management.campaigns.store') }}" class="form-card" enctype="multipart/form-data">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
     @csrf
 
     <h2>Nueva campaña</h2>
@@ -20,6 +23,7 @@
     <label>
         <span>Ubicación <b>*</b></span>
         <select name="ubicacion" required>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @foreach ($locationLabels as $value => $label)
             <option value="{{ $value }}" @selected((old('ubicacion', 'emergente')) === $value)>{{ $label }}</option>
             @endforeach
@@ -29,6 +33,7 @@
     <label>
         <span>Destino <b>*</b></span>
         <select name="destino" required data-campaign-destination>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @foreach ($campaignDestinations as $value => $label)
             <option value="{{ $value }}" @selected((old('url_boton', 'catalog')) === $value)>{{ $label }}</option>
             @endforeach
@@ -86,8 +91,10 @@
         </label>
         <label class="campanias-image-url"><span>O usa una URL existente</span><input name="url_imagen" maxlength="255" value="{{ old('url_imagen') }}" placeholder="https://..." data-campaign-image-url></label>
         <div class="campanias-preview" data-campaign-preview @if (! old('url_imagen')) hidden @endif>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if (old('url_imagen'))
             <img src="{{ old('url_imagen') }}" alt="Vista previa de la campaña" data-campaign-preview-image>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
             @else
             <img alt="Vista previa de la campaña" data-campaign-preview-image>
             @endif
@@ -99,6 +106,7 @@
         <legend>Segmentos de público</legend>
         <div>
             <label><input type="checkbox" data-campaign-all @checked(empty(old('segmentos', [])))><span>Todos</span></label>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @foreach ($segments as $segment)
             <label><input type="checkbox" name="segmentos[]" value="{{ $segment->id }}" @checked(in_array($segment->id, old('segmentos', []), true))><span>{{ $segment->nombre }}</span></label>
             @endforeach

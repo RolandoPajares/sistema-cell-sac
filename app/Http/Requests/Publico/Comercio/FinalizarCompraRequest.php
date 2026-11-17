@@ -17,6 +17,7 @@ class FinalizarCompraRequest extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         if ($this->user() === null) {
@@ -32,9 +33,11 @@ class FinalizarCompraRequest extends FormRequest
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         return [
+            // Valida el campo 'checkout_token' con las reglas definidas en la instruccion siguiente.
             'checkout_token' => [
                 'required', 'string', 'size:64', 'regex:/^[a-f0-9]{64}$/',
                 function (string $attribute, mixed $value, Closure $fail): void {
@@ -44,15 +47,22 @@ class FinalizarCompraRequest extends FormRequest
                     }
                 },
             ],
+            // Valida el campo 'nombre' con las reglas definidas en la instruccion siguiente.
             'nombre' => ['required_if:user_id,guest', 'nullable', 'string', 'max:160'],
+            // Valida el campo 'correo' con las reglas definidas en la instruccion siguiente.
             'correo' => ['required_if:user_id,guest', 'nullable', 'email:rfc', 'max:160'],
+            // Valida el campo 'telefono' con las reglas definidas en la instruccion siguiente.
             'telefono' => ['nullable', 'string', 'max:30'],
+            // Valida el campo 'direccion' con las reglas definidas en la instruccion siguiente.
             'direccion' => ['required_if:user_id,guest', 'nullable', 'string', 'max:255'],
+            // Valida el campo 'referencia' con las reglas definidas en la instruccion siguiente.
             'referencia' => ['nullable', 'string', 'max:500'],
+            // Valida el campo 'medio_pago_id' con las reglas definidas en la instruccion siguiente.
             'medio_pago_id' => ['nullable', 'integer', 'exists:medios_pago,id'],
         ];
     }
 
+    // Ajusta o limpia los datos recibidos antes de aplicar las reglas de validacion.
     protected function prepareForValidation(): void
     {
         if ($this->user() === null) {

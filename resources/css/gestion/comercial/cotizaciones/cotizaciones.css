@@ -1,3 +1,6 @@
+/* Define los estilos visuales del modulo o componente 'cotizaciones'. */
+
+/* Aplica estos estilos al bloque '.modulo-cotizaciones .admin-main'. */
 .modulo-cotizaciones .admin-main {
     max-width: none;
     min-height: calc(100vh - var(--reference-header-height));
@@ -8,10 +11,12 @@
 }
 
 .cotizaciones-page,
+/* Aplica estos estilos al bloque '.cotizaciones-page *'. */
 .cotizaciones-page * {
     box-sizing: border-box;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-page'. */
 .cotizaciones-page {
     width: 100%;
     max-width: 1540px;
@@ -25,17 +30,20 @@
 .cotizaciones-table-footer,
 .cotizaciones-bottom-grid,
 .cotizaciones-summary-card > header,
+/* Aplica estos estilos al bloque '.cotizaciones-recent-row'. */
 .cotizaciones-recent-row {
     display: flex;
     align-items: center;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-hero'. */
 .cotizaciones-hero {
     justify-content: space-between;
     gap: 20px;
     margin-bottom: 17px;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-breadcrumb'. */
 .cotizaciones-breadcrumb {
     display: flex;
     flex-wrap: wrap;
@@ -46,11 +54,13 @@
     font-weight: 700;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-breadcrumb a'. */
 .cotizaciones-breadcrumb a {
     color: #0874ed;
     text-decoration: none;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-hero h1'. */
 .cotizaciones-hero h1 {
     margin: 8px 0 4px;
     color: #101d50;
@@ -59,6 +69,7 @@
     line-height: 1.08;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-hero p'. */
 .cotizaciones-hero p {
     margin: 0;
     color: #6079a5;
@@ -66,6 +77,7 @@
 }
 
 .cotizaciones-primary-button,
+/* Aplica estos estilos al bloque '.cotizaciones-filter-button'. */
 .cotizaciones-filter-button {
     display: inline-flex;
     min-height: 38px;
@@ -91,6 +103,7 @@
     cursor: not-allowed;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-kpi-grid'. */
 .cotizaciones-kpi-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -98,6 +111,7 @@
     margin-bottom: 14px;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-kpi'. */
 .cotizaciones-kpi {
     min-width: 0;
     min-height: 91px;
@@ -110,6 +124,7 @@
     box-shadow: 0 8px 19px rgba(32, 94, 153, 0.06);
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-kpi-icon'. */
 .cotizaciones-kpi-icon {
     display: grid;
     flex: 0 0 43px;
@@ -120,11 +135,16 @@
     font-size: 1.25rem;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-kpi--blue .cotizaciones-kpi-icon'. */
 .cotizaciones-kpi--blue .cotizaciones-kpi-icon { color: #0874ed; background: #e0efff; }
+/* Aplica estos estilos al bloque '.cotizaciones-kpi--orange .cotizaciones-kpi-icon'. */
 .cotizaciones-kpi--orange .cotizaciones-kpi-icon { color: #e88d00; background: #fff0d7; }
+/* Aplica estos estilos al bloque '.cotizaciones-kpi--green .cotizaciones-kpi-icon'. */
 .cotizaciones-kpi--green .cotizaciones-kpi-icon { color: #08a66b; background: #d9f8e9; }
+/* Aplica estos estilos al bloque '.cotizaciones-kpi--purple .cotizaciones-kpi-icon'. */
 .cotizaciones-kpi--purple .cotizaciones-kpi-icon { color: #7437e9; background: #eee2ff; }
 
+/* Aplica estos estilos al bloque '.cotizaciones-kpi > div'. */
 .cotizaciones-kpi > div {
     display: grid;
     min-width: 0;
@@ -132,6 +152,7 @@
 }
 
 .cotizaciones-kpi small,
+/* Aplica estos estilos al bloque '.cotizaciones-kpi > div > span'. */
 .cotizaciones-kpi > div > span {
     overflow: hidden;
     color: #6079a5;
@@ -140,11 +161,13 @@
     white-space: nowrap;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-kpi small'. */
 .cotizaciones-kpi small {
     color: #243f70;
     font-weight: 800;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-kpi strong'. */
 .cotizaciones-kpi strong {
     overflow: hidden;
     color: #0d1d50;
@@ -154,6 +177,7 @@
     white-space: nowrap;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-filters'. */
 .cotizaciones-filters {
     display: grid;
     grid-template-columns: minmax(180px, 1.7fr) minmax(125px, 1fr) minmax(115px, 0.8fr) minmax(135px, 0.9fr) minmax(135px, 0.9fr) auto auto;
@@ -167,6 +191,7 @@
     box-shadow: 0 8px 19px rgba(32, 94, 153, 0.045);
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-filters label'. */
 .cotizaciones-filters label {
     display: flex;
     min-width: 0;
@@ -179,6 +204,7 @@
 }
 
 .cotizaciones-filters input,
+/* Aplica estos estilos al bloque '.cotizaciones-filters select'. */
 .cotizaciones-filters select {
     width: 100%;
     min-width: 0;
@@ -192,32 +218,41 @@
     font-size: 0.67rem;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-filters select'. */
 .cotizaciones-filters select { cursor: pointer; }
+/* Aplica estos estilos al bloque '.cotizaciones-filters input::placeholder'. */
 .cotizaciones-filters input::placeholder { color: #7a91b3; }
 
+/* Aplica estos estilos al bloque '.cotizaciones-search'. */
 .cotizaciones-search {
     gap: 8px;
     padding-left: 10px;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-search i'. */
 .cotizaciones-search i {
     color: #0874ed;
     font-size: 0.9rem;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-search input'. */
 .cotizaciones-search input { padding-left: 0; }
+/* Aplica estos estilos al bloque '.cotizaciones-date-filter input'. */
 .cotizaciones-date-filter input { color-scheme: light; }
+/* Aplica estos estilos al bloque '.cotizaciones-date-filter input[type="date"]'. */
 .cotizaciones-date-filter input[type="date"] {
     padding-right: 5px;
     padding-left: 7px;
     font-size: 0.62rem;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-filter-button'. */
 .cotizaciones-filter-button {
     min-height: 36px;
     padding: 0 12px;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-clear-button'. */
 .cotizaciones-clear-button {
     padding: 0 4px;
     color: #176fdb;
@@ -231,6 +266,7 @@
 .cotizaciones-breadcrumb a:hover { text-decoration: underline; }
 
 .cotizaciones-table-card,
+/* Aplica estos estilos al bloque '.cotizaciones-summary-card'. */
 .cotizaciones-summary-card {
     min-width: 0;
     border: 1px solid #dce9f5;
@@ -239,12 +275,14 @@
     box-shadow: 0 8px 19px rgba(32, 94, 153, 0.055);
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-table-header'. */
 .cotizaciones-table-header {
     justify-content: space-between;
     gap: 12px;
     padding: 13px 15px 11px;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-table-header > div'. */
 .cotizaciones-table-header > div {
     display: flex;
     align-items: baseline;
@@ -252,6 +290,7 @@
 }
 
 .cotizaciones-table-header h2,
+/* Aplica estos estilos al bloque '.cotizaciones-summary-card h2'. */
 .cotizaciones-summary-card h2 {
     margin: 0;
     color: #122a5a;
@@ -259,19 +298,23 @@
     letter-spacing: -0.02em;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-table-header span'. */
 .cotizaciones-table-header span {
     color: #7489aa;
     font-size: 0.64rem;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-table-scroll'. */
 .cotizaciones-table-scroll { overflow-x: auto; }
 
+/* Aplica estos estilos al bloque '.cotizaciones-table'. */
 .cotizaciones-table {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-table th'. */
 .cotizaciones-table th {
     padding: 9px 12px;
     border-top: 1px solid #e6eef7;
@@ -283,6 +326,7 @@
     white-space: nowrap;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-table td'. */
 .cotizaciones-table td {
     padding: 9px 12px;
     border-bottom: 1px solid #edf2f8;
@@ -294,18 +338,22 @@
 .cotizaciones-table tbody tr:last-child td { border-bottom: 0; }
 .cotizaciones-table tbody tr:hover td { background: #f8fbff; }
 
+/* Aplica estos estilos al bloque '.cotizaciones-table td > strong'. */
 .cotizaciones-table td > strong { color: #183566; }
 
+/* Aplica estos estilos al bloque '.cotizaciones-code'. */
 .cotizaciones-code {
     color: #176bce !important;
     font-size: 0.65rem;
 }
 
 .cotizaciones-customer,
+/* Aplica estos estilos al bloque '.cotizaciones-table td > small'. */
 .cotizaciones-table td > small {
     display: block;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-customer'. */
 .cotizaciones-customer {
     max-width: 190px;
     overflow: hidden;
@@ -314,12 +362,14 @@
     text-overflow: ellipsis;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-table td > small'. */
 .cotizaciones-table td > small {
     margin-top: 2px;
     color: #8395b0;
     font-size: 0.58rem;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-type'. */
 .cotizaciones-type {
     display: inline-flex;
     padding: 3px 8px;
@@ -330,6 +380,7 @@
     font-weight: 800;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-status'. */
 .cotizaciones-status {
     display: inline-flex;
     align-items: center;
@@ -340,16 +391,23 @@
     font-weight: 800;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-status i'. */
 .cotizaciones-status i { font-size: 0.5rem; }
 .cotizaciones-status--draft,
+/* Aplica estos estilos al bloque '.cotizaciones-status--muted'. */
 .cotizaciones-status--muted { color: #62718a; background: #edf1f6; }
+/* Aplica estos estilos al bloque '.cotizaciones-status--pending'. */
 .cotizaciones-status--pending { color: #ae7100; background: #fff3d8; }
 .cotizaciones-status--approved,
+/* Aplica estos estilos al bloque '.cotizaciones-status--converted'. */
 .cotizaciones-status--converted { color: #078452; background: #dff8ec; }
+/* Aplica estos estilos al bloque '.cotizaciones-status--rejected'. */
 .cotizaciones-status--rejected { color: #bf3543; background: #ffeaec; }
 
+/* Aplica estos estilos al bloque '.cotizaciones-row-details'. */
 .cotizaciones-row-details { position: relative; }
 
+/* Aplica estos estilos al bloque '.cotizaciones-row-details summary'. */
 .cotizaciones-row-details summary {
     display: grid;
     width: 28px;
@@ -363,9 +421,11 @@
     list-style: none;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-row-details summary::-webkit-details-marker'. */
 .cotizaciones-row-details summary::-webkit-details-marker { display: none; }
 .cotizaciones-row-details summary:hover { background: #edf6ff; }
 
+/* Aplica estos estilos al bloque '.cotizaciones-detail-popover'. */
 .cotizaciones-detail-popover {
     position: absolute;
     z-index: 4;
@@ -381,22 +441,26 @@
 }
 
 .cotizaciones-detail-popover > strong,
+/* Aplica estos estilos al bloque '.cotizaciones-detail-popover > span'. */
 .cotizaciones-detail-popover > span {
     display: block;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-detail-popover > strong'. */
 .cotizaciones-detail-popover > strong {
     color: #183566;
     font-size: 0.74rem;
 }
 
 .cotizaciones-detail-popover > span,
+/* Aplica estos estilos al bloque '.cotizaciones-detail-popover p'. */
 .cotizaciones-detail-popover p {
     margin: 4px 0 0;
     color: #6a80a4;
     font-size: 0.63rem;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-detail-popover ul'. */
 .cotizaciones-detail-popover ul {
     display: grid;
     gap: 7px;
@@ -405,6 +469,7 @@
     list-style: none;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-detail-popover li'. */
 .cotizaciones-detail-popover li {
     display: flex;
     justify-content: space-between;
@@ -413,8 +478,10 @@
     font-size: 0.64rem;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-detail-popover li b'. */
 .cotizaciones-detail-popover li b { color: #17345f; white-space: nowrap; }
 
+/* Aplica estos estilos al bloque '.cotizaciones-empty'. */
 .cotizaciones-empty {
     height: 150px;
     text-align: center;
@@ -423,11 +490,16 @@
 
 .cotizaciones-empty i,
 .cotizaciones-empty strong,
+/* Aplica estos estilos al bloque '.cotizaciones-empty span'. */
 .cotizaciones-empty span { display: block; }
+/* Aplica estos estilos al bloque '.cotizaciones-empty i'. */
 .cotizaciones-empty i { margin-bottom: 7px; color: #8ba3c5; font-size: 1.3rem; }
+/* Aplica estos estilos al bloque '.cotizaciones-empty strong'. */
 .cotizaciones-empty strong { color: #25416f; font-size: 0.76rem; }
+/* Aplica estos estilos al bloque '.cotizaciones-empty span'. */
 .cotizaciones-empty span { margin-top: 4px; color: #7a91b3; font-size: 0.65rem; }
 
+/* Aplica estos estilos al bloque '.cotizaciones-table-footer'. */
 .cotizaciones-table-footer {
     min-height: 46px;
     justify-content: space-between;
@@ -438,10 +510,12 @@
     font-size: 0.64rem;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-table-footer nav'. */
 .cotizaciones-table-footer nav { margin-left: auto; }
 .cotizaciones-table-footer nav > div:first-child { display: none; }
 .cotizaciones-table-footer nav > div:last-child { display: flex; align-items: center; gap: 4px; }
 .cotizaciones-table-footer nav span,
+/* Aplica estos estilos al bloque '.cotizaciones-table-footer nav a'. */
 .cotizaciones-table-footer nav a {
     display: grid;
     min-width: 27px;
@@ -454,24 +528,29 @@
     font-size: 0.64rem;
     text-decoration: none;
 }
+/* Aplica estos estilos al bloque '.cotizaciones-table-footer nav span[aria-current="page"]'. */
 .cotizaciones-table-footer nav span[aria-current="page"] { border-color: #0874ed; color: #fff; background: #0874ed; }
 
+/* Aplica estos estilos al bloque '.cotizaciones-bottom-grid'. */
 .cotizaciones-bottom-grid {
     align-items: stretch;
     gap: 12px;
     margin-top: 12px;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-summary-card'. */
 .cotizaciones-summary-card {
     flex: 1 1 0;
     padding: 13px 15px;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-summary-card > header'. */
 .cotizaciones-summary-card > header {
     gap: 9px;
     margin-bottom: 9px;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-summary-icon'. */
 .cotizaciones-summary-icon {
     display: grid;
     flex: 0 0 30px;
@@ -483,10 +562,14 @@
     background: #e5f1ff;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-summary-icon--green'. */
 .cotizaciones-summary-icon--green { color: #08a66b; background: #e1f8ed; }
+/* Aplica estos estilos al bloque '.cotizaciones-summary-card h2'. */
 .cotizaciones-summary-card h2 { font-size: 0.78rem; }
+/* Aplica estos estilos al bloque '.cotizaciones-summary-card header p'. */
 .cotizaciones-summary-card header p { margin: 3px 0 0; color: #778bad; font-size: 0.61rem; }
 
+/* Aplica estos estilos al bloque '.cotizaciones-recent-row'. */
 .cotizaciones-recent-row {
     min-width: 0;
     gap: 8px;
@@ -494,6 +577,7 @@
     border-top: 1px solid #edf2f8;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-recent-dot'. */
 .cotizaciones-recent-dot {
     flex: 0 0 7px;
     width: 7px;
@@ -502,89 +586,146 @@
     background: #12ae76;
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-recent-row > div'. */
 .cotizaciones-recent-row > div { min-width: 0; flex: 1; }
 .cotizaciones-recent-row strong,
+/* Aplica estos estilos al bloque '.cotizaciones-recent-row small'. */
 .cotizaciones-recent-row small { display: block; }
+/* Aplica estos estilos al bloque '.cotizaciones-recent-row strong'. */
 .cotizaciones-recent-row strong { overflow: hidden; color: #25416f; font-size: 0.63rem; text-overflow: ellipsis; white-space: nowrap; }
+/* Aplica estos estilos al bloque '.cotizaciones-recent-row small'. */
 .cotizaciones-recent-row small { margin-top: 3px; color: #7a91b3; font-size: 0.59rem; }
+/* Aplica estos estilos al bloque '.cotizaciones-recent-row .cotizaciones-status'. */
 .cotizaciones-recent-row .cotizaciones-status { flex: 0 0 auto; }
 
+/* Aplica estos estilos al bloque '.cotizaciones-status-row'. */
 .cotizaciones-status-row { display: grid; gap: 5px; padding: 7px 0; border-top: 1px solid #edf2f8; }
 .cotizaciones-status-row > div:first-child { display: flex; justify-content: space-between; gap: 10px; color: #6079a5; font-size: 0.63rem; }
+/* Aplica estos estilos al bloque '.cotizaciones-status-row strong'. */
 .cotizaciones-status-row strong { color: #25416f; }
+/* Aplica estos estilos al bloque '.cotizaciones-progress'. */
 .cotizaciones-progress { height: 6px; overflow: hidden; border-radius: 999px; background: #e9f0f7; }
+/* Aplica estos estilos al bloque '.cotizaciones-progress span'. */
 .cotizaciones-progress span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #12b77a, #5bd6a4); }
+/* Aplica estos estilos al bloque '.cotizaciones-summary-empty'. */
 .cotizaciones-summary-empty { margin: 12px 0; color: #7185a8; font-size: 0.68rem; }
 
+/* Aplica estos estilos al bloque '.cotizaciones-create-dialog .admin-dialog-body'. */
 .cotizaciones-create-dialog .admin-dialog-body { max-height: calc(100vh - 120px); overflow-y: auto; }
+/* Aplica estos estilos al bloque '.cotizaciones-create-dialog .form-card'. */
 .cotizaciones-create-dialog .form-card { max-width: none; margin: 0; box-shadow: none; }
+/* Aplica estos estilos al bloque '.cotizaciones-demo-actions'. */
 .cotizaciones-demo-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px solid #e8eff7; }
+/* Aplica estos estilos al bloque '.cotizaciones-demo-actions button'. */
 .cotizaciones-demo-actions button { padding: 6px 8px; border: 1px solid #cfe0f4; border-radius: 7px; color: #086de8; background: #fff; font-size: 0.59rem; font-weight: 800; cursor: pointer; }
+/* Aplica estos estilos al bloque '.cotizaciones-demo-dialog'. */
 .cotizaciones-demo-dialog { width: min(100% - 28px, 560px); max-height: calc(100vh - 28px); overflow: auto; }
+/* Aplica estos estilos al bloque '.cotizaciones-demo-body'. */
 .cotizaciones-demo-body { display: grid; gap: 15px; }
+/* Aplica estos estilos al bloque '.cotizaciones-demo-warning'. */
 .cotizaciones-demo-warning { display: flex; align-items: flex-start; gap: 10px; padding: 12px; border: 1px solid #cfe2f8; border-radius: 9px; color: #31547f; background: #f2f8ff; }
+/* Aplica estos estilos al bloque '.cotizaciones-demo-warning > i'. */
 .cotizaciones-demo-warning > i { margin-top: 2px; color: #0874ed; }
+/* Aplica estos estilos al bloque '.cotizaciones-demo-warning p'. */
 .cotizaciones-demo-warning p { margin: 0; font-size: 0.69rem; line-height: 1.5; }
+/* Aplica estos estilos al bloque '.cotizaciones-demo-body dl'. */
 .cotizaciones-demo-body dl { display: grid; gap: 8px; margin: 0; }
+/* Aplica estos estilos al bloque '.cotizaciones-demo-body dl > div'. */
 .cotizaciones-demo-body dl > div { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid #edf2f8; font-size: 0.69rem; }
+/* Aplica estos estilos al bloque '.cotizaciones-demo-body dt'. */
 .cotizaciones-demo-body dt { color: #7185a8; font-weight: 700; }
+/* Aplica estos estilos al bloque '.cotizaciones-demo-body dd'. */
 .cotizaciones-demo-body dd { margin: 0; color: #142954; font-weight: 800; text-align: right; overflow-wrap: anywhere; }
+/* Aplica estos estilos al bloque '.cotizaciones-demo-feedback'. */
 .cotizaciones-demo-feedback { margin: 0; padding: 11px; border: 1px solid #bde8d3; border-radius: 8px; color: #176b49; background: #effbf5; font-size: 0.67rem; line-height: 1.5; }
+/* Aplica estos estilos al bloque '.cotizaciones-demo-footer'. */
 .cotizaciones-demo-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 22px 18px; border-top: 1px solid #e0ebf6; }
 
 @media (max-width: 1180px) {
+/* Aplica estos estilos al bloque '.cotizaciones-filters'. */
     .cotizaciones-filters {
         grid-template-columns: minmax(200px, 1.5fr) repeat(2, minmax(130px, 1fr)) repeat(2, minmax(130px, 0.9fr)) auto;
     }
 
+/* Aplica estos estilos al bloque '.cotizaciones-clear-button'. */
     .cotizaciones-clear-button { grid-column: 1 / -1; justify-self: end; }
 }
 
 @media (max-width: 850px) {
+/* Aplica estos estilos al bloque '.cotizaciones-kpi-grid'. */
     .cotizaciones-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* Aplica estos estilos al bloque '.cotizaciones-filters'. */
     .cotizaciones-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* Aplica estos estilos al bloque '.cotizaciones-search'. */
     .cotizaciones-search { grid-column: 1 / -1; }
+/* Aplica estos estilos al bloque '.cotizaciones-filter-button'. */
     .cotizaciones-filter-button { min-height: 38px; }
+/* Aplica estos estilos al bloque '.cotizaciones-bottom-grid'. */
     .cotizaciones-bottom-grid { align-items: stretch; }
 }
 
 @media (max-width: 600px) {
+/* Aplica estos estilos al bloque '.modulo-cotizaciones .admin-main'. */
     .modulo-cotizaciones .admin-main { padding: 16px 12px 28px; }
+/* Aplica estos estilos al bloque '.cotizaciones-hero'. */
     .cotizaciones-hero { align-items: flex-start; flex-direction: column; }
+/* Aplica estos estilos al bloque '.cotizaciones-primary-button'. */
     .cotizaciones-primary-button { width: 100%; }
+/* Aplica estos estilos al bloque '.cotizaciones-kpi-grid'. */
     .cotizaciones-kpi-grid { gap: 8px; }
+/* Aplica estos estilos al bloque '.cotizaciones-kpi'. */
     .cotizaciones-kpi { min-height: 83px; gap: 8px; padding: 10px; }
+/* Aplica estos estilos al bloque '.cotizaciones-kpi-icon'. */
     .cotizaciones-kpi-icon { flex-basis: 36px; width: 36px; height: 36px; font-size: 1rem; }
+/* Aplica estos estilos al bloque '.cotizaciones-kpi strong'. */
     .cotizaciones-kpi strong { font-size: 1rem; }
     .cotizaciones-kpi small,
+/* Aplica estos estilos al bloque '.cotizaciones-kpi > div > span'. */
     .cotizaciones-kpi > div > span { font-size: 0.57rem; }
+/* Aplica estos estilos al bloque '.cotizaciones-filters'. */
     .cotizaciones-filters { gap: 6px; padding: 8px; }
     .cotizaciones-filters input,
+/* Aplica estos estilos al bloque '.cotizaciones-filters select'. */
     .cotizaciones-filters select { font-size: 0.62rem; }
+/* Aplica estos estilos al bloque '.cotizaciones-table'. */
     .cotizaciones-table { min-width: 760px; }
+/* Aplica estos estilos al bloque '.cotizaciones-table-footer'. */
     .cotizaciones-table-footer { align-items: flex-start; flex-direction: column; }
+/* Aplica estos estilos al bloque '.cotizaciones-table-footer nav'. */
     .cotizaciones-table-footer nav { margin-left: 0; }
+/* Aplica estos estilos al bloque '.cotizaciones-bottom-grid'. */
     .cotizaciones-bottom-grid { flex-direction: column; }
+/* Aplica estos estilos al bloque '.cotizaciones-recent-row'. */
     .cotizaciones-recent-row { flex-wrap: wrap; }
+/* Aplica estos estilos al bloque '.cotizaciones-demo-footer'. */
     .cotizaciones-demo-footer { align-items: stretch; flex-direction: column-reverse; }
+/* Aplica estos estilos al bloque '.cotizaciones-demo-footer button'. */
     .cotizaciones-demo-footer button { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .cotizaciones-page *,
     .cotizaciones-page *::before,
+/* Aplica estos estilos al bloque '.cotizaciones-page *::after'. */
     .cotizaciones-page *::after { scroll-behavior: auto !important; }
 }
 
+/* Aplica estos estilos al bloque '.cotizaciones-hero-actions'. */
 .cotizaciones-hero-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-wrap: nowrap; }
+/* Aplica estos estilos al bloque '.cotizaciones-export-menu'. */
 .cotizaciones-export-menu { position: relative; }
+/* Aplica estos estilos al bloque '.cotizaciones-export-options'. */
 .cotizaciones-export-options { position: absolute; z-index: 30; top: calc(100% + 8px); left: 50%; width: 218px; display: grid; gap: 4px; padding: 7px; border: 1px solid #d6e6f3; border-radius: 11px; background: #fff; box-shadow: 0 15px 35px rgba(12, 57, 120, .18); transform: translateX(-50%); }
+/* Aplica estos estilos al bloque '.cotizaciones-export-options a'. */
 .cotizaciones-export-options a { display: flex; align-items: center; gap: 9px; padding: 9px; border-radius: 8px; color: #254574; font-size: .74rem; font-weight: 800; text-decoration: none; }
 .cotizaciones-export-options a:hover { color: #0874ed; background: #edf6ff; }
+/* Aplica estos estilos al bloque '.cotizaciones-export-options a > i'. */
 .cotizaciones-export-options a > i { display: grid; flex: 0 0 28px; width: 28px; height: 28px; place-items: center; border-radius: 7px; color: #0873ed; background: #e5f2ff; font-size: 1rem; }
 .cotizaciones-export-options a:nth-child(1) > i { color: #e33449; background: #ffe8e9; }
 .cotizaciones-export-options a:nth-child(2) > i { color: #0b9b65; background: #dff8ec; }
+/* Aplica estos estilos al bloque '.cotizaciones-export-options a span'. */
 .cotizaciones-export-options a span { display: grid; gap: 2px; }
+/* Aplica estos estilos al bloque '.cotizaciones-export-options small'. */
 .cotizaciones-export-options small { color: #7588aa; font-size: .61rem; font-weight: 500; }
 @media (max-width: 700px) { .cotizaciones-export-options { left: auto; right: 0; width: min(218px, calc(100vw - 32px)); transform: none; } }
 @media (max-width: 650px) { .cotizaciones-hero-actions { justify-content: flex-start; flex-wrap: wrap; } }

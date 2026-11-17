@@ -22,13 +22,20 @@ class VerificarCuentaActiva
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Obtiene el usuario autenticado para revisar el estado de su cuenta.
         $user = $request->user();
+
+        // Solo revisa el estado si hay usuario y la tabla contiene la columna activo.
         if ($user !== null && Schema::hasColumn('usuarios', 'activo')) {
+            // Lee el estado activo guardado en el modelo; null se considera activo por compatibilidad.
             $activeStatus = $user->getAttribute('activo');
             $isActive = $activeStatus === null || (bool) $activeStatus;
+
+            // Determina si la fecha de bloqueo todavía está vigente.
             $isLocked = $user->getAttribute('bloqueado_hasta') !== null
                 && now()->lessThan($user->getAttribute('bloqueado_hasta'));
 
+            // Cierra la sesion y redirige al login si la cuenta esta inactiva o bloqueada.
             if (! $isActive || $isLocked) {
                 Auth::logout();
                 $request->session()->invalidate();

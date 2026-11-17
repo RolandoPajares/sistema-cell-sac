@@ -30,6 +30,8 @@ final class InicializarCatalogoRbac extends Command
      */
     public function handle(RbacInicialSeeder $inicializador, RegistradorAuditoria $registradorAuditoria): int
     {
+        // Verifica que la base tenga la estructura organizacional y de auditoria
+        // requerida antes de crear modulos, pantallas, permisos y menus.
         foreach (['usuarios', 'roles', 'usuarios_roles', 'empresas', 'sedes', 'almacenes', 'registros_auditoria'] as $tabla) {
             if (! Schema::hasTable($tabla)) {
                 $this->error('Falta la tabla requerida '.$tabla.'.');
@@ -38,6 +40,7 @@ final class InicializarCatalogoRbac extends Command
             }
         }
 
+        // Solo un administrador vigente puede autorizar la inicializacion del catalogo RBAC.
         $administradoresVigentes = $this->contarAdministradoresVigentes();
         if ($administradoresVigentes === 0) {
             $this->error('No existe un administrador activo con una asignación RBAC vigente. No se crearán cuentas ni asignaciones.');
@@ -45,6 +48,7 @@ final class InicializarCatalogoRbac extends Command
             return self::FAILURE;
         }
 
+        // Limita la consulta a dos resultados para detectar si hay cero, una o varias empresas activas.
         $empresasActivas = DB::table('empresas')->where('activo', true)->orderBy('id')->limit(2)->pluck('id');
         if ($empresasActivas->count() !== 1) {
             $this->error('Se requiere exactamente una empresa activa para habilitar el alcance empresarial vigente.');
@@ -65,6 +69,7 @@ final class InicializarCatalogoRbac extends Command
             return self::FAILURE;
         }
 
+        // El seeder diagnostica el estado actual sin modificar todavia la base de datos.
         $diagnostico = $inicializador->diagnosticarPreparacion();
         if ($diagnostico['errores'] !== []) {
             foreach ($diagnostico['errores'] as $error) {
@@ -110,8 +115,11 @@ final class InicializarCatalogoRbac extends Command
             return self::FAILURE;
         }
 
+        // La escritura se confirma como una sola operacion y se registra en auditoria.
         try {
             DB::transaction(function () use ($inicializador, $registradorAuditoria, $empresaId): void {
+                // Repite el diagnostico dentro de la transaccion para evitar aplicar
+                // cambios sobre un estado que otro proceso haya alterado.
                 $estadoActual = $inicializador->diagnosticarPreparacion();
                 if ($estadoActual['errores'] !== []) {
                     throw new \RuntimeException(implode(' ', $estadoActual['errores']));
@@ -156,6 +164,7 @@ final class InicializarCatalogoRbac extends Command
      */
     private function contarAdministradoresVigentes(): int
     {
+        // Cuenta usuarios activos con rol administrador activo y con una asignacion no vencida.
         return DB::table('usuarios_roles')
             ->join('usuarios', 'usuarios.id', '=', 'usuarios_roles.usuario_id')
             ->join('roles', 'roles.id', '=', 'usuarios_roles.rol_id')
@@ -178,6 +187,7 @@ final class InicializarCatalogoRbac extends Command
      */
     private function contarAlmacenesActivos(int $empresaId): int
     {
+        // Cuenta almacenes activos pertenecientes a sedes activas de la empresa indicada.
         return DB::table('almacenes')
             ->join('sedes', 'sedes.id', '=', 'almacenes.sede_id')
             ->where('sedes.empresa_id', $empresaId)

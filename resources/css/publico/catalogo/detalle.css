@@ -1,3 +1,6 @@
+/* Define los estilos visuales del modulo o componente 'detalle'. */
+
+/* Aplica estos estilos al bloque 'body > main .product-page-light'. */
 body > main .product-page-light {
     min-height: 72vh;
     padding: 16px 0 72px;
@@ -5,11 +8,13 @@ body > main .product-page-light {
     color: #273142;
 }
 
+/* Aplica estos estilos al bloque 'body > main .product-detail-container'. */
 body > main .product-detail-container {
     width: calc(100% - 68px);
     max-width: 1760px;
 }
 
+/* Aplica estos estilos al bloque 'body > main .product-breadcrumbs'. */
 body > main .product-breadcrumbs {
     display: flex;
     flex-wrap: wrap;
@@ -20,6 +25,7 @@ body > main .product-breadcrumbs {
     font-size: 0.9rem;
 }
 
+/* Aplica estos estilos al bloque 'body > main .product-breadcrumbs a'. */
 body > main .product-breadcrumbs a {
     color: #334155;
     text-decoration: none;
@@ -28,10 +34,12 @@ body > main .product-breadcrumbs a:hover {
     color: #075be8;
     text-decoration: underline;
 }
+/* Aplica estos estilos al bloque 'body > main .product-breadcrumbs [aria-current="page"]'. */
 body > main .product-breadcrumbs [aria-current="page"] {
     color: #667085;
 }
 
+/* Aplica estos estilos al bloque 'body > main .product-detail-modern'. */
 body > main .product-detail-modern {
     display: grid;
     grid-template-columns: minmax(0, 1.45fr) minmax(350px, 0.95fr);
@@ -39,6 +47,7 @@ body > main .product-detail-modern {
     gap: 34px;
 }
 
+/* Aplica estos estilos al bloque 'body > main .detail-gallery'. */
 body > main .detail-gallery {
     display: grid;
     grid-template-columns: 104px minmax(0, 1fr);
@@ -46,6 +55,7 @@ body > main .detail-gallery {
     min-width: 0;
 }
 
+/* Aplica estos estilos al bloque 'body > main .gallery-thumbs'. */
 body > main .gallery-thumbs {
     display: flex;
     flex-direction: column;
@@ -54,6 +64,7 @@ body > main .gallery-thumbs {
     overflow: auto;
 }
 
+/* Aplica estos estilos al bloque 'body > main .gallery-thumb'. */
 body > main .gallery-thumb {
     width: 100%;
     aspect-ratio: 1;
@@ -64,15 +75,18 @@ body > main .gallery-thumb {
     cursor: pointer;
 }
 
+/* Aplica estos estilos al bloque 'body > main .gallery-thumb.active'. */
 body > main .gallery-thumb.active {
     border: 1px solid #0ac45a;
 }
+/* Aplica estos estilos al bloque 'body > main .gallery-thumb img'. */
 body > main .gallery-thumb img {
     width: 100%;
     height: 100%;
     object-fit: contain;
 }
 
+/* Aplica estos estilos al bloque 'body > main .detail-main-image'. */
 body > main .detail-main-image {
     position: relative;
     display: grid;
@@ -84,6 +98,7 @@ body > main .detail-main-image {
     background: #f7f6f8;
 }
 
+/* Aplica estos estilos al bloque 'body > main .detail-main-image > img'. */
 body > main .detail-main-image > img {
     display: block;
     width: 100%;
@@ -95,10 +110,12 @@ body > main .detail-main-image > img {
 body > main .detail-main-image > img[hidden],
 body > main .detail-product-placeholder[hidden],
 body > main .gallery-thumbs[hidden],
+/* Aplica estos estilos al bloque 'body > main .gallery-arrow[hidden]'. */
 body > main .gallery-arrow[hidden] {
     display: none;
 }
 
+/* Aplica estos estilos al bloque 'body > main .detail-product-placeholder'. */
 body > main .detail-product-placeholder {
     display: flex;
     width: min(80%, 340px);
@@ -110,6 +127,7 @@ body > main .detail-product-placeholder {
     color: #6b7788;
 }
 
+/* Aplica estos estilos al bloque 'body > main .detail-product-icon'. */
 body > main .detail-product-icon {
     display: grid;
     width: 118px;
@@ -123,6 +141,7 @@ body > main .detail-product-icon {
     font-size: 2.8rem;
 }
 
+/* Aplica estos estilos al bloque 'body > main .detail-product-icon strong'. */
 body > main .detail-product-icon strong {
     color: #fff;
     font-size: 1.15rem;
@@ -132,6 +151,7 @@ body > main .detail-product-placeholder > span:last-child {
     font-size: 1rem;
 }
 body > main .detail-product-placeholder--audio .detail-product-icon,
+/* Aplica estos estilos al bloque 'body > main .detail-product-placeholder--accesorio .detail-product-icon'. */
 body > main .detail-product-placeholder--accesorio .detail-product-icon {
     width: 190px;
     height: 190px;
@@ -143,6 +163,7 @@ body > main .detail-product-placeholder--accesorio .detail-product-icon {
     font-size: 5rem;
 }
 
+/* Aplica estos estilos al bloque 'body > main .gallery-arrow'. */
 body > main .gallery-arrow {
     position: absolute;
     top: 50%;
@@ -160,17 +181,21 @@ body > main .gallery-arrow {
     cursor: pointer;
 }
 
+/* Aplica estos estilos al bloque 'body > main .gallery-arrow.prev'. */
 body > main .gallery-arrow.prev {
     left: 16px;
 }
+/* Aplica estos estilos al bloque 'body > main .gallery-arrow.next'. */
 body > main .gallery-arrow.next {
     right: 16px;
 }
 
+/* Aplica estos estilos al bloque 'body > main .detail-info'. */
 body > main .detail-info {
     min-width: 0;
     padding: 2px 8px 0 0;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-meta'. */
 body > main .product-detail-meta {
     display: flex;
     flex-wrap: wrap;
@@ -178,11 +203,13 @@ body > main .product-detail-meta {
     color: #667085;
     font-size: 0.92rem;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-meta span + span::before'. */
 body > main .product-detail-meta span + span::before {
     content: "|";
     margin-right: 7px;
     color: #98a2b3;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-meta .product-detail-badge'. */
 body > main .product-detail-meta .product-detail-badge {
     padding: 2px 7px;
     border-radius: 4px;
@@ -191,9 +218,11 @@ body > main .product-detail-meta .product-detail-badge {
     font-size: 0.8rem;
     font-weight: 700;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-meta .product-detail-badge::before'. */
 body > main .product-detail-meta .product-detail-badge::before {
     content: none;
 }
+/* Aplica estos estilos al bloque 'body > main .detail-info h1'. */
 body > main .detail-info h1 {
     margin: 8px 0 26px;
     color: #30343b;
@@ -202,6 +231,7 @@ body > main .detail-info h1 {
     line-height: 1.3;
 }
 
+/* Aplica estos estilos al bloque 'body > main .product-detail-price'. */
 body > main .product-detail-price {
     display: flex;
     flex-wrap: wrap;
@@ -209,11 +239,13 @@ body > main .product-detail-price {
     gap: 12px;
     margin: 0 0 14px;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-price > strong'. */
 body > main .product-detail-price > strong {
     color: #394150;
     font-size: 1.65rem;
     font-weight: 700;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-old-price'. */
 body > main .product-detail-old-price {
     display: flex;
     align-items: center;
@@ -221,6 +253,7 @@ body > main .product-detail-old-price {
     color: #747b86;
     font-size: 0.88rem;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-discount'. */
 body > main .product-detail-discount {
     padding: 3px 6px;
     border-radius: 3px;
@@ -230,6 +263,7 @@ body > main .product-detail-discount {
     font-weight: 700;
 }
 
+/* Aplica estos estilos al bloque 'body > main .product-detail-stock'. */
 body > main .product-detail-stock {
     display: flex;
     align-items: center;
@@ -238,21 +272,26 @@ body > main .product-detail-stock {
     font-size: 0.9rem;
     font-weight: 600;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-stock.is-available'. */
 body > main .product-detail-stock.is-available {
     color: #16803b;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-stock.is-unavailable'. */
 body > main .product-detail-stock.is-unavailable {
     color: #b42318;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-stock i'. */
 body > main .product-detail-stock i {
     font-size: 1rem;
 }
 
+/* Aplica estos estilos al bloque 'body > main .product-detail-cart'. */
 body > main .product-detail-cart {
     display: flex;
     gap: 12px;
     margin: 0 0 36px;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-buy'. */
 body > main .product-detail-buy {
     display: flex;
     width: min(100%, 440px);
@@ -274,6 +313,7 @@ body > main .product-detail-buy {
         transform 0.18s ease;
 }
 
+/* Aplica estos estilos al bloque 'body > main .product-detail-buy:hover:not(:disabled)'. */
 body > main .product-detail-buy:hover:not(:disabled) {
     background: #10b84c;
     transform: translateY(-1px);
@@ -285,16 +325,19 @@ body > main .product-detail-buy:disabled {
 }
 
 body > main .product-detail-description,
+/* Aplica estos estilos al bloque 'body > main .product-detail-specs'. */
 body > main .product-detail-specs {
     margin-top: 26px;
 }
 body > main .product-detail-description h2,
+/* Aplica estos estilos al bloque 'body > main .product-detail-specs h2'. */
 body > main .product-detail-specs h2 {
     margin: 0 0 12px;
     color: #343a46;
     font-size: 1.05rem;
     font-weight: 700;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-description p'. */
 body > main .product-detail-description p {
     margin: 0;
     color: #535d6b;
@@ -302,6 +345,7 @@ body > main .product-detail-description p {
     line-height: 1.65;
     white-space: normal;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-specs ul'. */
 body > main .product-detail-specs ul {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -310,6 +354,7 @@ body > main .product-detail-specs ul {
     padding: 0;
     list-style: none;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-specs li'. */
 body > main .product-detail-specs li {
     display: flex;
     align-items: baseline;
@@ -318,28 +363,34 @@ body > main .product-detail-specs li {
     color: #3f4651;
     font-size: 0.9rem;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-specs li::before'. */
 body > main .product-detail-specs li::before {
     content: "•";
     color: #343a46;
     font-size: 1.1rem;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-specs li span'. */
 body > main .product-detail-specs li span {
     font-weight: 700;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-specs li strong'. */
 body > main .product-detail-specs li strong {
     font-weight: 400;
     overflow-wrap: anywhere;
 }
 
 @media (max-width: 980px) {
+/* Aplica estos estilos al bloque 'body > main .product-detail-modern'. */
     body > main .product-detail-modern {
         grid-template-columns: minmax(0, 1fr) minmax(290px, 0.85fr);
         gap: 22px;
     }
+/* Aplica estos estilos al bloque 'body > main .detail-gallery'. */
     body > main .detail-gallery {
         grid-template-columns: 78px minmax(0, 1fr);
     }
     body > main .detail-main-image,
+/* Aplica estos estilos al bloque 'body > main .detail-main-image > img'. */
     body > main .detail-main-image > img {
         min-height: 520px;
         height: 520px;
@@ -347,38 +398,47 @@ body > main .product-detail-specs li strong {
 }
 
 @media (max-width: 720px) {
+/* Aplica estos estilos al bloque 'body > main .product-page-light'. */
     body > main .product-page-light {
         padding: 18px 0 44px;
     }
+/* Aplica estos estilos al bloque 'body > main .product-detail-container'. */
     body > main .product-detail-container {
         width: calc(100% - 32px);
     }
+/* Aplica estos estilos al bloque 'body > main .product-detail-modern'. */
     body > main .product-detail-modern {
         grid-template-columns: 1fr;
         gap: 24px;
     }
+/* Aplica estos estilos al bloque 'body > main .detail-gallery'. */
     body > main .detail-gallery {
         grid-template-columns: 1fr;
         gap: 8px;
     }
     body > main .detail-main-image,
+/* Aplica estos estilos al bloque 'body > main .detail-main-image > img'. */
     body > main .detail-main-image > img {
         min-height: 390px;
         height: 390px;
     }
+/* Aplica estos estilos al bloque 'body > main .gallery-thumbs'. */
     body > main .gallery-thumbs {
         flex-direction: row;
         order: 2;
         max-height: none;
         overflow-x: auto;
     }
+/* Aplica estos estilos al bloque 'body > main .gallery-thumb'. */
     body > main .gallery-thumb {
         width: 76px;
         min-width: 76px;
     }
+/* Aplica estos estilos al bloque 'body > main .detail-info'. */
     body > main .detail-info {
         padding: 0;
     }
+/* Aplica estos estilos al bloque 'body > main .product-detail-cart'. */
     body > main .product-detail-cart {
         margin-bottom: 28px;
     }
@@ -386,21 +446,26 @@ body > main .product-detail-specs li strong {
 
 @media (max-width: 420px) {
     body > main .detail-main-image,
+/* Aplica estos estilos al bloque 'body > main .detail-main-image > img'. */
     body > main .detail-main-image > img {
         min-height: 320px;
         height: 320px;
     }
+/* Aplica estos estilos al bloque 'body > main .product-detail-specs ul'. */
     body > main .product-detail-specs ul {
         grid-template-columns: 1fr;
     }
+/* Aplica estos estilos al bloque 'body > main .detail-info h1'. */
     body > main .detail-info h1 {
         margin-bottom: 20px;
     }
 }
 
+/* Aplica estos estilos al bloque 'body > main .product-detail-meta strong'. */
 body > main .product-detail-meta strong {
     color: #0b4eb9;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-rating'. */
 body > main .product-detail-rating {
     display: flex;
     flex-wrap: wrap;
@@ -410,10 +475,12 @@ body > main .product-detail-rating {
     color: #667085;
     font-size: 0.9rem;
 }
+/* Aplica estos estilos al bloque 'body > main .rating-muted'. */
 body > main .rating-muted {
     color: #667085;
 }
 body > main .rating-stars,
+/* Aplica estos estilos al bloque 'body > main .review-widget-stars'. */
 body > main .review-widget-stars {
     display: inline-flex;
     gap: 2px;
@@ -421,6 +488,7 @@ body > main .review-widget-stars {
     font-size: 1rem;
 }
 body > main .rating-stars button,
+/* Aplica estos estilos al bloque 'body > main .review-widget-stars button'. */
 body > main .review-widget-stars button {
     padding: 0;
     border: 0;
@@ -435,6 +503,7 @@ body > main .review-widget-stars button:focus-visible {
     color: #d99000;
     transform: scale(1.08);
 }
+/* Aplica estos estilos al bloque 'body > main .review-widget'. */
 body > main .review-widget {
     display: grid;
     gap: 12px;
@@ -444,16 +513,20 @@ body > main .review-widget {
     border-radius: 10px;
     background: #f8fbff;
 }
+/* Aplica estos estilos al bloque 'body > main .review-widget-stars'. */
 body > main .review-widget-stars {
     font-size: 1.35rem;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-sku'. */
 body > main .product-detail-sku {
     padding-left: 14px;
     border-left: 1px solid #d0d5dd;
 }
+/* Aplica estos estilos al bloque 'body > main .detail-gallery'. */
 body > main .detail-gallery {
     position: relative;
 }
+/* Aplica estos estilos al bloque 'body > main .detail-gallery-actions'. */
 body > main .detail-gallery-actions {
     position: absolute;
     z-index: 3;
@@ -462,6 +535,7 @@ body > main .detail-gallery-actions {
     display: flex;
     gap: 10px;
 }
+/* Aplica estos estilos al bloque 'body > main .detail-icon-button'. */
 body > main .detail-icon-button {
     display: grid;
     width: 42px;
@@ -484,10 +558,12 @@ body > main .detail-icon-button:disabled {
     opacity: 0.55;
 }
 body > main .detail-icon-button.is-favorite,
+/* Aplica estos estilos al bloque 'body > main .product-favorite-disabled.is-favorite'. */
 body > main .product-favorite-disabled.is-favorite {
     border-color: #ef476f;
     color: #d72655;
 }
+/* Aplica estos estilos al bloque 'body > main .gallery-counter'. */
 body > main .gallery-counter {
     position: absolute;
     z-index: 2;
@@ -499,22 +575,26 @@ body > main .gallery-counter {
     color: #fff;
     font-size: 0.75rem;
 }
+/* Aplica estos estilos al bloque 'body > main .product-variant-selector'. */
 body > main .product-variant-selector {
     margin: 8px 0 18px;
     padding: 0;
     border: 0;
 }
+/* Aplica estos estilos al bloque 'body > main .product-variant-selector legend'. */
 body > main .product-variant-selector legend {
     margin-bottom: 8px;
     color: #273142;
     font-size: 0.95rem;
     font-weight: 700;
 }
+/* Aplica estos estilos al bloque 'body > main .variant-options'. */
 body > main .variant-options {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
 }
+/* Aplica estos estilos al bloque 'body > main .variant-option'. */
 body > main .variant-option {
     display: inline-flex;
     align-items: center;
@@ -527,21 +607,26 @@ body > main .variant-option {
     cursor: pointer;
 }
 body > main .variant-option:has(input:checked),
+/* Aplica estos estilos al bloque 'body > main .variant-option.is-selected'. */
 body > main .variant-option.is-selected {
     border-color: #075ee8;
     box-shadow: 0 0 0 2px #075ee822;
     color: #075ee8;
 }
+/* Aplica estos estilos al bloque 'body > main .variant-option input'. */
 body > main .variant-option input {
     accent-color: #075ee8;
 }
+/* Aplica estos estilos al bloque 'body > main .variant-option.is-disabled'. */
 body > main .variant-option.is-disabled {
     cursor: not-allowed;
     opacity: 0.45;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-cart'. */
 body > main .product-detail-cart {
     display: block;
 }
+/* Aplica estos estilos al bloque 'body > main .quantity-control'. */
 body > main .quantity-control {
     display: flex;
     align-items: center;
@@ -551,6 +636,7 @@ body > main .quantity-control {
     color: #273142;
     font-weight: 700;
 }
+/* Aplica estos estilos al bloque 'body > main .quantity-control > div'. */
 body > main .quantity-control > div {
     display: inline-flex;
     overflow: hidden;
@@ -558,6 +644,7 @@ body > main .quantity-control > div {
     border-radius: 9px;
 }
 body > main .quantity-control button,
+/* Aplica estos estilos al bloque 'body > main .quantity-control input'. */
 body > main .quantity-control input {
     width: 42px;
     min-height: 40px;
@@ -567,6 +654,7 @@ body > main .quantity-control input {
     font: inherit;
     text-align: center;
 }
+/* Aplica estos estilos al bloque 'body > main .quantity-control button'. */
 body > main .quantity-control button {
     cursor: pointer;
     font-size: 1.2rem;
@@ -575,30 +663,37 @@ body > main .quantity-control button:hover,
 body > main .quantity-control button:focus-visible {
     background: #eef5ff;
 }
+/* Aplica estos estilos al bloque 'body > main .quantity-control input'. */
 body > main .quantity-control input {
     border-right: 1px solid #cbd5e1;
     border-left: 1px solid #cbd5e1;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-actions'. */
 body > main .product-detail-actions {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-buy'. */
 body > main .product-detail-buy {
     width: 100%;
     text-decoration: none;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-buy--primary'. */
 body > main .product-detail-buy--primary {
     background: #075ee8;
     color: #fff;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-buy--primary:hover:not(:disabled)'. */
 body > main .product-detail-buy--primary:hover:not(:disabled) {
     background: #0649b7;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-buy--success'. */
 body > main .product-detail-buy--success {
     background: #16c957;
     color: #073c1d;
 }
+/* Aplica estos estilos al bloque 'body > main .product-favorite-disabled'. */
 body > main .product-favorite-disabled {
     display: flex;
     width: 100%;
@@ -620,16 +715,19 @@ body > main .product-favorite-disabled:focus-visible {
     border-color: #075ee8;
     color: #075ee8;
 }
+/* Aplica estos estilos al bloque 'body > main .product-favorite-disabled small'. */
 body > main .product-favorite-disabled small {
     color: #98a2b3;
     font-weight: 400;
 }
+/* Aplica estos estilos al bloque 'body > main .product-detail-form-message'. */
 body > main .product-detail-form-message {
     margin: 10px 0;
     color: #b42318;
     font-size: 0.9rem;
     font-weight: 700;
 }
+/* Aplica estos estilos al bloque 'body > main .product-trust-grid'. */
 body > main .product-trust-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -637,6 +735,7 @@ body > main .product-trust-grid {
     padding-top: 16px;
     border-top: 1px solid #e4e7ec;
 }
+/* Aplica estos estilos al bloque 'body > main .product-trust-grid > div'. */
 body > main .product-trust-grid > div {
     display: flex;
     align-items: flex-start;
@@ -644,16 +743,19 @@ body > main .product-trust-grid > div {
     min-width: 0;
     color: #075ee8;
 }
+/* Aplica estos estilos al bloque 'body > main .product-trust-grid span'. */
 body > main .product-trust-grid span {
     display: grid;
     gap: 3px;
     color: #273142;
     font-size: 0.78rem;
 }
+/* Aplica estos estilos al bloque 'body > main .product-trust-grid small'. */
 body > main .product-trust-grid small {
     color: #667085;
     font-weight: 400;
 }
+/* Aplica estos estilos al bloque 'body > main .product-delivery-panel'. */
 body > main .product-delivery-panel {
     display: flex;
     align-items: center;
@@ -665,30 +767,36 @@ body > main .product-delivery-panel {
     background: #f7faff;
     color: #075ee8;
 }
+/* Aplica estos estilos al bloque 'body > main .product-delivery-panel div'. */
 body > main .product-delivery-panel div {
     display: grid;
     gap: 4px;
     flex: 1;
     color: #273142;
 }
+/* Aplica estos estilos al bloque 'body > main .product-delivery-panel span'. */
 body > main .product-delivery-panel span {
     color: #667085;
     font-size: 0.88rem;
 }
+/* Aplica estos estilos al bloque 'body > main .product-delivery-panel b'. */
 body > main .product-delivery-panel b {
     color: #667085;
     font-size: 0.78rem;
     font-weight: 600;
 }
+/* Aplica estos estilos al bloque 'body > main .product-tabs'. */
 body > main .product-tabs {
     border-top: 1px solid #dce3ed;
 }
+/* Aplica estos estilos al bloque 'body > main .product-tab-list'. */
 body > main .product-tab-list {
     display: flex;
     gap: 28px;
     overflow-x: auto;
     border-bottom: 1px solid #dce3ed;
 }
+/* Aplica estos estilos al bloque 'body > main .product-tab-list button'. */
 body > main .product-tab-list button {
     padding: 16px 2px;
     border: 0;
@@ -700,27 +808,33 @@ body > main .product-tab-list button {
     white-space: nowrap;
     cursor: pointer;
 }
+/* Aplica estos estilos al bloque 'body > main .product-tab-list button[aria-selected="true"]'. */
 body > main .product-tab-list button[aria-selected="true"] {
     border-bottom-color: #075ee8;
     color: #075ee8;
 }
+/* Aplica estos estilos al bloque 'body > main .product-tab-panel'. */
 body > main .product-tab-panel {
     padding: 24px 4px 10px;
 }
+/* Aplica estos estilos al bloque 'body > main .product-tab-panel h2'. */
 body > main .product-tab-panel h2 {
     margin: 0 0 12px;
     color: #102044;
     font-size: 1.15rem;
 }
+/* Aplica estos estilos al bloque 'body > main .product-tab-panel p'. */
 body > main .product-tab-panel p {
     max-width: 850px;
     color: #475467;
     line-height: 1.7;
 }
+/* Aplica estos estilos al bloque 'body > main .empty-state'. */
 body > main .empty-state {
     color: #667085;
     font-style: italic;
 }
+/* Aplica estos estilos al bloque 'body > main .specification-table'. */
 body > main .specification-table {
     display: grid;
     max-width: 760px;
@@ -729,6 +843,7 @@ body > main .specification-table {
     border-radius: 8px;
     overflow: hidden;
 }
+/* Aplica estos estilos al bloque 'body > main .specification-table > div'. */
 body > main .specification-table > div {
     display: grid;
     grid-template-columns: minmax(170px, 0.45fr) 1fr;
@@ -738,44 +853,53 @@ body > main .specification-table > div:last-child {
     border-bottom: 0;
 }
 body > main .specification-table dt,
+/* Aplica estos estilos al bloque 'body > main .specification-table dd'. */
 body > main .specification-table dd {
     margin: 0;
     padding: 9px 12px;
 }
+/* Aplica estos estilos al bloque 'body > main .specification-table dt'. */
 body > main .specification-table dt {
     background: #f2f4f7;
     color: #273142;
     font-weight: 700;
 }
+/* Aplica estos estilos al bloque 'body > main .specification-table dd'. */
 body > main .specification-table dd {
     color: #475467;
 }
+/* Aplica estos estilos al bloque 'body > main .related-products'. */
 body > main .related-products {
     margin-top: 34px;
     padding-top: 28px;
     border-top: 1px solid #dce3ed;
 }
+/* Aplica estos estilos al bloque 'body > main .related-products .section-head'. */
 body > main .related-products .section-head {
     display: flex;
     align-items: end;
     justify-content: space-between;
     gap: 18px;
 }
+/* Aplica estos estilos al bloque 'body > main .related-products .section-head h2'. */
 body > main .related-products .section-head h2 {
     margin: 5px 0 0;
     color: #102044;
 }
+/* Aplica estos estilos al bloque 'body > main .related-products .section-head a'. */
 body > main .related-products .section-head a {
     color: #075ee8;
     font-weight: 700;
     text-decoration: none;
 }
+/* Aplica estos estilos al bloque 'body > main .related-grid'. */
 body > main .related-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 16px;
     margin-top: 18px;
 }
+/* Aplica estos estilos al bloque 'body > main .related-card'. */
 body > main .related-card {
     overflow: hidden;
     border: 1px solid #dce8fb;
@@ -783,6 +907,7 @@ body > main .related-card {
     background: #fff;
     box-shadow: 0 8px 24px #1020440b;
 }
+/* Aplica estos estilos al bloque 'body > main .related-card-image'. */
 body > main .related-card-image {
     display: grid;
     height: 180px;
@@ -791,43 +916,53 @@ body > main .related-card-image {
     color: #075ee8;
     text-decoration: none;
 }
+/* Aplica estos estilos al bloque 'body > main .related-card-image img'. */
 body > main .related-card-image img {
     width: 100%;
     height: 100%;
     object-fit: contain;
 }
+/* Aplica estos estilos al bloque 'body > main .related-card > div'. */
 body > main .related-card > div {
     display: grid;
     gap: 6px;
     padding: 13px;
 }
+/* Aplica estos estilos al bloque 'body > main .related-card small'. */
 body > main .related-card small {
     color: #667085;
 }
+/* Aplica estos estilos al bloque 'body > main .related-card h3'. */
 body > main .related-card h3 {
     min-height: 42px;
     margin: 0;
     font-size: 0.95rem;
     line-height: 1.35;
 }
+/* Aplica estos estilos al bloque 'body > main .related-card h3 a'. */
 body > main .related-card h3 a {
     color: #273142;
     text-decoration: none;
 }
+/* Aplica estos estilos al bloque 'body > main .related-card strong'. */
 body > main .related-card strong {
     color: #075ee8;
     font-size: 1.1rem;
 }
+/* Aplica estos estilos al bloque 'body > main .related-stock'. */
 body > main .related-stock {
     font-size: 0.8rem;
     font-weight: 700;
 }
+/* Aplica estos estilos al bloque 'body > main .related-stock.is-available'. */
 body > main .related-stock.is-available {
     color: #16803b;
 }
+/* Aplica estos estilos al bloque 'body > main .related-stock.is-unavailable'. */
 body > main .related-stock.is-unavailable {
     color: #b42318;
 }
+/* Aplica estos estilos al bloque 'body > main .related-empty'. */
 body > main .related-empty {
     margin: 18px 0 0;
     padding: 24px;
@@ -835,6 +970,7 @@ body > main .related-empty {
     border-radius: 10px;
     text-align: center;
 }
+/* Aplica estos estilos al bloque 'body > main .product-zoom-dialog'. */
 body > main .product-zoom-dialog {
     position: relative;
     width: min(78vw, 680px);
@@ -846,15 +982,18 @@ body > main .product-zoom-dialog {
     background: #fff;
     box-shadow: 0 22px 70px #10204452;
 }
+/* Aplica estos estilos al bloque 'body > main .product-zoom-dialog::backdrop'. */
 body > main .product-zoom-dialog::backdrop {
     background: #102044cc;
 }
+/* Aplica estos estilos al bloque 'body > main .product-zoom-dialog img'. */
 body > main .product-zoom-dialog img {
     display: block;
     width: 100%;
     max-height: calc(82vh - 64px);
     object-fit: contain;
 }
+/* Aplica estos estilos al bloque 'body > main .product-zoom-header'. */
 body > main .product-zoom-header {
     display: flex;
     align-items: center;
@@ -862,6 +1001,7 @@ body > main .product-zoom-header {
     min-height: 52px;
     color: #102044;
 }
+/* Aplica estos estilos al bloque 'body > main .product-zoom-header button'. */
 body > main .product-zoom-header button {
     display: grid;
     width: 36px;
@@ -879,32 +1019,40 @@ body > main .product-zoom-header button:focus-visible {
 }
 
 @media (max-width: 900px) {
+/* Aplica estos estilos al bloque 'body > main .related-grid'. */
     body > main .related-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 @media (max-width: 620px) {
     body > main .product-detail-actions,
+/* Aplica estos estilos al bloque 'body > main .product-trust-grid'. */
     body > main .product-trust-grid {
         grid-template-columns: 1fr;
     }
+/* Aplica estos estilos al bloque 'body > main .product-delivery-panel'. */
     body > main .product-delivery-panel {
         align-items: flex-start;
         flex-wrap: wrap;
     }
+/* Aplica estos estilos al bloque 'body > main .product-delivery-panel b'. */
     body > main .product-delivery-panel b {
         width: 100%;
         padding-left: 34px;
     }
+/* Aplica estos estilos al bloque 'body > main .related-grid'. */
     body > main .related-grid {
         grid-template-columns: 1fr;
     }
+/* Aplica estos estilos al bloque 'body > main .specification-table > div'. */
     body > main .specification-table > div {
         grid-template-columns: 1fr;
     }
+/* Aplica estos estilos al bloque 'body > main .specification-table dt'. */
     body > main .specification-table dt {
         padding-bottom: 3px;
     }
+/* Aplica estos estilos al bloque 'body > main .specification-table dd'. */
     body > main .specification-table dd {
         padding-top: 3px;
     }

@@ -43,26 +43,35 @@ class PedidoController extends Controller
      */
     public function index(Request $request): View
     {
+        // Obtiene en $user la informacion de la solicitud o del usuario actual.
         $user = $request->user();
 
+        // Comprueba la condicion $this->authorization->allowsGlobal($user, 'gestion.seguridad.consultar' antes de ejecutar este bloque.
         if ($this->authorization->allowsGlobal($user, 'gestion.seguridad.consultar')
             && $this->authorization->allowsGlobal($user, 'gestion.pedidos.consultar')) {
             return $this->indiceAdministracion($request);
         }
 
+        // Guarda en $query el resultado necesario para continuar esta operacion.
         $query = Pedido::with('details.product', 'user')->latest('creado_en')->latest('id');
 
+        // Obtiene en $query la informacion de la solicitud o del usuario actual.
         $query = $this->authorization->scopeRecordsFor($query, $request->user(), 'gestion.pedidos.consultar', 'usuario_id');
 
+        // Agrupa en $tiposCliente los datos que se utilizaran en la siguiente operacion.
         $tiposCliente = [];
+        // Comprueba la condicion $this->authorization->allows($user, 'gestion.ventas.consultar') antes de ejecutar este bloque.
         if ($this->authorization->allows($user, 'gestion.ventas.consultar')) {
             $tiposCliente[] = 'minorista';
         }
+        // Comprueba la condicion $this->authorization->allows($user, 'gestion.cotizaciones.consultar') antes de ejecutar este bloque.
         if ($this->authorization->allows($user, 'gestion.cotizaciones.consultar')) {
             $tiposCliente[] = 'mayorista';
         }
 
+        // Comprueba la condicion $tiposCliente !== [] antes de ejecutar este bloque.
         if ($tiposCliente !== []) {
+            // Guarda en $rolesCliente el resultado necesario para continuar esta operacion.
             $rolesCliente = collect($tiposCliente)
                 ->map(static fn (string $tipo): string => 'cliente_'.$tipo)
                 ->all();
@@ -73,14 +82,18 @@ class PedidoController extends Controller
         } elseif ($this->authorization->allows($user, 'gestion.pedidos.consultar') || $this->authorization->allows($user, 'gestion.cotizaciones.consultar')) {
             $query->whereBelongsTo($request->user(), 'user');
         } else {
+            // Detiene la solicitud si se cumple la validacion de seguridad indicada.
             abort(403);
         }
 
+        // Guarda en $orders el resultado necesario para continuar esta operacion.
         $orders = $query->paginate(20)->withQueryString();
+        // Guarda en $presentationOrders el resultado necesario para continuar esta operacion.
         $presentationOrders = $orders->getCollection()
             ->mapWithKeys(fn (Pedido $order): array => [$order->id => $this->presentacionPedido($order)])
             ->all();
 
+        // Devuelve la vista 'publico.comercio.pedidos-cuenta' con los datos preparados por este controlador.
         return view('publico.comercio.pedidos-cuenta', [
             'orders' => $orders,
             'presentationOrders' => $presentationOrders,
@@ -95,7 +108,9 @@ class PedidoController extends Controller
      */
     private function indiceAdministracion(Request $request): View
     {
+        // Guarda en $filters el resultado necesario para continuar esta operacion.
         $filters = $this->filtrosAdministracion($request);
+        // Guarda en $orders el resultado necesario para continuar esta operacion.
         $orders = $this->consultaPedidosAdministracion($request, $filters)
             ->with([
                 'user:id,nombre,correo,rol',
@@ -105,36 +120,51 @@ class PedidoController extends Controller
             ->latest('id')
             ->paginate($filters['por_pagina'])
             ->withQueryString();
+        // Guarda en $statusCounts el resultado necesario para continuar esta operacion.
         $statusCounts = $this->pedidosEnAlcance($request)
             ->selectRaw('estado, COUNT(*) as total')
             ->groupBy('estado')
             ->pluck('total', 'estado');
+        // Guarda en $totalOrders el resultado necesario para continuar esta operacion.
         $totalOrders = (int) $statusCounts->sum();
+        // Guarda en $todayOrders el resultado necesario para continuar esta operacion.
         $todayOrders = $this->pedidosEnAlcance($request)->whereDate('creado_en', today())->count();
+        // Guarda en $yesterdayOrders el resultado necesario para continuar esta operacion.
         $yesterdayOrders = $this->pedidosEnAlcance($request)->whereDate('creado_en', today()->subDay())->count();
+        // Guarda en $paidOrders el resultado necesario para continuar esta operacion.
         $paidOrders = null;
+        // Guarda en $pendingOrders el resultado necesario para continuar esta operacion.
         $pendingOrders = $this->contarEstados($statusCounts, ['Pendiente']);
+        // Guarda en $shippingOrders el resultado necesario para continuar esta operacion.
         $shippingOrders = $this->contarEstados($statusCounts, ['Enviado']);
+        // Guarda en $deliveredOrders el resultado necesario para continuar esta operacion.
         $deliveredOrders = $this->contarEstados($statusCounts, ['Entregado']);
+        // Guarda en $cancelledOrders el resultado necesario para continuar esta operacion.
         $cancelledOrders = $this->contarEstados($statusCounts, ['Cancelado']);
+        // Guarda en $staleOrders el resultado necesario para continuar esta operacion.
         $staleOrders = $this->pedidosEnAlcance($request)
             ->whereNotIn('estado', ['Entregado', 'Cancelado'])
             ->where('creado_en', '<', now()->subHours(48))
             ->count();
+        // Guarda en $statusSummary el resultado necesario para continuar esta operacion.
         $statusSummary = $this->resumenEstados($statusCounts, $totalOrders);
+        // Guarda en $resumenCliente el resultado necesario para continuar esta operacion.
         $resumenCliente = $this->resumenCliente($request, $totalOrders);
+        // Guarda en $recentOrders el resultado necesario para continuar esta operacion.
         $recentOrders = $this->pedidosEnAlcance($request)
             ->with(['user:id,nombre,correo', 'details.product:id,nombre,marca,url_imagen'])
             ->latest('creado_en')
             ->latest('id')
             ->limit(5)
             ->get();
+        // Guarda en $presentationOrders el resultado necesario para continuar esta operacion.
         $presentationOrders = $orders->getCollection()
             ->concat($recentOrders)
             ->unique('id')
             ->mapWithKeys(fn (Pedido $order): array => [$order->id => $this->presentacionPedido($order)])
             ->all();
 
+        // Devuelve la vista 'gestion.comercial.pedidos.listar' con los datos preparados por este controlador.
         return view('gestion.comercial.pedidos.listar', [
             'orders' => $orders,
             'layout' => 'layouts.panel.principal',
@@ -161,19 +191,25 @@ class PedidoController extends Controller
         ]);
     }
 
-    /** @return array{status:array{label:string,class:string},shipping:array{label:string,class:string},payment:array{label:string,class:string},initials:string,image:?string,date:string,activity_icon:string} */
+    /** @return array{status:array{label:string,class:string},shipping:array{label:string,class:string},payment:array{label:string,class:string},initials:string,image:?string,date:string,time:string,datetime:string,activity_icon:string} */
     private function presentacionPedido(Pedido $order): array
     {
+        // Guarda en $status el resultado necesario para continuar esta operacion.
         $status = $this->estadoPresentacion((string) $order->estado);
+        // Guarda en $product el resultado necesario para continuar esta operacion.
         $product = $order->details->first()?->product;
+        // Guarda en $localDate el resultado necesario para continuar esta operacion.
+        $localDate = $order->creado_en?->copy()->setTimezone(config('app.timezone'));
 
         return [
             'status' => $status,
             'shipping' => $this->envioPara((string) $order->estado),
             'payment' => ['label' => 'No verificado', 'class' => 'muted'],
-            'initials' => $this->inicialesPara($order->user?->nombre),
+            'initials' => $this->inicialesPara($order->user?->nombre ?: $order->cliente_invitado_nombre),
             'image' => $this->imagenProducto($product?->url_imagen),
             'date' => $this->fechaPedido($order->creado_en),
+            'time' => $localDate?->format('H:i') ?? '—',
+            'datetime' => $localDate?->format('d/m/Y H:i') ?? 'Sin fecha',
             'activity_icon' => match ((string) $order->estado) {
                 'Entregado' => 'check2',
                 'Cancelado' => 'x-lg',
@@ -212,6 +248,7 @@ class PedidoController extends Controller
 
     private function inicialesPara(?string $name): string
     {
+        // Guarda en $parts el resultado necesario para continuar esta operacion.
         $parts = preg_split('/\s+/', trim((string) $name), -1, PREG_SPLIT_NO_EMPTY);
 
         return collect(array_slice($parts ?: ['CL'], 0, 2))
@@ -221,6 +258,7 @@ class PedidoController extends Controller
 
     private function imagenProducto(?string $path): ?string
     {
+        // Comprueba la condicion ! $path antes de ejecutar este bloque.
         if (! $path) {
             return null;
         }
@@ -230,10 +268,13 @@ class PedidoController extends Controller
 
     private function fechaPedido(?Carbon $date): string
     {
+        // Comprueba la condicion ! $date antes de ejecutar este bloque.
         if (! $date) {
             return 'Sin fecha';
         }
 
+        // Guarda en $date el resultado necesario para continuar esta operacion.
+        $date = $date->copy()->setTimezone(config('app.timezone'));
         $months = [1 => 'ene.', 2 => 'feb.', 3 => 'mar.', 4 => 'abr.', 5 => 'may.', 6 => 'jun.', 7 => 'jul.', 8 => 'ago.', 9 => 'sep.', 10 => 'oct.', 11 => 'nov.', 12 => 'dic.'];
 
         return $date->format('d').' '.$months[(int) $date->format('n')].' '.$date->format('Y');
@@ -243,12 +284,17 @@ class PedidoController extends Controller
     private function estiloDonut(array $summary): string
     {
         $palette = ['yellow' => '#f5a900', 'blue' => '#2b8df3', 'purple' => '#7137e8', 'green' => '#08a66b', 'red' => '#ef334f'];
+        // Agrupa en $segments los datos que se utilizaran en la siguiente operacion.
         $segments = [];
+        // Guarda en $start el resultado necesario para continuar esta operacion.
         $start = 0;
 
+        // Recorre $summary as $item y procesa cada elemento de la coleccion.
         foreach ($summary as $item) {
+            // Guarda en $end el resultado necesario para continuar esta operacion.
             $end = $start + $item['percent'];
             $segments[] = $palette[$item['color']].' '.$start.'% '.$end.'%';
+            // Guarda en $start el resultado necesario para continuar esta operacion.
             $start = $end;
         }
 
@@ -276,22 +322,27 @@ class PedidoController extends Controller
      */
     public function export(Request $request, string $format, ExportadorTabular $exportador, RegistradorAuditoria $auditoria): Response|StreamedResponse
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($this->authorization->allowsGlobal($request->user(), 'gestion.seguridad.consultar'), 403);
         $this->authorization->assertAllowed($request->user(), 'gestion.pedidos.exportar');
+        // Guarda en $filtros el resultado necesario para continuar esta operacion.
         $filtros = $this->filtrosAdministracion($request);
+        // Guarda en $pedidos el resultado necesario para continuar esta operacion.
         $pedidos = $this->consultaPedidosAdministracion($request, $filtros)
             ->with('user:id,nombre,correo')
             ->orderBy('creado_en')->orderBy('id')->get();
         $filas = $pedidos->map(static fn (Pedido $pedido): array => [
             $pedido->id,
-            $pedido->user?->nombre ?? 'Cliente eliminado',
-            $pedido->user?->correo ?? '—',
+            $pedido->user?->nombre ?: ($pedido->cliente_invitado_nombre ?: 'Cliente invitado'),
+            $pedido->user?->correo ?: ($pedido->cliente_invitado_correo ?: '—'),
             $pedido->canal ?? '—',
             $pedido->total,
             $pedido->estado,
             $pedido->creado_en,
         ])->all();
+        // Guarda en $respuesta el resultado necesario para continuar esta operacion.
         $respuesta = $exportador->download($format, 'pedidos-online', ['ID', 'Cliente', 'Correo', 'Canal', 'Total', 'Estado', 'Creado en'], $filas, [
             'title' => 'PEDIDOS ONLINE',
             'subtitle' => 'Datos reales filtrados desde MariaDB.',
@@ -320,12 +371,15 @@ class PedidoController extends Controller
     public function show(Request $request, Pedido $order): View
     {
         $order->loadMissing('user');
+        // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
         $this->authorize('view', $order);
 
+        // Obtiene en $isPanel la informacion de la solicitud o del usuario actual.
         $isPanel = $this->authorization->allowsGlobal($request->user(), 'gestion.seguridad.consultar')
             || $this->authorization->allowsGlobal($request->user(), 'gestion.ventas.consultar')
             || $this->authorization->allowsGlobal($request->user(), 'gestion.cotizaciones.consultar');
 
+        // Devuelve la vista 'publico.comercio.confirmacion' con los datos preparados por este controlador.
         return view('publico.comercio.confirmacion', [
             'order' => $order->load('details.product', 'user'),
             'isPanel' => $isPanel,
@@ -343,9 +397,12 @@ class PedidoController extends Controller
     public function updateStatus(ActualizarEstadoPedidoRequest $request, Pedido $order): RedirectResponse
     {
         $order->loadMissing('user');
+        // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
         $this->authorize('updateStatus', $order);
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $this->orderService->actualizarEstado($order, $request->user(), $request->validated('estado'), $request->ip());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Estado de pedido actualizado.');
     }
 
@@ -375,9 +432,11 @@ class PedidoController extends Controller
      */
     private function filtrosAdministracion(Request $request): array
     {
+        // Guarda en $validatedChannel el resultado necesario para continuar esta operacion.
         $validatedChannel = $request->validate([
             'canal' => ['nullable', 'string', 'max:30'],
         ])['canal'] ?? null;
+        // Agrupa en $statusMap los datos que se utilizaran en la siguiente operacion.
         $statusMap = [
             'pendiente' => 'Pendiente',
             'en_proceso' => 'En proceso',
@@ -385,9 +444,13 @@ class PedidoController extends Controller
             'entregado' => 'Entregado',
             'cancelado' => 'Cancelado',
         ];
+        // Guarda en $status el resultado necesario para continuar esta operacion.
         $status = trim($request->string('estado')->toString());
+        // Guarda en $period el resultado necesario para continuar esta operacion.
         $period = trim($request->string('periodo')->toString());
+        // Guarda en $perPage el resultado necesario para continuar esta operacion.
         $perPage = $request->integer('por_pagina', 10);
+        // Guarda en $search el resultado necesario para continuar esta operacion.
         $search = trim($request->string('buscar')->toString());
 
         return [
@@ -414,6 +477,7 @@ class PedidoController extends Controller
      */
     private function resumenEstados(Collection $statusCounts, int $totalOrders): array
     {
+        // Agrupa en $statuses los datos que se utilizaran en la siguiente operacion.
         $statuses = [
             ['key' => 'Pendiente', 'label' => 'Pendientes', 'color' => 'yellow'],
             ['key' => 'En proceso', 'label' => 'En preparación', 'color' => 'blue'],
@@ -423,6 +487,7 @@ class PedidoController extends Controller
         ];
 
         return array_map(function (array $status) use ($statusCounts, $totalOrders): array {
+            // Guarda en $count el resultado necesario para continuar esta operacion.
             $count = (int) $statusCounts->get($status['key'], 0);
 
             return $status + [
@@ -468,6 +533,7 @@ class PedidoController extends Controller
      */
     private function porcentajeTendencia(int $current, int $previous): ?float
     {
+        // Comprueba la condicion $previous === 0 antes de ejecutar este bloque.
         if ($previous === 0) {
             return null;
         }

@@ -54,20 +54,34 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Detecta consultas de relaciones no cargadas durante el desarrollo para evitar problemas de rendimiento.
         Model::preventLazyLoading(! app()->isProduction());
 
+        // Consulta los permisos personalizados antes de que Laravel evalÃºe las habilidades de gestiÃ³n.
         Gate::before(function ($user, string $ability): ?bool {
+            // Solo delega las habilidades cuyo nombre pertenece al Ã¡rea de gestiÃ³n.
             if ($user instanceof User && str_starts_with($ability, 'gestion.')) {
+                // Usa el servicio de autorizaciÃ³n para resolver el permiso segÃºn el usuario y su alcance.
                 return app(ServicioAutorizacion::class)->allows($user, $ability);
             }
 
+            // Devuelve null para que Laravel continÃºe con sus comprobaciones normales.
             return null;
         });
 
+        // Limita los intentos de inicio de sesiÃ³n a cinco por minuto usando correo e IP como identificador.
         RateLimiter::for('login', fn (Request $request): Limit => Limit::perMinute(5)->by(mb_strtolower((string) $request->input('correo')).'|'.$request->ip()));
+
+        // Limita los registros de nuevas cuentas a tres solicitudes por minuto por direcciÃ³n IP.
         RateLimiter::for('register', fn (Request $request): Limit => Limit::perMinute(3)->by($request->ip()));
+
+        // Limita la creaciÃ³n de pedidos a cinco solicitudes por minuto por usuario o IP invitada.
         RateLimiter::for('checkout', fn (Request $request): Limit => Limit::perMinute(5)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip())));
+
+        // Limita el envÃ­o del formulario de contacto a cinco solicitudes por minuto por IP.
         RateLimiter::for('contact', fn (Request $request): Limit => Limit::perMinute(5)->by($request->ip()));
+
+        // Permite hasta sesenta consultas por minuto al catÃ¡logo API por usuario o IP.
         RateLimiter::for('catalog-api', fn (Request $request): Limit => Limit::perMinute(60)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip())));
 
         View::composer(['layouts.tienda.principal', 'layouts.auth.principal'], function ($view): void {

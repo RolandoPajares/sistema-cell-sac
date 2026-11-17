@@ -19,8 +19,10 @@ class SesionCaja extends Model
     /** @use HasFactory<SesionCajaFactory> */
     use HasFactory;
 
+    // Usa la tabla 'sesiones_caja' como origen de los registros de este modelo.
     protected $table = 'sesiones_caja';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = [
         'caja_id', 'usuario_apertura_id', 'usuario_cierre_id', 'estado', 'saldo_inicial',
         'saldo_cierre_declarado', 'abierta_en', 'cerrada_en',

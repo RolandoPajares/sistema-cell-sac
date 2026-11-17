@@ -1,10 +1,15 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Datos de la empresa')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-organizacion')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section class="tc-org" data-organizacion="empresa" data-org-update-route="{{ route('management.company_settings.data.update') }}">
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
     @include('gestion.administracion.organizacion.componentes.cabecera', [
     'titulo' => 'Datos de la empresa',
     'icono' => 'bi-buildings',
@@ -12,20 +17,26 @@
     'mostrarEditar' => $puedeEditar && $empresa !== null,
     ])
 
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if (session('status'))
     <div class="tc-org__alert tc-org__alert--success" role="status">{{ session('status') }}</div>
     @endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if ($errors->any())
     <div class="tc-org__alert tc-org__alert--error" role="alert">
         <strong>No se pudieron actualizar los datos de la empresa.</strong>
         <ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
     </div>
     @endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if ($empresa === null)
     <div class="tc-org__alert" role="status">No existe una única empresa activa autorizada para esta sesión.</div>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
     @else
     <div class="tc-org__metrics">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
         @foreach ($metricas as $metrica)
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
             @include('gestion.administracion.organizacion.componentes.metrica', $metrica)
         @endforeach
     </div>
@@ -69,6 +80,7 @@
     </div>
     @endif
 
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
     @include('gestion.administracion.organizacion.componentes.modales', ['tipo' => 'empresa'])
 </section>
 @endsection

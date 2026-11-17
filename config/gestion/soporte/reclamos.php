@@ -1,5 +1,6 @@
 <?php
 
+// Devuelve la configuracion que describe este modulo y sus elementos visuales.
 return [
     'key' => 'soporte-reclamos',
     'area' => 'Relaciones comerciales',
@@ -9,17 +10,21 @@ return [
     'record_singular' => 'ticket',
     'record_plural' => 'tickets',
     'mode' => 'crud',
+    // Define las tarjetas de indicadores que resumen el estado del modulo.
     'kpis' => [
         ['label' => 'Tickets abiertos', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-envelope', 'tone' => 'blue'],
         ['label' => 'En atención', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-headset', 'tone' => 'purple'],
         ['label' => 'Resueltos', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-check2-circle', 'tone' => 'green'],
         ['label' => 'Prioridad alta', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-exclamation-triangle', 'tone' => 'red'],
     ],
+    // Define los graficos y datos resumidos que se muestran en el analisis del modulo.
     'analytics' => [
         ['title' => 'Actividad de soporte', 'icon' => 'bi-headset', 'description' => 'Evolución de tickets atendidos.', 'type' => 'line', 'labels' => ['Lun', 'Mar', 'Mié', 'Jue', 'Vie']],
         ['title' => 'Tickets por estado', 'icon' => 'bi-pie-chart', 'description' => 'Distribución de la bandeja de atención.', 'type' => 'donut', 'legend' => ['Abiertos', 'En proceso', 'Resueltos', 'Cerrados']],
     ],
+    // Define los encabezados de la tabla principal.
     'columns' => ['Ticket', 'Cliente', 'Asunto', 'Prioridad', 'Estado', 'Actualización'],
+    // Define los campos y reglas visuales del formulario del modulo.
     'fields' => [
         ['label' => 'Número de ticket', 'type' => 'text', 'placeholder' => 'Ej. TCK-0001', 'required' => true, 'wide' => false],
         ['label' => 'Cliente o proveedor', 'type' => 'text', 'placeholder' => 'Nombre del contacto', 'required' => true, 'wide' => false],

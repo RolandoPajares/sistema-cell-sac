@@ -31,6 +31,7 @@ class PaginaController extends Controller
      */
     public function about(): View
     {
+        // Devuelve la vista 'publico.paginas.nosotros' con los datos preparados por este controlador.
         return view('publico.paginas.nosotros');
     }
 
@@ -41,8 +42,10 @@ class PaginaController extends Controller
      */
     public function contact(Request $request): View
     {
+        // Obtiene en $user la informacion de la solicitud o del usuario actual.
         $user = $request->user();
 
+        // Devuelve la vista 'publico.paginas.contacto' con los datos preparados por este controlador.
         return view('publico.paginas.contacto', [
             'contactDefaults' => [
                 'nombre' => $user?->nombre,
@@ -56,6 +59,7 @@ class PaginaController extends Controller
      */
     public function claimsBook(): View
     {
+        // Devuelve la vista 'publico.paginas.libro-reclamaciones' con los datos preparados por este controlador.
         return view('publico.paginas.libro-reclamaciones');
     }
 
@@ -64,6 +68,7 @@ class PaginaController extends Controller
      */
     public function privacyPolicy(): View
     {
+        // Devuelve la vista 'publico.paginas.politicas-privacidad' con los datos preparados por este controlador.
         return view('publico.paginas.politicas-privacidad');
     }
 
@@ -72,6 +77,7 @@ class PaginaController extends Controller
      */
     public function terms(): View
     {
+        // Devuelve la vista 'publico.paginas.terminos-condiciones' con los datos preparados por este controlador.
         return view('publico.paginas.terminos-condiciones');
     }
 
@@ -80,6 +86,7 @@ class PaginaController extends Controller
      */
     public function frequentlyAskedQuestions(): View
     {
+        // Devuelve la vista 'publico.paginas.preguntas-frecuentes' con los datos preparados por este controlador.
         return view('publico.paginas.preguntas-frecuentes');
     }
 
@@ -91,8 +98,10 @@ class PaginaController extends Controller
      */
     public function sendContact(GuardarMensajeContactoRequest $request): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $this->servicioContacto->registrar($request->validated());
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Mensaje recibido. Nos pondremos en contacto contigo.');
     }
 }

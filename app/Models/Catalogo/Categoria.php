@@ -28,8 +28,10 @@ class Categoria extends Model
     /** @use HasFactory<CategoriaFactory> */
     use HasFactory;
 
+    // Usa la tabla 'categorias' como origen de los registros de este modelo.
     protected $table = 'categorias';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['nombre', 'descripcion', 'activo', 'creado_en', 'empresa_id'];
 
     public $timestamps = false;

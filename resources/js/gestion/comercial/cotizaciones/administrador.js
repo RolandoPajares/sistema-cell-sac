@@ -1,5 +1,13 @@
+/**
+ * GUIA DE EXPOSICION JAVASCRIPT
+ * Archivo: resources/js/gestion/comercial/cotizaciones/administrador.js
+ * Este modulo contiene comportamiento de interfaz, eventos, validaciones y/o
+ * comunicacion con el backend. Los comentarios explican el flujo sin cambiar la logica.
+ */
+
 (() => {
     const dialog = document.querySelector("[data-quotation-dialog]");
+    // Condicional: evalua "!dialog" para decidir si ejecuta el bloque siguiente.
     if (!dialog) {
         return;
     }
@@ -38,10 +46,13 @@
     );
     const bloqueo = dialog.querySelector("[data-quotation-blocked]");
 
+    // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
     document.querySelectorAll("[data-quotation-action]").forEach((boton) => {
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         boton.addEventListener("click", () => {
             const accion = boton.dataset.quotationAction ?? "";
             const textos = contenido[accion];
+            // Condicional: evalua "!textos" para decidir si ejecuta el bloque siguiente.
             if (!textos) {
                 return;
             }
@@ -60,12 +71,14 @@
             formulario.action = boton.dataset.send ?? "#";
             conversion.action = boton.dataset.convert ?? "#";
             const sedeId = boton.dataset.siteId ?? "";
+            // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
             Array.from(almacenConversion.options).forEach((opcion) => {
                 const visible =
                     opcion.value === "" || opcion.dataset.siteId === sedeId;
                 opcion.hidden = !visible;
                 opcion.disabled = !visible;
             });
+            // Condicional: evalua "almacenConversion.selectedOptions[0]?.hidden" para decidir si ejecuta el bloque siguiente.
             if (almacenConversion.selectedOptions[0]?.hidden) {
                 almacenConversion.value = "";
             }
@@ -84,10 +97,14 @@
 
     dialog
         .querySelectorAll("[data-close-quotation-dialog]")
+        // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
         .forEach((boton) =>
+            // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
             boton.addEventListener("click", () => dialog.close()),
         );
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     dialog.addEventListener("click", (evento) => {
+        // Condicional: evalua "evento.target === dialog" para decidir si ejecuta el bloque siguiente.
         if (evento.target === dialog) {
             dialog.close();
         }

@@ -1,3 +1,11 @@
+/**
+ * GUIA DE EXPOSICION JAVASCRIPT
+ * Archivo: resources/js/gestion/inventario-logistica/existencias-movimientos/listar-existencias.js
+ * Este modulo contiene comportamiento de interfaz, eventos, validaciones y/o
+ * comunicacion con el backend. Los comentarios explican el flujo sin cambiar la logica.
+ */
+
+// Evento: escucha el evento DOMContentLoaded y ejecuta la funcion asociada cuando ocurre.
 document.addEventListener('DOMContentLoaded', () => {
     const dialog = document.querySelector('#registrar-movimiento-inventario');
     const page = document.querySelector('[data-inventory-page]');
@@ -12,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveButton = movementForm?.querySelector('[type="submit"]');
     const detailDialog = document.querySelector('[data-inventory-detail-dialog]');
 
+    // Condicional: evalua "!dialog || !page || !productSelect || !productInput || !warehouseSelect || !variantSelect || !typeSelect || !quantityInput || !quantityLabel || !movementForm || !saveButton || !detailDialog" para decidir si ejecuta el bloque siguiente.
     if (!dialog || !page || !productSelect || !productInput || !warehouseSelect || !variantSelect || !typeSelect || !quantityInput || !quantityLabel || !movementForm || !saveButton || !detailDialog) {
         return;
     }
@@ -20,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const baseVariantOption = variantSelect.querySelector('option[value=""]');
     const variantOptions = [...variantSelect.querySelectorAll('option[data-producto-id]')];
 
+    // Funcion: updateMovementUrl concentra una tarea reutilizable del modulo.
     const updateMovementUrl = () => {
         const productId = productSelect.value;
         productInput.value = productId;
@@ -27,10 +37,12 @@ document.addEventListener('DOMContentLoaded', () => {
         saveButton.disabled = productId === '' || warehouseSelect.value === '' || movementForm.dataset.hayProductos !== '1' || movementForm.dataset.hayAlmacenes !== '1';
     };
 
+    // Funcion: updateAvailableVariants concentra una tarea reutilizable del modulo.
     const updateAvailableVariants = () => {
         const productId = productSelect.value;
         let productVariantCount = 0;
 
+        // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
         variantOptions.forEach((option) => {
             const belongsToProduct = option.dataset.productoId === productId;
             option.hidden = !belongsToProduct;
@@ -44,32 +56,43 @@ document.addEventListener('DOMContentLoaded', () => {
         variantSelect.required = requiresVariant;
         variantSelect.disabled = productId === '' || !requiresVariant;
 
+        // Condicional: evalua "!requiresVariant || variantSelect.selectedOptions[0]?.dataset.productoId !== productId" para decidir si ejecuta el bloque siguiente.
         if (!requiresVariant || variantSelect.selectedOptions[0]?.dataset.productoId !== productId) {
             variantSelect.value = '';
         }
     };
 
+    // Funcion: updateQuantityLabel concentra una tarea reutilizable del modulo.
     const updateQuantityLabel = () => {
         const isAdjustment = typeSelect.value === 'ajuste';
         quantityLabel.textContent = isAdjustment ? 'Existencias contadas (saldo final)' : 'Cantidad del movimiento';
         quantityInput.min = isAdjustment ? '0' : '1';
     };
 
+    // Evento: escucha el evento change y ejecuta la funcion asociada cuando ocurre.
     productSelect.addEventListener('change', updateMovementUrl);
+    // Evento: escucha el evento change y ejecuta la funcion asociada cuando ocurre.
     productSelect.addEventListener('change', updateAvailableVariants);
+    // Evento: escucha el evento change y ejecuta la funcion asociada cuando ocurre.
     warehouseSelect.addEventListener('change', updateMovementUrl);
+    // Evento: escucha el evento change y ejecuta la funcion asociada cuando ocurre.
     typeSelect.addEventListener('change', updateQuantityLabel);
     updateMovementUrl();
     updateAvailableVariants();
     updateQuantityLabel();
 
+    // Evento: escucha el evento change y ejecuta la funcion asociada cuando ocurre.
     page.querySelector('[data-inventory-per-page]')?.addEventListener('change', (event) => event.currentTarget.form.submit());
 
+    // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
     page.querySelectorAll('[data-open-inventory-movement]').forEach((button) => {
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         button.addEventListener('click', () => {
+            // Condicional: evalua "button.dataset.inventoryProduct" para decidir si ejecuta el bloque siguiente.
             if (button.dataset.inventoryProduct) {
                 productSelect.value = button.dataset.inventoryProduct;
             }
+            // Condicional: evalua "button.dataset.movementType" para decidir si ejecuta el bloque siguiente.
             if (button.dataset.movementType) {
                 typeSelect.value = button.dataset.movementType;
             }
@@ -80,19 +103,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     document.querySelectorAll('[data-close-inventory-movement]').forEach((button) => button.addEventListener('click', () => dialog.close()));
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     dialog.addEventListener('click', (event) => {
+        // Condicional: evalua "event.target === dialog" para decidir si ejecuta el bloque siguiente.
         if (event.target === dialog) {
             dialog.close();
         }
     });
 
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     page.querySelectorAll('[data-open-inventory-detail]').forEach((button) => button.addEventListener('click', () => {
         const row = button.closest('tr');
         const details = detailDialog.querySelector('[data-inventory-detail-fields]');
         const headings = [...row.closest('table').querySelectorAll('thead th')];
         const cells = [...row.querySelectorAll('td')];
         details.replaceChildren();
+        // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
         cells.slice(0, headings.length - 1).forEach((cell, index) => {
             const wrapper = document.createElement('div');
             const term = document.createElement('dt');
@@ -105,6 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
         detailDialog.showModal();
     }));
 
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     page.querySelectorAll('[data-open-movement-detail]').forEach((button) => button.addEventListener('click', () => {
         const details = detailDialog.querySelector('[data-inventory-detail-fields]');
         const fields = [
@@ -119,6 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ['Documento', button.dataset.documento],
         ];
         details.replaceChildren();
+        // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
         fields.forEach(([label, value]) => {
             const wrapper = document.createElement('div');
             const term = document.createElement('dt');
@@ -131,13 +161,17 @@ document.addEventListener('DOMContentLoaded', () => {
         detailDialog.showModal();
     }));
 
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     detailDialog.querySelectorAll('[data-close-inventory-detail]').forEach((button) => button.addEventListener('click', () => detailDialog.close()));
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     detailDialog.addEventListener('click', (event) => {
+        // Condicional: evalua "event.target === detailDialog" para decidir si ejecuta el bloque siguiente.
         if (event.target === detailDialog) {
             detailDialog.close();
         }
     });
 
+    // Condicional: evalua "page.dataset.hasErrors === '1'" para decidir si ejecuta el bloque siguiente.
     if (page.dataset.hasErrors === '1') {
         dialog.showModal();
     }

@@ -17,6 +17,7 @@ class FiltroReporteRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return $this->user() !== null && app(ServicioAutorizacion::class)->allowsRoute($this);
@@ -27,10 +28,13 @@ class FiltroReporteRequest extends FormRequest
      *
      * @return array Resultado de la operación.
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         return [
+            // Valida el campo 'desde' con las reglas definidas en la instruccion siguiente.
             'desde' => ['nullable', 'date'],
+            // Valida el campo 'hasta' con las reglas definidas en la instruccion siguiente.
             'hasta' => ['nullable', 'date', 'after_or_equal:desde'],
         ];
     }

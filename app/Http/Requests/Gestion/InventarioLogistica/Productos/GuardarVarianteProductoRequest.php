@@ -16,6 +16,7 @@ class GuardarVarianteProductoRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return $this->user() !== null && app(ServicioAutorizacion::class)->allowsRoute($this);
@@ -26,13 +27,19 @@ class GuardarVarianteProductoRequest extends FormRequest
      *
      * @return array Resultado de la operación.
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         $reglas = [
+            // Valida el campo 'codigo_sku' con las reglas definidas en la instruccion siguiente.
             'codigo_sku' => ['nullable', 'string', 'max:80', Rule::unique('variantes_productos', 'codigo_sku')->ignore($this->route('variante'))],
+            // Valida el campo 'codigo_barras' con las reglas definidas en la instruccion siguiente.
             'codigo_barras' => ['nullable', 'string', 'max:80', Rule::unique('variantes_productos', 'codigo_barras')->ignore($this->route('variante'))],
+            // Valida el campo 'nombre_color' con las reglas definidas en la instruccion siguiente.
             'nombre_color' => ['required', 'string', 'max:100'],
+            // Valida el campo 'codigo_color' con las reglas definidas en la instruccion siguiente.
             'codigo_color' => ['nullable', 'string', 'max:20'],
+            // Valida el campo 'controla_serie' con las reglas definidas en la instruccion siguiente.
             'controla_serie' => ['sometimes', 'boolean'],
         ];
 
@@ -48,6 +55,7 @@ class GuardarVarianteProductoRequest extends FormRequest
      *
      * @return void Fusiona los valores normalizados en los datos de la solicitud.
      */
+    // Ajusta o limpia los datos recibidos antes de aplicar las reglas de validacion.
     protected function prepareForValidation(): void
     {
         $camposOpcionales = [];

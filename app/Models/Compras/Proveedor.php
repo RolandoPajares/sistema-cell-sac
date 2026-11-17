@@ -14,8 +14,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Proveedor extends Model
 {
+    // Usa la tabla 'proveedores' como origen de los registros de este modelo.
     protected $table = 'proveedores';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['nombre', 'ruc', 'correo', 'telefono', 'ciudad', 'activo', 'creado_en', 'empresa_id'];
 
     public $timestamps = false;

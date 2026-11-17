@@ -1,2 +1,6 @@
+/* Define los estilos visuales del modulo o componente 'general'. */
+
+/* Aplica estos estilos al bloque '.admin-settings-page--configuracion-general .admin-settings-card-icon'. */
 .admin-settings-page--configuracion-general .admin-settings-card-icon { background: #e7f2ff; }
+/* Aplica estos estilos al bloque '.admin-settings-page--configuracion-general .admin-settings-footer-note'. */
 .admin-settings-page--configuracion-general .admin-settings-footer-note { border-color: #bcdcf8; }

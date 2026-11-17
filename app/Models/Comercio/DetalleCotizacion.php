@@ -13,8 +13,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class DetalleCotizacion extends Model
 {
+    // Usa la tabla 'detalles_cotizaciones' como origen de los registros de este modelo.
     protected $table = 'detalles_cotizaciones';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['cotizacion_id', 'producto_id', 'variante_id', 'cantidad', 'precio_unitario', 'descripcion_historica', 'descuento', 'impuesto', 'total_linea'];
 
     public $timestamps = false;

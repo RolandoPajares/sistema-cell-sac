@@ -30,15 +30,19 @@ final class ServicioConfiguracionSistema
     /** @return array<string, mixed> */
     public function consultarConfiguracion(string $grupo, int $empresaId, ?int $sedeId = null): array
     {
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! Schema::hasTable('configuraciones_sistema')) {
             return [];
         }
 
+        // Devuelve el resultado obtenido mediante el modelo correspondiente.
+        // ORM: este servicio aplica ORM para consultar o modificar datos en la base de datos.
         return ConfiguracionSistema::query()
             ->where('empresa_id', $empresaId)
             ->where('grupo', $grupo)
             ->where(function ($consulta) use ($sedeId): void {
                 $consulta->whereNull('sede_id');
+                // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
                 if ($sedeId !== null) {
                     $consulta->orWhere('sede_id', $sedeId);
                 }
@@ -52,6 +56,7 @@ final class ServicioConfiguracionSistema
 
     public function sedesConfigurables(int $empresaId): Collection
     {
+        // Devuelve el resultado obtenido mediante el modelo correspondiente.
         return DB::table('sedes')
             ->where('empresa_id', $empresaId)
             ->where('activa', true)
@@ -65,22 +70,32 @@ final class ServicioConfiguracionSistema
      */
     public function guardarConfiguracion(string $grupo, string $alcance, ?int $sedeId, array $datos, User $usuario, array $ubicacion, ?string $ip): void
     {
+        // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
         abort_unless(Schema::hasTable('configuraciones_sistema'), 503,
             'La persistencia de configuración requiere aplicar la migración aprobada.');
+        // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
         abort_unless(isset(self::CLAVES_CONFIGURABLES[$grupo]), 422, 'El grupo de configuración no es válido.');
+        // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
         abort_unless($ubicacion['empresa_id'] !== null, 409, 'No existe una empresa autorizada.');
 
         $sedeId = $alcance === 'sede' ? $sedeId : null;
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($sedeId !== null) {
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless(DB::table('sedes')->where('id', $sedeId)->where('empresa_id', $ubicacion['empresa_id'])->exists(), 422,
                 'La sede no pertenece a la empresa autorizada.');
         }
 
+        // Guarda en $permitidas el resultado necesario para continuar la operacion.
         $permitidas = array_flip(self::CLAVES_CONFIGURABLES[$grupo]);
+        // Guarda en $configuracion el resultado necesario para continuar la operacion.
         $configuracion = array_intersect_key($datos, $permitidas);
 
+        // Ejecuta los cambios dentro de una transaccion para evitar datos incompletos.
         DB::transaction(function () use ($grupo, $sedeId, $configuracion, $usuario, $ubicacion, $ip): void {
+            // Guarda en $anteriores el resultado necesario para continuar la operacion.
             $anteriores = $this->consultarConfiguracion($grupo, (int) $ubicacion['empresa_id'], $sedeId);
+            // Recorre los elementos recibidos para validar o procesar cada registro.
             foreach ($configuracion as $clave => $valor) {
                 ConfiguracionSistema::query()->updateOrCreate(
                     ['empresa_id' => $ubicacion['empresa_id'], 'sede_id' => $sedeId, 'grupo' => $grupo, 'clave' => $clave],
@@ -102,6 +117,7 @@ final class ServicioConfiguracionSistema
     public function obtenerDatosGenerales(User $usuario, array $ubicacion): array
     {
         $empresa = $ubicacion['empresa_id'] === null ? null : Empresa::query()->find($ubicacion['empresa_id']);
+        // Guarda en $sedes el resultado de la consulta ejecutada.
         $sedes = $empresa?->sedes()->where('activa', true)->get() ?? collect();
         $usuariosVinculados = $ubicacion['sede_id'] === null || ! Schema::hasTable('usuarios_sedes_roles')
             ? 0
@@ -118,6 +134,7 @@ final class ServicioConfiguracionSistema
             ? collect()
             : DB::table('series_documentos')->where('empresa_id', $ubicacion['empresa_id'])
                 ->where('sede_id', $ubicacion['sede_id'])->where('activa', true)->orderBy('tipo_documento_id')->get();
+        // Guarda en $cambios el resultado necesario para continuar la operacion.
         $cambios = $this->consultaAuditoria($usuario, $ubicacion['empresa_id'], $ubicacion['sede_id'])
             ->latest('creado_en')->limit(5)->get(['accion', 'entidad', 'creado_en']);
 
@@ -129,35 +146,48 @@ final class ServicioConfiguracionSistema
      */
     public function consultarIntegraciones(array $ubicacion, ?string $busqueda, ?string $estado): array
     {
+        // Prepara en $ultimosEventos la consulta que obtiene o modifica los datos necesarios.
         $ultimosEventos = DB::table('eventos_integracion')->select('integracion_id')
             ->selectRaw('MAX(iniciado_en) AS ultima_sincronizacion')->groupBy('integracion_id');
+        // Prepara en $consulta la consulta que obtiene o modifica los datos necesarios.
         $consulta = DB::table('integraciones')->leftJoinSub($ultimosEventos, 'ultimos_eventos', function ($union): void {
             $union->on('ultimos_eventos.integracion_id', '=', 'integraciones.id');
         })->select('integraciones.*', 'ultimos_eventos.ultima_sincronizacion')->whereRaw('1 = 0');
+        // Guarda en $eventos el resultado necesario para continuar la operacion.
         $eventos = collect();
+        // Guarda en $total el resultado necesario para continuar la operacion.
         $total = 0;
+        // Guarda en $activas el resultado necesario para continuar la operacion.
         $activas = 0;
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($ubicacion['empresa_id'] !== null && Schema::hasTable('integraciones')) {
+            // Prepara en $consulta la consulta que obtiene o modifica los datos necesarios.
             $consulta = DB::table('integraciones')->leftJoinSub($ultimosEventos, 'ultimos_eventos', function ($union): void {
                 $union->on('ultimos_eventos.integracion_id', '=', 'integraciones.id');
             })->select('integraciones.*', 'ultimos_eventos.ultima_sincronizacion')
                 ->where('integraciones.empresa_id', $ubicacion['empresa_id'])
                 ->when($busqueda !== null && trim($busqueda) !== '', function ($consulta) use ($busqueda): void {
+                    // Guarda en $termino el resultado necesario para continuar la operacion.
                     $termino = '%'.trim((string) $busqueda).'%';
                     $consulta->where(function ($subconsulta) use ($termino): void {
                         $subconsulta->where('nombre', 'like', $termino)->orWhere('proveedor', 'like', $termino)->orWhere('codigo', 'like', $termino);
                     });
                 })
                 ->when($estado !== null && $estado !== '', fn ($consulta) => $consulta->where('activa', $estado === 'Activa'));
+            // Guarda en $total el resultado necesario para continuar la operacion.
             $total = (clone $consulta)->count();
+            // Guarda en $activas el resultado necesario para continuar la operacion.
             $activas = (clone $consulta)->where('activa', true)->count();
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if (Schema::hasTable('eventos_integracion')) {
+                // Prepara en $eventos la consulta que obtiene o modifica los datos necesarios.
                 $eventos = DB::table('eventos_integracion')->join('integraciones', 'integraciones.id', '=', 'eventos_integracion.integracion_id')
                     ->where('integraciones.empresa_id', $ubicacion['empresa_id'])
                     ->orderByDesc('eventos_integracion.iniciado_en')->limit(10)
                     ->get(['eventos_integracion.id', 'integraciones.nombre', 'eventos_integracion.estado', 'eventos_integracion.direccion', 'eventos_integracion.iniciado_en']);
             }
         }
+        // Guarda en $integraciones el resultado necesario para continuar la operacion.
         $integraciones = (clone $consulta)->orderBy('nombre')->paginate(12)->withQueryString();
 
         return [
@@ -172,13 +202,16 @@ final class ServicioConfiguracionSistema
      */
     public function obtenerDatosSeguridad(User $usuario, array $ubicacion): array
     {
+        // Guarda en $sesiones el resultado necesario para continuar la operacion.
         $sesiones = Schema::hasTable('sesiones_usuarios')
             ? DB::table('sesiones_usuarios')->where('usuario_id', $usuario->getKey())->orderByDesc('ultimo_acceso')->limit(20)->get()
             : collect();
+        // Guarda en $eventos el resultado necesario para continuar la operacion.
         $eventos = $this->consultaAuditoria($usuario, $ubicacion['empresa_id'], $ubicacion['sede_id'])
             ->where(function ($consulta): void {
                 $consulta->where('modulo', 'seguridad')->orWhere('entidad', 'like', '%sesion%')->orWhere('accion', 'like', '%acceso%');
             })->latest('creado_en')->limit(10)->get(['accion', 'entidad', 'resultado', 'creado_en']);
+        // Agrupa en $controles los datos que se utilizaran en el siguiente paso.
         $controles = [
             ['Políticas de contraseña', 'La tabla usuarios almacena el hash y el bloqueo vigente; no existe una tabla de políticas.', 'bi-key', [['Política', 'Sin configuración persistida'], ['Usuario actual bloqueado', $usuario->bloqueado_hasta?->toDateTimeString() ?? 'No']], 'politica'],
             ['Autenticación en dos pasos', 'No existe configuración persistente de segundo factor en el esquema.', 'bi-lock', [['Estado', 'Sin configuración persistida'], ['Adopción', 'No disponible']], 'dos-pasos'],
@@ -201,8 +234,10 @@ final class ServicioConfiguracionSistema
      */
     private function consultaAuditoria(User $usuario, ?int $empresaId, ?int $sedeId): Builder
     {
+        // Devuelve el resultado obtenido mediante el modelo correspondiente.
         return DB::table('registros_auditoria')->where(function ($consulta) use ($usuario, $empresaId): void {
             $consulta->where('usuario_id', $usuario->getKey());
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if ($empresaId !== null) {
                 $consulta->orWhere('empresa_id', $empresaId);
             }

@@ -1,3 +1,10 @@
+/**
+ * GUIA DE EXPOSICION JAVASCRIPT
+ * Archivo: resources/js/nucleo/cargador-modulos.js
+ * Este modulo contiene comportamiento de interfaz, eventos, validaciones y/o
+ * comunicacion con el backend. Los comentarios explican el flujo sin cambiar la logica.
+ */
+
 const modulosPublicos = import.meta.glob('../publico/catalogo/*.js');
 const modulosInteligencia = import.meta.glob('../inteligente/**/*.js');
 
@@ -8,6 +15,7 @@ const modulosInteligencia = import.meta.glob('../inteligente/**/*.js');
  *
  * @returns {*} Resultado de la operación.
  */
+// Flujo asincrono: espera el resultado de una operacion que puede tardar antes de continuar.
 export async function cargarModulo(ruta) {
     const rutaNormalizada = ruta.replace(/^\/+|\/+$/g, '');
     const esInteligencia = rutaNormalizada.startsWith('inteligente/');
@@ -30,9 +38,12 @@ export async function cargarModulo(ruta) {
  *
  * @returns {*} Resultado de la operación.
  */
+// Flujo asincrono: espera el resultado de una operacion que puede tardar antes de continuar.
 export async function cargarModulosDesdePagina(selector = '[data-js-modules]') {
     const elemento = document.querySelector(selector);
+    // Recorrido: usa map para procesar cada elemento y obtener o actualizar datos.
     const nombres = elemento?.dataset.jsModules?.split(',').map((nombre) => nombre.trim()).filter(Boolean) ?? [];
 
+    // Recorrido: usa map para procesar cada elemento y obtener o actualizar datos.
     return Promise.all(nombres.map((nombre) => cargarModulo(nombre)));
 }

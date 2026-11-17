@@ -22,8 +22,10 @@ class Pantalla extends Model
     /** @use HasFactory<PantallaFactory> */
     use HasFactory;
 
+    // Usa la tabla 'pantallas' como origen de los registros de este modelo.
     protected $table = 'pantallas';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['modulo_id', 'codigo', 'nombre', 'ruta', 'icono', 'habilitada'];
 
     /**
@@ -46,6 +48,7 @@ class Pantalla extends Model
         return $this->belongsTo(Modulo::class, 'modulo_id');
     }
 
+    // Define la relacion 'permisos' entre este modelo y los registros relacionados.
     public function permisos(): HasMany
     {
         return $this->hasMany(Permiso::class, 'pantalla_id');

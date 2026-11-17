@@ -1,8 +1,12 @@
+/* Define los estilos visuales del modulo o componente 'carrito'. */
+
+/* Aplica estos estilos al bloque '.qty'. */
 .qty {
   display: flex;
   align-items: center;
   gap: 8px;
 }
+/* Aplica estos estilos al bloque '.cart-product-cell'. */
 .cart-product-cell {
   display: flex;
   align-items: center;
@@ -10,6 +14,7 @@
   min-width: 220px;
 }
 .cart-product-cell > img,
+/* Aplica estos estilos al bloque '.cart-product-placeholder'. */
 .cart-product-placeholder {
   display: grid;
   flex: 0 0 46px;
@@ -22,6 +27,7 @@
   background: #f1f7ff;
   border-radius: 8px;
 }
+/* Aplica estos estilos al bloque '.cart-summary'. */
 .cart-summary {
   display: flex;
   justify-content: space-between;

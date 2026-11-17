@@ -1,8 +1,12 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Proveedores')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-proveedores')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
     <section class="proveedores-page" data-proveedores-page data-open-dialog-on-load="{{ $errors->any() ? 'nuevo-proveedor' : '' }}">
         <header class="proveedores-hero">
@@ -41,6 +45,7 @@
             <span class="proveedores-tab">Análisis y métricas</span>
         </nav>
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
         <form class="proveedores-toolbar" method="get" action="{{ route('management.suppliers') }}">
             <label class="proveedores-search">
                 <i class="bi bi-search" aria-hidden="true"></i>
@@ -51,6 +56,7 @@
                 <span class="visually-hidden">Filtrar por categoría</span>
                 <select name="categoria">
                     <option value="">Todas las categorías</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach ($categories as $category)
                         <option value="{{ $category->id }}" @selected(($filters['categoria'] ?? null) === $category->id)>{{ $category->nombre }}</option>
                     @endforeach
@@ -68,12 +74,14 @@
                 <span class="visually-hidden">Filtrar por ciudad</span>
                 <select name="ciudad">
                     <option value="">Todas las ciudades</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach ($cities as $city)
                         <option value="{{ $city }}" @selected(($filters['ciudad'] ?? null) === $city)>{{ $city }}</option>
                     @endforeach
                 </select>
             </label>
             <button class="proveedores-toolbar-button" type="submit"><i class="bi bi-funnel" aria-hidden="true"></i><span>Filtros</span></button>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if (($filters['buscar'] ?? null) || ($filters['categoria'] ?? null) || ($filters['estado'] ?? null) || ($filters['ciudad'] ?? null))
                 <a class="proveedores-clear-button" href="{{ route('management.suppliers') }}">Limpiar filtros</a>
             @endif
@@ -94,6 +102,7 @@
                             <tr><th><span class="proveedores-checkbox" aria-hidden="true"></span></th><th>#</th><th>Proveedor</th><th>RUC</th><th>Categoría</th><th>Ciudad</th><th>Estado</th><th>Acciones</th></tr>
                         </thead>
                         <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                             @forelse ($suppliers as $supplier)
                                 <tr class="{{ $supplierPresentation[$supplier->id]['is_selected'] ? 'is-selected' : '' }}">
                                     <td><span class="proveedores-checkbox" aria-hidden="true"></span></td>
@@ -107,6 +116,7 @@
                                     <td class="proveedores-muted">{{ $supplier->ruc }}</td>
                                     <td>
                                         <span class="proveedores-category-list">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                                             @forelse (array_slice($supplierPresentation[$supplier->id]['categories'], 0, 2) as $categoryName)
                                                 <b>{{ $categoryName }}</b>
                                             @empty
@@ -119,9 +129,13 @@
                                     <td class="proveedores-actions-cell">
                                         <a class="proveedores-action" href="{{ request()->fullUrlWithQuery(['proveedor' => $supplier->id]) }}" title="Ver proveedor"><i class="bi bi-eye" aria-hidden="true"></i></a>
                                         <button class="proveedores-action" type="button" data-open-supplier-edit="{{ $supplier->id }}" title="Editar proveedor"><i class="bi bi-pencil" aria-hidden="true"></i></button>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                         @if ($supplier->activo)
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                                             <form method="post" action="{{ route('management.suppliers.deactivate', $supplier) }}">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                                                 @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
                                                 @method('DELETE')
                                                 <button class="proveedores-action proveedores-action--danger" type="submit" data-confirm="¿Desactivar este proveedor?" title="Desactivar proveedor"><i class="bi bi-trash3" aria-hidden="true"></i></button>
                                             </form>
@@ -139,12 +153,16 @@
                     <span>Mostrando {{ $suppliers->firstItem() ?? 0 }} a {{ $suppliers->lastItem() ?? 0 }} de {{ number_format($suppliers->total()) }} proveedores</span>
                     <div class="proveedores-pagination-controls">
                         {{ $suppliers->onEachSide(1)->links() }}
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                         <form method="get" action="{{ route('management.suppliers') }}" class="proveedores-per-page">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                             @foreach (request()->except(['page', 'por_pagina']) as $key => $value)
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                                 @if (is_scalar($value))<input type="hidden" name="{{ $key }}" value="{{ $value }}">@endif
                             @endforeach
                             <label for="proveedores-por-pagina">Proveedores por página</label>
                             <select id="proveedores-por-pagina" name="por_pagina" onchange="this.form.submit()">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                                 @foreach ([10, 20, 50] as $option)
                                     <option value="{{ $option }}" @selected(($filters['por_pagina'] ?? 10) === $option)>{{ $option }}</option>
                                 @endforeach
@@ -159,6 +177,7 @@
                     <header class="proveedores-card-header">
                         <h2>Detalle del proveedor <i class="bi bi-chevron-up" aria-hidden="true"></i></h2>
                     </header>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                     @if ($selectedSupplier)
                         <div class="proveedores-detail-identity">
                             <span class="proveedores-detail-avatar">{{ $selectedSupplierPresentation['initial'] }}</span>
@@ -191,6 +210,7 @@
                                 </div>
                             </div>
                         </div>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                     @else
                         <div class="proveedores-detail-empty"><i class="bi bi-truck" aria-hidden="true"></i><strong>Selecciona un proveedor</strong><span>Su información aparecerá aquí.</span></div>
                     @endif
@@ -202,6 +222,7 @@
             <section class="proveedores-secondary-card">
                 <header class="proveedores-card-header"><div><h2><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i> Productos sin existencias <span class="proveedores-alert-count">{{ $lowStockProducts->count() }}</span></h2><p>Productos con saldo físico igual a cero.</p></div><a href="{{ route('management.inventory', ['estado' => 'sin_existencias']) }}">Ver todas</a></header>
                 <div class="proveedores-alert-list">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @forelse ($lowStockProducts as $product)
                         <div class="proveedores-alert-row"><span class="proveedores-alert-icon"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i></span><span><strong>Sin existencias: {{ $product->nombre }}</strong><small>{{ number_format((float) $product->existencias_alcance) }} unidades · {{ $product->suppliers->first()?->nombre ?: 'Sin proveedor' }}</small></span><time>Reponer</time><a href="{{ route('management.inventory', ['buscar' => $product->nombre]) }}">Revisar</a></div>
                     @empty
@@ -213,6 +234,7 @@
             <section class="proveedores-secondary-card">
                 <header class="proveedores-card-header"><div><h2><i class="bi bi-clock-history" aria-hidden="true"></i> Actividad reciente</h2><p>Últimos movimientos de proveedores y compras.</p></div><a href="{{ route('management.audit') }}">Ver todas</a></header>
                 <div class="proveedores-activity-list">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @forelse ($recentActivity as $activity)
                         <div class="proveedores-activity-row"><span class="proveedores-activity-icon proveedores-activity-icon--{{ $activity['color'] }}"><i class="bi bi-{{ $activity['icon'] }}" aria-hidden="true"></i></span><span><strong>{{ $activity['title'] }}</strong><small>{{ $activity['detail'] }}</small></span><time>{{ $activity['date']?->diffForHumans() }}</time></div>
                     @empty
@@ -230,6 +252,7 @@
         </div>
     </dialog>
 
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
     @foreach ($suppliers as $supplier)
         <dialog class="proveedores-dialog" id="editar-proveedor-{{ $supplier->id }}" aria-labelledby="proveedor-editar-titulo-{{ $supplier->id }}">
             <div class="proveedores-dialog-card">
@@ -240,6 +263,7 @@
     @endforeach
 @endsection
 
+{{-- bloque de estilos o scripts para el lugar reservado por la plantilla. --}}
 @push('scripts')
     @vite('resources/js/gestion/comercial/proveedores/index.js')
 @endpush

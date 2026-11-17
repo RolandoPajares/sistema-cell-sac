@@ -1,3 +1,4 @@
+
 {{-- Componente de analitica: reportes\_orders-table.blade.php. Renderiza un bloque visual reutilizable. --}}
 {{-- Bloque reutilizable: muestra el listado tabular de pedidos recientes del reporte. --}}
 <div class="reportes-orders-table-wrap">
@@ -6,6 +7,7 @@
         <thead><tr><th>#</th><th>Cliente</th><th>Fecha</th><th>Productos</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead>
         <tbody>
             {{-- Recorre los pedidos preparados por el controlador para mostrar cada registro. --}}
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @forelse ($latestOrders as $order)
                 <tr>
                     {{-- Identificador del pedido con formato uniforme de seis dígitos. --}}

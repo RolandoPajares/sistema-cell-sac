@@ -17,8 +17,10 @@ final class ResponsableOrganizacional extends Model
 
     public const UPDATED_AT = 'actualizado_en';
 
+    // Usa la tabla 'responsables_organizacionales' como origen de los registros de este modelo.
     protected $table = 'responsables_organizacionales';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = [
         'empresa_id', 'sede_id', 'tipo_recurso', 'almacen_id',
         'responsable_usuario_id', 'cargo', 'vigente_desde', 'vigente_hasta',

@@ -35,6 +35,7 @@ class InicializarTechnologyCell extends Command
      */
     public function handle(RegistradorAuditoria $audit): int
     {
+        // La vista previa solo informa el plan y el estado de la base; no realiza escrituras.
         if ($this->option('vista-previa')) {
             $this->mostrarPlan();
             $this->mostrarConciliacion();
@@ -48,6 +49,7 @@ class InicializarTechnologyCell extends Command
             return self::FAILURE;
         }
 
+        // Verifica que existan las tablas necesarias para realizar una instalacion controlada.
         foreach (['usuarios', 'empresas', 'sedes', 'almacenes', 'roles', 'usuarios_roles', 'registros_auditoria', 'versiones_inicializacion_control_acceso'] as $table) {
             if (! Schema::hasTable($table)) {
                 $this->error('Falta una tabla requerida: '.$table);
@@ -70,6 +72,7 @@ class InicializarTechnologyCell extends Command
             }
         }
 
+        // Recoge los datos de empresa, sede, almacen y administrador que se crearan.
         $data = [
             'empresa_codigo' => $this->ask('Código de empresa'),
             'razon_social' => $this->ask('Razón social'),
@@ -82,6 +85,7 @@ class InicializarTechnologyCell extends Command
             'password' => $this->secret('Contraseña del administrador inicial'),
             'password_confirmation' => $this->secret('Repite la contraseña'),
         ];
+        // Valida codigos, nombres, correo y contrasena antes de abrir la transaccion.
         $validator = Validator::make($data, [
             'empresa_codigo' => ['required', 'string', 'max:30', 'regex:/\A[a-zA-Z0-9_-]+\z/'],
             'razon_social' => ['required', 'string', 'max:180'],
@@ -137,7 +141,9 @@ class InicializarTechnologyCell extends Command
         }
 
         $etapa = 'preparación';
+        // Conserva la etapa actual para informar con precision si la transaccion falla.
         try {
+            // Agrupa la creacion del catalogo, organizacion, usuario, rol y auditoria.
             DB::transaction(function () use ($data, $audit, &$etapa): void {
                 $etapa = 'control de ejecución duplicada';
                 $inserted = DB::table('versiones_inicializacion_control_acceso')->insertOrIgnore([
@@ -156,6 +162,7 @@ class InicializarTechnologyCell extends Command
 
                 $etapa = 'catálogos RBAC';
                 app(RbacInicialSeeder::class)->run();
+                // Obtiene el rol administrador que se asignara al usuario inicial.
                 $roleId = DB::table('roles')->where('codigo', 'administrador')->where('alcance_permitido', 'empresa')
                     ->where('es_sistema', true)->where('activo', true)->value('id');
                 if ($roleId === null) {
@@ -178,6 +185,7 @@ class InicializarTechnologyCell extends Command
                     'activo' => true, 'creado_en' => now(), 'actualizado_en' => now(),
                 ]);
                 $etapa = 'administrador';
+                // Crea la cuenta inicial con el modelo User y sus reglas de almacenamiento.
                 $user = User::create([
                     'nombre' => $data['nombre'], 'correo' => mb_strtolower(trim($data['correo'])),
                     'password' => $data['password'], 'rol' => 'administrador', 'acceso_controlado' => true,
@@ -187,6 +195,7 @@ class InicializarTechnologyCell extends Command
                     'usuario_id' => $user->getKey(), 'rol_id' => $roleId, 'asignado_en' => now(), 'activo' => true,
                 ]);
                 $etapa = 'auditoría';
+                // Registra la instalacion para dejar trazabilidad de los datos iniciales.
                 $audit->record($user->getKey(), 'instalacion.inicializada', 'empresas', $companyId, null, [
                     'empresa_id' => $companyId, 'sede_id' => $siteId, 'almacen_id' => $warehouseId,
                 ], null, scope: ['empresa_id' => $companyId, 'sede_id' => $siteId]);
@@ -219,6 +228,7 @@ class InicializarTechnologyCell extends Command
      */
     private function mostrarPlan(): void
     {
+        // Describe las operaciones que se ejecutarian si el usuario confirma la instalacion.
         $this->line('Vista previa: crear los catálogos RBAC iniciales, una empresa, una sede, un almacén y un administrador.');
         $this->line('Solo se asignará el rol administrador a la cuenta nueva; se registrará auditoría y no se modificarán cuentas existentes.');
         $this->line('Datos requeridos: códigos y nombres de empresa, sede y almacén; nombre, correo y contraseña del administrador.');
@@ -231,6 +241,7 @@ class InicializarTechnologyCell extends Command
      */
     private function mostrarConciliacion(): void
     {
+        // Consulta la estructura y los registros existentes para detectar una instalacion parcial.
         $this->line('Base configurada: '.DB::connection()->getDatabaseName());
         if (DB::getDriverName() === 'mysql') {
             $schema = DB::connection()->getDatabaseName();
@@ -240,10 +251,12 @@ class InicializarTechnologyCell extends Command
             $this->line('Estructura: '.$objects->get('BASE TABLE', 0).' tablas, '.$objects->get('VIEW', 0).' vistas, '.$triggers.' disparadores.');
         }
 
+        // Muestra el numero de registros de las tablas que intervienen en la instalacion y RBAC.
         foreach (['empresas', 'sedes', 'almacenes', 'usuarios', 'roles', 'permisos', 'usuarios_roles', 'usuarios_sedes_roles', 'versiones_inicializacion_control_acceso', 'migraciones_laravel', 'migrations'] as $table) {
             $this->line($table.': '.(Schema::hasTable($table) ? DB::table($table)->count().' registro(s)' : 'tabla ausente'));
         }
 
+        // Cuenta administradores activos con una asignacion RBAC vigente.
         if (Schema::hasTable('usuarios_roles') && Schema::hasTable('roles') && Schema::hasTable('usuarios')) {
             $administrators = DB::table('usuarios_roles')->join('roles', 'roles.id', '=', 'usuarios_roles.rol_id')
                 ->join('usuarios', 'usuarios.id', '=', 'usuarios_roles.usuario_id')

@@ -35,21 +35,30 @@ class ReporteController extends Controller
      */
     public function index(FiltroReporteRequest $request): View
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $filters = $this->filtrosReporte($request->validated());
+        // Guarda en $period el resultado necesario para continuar esta operacion.
         $period = $this->periodo($filters);
+        // Guarda en $salesQuery el resultado necesario para continuar esta operacion.
         $salesQuery = $this->consultaVentas($filters);
+        // Guarda en $summary el resultado necesario para continuar esta operacion.
         $summary = (clone $salesQuery)
             ->selectRaw('COALESCE(SUM(total), 0) as total_sales, COUNT(*) as total_orders')
             ->first();
+        // Guarda en $details el resultado necesario para continuar esta operacion.
         $details = $this->consultaDetalles($filters)
             ->with(['product:id,nombre,categoria,categoria_id,precio,url_imagen', 'product.category:id,nombre'])
             ->get();
+        // Guarda en $trend el resultado necesario para continuar esta operacion.
         $trend = $this->tendenciaVentas($filters, $period['from'], $period['to']);
+        // Prepara en $campaignMetrics la consulta que obtiene o modifica los registros necesarios.
         $campaignMetrics = Campania::query()
             ->whereBetween('creado_en', [$period['from'], $period['to']])
             ->selectRaw('COALESCE(SUM(vistas), 0) as views, COALESCE(SUM(clics), 0) as clicks')
             ->first();
+        // Prepara en $activeProducts la consulta que obtiene o modifica los registros necesarios.
         $activeProducts = Producto::query()->where('activo', true)->count();
+        // Agrupa en $productReport los datos que se utilizaran en la siguiente operacion.
         $productReport = [
             'active' => $activeProducts,
             'inactive' => Producto::query()->where('activo', false)->count(),
@@ -60,14 +69,21 @@ class ReporteController extends Controller
                 ->limit(8)
                 ->get(['id', 'nombre', 'marca', 'categoria', 'categoria_id', 'precio', 'existencias', 'activo']),
         ];
+        // Guarda en $customerReport el resultado necesario para continuar esta operacion.
         $customerReport = $this->reporteClientes($filters);
+        // Guarda en $inventoryReport el resultado necesario para continuar esta operacion.
         $inventoryReport = $this->reporteInventario();
+        // Guarda en $campaignReport el resultado necesario para continuar esta operacion.
         $campaignReport = $this->reporteCampanias($period['from'], $period['to']);
+        // Guarda en $categorySales el resultado necesario para continuar esta operacion.
         $categorySales = $this->ventasPorCategoria($details);
+        // Guarda en $inventorySummary el resultado necesario para continuar esta operacion.
         $inventorySummary = $this->resumenInventario();
+        // Guarda en $orderStatusSummary el resultado necesario para continuar esta operacion.
         $orderStatusSummary = $this->resumenEstadosPedidos($filters);
         $customerReport['top'] = $customerReport['top']
             ->map(static function (Pedido $order): array {
+                // Guarda en $customer el resultado necesario para continuar esta operacion.
                 $customer = $order->user?->customer;
 
                 return [
@@ -82,6 +98,7 @@ class ReporteController extends Controller
                 ];
             })
             ->all();
+        // Guarda en $presentation el resultado necesario para continuar esta operacion.
         $presentation = $this->datosPresentacion(
             $trend,
             $categorySales,
@@ -91,7 +108,9 @@ class ReporteController extends Controller
             $customerReport,
             $request,
         );
+        // Guarda en $latestOrders el resultado necesario para continuar esta operacion.
         $latestOrders = $this->pedidosRecientes($filters)->map(function (Pedido $order) use ($presentation): Pedido {
+            // Guarda en $customer el resultado necesario para continuar esta operacion.
             $customer = $order->user?->customer;
             $status = $presentation['orderStatuses'][$order->estado] ?? ['label' => $order->estado, 'class' => 'processing'];
             $order->setAttribute('customer_name', $customer?->razon_social ?: $customer?->nombre_contacto ?: $order->user?->nombre ?: 'Cliente');
@@ -101,6 +120,7 @@ class ReporteController extends Controller
             return $order;
         });
 
+        // Devuelve la vista 'gestion.analitica.reportes.listar' con los datos preparados por este controlador.
         return view('gestion.analitica.reportes.listar', [
             'filters' => $filters,
             'activeView' => $this->vistaActiva($request),
@@ -147,13 +167,20 @@ class ReporteController extends Controller
         array $customerReport,
         FiltroReporteRequest $request,
     ): array {
+        // Guarda en $salesMax el resultado necesario para continuar esta operacion.
         $salesMax = max(1, ...array_column($salesTrend, 'sales'));
+        // Guarda en $ordersMax el resultado necesario para continuar esta operacion.
         $ordersMax = max(1, ...array_column($salesTrend, 'orders'));
+        // Agrupa en $chartPoints los datos que se utilizaran en la siguiente operacion.
         $chartPoints = [];
+        // Agrupa en $chartCircles los datos que se utilizaran en la siguiente operacion.
         $chartCircles = [];
 
+        // Recorre $salesTrend as $index => $point y procesa cada elemento de la coleccion.
         foreach ($salesTrend as $index => $point) {
+            // Guarda en $x el resultado necesario para continuar esta operacion.
             $x = count($salesTrend) > 1 ? ($index / (count($salesTrend) - 1)) * 100 : 50;
+            // Guarda en $y el resultado necesario para continuar esta operacion.
             $y = 100 - (($point['orders'] / $ordersMax) * 100);
             $chartPoints[] = round($x, 2).','.round($y, 2);
             $chartCircles[] = ['x' => round($x, 2), 'y' => round($y, 2)];
@@ -201,15 +228,21 @@ class ReporteController extends Controller
         $total = $valueKey === 'count'
             ? max(1, array_sum(array_column($items, $valueKey)))
             : 100;
+        // Guarda en $cursor el resultado necesario para continuar esta operacion.
         $cursor = 0;
+        // Agrupa en $segments los datos que se utilizaran en la siguiente operacion.
         $segments = [];
 
+        // Recorre $items as $item y procesa cada elemento de la coleccion.
         foreach ($items as $item) {
+            // Guarda en $next el resultado necesario para continuar esta operacion.
             $next = $cursor + (($item[$valueKey] / $total) * 100);
             $segments[] = $item['color'].' '.$cursor.'% '.$next.'%';
+            // Guarda en $cursor el resultado necesario para continuar esta operacion.
             $cursor = $next;
         }
 
+        // Comprueba la condicion $cursor < 100 antes de ejecutar este bloque.
         if ($cursor < 100) {
             $segments[] = '#e8f0fa '.$cursor.'% 100%';
         }
@@ -222,6 +255,7 @@ class ReporteController extends Controller
      */
     private function conversionCampanias(Collection $campaigns): float
     {
+        // Guarda en $views el resultado necesario para continuar esta operacion.
         $views = (int) $campaigns->sum('vistas');
 
         return $views > 0 ? ((int) $campaigns->sum('clics') / $views) * 100 : 0;
@@ -233,6 +267,7 @@ class ReporteController extends Controller
      */
     private function elementosEstado(array $summary): array
     {
+        // Guarda en $total el resultado necesario para continuar esta operacion.
         $total = max(1, $summary['total']);
 
         return array_map(static fn (array $item): array => $item + [
@@ -246,10 +281,12 @@ class ReporteController extends Controller
      */
     private function elementosTipoCliente(array $report): array
     {
+        // Agrupa en $items los datos que se utilizaran en la siguiente operacion.
         $items = [
             ['label' => 'Mayoristas', 'count' => $report['mayoristas'], 'color' => '#7b55ed'],
             ['label' => 'Minoristas', 'count' => $report['minoristas'], 'color' => '#18b78d'],
         ];
+        // Guarda en $total el resultado necesario para continuar esta operacion.
         $total = max(1, $report['active']);
 
         return array_map(static fn (array $item): array => $item + [
@@ -268,8 +305,11 @@ class ReporteController extends Controller
      */
     public function export(FiltroReporteRequest $request, ExportadorTabular $exporter, RegistradorAuditoria $audit, string $format = 'csv'): Response|StreamedResponse
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $filters = $this->filtrosReporte($request->validated());
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $orders = $this->consultaVentas($request->validated())
             ->select(['id', 'usuario_id', 'subtotal', 'descuento', 'total', 'estado', 'creado_en'])
             ->orderBy('creado_en')
@@ -284,6 +324,7 @@ class ReporteController extends Controller
             $order->estado,
             $order->creado_en?->toDateTimeString(),
         ])->all();
+        // Guarda en $response el resultado necesario para continuar esta operacion.
         $response = $exporter->download($format, 'reporte-pedidos',
             ['id', 'usuario_id', 'subtotal', 'descuento', 'total', 'estado', 'creado_en'],
             $rows,
@@ -324,6 +365,7 @@ class ReporteController extends Controller
     private function consultaDetalles(array $filters): Builder
     {
         return DetallePedido::query()->whereHas('order', function (Builder $query) use ($filters): void {
+            // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
             $this->aplicarFiltrosFecha($query->whereNotIn('estado', ['Cancelado', 'Cancelada']), $filters);
         });
     }
@@ -334,9 +376,11 @@ class ReporteController extends Controller
      */
     private function periodo(array $filters): array
     {
+        // Guarda en $from el resultado necesario para continuar esta operacion.
         $from = isset($filters['desde'])
             ? CarbonImmutable::parse((string) $filters['desde'])->startOfDay()
             : CarbonImmutable::now()->subDays(29)->startOfDay();
+        // Guarda en $to el resultado necesario para continuar esta operacion.
         $to = isset($filters['hasta'])
             ? CarbonImmutable::parse((string) $filters['hasta'])->endOfDay()
             : CarbonImmutable::now()->endOfDay();
@@ -350,6 +394,7 @@ class ReporteController extends Controller
      */
     private function filtrosReporte(array $filters): array
     {
+        // Guarda en $period el resultado necesario para continuar esta operacion.
         $period = $this->periodo($filters);
 
         return [
@@ -364,18 +409,25 @@ class ReporteController extends Controller
      */
     private function tendenciaVentas(array $filters, CarbonImmutable $from, CarbonImmutable $to): array
     {
+        // Guarda en $rows el resultado necesario para continuar esta operacion.
         $rows = $this->consultaVentas($filters)
             ->selectRaw('DATE(creado_en) as day, COALESCE(SUM(total), 0) as sales, COUNT(*) as orders')
             ->groupByRaw('DATE(creado_en)')
             ->orderBy('day')
             ->get()
             ->keyBy('day');
+        // Guarda en $days el resultado necesario para continuar esta operacion.
         $days = $from->diffInDays($to) + 1;
+        // Agrupa en $points los datos que se utilizaran en la siguiente operacion.
         $points = [];
 
+        // Comprueba la condicion $days <= 31 antes de ejecutar este bloque.
         if ($days <= 31) {
+            // Repite este bloque usando la configuracion del ciclo $index = 0; $index < $days; $index++.
             for ($index = 0; $index < $days; $index++) {
+                // Guarda en $date el resultado necesario para continuar esta operacion.
                 $date = $from->addDays($index);
+                // Guarda en $row el resultado necesario para continuar esta operacion.
                 $row = $rows->get($date->toDateString());
                 $points[] = [
                     'label' => $date->format('d M'),
@@ -384,7 +436,9 @@ class ReporteController extends Controller
                 ];
             }
         } else {
+            // Recorre $rows as $row y procesa cada elemento de la coleccion.
             foreach ($rows as $row) {
+                // Guarda en $date el resultado necesario para continuar esta operacion.
                 $date = CarbonImmutable::parse((string) $row->day);
                 $points[] = [
                     'label' => $date->format('d M'),
@@ -394,7 +448,9 @@ class ReporteController extends Controller
             }
         }
 
+        // Guarda en $maxSales el resultado necesario para continuar esta operacion.
         $maxSales = max(1, ...array_column($points, 'sales'));
+        // Guarda en $maxOrders el resultado necesario para continuar esta operacion.
         $maxOrders = max(1, ...array_column($points, 'orders'));
 
         return array_map(static function (array $point) use ($maxSales, $maxOrders): array {
@@ -415,7 +471,9 @@ class ReporteController extends Controller
     private function ventasPorCategoria(Collection $details): array
     {
         $total = (float) $details->sum(static fn (DetallePedido $detail): float => (float) $detail->cantidad * (float) $detail->precio_unitario);
+        // Agrupa en $colors los datos que se utilizaran en la siguiente operacion.
         $colors = ['#2583f7', '#18b78d', '#139bc3', '#f35b3e', '#fb9a17', '#7b7cf6'];
+        // Guarda en $rows el resultado necesario para continuar esta operacion.
         $rows = $details
             ->groupBy(static fn (DetallePedido $detail): string => $detail->product?->category?->nombre ?? $detail->product?->categoria ?? 'Sin categoría')
             ->map(function (Collection $categoryDetails, string $name) use ($total): array {
@@ -444,6 +502,7 @@ class ReporteController extends Controller
         return $details
             ->groupBy('producto_id')
             ->map(static function (Collection $productDetails): array {
+                // Guarda en $product el resultado necesario para continuar esta operacion.
                 $product = $productDetails->first()?->product;
 
                 return [
@@ -495,12 +554,14 @@ class ReporteController extends Controller
      */
     private function resumenEstadosPedidos(array $filters): array
     {
+        // Guarda en $counts el resultado necesario para continuar esta operacion.
         $counts = $this->aplicarFiltrosFecha(
             Pedido::query()->selectRaw('estado, COUNT(*) as total'),
             $filters,
         )
             ->groupBy('estado')
             ->pluck('total', 'estado');
+        // Agrupa en $statuses los datos que se utilizaran en la siguiente operacion.
         $statuses = [
             ['key' => 'Pendiente', 'label' => 'Pendientes', 'color' => '#f7a719'],
             ['key' => 'En proceso', 'label' => 'En preparación', 'color' => '#2583f7'],
@@ -508,6 +569,7 @@ class ReporteController extends Controller
             ['key' => 'Entregado', 'label' => 'Entregados', 'color' => '#18b78d'],
             ['key' => 'Cancelado', 'label' => 'Cancelados', 'color' => '#f23c52'],
         ];
+        // Guarda en $items el resultado necesario para continuar esta operacion.
         $items = array_map(static function (array $status) use ($counts): array {
             return $status + ['count' => (int) $counts->get($status['key'], 0)];
         }, $statuses);
@@ -524,11 +586,13 @@ class ReporteController extends Controller
      */
     private function reporteClientes(array $filters): array
     {
+        // Prepara en $typeCounts la consulta que obtiene o modifica los registros necesarios.
         $typeCounts = Cliente::query()
             ->where('activo', true)
             ->selectRaw('tipo, COUNT(*) as total')
             ->groupBy('tipo')
             ->pluck('total', 'tipo');
+        // Guarda en $topCustomers el resultado necesario para continuar esta operacion.
         $topCustomers = $this->aplicarFiltrosFecha(
             Pedido::query()
                 ->whereNotIn('estado', ['Cancelado', 'Cancelada'])
@@ -585,7 +649,9 @@ class ReporteController extends Controller
      */
     private function reporteCampanias(CarbonImmutable $from, CarbonImmutable $to): array
     {
+        // Prepara en $periodQuery la consulta que obtiene o modifica los registros necesarios.
         $periodQuery = Campania::query()->whereBetween('creado_en', [$from, $to]);
+        // Guarda en $locationRows el resultado necesario para continuar esta operacion.
         $locationRows = (clone $periodQuery)
             ->selectRaw('ubicacion, COUNT(*) as total, COALESCE(SUM(vistas), 0) as views, COALESCE(SUM(clics), 0) as clicks')
             ->groupBy('ubicacion')
@@ -611,6 +677,7 @@ class ReporteController extends Controller
      */
     private function vistaActiva(FiltroReporteRequest $request): string
     {
+        // Guarda en $view el resultado necesario para continuar esta operacion.
         $view = $request->string('vista')->toString();
 
         return in_array($view, ['resumen', 'ventas', 'pedidos', 'productos', 'inventario', 'clientes', 'campanas'], true)
@@ -623,6 +690,7 @@ class ReporteController extends Controller
      */
     private function etiquetaPeriodo(FiltroReporteRequest $request, CarbonImmutable $from, CarbonImmutable $to): string
     {
+        // Comprueba la condicion ! $request->filled('desde') && ! $request->filled('hasta') antes de ejecutar este bloque.
         if (! $request->filled('desde') && ! $request->filled('hasta')) {
             return 'Últimos 30 días';
         }
@@ -635,7 +703,9 @@ class ReporteController extends Controller
      */
     private function aplicarFiltrosFecha(Builder $query, array $filters): Builder
     {
+        // Recorre ['desde' => '>=', 'hasta' => '<='] as $field => $operator y procesa cada elemento de la coleccion.
         foreach (['desde' => '>=', 'hasta' => '<='] as $field => $operator) {
+            // Comprueba la condicion ! isset($filters[$field]) antes de ejecutar este bloque.
             if (! isset($filters[$field])) {
                 continue;
             }

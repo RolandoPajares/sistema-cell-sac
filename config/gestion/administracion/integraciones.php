@@ -1,5 +1,6 @@
 <?php
 
+// Devuelve la configuracion que describe este modulo y sus elementos visuales.
 return [
     'key' => 'integraciones',
     'area' => 'Administración del sistema',
@@ -9,17 +10,21 @@ return [
     'record_singular' => 'integración',
     'record_plural' => 'integraciones',
     'mode' => 'crud',
+    // Define las tarjetas de indicadores que resumen el estado del modulo.
     'kpis' => [
         ['label' => 'Conectadas', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-link-45deg', 'tone' => 'green'],
         ['label' => 'Pendientes', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-hourglass-split', 'tone' => 'orange'],
         ['label' => 'Con error', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-exclamation-circle', 'tone' => 'red'],
         ['label' => 'Disponibles', 'value' => '—', 'helper' => 'Sin datos integrados', 'icon' => 'bi-grid-3x3-gap', 'tone' => 'blue'],
     ],
+    // Define los graficos y datos resumidos que se muestran en el analisis del modulo.
     'analytics' => [
         ['title' => 'Estado de conexiones', 'icon' => 'bi-plug', 'description' => 'Disponibilidad de servicios conectados.', 'type' => 'line', 'labels' => ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4', 'Semana 5']],
         ['title' => 'Integraciones por tipo', 'icon' => 'bi-pie-chart', 'description' => 'Distribución de servicios externos.', 'type' => 'donut', 'legend' => ['Pagos', 'Correo', 'Logística', 'Analítica']],
     ],
+    // Define los encabezados de la tabla principal.
     'columns' => ['Servicio', 'Tipo', 'Entorno', 'Estado', 'Última sincronización', 'Acciones'],
+    // Define los campos y reglas visuales del formulario del modulo.
     'fields' => [
         ['label' => 'Nombre del servicio', 'type' => 'text', 'placeholder' => 'Ej. Pasarela de pago', 'required' => true, 'wide' => false],
         ['label' => 'Tipo', 'type' => 'select', 'placeholder' => 'Seleccionar tipo', 'required' => true, 'wide' => false, 'options' => ['Pago', 'Correo', 'Logística', 'Analítica']],
@@ -27,5 +32,6 @@ return [
         ['label' => 'Estado', 'type' => 'select', 'placeholder' => 'Seleccionar estado', 'required' => true, 'wide' => false, 'options' => ['Conectada', 'Pendiente', 'Con error']],
         ['label' => 'Notas técnicas', 'type' => 'textarea', 'placeholder' => 'Información de configuración', 'required' => false, 'wide' => true],
     ],
+    // Define el contenido informativo y las acciones principales de la pantalla.
     'content' => ['title' => 'Gestión de integraciones', 'description' => 'Organiza servicios externos y prepara conexiones seguras para el sistema.', 'action' => 'Ver documentación', 'primary' => 'Nueva integración', 'summary' => ['Seguridad de integraciones', 'Pendientes de configuración', 'Historial de conexiones']],
 ];

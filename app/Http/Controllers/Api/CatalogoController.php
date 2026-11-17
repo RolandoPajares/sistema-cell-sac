@@ -26,7 +26,9 @@ class CatalogoController extends Controller
      */
     public function index(FiltroCatalogoRequest $request, ServicioCatalogo $catalogService): AnonymousResourceCollection
     {
+        // Guarda en $products el resultado necesario para continuar esta operacion.
         $products = $catalogService
+            // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
             ->query($request->validated())
             ->paginate($request->integer('per_page', 20))
             ->withQueryString();
@@ -45,6 +47,7 @@ class CatalogoController extends Controller
      */
     public function show(Request $request, Producto $product, ServicioCatalogo $catalogService): RecursoProducto
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($product->activo, 404);
 
         $product->load('category', 'images');

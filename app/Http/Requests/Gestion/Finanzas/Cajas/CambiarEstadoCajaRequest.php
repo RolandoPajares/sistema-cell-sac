@@ -18,6 +18,7 @@ class CambiarEstadoCajaRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         $authorization = app(ServicioAutorizacion::class);
@@ -37,7 +38,9 @@ class CambiarEstadoCajaRequest extends FormRequest
     public function messages(): array
     {
         return [
+            // Valida el campo 'activa.required' con las reglas definidas en la instruccion siguiente.
             'activa.required' => 'Indica el estado de la caja.',
+            // Valida el campo 'activa.boolean' con las reglas definidas en la instruccion siguiente.
             'activa.boolean' => 'El estado de la caja no es válido.',
         ];
     }

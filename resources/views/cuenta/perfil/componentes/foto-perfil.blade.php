@@ -1,8 +1,11 @@
+
 <section class="tc-profile-summary" aria-label="Resumen del perfil">
     <div class="tc-profile-identity">
         <button type="button" class="tc-profile-avatar-button" data-profile-photo-open aria-label="Ver foto de perfil">
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if ($photoUrl)
                 <img class="tc-profile-avatar tc-profile-avatar--image" src="{{ $photoUrl }}" alt="Fotografía de {{ $user->nombre }}">
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
             @else
                 <span class="tc-profile-avatar">{{ $initials ?: 'U' }}</span>
             @endif
@@ -17,12 +20,17 @@
     <div class="tc-profile-last-access"><i class="bi bi-calendar3" aria-hidden="true"></i><span><strong>Último acceso</strong><small>Sesión actual validada</small></span></div>
     <div class="tc-profile-completion"><div><strong>Perfil completo <i class="bi bi-info-circle" aria-hidden="true"></i></strong><b>{{ $profileCompletion }}%</b></div><span><i style="width: {{ $profileCompletion }}%"></i></span></div>
     <div class="tc-profile-photo-actions">
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
         <form method="post" action="{{ route($avatarRoute) }}" enctype="multipart/form-data" class="tc-profile-photo-form">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
             @csrf @method('PUT')
             <label class="tc-profile-photo-button"><i class="bi bi-camera" aria-hidden="true"></i> Cambiar fotografía<input type="file" name="foto_perfil" accept="image/jpeg,image/png,image/webp" data-profile-photo-input required></label>
         </form>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
         @if ($photoUrl)
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form method="post" action="{{ route($avatarDeleteRoute) }}" class="tc-profile-photo-delete-form">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                 @csrf @method('DELETE')
                 <button class="tc-profile-secondary" type="submit">Eliminar</button>
             </form>
@@ -33,8 +41,10 @@
 <dialog class="tc-profile-photo-dialog" data-profile-photo-dialog aria-labelledby="tc-profile-photo-title">
     <div class="tc-profile-photo-dialog-card">
         <header><h2 id="tc-profile-photo-title">Foto de perfil</h2><button type="button" data-profile-photo-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
         @if ($photoUrl)
             <img src="{{ $photoUrl }}" alt="Foto de {{ $user->nombre }}">
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
         @else
             <div class="tc-profile-photo-dialog-placeholder"><span class="tc-profile-avatar">{{ $initials ?: 'U' }}</span><p>Aún no has cargado una foto de perfil.</p></div>
         @endif

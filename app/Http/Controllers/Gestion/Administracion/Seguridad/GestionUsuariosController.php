@@ -39,19 +39,28 @@ class GestionUsuariosController extends Controller
      */
     public function index(Request $request): View
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(app(ServicioAutorizacion::class)->allowsGlobal($request->user(), 'gestion.seguridad.consultar'), 403);
+        // Guarda en $filters el resultado necesario para continuar esta operacion.
         $filters = $this->filtros($request);
+        // Guarda en $hasAccountStatus el resultado necesario para continuar esta operacion.
         $hasAccountStatus = Schema::hasColumn('usuarios', 'activo');
+        // Guarda en $users el resultado necesario para continuar esta operacion.
         $users = $this->consultaUsuarios($filters)
             ->with(['customer:id,usuario_id,documento,razon_social,tipo,ciudad,activo', 'rolesVigentes', 'rolesPorSedeVigentes'])
             ->orderByDesc('creado_en')
             ->orderByDesc('id')
             ->paginate($filters['por_pagina'])
             ->withQueryString();
+        // Guarda en $codigosRoles el resultado necesario para continuar esta operacion.
         $codigosRoles = $this->codigosRoles();
+        // Prepara en $totalUsers la consulta que obtiene o modifica los registros necesarios.
         $totalUsers = User::query()->count();
+        // Guarda en $roleLabels el resultado necesario para continuar esta operacion.
         $roleLabels = $this->roleLabels($codigosRoles);
+        // Guarda en $distribucionRoles el resultado necesario para continuar esta operacion.
         $distribucionRoles = $this->distribucionRoles();
+        // Prepara en $recentUsers la consulta que obtiene o modifica los registros necesarios.
         $recentUsers = User::query()
             ->with(['customer:id,usuario_id,ciudad', 'rolesVigentes', 'rolesPorSedeVigentes'])
             ->latest('creado_en')
@@ -59,6 +68,7 @@ class GestionUsuariosController extends Controller
             ->limit(5)
             ->get(['id', 'nombre', 'correo', 'rol', 'creado_en']);
 
+        // Devuelve la vista 'gestion.administracion.seguridad.usuarios.listar' con los datos preparados por este controlador.
         return view('gestion.administracion.seguridad.usuarios.listar', [
             'users' => $users,
             'roles' => $codigosRoles,
@@ -99,14 +109,20 @@ class GestionUsuariosController extends Controller
      */
     public function export(Request $request, string $format, ExportadorTabular $exporter, RegistradorAuditoria $audit): Response|StreamedResponse
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(app(ServicioAutorizacion::class)->allowsGlobal($request->user(), 'gestion.seguridad.consultar'), 403);
 
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(in_array($format, ['csv', 'excel', 'pdf'], true), 422, 'Formato de exportación no permitido.');
+        // Guarda en $filters el resultado necesario para continuar esta operacion.
         $filters = $this->filtros($request);
+        // Guarda en $users el resultado necesario para continuar esta operacion.
         $users = $this->consultaUsuarios($filters)
             ->with(['customer:id,usuario_id,documento,razon_social,tipo,ciudad', 'rolesVigentes', 'rolesPorSedeVigentes'])
             ->orderByDesc('creado_en')->orderByDesc('id')->limit(5000)->get();
+        // Guarda en $rows el resultado necesario para continuar esta operacion.
         $rows = $users->map(function (User $user): array {
+            // Guarda en $roles el resultado necesario para continuar esta operacion.
             $roles = $user->rolesVigentes->concat($user->rolesPorSedeVigentes)->pluck('nombre')->unique()->join(', ');
 
             return [
@@ -115,10 +131,12 @@ class GestionUsuariosController extends Controller
                 $roles !== '' ? $roles : 'Sin rol vigente',
                 $user->customer?->tipo ?? 'Administrativo',
                 $user->customer?->ciudad ?? '',
+                // Ejecuta la consulta o modificacion de base de datos indicada en la instruccion siguiente.
                 Schema::hasColumn('usuarios', 'activo') ? ($user->activo ? 'Activo' : 'Inactivo') : 'Sin control de estado',
                 $user->creado_en?->format('Y-m-d H:i:s'),
             ];
         })->all();
+        // Guarda en $response el resultado necesario para continuar esta operacion.
         $response = $exporter->download($format, 'usuarios-'.now()->format('Ymd'),
             ['Nombre', 'Correo', 'Roles', 'Tipo', 'Ciudad', 'Estado', 'Registrado'],
             $rows,
@@ -148,13 +166,20 @@ class GestionUsuariosController extends Controller
      */
     public function store(GuardarUsuarioRequest $request, ServicioDelegacion $delegacion, RegistradorAuditoria $audit): RedirectResponse
     {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $data = $request->validated();
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(app(ServicioAutorizacion::class)->isSeeded(), 503, 'El control de acceso aún no está inicializado.');
+        // Prepara en $role la consulta que obtiene o modifica los registros necesarios.
         $role = Rol::query()->where('codigo', $data['rol'])->where('activo', true)->first();
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_if($role === null, 422, 'El rol seleccionado ya no está disponible.');
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($delegacion->puedeAsignarRol($request->user(), $role), 403, 'No puedes crear una cuenta con privilegios superiores a los tuyos.');
 
+        // Prepara en $user la consulta que obtiene o modifica los registros necesarios.
         $user = DB::transaction(function () use ($data, $role, $request, $audit): User {
+            // Agrupa en $attributes los datos que se utilizaran en la siguiente operacion.
             $attributes = [
                 'nombre' => $data['nombre'],
                 'correo' => mb_strtolower($data['correo']),
@@ -163,18 +188,27 @@ class GestionUsuariosController extends Controller
             ];
             $attributes['activo'] = true;
 
+            // Prepara en $user la consulta que obtiene o modifica los registros necesarios.
             $user = User::query()->create($attributes);
 
+            // Comprueba la condicion $role !== null antes de ejecutar este bloque.
             if ($role !== null) {
+                // Comprueba la condicion $role->alcance_permitido === 'sede' antes de ejecutar este bloque.
                 if ($role->alcance_permitido === 'sede') {
+                    // Obtiene en $siteId la informacion de la solicitud o del usuario actual.
                     $siteId = app(ServicioAutorizacion::class)->operationSite($request->user())['sede_id'];
+                    // Comprueba la condicion $siteId === null antes de ejecutar este bloque.
                     if ($siteId === null) {
+                        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
                         abort(422, 'No existe una sede interna autorizada para asignar este rol.');
                     }
 
+                    // Prepara en $site la consulta que obtiene o modifica los registros necesarios.
                     $site = Sede::query()->whereKey($siteId)->where('activa', true)->firstOrFail();
+                    // Detiene la solicitud si se cumple la validacion de seguridad indicada.
                     abort_unless(app(ServicioAutorizacion::class)->allowsRecord($request->user(), 'gestion.seguridad.asignar', (int) $site->empresa_id, $siteId), 403);
 
+                    // Ejecuta la consulta o modificacion de base de datos indicada en la instruccion siguiente.
                     DB::table('usuarios_sedes_roles')->insert([
                         'usuario_id' => $user->getKey(),
                         'sede_id' => $siteId,
@@ -184,6 +218,7 @@ class GestionUsuariosController extends Controller
                         'activo' => true,
                     ]);
                 } else {
+                    // Ejecuta la consulta o modificacion de base de datos indicada en la instruccion siguiente.
                     DB::table('usuarios_roles')->insert([
                         'usuario_id' => $user->getKey(),
                         'rol_id' => $role->getKey(),
@@ -195,6 +230,7 @@ class GestionUsuariosController extends Controller
 
             }
 
+            // Comprueba la condicion str_starts_with($data['rol'], 'cliente_') antes de ejecutar este bloque.
             if (str_starts_with($data['rol'], 'cliente_')) {
                 Cliente::query()->create([
                     'usuario_id' => $user->getKey(),
@@ -217,6 +253,7 @@ class GestionUsuariosController extends Controller
             return $user;
         });
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Cuenta creada. La contraseña no se volverá a mostrar.');
     }
 
@@ -231,29 +268,40 @@ class GestionUsuariosController extends Controller
      */
     public function updateStatus(CambiarEstadoUsuarioRequest $request, User $user, ServicioDelegacion $delegacion, RegistradorAuditoria $audit): RedirectResponse
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(Schema::hasColumn('usuarios', 'activo'), 503, 'El bloqueo de cuentas requiere el esquema de seguridad de usuarios.');
+        // Guarda en $active el resultado necesario para continuar esta operacion.
         $active = $request->boolean('activo');
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_if(! $active && $user->is($request->user()), 422, 'No puedes desactivar tu propia cuenta desde esta sesión.');
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($delegacion->puedeAdministrarUsuario($request->user(), $user), 403, 'No puedes administrar una cuenta con privilegios superiores a los tuyos.');
 
+        // Ejecuta la consulta o modificacion de base de datos indicada en la instruccion siguiente.
         DB::transaction(function () use ($user, $active, $request, $audit, $delegacion): void {
+            // Prepara en $user la consulta que obtiene o modifica los registros necesarios.
             $user = User::query()->lockForUpdate()->findOrFail($user->getKey());
 
+            // Comprueba la condicion ! $active && $user->can('gestion.seguridad.consultar') antes de ejecutar este bloque.
             if (! $active && $user->can('gestion.seguridad.consultar')) {
                 $delegacion->bloquearAdministradoresGlobales();
                 $user->refresh();
+                // Detiene la solicitud si se cumple la validacion de seguridad indicada.
                 abort_if($delegacion->esUltimoAdministradorGlobal($user), 422, 'No se puede desactivar el último administrador global autorizado.');
             }
 
             $before = ['activo' => (bool) $user->activo, 'bloqueado_hasta' => $user->bloqueado_hasta?->toIso8601String()];
             $user->forceFill(['activo' => $active, 'bloqueado_hasta' => null])->save();
+            // Comprueba la condicion ! $active && Schema::hasTable('sesiones_usuarios') antes de ejecutar este bloque.
             if (! $active && Schema::hasTable('sesiones_usuarios')) {
+                // Ejecuta la consulta o modificacion de base de datos indicada en la instruccion siguiente.
                 DB::table('sesiones_usuarios')->where('usuario_id', $user->getKey())->whereNull('revocada_en')
                     ->update(['revocada_en' => now(), 'actualizado_en' => now()]);
             }
             $audit->record($request->user()->getKey(), $active ? 'reactivar_usuario' : 'desactivar_usuario', 'usuarios', $user->getKey(), $before, ['activo' => $active], $request->ip());
         });
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', $active ? 'La cuenta fue reactivada.' : 'La cuenta fue desactivada y sus sesiones revocadas.');
     }
 
@@ -268,13 +316,18 @@ class GestionUsuariosController extends Controller
      */
     public function update(ActualizarUsuarioRequest $request, User $user, ServicioDelegacion $delegacion, RegistradorAuditoria $audit): RedirectResponse
     {
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($delegacion->puedeAdministrarUsuario($request->user(), $user), 403, 'No puedes editar una cuenta con privilegios superiores a los tuyos.');
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $data = $request->validated();
 
+        // Ejecuta la consulta o modificacion de base de datos indicada en la instruccion siguiente.
         DB::transaction(function () use ($data, $request, $user, $audit): void {
+            // Prepara en $locked la consulta que obtiene o modifica los registros necesarios.
             $locked = User::query()->lockForUpdate()->findOrFail($user->getKey());
             $before = ['nombre' => $locked->nombre, 'correo' => $locked->correo];
             $attributes = ['nombre' => $data['nombre'], 'correo' => mb_strtolower($data['correo'])];
+            // Comprueba la condicion filled($data['password'] ?? null) antes de ejecutar este bloque.
             if (filled($data['password'] ?? null)) {
                 $attributes['password'] = $data['password'];
             }
@@ -283,6 +336,7 @@ class GestionUsuariosController extends Controller
             $audit->record($request->user()->getKey(), 'user.updated', 'usuarios', $locked->getKey(), $before, $after, $request->ip());
         }, 3);
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'La cuenta fue actualizada correctamente.');
     }
 
@@ -314,6 +368,7 @@ class GestionUsuariosController extends Controller
      */
     private function distribucionRoles(): Collection
     {
+        // Prepara en $global la consulta que obtiene o modifica los registros necesarios.
         $global = DB::table('usuarios_roles as asignacion')
             ->join('roles', 'roles.id', '=', 'asignacion.rol_id')
             ->where('roles.activo', true)
@@ -322,6 +377,7 @@ class GestionUsuariosController extends Controller
             ->where(fn ($query) => $query->whereNull('asignacion.vigente_hasta')->orWhere('asignacion.vigente_hasta', '>', now()))
             ->select('roles.codigo as rol', 'asignacion.usuario_id');
 
+        // Prepara en $sites la consulta que obtiene o modifica los registros necesarios.
         $sites = DB::table('usuarios_sedes_roles as asignacion')
             ->join('roles', 'roles.id', '=', 'asignacion.rol_id')
             ->join('sedes', 'sedes.id', '=', 'asignacion.sede_id')
@@ -346,8 +402,10 @@ class GestionUsuariosController extends Controller
      */
     private function prepararPresentacionUsuarios(Collection $accounts): array
     {
+        // Agrupa en $presentation los datos que se utilizaran en la siguiente operacion.
         $presentation = [];
 
+        // Recorre $accounts->values() as $index => $account y procesa cada elemento de la coleccion.
         foreach ($accounts->values() as $index => $account) {
             $presentation[$account->getKey()] = [
                 'initials' => $this->inicialesPara($account->nombre),
@@ -369,6 +427,7 @@ class GestionUsuariosController extends Controller
     private function prepararDistribucionRoles(Collection $distribution): array
     {
         return $distribution->values()->map(function (object $item): object {
+            // Guarda en $total el resultado necesario para continuar esta operacion.
             $total = (int) $item->total;
 
             return (object) [
@@ -405,11 +464,17 @@ class GestionUsuariosController extends Controller
     /** @return array{buscar:?string,rol:?string,estado:?string,ciudad:?string,fecha:?string,por_pagina:int} */
     private function filtros(Request $request): array
     {
+        // Guarda en $search el resultado necesario para continuar esta operacion.
         $search = trim($request->string('buscar')->toString());
+        // Guarda en $role el resultado necesario para continuar esta operacion.
         $role = trim($request->string('rol')->toString());
+        // Guarda en $status el resultado necesario para continuar esta operacion.
         $status = trim($request->string('estado')->toString());
+        // Guarda en $city el resultado necesario para continuar esta operacion.
         $city = trim($request->string('ciudad')->toString());
+        // Guarda en $date el resultado necesario para continuar esta operacion.
         $date = trim($request->string('fecha')->toString());
+        // Guarda en $perPage el resultado necesario para continuar esta operacion.
         $perPage = $request->integer('por_pagina', 10);
 
         return [
@@ -425,7 +490,9 @@ class GestionUsuariosController extends Controller
     /** @return array<int,string> */
     private function codigosRoles(): array
     {
+        // Comprueba la condicion Schema::hasTable('roles') antes de ejecutar este bloque.
         if (Schema::hasTable('roles')) {
+            // Prepara en $configuredRoles la consulta que obtiene o modifica los registros necesarios.
             $configuredRoles = DB::table('roles')->where('activo', true)->orderBy('codigo')->pluck('codigo')->all();
 
             return $configuredRoles;

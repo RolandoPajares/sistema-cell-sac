@@ -15,8 +15,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 class Pedido extends Model
 {
+    // Usa la tabla 'pedidos' como origen de los registros de este modelo.
     protected $table = 'pedidos';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['usuario_id', 'cliente_id', 'cliente_invitado_nombre', 'cliente_invitado_correo', 'cliente_invitado_telefono', 'token_acceso_publico', 'direccion_entrega_snapshot', 'cotizacion_id', 'canal', 'tipo_venta', 'observaciones', 'total', 'subtotal', 'descuento', 'cupon_id', 'cupon_codigo', 'estado', 'creado_en', 'empresa_id', 'sede_id', 'almacen_id'];
 
     public $timestamps = false;

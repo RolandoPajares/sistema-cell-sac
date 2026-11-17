@@ -20,6 +20,7 @@ class AprobarReembolsoRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return $this->user() instanceof User
@@ -36,7 +37,9 @@ class AprobarReembolsoRequest extends FormRequest
     public function messages(): array
     {
         return [
+            // Valida el campo 'confirmacion.required' con las reglas definidas en la instruccion siguiente.
             'confirmacion.required' => 'Confirma la aprobación antes de continuar.',
+            // Valida el campo 'confirmacion.in' con las reglas definidas en la instruccion siguiente.
             'confirmacion.in' => 'La confirmación no es válida.',
         ];
     }

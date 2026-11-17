@@ -28,15 +28,23 @@ final class PersonalSedeController extends Controller
      */
     public function listar(FiltroPersonalSedeRequest $request, ServicioAutorizacion $autorizacion): View
     {
+        // Obtiene en $usuario la informacion de la solicitud o del usuario actual.
         $usuario = $request->user();
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($usuario instanceof User, 403);
 
+        // Guarda en $idsSede el resultado necesario para continuar esta operacion.
         $idsSede = $autorizacion->authorizedSiteIds($usuario, 'gestion.organizacion.consultar');
+        // Guarda en $consultaBase el resultado necesario para continuar esta operacion.
         $consultaBase = $this->consultaAsignaciones($idsSede);
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $filtros = $request->validated();
+        // Guarda en $consulta el resultado necesario para continuar esta operacion.
         $consulta = clone $consultaBase;
 
+        // Comprueba la condicion filled($filtros['buscar'] ?? null) antes de ejecutar este bloque.
         if (filled($filtros['buscar'] ?? null)) {
+            // Guarda en $buscar el resultado necesario para continuar esta operacion.
             $buscar = trim((string) $filtros['buscar']);
             $consulta->where(static function (Builder $subconsulta) use ($buscar): void {
                 $subconsulta->where('usuario.nombre', 'like', '%'.$buscar.'%')
@@ -46,13 +54,17 @@ final class PersonalSedeController extends Controller
             });
         }
 
+        // Comprueba la condicion filled($filtros['sede_id'] ?? null) antes de ejecutar este bloque.
         if (filled($filtros['sede_id'] ?? null)) {
             $consulta->where('asignacion.sede_id', (int) $filtros['sede_id']);
         }
 
+        // Comprueba la condicion ($filtros['estado'] ?? null) === 'vigente' antes de ejecutar este bloque.
         if (($filtros['estado'] ?? null) === 'vigente') {
+            // Solicita al servicio o dependencia la operacion indicada en esta instruccion.
             $this->restringirAsignacionesVigentes($consulta, now());
         } elseif (($filtros['estado'] ?? null) === 'no_vigente') {
+            // Guarda en $ahora el resultado necesario para continuar esta operacion.
             $ahora = now();
             $consulta->where(static function (Builder $subconsulta) use ($ahora): void {
                 $subconsulta->where('asignacion.activo', false)
@@ -67,6 +79,7 @@ final class PersonalSedeController extends Controller
             });
         }
 
+        // Guarda en $asignaciones el resultado necesario para continuar esta operacion.
         $asignaciones = $consulta
             ->select([
                 'asignacion.usuario_id', 'asignacion.sede_id', 'asignacion.rol_id',
@@ -77,6 +90,7 @@ final class PersonalSedeController extends Controller
             ])
             ->orderBy('sede.nombre')->orderBy('usuario.nombre')->orderBy('asignacion.rol_id')
             ->paginate((int) ($filtros['por_pagina'] ?? 15))->withQueryString();
+        // Guarda en $ahora el resultado necesario para continuar esta operacion.
         $ahora = now();
         $asignaciones->through(static function (object $asignacion) use ($ahora): object {
             $asignacion->vigente = (bool) $asignacion->asignacion_activa
@@ -89,11 +103,16 @@ final class PersonalSedeController extends Controller
             return $asignacion;
         });
 
+        // Guarda en $resumen el resultado necesario para continuar esta operacion.
         $resumen = $this->resumenPersonal($consultaBase, $ahora);
+        // Guarda en $personalPorSede el resultado necesario para continuar esta operacion.
         $personalPorSede = $this->personalPorSede($consultaBase, $ahora);
+        // Guarda en $personalPorRol el resultado necesario para continuar esta operacion.
         $personalPorRol = $this->personalPorRol($consultaBase, $ahora);
+        // Prepara en $sedesAutorizadas la consulta que obtiene o modifica los registros necesarios.
         $sedesAutorizadas = Sede::query()->whereIn('id', $idsSede)->orderBy('nombre')->get(['id', 'codigo', 'nombre']);
 
+        // Devuelve la vista 'gestion.administracion.seguridad.personal.listar' con los datos preparados por este controlador.
         return view('gestion.administracion.seguridad.personal.listar', [
             'asignaciones' => $asignaciones,
             'filtros' => $filtros,
@@ -137,7 +156,9 @@ final class PersonalSedeController extends Controller
     /** @return array{personal_total:int,asignaciones_vigentes:int,sedes_con_personal:int,roles_vigentes:int} */
     private function resumenPersonal(Builder $consultaBase, Carbon $ahora): array
     {
+        // Guarda en $condicionVigente el resultado necesario para continuar esta operacion.
         $condicionVigente = '(asignacion.activo = 1 AND usuario.activo = 1 AND rol.activo = 1 AND sede.activa = 1 AND empresa.activo = 1 AND (asignacion.vigente_hasta IS NULL OR asignacion.vigente_hasta > ?))';
+        // Guarda en $resumen el resultado necesario para continuar esta operacion.
         $resumen = (clone $consultaBase)
             ->selectRaw('COUNT(DISTINCT usuario.id) AS personal_total')
             ->selectRaw('COUNT(CASE WHEN '.$condicionVigente.' THEN asignacion.usuario_id END) AS asignaciones_vigentes', [$ahora])

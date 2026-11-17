@@ -1,8 +1,12 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Detalle de reembolso')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-reembolsos')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section class="admin-finance-module admin-finance-module--reembolsos" data-finance-module="reembolsos">
     <header class="admin-finance-header">
@@ -20,7 +24,9 @@
             <div class="admin-finance-actions"><a class="admin-finance-button admin-finance-button--secondary" href="{{ route('management.refunds') }}">Volver al listado</a></div>
         </div>
     </header>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if (session('status')) <p class="alert alert-success" role="status">{{ session('status') }}</p> @endif
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
     @foreach ($errors->all() as $error) <p class="text-danger" role="alert">{{ $error }}</p> @endforeach
     <section class="admin-finance-table-card">
         <header class="admin-finance-card-header"><div><h2>Datos de la solicitud</h2></div></header>
@@ -38,22 +44,30 @@
             </table>
         </div>
     </section>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if ($canApprove)
         <section class="admin-finance-table-card">
             <header class="admin-finance-card-header"><div><h2>Aprobación administrativa</h2><p>Se comprobará la evidencia del cobro original. No se enviará dinero.</p></div></header>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form method="POST" action="{{ route('management.refunds.approve', $record) }}" class="admin-finance-filters">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                 @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
                 @method('PATCH')
                 <input type="hidden" name="confirmacion" value="aprobar">
                 <button class="admin-finance-button admin-finance-button--primary" type="submit" data-confirm="¿Aprobar esta solicitud? Esta acción no envía dinero.">Aprobar solicitud</button>
             </form>
         </section>
     @endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if ($canCancel)
         <section class="admin-finance-table-card">
             <header class="admin-finance-card-header"><div><h2>Anular solicitud pendiente</h2></div></header>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form method="POST" action="{{ route('management.refunds.cancel', $record) }}" class="admin-finance-filters">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                 @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
                 @method('PATCH')
                 <label>Motivo de anulación
                     <input type="text" name="motivo" value="{{ old('motivo') }}" minlength="10" maxlength="500" required>
@@ -68,6 +82,7 @@
             <table class="admin-finance-table">
                 <thead><tr><th>Fecha</th><th>Acción</th><th>Usuario</th></tr></thead>
                 <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @forelse ($history as $event)
                         <tr><td>{{ $event->creado_en?->format('d/m/Y H:i') }}</td><td>{{ $event->accion }}</td><td>{{ $event->user?->nombre ?? 'Usuario no disponible' }}</td></tr>
                     @empty

@@ -5,9 +5,13 @@
 --}}
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Editar cotización')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-cotizaciones')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <main class="cotizaciones-page">
     <header class="cotizaciones-hero">
@@ -23,8 +27,11 @@
     </header>
 
     {{-- El formulario conserva cliente, líneas y observaciones cargados desde MariaDB. --}}
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
     <form method="POST" action="{{ route('management.quotations.update', $quotation) }}" class="cotizaciones-form" data-quotation-form>
+{{-- proteccion CSRF que valida el origen del formulario. --}}
         @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
         @method('PUT')
 
         {{-- Cliente seleccionado; el servicio vuelve a comprobar empresa, tipo y estado. --}}
@@ -32,12 +39,14 @@
             <legend>1. Datos del cliente</legend>
             <label for="cliente_id">Cliente</label>
             <select id="cliente_id" name="cliente_id" required>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @foreach ($customers as $customer)
                     <option value="{{ $customer->id }}" @selected((int) old('cliente_id', $quotation->cliente_id) === (int) $customer->id)>
                         {{ $customer->nombre_contacto ?: $customer->razon_social }} · {{ $customer->documento }}
                     </option>
                 @endforeach
             </select>
+{{-- mensaje de validacion para el campo que contiene errores. --}}
             @error('cliente_id')<small class="form-error">{{ $message }}</small>@enderror
         </fieldset>
 
@@ -45,10 +54,12 @@
         <fieldset class="cotizaciones-form-section">
             <legend>2. Productos o servicios</legend>
             <div class="cotizaciones-items" data-quotation-items>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                 @foreach ($quotation->details as $index => $detail)
                     <div class="cotizaciones-item" data-quotation-item>
                         <label>Producto
                             <select name="items[{{ $index }}][producto_id]" required data-product-select>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                                 @foreach ($products as $product)
                                     <option value="{{ $product->id }}" data-price="{{ $product->effective_price }}" @selected((int) old("items.$index.producto_id", $detail->producto_id) === (int) $product->id)>{{ $product->nombre }} · S/ {{ number_format((float) $product->effective_price, 2) }}</option>
                                 @endforeach
@@ -70,6 +81,7 @@
             <legend>3. Condiciones y observaciones</legend>
             <label for="notas">Observaciones</label>
             <textarea id="notas" name="notas" maxlength="500" rows="4">{{ old('notas', $quotation->notas) }}</textarea>
+{{-- mensaje de validacion para el campo que contiene errores. --}}
             @error('notas')<small class="form-error">{{ $message }}</small>@enderror
         </fieldset>
 
@@ -82,6 +94,7 @@
 </main>
 @endsection
 
+{{-- bloque de estilos o scripts para el lugar reservado por la plantilla. --}}
 @push('scripts')
     @vite('resources/js/gestion/comercial/cotizaciones/formulario.js')
 @endpush

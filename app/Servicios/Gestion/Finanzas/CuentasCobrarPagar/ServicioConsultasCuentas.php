@@ -29,17 +29,23 @@ class ServicioConsultasCuentas
      */
     public function obtenerVista(User $usuario): array
     {
+        // Guarda en $permiso el resultado necesario para continuar la operacion.
         $permiso = 'gestion.pagos.consultar';
         $this->autorizacion->assertAllowed($usuario, $permiso);
+        // Guarda en $sedes el resultado necesario para continuar la operacion.
         $sedes = $this->autorizacion->authorizedSiteIds($usuario, $permiso);
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($sedes === []) {
             throw new HttpException(403, 'No tienes sedes autorizadas para consultar estas cuentas.');
         }
+        // Prepara en $monedasAutorizadas la consulta que obtiene o modifica los datos necesarios.
+        // ORM: este servicio aplica ORM para consultar o modificar datos en la base de datos.
         $monedasAutorizadas = DB::table('sedes')->join('empresas', 'empresas.id', '=', 'sedes.empresa_id')
             ->whereIn('sedes.id', $sedes)->where('sedes.activa', true)->where('empresas.activo', true)
             ->distinct()->orderBy('empresas.moneda_base')->pluck('empresas.moneda_base')->all();
 
+        // Prepara en $aplicacionesCobro la consulta que obtiene o modifica los datos necesarios.
         $aplicacionesCobro = DB::table('aplicaciones_cobro as aplicaciones')
             ->join('pagos as pagos_aplicados', 'pagos_aplicados.id', '=', 'aplicaciones.pago_id')
             ->select('aplicaciones.cuenta_cobrar_id')
@@ -48,6 +54,7 @@ class ServicioConsultasCuentas
             ->where('pagos_aplicados.estado', 'registrado')
             ->groupBy('aplicaciones.cuenta_cobrar_id');
 
+        // Prepara en $porCobrar la consulta que obtiene o modifica los datos necesarios.
         $porCobrar = DB::table('cuentas_por_cobrar as cuentas')
             ->join('documentos_electronicos as documentos', 'documentos.id', '=', 'cuentas.documento_electronico_id')
             ->join('sedes as sedes_documento', 'sedes_documento.id', '=', 'documentos.sede_id')
@@ -63,10 +70,12 @@ class ServicioConsultasCuentas
             ->map(fn (object $cuenta): array => $this->formatearFila(
                 $cuenta,
                 'Por cobrar',
+                // Delega esta parte de la operacion al servicio o dependencia correspondiente.
                 $this->nombreReceptor($cuenta->receptor_historico),
                 trim($cuenta->serie.'-'.str_pad((string) $cuenta->correlativo, 8, '0', STR_PAD_LEFT)),
             ));
 
+        // Prepara en $aplicacionesPago la consulta que obtiene o modifica los datos necesarios.
         $aplicacionesPago = DB::table('aplicaciones_pago as aplicaciones')
             ->join('pagos as pagos_aplicados', 'pagos_aplicados.id', '=', 'aplicaciones.pago_id')
             ->select('aplicaciones.cuenta_pagar_id')
@@ -75,6 +84,7 @@ class ServicioConsultasCuentas
             ->where('pagos_aplicados.estado', 'registrado')
             ->groupBy('aplicaciones.cuenta_pagar_id');
 
+        // Prepara en $porPagar la consulta que obtiene o modifica los datos necesarios.
         $porPagar = DB::table('cuentas_por_pagar as cuentas')
             ->join('compras', 'compras.id', '=', 'cuentas.compra_id')
             ->join('sedes as sedes_compra', 'sedes_compra.id', '=', 'compras.sede_id')
@@ -96,13 +106,16 @@ class ServicioConsultasCuentas
                 $cuenta->numero_referencia ?: 'Compra #'.$cuenta->id,
             ));
 
+        // Guarda en $filas el resultado necesario para continuar la operacion.
         $filas = $porCobrar->concat($porPagar)->sortByDesc('fecha_orden')->values();
+        // Guarda en $hoy el resultado necesario para continuar la operacion.
         $hoy = Carbon::today();
         $cobrosVigentes = $porCobrar->filter(fn (array $fila): bool => $fila['saldo'] > 0 && $fila['vence_orden'] >= $hoy->toDateString());
         $cobrosVencidos = $porCobrar->filter(fn (array $fila): bool => $fila['saldo'] > 0 && $fila['vence_orden'] < $hoy->toDateString());
         $pagosVigentes = $porPagar->filter(fn (array $fila): bool => $fila['saldo'] > 0 && $fila['vence_orden'] >= $hoy->toDateString());
         $pagosVencidos = $porPagar->filter(fn (array $fila): bool => $fila['saldo'] > 0 && $fila['vence_orden'] < $hoy->toDateString());
 
+        // Guarda en $totalCuentasCobrar el resultado necesario para continuar la operacion.
         $totalCuentasCobrar = max(1, $porCobrar->count());
 
         return [
@@ -116,9 +129,13 @@ class ServicioConsultasCuentas
                 'cuenta_id' => $fila['id'], 'tipo_cuenta' => $fila['tipo'], 'origen_id' => $fila['origen_id'],
             ])->all(),
             'metricas' => [
+                // Delega esta parte de la operacion al servicio o dependencia correspondiente.
                 $this->metricaReal('Por cobrar vigente', $cobrosVigentes, 'bi-person-check', 'azul', $monedasAutorizadas),
+                // Delega esta parte de la operacion al servicio o dependencia correspondiente.
                 $this->metricaReal('Por cobrar vencido', $cobrosVencidos, 'bi-exclamation-triangle', 'rojo', $monedasAutorizadas),
+                // Delega esta parte de la operacion al servicio o dependencia correspondiente.
                 $this->metricaReal('Por pagar próximo', $pagosVigentes, 'bi-calendar3', 'verde', $monedasAutorizadas),
+                // Delega esta parte de la operacion al servicio o dependencia correspondiente.
                 $this->metricaReal('Por pagar vencido', $pagosVencidos, 'bi-exclamation-circle', 'ambar', $monedasAutorizadas),
             ],
             'paneles' => [
@@ -132,8 +149,11 @@ class ServicioConsultasCuentas
     /** @return array<string, mixed> */
     private function formatearFila(object $cuenta, string $tipo, string $tercero, string $documento): array
     {
+        // Guarda en $saldo el resultado necesario para continuar la operacion.
         $saldo = max(0, round((float) $cuenta->monto_original - (float) $cuenta->total_aplicado, 2));
+        // Guarda en $fechaVencimiento el resultado necesario para continuar la operacion.
         $fechaVencimiento = (string) $cuenta->vence_en;
+        // Guarda en $estado el resultado necesario para continuar la operacion.
         $estado = $saldo <= 0 ? 'Pagada' : ($fechaVencimiento < Carbon::today()->toDateString() ? 'Vencida' : ((float) $cuenta->total_aplicado > 0 ? 'Parcial' : (string) $cuenta->estado));
 
         return [
@@ -156,7 +176,9 @@ class ServicioConsultasCuentas
      */
     private function nombreReceptor(string $datos): string
     {
+        // Guarda en $receptor el resultado necesario para continuar la operacion.
         $receptor = json_decode($datos, true);
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! is_array($receptor)) {
             return '';
         }
@@ -175,6 +197,7 @@ class ServicioConsultasCuentas
     /** @param array<int, string> $monedasAutorizadas */
     private function importeAgrupado(Collection $cuentas, array $monedasAutorizadas): string
     {
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($cuentas->isEmpty()) {
             return collect($monedasAutorizadas)->map(fn (string $moneda): string => $this->formatearImporte(0, $moneda))->implode(' · ');
         }
@@ -219,7 +242,9 @@ class ServicioConsultasCuentas
      */
     private function gradienteSaldos(int $vigentes, int $vencidos, int $pagados, int $total): string
     {
+        // Guarda en $porcentajeVigentes el resultado necesario para continuar la operacion.
         $porcentajeVigentes = $this->porcentaje($vigentes, $total);
+        // Guarda en $porcentajeVencidos el resultado necesario para continuar la operacion.
         $porcentajeVencidos = $porcentajeVigentes + $this->porcentaje($vencidos, $total);
 
         return 'conic-gradient(#0950c6 0 '.$porcentajeVigentes.'%, #f34d61 '.$porcentajeVigentes.'% '.$porcentajeVencidos.'%, #29b66a '.$porcentajeVencidos.'% 100%)';

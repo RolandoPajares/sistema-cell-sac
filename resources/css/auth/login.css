@@ -1,16 +1,22 @@
+/* Define los estilos visuales del modulo o componente 'login'. */
+
+/* Aplica estos estilos al bloque '.auth-wrap'. */
 .auth-wrap {
   width: min(520px, 92%);
   margin: 60px auto;
 }
 
+/* Aplica estos estilos al bloque '.auth-wrap h1'. */
 .auth-wrap h1 {
   margin-top: 0;
 }
 
+/* Aplica estos estilos al bloque '.auth-submit'. */
 .auth-submit {
   width: 100%;
 }
 
+/* Aplica estos estilos al bloque '.auth-register-link'. */
 .auth-register-link {
   color: var(--primary);
 }

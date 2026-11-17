@@ -18,7 +18,9 @@ class ActualizarCajaRequest extends GuardarCajaRequest
         $box = $this->route('caja');
 
         return array_replace(parent::rules(), [
+            // Valida el campo 'sede_id' con las reglas definidas en la instruccion siguiente.
             'sede_id' => ['required', 'integer', Rule::in([(int) $box->sede_id])],
+            // Valida el campo 'codigo' con las reglas definidas en la instruccion siguiente.
             'codigo' => ['required', 'string', 'max:40', 'regex:/\A[A-Za-z0-9][A-Za-z0-9._-]*\z/',
                 Rule::unique('cajas', 'codigo')->where('sede_id', $box->sede_id)->ignore($box)],
         ]);

@@ -12,9 +12,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class CaracteristicaProducto extends Model
 {
+    // Usa la tabla 'caracteristicas_productos' como origen de los registros de este modelo.
     protected $table = 'caracteristicas_productos';
 
-    protected $fillable = ['producto_id', 'nombre', 'valor'];
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
+    protected $fillable = ['producto_id',
+                             'nombre', 
+                             'valor'];
 
     public $timestamps = false;
 

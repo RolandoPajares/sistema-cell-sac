@@ -33,8 +33,10 @@ class Producto extends Model
         return ProductoFactory::new();
     }
 
+    // ORM: relaciona la clase Producto con la tabla productos sin escribir SQL manual.
     protected $table = 'productos';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = [
         'marca', 'nombre', 'categoria_id', 'categoria', 'precio', 'precio_original',
         'descuento', 'precio_oferta', 'url_imagen', 'existencias', 'almacenamiento',
@@ -110,11 +112,13 @@ class Producto extends Model
         return $this->hasMany(VarianteProducto::class, 'producto_id');
     }
 
+    // Define la relacion 'reviews' entre este modelo y los registros relacionados.
     public function reviews(): HasMany
     {
         return $this->hasMany(ResenaProducto::class, 'producto_id');
     }
 
+    // Define la relacion 'favorites' entre este modelo y los registros relacionados.
     public function favorites(): HasMany
     {
         return $this->hasMany(FavoritoProducto::class, 'producto_id');

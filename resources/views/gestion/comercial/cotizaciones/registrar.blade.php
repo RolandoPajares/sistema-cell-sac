@@ -1,9 +1,12 @@
+
 {{--
     Formulario de registro de cotizaciones.
     Esta vista solo presenta datos entregados por el controlador; la autorización,
     validación, cálculo definitivo y persistencia se ejecutan en el servidor.
 --}}
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
 <form method="POST" action="{{ route('quotations.store') }}" class="cotizaciones-form" data-quotation-form>
+{{-- proteccion CSRF que valida el origen del formulario. --}}
     @csrf
 
     {{-- Selección del cliente existente dentro del alcance empresarial autorizado. --}}
@@ -29,12 +32,14 @@
         <label for="cliente_id">Cliente</label>
         <select id="cliente_id" name="cliente_id" required>
             <option value="">Seleccionar cliente</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @foreach ($customers as $customer)
                 <option value="{{ $customer->id }}" @selected((string) old('cliente_id') === (string) $customer->id)>
                     {{ $customer->nombre_contacto ?: $customer->razon_social }} · {{ $customer->documento }}
                 </option>
             @endforeach
         </select>
+{{-- mensaje de validacion para el campo que contiene errores. --}}
         @error('cliente_id')<small class="form-error">{{ $message }}</small>@enderror
     </fieldset>
 
@@ -46,6 +51,7 @@
                 <label>Producto
                     <select name="items[0][producto_id]" required data-product-select>
                         <option value="">Seleccionar producto</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                         @foreach ($products as $product)
                             <option value="{{ $product->id }}" data-price="{{ $product->effective_price }}">{{ $product->nombre }} · S/ {{ number_format((float) $product->effective_price, 2) }}</option>
                         @endforeach
@@ -66,6 +72,7 @@
         <legend>3. Condiciones y observaciones</legend>
         <label for="notas">Observaciones</label>
         <textarea id="notas" name="notas" maxlength="500" rows="4">{{ old('notas') }}</textarea>
+{{-- mensaje de validacion para el campo que contiene errores. --}}
         @error('notas')<small class="form-error">{{ $message }}</small>@enderror
     </fieldset>
 
@@ -76,6 +83,7 @@
     </footer>
 </form>
 
+{{-- bloque de estilos o scripts para el lugar reservado por la plantilla. --}}
 @push('scripts')
     @vite('resources/js/gestion/comercial/cotizaciones/formulario.js')
 @endpush

@@ -1,2 +1,6 @@
+/* Define los estilos visuales del modulo o componente 'integraciones'. */
+
+/* Aplica estos estilos al bloque '.admin-system-module--integraciones .admin-system-card-icon'. */
 .admin-system-module--integraciones .admin-system-card-icon { background: #f0e7ff; color: #7041df; }
+/* Aplica estos estilos al bloque '.admin-system-module--integraciones .admin-system-summary-icon'. */
 .admin-system-module--integraciones .admin-system-summary-icon { background: #fff1d8; color: #e69705; }

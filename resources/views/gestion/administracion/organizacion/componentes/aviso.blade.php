@@ -1,1 +1,4 @@
+{{-- Muestra un aviso informativo reutilizable dentro del modulo de organizacion. --}}
+
+
 <div class="tc-org__design-notice" role="status"><i class="bi bi-eye" aria-hidden="true"></i><strong>Vista de diseño</strong><span>Las cifras, nombres y registros mostrados son ejemplos. Las acciones de guardado y exportación están pendientes de integración.</span></div>

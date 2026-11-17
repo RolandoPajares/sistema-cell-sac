@@ -1,5 +1,9 @@
+
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
 <form class="productos-create-form productos-edit-form" method="post" action="{{ route('management.products.update', $product) }}" enctype="multipart/form-data">
+{{-- proteccion CSRF que valida el origen del formulario. --}}
     @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
     @method('PUT')
 
     <div class="productos-create-layout">
@@ -25,6 +29,7 @@
                         <span>Categoría <b>*</b></span>
                         <select class="productos-create-input" name="categoria_id" required>
                             <option value="">Selecciona una categoría</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                             @foreach ($categories as $category)
                                 <option value="{{ $category->id }}" @selected((string) old('categoria_id', $product->categoria_id) === (string) $category->id)>{{ $category->nombre }}</option>
                             @endforeach
@@ -35,9 +40,11 @@
                         <span>Marca <b>*</b></span>
                         <select class="productos-create-input" name="marca" required>
                             <option value="">Selecciona una marca</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                             @foreach (($brands ?? collect()) as $brand)
                                 <option value="{{ $brand }}" @selected(old('marca', $product->marca) === $brand)>{{ $brand }}</option>
                             @endforeach
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                             @if ($product->marca && !($brands ?? collect())->contains($product->marca))
                                 <option value="{{ $product->marca }}" selected>{{ $product->marca }}</option>
                             @endif
@@ -75,6 +82,7 @@
                         <span>Proveedor</span>
                         <select class="productos-create-input" name="proveedor_id">
                             <option value="">Selecciona un proveedor</option>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                             @foreach (($suppliers ?? collect()) as $supplier)
                                 <option value="{{ $supplier->id }}" @selected((string) old('proveedor_id', $product->suppliers->first()?->id) === (string) $supplier->id)>{{ $supplier->nombre }}</option>
                             @endforeach

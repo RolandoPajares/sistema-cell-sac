@@ -13,8 +13,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class EventoCampania extends Model
 {
+    // Usa la tabla 'eventos_campana' como origen de los registros de este modelo.
     protected $table = 'eventos_campana';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['campana_id', 'usuario_id', 'tipo', 'sesion_hash', 'creado_en'];
 
     public $timestamps = false;

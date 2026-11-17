@@ -15,10 +15,15 @@ final class ServicioPlantillasRbac
     /** @return array<int, int> */
     public function permissionIdsFor(?string $roleCode): array
     {
+        // ORM: consulta la plantilla de permisos mediante el constructor de consultas de Laravel.
+        // Devuelve los permisos activos de la plantilla asociada al codigo de rol.
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($roleCode === null || ! DB::getSchemaBuilder()->hasTable('roles')) {
             return [];
         }
 
+        // Devuelve el resultado obtenido mediante el modelo correspondiente.
+        // Consulta la tabla pivote que relaciona roles con permisos.
         return DB::table('roles_permisos')
             ->join('roles', 'roles.id', '=', 'roles_permisos.rol_id')
             ->join('permisos', 'permisos.id', '=', 'roles_permisos.permiso_id')

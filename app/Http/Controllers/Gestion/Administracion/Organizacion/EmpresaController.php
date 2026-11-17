@@ -30,6 +30,7 @@ class EmpresaController extends Controller
      */
     public function index(Request $request, ServicioAutorizacion $autorizacion): View
     {
+        // Guarda en $empresaId el resultado necesario para continuar esta operacion.
         $empresaId = $autorizacion->activeCompanyId();
         $empresa = $empresaId === null ? null : Empresa::query()
             ->withCount('sedes')
@@ -40,8 +41,10 @@ class EmpresaController extends Controller
         $almacenes = $empresaId === null ? 0 : DB::table('almacenes')
             ->join('sedes', 'sedes.id', '=', 'almacenes.sede_id')
             ->where('sedes.empresa_id', $empresaId)->count();
+        // Guarda en $sedesActivas el resultado necesario para continuar esta operacion.
         $sedesActivas = (int) ($empresa?->sedes_activas_count ?? 0);
 
+        // Devuelve la vista 'gestion.administracion.organizacion.datos-empresa' con los datos preparados por este controlador.
         return view('gestion.administracion.organizacion.datos-empresa', [
             'empresa' => $empresa,
             'almacenes' => $almacenes,
@@ -67,14 +70,21 @@ class EmpresaController extends Controller
         ServicioAutorizacion $autorizacion,
         RegistradorAuditoria $auditoria,
     ): RedirectResponse {
+        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $datos = $request->validated();
+        // Obtiene en $usuario la informacion de la solicitud o del usuario actual.
         $usuario = $request->user();
+        // Guarda en $empresaId el resultado necesario para continuar esta operacion.
         $empresaId = $autorizacion->activeCompanyId();
 
+        // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_if($empresaId === null, 409, 'Debe existir una empresa activa autorizada antes de actualizar sus datos.');
 
+        // Ejecuta la consulta o modificacion de base de datos indicada en la instruccion siguiente.
         DB::transaction(function () use ($datos, $usuario, $empresaId, $auditoria, $request): void {
+            // Prepara en $empresa la consulta que obtiene o modifica los registros necesarios.
             $empresa = Empresa::query()->whereKey($empresaId)->where('activo', true)->lockForUpdate()->firstOrFail();
+            // Agrupa en $valoresAnteriores los datos que se utilizaran en la siguiente operacion.
             $valoresAnteriores = [
                 'razon_social' => $empresa->razon_social,
                 'nombre_comercial' => $empresa->nombre_comercial,
@@ -99,6 +109,7 @@ class EmpresaController extends Controller
             );
         }, 3);
 
+        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Los datos de la empresa quedaron actualizados.');
     }
 }

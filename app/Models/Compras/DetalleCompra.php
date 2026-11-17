@@ -14,8 +14,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class DetalleCompra extends Model
 {
+    // Usa la tabla 'detalles_compras' como origen de los registros de este modelo.
     protected $table = 'detalles_compras';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['compra_id', 'producto_id', 'variante_id', 'cantidad', 'costo_unitario', 'descuento', 'impuesto', 'total_linea'];
 
     public $timestamps = false;

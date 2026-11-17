@@ -1,3 +1,6 @@
+{{-- Muestra el mensaje cuando el usuario no tiene permisos para realizar una accion. --}}
+
+
 <!doctype html>
 <html lang="es">
     <head>

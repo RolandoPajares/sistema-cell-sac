@@ -18,6 +18,7 @@ class ImportarPreciosMayoristasRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return app(ServicioAutorizacion::class)->allows($this->user(), 'gestion.productos.actualizar');
@@ -28,10 +29,13 @@ class ImportarPreciosMayoristasRequest extends FormRequest
      *
      * @return array Resultado de la operación.
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         return [
+            // Valida el campo 'archivo' con las reglas definidas en la instruccion siguiente.
             'archivo' => ['required', File::types(['csv'])->max(2048)],
+            // Valida el campo 'confirmar' con las reglas definidas en la instruccion siguiente.
             'confirmar' => ['accepted'],
         ];
     }

@@ -1,108 +1,203 @@
-﻿.modulo-finanzas-facturacion .admin-main { max-width: none; padding: 18px 22px 34px; }
+/* Define los estilos visuales del modulo o componente 'finanzas-facturacion'. */
+
+/* Aplica estos estilos al bloque '.modulo-finanzas-facturacion .admin-main'. */
+.modulo-finanzas-facturacion .admin-main { max-width: none; padding: 18px 22px 34px; }
+/* Aplica estos estilos al bloque '.tc-ff'. */
 .tc-ff { --ff-blue: #0767e9; --ff-ink: #071d54; --ff-line: #d4e1f3; color: var(--ff-ink); font-size: .8rem; }
+/* Aplica estos estilos al bloque '.tc-ff *, .tc-ff *::before, .tc-ff *::after'. */
 .tc-ff *, .tc-ff *::before, .tc-ff *::after { box-sizing: border-box; }
+/* Aplica estos estilos al bloque '.tc-ff__header'. */
 .tc-ff__header { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 14px; }
+/* Aplica estos estilos al bloque '.tc-ff__breadcrumb'. */
 .tc-ff__breadcrumb { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 18px; color: #174789; background: #e9f3ff; font-size: .72rem; font-weight: 800; }
+/* Aplica estos estilos al bloque '.tc-ff__breadcrumb i'. */
 .tc-ff__breadcrumb i { color: var(--ff-blue); }
+/* Aplica estos estilos al bloque '.tc-ff__header h1'. */
 .tc-ff__header h1 { display: flex; align-items: center; gap: 14px; margin: 8px 0 3px; color: #071c4e; font-size: clamp(1.7rem, 2.1vw, 2.25rem); font-weight: 850; letter-spacing: -.04em; line-height: 1.1; }
+/* Aplica estos estilos al bloque '.tc-ff__header h1 i'. */
 .tc-ff__header h1 i { color: #0a4fb9; }
+/* Aplica estos estilos al bloque '.tc-ff__header p'. */
 .tc-ff__header p { margin: 0; color: #526a94; font-size: .87rem; }
+/* Aplica estos estilos al bloque '.tc-ff__header-actions'. */
 .tc-ff__header-actions { display: flex; flex-wrap: wrap; gap: 9px; }
+/* Aplica estos estilos al bloque '.tc-ff__button'. */
 .tc-ff__button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 39px; padding: 0 15px; border: 1px solid #9abaf3; border-radius: 8px; color: #0747af; background: linear-gradient(#fff, #f7faff); font: inherit; font-weight: 800; white-space: nowrap; box-shadow: 0 3px 9px #1d5daf17; }
+/* Aplica estos estilos al bloque '.tc-ff__button--primary'. */
 .tc-ff__button--primary { border-color: #0755c8; color: #fff; background: linear-gradient(160deg, #0b7cfa, #073db6); }
+/* Aplica estos estilos al bloque '.tc-ff__button:disabled, .tc-ff__row-actions button:disabled'. */
 .tc-ff__button:disabled, .tc-ff__row-actions button:disabled { cursor: not-allowed; }
+/* Aplica estos estilos al bloque '.tc-ff__notice'. */
 .tc-ff__notice { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; width: fit-content; max-width: 100%; margin: 0 0 12px; padding: 7px 11px; border: 1px solid #b9d5f7; border-radius: 8px; color: #12529c; background: #ebf5ff; font-size: .71rem; }
+/* Aplica estos estilos al bloque '.tc-ff__notice a'. */
 .tc-ff__notice a { margin-left: 5px; color: #064fb9; font-weight: 800; text-decoration: none; }
 .tc-ff__notice a:hover { text-decoration: underline; }
+/* Aplica estos estilos al bloque '.tc-ff__metrics'. */
 .tc-ff__metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; margin-bottom: 13px; }
+/* Aplica estos estilos al bloque '.tc-ff__metric'. */
 .tc-ff__metric { display: flex; align-items: center; gap: 12px; min-width: 0; min-height: 85px; padding: 12px 14px; border: 1px solid #d7e6f8; border-radius: 13px; background: linear-gradient(125deg, #fff, #edf6ff); box-shadow: 0 4px 12px #1d5ba814; }
+/* Aplica estos estilos al bloque '.tc-ff__metric--verde'. */
 .tc-ff__metric--verde { background: linear-gradient(125deg, #fff, #ebfbf0); }
+/* Aplica estos estilos al bloque '.tc-ff__metric--rojo'. */
 .tc-ff__metric--rojo { background: linear-gradient(125deg, #fff, #fff0f2); }
+/* Aplica estos estilos al bloque '.tc-ff__metric--ambar'. */
 .tc-ff__metric--ambar { background: linear-gradient(125deg, #fff, #fff7e4); }
+/* Aplica estos estilos al bloque '.tc-ff__metric--violeta'. */
 .tc-ff__metric--violeta { background: linear-gradient(125deg, #fff, #f2efff); }
+/* Aplica estos estilos al bloque '.tc-ff__metric-icon'. */
 .tc-ff__metric-icon { display: grid; flex: 0 0 46px; width: 46px; height: 46px; place-items: center; border-radius: 12px; color: #086af0; background: #e2f0ff; font-size: 1.6rem; }
+/* Aplica estos estilos al bloque '.tc-ff__metric--verde .tc-ff__metric-icon'. */
 .tc-ff__metric--verde .tc-ff__metric-icon { color: #08a64c; background: #def9e8; }
+/* Aplica estos estilos al bloque '.tc-ff__metric--rojo .tc-ff__metric-icon'. */
 .tc-ff__metric--rojo .tc-ff__metric-icon { color: #ed2442; background: #ffe4e8; }
+/* Aplica estos estilos al bloque '.tc-ff__metric--ambar .tc-ff__metric-icon'. */
 .tc-ff__metric--ambar .tc-ff__metric-icon { color: #e59a06; background: #fff0cf; }
+/* Aplica estos estilos al bloque '.tc-ff__metric--violeta .tc-ff__metric-icon'. */
 .tc-ff__metric--violeta .tc-ff__metric-icon { color: #6835eb; background: #eae4ff; }
+/* Aplica estos estilos al bloque '.tc-ff__metric div'. */
 .tc-ff__metric div { display: grid; min-width: 0; gap: 1px; }
+/* Aplica estos estilos al bloque '.tc-ff__metric small'. */
 .tc-ff__metric small { overflow: hidden; font-size: .7rem; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+/* Aplica estos estilos al bloque '.tc-ff__metric strong'. */
 .tc-ff__metric strong { overflow: hidden; font-size: clamp(1.1rem, 1.45vw, 1.65rem); font-weight: 850; line-height: 1.12; text-overflow: ellipsis; white-space: nowrap; }
+/* Aplica estos estilos al bloque '.tc-ff__metric div > span'. */
 .tc-ff__metric div > span { color: #5d7197; font-size: .67rem; }
+/* Aplica estos estilos al bloque '.tc-ff__metric > b'. */
 .tc-ff__metric > b { align-self: flex-end; margin-left: auto; color: #0a9b40; font-size: .68rem; white-space: nowrap; }
+/* Aplica estos estilos al bloque '.tc-ff__filters, .tc-ff__card'. */
 .tc-ff__filters, .tc-ff__card { min-width: 0; border: 1px solid var(--ff-line); border-radius: 13px; background: linear-gradient(135deg, #fff, #f8fbff); box-shadow: 0 5px 15px #1f58a314; }
+/* Aplica estos estilos al bloque '.tc-ff__filters'. */
 .tc-ff__filters { margin-bottom: 13px; padding: 12px; }
+/* Aplica estos estilos al bloque '.tc-ff__search'. */
 .tc-ff__search { display: flex; align-items: center; gap: 9px; min-height: 35px; padding: 0 11px; border: 1px solid #c7d7ed; border-radius: 7px; color: #546d96; background: #fff; }
+/* Aplica estos estilos al bloque '.tc-ff__search input'. */
 .tc-ff__search input { width: 100%; min-width: 0; border: 0; outline: 0; color: var(--ff-ink); background: transparent; font: inherit; }
+/* Aplica estos estilos al bloque '.tc-ff__search input::placeholder'. */
 .tc-ff__search input::placeholder { color: #6c80a3; }
+/* Aplica estos estilos al bloque '.tc-ff__filter-fields'. */
 .tc-ff__filter-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); align-items: end; gap: 10px; margin-top: 9px; }
+/* Aplica estos estilos al bloque '.tc-ff__filter-fields label'. */
 .tc-ff__filter-fields label { display: grid; min-width: 0; gap: 4px; font-size: .69rem; font-weight: 800; }
+/* Aplica estos estilos al bloque '.tc-ff__filter-fields select, .tc-ff__form-grid select, .tc-ff__form-grid input, .tc-ff__form-grid textarea'. */
 .tc-ff__filter-fields select, .tc-ff__form-grid select, .tc-ff__form-grid input, .tc-ff__form-grid textarea { width: 100%; min-height: 34px; padding: 0 9px; border: 1px solid #cad9ed; border-radius: 7px; color: #173c77; background: #fbfdff; font: inherit; }
+/* Aplica estos estilos al bloque '.tc-ff__filter-fields select:focus, .tc-ff__filter-fields input:focus'. */
 .tc-ff__filter-fields select:focus, .tc-ff__filter-fields input:focus { border-color: #4a98f5; box-shadow: 0 0 0 3px rgb(7 103 233 / 12%); outline: 0; }
+/* Aplica estos estilos al bloque '.tc-ff__filter-fields .tc-ff__button'. */
 .tc-ff__filter-fields .tc-ff__button { min-height: 34px; }
+/* Aplica estos estilos al bloque '.tc-ff__filter-fields a.tc-ff__button'. */
 .tc-ff__filter-fields a.tc-ff__button { text-decoration: none; }
+/* Aplica estos estilos al bloque '.tc-ff__main-grid'. */
 .tc-ff__main-grid { display: grid; grid-template-columns: minmax(0, 2.15fr) minmax(280px, .8fr); align-items: start; gap: 13px; margin-bottom: 13px; }
+/* Aplica estos estilos al bloque '.tc-ff__card-heading'. */
 .tc-ff__card-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 11px 13px; }
+/* Aplica estos estilos al bloque '.tc-ff__card-heading h2, .tc-ff__aside h2'. */
 .tc-ff__card-heading h2, .tc-ff__aside h2 { display: flex; align-items: center; gap: 9px; margin: 0; color: #082c82; font-size: 1rem; font-weight: 850; }
+/* Aplica estos estilos al bloque '.tc-ff__card-heading h2 i, .tc-ff__aside h2 i'. */
 .tc-ff__card-heading h2 i, .tc-ff__aside h2 i { color: #0669ef; font-size: 1.1rem; }
+/* Aplica estos estilos al bloque '.tc-ff__card-heading small'. */
 .tc-ff__card-heading small { color: #5b7197; font-size: .67rem; white-space: nowrap; }
+/* Aplica estos estilos al bloque '.tc-ff__table-card'. */
 .tc-ff__table-card { overflow: hidden; }
+/* Aplica estos estilos al bloque '.tc-ff__table-wrap'. */
 .tc-ff__table-wrap { overflow-x: auto; }
+/* Aplica estos estilos al bloque '.tc-ff__table-wrap table'. */
 .tc-ff__table-wrap table { width: 100%; border-collapse: collapse; font-size: .68rem; white-space: nowrap; }
+/* Aplica estos estilos al bloque '.tc-ff__table-wrap thead'. */
 .tc-ff__table-wrap thead { color: #112d66; background: #edf4ff; }
+/* Aplica estos estilos al bloque '.tc-ff__table-wrap th, .tc-ff__table-wrap td'. */
 .tc-ff__table-wrap th, .tc-ff__table-wrap td { padding: 8px 7px; border-bottom: 1px solid #e1eaf6; text-align: left; }
 .tc-ff__table-wrap tbody tr:nth-child(even) { background: #f8fbff; }
 .tc-ff__table-wrap tbody td:first-child { color: #0757c6; font-weight: 800; }
+/* Aplica estos estilos al bloque '.tc-ff__table-wrap tbody tr[hidden], .tc-ff__empty[hidden]'. */
 .tc-ff__table-wrap tbody tr[hidden], .tc-ff__empty[hidden] { display: none; }
+/* Aplica estos estilos al bloque '.tc-ff__pill'. */
 .tc-ff__pill { display: inline-flex; padding: 4px 9px; border-radius: 15px; color: #075ad1; background: #ddecff; font-size: .64rem; font-weight: 800; }
+/* Aplica estos estilos al bloque '.tc-ff__pill--verde'. */
 .tc-ff__pill--verde { color: #078a46; background: #d9f7e5; }
+/* Aplica estos estilos al bloque '.tc-ff__pill--rojo'. */
 .tc-ff__pill--rojo { color: #d92742; background: #ffe2e6; }
+/* Aplica estos estilos al bloque '.tc-ff__pill--ambar'. */
 .tc-ff__pill--ambar { color: #b87900; background: #fff1cb; }
+/* Aplica estos estilos al bloque '.tc-ff__row-actions'. */
 .tc-ff__row-actions { display: flex; gap: 4px; }
+/* Aplica estos estilos al bloque '.tc-ff__row-actions button'. */
 .tc-ff__row-actions button { width: 25px; height: 25px; border: 1px solid #cfddf2; border-radius: 7px; color: #0758cc; background: #f5faff; }
+/* Aplica estos estilos al bloque '.tc-ff__empty'. */
 .tc-ff__empty { margin: 0; padding: 16px; color: #547099; text-align: center; }
+/* Aplica estos estilos al bloque '.tc-ff__aside'. */
 .tc-ff__aside { padding: 11px 13px 13px; }
+/* Aplica estos estilos al bloque '.tc-ff__aside > p'. */
 .tc-ff__aside > p { margin: 5px 0 12px; color: #617698; font-size: .68rem; }
+/* Aplica estos estilos al bloque '.tc-ff__form-grid'. */
 .tc-ff__form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+/* Aplica estos estilos al bloque '.tc-ff__form-grid label'. */
 .tc-ff__form-grid label { display: grid; min-width: 0; gap: 4px; color: #092a65; font-size: .68rem; font-weight: 800; }
+/* Aplica estos estilos al bloque '.tc-ff__form-grid label > span'. */
 .tc-ff__form-grid label > span { color: #e22740; }
+/* Aplica estos estilos al bloque '.tc-ff__form-grid .tc-ff__form-full'. */
 .tc-ff__form-grid .tc-ff__form-full { grid-column: 1 / -1; }
+/* Aplica estos estilos al bloque '.tc-ff__form-grid textarea'. */
 .tc-ff__form-grid textarea { min-height: 58px; padding-top: 8px; resize: none; }
 .tc-ff__form-grid :disabled { opacity: 1; color: #7083a0; cursor: not-allowed; }
+/* Aplica estos estilos al bloque '.tc-ff__submit'. */
 .tc-ff__submit { width: 100%; margin-top: 13px; }
+/* Aplica estos estilos al bloque '.tc-ff__bottom-grid'. */
 .tc-ff__bottom-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; }
+/* Aplica estos estilos al bloque '.tc-ff__bottom-grid > .tc-ff__card'. */
 .tc-ff__bottom-grid > .tc-ff__card { min-height: 198px; padding-bottom: 12px; }
+/* Aplica estos estilos al bloque '.tc-ff__donut-layout'. */
 .tc-ff__donut-layout { display: flex; align-items: center; gap: 16px; padding: 5px 13px; }
+/* Aplica estos estilos al bloque '.tc-ff__donut'. */
 .tc-ff__donut { display: grid; flex: 0 0 128px; width: 128px; height: 128px; place-items: center; border-radius: 50%; background: var(--tc-ff-donut); }
+/* Aplica estos estilos al bloque '.tc-ff__donut > span'. */
 .tc-ff__donut > span { display: grid; align-content: center; width: 90px; height: 90px; border-radius: 50%; background: #fff; text-align: center; }
+/* Aplica estos estilos al bloque '.tc-ff__donut strong'. */
 .tc-ff__donut strong { font-size: 1.15rem; }
+/* Aplica estos estilos al bloque '.tc-ff__donut small'. */
 .tc-ff__donut small { color: #536e9a; font-size: .68rem; }
+/* Aplica estos estilos al bloque '.tc-ff__legend'. */
 .tc-ff__legend { flex: 1; min-width: 0; margin: 0; padding: 0; list-style: none; }
+/* Aplica estos estilos al bloque '.tc-ff__legend li'. */
 .tc-ff__legend li { display: flex; align-items: center; gap: 6px; padding: 6px 0; border-bottom: 1px solid #e6eef8; font-size: .67rem; }
+/* Aplica estos estilos al bloque '.tc-ff__legend li i'. */
 .tc-ff__legend li i { width: 8px; height: 8px; border-radius: 50%; background: #1482f7; }
 .tc-ff__legend li:nth-child(2) i { background: #2ac76a; }
 .tc-ff__legend li:nth-child(3) i { background: #ffbf24; }
 .tc-ff__legend li:nth-child(4) i { background: #f25769; }
+/* Aplica estos estilos al bloque '.tc-ff__legend li span'. */
 .tc-ff__legend li span { flex: 1; }
+/* Aplica estos estilos al bloque '.tc-ff__columns'. */
 .tc-ff__columns { display: flex; align-items: end; justify-content: space-around; gap: 12px; height: 146px; margin: 0 15px; padding-top: 10px; border-bottom: 1px solid #bdcde6; }
+/* Aplica estos estilos al bloque '.tc-ff__columns > div'. */
 .tc-ff__columns > div { display: flex; flex: 1; height: 100%; min-width: 0; flex-direction: column; align-items: center; justify-content: end; gap: 3px; text-align: center; }
+/* Aplica estos estilos al bloque '.tc-ff__columns strong'. */
 .tc-ff__columns strong { font-size: .72rem; }
+/* Aplica estos estilos al bloque '.tc-ff__columns i'. */
 .tc-ff__columns i { display: block; width: 100%; max-width: 56px; min-height: 4px; border-radius: 5px 5px 0 0; background: linear-gradient(#38a1ff, #0061e8); }
 .tc-ff__columns > div:nth-child(2) i { background: linear-gradient(#6fbaff, #3991ed); }
 .tc-ff__columns > div:nth-child(3) i { background: linear-gradient(#5ee491, #16b35a); }
 .tc-ff__columns > div:nth-child(4) i { background: linear-gradient(#ffdb62, #ffba17); }
+/* Aplica estos estilos al bloque '.tc-ff__columns small'. */
 .tc-ff__columns small { min-height: 25px; color: #38547f; font-size: .62rem; }
+/* Aplica estos estilos al bloque '.tc-ff__bars'. */
 .tc-ff__bars { display: grid; gap: 10px; padding: 10px 15px 6px; }
+/* Aplica estos estilos al bloque '.tc-ff__bars > div'. */
 .tc-ff__bars > div { display: grid; grid-template-columns: minmax(72px, .8fr) minmax(40px, 1fr) 26px; align-items: center; gap: 8px; font-size: .67rem; }
+/* Aplica estos estilos al bloque '.tc-ff__bars i'. */
 .tc-ff__bars i { height: 10px; overflow: hidden; border-radius: 10px; background: #e6eef7; }
+/* Aplica estos estilos al bloque '.tc-ff__bars i b'. */
 .tc-ff__bars i b { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #4faeff, #0768eb); }
+/* Aplica estos estilos al bloque '.tc-ff__ranking'. */
 .tc-ff__ranking { padding: 3px 13px; }
+/* Aplica estos estilos al bloque '.tc-ff__ranking > div'. */
 .tc-ff__ranking > div { display: flex; align-items: center; gap: 9px; padding: 7px 0; border-bottom: 1px solid #e3ebf6; font-size: .68rem; }
+/* Aplica estos estilos al bloque '.tc-ff__ranking b'. */
 .tc-ff__ranking b { display: grid; width: 20px; height: 20px; place-items: center; border-radius: 50%; color: #0658cb; background: #dcecff; }
+/* Aplica estos estilos al bloque '.tc-ff__ranking span'. */
 .tc-ff__ranking span { flex: 1; }
 @media (max-width: 1080px) { .tc-ff__metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tc-ff__main-grid { grid-template-columns: minmax(0, 1fr); } .tc-ff__bottom-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 760px) { .modulo-finanzas-facturacion .admin-main { padding: 15px 11px 26px; } .tc-ff__header { align-items: start; flex-direction: column; } .tc-ff__header-actions { width: 100%; } .tc-ff__metrics, .tc-ff__bottom-grid { grid-template-columns: minmax(0, 1fr); } .tc-ff__filter-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tc-ff__filter-fields .tc-ff__button { grid-column: 1 / -1; } .tc-ff__card-heading { flex-wrap: wrap; } }
 
+/* Aplica estos estilos al bloque '.tc-ff__dialog'. */
 .tc-ff__dialog {
     width: min(760px, calc(100vw - 28px));
     max-width: none;
@@ -115,57 +210,105 @@
     background: transparent;
 }
 
+/* Aplica estos estilos al bloque '.tc-ff__dialog::backdrop'. */
 .tc-ff__dialog::backdrop { background: rgb(14 30 55 / 58%); backdrop-filter: blur(2px); }
+/* Aplica estos estilos al bloque '.tc-ff__dialog[open]'. */
 .tc-ff__dialog[open] { display: block; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog [hidden]'. */
 .tc-ff__dialog [hidden] { display: none !important; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog-card'. */
 .tc-ff__dialog-card { display: flex; max-height: calc(100dvh - 28px); flex-direction: column; overflow: hidden; border: 1px solid #e0e8f3; border-radius: 16px; background: #fff; box-shadow: 0 24px 72px rgb(0 24 68 / 28%); }
+/* Aplica estos estilos al bloque '.tc-ff__dialog-header'. */
 .tc-ff__dialog-header { display: flex; flex: 0 0 auto; align-items: flex-start; justify-content: space-between; gap: 18px; border-bottom: 1px solid #e8eef6; padding: 19px 22px; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog-header > div'. */
 .tc-ff__dialog-header > div { display: flex; align-items: center; gap: 13px; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog-icon'. */
 .tc-ff__dialog-icon { display: grid; width: 42px; height: 42px; flex: 0 0 auto; place-items: center; border-radius: 12px; color: #075cc4; background: #e9f3ff; font-size: 1.15rem; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog-icon--warning'. */
 .tc-ff__dialog-icon--warning { color: #91620b; background: #fff3d2; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog-header h2'. */
 .tc-ff__dialog-header h2 { margin: 0; color: #19365e; font-size: 1.05rem; font-weight: 750; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog-header p'. */
 .tc-ff__dialog-header p { margin: 4px 0 0; color: #667994; font-size: .77rem; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog-close'. */
 .tc-ff__dialog-close { display: grid; width: 34px; height: 34px; flex: 0 0 auto; place-items: center; border: 0; border-radius: 9px; color: #58708e; background: #f2f6fb; cursor: pointer; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog-body'. */
 .tc-ff__dialog-body { overflow-y: auto; padding: 19px 22px; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog-body > p'. */
 .tc-ff__dialog-body > p { color: #516782; font-size: .82rem; line-height: 1.55; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog-body h3'. */
 .tc-ff__dialog-body h3 { margin: 0 0 10px; color: #24466f; font-size: .93rem; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog-footer'. */
 .tc-ff__dialog-footer { display: flex; flex: 0 0 auto; justify-content: flex-end; flex-wrap: wrap; gap: 9px; border-top: 1px solid #e8eef6; padding: 14px 22px; background: #fbfdff; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog .tc-ff__button'. */
 .tc-ff__dialog .tc-ff__button { display: inline-flex; min-height: 38px; align-items: center; justify-content: center; gap: 7px; border: 1px solid #d5e0ee; border-radius: 9px; padding: 8px 13px; color: #29486c; background: #fff; font: inherit; font-size: .78rem; font-weight: 650; cursor: pointer; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog .tc-ff__button--primary'. */
 .tc-ff__dialog .tc-ff__button--primary { border-color: #0b68d3; color: #fff; background: linear-gradient(135deg, #1683ec, #0759c6); box-shadow: 0 4px 10px rgb(10 96 202 / 18%); }
 .tc-ff__dialog .tc-ff__button:disabled { opacity: .55; cursor: not-allowed; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog .tc-ff__field-grid'. */
 .tc-ff__dialog .tc-ff__field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog .tc-ff__field'. */
 .tc-ff__dialog .tc-ff__field { display: grid; min-width: 0; gap: 7px; color: #2a4b72; font-size: .78rem; font-weight: 650; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog .tc-ff__field input, .tc-ff__dialog .tc-ff__field select, .tc-ff__dialog .tc-ff__field textarea'. */
 .tc-ff__dialog .tc-ff__field input, .tc-ff__dialog .tc-ff__field select, .tc-ff__dialog .tc-ff__field textarea { width: 100%; min-width: 0; border: 1px solid #d4e0ef; border-radius: 9px; padding: 10px 11px; color: #273a53; background: #fff; font: inherit; font-weight: 450; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog .tc-ff__field :is(input, select, textarea):focus'. */
 .tc-ff__dialog .tc-ff__field :is(input, select, textarea):focus { outline: 3px solid rgb(23 117 222 / 14%); border-color: #3284df; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog .tc-ff__field [aria-invalid="true"]'. */
 .tc-ff__dialog .tc-ff__field [aria-invalid="true"] { border-color: #d33d4e; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog .tc-ff__field--full'. */
 .tc-ff__dialog .tc-ff__field--full { grid-column: 1 / -1; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog .tc-ff__notice-inline, .tc-ff__dialog .tc-ff__warning'. */
 .tc-ff__dialog .tc-ff__notice-inline, .tc-ff__dialog .tc-ff__warning { margin: 14px 0 0; border: 1px solid #f0d99f; border-radius: 9px; padding: 11px 13px; color: #73530d !important; background: #fff9e9; font-size: .76rem !important; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog .tc-ff__error'. */
 .tc-ff__dialog .tc-ff__error { margin: 12px 0 0; color: #b42332 !important; font-size: .8rem !important; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog .tc-ff__feedback'. */
 .tc-ff__dialog .tc-ff__feedback { margin: 12px 0 0; border-radius: 9px; padding: 11px 13px; color: #155b39 !important; background: #eaf8f0; font-size: .8rem !important; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog .tc-ff__steps'. */
 .tc-ff__dialog .tc-ff__steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 17px; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog .tc-ff__steps span'. */
 .tc-ff__dialog .tc-ff__steps span { border-bottom: 3px solid #dbe5f1; padding: 0 4px 8px; color: #71819a; font-size: .72rem; text-align: center; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog .tc-ff__steps span.is-current'. */
 .tc-ff__dialog .tc-ff__steps span.is-current { border-color: #1674dc; color: #075cc4; font-weight: 700; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog .tc-ff__check'. */
 .tc-ff__dialog .tc-ff__check { display: flex; align-items: flex-start; gap: 9px; color: #3d5879; font-size: .78rem; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog .tc-ff__detail-list'. */
 .tc-ff__dialog .tc-ff__detail-list { display: grid; grid-template-columns: minmax(110px, .65fr) minmax(0, 1fr); gap: 9px 15px; margin: 0; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog .tc-ff__detail-list > div'. */
 .tc-ff__dialog .tc-ff__detail-list > div { display: contents; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog .tc-ff__detail-list dt'. */
 .tc-ff__dialog .tc-ff__detail-list dt { color: #71819a; font-size: .78rem; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog .tc-ff__detail-list dd'. */
 .tc-ff__dialog .tc-ff__detail-list dd { margin: 0; color: #263d5a; font-size: .8rem; font-weight: 650; overflow-wrap: anywhere; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog .tc-ff__dialog-body small'. */
 .tc-ff__dialog .tc-ff__dialog-body small { display: block; margin-top: 5px; color: #64758a; font-size: .7rem; }
 
 @media (max-width: 600px) {
+/* Aplica estos estilos al bloque '.tc-ff__dialog'. */
     .tc-ff__dialog { width: calc(100vw - 18px); max-height: calc(100dvh - 18px); }
+/* Aplica estos estilos al bloque '.tc-ff__dialog-card'. */
     .tc-ff__dialog-card { max-height: calc(100dvh - 18px); border-radius: 13px; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog-header, .tc-ff__dialog-body'. */
     .tc-ff__dialog-header, .tc-ff__dialog-body { padding: 15px; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog-footer'. */
     .tc-ff__dialog-footer { justify-content: stretch; padding: 12px 15px; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog .tc-ff__dialog-footer .tc-ff__button'. */
     .tc-ff__dialog .tc-ff__dialog-footer .tc-ff__button { flex: 1 1 auto; }
+/* Aplica estos estilos al bloque '.tc-ff__dialog .tc-ff__field-grid'. */
     .tc-ff__dialog .tc-ff__field-grid { grid-template-columns: minmax(0, 1fr); }
+/* Aplica estos estilos al bloque '.tc-ff__dialog .tc-ff__field--full'. */
     .tc-ff__dialog .tc-ff__field--full { grid-column: auto; }
 }
 
+/* Aplica estos estilos al bloque '.tc-ff__aside'. */
 .tc-ff__aside { padding: 12px 14px 15px; }
+/* Aplica estos estilos al bloque '.tc-ff__aside > p'. */
 .tc-ff__aside > p { margin: 6px 0 13px; color: #5d7197; font-size: .7rem; }
+/* Aplica estos estilos al bloque '.tc-ff__summary > strong'. */
 .tc-ff__summary > strong { display: block; padding: 8px 0 12px; color: #0a3a9e; font-size: 1.13rem; }
+/* Aplica estos estilos al bloque '.tc-ff__summary > div'. */
 .tc-ff__summary > div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid #dfe9f6; font-size: .74rem; }
+/* Aplica estos estilos al bloque '.tc-ff__summary > div b'. */
 .tc-ff__summary > div b { text-align: right; }
+/* Aplica estos estilos al bloque '.tc-ff__pill--violeta'. */
 .tc-ff__pill--violeta { color: #6433d7; background: #eae3ff; }
 

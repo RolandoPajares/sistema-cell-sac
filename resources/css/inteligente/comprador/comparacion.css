@@ -1,11 +1,16 @@
+/* Define los estilos visuales del modulo o componente 'comparacion'. */
+
+/* Aplica estos estilos al bloque '.comparison-grid'. */
 .comparison-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
 }
+/* Aplica estos estilos al bloque '.comparison-card h2'. */
 .comparison-card h2 {
   min-height: 58px;
 }
+/* Aplica estos estilos al bloque '.comparison-product-photo'. */
 .comparison-product-photo {
   display: grid;
   width: 100%;
@@ -17,16 +22,19 @@
   background: #f4f8ff;
   border-radius: 12px;
 }
+/* Aplica estos estilos al bloque '.comparison-product-placeholder'. */
 .comparison-product-placeholder {
   color: #2464ad;
   font-size: 4rem;
 }
+/* Aplica estos estilos al bloque '.score-row'. */
 .score-row {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 7px;
   margin: 16px 0;
 }
+/* Aplica estos estilos al bloque '.scorebar'. */
 .scorebar {
   grid-column: 1/-1;
   height: 8px;
@@ -34,6 +42,7 @@
   border-radius: 99px;
   overflow: hidden;
 }
+/* Aplica estos estilos al bloque '.scorebar i'. */
 .scorebar i {
   display: block;
   height: 100%;
@@ -42,12 +51,14 @@
 }
 
 @media (max-width: 900px) {
+/* Aplica estos estilos al bloque '.comparison-grid'. */
   .comparison-grid {
     grid-template-columns: 1fr 1fr;
   }
 }
 
 @media (max-width: 650px) {
+/* Aplica estos estilos al bloque '.comparison-grid'. */
   .comparison-grid {
     grid-template-columns: 1fr;
   }

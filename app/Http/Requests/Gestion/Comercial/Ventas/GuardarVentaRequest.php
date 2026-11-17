@@ -18,6 +18,7 @@ class GuardarVentaRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         // Verifica que el usuario esté autenticado y que tenga permisos según el servicio de autorización y la ruta actual.
@@ -31,6 +32,7 @@ class GuardarVentaRequest extends FormRequest
      */
 
     //
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         return [

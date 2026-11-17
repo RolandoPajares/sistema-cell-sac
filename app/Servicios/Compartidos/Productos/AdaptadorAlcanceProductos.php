@@ -30,6 +30,7 @@ final class AdaptadorAlcanceProductos implements AlcanceProductos
      */
     public function atributosDeAlcance(User $usuario, string $tabla): array
     {
+        // Devuelve los filtros de empresa y sede que el usuario puede consultar.
         return $this->autorizacion->operationScopeAttributes($usuario, $tabla);
     }
 }

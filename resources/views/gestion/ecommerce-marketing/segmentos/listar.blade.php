@@ -1,14 +1,21 @@
 @extends('layouts.panel.principal')
 
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Segmentación')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', $isAdmin ? 'modulo-segmentos' : '')
 
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
 @if (! $isAdmin)
 <section class="container content-page">
     <h1>Segmentación de clientes</h1>
     <p class="notice">Organiza audiencias para tus acciones comerciales.</p>
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
     @include('gestion.ecommerce-marketing.segmentos.crear', ['roles' => $roles])
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
     @foreach ($segments as $segment)
     <article class="data-row">
         <strong>{{ $segment->nombre }}</strong>
@@ -18,6 +25,7 @@
     @endforeach
     {{ $segments->links() }}
 </section>
+{{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
 @else
 <section class="admin-marketing-module admin-segmentos-page" data-pending-module="segmentos" data-em-segment-page data-em-segment-base-url="{{ url('/gestion/segmentos') }}">
     <header class="admin-marketing-header">
@@ -46,6 +54,7 @@
         </article>
     </section>
 
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
     <form class="admin-marketing-filters" method="get" action="{{ route('management.segments') }}"><label class="admin-marketing-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Buscar segmentos</span><input type="search" name="buscar" value="{{ request('buscar') }}" placeholder="Buscar segmento o tipo..."></label><label><span class="visually-hidden">Tipo</span><select name="tipo">
                 <option value="">Tipo: Todos</option>
                 <option value="roles" @selected(request('tipo') === 'roles')>Por roles</option>
@@ -79,6 +88,7 @@
                     </tr>
                 </thead>
                 <tbody>
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @forelse ($segments as $segment)
                     <tr>
                         <td><strong>{{ $segment->nombre }}</strong><small>Audiencia administrada</small></td>
@@ -199,8 +209,11 @@
                     </div>
                 </div><button type="button" data-em-segment-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
             </header>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form method="post" class="admin-marketing-dialog-body" data-em-segment-edit-form>
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                 @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
                 @method('PUT')
                 <div class="em-marketing-dialog__notice">Los cambios se guardarán en segmentos_clientes y se registrarán en auditoría.</div>
                 <div class="em-marketing-dialog__grid"><label class="em-marketing-dialog__full">Nombre del segmento<input type="text" maxlength="120" required data-em-segment-edit-name></label>
@@ -225,8 +238,11 @@
                     </div>
                 </div><button type="button" data-em-segment-close aria-label="Cerrar"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
             </header>
+{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
             <form method="post" class="admin-marketing-dialog-body" data-em-segment-remove-form>
+{{-- proteccion CSRF que valida el origen del formulario. --}}
                 @csrf
+{{-- metodo HTTP que permite simular PUT, PATCH o DELETE desde el formulario. --}}
                 @method('DELETE')
                 <div class="em-marketing-dialog__warning"><strong>El segmento se desactivará, no se eliminará físicamente.</strong><span>Así se conserva la trazabilidad y se evita romper campañas asociadas.</span></div>
                 <p class="em-marketing-dialog__record">Segmento seleccionado: <strong data-em-segment-remove-name>—</strong></p><label class="em-marketing-dialog__check"><input type="checkbox" data-em-segment-remove-ack> Entiendo que esta confirmación no elimina el segmento.</label>

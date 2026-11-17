@@ -16,8 +16,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class MovimientoInventario extends Model
 {
+    // Usa la tabla 'movimientos_inventario' como origen de los registros de este modelo.
     protected $table = 'movimientos_inventario';
 
+    // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
     protected $fillable = ['producto_id', 'usuario_id', 'tipo_movimiento', 'cantidad', 'notas', 'creado_en', 'empresa_id', 'sede_id', 'almacen_id', 'variante_id', 'documento_tipo', 'documento_id'];
 
     public $timestamps = false;

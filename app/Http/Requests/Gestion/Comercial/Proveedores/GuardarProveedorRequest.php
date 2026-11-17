@@ -16,6 +16,7 @@ class GuardarProveedorRequest extends FormRequest
     /**
      * Completa el nombre persistible a partir de los campos visibles del formulario.
      */
+    // Ajusta o limpia los datos recibidos antes de aplicar las reglas de validacion.
     protected function prepareForValidation(): void
     {
         if (trim((string) $this->input('nombre')) !== '') {
@@ -37,6 +38,7 @@ class GuardarProveedorRequest extends FormRequest
      *
      * @return bool Resultado de la operación.
      */
+    // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
         return $this->user() !== null && app(ServicioAutorizacion::class)->allowsRoute($this);
@@ -47,19 +49,27 @@ class GuardarProveedorRequest extends FormRequest
      *
      * @return array Resultado de la operación.
      */
+    // Define las reglas que validan todos los campos recibidos por este formulario.
     public function rules(): array
     {
         return [
+            // Valida el campo 'nombre' con las reglas definidas en la instruccion siguiente.
             'nombre' => ['required', 'string', 'max:160'],
+            // Valida el campo 'tipo_persona' con las reglas definidas en la instruccion siguiente.
             'tipo_persona' => ['required', Rule::in(['natural', 'juridica'])],
+            // Valida el campo 'tipo_documento' con las reglas definidas en la instruccion siguiente.
             'tipo_documento' => ['required', Rule::in(['dni', 'ruc'])],
+            // Valida el campo 'ruc' con las reglas definidas en la instruccion siguiente.
             'ruc' => [
                 'required', 'string', 'max:20',
                 $this->input('tipo_documento') === 'dni' ? 'size:8' : 'size:11',
                 'regex:/^[0-9]+$/', Rule::unique('proveedores', 'ruc'),
             ],
+            // Valida el campo 'correo' con las reglas definidas en la instruccion siguiente.
             'correo' => ['required', 'email', 'max:160'],
+            // Valida el campo 'telefono' con las reglas definidas en la instruccion siguiente.
             'telefono' => ['nullable', 'string', 'max:30'],
+            // Valida el campo 'ciudad' con las reglas definidas en la instruccion siguiente.
             'ciudad' => ['nullable', 'string', 'max:80'],
         ];
     }

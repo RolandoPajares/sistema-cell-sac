@@ -1,6 +1,10 @@
 @extends('layouts.panel.principal')
+
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('title', 'Configuración de la tienda virtual')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('body_class', 'modulo-ecommerce-marketing')
+{{-- seccion Blade que la plantilla principal mostrara en esta vista. --}}
 @section('content')
 <section class="tc-em" data-ecommerce-tienda>
     <header class="tc-em__header">
@@ -10,12 +14,15 @@
         </div>
         <div class="tc-em__actions"><a class="tc-em__button" href="{{ route('catalog.index') }}"><i class="bi bi-eye"></i> Ver tienda <i class="bi bi-box-arrow-up-right"></i></a><button type="button" class="tc-em__button tc-em__button--primary" data-em-store-open data-em-store-section="general" @disabled(!($configuracionTiendaDisponible && $puedeActualizarConfiguracion)) title="{{ $configuracionTiendaDisponible ? 'Editar preferencias guardadas por empresa' : 'El esquema no contiene una entidad para guardar esta configuración' }}"><i class="bi bi-sliders"></i> Editar configuración</button></div>
     </header>
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if (session('status'))<div class="tc-em__notice" role="status"><i class="bi bi-check-circle"></i><strong>Operación registrada</strong><span>{{ session('status') }}</span></div>@endif
+{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
     @if ($errors->any())<div class="tc-em__notice" role="alert"><i class="bi bi-exclamation-circle"></i><strong>No se guardó la configuración</strong><span>{{ $errors->first() }}</span></div>@endif
     <div class="tc-em__notice"><i class="bi bi-info-circle"></i><strong>Datos de MariaDB</strong><span>La empresa, moneda, catálogo y medios de pago se consultan desde la base. Las preferencias se guardan por empresa cuando la estructura está disponible.</span></div>
     <div class="tc-em__store-tabs" role="tablist" aria-label="Secciones de configuración">@foreach ($secciones as $seccion)<button type="button" role="tab" aria-selected="{{ $loop->first ? 'true' : 'false' }}" class="{{ $loop->first ? 'is-active' : '' }}" data-em-store-tab="{{ $seccion['clave'] }}"><i class="bi {{ $seccion['icono'] }}"></i>{{ $seccion['titulo'] }}</button>@endforeach</div>
     <div class="tc-em__store-grid">
         <div class="tc-em__store-left">
+{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
             @foreach ($secciones as $seccion)
             <article class="tc-em__card tc-em__settings-card" data-em-store-panel="{{ $seccion['clave'] }}" @if (! $loop->first) hidden @endif><h2><i class="bi {{ $seccion['icono'] }}"></i>{{ $seccion['resumen'] }}</h2>
                 <p>Información consultada desde las entidades disponibles en la base de datos.</p>
@@ -56,6 +63,7 @@
             </article>
         </aside>
     </div>
+{{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
     @include('gestion.ecommerce-marketing.componentes.modal-tienda')
 </section>
 @endsection

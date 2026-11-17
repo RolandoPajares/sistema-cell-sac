@@ -1,3 +1,11 @@
+/**
+ * GUIA DE EXPOSICION JAVASCRIPT
+ * Archivo: resources/js/gestion/inventario-logistica/inventario-logistica/inventario-logistica.js
+ * Este modulo contiene comportamiento de interfaz, eventos, validaciones y/o
+ * comunicacion con el backend. Los comentarios explican el flujo sin cambiar la logica.
+ */
+
+// Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
 document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
     const search = page.querySelector('[data-il-search]');
     const filters = [...page.querySelectorAll('[data-il-filter]')];
@@ -10,12 +18,15 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
  *
  * @returns {*} Resultado de la operación.
  */
+    // Funcion: applyFilters concentra una tarea reutilizable del modulo.
     const applyFilters = () => {
         const query = search?.value.trim().toLocaleLowerCase('es') ?? '';
         let visible = 0;
 
+        // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
         rows.forEach((row) => {
             const textMatches = row.textContent.toLocaleLowerCase('es').includes(query);
+            // Funcion: filtersMatch concentra una tarea reutilizable del modulo.
             const filtersMatch = filters.every((filter) => {
                 const selected = filter.value;
                 const field = filter.dataset.ilFilter;
@@ -28,14 +39,19 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
             visible += Number(!row.hidden);
         });
 
+        // Condicional: evalua "empty" para decidir si ejecuta el bloque siguiente.
         if (empty) {
             empty.hidden = visible > 0;
         }
     };
 
+    // Evento: escucha el evento input y ejecuta la funcion asociada cuando ocurre.
     search?.addEventListener('input', applyFilters);
+    // Evento: escucha el evento change y ejecuta la funcion asociada cuando ocurre.
     filters.forEach((filter) => filter.addEventListener('change', applyFilters));
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     page.querySelector('[data-il-apply]')?.addEventListener('click', applyFilters);
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     page.querySelector('[data-il-history]')?.addEventListener('click', () => {
         page.querySelector('.tc-il__table-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
@@ -48,6 +64,7 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
  *
  * @returns {*} Resultado de la operación.
  */
+    // Funcion: getDialog concentra una tarea reutilizable del modulo.
     const getDialog = (name) => dialogs.find((dialog) => dialog.dataset.ilDialog === name);
 /**
  * Gestiona la interacción y actualiza el estado visual correspondiente.
@@ -56,7 +73,9 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
  *
  * @returns {*} Resultado de la operación.
  */
+    // Funcion: closeDialog concentra una tarea reutilizable del modulo.
     const closeDialog = (dialog) => {
+        // Condicional: evalua "dialog?.open" para decidir si ejecuta el bloque siguiente.
         if (dialog?.open) {
             dialog.close();
         }
@@ -69,19 +88,23 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
  *
  * @returns {*} Resultado de la operación.
  */
+    // Funcion: renderDetails concentra una tarea reutilizable del modulo.
     const renderDetails = (row) => {
         const dialog = getDialog('detalle');
         const details = dialog?.querySelector('[data-il-detail-fields]');
         const headings = [...row.closest('table').querySelectorAll('thead th')];
         const cells = [...row.querySelectorAll('td')];
 
+        // Condicional: evalua "!dialog || !details" para decidir si ejecuta el bloque siguiente.
         if (!dialog || !details) {
             return;
         }
 
         const timeline = dialog.querySelector('[data-il-shipment-timeline]');
+        // Condicional: evalua "timeline" para decidir si ejecuta el bloque siguiente.
         if (timeline) timeline.hidden = mode !== 'envios';
         details.replaceChildren();
+        // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
         cells.slice(0, headings.length - 1).forEach((cell, index) => {
             const wrapper = document.createElement('div');
             const term = document.createElement('dt');
@@ -103,6 +126,7 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
  *
  * @returns {*} Resultado de la operación.
  */
+    // Funcion: showOperation concentra una tarea reutilizable del modulo.
     const showOperation = (row, operation) => {
         const dialog = getDialog('operacion');
         const warning = dialog?.querySelector('[data-il-operation-warning]');
@@ -118,6 +142,7 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
             duplicidad: `Este registro de ejemplo está marcado como posible duplicado. No se consultó la base real y no se confirma que exista una serie repetida.`
         };
 
+        // Condicional: evalua "!dialog || !warning || !confirm" para decidir si ejecuta el bloque siguiente.
         if (!dialog || !warning || !confirm) {
             return;
         }
@@ -128,37 +153,49 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
         confirm.disabled = false;
         confirm.dataset.operation = operation;
         evidenceField.hidden = operation !== 'entrega';
+        // Condicional: evalua "evidenceName" para decidir si ejecuta el bloque siguiente.
         if (evidenceName) {
             evidenceName.textContent = 'No se ha seleccionado evidencia. No se leerá ni transmitirá el archivo.';
         }
         const evidenceInput = dialog.querySelector('[data-il-evidence-file]');
+        // Condicional: evalua "evidenceInput" para decidir si ejecuta el bloque siguiente.
         if (evidenceInput) {
             evidenceInput.value = '';
         }
         dialog.showModal();
     };
 
+    // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
     page.querySelectorAll('[data-il-open]').forEach((button) => {
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         button.addEventListener('click', () => {
             const requested = button.dataset.ilOpen;
             const dialogName = requested === 'ruta' ? 'envio' : requested;
             const dialog = getDialog(dialogName);
 
+            // Condicional: evalua "!dialog" para decidir si ejecuta el bloque siguiente.
             if (!dialog) {
                 return;
             }
 
+            // Condicional: evalua "dialogName === 'envio'" para decidir si ejecuta el bloque siguiente.
             if (dialogName === 'envio') {
                 resetStepper(dialog, requested === 'ruta' ? 1 : 0);
+            // Condicional alternativo: este bloque se ejecuta cuando la comprobacion anterior no se cumple.
             } else if (dialogName === 'transferencia') {
                 resetStepper(dialog, 0);
+            // Condicional alternativo: este bloque se ejecuta cuando la comprobacion anterior no se cumple.
             } else if (dialogName === 'serie') {
                 const feedback = dialog.querySelector('[data-il-series-feedback]');
                 const error = dialog.querySelector('[data-il-series-error]');
                 const confirm = dialog.querySelector('[data-il-series-confirm]');
+                // Condicional: evalua "feedback" para decidir si ejecuta el bloque siguiente.
                 if (feedback) feedback.hidden = true;
+                // Condicional: evalua "error" para decidir si ejecuta el bloque siguiente.
                 if (error) error.hidden = true;
+                // Condicional: evalua "confirm" para decidir si ejecuta el bloque siguiente.
                 if (confirm) confirm.disabled = false;
+            // Condicional alternativo: este bloque se ejecuta cuando la comprobacion anterior no se cumple.
             } else if (dialogName === 'importar-series') {
                 resetImportWizard(dialog);
             }
@@ -167,22 +204,31 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
         });
     });
 
+    // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
     page.querySelectorAll('[data-il-detail]').forEach((button) => {
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         button.addEventListener('click', () => renderDetails(button.closest('[data-il-row]')));
     });
 
+    // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
     page.querySelectorAll('[data-il-row-action-button]').forEach((button) => {
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         button.addEventListener('click', () => {
             const row = button.closest('[data-il-row]');
             showOperation(row, row?.dataset.ilRowAction);
         });
     });
 
+    // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
     dialogs.forEach((dialog) => {
+        // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
         dialog.querySelectorAll('[data-il-close]').forEach((button) => {
+            // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
             button.addEventListener('click', () => closeDialog(dialog));
         });
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         dialog.addEventListener('click', (event) => {
+            // Condicional: evalua "event.target === dialog" para decidir si ejecuta el bloque siguiente.
             if (event.target === dialog) {
                 closeDialog(dialog);
             }
@@ -190,6 +236,7 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
     });
 
     const operationDialog = getDialog('operacion');
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     operationDialog?.querySelector('[data-il-operation-confirm]')?.addEventListener('click', (event) => {
         const confirm = event.currentTarget;
         const feedback = operationDialog.querySelector('[data-il-operation-feedback]');
@@ -205,15 +252,18 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
         confirm.disabled = true;
     });
 
+    // Evento: escucha el evento change y ejecuta la funcion asociada cuando ocurre.
     operationDialog?.querySelector('[data-il-evidence-file]')?.addEventListener('change', (event) => {
         const file = event.currentTarget.files?.[0] ?? null;
         const name = operationDialog.querySelector('[data-il-evidence-name]');
+        // Condicional: evalua "name" para decidir si ejecuta el bloque siguiente.
         if (name) {
             name.textContent = file ? `Seleccionado: ${file.name}. No se leerá ni transmitirá.` : 'No se ha seleccionado evidencia. No se leerá ni transmitirá el archivo.';
         }
     });
 
     const transferDialog = getDialog('transferencia');
+    // Condicional: evalua "transferDialog" para decidir si ejecuta el bloque siguiente.
     if (transferDialog) {
         const products = transferDialog.querySelector('[data-il-transfer-products]');
         const template = transferDialog.querySelector('[data-il-transfer-template]');
@@ -223,50 +273,64 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
         const destinationWarehouse = transferDialog.querySelector('[data-il-transfer-destination-warehouse]');
         const transferError = transferDialog.querySelector('[data-il-transfer-error]');
 
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         transferDialog.querySelector('[data-il-transfer-add]')?.addEventListener('click', () => {
+            // Condicional: evalua "template && products" para decidir si ejecuta el bloque siguiente.
             if (template && products) {
                 products.append(template.content.cloneNode(true));
                 updateTransferRemoveButtons(products);
             }
         });
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         products?.addEventListener('click', (event) => {
             const remove = event.target.closest('[data-il-transfer-remove]');
+            // Condicional: evalua "remove && !remove.disabled" para decidir si ejecuta el bloque siguiente.
             if (remove && !remove.disabled) {
                 remove.closest('[data-il-transfer-product-row]')?.remove();
                 updateTransferRemoveButtons(products);
             }
         });
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         transferDialog.querySelector('[data-il-next]')?.addEventListener('click', () => {
             const step = currentStep(transferDialog);
+            // Condicional: evalua "step === 3" para decidir si ejecuta el bloque siguiente.
             if (step === 3) {
                 return;
             }
+            // Condicional: evalua "!validateVisibleStep(transferDialog)" para decidir si ejecuta el bloque siguiente.
             if (!validateVisibleStep(transferDialog)) {
                 return;
             }
+            // Condicional: evalua "step === 1 && sourceSite.value === destinationSite.value" para decidir si ejecuta el bloque siguiente.
             if (step === 1 && sourceSite.value === destinationSite.value) {
                 transferError.textContent = 'La sede de origen y la sede de destino deben ser distintas.';
                 transferError.hidden = false;
                 return;
             }
             transferError.hidden = true;
+            // Condicional: evalua "step === 2" para decidir si ejecuta el bloque siguiente.
             if (step === 2) {
                 const rowsInTransfer = [...products.querySelectorAll('[data-il-transfer-product-row]')];
+                // Condicional: evalua "rowsInTransfer.some((row) => Number(row.querySelector('input[type="number"]')?.value) <= 0)" para decidir si ejecuta el bloque siguiente.
                 if (rowsInTransfer.some((row) => Number(row.querySelector('input[type="number"]')?.value) <= 0)) {
                     showStepError(transferDialog, 'Cada cantidad debe ser mayor que cero.');
                     return;
                 }
             }
             const next = step + 1;
+            // Condicional: evalua "next === 3" para decidir si ejecuta el bloque siguiente.
             if (next === 3) {
                 renderTransferReview(transferDialog);
             }
             renderStepper(transferDialog, next);
         });
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         transferDialog.querySelector('[data-il-previous]')?.addEventListener('click', () => renderStepper(transferDialog, Math.max(0, currentStep(transferDialog) - 1)));
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         transferDialog.querySelector('[data-il-confirm]')?.addEventListener('click', () => {
             const acknowledgement = transferDialog.querySelector('[data-il-transfer-ack]');
             const feedback = transferDialog.querySelector('[data-il-transfer-feedback]');
+            // Condicional: evalua "!acknowledgement.checked" para decidir si ejecuta el bloque siguiente.
             if (!acknowledgement.checked) {
                 showStepError(transferDialog, 'Marca la confirmación para continuar.');
                 return;
@@ -279,20 +343,26 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
     }
 
     const shipmentDialog = getDialog('envio');
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     shipmentDialog?.querySelector('[data-il-next]')?.addEventListener('click', () => {
         const step = currentStep(shipmentDialog);
+        // Condicional: evalua "step === 2" para decidir si ejecuta el bloque siguiente.
         if (step === 2) {
             return;
         }
+        // Condicional: evalua "!validateVisibleStep(shipmentDialog)" para decidir si ejecuta el bloque siguiente.
         if (!validateVisibleStep(shipmentDialog)) {
             return;
         }
         renderStepper(shipmentDialog, step + 1);
     });
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     shipmentDialog?.querySelector('[data-il-previous]')?.addEventListener('click', () => renderStepper(shipmentDialog, Math.max(0, currentStep(shipmentDialog) - 1)));
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     shipmentDialog?.querySelector('[data-il-confirm]')?.addEventListener('click', () => {
         const acknowledgement = shipmentDialog.querySelector('[data-il-shipment-ack]');
         const feedback = shipmentDialog.querySelector('[data-il-shipment-feedback]');
+        // Condicional: evalua "!acknowledgement.checked" para decidir si ejecuta el bloque siguiente.
         if (!acknowledgement.checked) {
             showStepError(shipmentDialog, 'Marca la confirmación para continuar.');
             return;
@@ -304,11 +374,14 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
     });
 
     const seriesDialog = getDialog('serie');
+    // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     seriesDialog?.querySelector('[data-il-series-confirm]')?.addEventListener('click', () => {
         const fields = [...seriesDialog.querySelectorAll('.tc-il__dialog-body input[required], .tc-il__dialog-body select[required]')];
+        // Funcion: invalid concentra una tarea reutilizable del modulo.
         const invalid = fields.find((field) => !field.checkValidity());
         const error = seriesDialog.querySelector('[data-il-series-error]');
         const feedback = seriesDialog.querySelector('[data-il-series-feedback]');
+        // Condicional: evalua "invalid" para decidir si ejecuta el bloque siguiente.
         if (invalid) {
             invalid.setAttribute('aria-invalid', 'true');
             error.textContent = 'Completa los campos requeridos y revisa el formato ilustrativo.';
@@ -316,6 +389,7 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
             invalid.focus();
             return;
         }
+        // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
         fields.forEach((field) => field.removeAttribute('aria-invalid'));
         error.hidden = true;
         feedback.textContent = 'Integración pendiente: no se registró la serie, no se consultaron duplicados y no se creó stock.';
@@ -324,6 +398,7 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
     });
 
     const importDialog = getDialog('importar-series');
+    // Condicional: evalua "importDialog" para decidir si ejecuta el bloque siguiente.
     if (importDialog) {
         const wizard = importDialog.querySelector('[data-il-import-wizard]');
         const fileInput = importDialog.querySelector('[data-il-series-file]');
@@ -339,11 +414,15 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
  *
  * @returns {*} Resultado de la operación.
  */
+        // Funcion: currentImportStep concentra una tarea reutilizable del modulo.
         const currentImportStep = () => Number(wizard.dataset.ilImportStep ?? 0);
 
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         importDialog.querySelector('[data-il-series-template]')?.addEventListener('click', () => downloadCsv('plantilla-imei-series.csv', 'imei_o_serie,producto,almacen,condicion'));
+        // Evento: escucha el evento change y ejecuta la funcion asociada cuando ocurre.
         fileInput.addEventListener('change', () => {
             const file = fileInput.files?.[0] ?? null;
+            // Condicional: evalua "file && !/\.(csv|xlsx)$/i.test(file.name)" para decidir si ejecuta el bloque siguiente.
             if (file && !/\.(csv|xlsx)$/i.test(file.name)) {
                 wizard.dataset.ilSelectedFile = '';
                 fileInput.value = '';
@@ -356,9 +435,12 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
             fileName.textContent = file ? `Seleccionado: ${file.name}` : 'No se ha seleccionado un archivo.';
             error.hidden = true;
         });
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         previous.addEventListener('click', () => renderImportStep(importDialog, Math.max(0, currentImportStep() - 1)));
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         next.addEventListener('click', () => {
             const step = currentImportStep();
+            // Condicional: evalua "step === 1 && !wizard.dataset.ilSelectedFile" para decidir si ejecuta el bloque siguiente.
             if (step === 1 && !wizard.dataset.ilSelectedFile) {
                 error.textContent = 'Selecciona un archivo para continuar con la vista previa ilustrativa.';
                 error.hidden = false;
@@ -366,7 +448,9 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
             }
             renderImportStep(importDialog, Math.min(4, step + 1));
         });
+        // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
         confirm.addEventListener('click', () => {
+            // Condicional: evalua "!acknowledgement.checked" para decidir si ejecuta el bloque siguiente.
             if (!acknowledgement.checked) {
                 error.textContent = 'Confirma que revisaste los ejemplos y las validaciones ilustrativas.';
                 error.hidden = false;
@@ -387,6 +471,7 @@ document.querySelectorAll('[data-inventario-diseno]').forEach((page) => {
  *
  * @returns {*} Resultado de la operación.
  */
+// Funcion: currentStep concentra una tarea reutilizable del modulo.
 function currentStep(dialog) {
     return Number(dialog.querySelector('[data-il-step]:not([hidden])')?.dataset.ilStep ?? 0);
 }
@@ -400,10 +485,13 @@ function currentStep(dialog) {
  *
  * @returns {*} Resultado de la operación.
  */
+// Funcion: resetStepper concentra una tarea reutilizable del modulo.
 function resetStepper(dialog, initialStep = 0) {
+    // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
     dialog.querySelectorAll('[data-il-step]').forEach((step) => {
         step.hidden = Number(step.dataset.ilStep) !== initialStep;
     });
+    // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
     dialog.querySelectorAll('[data-il-step-indicator]').forEach((indicator) => {
         indicator.classList.toggle('is-current', Number(indicator.dataset.ilStepIndicator) === initialStep);
     });
@@ -411,15 +499,21 @@ function resetStepper(dialog, initialStep = 0) {
     const next = dialog.querySelector('[data-il-next]');
     const confirm = dialog.querySelector('[data-il-confirm]');
     const error = dialog.querySelector('[data-il-step-error]');
+    // Condicional: evalua "previous" para decidir si ejecuta el bloque siguiente.
     if (previous) previous.hidden = initialStep === 0;
+    // Condicional: evalua "next) next.hidden = initialStep === dialog.querySelectorAll('[data-il-step]'" para decidir si ejecuta el bloque siguiente.
     if (next) next.hidden = initialStep === dialog.querySelectorAll('[data-il-step]').length - 1;
+    // Condicional: evalua "confirm" para decidir si ejecuta el bloque siguiente.
     if (confirm) {
         confirm.hidden = initialStep !== dialog.querySelectorAll('[data-il-step]').length - 1;
         confirm.disabled = false;
     }
+    // Condicional: evalua "error" para decidir si ejecuta el bloque siguiente.
     if (error) error.hidden = true;
+    // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
     dialog.querySelectorAll('[data-il-transfer-feedback], [data-il-shipment-feedback]').forEach((feedback) => { feedback.hidden = true; });
     const acknowledgement = dialog.querySelector('[data-il-transfer-ack], [data-il-shipment-ack]');
+    // Condicional: evalua "acknowledgement" para decidir si ejecuta el bloque siguiente.
     if (acknowledgement) acknowledgement.checked = false;
 }
 
@@ -432,6 +526,7 @@ function resetStepper(dialog, initialStep = 0) {
  *
  * @returns {*} Resultado de la operación.
  */
+// Funcion: renderStepper concentra una tarea reutilizable del modulo.
 function renderStepper(dialog, step) {
     resetStepper(dialog, step);
 }
@@ -443,15 +538,19 @@ function renderStepper(dialog, step) {
  *
  * @returns {*} Resultado de la operación.
  */
+// Funcion: validateVisibleStep concentra una tarea reutilizable del modulo.
 function validateVisibleStep(dialog) {
     const active = dialog.querySelector('[data-il-step]:not([hidden])');
+    // Funcion: invalid concentra una tarea reutilizable del modulo.
     const invalid = [...(active?.querySelectorAll('input[required], select[required], textarea[required]') ?? [])].find((field) => !field.checkValidity());
+    // Condicional: evalua "invalid" para decidir si ejecuta el bloque siguiente.
     if (invalid) {
         invalid.setAttribute('aria-invalid', 'true');
         invalid.focus();
         showStepError(dialog, 'Completa los campos obligatorios para continuar.');
         return false;
     }
+    // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
     active?.querySelectorAll('[aria-invalid="true"]').forEach((field) => field.removeAttribute('aria-invalid'));
     showStepError(dialog, '');
     return true;
@@ -466,8 +565,10 @@ function validateVisibleStep(dialog) {
  *
  * @returns {*} Resultado de la operación.
  */
+// Funcion: showStepError concentra una tarea reutilizable del modulo.
 function showStepError(dialog, message) {
     const error = dialog.querySelector('[data-il-step-error]');
+    // Condicional: evalua "error" para decidir si ejecuta el bloque siguiente.
     if (error) {
         error.textContent = message;
         error.hidden = message === '';
@@ -481,10 +582,13 @@ function showStepError(dialog, message) {
  *
  * @returns {*} Resultado de la operación.
  */
+// Funcion: updateTransferRemoveButtons concentra una tarea reutilizable del modulo.
 function updateTransferRemoveButtons(container) {
     const rows = [...container.querySelectorAll('[data-il-transfer-product-row]')];
+    // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
     rows.forEach((row) => {
         const remove = row.querySelector('[data-il-transfer-remove]');
+        // Condicional: evalua "remove" para decidir si ejecuta el bloque siguiente.
         if (remove) remove.disabled = rows.length === 1;
     });
 }
@@ -496,6 +600,7 @@ function updateTransferRemoveButtons(container) {
  *
  * @returns {*} Resultado de la operación.
  */
+// Funcion: renderTransferReview concentra una tarea reutilizable del modulo.
 function renderTransferReview(dialog) {
     const list = dialog.querySelector('[data-il-transfer-review]');
     const rows = [...dialog.querySelectorAll('[data-il-transfer-product-row]')];
@@ -506,9 +611,11 @@ function renderTransferReview(dialog) {
     const values = [
         ['Origen', `${sourceSite.value} · ${sourceWarehouse.value}`],
         ['Destino', `${destinationSite.value} · ${destinationWarehouse.value}`],
+        // Recorrido: usa map para procesar cada elemento y obtener o actualizar datos.
         ['Productos ilustrativos', rows.map((row) => `${row.querySelector('select').value} × ${row.querySelector('input').value}`).join('; ')]
     ];
     list.replaceChildren();
+    // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
     values.forEach(([label, value]) => {
         const wrapper = document.createElement('div');
         const term = document.createElement('dt');
@@ -527,16 +634,22 @@ function renderTransferReview(dialog) {
  *
  * @returns {*} Resultado de la operación.
  */
+// Funcion: resetImportWizard concentra una tarea reutilizable del modulo.
 function resetImportWizard(dialog) {
     const wizard = dialog.querySelector('[data-il-import-wizard]');
     const fileInput = dialog.querySelector('[data-il-series-file]');
     const fileName = dialog.querySelector('[data-il-series-file-name]');
     const acknowledgement = dialog.querySelector('[data-il-series-import-ack]');
     const confirm = dialog.querySelector('[data-il-import-confirm]');
+    // Condicional: evalua "fileInput" para decidir si ejecuta el bloque siguiente.
     if (fileInput) fileInput.value = '';
+    // Condicional: evalua "fileName" para decidir si ejecuta el bloque siguiente.
     if (fileName) fileName.textContent = 'No se ha seleccionado un archivo.';
+    // Condicional: evalua "acknowledgement" para decidir si ejecuta el bloque siguiente.
     if (acknowledgement) acknowledgement.checked = false;
+    // Condicional: evalua "confirm" para decidir si ejecuta el bloque siguiente.
     if (confirm) confirm.disabled = false;
+    // Condicional: evalua "wizard" para decidir si ejecuta el bloque siguiente.
     if (wizard) wizard.dataset.ilSelectedFile = '';
     renderImportStep(dialog, 0);
 }
@@ -550,11 +663,14 @@ function resetImportWizard(dialog) {
  *
  * @returns {*} Resultado de la operación.
  */
+// Funcion: renderImportStep concentra una tarea reutilizable del modulo.
 function renderImportStep(dialog, step) {
     dialog.querySelector('[data-il-import-wizard]').dataset.ilImportStep = String(step);
+    // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
     dialog.querySelectorAll('[data-il-import-stage]').forEach((stage) => {
         stage.hidden = Number(stage.dataset.ilImportStage) !== step;
     });
+    // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
     dialog.querySelectorAll('[data-il-import-indicator]').forEach((indicator) => {
         indicator.classList.toggle('is-current', Number(indicator.dataset.ilImportIndicator) === step);
     });
@@ -563,10 +679,15 @@ function renderImportStep(dialog, step) {
     const confirm = dialog.querySelector('[data-il-import-confirm]');
     const error = dialog.querySelector('[data-il-import-error]');
     const feedback = dialog.querySelector('[data-il-series-import-feedback]');
+    // Condicional: evalua "previous" para decidir si ejecuta el bloque siguiente.
     if (previous) previous.hidden = step === 0;
+    // Condicional: evalua "next" para decidir si ejecuta el bloque siguiente.
     if (next) next.hidden = step === 4;
+    // Condicional: evalua "confirm" para decidir si ejecuta el bloque siguiente.
     if (confirm) confirm.hidden = step !== 4;
+    // Condicional: evalua "error" para decidir si ejecuta el bloque siguiente.
     if (error) error.hidden = true;
+    // Condicional: evalua "feedback" para decidir si ejecuta el bloque siguiente.
     if (feedback) feedback.hidden = true;
 }
 
@@ -579,6 +700,7 @@ function renderImportStep(dialog, step) {
  *
  * @returns {*} Resultado de la operación.
  */
+// Funcion: downloadCsv concentra una tarea reutilizable del modulo.
 function downloadCsv(filename, header) {
     const csv = `\uFEFF${header}\r\n`;
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
