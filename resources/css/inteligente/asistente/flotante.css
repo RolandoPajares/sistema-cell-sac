@@ -133,11 +133,11 @@
 /* Aplica estos estilos al bloque '.assistant-float-prompts i'. */
 .assistant-float-prompts i { color: #0876f9; }
 /* Aplica estos estilos al bloque '.assistant-float-form'. */
-.assistant-float-form { display: grid; grid-template-columns: 1fr 44px; gap: 8px; margin: 12px 18px 18px; padding: 5px; border: 1px solid #cfe1f4; border-radius: 14px; }
+.assistant-float-form { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin: 12px 18px 18px; padding: 5px; border: 1px solid #cfe1f4; border-radius: 14px; }
 /* Aplica estos estilos al bloque '.assistant-float-form input'. */
 .assistant-float-form input { min-width: 0; border: 0; outline: 0; padding: 8px 9px; color: #17396e; background: transparent; font-size: .8rem; }
 /* Aplica estos estilos al bloque '.assistant-float-form button'. */
-.assistant-float-form button { border: 0; border-radius: 10px; color: #fff; background: #0876ed; cursor: pointer; }
+.assistant-float-form button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 76px; padding: 8px 12px; border: 0; border-radius: 10px; color: #fff; background: #0876ed; cursor: pointer; }
 /* Aplica estos estilos al bloque '@keyframes assistantFloatIn'. */
 @keyframes assistantFloatIn { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 /* Aplica estos estilos al bloque '@keyframes assistantFloatSlideIn'. */

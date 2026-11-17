@@ -7,8 +7,10 @@ use App\Http\Requests\Inteligente\Asistente\AsistenteRequest;
 use App\Models\Catalogo\Producto;
 use App\Models\Comercio\Pedido;
 use App\Models\Comercio\Venta;
+use App\Models\User;
 use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
 use App\Servicios\Gestion\InventarioLogistica\ServicioInventario;
+use App\Servicios\Inteligente\ServicioAsistenteGemini;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
@@ -29,6 +31,7 @@ class AsistenteController extends Controller
     public function __construct(
         private readonly ServicioAutorizacion $autorizacion,
         private readonly ServicioInventario $inventario,
+        private readonly ServicioAsistenteGemini $asistenteGemini,
     ) {}
 
     /**
@@ -102,9 +105,31 @@ class AsistenteController extends Controller
         } elseif (str_contains($query, 'producto')) {
             // Prepara en $answer la consulta que obtiene o modifica los registros necesarios.
             $answer = 'Hay '.Producto::query()->active()->count().' productos activos registrados en el catálogo.';
+        } elseif (str_contains($query, 'funcion') || str_contains($query, 'modulo') || str_contains($query, 'administrador') || str_contains($query, 'permiso') || str_contains($query, 'rol')) {
+            $answer = $this->resumenFuncionesAutorizadas($user);
         } else {
             // Guarda en $answer el resultado necesario para continuar esta operacion.
-            $answer = 'Puedo consultar información registrada sobre stock, pedidos, ventas por pedidos y productos. No utilizo un servicio externo de inteligencia artificial.';
+            $answer = 'Puedo ayudarte con información pública del catálogo y, según tu rol, con las funciones autorizadas del sistema.';
+        }
+
+        $consultaEstructurada = str_contains($query, 'stock')
+            || str_contains($query, 'inventario')
+            || str_contains($query, 'pedido')
+            || str_contains($query, 'venta')
+            || str_contains($query, 'producto')
+            || str_contains($query, 'funcion')
+            || str_contains($query, 'modulo')
+            || str_contains($query, 'administrador')
+            || str_contains($query, 'permiso')
+            || str_contains($query, 'rol');
+
+        $contexto = $user === null
+            ? 'Perfil público. Solo puede recibir información pública del catálogo y orientación general de compra. No tiene acceso a inventario interno, pedidos, ventas, usuarios ni permisos. Respuesta pública autorizada: '.$answer
+            : 'Perfil autenticado. La aplicación ya filtró la información según sus permisos. Solo se puede usar este resumen autorizado: '.$answer;
+        $respuestaIa = $consultaEstructurada ? null : $this->asistenteGemini->responder($query, $contexto);
+
+        if ($respuestaIa !== null) {
+            $answer = $respuestaIa;
         }
 
         // Comprueba la condicion $request->expectsJson() antes de ejecutar este bloque.
@@ -121,5 +146,42 @@ class AsistenteController extends Controller
 
         // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('assistant_answer', $answer);
+    }
+
+    private function resumenFuncionesAutorizadas(?User $user): string
+    {
+        if ($user === null) {
+            return 'Inicia sesión para consultar las funciones autorizadas de tu rol.';
+        }
+
+        $modulos = [
+            'Panel y dashboard' => 'gestion.panel.consultar',
+            'Productos y catálogo' => 'gestion.productos.consultar',
+            'Inventario y logística' => 'gestion.inventario.consultar',
+            'Ventas' => 'gestion.ventas.consultar',
+            'Pedidos' => 'gestion.pedidos.consultar',
+            'Compras' => 'gestion.compras.consultar',
+            'Cotizaciones' => 'gestion.cotizaciones.consultar',
+            'Clientes' => 'gestion.clientes.consultar',
+            'Proveedores' => 'gestion.proveedores.consultar',
+            'Marketing y campañas' => 'gestion.campanias.consultar',
+            'Finanzas y pagos' => 'gestion.pagos.consultar',
+            'Seguridad, usuarios y permisos' => 'gestion.seguridad.consultar',
+            'Organización y configuración' => 'gestion.organizacion.consultar',
+            'Reportes y auditoría' => 'gestion.reportes.consultar',
+        ];
+
+        $permitidos = collect($modulos)
+            ->filter(fn (string $permiso): bool => $this->autorizacion->allows($user, $permiso))
+            ->keys()
+            ->values();
+
+        $rol = (string) ($user->rolesVigentes()->pluck('codigo')->first() ?? $user->getAttribute('rol') ?? 'sin rol');
+
+        if ($permitidos->isEmpty()) {
+            return 'Tu rol '.$rol.' no tiene módulos de gestión habilitados en la matriz de permisos vigente.';
+        }
+
+        return 'Tu rol '.$rol.' tiene acceso autorizado a: '.$permitidos->join(', ').'. Las acciones de crear, editar, eliminar y exportar dependen de los permisos específicos de cada módulo.';
     }
 }

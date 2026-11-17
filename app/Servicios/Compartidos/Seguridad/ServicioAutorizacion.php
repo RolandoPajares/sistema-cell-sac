@@ -58,11 +58,16 @@ final class ServicioAutorizacion
      */
     public function schemaAvailable(): bool
     {
+        // ORM: consulta las tablas RBAC mediante el constructor de consultas de Laravel.
+        // Comprueba si la estructura RBAC esta disponible en la base actual.
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (Schema::getFacadeRoot() === null) {
             return false;
         }
 
+        // Recorre los elementos recibidos para validar o procesar cada registro.
         foreach (self::REQUIRED_TABLES as $table) {
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if (! Schema::hasTable($table)) {
                 return false;
             }
@@ -78,6 +83,7 @@ final class ServicioAutorizacion
      */
     public function isSeeded(): bool
     {
+        // Verifica si ya existen modulos, permisos y menus iniciales.
         return $this->schemaAvailable()
             && DB::table('roles')->where('activo', true)->exists()
             && DB::table('permisos')->where('activo', true)->exists();
@@ -92,12 +98,16 @@ final class ServicioAutorizacion
      */
     public function hasRole(User $user, string $roleCode): bool
     {
+        // Comprueba que el usuario tenga activo el rol solicitado.
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! $this->isSeeded()) {
             return false;
         }
 
+        // Prepara en $role la consulta que obtiene o modifica los datos necesarios.
         $role = DB::table('roles')->where('codigo', $roleCode)->where('activo', true)->first(['id', 'alcance_permitido']);
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($role === null) {
             return false;
         }
@@ -111,10 +121,12 @@ final class ServicioAutorizacion
             })
             ->exists();
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($activeAssignment) {
             return true;
         }
 
+        // Guarda en $siteId el resultado necesario para continuar la operacion.
         $siteId = $this->idSedeActivaInterna($user);
         $siteAssignment = $role->alcance_permitido === 'sede' && $siteId !== null && DB::table('usuarios_sedes_roles')
             ->where('usuario_id', $user->getKey())
@@ -126,6 +138,7 @@ final class ServicioAutorizacion
             })
             ->exists();
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($siteAssignment) {
             return true;
         }
@@ -145,6 +158,8 @@ final class ServicioAutorizacion
      */
     public function allows(User $user, string $permissionCode): bool
     {
+        // Evalua el permiso considerando sus asignaciones y alcance organizacional.
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! $this->isSeeded()) {
             return false;
         }
@@ -174,25 +189,32 @@ final class ServicioAutorizacion
      */
     public function assertAllowed(User $user, string $permissionCode): void
     {
+        // Interrumpe la solicitud cuando el usuario no tiene el permiso requerido.
+        // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
         abort_unless($this->allows($user, $permissionCode), 403);
     }
 
     /** @return array{empresa_id:?int,sede_id:?int,almacen_id:?int} */
     public function operationLocation(User $user): array
     {
+        // Guarda en $site el resultado necesario para continuar la operacion.
         $site = $this->operationSite($user);
         $location = $site + ['almacen_id' => null];
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($site['sede_id'] === null) {
             return $location;
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (Schema::hasTable('almacenes')) {
+            // Prepara en $warehouses la consulta que obtiene o modifica los datos necesarios.
             $warehouses = DB::table('almacenes')
                 ->where('sede_id', $site['sede_id'])
                 ->where('activo', true)
                 ->orderBy('id')
                 ->limit(2)
                 ->pluck('id');
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_if($warehouses->count() > 1, 409, 'Selecciona un almacén autorizado antes de continuar.');
             $location['almacen_id'] = $warehouses->isEmpty() ? null : (int) $warehouses->first();
         }
@@ -205,24 +227,33 @@ final class ServicioAutorizacion
     {
         $siteLocation = ['empresa_id' => null, 'sede_id' => null];
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! Schema::hasTable('sedes') || ! Schema::hasTable('empresas')) {
             return $siteLocation;
         }
 
+        // Guarda en $siteId el resultado necesario para continuar la operacion.
         $siteId = $this->idSedeActivaInterna($user);
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($siteId === null && $this->allowsGlobal($user, 'gestion.organizacion.consultar')) {
+            // Guarda en $siteId el resultado necesario para continuar la operacion.
             $siteId = $this->idSedeActivaUnica();
         }
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($siteId === null && $this->allows($user, 'gestion.pedidos.consultar')) {
+            // Guarda en $siteId el resultado necesario para continuar la operacion.
             $siteId = $this->idSedeActivaUnica();
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($siteId === null) {
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_if($this->isSeeded(), 403, 'Selecciona una sede autorizada para registrar esta operación.');
 
             return $siteLocation;
         }
 
+        // Prepara en $site la consulta que obtiene o modifica los datos necesarios.
         $site = DB::table('sedes')
             ->join('empresas', 'empresas.id', '=', 'sedes.empresa_id')
             ->where('sedes.id', $siteId)
@@ -230,6 +261,7 @@ final class ServicioAutorizacion
             ->where('empresas.activo', true)
             ->first(['sedes.id', 'sedes.empresa_id']);
 
+        // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
         abort_unless($site !== null, 403, 'La sede seleccionada no está habilitada.');
 
         return ['empresa_id' => (int) $site->empresa_id, 'sede_id' => (int) $site->id];
@@ -259,10 +291,12 @@ final class ServicioAutorizacion
     /** @return array<string, int|null> */
     public function operationScopeAttributes(User $user, string $table): array
     {
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! Schema::hasTable($table)) {
             return [];
         }
 
+        // Guarda en $location el resultado necesario para continuar la operacion.
         $location = $this->operationLocation($user);
 
         return array_filter(
@@ -289,36 +323,46 @@ final class ServicioAutorizacion
         ?int $siteId,
         ?int $ownerId = null,
     ): bool {
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! $this->isSeeded()) {
             return false;
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! $this->allows($user, $permissionCode)) {
             return false;
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($siteId !== null && $companyId !== null) {
+            // Prepara en $siteCompanyId la consulta que obtiene o modifica los datos necesarios.
             $siteCompanyId = DB::table('sedes')->where('id', $siteId)->value('empresa_id');
 
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if ($siteCompanyId === null || (int) $siteCompanyId !== $companyId) {
                 return false;
             }
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($this->allowsGlobal($user, $permissionCode)) {
             return $companyId !== null && $companyId === $this->idEmpresaActivaUnica();
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($ownerId === (int) $user->getKey() && $this->tienePermisoEnAlcance($user, $permissionCode, 'propio')) {
             return true;
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($siteId === null || $companyId === null) {
             return false;
         }
 
+        // Guarda en $selectedSiteId el resultado de la consulta ejecutada.
         $selectedSiteId = request()->hasSession() ? request()->session()->get('sede_actual_id') : null;
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (is_numeric($selectedSiteId) && (int) $selectedSiteId !== $siteId) {
             return false;
         }
@@ -329,20 +373,25 @@ final class ServicioAutorizacion
     /** @return array<int, int> */
     public function authorizedSiteIds(User $user, string $permissionCode): array
     {
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! $this->allows($user, $permissionCode)) {
             return [];
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($this->allowsGlobal($user, $permissionCode)) {
+            // Guarda en $companyId el resultado necesario para continuar la operacion.
             $companyId = $this->idEmpresaActivaUnica();
 
             $siteIds = $companyId === null ? [] : DB::table('sedes')
                 ->where('empresa_id', $companyId)->where('activa', true)
                 ->pluck('id')->map(static fn (mixed $id): int => (int) $id)->all();
         } else {
+            // Guarda en $siteIds el resultado necesario para continuar la operacion.
             $siteIds = $this->idsSedesConPermiso($user, $permissionCode);
         }
 
+        // Guarda en $selectedSiteId el resultado de la consulta ejecutada.
         $selectedSiteId = request()->hasSession() ? request()->session()->get('sede_actual_id') : null;
 
         return is_numeric($selectedSiteId)
@@ -356,23 +405,30 @@ final class ServicioAutorizacion
      */
     public function scopeRecordsFor(Builder $query, User $user, string $permissionCode, ?string $ownerColumn = null): Builder
     {
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! $this->isSeeded()) {
             return $query->whereRaw('1 = 0');
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! $this->allows($user, $permissionCode)) {
             return $query->whereRaw('1 = 0');
         }
 
+        // Guarda en $table el resultado necesario para continuar la operacion.
         $table = $query->getModel()->getTable();
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($this->allowsGlobal($user, $permissionCode)) {
+            // Guarda en $companyId el resultado necesario para continuar la operacion.
             $companyId = $this->idEmpresaActivaUnica();
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if ($companyId === null || ! Schema::hasColumn($table, 'empresa_id')) {
                 return $query->whereRaw('1 = 0');
             }
 
             $query->where($table.'.empresa_id', $companyId);
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if (Schema::hasColumn($table, 'sede_id')) {
                 $query->where(function (Builder $companyQuery) use ($table): void {
                     $companyQuery->whereNull($table.'.sede_id')
@@ -387,31 +443,39 @@ final class ServicioAutorizacion
             return $query;
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! Schema::hasColumn($table, 'sede_id')) {
             return $query->whereRaw('1 = 0');
         }
 
+        // Guarda en $siteIds el resultado necesario para continuar la operacion.
         $siteIds = $this->idsSedesConPermiso($user, $permissionCode);
         $hasOwnScope = $ownerColumn !== null
             && Schema::hasColumn($table, $ownerColumn)
             && $this->tienePermisoEnAlcance($user, $permissionCode, 'propio');
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($siteIds === [] && ! $hasOwnScope) {
             return $query->whereRaw('1 = 0');
         }
 
+        // Guarda en $selectedSiteId el resultado de la consulta ejecutada.
         $selectedSiteId = request()->hasSession() ? request()->session()->get('sede_actual_id') : null;
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (is_numeric($selectedSiteId)) {
             $siteIds = array_values(array_filter($siteIds, static fn (int $siteId): bool => $siteId === (int) $selectedSiteId));
         }
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($siteIds === [] && ! $hasOwnScope) {
             return $query->whereRaw('1 = 0');
         }
 
         return $query->where(function (Builder $scopedQuery) use ($table, $siteIds, $hasOwnScope, $ownerColumn, $user): void {
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if ($siteIds !== []) {
                 $scopedQuery->whereIn($table.'.sede_id', $siteIds);
 
+                // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
                 if (Schema::hasColumn($table, 'empresa_id')) {
                     $scopedQuery->whereExists(function ($siteQuery) use ($table): void {
                         $siteQuery->selectRaw('1')
@@ -423,7 +487,9 @@ final class ServicioAutorizacion
 
             }
 
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if ($hasOwnScope && $ownerColumn !== null) {
+                // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
                 if ($siteIds !== []) {
                     $scopedQuery->orWhere($table.'.'.$ownerColumn, $user->getKey());
                 } else {
@@ -442,10 +508,12 @@ final class ServicioAutorizacion
      */
     public function allowsGlobal(User $user, string $permissionCode): bool
     {
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! $this->isSeeded() || ! $this->allows($user, $permissionCode) || $this->idEmpresaActivaUnica() === null) {
             return false;
         }
 
+        // Devuelve el resultado obtenido mediante el modelo correspondiente.
         return DB::table('usuarios_roles')
             ->join('roles', 'roles.id', '=', 'usuarios_roles.rol_id')
             ->join('roles_permisos', 'roles_permisos.rol_id', '=', 'roles.id')
@@ -472,51 +540,68 @@ final class ServicioAutorizacion
      */
     public function allowsRoute(Request $request): bool
     {
+        // Resuelve el permiso de la ruta actual y comprueba el acceso del usuario.
+        // Guarda en $routeName el resultado necesario para continuar la operacion.
         $routeName = $request->route()?->getName();
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (is_string($routeName) && ($routeName === 'management.account' || Str::startsWith($routeName, 'management.account.') || Str::startsWith($routeName, 'legacy.admin.account'))) {
             return true;
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (str_contains((string) $request->route()?->getActionName(), 'Illuminate\\Routing\\ViewController')) {
             return false;
         }
 
+        // Guarda en $permissionCode el resultado necesario para continuar la operacion.
         $permissionCode = $this->permissionForRoute($request);
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($permissionCode === null || ! ($request->user() instanceof User)) {
             return false;
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! $this->isSeeded()) {
             return false;
         }
 
+        // Guarda en $canonicalRoute el resultado necesario para continuar la operacion.
         $canonicalRoute = $routeName;
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (is_string($canonicalRoute) && Str::startsWith($canonicalRoute, 'legacy.admin.')) {
+            // Guarda en $canonicalRoute el resultado necesario para continuar la operacion.
             $canonicalRoute = 'management.'.Str::after($canonicalRoute, 'legacy.admin.');
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (is_string($canonicalRoute)) {
+            // Guarda en $codigoModulo el resultado necesario para continuar la operacion.
             $codigoModulo = explode('.', $permissionCode)[1] ?? null;
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if ($codigoModulo === null) {
                 return false;
             }
 
+            // Prepara en $pantallasCoincidentes la consulta que obtiene o modifica los datos necesarios.
             $pantallasCoincidentes = DB::table('pantallas')
                 ->join('modulos', 'modulos.id', '=', 'pantallas.modulo_id')
                 ->where('pantallas.ruta', $canonicalRoute)
                 ->where('modulos.codigo', $codigoModulo)
                 ->get(['pantallas.codigo', 'pantallas.habilitada', 'modulos.habilitado']);
 
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if ($pantallasCoincidentes->isNotEmpty()) {
                 $pantallasHabilitadas = $pantallasCoincidentes->filter(static fn (object $pantalla): bool => (bool) $pantalla->habilitada && (bool) $pantalla->habilitado);
 
+                // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
                 if ($pantallasHabilitadas->isEmpty()) {
                     return false;
                 }
 
                 $tienePermisoDePantalla = $pantallasHabilitadas->contains(fn (object $pantalla): bool => $this->allows($request->user(), 'pantalla.'.$pantalla->codigo.'.consultar'));
 
+                // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
                 if (! $tienePermisoDePantalla) {
                     return false;
                 }
@@ -536,44 +621,61 @@ final class ServicioAutorizacion
      */
     public function permissionForRoute(Request $request): ?string
     {
+        // Traduce el nombre de ruta a su codigo de permiso RBAC.
+        // Guarda en $routeName el resultado necesario para continuar la operacion.
         $routeName = $request->route()?->getName();
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! is_string($routeName)) {
             return null;
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($routeName === 'smart.ads' || $routeName === 'legacy.ads') {
             return 'gestion.campanias.consultar';
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (Str::startsWith($routeName, 'management.account.') || in_array($routeName, ['management.account', 'management.account.avatar'], true)) {
             return null;
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (Str::startsWith($routeName, 'legacy.admin.')) {
+            // Guarda en $routeName el resultado necesario para continuar la operacion.
             $routeName = Str::after($routeName, 'legacy.admin.');
         } elseif (Str::startsWith($routeName, 'management.')) {
+            // Guarda en $routeName el resultado necesario para continuar la operacion.
             $routeName = Str::after($routeName, 'management.');
         } else {
             return null;
         }
 
+        // Guarda en $parts el resultado necesario para continuar la operacion.
         $parts = explode('.', $routeName);
+        // Guarda en $routeModule el resultado necesario para continuar la operacion.
         $routeModule = array_shift($parts);
+        // Guarda en $module el resultado necesario para continuar la operacion.
         $module = self::ROUTE_MODULES[$routeModule] ?? null;
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($module === null) {
             return null;
         }
 
+        // Guarda en $action el resultado necesario para continuar la operacion.
         $action = 'consultar';
+        // Recorre los elementos recibidos para validar o procesar cada registro.
         foreach (array_reverse($parts) as $part) {
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if (isset(self::ACTIONS[$part])) {
+                // Guarda en $action el resultado necesario para continuar la operacion.
                 $action = self::ACTIONS[$part];
                 break;
             }
         }
 
+        // Agrupa en $transferActions los datos que se utilizaran en el siguiente paso.
         $transferActions = [
             'inventory.transfer_request' => 'transferir',
             'inventory.transfer_approve' => 'aprobar',
@@ -586,49 +688,72 @@ final class ServicioAutorizacion
             'inventory.transfer_close' => 'transferir',
         ];
 
+        // Guarda en $action el resultado necesario para continuar la operacion.
         $action = $transferActions[$routeName] ?? $action;
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($routeName === 'purchases.receive_partial') {
+            // Guarda en $action el resultado necesario para continuar la operacion.
             $action = 'recibir';
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($routeModule === 'company_settings'
             && (str_starts_with($routeName, 'company_settings.warehouses.') || str_starts_with($routeName, 'company_settings.sites.'))
             && in_array($request->method(), ['POST', 'PUT', 'PATCH'], true)) {
+            // Guarda en $action el resultado necesario para continuar la operacion.
             $action = 'actualizar';
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($routeModule === 'account') {
+            // Guarda en $module el resultado necesario para continuar la operacion.
             $module = 'cuenta';
+            // Guarda en $action el resultado necesario para continuar la operacion.
             $action = in_array($request->method(), ['PUT', 'PATCH', 'POST'], true) ? 'actualizar' : 'consultar';
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($routeModule === 'user_assignments') {
+            // Guarda en $module el resultado necesario para continuar la operacion.
             $module = 'seguridad';
+            // Guarda en $action el resultado necesario para continuar la operacion.
             $action = Str::contains($routeName, 'revoke') ? 'revocar' : ($request->isMethod('GET') ? 'consultar' : 'asignar');
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($routeModule === 'menus' || $routeModule === 'modules' || $routeModule === 'roles_permissions') {
+            // Guarda en $module el resultado necesario para continuar la operacion.
             $module = 'seguridad';
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if (in_array($request->method(), ['POST', 'PUT', 'PATCH', 'DELETE'], true) && $action === 'consultar') {
                 $action = $routeModule === 'roles_permissions' && $request->isMethod('POST') ? 'crear' : 'actualizar';
             }
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($routeModule === 'security_sessions') {
+            // Guarda en $module el resultado necesario para continuar la operacion.
             $module = 'seguridad';
+            // Guarda en $action el resultado necesario para continuar la operacion.
             $action = $request->isMethod('GET') ? 'consultar' : 'revocar';
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($routeModule === 'integrations' && in_array($routeName, ['integrations.store', 'integrations.update'], true)) {
+            // Guarda en $action el resultado necesario para continuar la operacion.
             $action = 'configurar';
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($routeModule === 'backups' && $routeName === 'backups.store') {
+            // Guarda en $action el resultado necesario para continuar la operacion.
             $action = 'crear';
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($routeModule === 'products' && $routeName === 'products.wholesale_prices.import') {
+            // Guarda en $action el resultado necesario para continuar la operacion.
             $action = 'actualizar';
         }
 
@@ -636,6 +761,7 @@ final class ServicioAutorizacion
         // Exportar no amplía el alcance de lectura: conserva el permiso de consulta
         // hasta que el permiso específico sea administrado desde la matriz gráfica.
         if ($routeModule === 'segments' && $routeName === 'segments.export') {
+            // Guarda en $action el resultado necesario para continuar la operacion.
             $action = 'consultar';
         }
 
@@ -645,16 +771,21 @@ final class ServicioAutorizacion
     /** @return array<int, int> */
     public function permissionIds(User $user): array
     {
+        // Obtiene los identificadores de permisos activos del usuario.
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! $this->isSeeded()) {
             return [];
         }
 
+        // Guarda en $permissionCodes el resultado necesario para continuar la operacion.
         $permissionCodes = $this->codigosPermisos($user);
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($permissionCodes === []) {
             return [];
         }
 
+        // Devuelve el resultado obtenido mediante el modelo correspondiente.
         return DB::table('permisos')
             ->whereIn('codigo', $permissionCodes)
             ->pluck('id')
@@ -682,21 +813,27 @@ final class ServicioAutorizacion
      */
     private function idSedeActivaInterna(User $user): ?int
     {
+        // Guarda en $sessionSiteId el resultado de la consulta ejecutada.
         $sessionSiteId = request()->hasSession() ? request()->session()->get('sede_actual_id') : null;
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (is_numeric($sessionSiteId)) {
+            // Guarda en $siteId el resultado necesario para continuar la operacion.
             $siteId = (int) $sessionSiteId;
 
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if (! $this->sedeActiva($siteId)) {
                 return null;
             }
 
+            // Guarda en $hasGlobalAdministrator el resultado necesario para continuar la operacion.
             $hasGlobalAdministrator = $this->tienePermisoEnAlcance(
                 $user,
                 'gestion.organizacion.consultar',
                 'empresa',
             );
 
+            // Prepara en $hasSiteAssignment la consulta que obtiene o modifica los datos necesarios.
             $hasSiteAssignment = DB::table('usuarios_sedes_roles')
                 ->join('roles', 'roles.id', '=', 'usuarios_sedes_roles.rol_id')
                 ->join('sedes', 'sedes.id', '=', 'usuarios_sedes_roles.sede_id')
@@ -715,10 +852,12 @@ final class ServicioAutorizacion
             return $hasGlobalAdministrator || $hasSiteAssignment ? $siteId : null;
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! $this->isSeeded()) {
             return null;
         }
 
+        // Prepara en $siteIds la consulta que obtiene o modifica los datos necesarios.
         $siteIds = DB::table('usuarios_sedes_roles')
             ->join('roles', 'roles.id', '=', 'usuarios_sedes_roles.rol_id')
             ->join('sedes', 'sedes.id', '=', 'usuarios_sedes_roles.sede_id')
@@ -746,6 +885,7 @@ final class ServicioAutorizacion
      */
     private function sedeActiva(int $siteId): bool
     {
+        // Devuelve el resultado obtenido mediante el modelo correspondiente.
         return Schema::hasTable('sedes')
             && Schema::hasTable('empresas')
             && DB::table('sedes')
@@ -766,15 +906,19 @@ final class ServicioAutorizacion
      */
     private function tienePermisoEnAlcance(User $user, string $permissionCode, string $scope): bool
     {
+        // Busca el permiso dentro del alcance empresa, sede o propio.
+        // Prepara en $permissionId la consulta que obtiene o modifica los datos necesarios.
         $permissionId = DB::table('permisos')
             ->where('codigo', $permissionCode)
             ->where('activo', true)
             ->value('id');
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($permissionId === null) {
             return false;
         }
 
+        // Prepara en $globalAssignment la consulta que obtiene o modifica los datos necesarios.
         $globalAssignment = DB::table('usuarios_roles')
             ->join('roles', 'roles.id', '=', 'usuarios_roles.rol_id')
             ->join('roles_permisos', 'roles_permisos.rol_id', '=', 'roles.id')
@@ -788,10 +932,12 @@ final class ServicioAutorizacion
             })
             ->exists();
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($globalAssignment) {
             return true;
         }
 
+        // Devuelve el resultado obtenido mediante el modelo correspondiente.
         return DB::table('usuarios_sedes_roles')
             ->join('roles', 'roles.id', '=', 'usuarios_sedes_roles.rol_id')
             ->join('sedes', 'sedes.id', '=', 'usuarios_sedes_roles.sede_id')
@@ -813,6 +959,8 @@ final class ServicioAutorizacion
     /** @return array<int, int> */
     private function idsSedesConPermiso(User $user, string $permissionCode): array
     {
+        // Devuelve las sedes donde el usuario posee el permiso indicado.
+        // Devuelve el resultado obtenido mediante el modelo correspondiente.
         return DB::table('usuarios_sedes_roles')
             ->join('roles', 'roles.id', '=', 'usuarios_sedes_roles.rol_id')
             ->join('sedes', 'sedes.id', '=', 'usuarios_sedes_roles.sede_id')
@@ -850,10 +998,12 @@ final class ServicioAutorizacion
      */
     private function idSedeActivaUnica(): ?int
     {
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! Schema::hasTable('sedes')) {
             return null;
         }
 
+        // Prepara en $activeSiteIds la consulta que obtiene o modifica los datos necesarios.
         $activeSiteIds = DB::table('sedes')
             ->join('empresas', 'empresas.id', '=', 'sedes.empresa_id')
             ->where('sedes.activa', true)
@@ -872,10 +1022,12 @@ final class ServicioAutorizacion
      */
     private function idEmpresaActivaUnica(): ?int
     {
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! Schema::hasTable('empresas')) {
             return null;
         }
 
+        // Prepara en $companies la consulta que obtiene o modifica los datos necesarios.
         $companies = DB::table('empresas')->where('activo', true)->orderBy('id')->limit(2)->pluck('id');
 
         return $companies->count() === 1 ? (int) $companies->first() : null;
@@ -884,8 +1036,10 @@ final class ServicioAutorizacion
     /** @return array<int, string> */
     private function codigosPermisos(User $user): array
     {
+        // Guarda en $siteId el resultado necesario para continuar la operacion.
         $siteId = $this->idSedeActivaInterna($user);
 
+        // Prepara en $globalRoleIds la consulta que obtiene o modifica los datos necesarios.
         $globalRoleIds = DB::table('usuarios_roles')
             ->join('roles', 'roles.id', '=', 'usuarios_roles.rol_id')
             ->where('usuarios_roles.usuario_id', $user->getKey())
@@ -897,9 +1051,12 @@ final class ServicioAutorizacion
             })
             ->pluck('roles.id');
 
+        // Guarda en $siteRoleIds el resultado necesario para continuar la operacion.
         $siteRoleIds = collect();
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($siteId !== null) {
+            // Prepara en $siteRoleIds la consulta que obtiene o modifica los datos necesarios.
             $siteRoleIds = DB::table('usuarios_sedes_roles')
                 ->join('roles', 'roles.id', '=', 'usuarios_sedes_roles.rol_id')
                 ->where('usuarios_sedes_roles.usuario_id', $user->getKey())
@@ -912,10 +1069,12 @@ final class ServicioAutorizacion
                 ->pluck('roles.id');
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($globalRoleIds->isEmpty() && $siteRoleIds->isEmpty()) {
             return [];
         }
 
+        // Prepara en $permissions la consulta que obtiene o modifica los datos necesarios.
         $permissions = DB::table('roles_permisos')
             ->join('permisos', 'permisos.id', '=', 'roles_permisos.permiso_id')
             ->join('modulos', 'modulos.id', '=', 'permisos.modulo_id')
@@ -926,6 +1085,7 @@ final class ServicioAutorizacion
                 $query->whereNull('permisos.pantalla_id')->orWhere('pantallas.habilitada', true);
             })
             ->where(function ($query) use ($globalRoleIds, $siteRoleIds): void {
+                // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
                 if ($globalRoleIds->isNotEmpty()) {
                     $query->where(function ($globalQuery) use ($globalRoleIds): void {
                         $globalQuery->whereIn('roles_permisos.rol_id', $globalRoleIds)
@@ -933,6 +1093,7 @@ final class ServicioAutorizacion
                     });
                 }
 
+                // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
                 if ($siteRoleIds->isNotEmpty()) {
                     $query->orWhere(function ($siteQuery) use ($siteRoleIds): void {
                         $siteQuery->whereIn('roles_permisos.rol_id', $siteRoleIds)

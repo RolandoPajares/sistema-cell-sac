@@ -31,16 +31,22 @@ final class AsegurarCarritoEcommerce
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Obtiene el usuario actual para comprobar si puede utilizar el carrito.
         $user = $request->user();
+
+        // Permite continuar a visitantes y clientes que se gestionan mediante el flujo publico.
         if (! $user instanceof User) {
             return $next($request);
         }
 
+        // Comprueba si el usuario tiene permisos de cliente para utilizar el comercio electronico.
         $esCliente = $this->autorizacion->allows($user, 'gestion.cotizaciones.consultar')
             || $this->autorizacion->allows($user, 'gestion.pedidos.consultar');
 
+        // Exige permiso de cliente o permiso administrativo para crear pedidos.
         abort_unless($esCliente || $this->autorizacion->allows($user, 'gestion.pedidos.crear'), 403);
 
+        // Continua hacia la ruta del carrito una vez superadas las comprobaciones.
         return $next($request);
     }
 }

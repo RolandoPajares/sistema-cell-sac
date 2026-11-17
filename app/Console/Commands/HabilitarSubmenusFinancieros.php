@@ -46,6 +46,8 @@ final class HabilitarSubmenusFinancieros extends Command
      */
     public function handle(RegistradorAuditoria $registradorAuditoria): int
     {
+        // Comprueba que existan las tablas necesarias para consultar y actualizar
+        // pantallas, permisos, menus, asignaciones y auditoria.
         foreach (['usuarios', 'roles', 'usuarios_roles', 'modulos', 'pantallas', 'permisos',
             'roles_permisos', 'menus', 'roles_menus', 'elementos_menu', 'registros_auditoria'] as $tabla) {
             if (! Schema::hasTable($tabla)) {
@@ -55,6 +57,8 @@ final class HabilitarSubmenusFinancieros extends Command
             }
         }
 
+        // Obtiene el rol administrador y verifica que al menos una cuenta activa
+        // tenga una asignacion RBAC vigente antes de modificar el catalogo.
         $rol = DB::table('roles')->where('codigo', 'administrador')->where('activo', true)->first(['id']);
         if ($rol === null || ! $this->hayAdministradorVigente((int) $rol->id)) {
             $this->error('No existe un administrador activo con asignación RBAC vigente. No se modificaron datos.');
@@ -62,6 +66,8 @@ final class HabilitarSubmenusFinancieros extends Command
             return self::FAILURE;
         }
 
+        // Busca el menu administrativo y confirma que el rol administrador ya
+        // tenga acceso a ese menu.
         $menuId = DB::table('menus')->where('codigo', 'administrador.sidebar')->value('id');
         if ($menuId === null || ! DB::table('roles_menus')->where('rol_id', $rol->id)->where('menu_id', $menuId)->exists()) {
             $this->error('No existe la asignación del menú administrativo actual. No se crearán menús ni roles.');
@@ -69,6 +75,7 @@ final class HabilitarSubmenusFinancieros extends Command
             return self::FAILURE;
         }
 
+        // Diagnostica cada pantalla financiera antes de decidir si debe aplicar cambios.
         $estado = $this->consultarEstado((int) $rol->id, (int) $menuId);
         if ($estado['errores'] !== []) {
             foreach ($estado['errores'] as $error) {
@@ -106,10 +113,13 @@ final class HabilitarSubmenusFinancieros extends Command
             return self::FAILURE;
         }
 
+        // Agrupa la actualizacion del catalogo y el registro de auditoria en una transaccion.
         try {
             DB::transaction(function () use ($rol, $menuId, $registradorAuditoria, $estado): void {
+                // Guarda los permisos creados o reactivados para incluirlos en la auditoria.
                 $permisosHabilitados = [];
                 foreach ($estado['pantallas'] as $codigo => $pantalla) {
+                    // Cada pantalla recibe su permiso de consulta y su vinculo dentro del menu.
                     $codigoPermiso = 'pantalla.'.$codigo.'.consultar';
                     $permisoId = DB::table('permisos')->where('codigo', $codigoPermiso)->lockForUpdate()->value('id');
                     if ($permisoId === null) {
@@ -131,6 +141,7 @@ final class HabilitarSubmenusFinancieros extends Command
                         ]);
                     }
 
+                    // Revisa si el rol administrador ya posee el permiso antes de insertarlo.
                     $asignacion = DB::table('roles_permisos')->where('rol_id', $rol->id)
                         ->where('permiso_id', $permisoId)->first(['alcance']);
                     if ($asignacion === null) {
@@ -186,6 +197,7 @@ final class HabilitarSubmenusFinancieros extends Command
      */
     private function hayAdministradorVigente(int $rolId): bool
     {
+        // Determina si existe un usuario activo con el rol indicado y una asignacion vigente.
         return DB::table('usuarios_roles as asignacion')
             ->join('usuarios', 'usuarios.id', '=', 'asignacion.usuario_id')
             ->where('asignacion.rol_id', $rolId)
@@ -205,6 +217,8 @@ final class HabilitarSubmenusFinancieros extends Command
      */
     private function consultarEstado(int $rolId, int $menuId): array
     {
+        // Construye un diagnostico de pantallas, permisos, asignaciones y elementos de menu.
+        // El diagnostico permite mostrar una vista previa sin escribir en la base.
         $filas = DB::table('pantallas as pantalla')
             ->join('modulos as modulo', 'modulo.id', '=', 'pantalla.modulo_id')
             ->whereIn('pantalla.codigo', array_keys(self::PANTALLAS_OBJETIVO))

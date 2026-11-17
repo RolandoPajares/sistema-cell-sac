@@ -28,7 +28,9 @@ final class ServicioPresentacionInventario
      */
     public function productoCatalogo(Producto $product): array
     {
+        // Guarda en $stock el resultado necesario para continuar la operacion.
         $stock = (float) $product->existencias_alcance;
+        // Guarda en $status el resultado necesario para continuar la operacion.
         $status = ! $product->activo
             ? 'Inactivo'
             : ($stock <= 0 ? 'Sin stock' : ($product->precio_oferta ? 'Oferta' : 'Activo'));
@@ -92,16 +94,19 @@ final class ServicioPresentacionInventario
 
     public function imagen(?string $path): ?string
     {
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! $path) {
             return null;
         }
 
+        // Devuelve el resultado obtenido mediante el modelo correspondiente.
         return Str::startsWith($path, ['http://', 'https://']) ? $path : asset(ltrim($path, '/'));
     }
 
     public function etiquetaHoy(): string
     {
         $months = [1 => 'Ene', 2 => 'Feb', 3 => 'Mar', 4 => 'Abr', 5 => 'May', 6 => 'Jun', 7 => 'Jul', 8 => 'Ago', 9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dic'];
+        // Guarda en $today el resultado necesario para continuar la operacion.
         $today = now();
 
         return $today->format('d').' de '.$months[(int) $today->format('n')].', '.$today->format('Y');

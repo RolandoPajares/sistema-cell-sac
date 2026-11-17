@@ -10,6 +10,8 @@ final class ServicioPresentacionCategorias
     // Determina el icono visual que corresponde a la categoria recibida.
     public function icono(Categoria $categoria): string
     {
+        // Devuelve el icono correspondiente a la categoria del catalogo.
+        // Guarda en $nombre el resultado necesario para continuar la operacion.
         $nombre = Str::lower($categoria->nombre);
 
         // Selecciona el resultado segun el nombre o condicion evaluada.

@@ -53,6 +53,7 @@ final class HabilitarSubmenusOrganizacion extends Command
      */
     public function handle(RegistradorAuditoria $registradorAuditoria): int
     {
+        // Obtiene las pantallas objetivo segun la opcion de consola y revisa su estado actual.
         $pantallasObjetivo = $this->pantallasObjetivo();
         $estado = $this->consultarEstado($pantallasObjetivo);
 
@@ -88,9 +89,12 @@ final class HabilitarSubmenusOrganizacion extends Command
             return self::SUCCESS;
         }
 
+        // Crea un respaldo antes de actualizar la configuracion y la auditoria RBAC.
         try {
             $respaldo = $this->crearRespaldo($estado, $pantallasObjetivo);
             DB::transaction(function () use ($estado, $registradorAuditoria, $respaldo, $pantallasObjetivo): void {
+                // Revalida el estado dentro de la transaccion para evitar aplicar
+                // cambios sobre datos que hayan cambiado desde la vista previa.
                 $estadoActual = $this->consultarEstado($pantallasObjetivo);
                 if ($estadoActual['errores'] !== []) {
                     throw new \RuntimeException(implode(' ', $estadoActual['errores']));
@@ -102,6 +106,7 @@ final class HabilitarSubmenusOrganizacion extends Command
 
                 $identificadoresPermiso = [];
                 foreach ($pantallasObjetivo as $codigo => $definicion) {
+                    // Bloquea la pantalla y su permiso para evitar asignaciones duplicadas.
                     $pantalla = DB::table('pantallas')->where('codigo', $codigo)->lockForUpdate()->first();
                     $codigoPermiso = 'pantalla.'.$codigo.'.consultar';
                     $permiso = DB::table('permisos')->where('codigo', $codigoPermiso)->lockForUpdate()->first();
@@ -124,12 +129,14 @@ final class HabilitarSubmenusOrganizacion extends Command
                         ]);
                     }
 
+                    // Actualiza la ruta y habilita la pantalla que se mostrara en el sistema.
                     DB::table('pantallas')->where('id', $pantalla->id)->update([
                         'ruta' => $definicion['ruta'],
                         'habilitada' => true,
                         'actualizado_en' => now(),
                     ]);
 
+                    // Asigna el permiso al administrador solo si la relacion aun no existe.
                     if (! DB::table('roles_permisos')->where('rol_id', $estado['rol_id'])->where('permiso_id', $permisoId)->exists()) {
                         DB::table('roles_permisos')->insert([
                             'rol_id' => $estado['rol_id'],
@@ -139,6 +146,7 @@ final class HabilitarSubmenusOrganizacion extends Command
                         ]);
                     }
 
+                    // Busca el elemento del menu para actualizarlo o crearlo bajo el grupo organizacion.
                     $elemento = DB::table('elementos_menu')->where('menu_id', $estado['menu_id'])
                         ->where('pantalla_id', $pantalla->id)->lockForUpdate()->first();
 
@@ -217,6 +225,8 @@ final class HabilitarSubmenusOrganizacion extends Command
     /** @param array<string, array{modulo:string,nombre:string,ruta:string,icono:string}> $pantallasObjetivo */
     private function consultarEstado(array $pantallasObjetivo): array
     {
+        // Revisa tablas, rutas, modulo, menu, permisos y asignaciones necesarias
+        // para que cada pantalla sea accesible por RBAC.
         $tablasRequeridas = [
             'usuarios', 'roles', 'usuarios_roles', 'empresas', 'modulos', 'pantallas', 'permisos',
             'roles_permisos', 'menus', 'roles_menus', 'elementos_menu', 'registros_auditoria',
@@ -410,6 +420,7 @@ final class HabilitarSubmenusOrganizacion extends Command
      */
     private function crearRespaldo(array $estado, array $pantallasObjetivo): array
     {
+        // Copia el estado actual de las entidades RBAC que seran modificadas.
         $codigosPantalla = array_keys($pantallasObjetivo);
         $codigosPermiso = array_map(static fn (string $codigo): string => 'pantalla.'.$codigo.'.consultar', $codigosPantalla);
         $idsPantalla = collect($estado['pantallas'])->pluck('pantalla_id')->all();
@@ -445,6 +456,7 @@ final class HabilitarSubmenusOrganizacion extends Command
     /** @return array<string, array{modulo:string,nombre:string,ruta:string,icono:string}> */
     private function pantallasObjetivo(): array
     {
+        // Filtra las pantallas configuradas cuando se solicita incluir Personal por sede.
         if ($this->option('incluir-personal')) {
             return ['admin.staff' => self::PANTALLAS_OBJETIVO['admin.staff']];
         }

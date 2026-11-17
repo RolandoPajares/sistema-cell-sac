@@ -23,10 +23,15 @@ final class ServicioGestionProductos
     /** @param array<string, mixed> $datos */
     public function crear(array $datos, ?int $proveedorId, User $usuario, string $ip): Producto
     {
+        // Crea el producto y registra sus datos iniciales dentro de una transaccion.
+        // Ejecuta los cambios dentro de una transaccion para evitar datos incompletos.
+        // ORM: este servicio aplica ORM para consultar o modificar datos en la base de datos.
         return DB::transaction(function () use ($datos, $proveedorId, $usuario, $ip): Producto {
+            // Guarda en $stockInicial el resultado necesario para continuar la operacion.
             $stockInicial = (int) ($datos['existencias'] ?? 0);
             unset($datos['existencias']);
 
+            // Crea y guarda en $producto el registro gestionado por este servicio.
             $producto = Producto::create($datos + [
                 'activo' => true,
                 'creado_en' => now(),
@@ -51,14 +56,20 @@ final class ServicioGestionProductos
      */
     public function actualizar(Producto $producto, array $datos, array $datosValidados, array $antes, User $usuario, string $ip): void
     {
+        // Actualiza el producto, sincroniza stock o proveedor y registra los cambios.
+        // Ejecuta los cambios dentro de una transaccion para evitar datos incompletos.
+        // Mantiene atomicas la actualizacion y la auditoria del producto.
         DB::transaction(function () use ($producto, $datos, $datosValidados, $antes, $usuario, $ip): void {
+            // Guarda en $stockObjetivo el resultado necesario para continuar la operacion.
             $stockObjetivo = array_key_exists('existencias', $datosValidados) ? (int) $datosValidados['existencias'] : null;
             unset($datos['existencias']);
 
             $producto->update($datos);
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if ($stockObjetivo !== null) {
                 $this->stock->sincronizar($producto, $stockObjetivo, $usuario, 'Stock actualizado desde el formulario de producto.');
             }
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if (array_key_exists('proveedor_id', $datosValidados)) {
                 $producto->suppliers()->sync($datosValidados['proveedor_id'] ? [$datosValidados['proveedor_id']] : []);
             }

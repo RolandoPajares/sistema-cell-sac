@@ -50,9 +50,10 @@
             <p>Herramientas con IA y filtros avanzados para encontrar exactamente lo que necesitas.</p>
         </div>
         <div class="smart-home-grid">
-            <a class="smart-tile smart-purple" href="{{ route('recommendations') }}"><span><i class="bi bi-lightbulb-fill" aria-hidden="true"></i></span><div><b>SmartMatch</b><small>Encuentra el equipo ideal según tu estilo de vida.</small></div><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
-            <a class="smart-tile smart-orange" href="{{ route('comparison') }}"><span><i class="bi bi-columns-gap" aria-hidden="true"></i></span><div><b>Comparador</b><small>Compara hasta 3 equipos con puntajes.</small></div><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
-            <a class="smart-tile smart-gold" href="{{ route('smart.wholesale') }}"><span><i class="bi bi-cash-coin" aria-hidden="true"></i></span><div><b>Modo emprendedor</b><small>Arma una compra mayorista según tu presupuesto.</small></div><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+            <a class="smart-tile smart-purple" href="{{ route('recommendations') }}"><span><i class="bi bi-lightbulb-fill" aria-hidden="true"></i></span><div><b>SmartMatch</b></div><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+            <a class="smart-tile smart-orange" href="{{ route('comparison') }}"><span><i class="bi bi-columns-gap" aria-hidden="true"></i></span><div><b>Comparador</b></div><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+            <a class="smart-tile smart-gold" href="{{ route('smart.wholesale') }}"><span><i class="bi bi-cash-coin" aria-hidden="true"></i></span><div><b>Modo emprendedor</b></div><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+            <a class="smart-tile smart-blue" href="{{ route('assistant') }}"><span><i class="bi bi-stars" aria-hidden="true"></i></span><div><b>Asistente IA</b></div><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
         </div>
     </div>
 </section>

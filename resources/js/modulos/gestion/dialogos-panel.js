@@ -72,7 +72,8 @@ document.addEventListener("click", (evento) => {
     }
 });
 
-// Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
+/* legacy audit-detail listener removed; audit detail is handled by the analytics module. */
+/*
 document.querySelectorAll("[data-audit-id]").forEach((boton) =>
     // Evento: escucha el evento click y ejecuta la funcion asociada cuando ocurre.
     boton.addEventListener("click", () => {
@@ -117,6 +118,7 @@ document.querySelectorAll("[data-audit-id]").forEach((boton) =>
         });
     })
 );
+*/
 
 // Recorrido: usa forEach para procesar cada elemento y obtener o actualizar datos.
 document.querySelectorAll("dialog[data-auto-open='1']").forEach((dialogo) => {

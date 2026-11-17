@@ -30,6 +30,7 @@ class ConsultaVentas
     /** @return Builder<Venta> */
     public function query(User $usuario, array $filtros): Builder
     {
+        // ORM: este servicio aplica ORM para consultar o modificar datos en la base de datos.
         return $this->autorizacion->scopeRecordsFor(Venta::query(), $usuario, 'gestion.ventas.consultar')
             ->when(isset($filtros['from'], $filtros['to']), fn (Builder $query): Builder => $query
                 ->whereBetween('ventas.fecha_venta', [$filtros['from'], $filtros['to']]))
@@ -46,6 +47,7 @@ class ConsultaVentas
             ->when($filtros['cliente_id'] ?? null, fn (Builder $query, int $clienteId) => $query->where('ventas.cliente_id', $clienteId))
             ->when($filtros['sede_id'] ?? null, fn (Builder $query, int $sedeId) => $query->where('ventas.sede_id', $sedeId))
             ->when($filtros['canal'] ?? null, function (Builder $query, string $canal): void {
+                // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
                 if (! Schema::hasColumn('ventas', 'canal')) {
                     $query->whereHas('pedido', fn (Builder $pedido) => $pedido->where('canal', $canal));
 
@@ -87,6 +89,7 @@ class ConsultaVentas
             ->where('ventas.moneda', 'PEN')
             ->select('ventas.id');
 
+        // Devuelve el resultado obtenido mediante el modelo correspondiente.
         return DetalleVenta::query()
             ->whereIn('venta_id', $ventasConfirmadas)
             ->selectRaw('producto_id, descripcion_historica, SUM(cantidad) AS unidades_vendidas, SUM(total_linea) AS importe_vendido')
@@ -106,13 +109,21 @@ class ConsultaVentas
      */
     public function resumen(User $usuario, array $filtros): array
     {
+        // Prepara en $query la consulta que obtiene o modifica los datos necesarios.
         $query = $this->query($usuario, $filtros);
+        // Guarda en $totales el resultado de la consulta ejecutada.
         $totales = (clone $query)->selectRaw('COUNT(*) AS cantidad, COALESCE(SUM(ventas.total), 0) AS total, COUNT(DISTINCT ventas.cliente_id) AS clientes')->first();
+        // Guarda en $cantidad el resultado necesario para continuar la operacion.
         $cantidad = (int) $totales->cantidad;
+        // Guarda en $total el resultado necesario para continuar la operacion.
         $total = (float) $totales->total;
+        // Guarda en $monedas el resultado de la consulta ejecutada.
         $monedas = (clone $query)->distinct()->pluck('ventas.moneda');
+        // Guarda en $monedasMultiples el resultado necesario para continuar la operacion.
         $monedasMultiples = $monedas->count() > 1;
+        // Guarda en $campoCanal el resultado necesario para continuar la operacion.
         $campoCanal = Schema::hasColumn('ventas', 'canal') ? 'COALESCE(ventas.canal, pedidos.canal)' : 'pedidos.canal';
+        // Guarda en $canales el resultado necesario para continuar la operacion.
         $canales = (clone $query)->leftJoin('pedidos', 'pedidos.id', '=', 'ventas.pedido_id')
             ->selectRaw($campoCanal.' AS canal, COUNT(*) AS cantidad')->groupByRaw($campoCanal)->get();
         $colores = ['ecommerce' => '#1784f5', 'presencial' => '#15a774'];
@@ -122,29 +133,40 @@ class ConsultaVentas
             'percent' => $cantidad > 0 ? ((int) $fila->cantidad * 100 / $cantidad) : 0,
             'color' => $colores[$fila->canal] ?? '#6c7d90',
         ])->all();
+        // Guarda en $porDia el resultado necesario para continuar la operacion.
         $porDia = (clone $query)->selectRaw('DATE(ventas.fecha_venta) AS dia, COUNT(*) AS cantidad, COALESCE(SUM(ventas.total), 0) AS total')
             ->groupByRaw('DATE(ventas.fecha_venta)')->orderBy('dia')->get();
         $puntos = $porDia->map(static fn ($fila): array => [
             'label' => (string) $fila->dia, 'sales' => (float) $fila->total, 'orders' => (int) $fila->cantidad,
         ])->all();
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($puntos === []) {
             $puntos = [['label' => 'Sin registros', 'sales' => 0.0, 'orders' => 0]];
         }
+        // Guarda en $maximoTotal el resultado necesario para continuar la operacion.
         $maximoTotal = max(1, ...array_column($puntos, 'sales'));
+        // Guarda en $maximoCantidad el resultado necesario para continuar la operacion.
         $maximoCantidad = max(1, ...array_column($puntos, 'orders'));
+        // Guarda en $monedaReporte el resultado de la consulta ejecutada.
         $monedaReporte = $monedas->first() ?? 'PEN';
         $tendencia = array_map(static fn (array $punto): array => $punto + [
             'sales_height' => $punto['sales'] / $maximoTotal * 100,
             'orders_height' => $punto['orders'] / $maximoCantidad * 100,
             'sales_label' => self::formatearMoneda($punto['sales'], $monedaReporte),
         ], $puntos);
+        // Agrupa en $channelSegments los datos que se utilizaran en el siguiente paso.
         $channelSegments = [];
+        // Guarda en $channelStart el resultado necesario para continuar la operacion.
         $channelStart = 0;
+        // Recorre los elementos recibidos para validar o procesar cada registro.
         foreach ($resumenCanales as $channel) {
+            // Guarda en $channelEnd el resultado necesario para continuar la operacion.
             $channelEnd = $channelStart + $channel['percent'];
             $channelSegments[] = $channel['color'].' '.$channelStart.'% '.$channelEnd.'%';
+            // Guarda en $channelStart el resultado necesario para continuar la operacion.
             $channelStart = $channelEnd;
         }
+        // Prepara en $detalles la consulta que obtiene o modifica los datos necesarios.
         $detalles = DetalleVenta::query()->whereIn('venta_id', (clone $query)->select('ventas.id'))
             ->selectRaw('producto_id, descripcion_historica, SUM(cantidad) AS unidades, SUM(total_linea) AS importe')
             ->groupBy('producto_id', 'descripcion_historica')->orderByDesc('importe')->limit(5)->get();
@@ -169,6 +191,7 @@ class ConsultaVentas
 
     private static function formatearMoneda(float|int|string|null $value, string $currency): string
     {
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($value === null) {
             return 'Monedas múltiples';
         }

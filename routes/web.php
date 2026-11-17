@@ -2,7 +2,6 @@
 
 /*
 
-
 modulos
   @MODULO 01  Inicio y catálogo público
   @MODULO 05  Inicio de sesión y registro

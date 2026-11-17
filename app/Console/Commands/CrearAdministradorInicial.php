@@ -16,6 +16,10 @@ use RuntimeException;
 #[Description('Crea el único administrador inicial de cell_sac_limpia mediante credenciales interactivas.')]
 class CrearAdministradorInicial extends Command
 {
+    /**
+     * Verifica que la base sea la prevista y crea el primer administrador
+     * junto con su asignacion al rol administrador.
+     */
     // Coordina el proceso completo que ejecuta este comando de consola.
     public function handle(): int
     {
@@ -27,6 +31,8 @@ class CrearAdministradorInicial extends Command
         }
 
         // Recorre ['usuarios', 'roles', 'empresas', 'sedes', 'usuarios_roles'] as $table para validar o procesar cada elemento.
+        // Confirma que existan las tablas minimas para crear el usuario y
+        // relacionarlo con la empresa, sede y rol disponibles.
         foreach (['usuarios', 'roles', 'empresas', 'sedes', 'usuarios_roles'] as $table) {
             // Comprueba la condicion ! Schema::hasTable($table) antes de continuar.
             if (! Schema::hasTable($table)) {
@@ -44,6 +50,7 @@ class CrearAdministradorInicial extends Command
         }
 
         // Reune los datos ingresados por el operador para validarlos y guardarlos.
+        // Reune las credenciales introducidas en consola antes de validarlas.
         $data = [
             'nombre' => trim((string) $this->ask('Nombre del administrador')),
             'correo' => mb_strtolower(trim((string) $this->ask('Correo del administrador'))),
@@ -52,6 +59,7 @@ class CrearAdministradorInicial extends Command
         ];
 
         // Crea el validador que comprueba los datos capturados en la consola.
+        // Valida nombre, correo y confirmacion de contrasena antes de tocar la base.
         $validator = Validator::make($data, [
             'nombre' => ['required', 'string', 'max:120'],
             'correo' => ['required', 'email', 'max:160'],
@@ -77,6 +85,7 @@ class CrearAdministradorInicial extends Command
         }
 
         // Ejecuta la operacion dentro de un bloque controlado para atender posibles errores.
+        // La transaccion evita dejar una cuenta parcialmente registrada si falla una insercion.
         try {
             // Agrupa las inserciones para confirmar todo o revertirlo si ocurre un error.
             DB::transaction(function () use ($data): void {
@@ -85,6 +94,7 @@ class CrearAdministradorInicial extends Command
                     throw new RuntimeException('La base dejó de estar vacía durante la operación.');
                 }
 
+                // Obtiene la empresa activa y el rol administrador que recibira la cuenta.
                 $companyId = DB::table('empresas')->where('activo', true)->orderBy('id')->value('id');
                 $roleId = DB::table('roles')->where('codigo', 'administrador')->where('activo', true)->value('id');
                 // Comprueba la condicion $companyId === null || ! DB::table('sedes')->where('activa', true)->exists() || $roleId === null antes de continuar.
@@ -92,6 +102,7 @@ class CrearAdministradorInicial extends Command
                     throw new RuntimeException('Faltan empresa, sede o rol administrador inicial.');
                 }
 
+                // Inserta la cuenta con la contrasena protegida mediante Hash::make().
                 $userId = DB::table('usuarios')->insertGetId([
                     'nombre' => $data['nombre'],
                     'correo' => $data['correo'],
@@ -103,6 +114,7 @@ class CrearAdministradorInicial extends Command
                     'actualizado_en' => now(),
                 ]);
 
+                // Relaciona la cuenta creada con el rol administrador para activar su RBAC.
                 DB::table('usuarios_roles')->insert([
                     'usuario_id' => $userId,
                     'rol_id' => $roleId,

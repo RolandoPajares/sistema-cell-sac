@@ -10,12 +10,16 @@ final class ServicioPresentacionFinanzasFacturacion
      */
     public function preparar(array $pagina): array
     {
+        // Prepara comprobantes, totales y filtros para la pantalla de facturacion.
+        // Guarda en $clave el resultado necesario para continuar la operacion.
         $clave = (string) ($pagina['clave'] ?? '');
+        // Guarda en $datosReales el resultado necesario para continuar la operacion.
         $datosReales = (bool) ($pagina['datosReales'] ?? false);
 
         $pagina['acciones'] = collect($pagina['acciones'] ?? [])
             ->values()
             ->map(function (array $accion, int $indice) use ($clave, $datosReales): array {
+                // Guarda en $identificador el resultado necesario para continuar la operacion.
                 $identificador = $clave.'-'.$indice;
 
                 $accion['ruta_real'] = $datosReales ? null : match ($identificador) {
@@ -47,6 +51,7 @@ final class ServicioPresentacionFinanzasFacturacion
 
         $pagina['filas'] = collect($pagina['filas'] ?? [])
             ->map(function (array $fila) use ($clave, $datosReales): array {
+                // Guarda en $estado el resultado necesario para continuar la operacion.
                 $estado = (string) ($fila['filtros']['estado'] ?? '');
                 $fila['accion'] = $datosReales ? '' : match ($clave) {
                     'cajas' => 'editar-caja',
@@ -71,6 +76,7 @@ final class ServicioPresentacionFinanzasFacturacion
             })
             ->all();
 
+        // Guarda en $filas el resultado necesario para continuar la operacion.
         $filas = collect($pagina['filas']);
         $pagina['cuentasPorPagar'] = $filas->where('tipo_cuenta', 'Por pagar')->values();
         $pagina['cuentasPorCobrar'] = $filas->where('tipo_cuenta', 'Por cobrar')->values();
@@ -83,6 +89,7 @@ final class ServicioPresentacionFinanzasFacturacion
     /** @param array<int|string, mixed> $registros */
     private function tieneRegistros(array $registros): bool
     {
+        // Indica si el bloque recibido contiene registros para mostrar.
         return collect($registros)->flatten(1)->isNotEmpty();
     }
 }

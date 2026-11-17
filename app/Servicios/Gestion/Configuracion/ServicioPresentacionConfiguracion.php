@@ -15,6 +15,8 @@ final class ServicioPresentacionConfiguracion
      */
     public function preparar(string $tipo, array $datos): array
     {
+        // Normaliza la configuracion para que la vista reciba una estructura uniforme.
+        // Agrupa en $paginas los datos que se utilizaran en el siguiente paso.
         $paginas = [
             'general' => [
                 'titulo' => 'Configuración general',
@@ -50,6 +52,7 @@ final class ServicioPresentacionConfiguracion
             ],
         ];
 
+        // Guarda en $metricas el resultado necesario para continuar la operacion.
         $metricas = match ($tipo) {
             'general' => [
                 ['etiqueta' => 'Sedes activas', 'valor' => $datos['sedes']->count(), 'icono' => 'bi-shop', 'tono' => 'azul', 'ayuda' => 'Empresa autorizada'],
@@ -95,6 +98,7 @@ final class ServicioPresentacionConfiguracion
      */
     private function tamanoRespaldos(array $respaldos): string
     {
+        // Suma los tamanos de respaldo y los convierte a una unidad legible.
         $bytes = array_sum(array_map(static fn (array $respaldo): int => (int) ($respaldo['tamano'] ?? 0), $respaldos));
 
         return number_format($bytes / 1048576, 2).' MB';

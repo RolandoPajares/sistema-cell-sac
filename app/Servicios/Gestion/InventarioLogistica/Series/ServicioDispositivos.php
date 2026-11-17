@@ -38,8 +38,12 @@ final class ServicioDispositivos
      */
     public function listar(User $usuario, array $filtros): array
     {
+        // ORM: consulta dispositivos, productos y almacenes mediante modelos Eloquent.
+        // Guarda en $sedesAutorizadas el resultado necesario para continuar la operacion.
         $sedesAutorizadas = $this->autorizacion->authorizedSiteIds($usuario, 'gestion.inventario.consultar');
+        // Guarda en $consultaBase el resultado necesario para continuar la operacion.
         $consultaBase = $this->consultaPorSedes($sedesAutorizadas);
+        // Guarda en $distribucion el resultado necesario para continuar la operacion.
         $distribucion = (clone $consultaBase)
             ->select('estado')
             ->selectRaw('COUNT(*) AS cantidad')
@@ -52,9 +56,12 @@ final class ServicioDispositivos
             ])
             ->all();
 
+        // Guarda en $consultaFiltrada el resultado necesario para continuar la operacion.
         $consultaFiltrada = clone $consultaBase;
+        // Delega esta parte de la operacion al servicio o dependencia correspondiente.
         $this->aplicarFiltros($consultaFiltrada, $filtros);
 
+        // Guarda en $dispositivos el resultado necesario para continuar la operacion.
         $dispositivos = $consultaFiltrada
             ->with(['producto', 'variante', 'almacen.sede', 'ultimoMovimiento'])
             ->orderByDesc('fecha_ingreso')
@@ -90,6 +97,7 @@ final class ServicioDispositivos
      */
     private function consultaPorSedes(array $sedesAutorizadas): Builder
     {
+        // Devuelve el resultado obtenido mediante el modelo correspondiente.
         return Dispositivo::query()
             ->when(
                 $sedesAutorizadas === [],
@@ -107,23 +115,29 @@ final class ServicioDispositivos
      */
     private function aplicarFiltros(Builder $consulta, array $filtros): void
     {
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! empty($filtros['producto'])) {
             $consulta->where('producto_id', (int) $filtros['producto']);
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! empty($filtros['almacen'])) {
             $consulta->where('almacen_actual_id', (int) $filtros['almacen']);
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! empty($filtros['estado'])) {
             $consulta->where('estado', $filtros['estado']);
         }
 
+        // Guarda en $termino el resultado necesario para continuar la operacion.
         $termino = trim((string) ($filtros['buscar'] ?? ''));
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($termino === '') {
             return;
         }
 
+        // Guarda en $coincidencia el resultado necesario para continuar la operacion.
         $coincidencia = '%'.$termino.'%';
         $consulta->where(static function (Builder $consulta) use ($coincidencia): void {
             $consulta->where('imei', 'like', $coincidencia)

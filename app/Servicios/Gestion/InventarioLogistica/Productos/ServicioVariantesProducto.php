@@ -32,8 +32,12 @@ class ServicioVariantesProducto
      */
     public function registrar(Producto $producto, array $datos, User $usuario, ?string $ip): VarianteProducto
     {
+        // Ejecuta los cambios dentro de una transaccion para evitar datos incompletos.
+        // ORM: este servicio aplica ORM para consultar o modificar datos en la base de datos.
         return DB::transaction(function () use ($producto, $datos, $usuario, $ip): VarianteProducto {
+            // Prepara en $productoBloqueado la consulta que obtiene o modifica los datos necesarios.
             $productoBloqueado = Producto::query()->whereKey($producto->getKey())->lockForUpdate()->firstOrFail();
+            // Prepara en $saldoBasePendiente la consulta que obtiene o modifica los datos necesarios.
             $saldoBasePendiente = DB::table('existencias_almacen')
                 ->where('producto_id', $productoBloqueado->id)
                 ->where('empresa_id', $productoBloqueado->empresa_id)
@@ -43,8 +47,10 @@ class ServicioVariantesProducto
                 })
                 ->exists();
 
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_if($saldoBasePendiente, 409, 'El producto tiene existencias sin variante asignada. Ajusta ese saldo desde Inventario antes de registrar variantes.');
 
+            // Crea y guarda en $variante el registro gestionado por este servicio.
             $variante = $productoBloqueado->variants()->create($datos + [
                 'controla_serie' => false,
                 'estado' => 'activo',
@@ -71,18 +77,26 @@ class ServicioVariantesProducto
      */
     public function actualizar(Producto $producto, VarianteProducto $variante, array $datos, User $usuario, ?string $ip): VarianteProducto
     {
+        // Ejecuta los cambios dentro de una transaccion para evitar datos incompletos.
         return DB::transaction(function () use ($producto, $variante, $datos, $usuario, $ip): VarianteProducto {
+            // Prepara en $productoBloqueado la consulta que obtiene o modifica los datos necesarios.
             $productoBloqueado = Producto::query()->whereKey($producto->getKey())->lockForUpdate()->firstOrFail();
+            // Guarda en $varianteBloqueada el resultado necesario para continuar la operacion.
             $varianteBloqueada = $productoBloqueado->variants()
                 ->whereKey($variante->getKey())
                 ->lockForUpdate()
                 ->firstOrFail();
+            // Guarda en $antes el resultado necesario para continuar la operacion.
             $antes = $varianteBloqueada->only(['codigo_sku', 'codigo_barras', 'nombre_color', 'codigo_color', 'controla_serie', 'estado']);
 
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if (array_key_exists('controla_serie', $datos)) {
+                // Guarda en $controlaSerieNuevo el resultado necesario para continuar la operacion.
                 $controlaSerieNuevo = filter_var($datos['controla_serie'], FILTER_VALIDATE_BOOLEAN);
 
+                // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
                 if ($controlaSerieNuevo !== (bool) $varianteBloqueada->controla_serie) {
+                    // Prepara en $existeSaldo la consulta que obtiene o modifica los datos necesarios.
                     $existeSaldo = DB::table('existencias_almacen')
                         ->where('producto_id', $productoBloqueado->id)
                         ->where('variante_id', $varianteBloqueada->id)
@@ -91,15 +105,18 @@ class ServicioVariantesProducto
                                 ->orWhere('cantidad_reservada', '<>', 0);
                         })
                         ->exists();
+                    // Prepara en $existeMovimiento la consulta que obtiene o modifica los datos necesarios.
                     $existeMovimiento = DB::table('movimientos_inventario')
                         ->where('producto_id', $productoBloqueado->id)
                         ->where('variante_id', $varianteBloqueada->id)
                         ->exists();
+                    // Prepara en $existeDispositivo la consulta que obtiene o modifica los datos necesarios.
                     $existeDispositivo = DB::table('dispositivos')
                         ->where('producto_id', $productoBloqueado->id)
                         ->where('variante_id', $varianteBloqueada->id)
                         ->exists();
 
+                    // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
                     abort_if(
                         $existeSaldo || $existeMovimiento || $existeDispositivo,
                         409,
@@ -138,13 +155,17 @@ class ServicioVariantesProducto
      */
     public function desactivar(Producto $producto, VarianteProducto $variante, User $usuario, ?string $ip): VarianteProducto
     {
+        // Ejecuta los cambios dentro de una transaccion para evitar datos incompletos.
         return DB::transaction(function () use ($producto, $variante, $usuario, $ip): VarianteProducto {
+            // Prepara en $productoBloqueado la consulta que obtiene o modifica los datos necesarios.
             $productoBloqueado = Producto::query()->whereKey($producto->getKey())->lockForUpdate()->firstOrFail();
+            // Guarda en $varianteBloqueada el resultado necesario para continuar la operacion.
             $varianteBloqueada = $productoBloqueado->variants()
                 ->whereKey($variante->getKey())
                 ->lockForUpdate()
                 ->firstOrFail();
 
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if ($varianteBloqueada->estado === 'activo') {
                 $varianteBloqueada->update(['estado' => 'inactivo']);
                 $this->auditoria->record(
@@ -176,16 +197,22 @@ class ServicioVariantesProducto
         User $usuario,
         ?string $ip,
     ): ImagenVariante {
+        // Guarda en $rutaGuardada el resultado necesario para continuar la operacion.
         $rutaGuardada = $archivo->store('variantes', 'public');
+        // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
         abort_if($rutaGuardada === false, 500, 'No se pudo guardar la imagen de la variante.');
 
         try {
+            // Ejecuta los cambios dentro de una transaccion para evitar datos incompletos.
             return DB::transaction(function () use ($producto, $variante, $rutaGuardada, $imagenPrincipal, $usuario, $ip): ImagenVariante {
+                // Prepara en $productoBloqueado la consulta que obtiene o modifica los datos necesarios.
                 $productoBloqueado = Producto::query()->whereKey($producto->getKey())->lockForUpdate()->firstOrFail();
+                // Guarda en $varianteBloqueada el resultado necesario para continuar la operacion.
                 $varianteBloqueada = $productoBloqueado->variants()
                     ->whereKey($variante->getKey())
                     ->lockForUpdate()
                     ->firstOrFail();
+                // Guarda en $imagenPrincipalExistente el resultado necesario para continuar la operacion.
                 $imagenPrincipalExistente = $varianteBloqueada->images()
                     ->where('imagen_principal', true)
                     ->orderBy('orden')
@@ -195,13 +222,16 @@ class ServicioVariantesProducto
 
                 $varianteBloqueada->images()->update(['imagen_principal' => false]);
 
+                // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
                 if (! $esPrincipal) {
                     $varianteBloqueada->images()
                         ->whereKey($imagenPrincipalExistente->getKey())
                         ->update(['imagen_principal' => true]);
                 }
 
+                // Guarda en $ultimoOrden el resultado necesario para continuar la operacion.
                 $ultimoOrden = $varianteBloqueada->images()->max('orden');
+                // Crea y guarda en $imagenRegistrada el registro gestionado por este servicio.
                 $imagenRegistrada = $varianteBloqueada->images()->create([
                     'ruta_imagen' => 'storage/'.$rutaGuardada,
                     'imagen_principal' => $esPrincipal,
@@ -241,30 +271,41 @@ class ServicioVariantesProducto
         User $usuario,
         ?string $ip,
     ): void {
+        // Prepara en $rutaImagenEliminada la consulta que obtiene o modifica los datos necesarios.
         $rutaImagenEliminada = DB::transaction(function () use ($producto, $variante, $imagenId, $usuario, $ip): string {
+            // Prepara en $productoBloqueado la consulta que obtiene o modifica los datos necesarios.
             $productoBloqueado = Producto::query()->whereKey($producto->getKey())->lockForUpdate()->firstOrFail();
+            // Guarda en $varianteBloqueada el resultado necesario para continuar la operacion.
             $varianteBloqueada = $productoBloqueado->variants()
                 ->whereKey($variante->getKey())
                 ->lockForUpdate()
                 ->firstOrFail();
+            // Guarda en $imagen el resultado necesario para continuar la operacion.
             $imagen = $varianteBloqueada->images()->whereKey($imagenId)->lockForUpdate()->firstOrFail();
+            // Guarda en $eraPrincipal el resultado necesario para continuar la operacion.
             $eraPrincipal = (bool) $imagen->imagen_principal;
+            // Guarda en $rutaImagen el resultado necesario para continuar la operacion.
             $rutaImagen = (string) $imagen->ruta_imagen;
+            // Guarda en $valoresAnteriores el resultado necesario para continuar la operacion.
             $valoresAnteriores = $imagen->only(['variante_id', 'ruta_imagen', 'imagen_principal', 'orden']);
 
             $imagen->delete();
 
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if ($eraPrincipal) {
+                // Guarda en $siguienteImagen el resultado necesario para continuar la operacion.
                 $siguienteImagen = $varianteBloqueada->images()
                     ->orderBy('orden')
                     ->orderBy('id')
                     ->lockForUpdate()
                     ->first();
 
+                // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
                 if ($siguienteImagen !== null) {
                     $varianteBloqueada->images()->update(['imagen_principal' => false]);
                 }
 
+                // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
                 if ($siguienteImagen !== null) {
                     $varianteBloqueada->images()
                         ->whereKey($siguienteImagen->getKey())
@@ -286,6 +327,7 @@ class ServicioVariantesProducto
             return $rutaImagen;
         }, 3);
 
+        // Delega esta parte de la operacion al servicio o dependencia correspondiente.
         $this->eliminarArchivoSiNoEstaReferenciado($rutaImagenEliminada);
     }
 
@@ -297,17 +339,24 @@ class ServicioVariantesProducto
      */
     private function eliminarArchivoSiNoEstaReferenciado(string $rutaImagen): void
     {
+        // Prepara en $referenciadaEnVariantes la consulta que obtiene o modifica los datos necesarios.
         $referenciadaEnVariantes = DB::table('imagenes_variantes')->where('ruta_imagen', $rutaImagen)->exists();
+        // Prepara en $referenciadaEnProductos la consulta que obtiene o modifica los datos necesarios.
         $referenciadaEnProductos = DB::table('referencias_imagenes_productos')->where('ruta_imagen', $rutaImagen)->exists();
+        // Prepara en $utilizadaComoPortada la consulta que obtiene o modifica los datos necesarios.
         $utilizadaComoPortada = DB::table('productos')->where('url_imagen', $rutaImagen)->exists();
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($referenciadaEnVariantes || $referenciadaEnProductos || $utilizadaComoPortada || ! str_starts_with($rutaImagen, 'storage/')) {
             return;
         }
 
+        // Guarda en $rutaRelativa el resultado necesario para continuar la operacion.
         $rutaRelativa = substr($rutaImagen, strlen('storage/'));
+        // Guarda en $segmentos el resultado necesario para continuar la operacion.
         $segmentos = explode('/', str_replace('\\', '/', $rutaRelativa));
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($rutaRelativa === '' || in_array('..', $segmentos, true) || in_array('.', $segmentos, true)) {
             return;
         }

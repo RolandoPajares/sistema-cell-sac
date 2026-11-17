@@ -33,7 +33,7 @@ class Producto extends Model
         return ProductoFactory::new();
     }
 
-    // Usa la tabla 'productos' como origen de los registros de este modelo.
+    // ORM: relaciona la clase Producto con la tabla productos sin escribir SQL manual.
     protected $table = 'productos';
 
     // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.

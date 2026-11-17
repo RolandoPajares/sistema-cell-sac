@@ -1,0 +1,33 @@
+{
+  "info": {
+    "name": "Technology Cell - API v1",
+    "description": "Pruebas reproducibles de la API interna de catálogo. Definir baseUrl según el VirtualHost o URL pública del entorno.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "baseUrl", "value": "http://localhost/dwa2/sistema-cell-sac/public"},
+    {"key": "productId", "value": "144"}
+  ],
+  "item": [
+    {
+      "name": "Listar catálogo",
+      "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/api/v1/catalogo?per_page=5", "host": ["{{baseUrl}}"], "path": ["api", "v1", "catalogo"], "query": [{"key": "per_page", "value": "5"}]}},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('responde 200', function () { pm.response.to.have.status(200); });", "pm.test('responde JSON', function () { pm.response.to.be.json; });"]}}]
+    },
+    {
+      "name": "Mostrar producto",
+      "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/api/v1/catalogo/{{productId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "catalogo", "{{productId}}"]}},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('responde 200', function () { pm.response.to.have.status(200); });", "pm.test('responde JSON', function () { pm.response.to.be.json; });"]}}]
+    },
+    {
+      "name": "Producto inexistente",
+      "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/api/v1/catalogo/999999", "host": ["{{baseUrl}}"], "path": ["api", "v1", "catalogo", "999999"]}},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('responde 404', function () { pm.response.to.have.status(404); });"]}}]
+    },
+    {
+      "name": "Validación de paginación",
+      "request": {"method": "GET", "header": [], "url": {"raw": "{{baseUrl}}/api/v1/catalogo?per_page=101", "host": ["{{baseUrl}}"], "path": ["api", "v1", "catalogo"], "query": [{"key": "per_page", "value": "101"}]}},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["pm.test('responde 422', function () { pm.response.to.have.status(422); });"]}}]
+    }
+  ]
+}

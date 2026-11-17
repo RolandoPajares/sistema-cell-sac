@@ -31,20 +31,27 @@ final class ServicioMenuDinamico
     /** @return array{dinamico:bool,grupos:array<int,array<string,mixed>>} */
     public function paraUsuario(?User $user): array
     {
+        // ORM: consulta menus, elementos y roles mediante el constructor de consultas de Laravel.
+        // Devuelve solo los menus y opciones permitidos para el usuario actual.
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! $user instanceof User) {
             return ['dinamico' => false, 'grupos' => []];
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! $this->esquemaDisponible() || ! $this->autorizacion->isSeeded()) {
             return ['dinamico' => true, 'grupos' => []];
         }
 
+        // Guarda en $roleIds el resultado necesario para continuar la operacion.
         $roleIds = $this->idsRolesPara($user);
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($roleIds === []) {
             return ['dinamico' => true, 'grupos' => []];
         }
 
+        // Prepara en $menus la consulta que obtiene o modifica los datos necesarios.
         $menus = DB::table('menus')
             ->leftJoin('roles_menus', function ($join) use ($roleIds): void {
                 $join->on('roles_menus.menu_id', '=', 'menus.id')->whereIn('roles_menus.rol_id', $roleIds);
@@ -56,10 +63,12 @@ final class ServicioMenuDinamico
             ->orderBy('menus.id')
             ->get();
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($menus->isEmpty()) {
             return ['dinamico' => true, 'grupos' => []];
         }
 
+        // Prepara en $elementos la consulta que obtiene o modifica los datos necesarios.
         $elementos = DB::table('elementos_menu')
             ->leftJoin('pantallas', 'pantallas.id', '=', 'elementos_menu.pantalla_id')
             ->leftJoin('modulos', 'modulos.id', '=', 'pantallas.modulo_id')
@@ -78,17 +87,25 @@ final class ServicioMenuDinamico
             ->get()
             ->groupBy('menu_id');
 
+        // Agrupa en $groups los datos que se utilizaran en el siguiente paso.
         $groups = [];
 
+        // Recorre los elementos recibidos para validar o procesar cada registro.
         foreach ($menus as $menu) {
+            // Guarda en $rows el resultado de la consulta ejecutada.
             $rows = $elementos->get($menu->id, collect())->keyBy('id');
+            // Guarda en $children el resultado necesario para continuar la operacion.
             $children = $rows->groupBy('padre_id');
 
+            // Recorre los elementos recibidos para validar o procesar cada registro.
             foreach ($children->get(null, collect()) as $root) {
+                // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
                 if ($root->tipo === 'grupo') {
                     $groups[] = $this->crearGrupo($root, $children, $user);
                 } else {
+                    // Guarda en $item el resultado necesario para continuar la operacion.
                     $item = $this->crearElemento($root, $user);
+                    // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
                     if ($item !== null) {
                         $groups[] = [
                             'id' => 'item-'.$root->id,
@@ -102,6 +119,7 @@ final class ServicioMenuDinamico
             }
         }
 
+        // Guarda en $groups el resultado necesario para continuar la operacion.
         $groups = $this->fusionarGrupos($groups);
 
         return ['dinamico' => true, 'grupos' => $groups];
@@ -114,7 +132,10 @@ final class ServicioMenuDinamico
      */
     private function esquemaDisponible(): bool
     {
+        // Comprueba que las tablas necesarias existan antes de consultar el menu.
+        // Recorre los elementos recibidos para validar o procesar cada registro.
         foreach (['roles', 'usuarios_roles', 'usuarios_sedes_roles', 'roles_menus', 'menus', 'elementos_menu', 'pantallas', 'permisos'] as $table) {
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if (! Schema::hasTable($table)) {
                 return false;
             }
@@ -126,6 +147,8 @@ final class ServicioMenuDinamico
     /** @return array<int,int> */
     private function idsRolesPara(User $user): array
     {
+        // Reune los roles globales y los roles asignados por sede del usuario.
+        // Prepara en $globalIds la consulta que obtiene o modifica los datos necesarios.
         $globalIds = DB::table('usuarios_roles')
             ->join('roles', 'roles.id', '=', 'usuarios_roles.rol_id')
             ->where('usuarios_roles.usuario_id', $user->getKey())
@@ -136,6 +159,7 @@ final class ServicioMenuDinamico
             })
             ->pluck('roles.id');
 
+        // Guarda en $siteId el resultado necesario para continuar la operacion.
         $siteId = $this->autorizacion->activeSiteIdFor($user);
         $siteIds = $siteId === null ? collect() : DB::table('usuarios_sedes_roles')
             ->join('roles', 'roles.id', '=', 'usuarios_sedes_roles.rol_id')
@@ -158,22 +182,30 @@ final class ServicioMenuDinamico
      */
     private function fusionarGrupos(array $groups): array
     {
+        // Combina grupos repetidos para que cada opcion aparezca una sola vez.
+        // Agrupa en $merged los datos que se utilizaran en el siguiente paso.
         $merged = [];
 
+        // Recorre los elementos recibidos para validar o procesar cada registro.
         foreach ($groups as $group) {
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if ($group['items'] === []) {
                 continue;
             }
 
+            // Guarda en $key el resultado necesario para continuar la operacion.
             $key = mb_strtolower(trim((string) $group['label']));
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if (! isset($merged[$key])) {
                 $merged[$key] = $group;
 
                 continue;
             }
 
+            // Recorre los elementos recibidos para validar o procesar cada registro.
             foreach ($group['items'] as $item) {
                 $duplicate = collect($merged[$key]['items'])->contains(static fn (array $existing): bool => $existing['label'] === $item['label'] && $existing['route'] === $item['route']);
+                // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
                 if (! $duplicate) {
                     $merged[$key]['items'][] = $item;
                 }
@@ -189,9 +221,14 @@ final class ServicioMenuDinamico
      */
     private function crearGrupo(object $root, $children, User $user): array
     {
+        // Construye un grupo del menu y sus elementos hijos visibles.
+        // Agrupa en $items los datos que se utilizaran en el siguiente paso.
         $items = [];
+        // Recorre los elementos recibidos para validar o procesar cada registro.
         foreach ($children->get($root->id, collect()) as $child) {
+            // Guarda en $item el resultado necesario para continuar la operacion.
             $item = $this->crearElemento($child, $user);
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if ($item !== null) {
                 $items[] = $item;
             }
@@ -208,10 +245,13 @@ final class ServicioMenuDinamico
     /** @return array<string,mixed>|null */
     private function crearElemento(object $row, User $user): ?array
     {
+        // Convierte un registro de menu en la estructura que consume Blade.
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (is_string($row->ruta) && in_array($row->ruta, self::RUTAS_NO_VISIBLES, true)) {
             return null;
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (is_string($row->ruta)
             && $row->ruta !== 'dashboard'
             && ! str_starts_with($row->ruta, 'management.account')
@@ -220,10 +260,12 @@ final class ServicioMenuDinamico
             return null;
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (is_string($row->permiso_codigo) && ! $this->autorizacion->allows($user, $row->permiso_codigo)) {
             return null;
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (is_string($row->ruta)
             && $row->ruta !== 'dashboard'
             && ! str_starts_with($row->ruta, 'management.account')
@@ -231,6 +273,7 @@ final class ServicioMenuDinamico
             return null;
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (is_string($row->ruta)
             && $row->ruta !== 'dashboard'
             && ! str_starts_with($row->ruta, 'management.account')
@@ -239,6 +282,7 @@ final class ServicioMenuDinamico
             return null;
         }
 
+        // Guarda en $route el resultado necesario para continuar la operacion.
         $route = is_string($row->ruta) ? $row->ruta : null;
         $enabled = (bool) $row->pantalla_habilitada && $route !== null && Route::has($route);
 
@@ -260,6 +304,8 @@ final class ServicioMenuDinamico
      */
     private function rutaActiva(string $route): bool
     {
+        // Indica si la ruta del elemento coincide con la pagina actual.
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($route === 'management.inventory') {
             return request()->routeIs('management.inventory', 'management.inventory.movements');
         }

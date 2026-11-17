@@ -47,6 +47,8 @@ if (asistente) {
     const mensajes = asistente.querySelector("[data-admin-assistant-messages]");
     const formulario = asistente.querySelector("[data-admin-assistant-form]");
     const campoEntrada = formulario?.querySelector("input");
+    const botonEnviar = formulario?.querySelector('button[type="submit"]');
+    const endpoint = asistente.dataset.endpoint;
     const launcher = asistente.querySelector(".assistant-float-launcher");
     const panelHeader = asistente.querySelector(".assistant-float-header");
 /**
@@ -333,12 +335,39 @@ if (asistente) {
         agregarMensaje(consultaLimpia, true);
         campoEntrada.value = "";
         campoEntrada.disabled = true;
+        if (botonEnviar) {
+            botonEnviar.disabled = true;
+            botonEnviar.innerHTML = '<i class="bi bi-arrow-repeat" aria-hidden="true"></i><span>Enviando...</span>';
+        }
 
-        window.setTimeout(() => {
-            agregarMensaje("El Asistente IA se encuentra en mantenimiento. La conexión con la API estará disponible próximamente. Mientras tanto, puedes continuar usando todos los módulos del sistema.");
+        const controlador = new AbortController();
+        const temporizador = window.setTimeout(() => controlador.abort(), 20000);
+        try {
+            const csrf = document.querySelector('meta[name="csrf-token"]')?.content || "";
+            const respuestaHttp = await fetch(endpoint, {
+                method: "POST",
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+                    "X-CSRF-TOKEN": csrf,
+                },
+                signal: controlador.signal,
+                body: new URLSearchParams({ consulta: consultaLimpia, _token: csrf }),
+            });
+            const datos = await respuestaHttp.json();
+            if (!respuestaHttp.ok || !datos.ok) throw new Error(datos.mensaje || "No se pudo procesar la consulta.");
+            agregarMensaje(datos.respuesta?.mensaje || "No tengo información suficiente para responder.");
+        } catch (_) {
+            agregarMensaje("No pude procesar la consulta en este momento. Puedes intentar nuevamente.");
+        } finally {
+            window.clearTimeout(temporizador);
             campoEntrada.disabled = false;
+            if (botonEnviar) {
+                botonEnviar.disabled = false;
+                botonEnviar.innerHTML = '<i class="bi bi-send-fill" aria-hidden="true"></i><span>Enviar</span>';
+            }
             campoEntrada.focus();
-        }, 420);
+        }
     };
 
     // Evento: escucha el evento submit y ejecuta la funcion asociada cuando ocurre.

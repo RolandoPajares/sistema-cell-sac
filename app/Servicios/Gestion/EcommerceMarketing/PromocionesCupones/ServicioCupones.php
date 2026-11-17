@@ -23,7 +23,10 @@ class ServicioCupones
      */
     public function query(array $filters, ?int $empresaId): Builder
     {
+        // Prepara en $query la consulta que obtiene o modifica los datos necesarios.
+        // ORM: este servicio aplica ORM para consultar o modificar datos en la base de datos.
         $query = Cupon::query();
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! Schema::hasColumn('cupones', 'empresa_id') || $empresaId === null) {
             return $query->whereRaw('1 = 0');
         }
@@ -32,6 +35,7 @@ class ServicioCupones
             ->when($filters['buscar'] ?? null, fn (Builder $query, string $search): Builder => $query->where('codigo', 'like', '%'.$search.'%'))
             ->when($filters['tipo'] ?? null, fn (Builder $query, string $type): Builder => $query->where('tipo_descuento', $type));
 
+        // Guarda en $now el resultado necesario para continuar la operacion.
         $now = now();
         match ($filters['estado'] ?? null) {
             'Activo' => $query->where('activo', true)
@@ -58,11 +62,14 @@ class ServicioCupones
     /** @return array{total:int,activos:int,canjes:int,proximos:iterable,mas_usados:iterable} */
     public function dashboard(?int $empresaId): array
     {
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! Schema::hasColumn('cupones', 'empresa_id') || $empresaId === null) {
             return ['total' => 0, 'activos' => 0, 'canjes' => 0, 'proximos' => collect(), 'mas_usados' => collect()];
         }
 
+        // Guarda en $now el resultado necesario para continuar la operacion.
         $now = now();
+        // Prepara en $cuponesEmpresa la consulta que obtiene o modifica los datos necesarios.
         $cuponesEmpresa = Cupon::query()->where('empresa_id', $empresaId);
 
         return [
@@ -79,12 +86,16 @@ class ServicioCupones
     /** @param array<string, mixed> $attributes */
     public function registrar(array $attributes, User $actor, ?string $ip): Cupon
     {
+        // Delega esta parte de la operacion al servicio o dependencia correspondiente.
         $this->autorizacion()->assertAllowed($actor, 'gestion.cupones.crear');
+        // Guarda en $empresaId el resultado necesario para continuar la operacion.
         $empresaId = $this->empresaActual();
         $attributes['empresa_id'] = $empresaId;
         $attributes['codigo'] = mb_strtoupper((string) $attributes['codigo']);
+        // Delega esta parte de la operacion al servicio o dependencia correspondiente.
         $this->comprobarReglasCupon($attributes, 0);
 
+        // Ejecuta los cambios dentro de una transaccion para evitar datos incompletos.
         return DB::transaction(function () use ($attributes, $actor, $ip, $empresaId): Cupon {
             $coupon = Cupon::query()->create($attributes + ['activo' => true, 'usos' => 0]);
             app(RegistradorAuditoria::class)->record(
@@ -100,12 +111,18 @@ class ServicioCupones
     /** @param array<string, mixed> $attributes */
     public function update(Cupon $coupon, array $attributes, User $actor, ?string $ip): Cupon
     {
+        // Delega esta parte de la operacion al servicio o dependencia correspondiente.
         $this->autorizacion()->assertAllowed($actor, 'gestion.cupones.actualizar');
+        // Guarda en $empresaId el resultado necesario para continuar la operacion.
         $empresaId = $this->empresaActual();
 
+        // Ejecuta los cambios dentro de una transaccion para evitar datos incompletos.
         return DB::transaction(function () use ($coupon, $attributes, $actor, $ip, $empresaId): Cupon {
+            // Prepara en $lockedCoupon la consulta que obtiene o modifica los datos necesarios.
             $lockedCoupon = Cupon::query()->where('empresa_id', $empresaId)->whereKey($coupon->getKey())->lockForUpdate()->firstOrFail();
+            // Delega esta parte de la operacion al servicio o dependencia correspondiente.
             $this->comprobarReglasCupon($attributes, (int) $lockedCoupon->usos);
+            // Guarda en $before el resultado necesario para continuar la operacion.
             $before = $lockedCoupon->only(['tipo_descuento', 'valor', 'minimo_compra', 'limite_usos', 'inicia_en', 'finaliza_en']);
             $lockedCoupon->update($attributes + ['actualizado_en' => now()]);
             app(RegistradorAuditoria::class)->record(
@@ -127,11 +144,16 @@ class ServicioCupones
      */
     public function deactivate(Cupon $coupon, User $actor, ?string $ip): Cupon
     {
+        // Delega esta parte de la operacion al servicio o dependencia correspondiente.
         $this->autorizacion()->assertAllowed($actor, 'gestion.cupones.eliminar');
+        // Guarda en $empresaId el resultado necesario para continuar la operacion.
         $empresaId = $this->empresaActual();
 
+        // Ejecuta los cambios dentro de una transaccion para evitar datos incompletos.
         return DB::transaction(function () use ($coupon, $actor, $ip, $empresaId): Cupon {
+            // Prepara en $lockedCoupon la consulta que obtiene o modifica los datos necesarios.
             $lockedCoupon = Cupon::query()->where('empresa_id', $empresaId)->whereKey($coupon->getKey())->lockForUpdate()->firstOrFail();
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if (! $lockedCoupon->activo) {
                 return $lockedCoupon;
             }
@@ -154,6 +176,7 @@ class ServicioCupones
      */
     public function status(Cupon $coupon): string
     {
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (! $coupon->activo || $coupon->finaliza_en->isPast()
             || ($coupon->limite_usos !== null && (int) $coupon->usos >= (int) $coupon->limite_usos)) {
             return 'Finalizado';
@@ -165,8 +188,11 @@ class ServicioCupones
     /** @param array<string, mixed> $attributes */
     private function comprobarReglasCupon(array $attributes, int $registeredUses): void
     {
+        // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
         abort_if(($attributes['tipo_descuento'] ?? null) === 'porcentaje' && (float) ($attributes['valor'] ?? 0) > 100, 422, 'El descuento porcentual no puede superar el 100 %.');
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if (isset($attributes['limite_usos'])) {
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_if((int) $attributes['limite_usos'] < $registeredUses, 422, 'El límite de usos no puede ser inferior a los canjes ya registrados.');
         }
     }
@@ -188,6 +214,7 @@ class ServicioCupones
      */
     public function empresaDisponible(): bool
     {
+        // Devuelve el resultado obtenido mediante el modelo correspondiente.
         return Schema::hasColumn('cupones', 'empresa_id') && $this->autorizacion()->activeCompanyId() !== null;
     }
 
@@ -198,9 +225,12 @@ class ServicioCupones
      */
     private function empresaActual(): int
     {
+        // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
         abort_unless(Schema::hasColumn('cupones', 'empresa_id'), 503,
             'Los cupones están deshabilitados hasta aplicar la estructura de propiedad por empresa.');
+        // Guarda en $empresaId el resultado necesario para continuar la operacion.
         $empresaId = $this->autorizacion()->activeCompanyId();
+        // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
         abort_unless($empresaId !== null, 409, 'Selecciona una empresa activa para gestionar cupones.');
 
         return $empresaId;

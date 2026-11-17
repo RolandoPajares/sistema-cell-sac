@@ -48,13 +48,19 @@ class ServicioCotizaciones
     {
         $this->authorization->assertAllowed($user, 'gestion.cotizaciones.crear');
 
+        // Ejecuta los cambios dentro de una transaccion para evitar datos incompletos.
+        // ORM: este servicio aplica ORM para consultar o modificar datos en la base de datos.
         return DB::transaction(function () use ($data, $user): Cotizacion {
+            // Guarda en $customerId el resultado de la consulta ejecutada.
             $customerId = $data['cliente_id'] ?? Cliente::whereBelongsTo($user, 'user')->where('tipo', 'mayorista')->value('id');
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($customerId, 422, 'El usuario debe tener un perfil de cliente mayorista.');
 
+            // Guarda en $customer el resultado necesario para continuar la operacion.
             $customer = Cliente::findOrFail($customerId);
             $isOwner = (int) $customer->usuario_id === (int) $user->id
                 && $this->authorization->allows($user, 'gestion.cotizaciones.consultar');
+            // Guarda en $isAuthorizedEmployee el resultado necesario para continuar la operacion.
             $isAuthorizedEmployee = ($this->authorization->allowsGlobal($user, 'gestion.seguridad.consultar') || $this->authorization->allows($user, 'gestion.cotizaciones.consultar'))
                 && $this->authorization->allowsRecord(
                     $user,
@@ -62,22 +68,32 @@ class ServicioCotizaciones
                     is_numeric($customer->empresa_id) ? (int) $customer->empresa_id : null,
                     $this->authorization->activeSiteIdFor($user),
                 );
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($isOwner || $isAuthorizedEmployee, 403);
 
+            // Guarda en $items el resultado necesario para continuar la operacion.
             $items = collect($data['items']);
+            // Prepara en $products la consulta que obtiene o modifica los datos necesarios.
             $products = Producto::query()->whereIn('id', $items->pluck('producto_id'))
                 ->where('empresa_id', $customer->empresa_id)->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            // Guarda en $total el resultado necesario para continuar la operacion.
             $total = 0.0;
+            // Agrupa en $lines los datos que se utilizaran en el siguiente paso.
             $lines = [];
 
+            // Recorre los elementos recibidos para validar o procesar cada registro.
             foreach ($items as $item) {
+                // Guarda en $product el resultado de la consulta ejecutada.
                 $product = $products->get((int) $item['producto_id']);
+                // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
                 abort_unless($product instanceof Producto && $product->activo, 422, 'Producto no disponible.');
+                // Guarda en $price el resultado necesario para continuar la operacion.
                 $price = (float) $product->effective_price;
                 $total += $price * (int) $item['cantidad'];
                 $lines[] = [$product->id, (int) $item['cantidad'], $price];
             }
 
+            // Crea y guarda en $quotation el registro gestionado por este servicio.
             $quotation = Cotizacion::create([
                 'cliente_id' => $customer->id,
                 'creado_por_usuario_id' => $user->id,
@@ -89,6 +105,7 @@ class ServicioCotizaciones
                 ...$this->authorization->operationScopeAttributes($user, 'cotizaciones'),
             ]);
 
+            // Recorre los elementos recibidos para validar o procesar cada registro.
             foreach ($lines as [$productId, $quantity, $price]) {
                 $quotation->details()->create(['producto_id' => $productId, 'cantidad' => $quantity, 'precio_unitario' => $price]);
             }
@@ -113,21 +130,30 @@ class ServicioCotizaciones
     {
         $this->authorization->assertAllowed($usuario, 'gestion.cotizaciones.aprobar');
 
+        // Ejecuta los cambios dentro de una transaccion para evitar datos incompletos.
         return DB::transaction(function () use ($cotizacion, $usuario, $ip): Cotizacion {
+            // Prepara en $cotizacionBloqueada la consulta que obtiene o modifica los datos necesarios.
             $cotizacionBloqueada = Cotizacion::query()->whereKey($cotizacion->getKey())->lockForUpdate()->firstOrFail();
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($cotizacionBloqueada->activo, 409, 'La cotizacion esta desactivada.');
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($this->authorization->allowsRecord(
                 $usuario,
                 'gestion.cotizaciones.aprobar',
                 is_numeric($cotizacionBloqueada->empresa_id) ? (int) $cotizacionBloqueada->empresa_id : null,
                 is_numeric($cotizacionBloqueada->sede_id) ? (int) $cotizacionBloqueada->sede_id : null,
             ), 403);
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless(in_array($cotizacionBloqueada->estado, ['Pendiente', 'Enviada'], true), 409, 'Solo se pueden aprobar cotizaciones pendientes o enviadas.');
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($cotizacionBloqueada->cliente_id !== null
                 && $cotizacionBloqueada->customer()->where('activo', true)->where('empresa_id', $cotizacionBloqueada->empresa_id)->exists(), 409, 'La cotizacion requiere un cliente activo de la empresa correspondiente.');
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($cotizacionBloqueada->details()->exists(), 409, 'La cotizacion no contiene productos para aprobar.');
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_if(DB::table('pedidos')->where('cotizacion_id', $cotizacionBloqueada->id)->exists(), 409, 'La cotizacion ya fue convertida en pedido.');
 
+            // Guarda en $estadoAnterior el resultado necesario para continuar la operacion.
             $estadoAnterior = $cotizacionBloqueada->estado;
             $cotizacionBloqueada->update(['estado' => 'Aprobada']);
             $this->auditoria->record($usuario->id, 'cotizacion.aprobada', 'cotizaciones', $cotizacionBloqueada->id,
@@ -153,25 +179,35 @@ class ServicioCotizaciones
     {
         $this->authorization->assertAllowed($usuario, 'gestion.cotizaciones.actualizar');
 
+        // Ejecuta los cambios dentro de una transaccion para evitar datos incompletos.
         return DB::transaction(function () use ($cotizacion, $usuario, $ip): Cotizacion {
+            // Prepara en $cotizacionBloqueada la consulta que obtiene o modifica los datos necesarios.
             $cotizacionBloqueada = Cotizacion::query()->whereKey($cotizacion->getKey())->lockForUpdate()->firstOrFail();
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($cotizacionBloqueada->activo, 409, 'La cotizacion esta desactivada.');
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($this->authorization->allowsRecord(
                 $usuario,
                 'gestion.cotizaciones.actualizar',
                 is_numeric($cotizacionBloqueada->empresa_id) ? (int) $cotizacionBloqueada->empresa_id : null,
                 is_numeric($cotizacionBloqueada->sede_id) ? (int) $cotizacionBloqueada->sede_id : null,
             ), 403);
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if ($cotizacionBloqueada->estado === 'Enviada') {
                 return $cotizacionBloqueada;
             }
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless(in_array($cotizacionBloqueada->estado, ['Borrador', 'Pendiente'], true), 409, 'El estado actual no permite registrar el envio manual.');
 
+            // Guarda en $cliente el resultado necesario para continuar la operacion.
             $cliente = $cotizacionBloqueada->customer()->where('activo', true)
                 ->where('empresa_id', $cotizacionBloqueada->empresa_id)->first();
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($cliente !== null && filter_var($cliente->correo, FILTER_VALIDATE_EMAIL) !== false, 409, 'La cotizacion requiere un correo valido para el cliente de la empresa.');
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($cotizacionBloqueada->details()->exists(), 409, 'La cotizacion no contiene productos para enviar.');
 
+            // Guarda en $estadoAnterior el resultado necesario para continuar la operacion.
             $estadoAnterior = $cotizacionBloqueada->estado;
             $cotizacionBloqueada->update(['estado' => 'Enviada']);
             $this->auditoria->record($usuario->id, 'cotizacion.envio_manual_registrado', 'cotizaciones', $cotizacionBloqueada->id,
@@ -198,15 +234,20 @@ class ServicioCotizaciones
     {
         $this->authorization->assertAllowed($usuario, 'gestion.cotizaciones.actualizar');
 
+        // Ejecuta los cambios dentro de una transaccion para evitar datos incompletos.
         return DB::transaction(function () use ($cotizacion, $usuario, $ip): Cotizacion {
+            // Prepara en $bloqueada la consulta que obtiene o modifica los datos necesarios.
             $bloqueada = Cotizacion::query()->whereKey($cotizacion->getKey())->lockForUpdate()->firstOrFail();
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($this->authorization->allowsRecord(
                 $usuario,
                 'gestion.cotizaciones.actualizar',
                 is_numeric($bloqueada->empresa_id) ? (int) $bloqueada->empresa_id : null,
                 is_numeric($bloqueada->sede_id) ? (int) $bloqueada->sede_id : null,
             ), 403);
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($bloqueada->activo, 409, 'La cotizacion ya esta desactivada.');
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless(in_array($bloqueada->estado, ['Borrador', 'Pendiente'], true), 409, 'Solo se pueden desactivar cotizaciones en borrador o pendientes.');
             $bloqueada->update(['activo' => false]);
             $this->auditoria->record($usuario->id, 'cotizacion.desactivada', 'cotizaciones', $bloqueada->id,
@@ -234,10 +275,15 @@ class ServicioCotizaciones
     {
         $this->authorization->assertAllowed($usuario, 'gestion.cotizaciones.actualizar');
 
+        // Ejecuta los cambios dentro de una transaccion para evitar datos incompletos.
         return DB::transaction(function () use ($cotizacion, $data, $usuario, $ip): Cotizacion {
+            // Prepara en $bloqueada la consulta que obtiene o modifica los datos necesarios.
             $bloqueada = Cotizacion::query()->whereKey($cotizacion->getKey())->lockForUpdate()->firstOrFail();
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($bloqueada->activo, 409, 'La cotización está desactivada.');
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless(in_array($bloqueada->estado, ['Borrador', 'Pendiente'], true), 409, 'Solo se pueden editar cotizaciones en borrador o pendientes.');
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($this->authorization->allowsRecord(
                 $usuario,
                 'gestion.cotizaciones.actualizar',
@@ -245,19 +291,30 @@ class ServicioCotizaciones
                 is_numeric($bloqueada->sede_id) ? (int) $bloqueada->sede_id : null,
             ), 403);
 
+            // Prepara en $cliente la consulta que obtiene o modifica los datos necesarios.
             $cliente = Cliente::query()->whereKey((int) $data['cliente_id'])
                 ->where('empresa_id', $bloqueada->empresa_id)->where('tipo', 'mayorista')->where('activo', true)->first();
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($cliente !== null, 422, 'El cliente debe ser mayorista, activo y pertenecer a la empresa de la cotización.');
 
+            // Guarda en $items el resultado necesario para continuar la operacion.
             $items = collect($data['items']);
+            // Prepara en $productos la consulta que obtiene o modifica los datos necesarios.
             $productos = Producto::query()->whereIn('id', $items->pluck('producto_id')->unique())
                 ->where('empresa_id', $bloqueada->empresa_id)->where('activo', true)->lockForUpdate()->get()->keyBy('id');
+            // Guarda en $total el resultado necesario para continuar la operacion.
             $total = 0.0;
+            // Agrupa en $lineas los datos que se utilizaran en el siguiente paso.
             $lineas = [];
+            // Recorre los elementos recibidos para validar o procesar cada registro.
             foreach ($items as $item) {
+                // Guarda en $producto el resultado de la consulta ejecutada.
                 $producto = $productos->get((int) $item['producto_id']);
+                // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
                 abort_unless($producto instanceof Producto, 422, 'Uno de los productos no pertenece a la empresa o está inactivo.');
+                // Guarda en $cantidad el resultado necesario para continuar la operacion.
                 $cantidad = (int) $item['cantidad'];
+                // Guarda en $precio el resultado necesario para continuar la operacion.
                 $precio = (float) $producto->effective_price;
                 $total += $precio * $cantidad;
                 $lineas[] = [$producto->id, $cantidad, $precio];
@@ -266,6 +323,7 @@ class ServicioCotizaciones
             $antes = ['cliente_id' => $bloqueada->cliente_id, 'total' => $bloqueada->total, 'notas' => $bloqueada->notas, 'detalle_ids' => $bloqueada->details()->pluck('id')->all()];
             $bloqueada->update(['cliente_id' => $cliente->id, 'total' => $total, 'notas' => $data['notas'] ?? null]);
             $bloqueada->details()->delete();
+            // Recorre los elementos recibidos para validar o procesar cada registro.
             foreach ($lineas as [$productoId, $cantidad, $precio]) {
                 $bloqueada->details()->create(['producto_id' => $productoId, 'cantidad' => $cantidad, 'precio_unitario' => $precio]);
             }
@@ -294,9 +352,13 @@ class ServicioCotizaciones
     {
         $this->authorization->assertAllowed($usuario, 'gestion.ventas.crear');
 
+        // Ejecuta los cambios dentro de una transaccion para evitar datos incompletos.
         return DB::transaction(function () use ($cotizacion, $almacenId, $usuario, $ip): Venta {
+            // Prepara en $cotizacionBloqueada la consulta que obtiene o modifica los datos necesarios.
             $cotizacionBloqueada = Cotizacion::query()->whereKey($cotizacion->getKey())->lockForUpdate()->firstOrFail();
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($cotizacionBloqueada->activo, 409, 'La cotizacion esta desactivada.');
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($this->authorization->allowsRecord(
                 $usuario,
                 'gestion.ventas.crear',
@@ -304,15 +366,21 @@ class ServicioCotizaciones
                 is_numeric($cotizacionBloqueada->sede_id) ? (int) $cotizacionBloqueada->sede_id : null,
             ), 403);
 
+            // Prepara en $pedidoExistente la consulta que obtiene o modifica los datos necesarios.
             $pedidoExistente = Pedido::query()->where('cotizacion_id', $cotizacionBloqueada->id)->lockForUpdate()->first();
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if ($pedidoExistente !== null) {
+                // Prepara en $ventaExistente la consulta que obtiene o modifica los datos necesarios.
                 $ventaExistente = Venta::query()->where('pedido_id', $pedidoExistente->id)->lockForUpdate()->first();
+                // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
                 abort_unless($cotizacionBloqueada->estado === 'Convertida' && $ventaExistente !== null, 409, 'La cotizacion ya tiene un pedido asociado que requiere conciliacion.');
 
                 return $ventaExistente;
             }
 
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($cotizacionBloqueada->estado === 'Aprobada', 409, 'Solo se pueden convertir cotizaciones aprobadas.');
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless(Schema::hasColumns('ventas', ['canal', 'observaciones', 'pedido_id'])
                 && Schema::hasColumns('pedidos', ['cotizacion_id', 'canal', 'tipo_venta', 'empresa_id', 'sede_id', 'almacen_id'])
                 && Schema::hasColumns('detalles_pedidos', ['variante_id', 'descuento', 'impuesto'])
@@ -320,6 +388,7 @@ class ServicioCotizaciones
                 && Schema::hasColumns('detalles_ventas', ['detalle_pedido_id', 'variante_id']),
                 503, 'El esquema de ventas vinculadas no contiene las columnas requeridas.');
 
+            // Prepara en $almacen la consulta que obtiene o modifica los datos necesarios.
             $almacen = DB::table('almacenes')
                 ->join('sedes', 'sedes.id', '=', 'almacenes.sede_id')
                 ->join('empresas', 'empresas.id', '=', 'sedes.empresa_id')
@@ -332,36 +401,61 @@ class ServicioCotizaciones
                 ->where('empresas.activo', true)
                 ->lockForUpdate()
                 ->first(['almacenes.id', 'almacenes.sede_id', 'sedes.empresa_id']);
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($almacen !== null, 422, 'Selecciona un almacen activo y autorizado para ventas en la sede de la cotizacion.');
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($this->authorization->allowsRecord($usuario, 'gestion.ventas.crear', (int) $almacen->empresa_id, (int) $almacen->sede_id), 403);
 
+            // Prepara en $cliente la consulta que obtiene o modifica los datos necesarios.
             $cliente = Cliente::query()->whereKey($cotizacionBloqueada->cliente_id)
                 ->where('empresa_id', $cotizacionBloqueada->empresa_id)->where('activo', true)->first();
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($cliente !== null, 409, 'La cotizacion requiere un cliente activo de la misma empresa.');
+            // Guarda en $detalles el resultado de la consulta ejecutada.
             $detalles = $cotizacionBloqueada->details()->orderBy('id')->lockForUpdate()->get();
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($detalles->isNotEmpty(), 409, 'La cotizacion aprobada no contiene productos.');
 
+            // Guarda en $subcentimos el resultado necesario para continuar la operacion.
             $subcentimos = 0;
+            // Guarda en $descuentosCentimos el resultado necesario para continuar la operacion.
             $descuentosCentimos = 0;
+            // Guarda en $impuestosCentimos el resultado necesario para continuar la operacion.
             $impuestosCentimos = 0;
+            // Guarda en $totalCentimos el resultado necesario para continuar la operacion.
             $totalCentimos = 0;
+            // Agrupa en $lineas los datos que se utilizaran en el siguiente paso.
             $lineas = [];
+            // Prepara en $productos la consulta que obtiene o modifica los datos necesarios.
             $productos = Producto::query()->whereIn('id', $detalles->pluck('producto_id')->unique())->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            // Recorre los elementos recibidos para validar o procesar cada registro.
             foreach ($detalles as $detalle) {
+                // Guarda en $producto el resultado de la consulta ejecutada.
                 $producto = $productos->get((int) $detalle->producto_id);
+                // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
                 abort_unless($producto instanceof Producto && $producto->activo && (int) $producto->empresa_id === (int) $cotizacionBloqueada->empresa_id, 409, 'Un producto de la cotizacion no esta activo en la empresa autorizada.');
+                // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
                 abort_unless((int) $detalle->cantidad > 0 && (int) $detalle->cantidad <= 1000, 409, 'La cotizacion contiene una cantidad no valida para el flujo actual de ventas.');
                 $varianteId = $detalle->variante_id === null ? null : (int) $detalle->variante_id;
+                // Guarda en $variante el resultado necesario para continuar la operacion.
                 $variante = null;
+                // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
                 if ($varianteId !== null) {
+                    // Prepara en $variante la consulta que obtiene o modifica los datos necesarios.
                     $variante = DB::table('variantes_productos')->where('id', $varianteId)->where('producto_id', $producto->id)->where('estado', 'activo')->lockForUpdate()->first(['id', 'codigo_sku', 'controla_serie']);
+                    // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
                     abort_unless($variante !== null, 409, 'Una variante de la cotizacion ya no esta activa o no corresponde al producto.');
                 }
+                // Guarda en $unitario el resultado necesario para continuar la operacion.
                 $unitario = (int) round((float) $detalle->precio_unitario * 100);
+                // Guarda en $descuento el resultado necesario para continuar la operacion.
                 $descuento = (int) round((float) $detalle->descuento * 100);
+                // Guarda en $impuesto el resultado necesario para continuar la operacion.
                 $impuesto = (int) round((float) $detalle->impuesto * 100);
+                // Guarda en $baseLinea el resultado necesario para continuar la operacion.
                 $baseLinea = $unitario * (int) $detalle->cantidad;
                 $totalLinea = $detalle->total_linea === null ? $baseLinea - $descuento + $impuesto : (int) round((float) $detalle->total_linea * 100);
+                // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
                 abort_if($unitario < 0 || $descuento < 0 || $descuento > $baseLinea || $impuesto < 0
                     || $totalLinea < 0 || $totalLinea !== $baseLinea - $descuento + $impuesto,
                     409, 'Una linea de la cotizacion contiene importes no validos o requiere conciliacion.');
@@ -372,9 +466,12 @@ class ServicioCotizaciones
                 $lineas[] = [$detalle, $producto, $variante, $baseLinea, $descuento, $impuesto, $totalLinea];
             }
 
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_unless($totalCentimos === (int) round((float) $cotizacionBloqueada->total * 100), 409, 'El total aprobado no coincide con el detalle de la cotizacion; requiere conciliacion.');
+            // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
             abort_if($totalCentimos > 999999999, 422, 'El total supera la capacidad del pedido comercial.');
 
+            // Prepara en $pedido la consulta que obtiene o modifica los datos necesarios.
             $pedido = Pedido::query()->create([
                 'usuario_id' => $usuario->id,
                 'cliente_id' => $cliente->id,
@@ -392,6 +489,7 @@ class ServicioCotizaciones
                 'almacen_id' => $almacen->id,
             ]);
 
+            // Prepara en $venta la consulta que obtiene o modifica los datos necesarios.
             $venta = Venta::query()->create([
                 'empresa_id' => $almacen->empresa_id,
                 'sede_id' => $almacen->sede_id,
@@ -411,7 +509,9 @@ class ServicioCotizaciones
                 'observaciones' => $cotizacionBloqueada->notas,
             ]);
 
+            // Recorre los elementos recibidos para validar o procesar cada registro.
             foreach ($lineas as [$detalle, $producto, $variante, $baseLinea, $descuento, $impuesto, $totalLinea]) {
+                // Prepara en $detallePedido la consulta que obtiene o modifica los datos necesarios.
                 $detallePedido = DetallePedido::query()->create([
                     'pedido_id' => $pedido->id,
                     'producto_id' => $producto->id,

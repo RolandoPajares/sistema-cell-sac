@@ -192,7 +192,14 @@ class CategoriaController extends Controller
     {
         return Categoria::query()
             ->where('categorias.empresa_id', $empresaId)
-            ->withCount(['products' => fn (Builder $consulta): Builder => $consulta->where('productos.empresa_id', $empresaId)])
+            ->select('categorias.*')
+            ->selectSub(
+                Producto::query()
+                    ->selectRaw('COUNT(*)')
+                    ->whereColumn('productos.categoria_id', 'categorias.id')
+                    ->where('productos.empresa_id', $empresaId),
+                'products_count'
+            )
             ->when($filtros['buscar'], function (Builder $consulta, string $busqueda): void {
                 $consulta->where(function (Builder $consultaBusqueda) use ($busqueda): void {
                     $consultaBusqueda

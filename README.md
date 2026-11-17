@@ -1,58 +1,120 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistema Cell SAC
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistema web de gestión comercial e inventario para una empresa de tecnología y venta de equipos celulares.
 
-## About Laravel
+## Funcionalidades principales
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Autenticación y registro de usuarios.
+- Control de acceso mediante roles, permisos y alcance por empresa/sede.
+- Gestión de categorías, marcas, productos, variantes e imágenes.
+- Control de existencias, ajustes, movimientos y transferencias entre almacenes.
+- Catálogo público, carrito, checkout y seguimiento de pedidos.
+- Gestión de compras, cotizaciones, ventas, clientes y proveedores.
+- Paneles, reportes, exportación tabular y auditoría de operaciones.
+- Módulos financieros para cajas, pagos, cuentas por cobrar/pagar y reembolsos.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Requisitos
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP 8.5 o compatible con `composer.json`.
+- Composer.
+- Node.js y npm.
+- MariaDB 10.4 o compatible.
+- Extensiones PHP `pdo_mysql`, `mbstring`, `openssl`, `fileinfo` y `zip`.
 
-## Learning Laravel
+## Instalación local
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+1. Instalar dependencias:
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+   ```bash
+   composer install
+   npm install
+   ```
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+2. Crear el archivo de entorno y generar la clave:
 
-## Agentic Development
+   ```bash
+   copy .env.example .env
+   php artisan key:generate
+   ```
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+3. Configurar en `.env` la conexión MariaDB:
 
-```bash
-composer require laravel/boost --dev
+   ```dotenv
+   APP_NAME="CELL SAC"
+   APP_URL=http://localhost/sistema-cell-sac/public
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=bd_cell
+   DB_USERNAME=tu_usuario
+   DB_PASSWORD=tu_contraseña
+   ```
 
-php artisan boost:install
+4. Crear la base de datos e importar el esquema incluido:
+
+   ```bash
+   mysql -h 127.0.0.1 -P 3306 -u tu_usuario -p bd_cell < "storage/md_tecnologia_digital_cell (1).sql"
+   ```
+
+   También se puede importar el archivo desde phpMyAdmin. El archivo contiene el esquema MariaDB del sistema y no incluye contraseñas ni datos personales de usuarios. Esta entrega usa ese esquema base versionado; la importación del SQL es el paso que crea las tablas.
+
+5. Inicializar la empresa y el administrador desde la consola:
+
+   ```bash
+   php artisan technology-cell:inicializar --vista-previa
+   php artisan technology-cell:inicializar --confirmar
+   ```
+
+   El comando solicita los datos de la empresa, sede, almacén y administrador. La contraseña debe tener al menos 12 caracteres, letras y números.
+
+6. Construir los recursos frontend:
+
+   ```bash
+   npm run build
+   ```
+
+7. Ejecutar la aplicación con Apache/XAMPP o con el servidor de desarrollo:
+
+   ```bash
+   php artisan serve
+   ```
+
+## Pruebas
+
+Las pruebas usan SQLite en memoria. En Windows, si el entorno tiene una variable `DB_CONNECTION` externa, ejecutar:
+
+```powershell
+$env:DB_CONNECTION='sqlite'
+$env:DB_DATABASE=':memory:'
+$env:DB_URL=''
+php artisan test --compact
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Resultado de verificación del entregable: 297 pruebas ejecutadas, 279 aprobadas y 18 omitidas porque requieren una instancia MariaDB descartable independiente.
 
-## Contributing
+## Flujo recomendado para la demostración
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+1. Iniciar sesión con el administrador creado.
+2. Mostrar el dashboard y el menú dinámico según permisos.
+3. Registrar o revisar una categoría y un producto.
+4. Mostrar que la categoría cuenta sus productos mediante la relación `categoria_id`.
+5. Ajustar existencias y revisar el movimiento de inventario.
+6. Abrir el catálogo público, agregar un producto al carrito y completar el checkout.
+7. Volver al panel para consultar el pedido y actualizar su estado.
+8. Mostrar reportes, exportación y registro de auditoría.
 
-## Code of Conduct
+## Comandos útiles
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+php artisan route:list
+php artisan technology-cell:inicializar-rbac --vista-previa
+php artisan optimize:clear
+vendor/bin/pint --dirty --format agent
+```
 
-## Security Vulnerabilities
+## Observaciones de entrega
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- No subir el archivo `.env` al repositorio.
+- Cambiar `APP_DEBUG=false` en cualquier entorno que no sea desarrollo local.
+- No reutilizar contraseñas de desarrollo en la presentación.
+- Las integraciones externas como SUNAT requieren credenciales y autorización propias; el resto del flujo interno funciona con la base MariaDB del proyecto.

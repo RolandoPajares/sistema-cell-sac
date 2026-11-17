@@ -22,15 +22,22 @@ class RegistrarSesionUsuario
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Obtiene el usuario autenticado para asociar la sesion con su cuenta.
         $user = $request->user();
+
+        // Omite el registro si no hay usuario, tabla de sesiones o sesion HTTP disponible.
         if ($user === null || ! Schema::hasTable('sesiones_usuarios') || ! $request->hasSession()) {
             return $next($request);
         }
 
+        // Obtiene el identificador de la sesion y crea un resumen seguro para almacenarlo.
         $sessionId = $request->session()->getId();
         $sessionHash = hash('sha256', $sessionId);
+
+        // Busca si la sesion actual existe y si fue revocada por el sistema o por el usuario.
         $session = DB::table('sesiones_usuarios')->where('resumen_identificador', $sessionHash)->first();
 
+        // Cierra la sesion si el registro fue marcado como revocado.
         if ($session !== null && $session->revocada_en !== null) {
             auth()->logout();
             $request->session()->invalidate();
@@ -39,6 +46,7 @@ class RegistrarSesionUsuario
             return redirect()->route('login')->withErrors(['correo' => 'La sesión ya no está activa. Inicia sesión nuevamente.']);
         }
 
+        // Crea o actualiza el registro de sesion con usuario, IP, navegador y fecha de acceso.
         DB::table('sesiones_usuarios')->updateOrInsert(
             ['resumen_identificador' => $sessionHash],
             [

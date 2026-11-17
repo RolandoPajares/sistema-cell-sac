@@ -38,15 +38,20 @@ final class ServicioNotificaciones
         string $estado = 'todas',
         ?string $busqueda = null,
     ): LengthAwarePaginator {
+        // ORM: consulta las notificaciones del usuario mediante Eloquent.
+        // Guarda en $consulta el resultado necesario para continuar la operacion.
         $consulta = $this->consultaDelUsuario($usuario);
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($estado === 'no_leidas') {
             $consulta->whereNull('leido_en');
         } elseif ($estado === 'leidas') {
             $consulta->whereNotNull('leido_en');
         }
 
+        // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
         if ($busqueda !== null && trim($busqueda) !== '') {
+            // Guarda en $termino el resultado necesario para continuar la operacion.
             $termino = '%'.trim($busqueda).'%';
             $consulta->where(function (Builder $consulta) use ($termino): void {
                 $consulta->where('tipo', 'like', $termino)
@@ -69,6 +74,7 @@ final class ServicioNotificaciones
      */
     public function obtenerResumenDelUsuario(User $usuario): array
     {
+        // Guarda en $grupos el resultado necesario para continuar la operacion.
         $grupos = $this->consultaDelUsuario($usuario)
             ->select('tipo')
             ->selectRaw('COUNT(*) AS cantidad')
@@ -78,15 +84,22 @@ final class ServicioNotificaciones
             ->get();
         $total = (int) $grupos->sum(static fn (Notificacion $notificacion): int => (int) $notificacion->getAttribute('cantidad'));
         $noLeidas = (int) $grupos->sum(static fn (Notificacion $notificacion): int => (int) $notificacion->getAttribute('no_leidas'));
+        // Guarda en $inicio el resultado necesario para continuar la operacion.
         $inicio = 0.0;
+        // Agrupa en $segmentos los datos que se utilizaran en el siguiente paso.
         $segmentos = [];
+        // Agrupa en $distribucion los datos que se utilizaran en el siguiente paso.
         $distribucion = [];
+        // Guarda en $cantidadTipos el resultado necesario para continuar la operacion.
         $cantidadTipos = $grupos->count();
 
+        // Recorre los elementos recibidos para validar o procesar cada registro.
         foreach ($grupos as $indice => $notificacion) {
+            // Guarda en $cantidad el resultado necesario para continuar la operacion.
             $cantidad = (int) $notificacion->getAttribute('cantidad');
             $porcentaje = $total === 0 ? 0 : round(($cantidad / $total) * 100, 2);
             $fin = $indice === $cantidadTipos - 1 ? 100.0 : min(100.0, $inicio + $porcentaje);
+            // Guarda en $color el resultado necesario para continuar la operacion.
             $color = self::COLORES_GRAFICO[$indice % count(self::COLORES_GRAFICO)];
 
             $segmentos[] = sprintf('%s %.2f%% %.2f%%', $color, $inicio, $fin);
@@ -95,6 +108,7 @@ final class ServicioNotificaciones
                 'valor' => $cantidad,
                 'color' => $color,
             ];
+            // Guarda en $inicio el resultado necesario para continuar la operacion.
             $inicio = $fin;
         }
 
@@ -132,18 +146,23 @@ final class ServicioNotificaciones
      */
     public function marcarComoLeida(User $usuario, string $identificador, ?string $direccionIp): bool
     {
+        // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
         abort_unless(Schema::hasTable('registros_auditoria'), 503, 'La lectura requiere la tabla de auditoría disponible.');
 
+        // Ejecuta los cambios dentro de una transaccion para evitar datos incompletos.
         return DB::transaction(function () use ($usuario, $identificador, $direccionIp): bool {
+            // Guarda en $notificacion el resultado necesario para continuar la operacion.
             $notificacion = $this->consultaDelUsuario($usuario)
                 ->whereKey($identificador)
                 ->lockForUpdate()
                 ->firstOrFail();
 
+            // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
             if ($notificacion->leido_en !== null) {
                 return false;
             }
 
+            // Guarda en $fechaLectura el resultado necesario para continuar la operacion.
             $fechaLectura = now();
             $notificacion->forceFill(['leido_en' => $fechaLectura])->save();
             $this->registradorAuditoria->record(
@@ -163,6 +182,7 @@ final class ServicioNotificaciones
     /** @return Builder<Notificacion> */
     private function consultaDelUsuario(User $usuario): Builder
     {
+        // Devuelve el resultado obtenido mediante el modelo correspondiente.
         return Notificacion::query()
             ->where('tipo_notificable', $usuario->getMorphClass())
             ->where('notificable_id', $usuario->getKey());
