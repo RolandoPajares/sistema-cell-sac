@@ -7,11 +7,109 @@
 
 // El catálogo ya recibe del servidor los datos consultados por el controlador.
 (() => {
-    const formularioOrden = document.querySelector("[data-catalog-sort]");
-    // Evento: escucha el evento change y ejecuta la funcion asociada cuando ocurre.
-    formularioOrden?.addEventListener("change", () =>
-        formularioOrden.form?.requestSubmit()
-    );
+    let solicitudActual = null;
+    let secuenciaSolicitud = 0;
+    let temporizadorFiltros = null;
+
+    const cargarCatalogo = async (url, agregarHistorial = true) => {
+        const catalogo = document.querySelector(".catalog-page");
+        if (!catalogo) {
+            return;
+        }
+
+        solicitudActual?.abort();
+        solicitudActual = new AbortController();
+        const secuencia = ++secuenciaSolicitud;
+        catalogo.setAttribute("aria-busy", "true");
+
+        try {
+            const respuesta = await fetch(url, {
+                headers: { "X-Requested-With": "XMLHttpRequest", Accept: "text/html" },
+                signal: solicitudActual.signal,
+            });
+            if (!respuesta.ok) {
+                throw new Error("No se pudo actualizar el catálogo.");
+            }
+
+            const html = await respuesta.text();
+            if (secuencia !== secuenciaSolicitud) {
+                return;
+            }
+
+            const documento = new DOMParser().parseFromString(html, "text/html");
+            const sidebarNueva = documento.querySelector(".catalog-sidebar");
+            const contenidoNuevo = documento.querySelector(".catalog-content");
+            const sidebarActual = document.querySelector(".catalog-sidebar");
+            const contenidoActual = document.querySelector(".catalog-content");
+            if (!sidebarNueva || !contenidoNuevo || !sidebarActual || !contenidoActual) {
+                throw new Error("La respuesta del catálogo está incompleta.");
+            }
+
+            sidebarActual.replaceWith(sidebarNueva);
+            contenidoActual.replaceWith(contenidoNuevo);
+            if (agregarHistorial) {
+                window.history.pushState({ catalogo: true }, "", url);
+            }
+            document.querySelector("#productos")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        } catch (error) {
+            if (error.name !== "AbortError") {
+                catalogo.querySelector(".catalog-content")?.insertAdjacentHTML(
+                    "afterbegin",
+                    '<p class="alert alert-danger" role="alert">No se pudo actualizar el catálogo. Intenta nuevamente.</p>'
+                );
+            }
+        } finally {
+            if (secuencia === secuenciaSolicitud) {
+                catalogo.removeAttribute("aria-busy");
+            }
+        }
+    };
+
+    document.addEventListener("submit", (evento) => {
+        const formulario = evento.target.closest(".catalog-page form");
+        if (!formulario || formulario.matches("form[action*='/carrito']")) {
+            return;
+        }
+
+        evento.preventDefault();
+        const url = new URL(formulario.action, window.location.href);
+        url.search = new URLSearchParams(new FormData(formulario)).toString();
+        url.searchParams.delete("page");
+        cargarCatalogo(url.toString());
+    });
+
+    document.addEventListener("change", (evento) => {
+        if (evento.target.matches("[data-catalog-sort]")) {
+            evento.target.form?.requestSubmit();
+            return;
+        }
+
+        if (evento.target.matches(".catalog-facet-form input[type='checkbox']")) {
+            window.clearTimeout(temporizadorFiltros);
+            temporizadorFiltros = window.setTimeout(() => {
+                evento.target.form?.requestSubmit();
+            }, 180);
+        }
+    });
+
+    document.addEventListener("click", (evento) => {
+        const filtroEnlace = evento.target.closest(".catalog-filter-list a");
+        if (filtroEnlace) {
+            evento.preventDefault();
+            cargarCatalogo(filtroEnlace.href);
+            return;
+        }
+
+        const enlace = evento.target.closest(".catalog-pagination a");
+        if (!enlace) {
+            return;
+        }
+
+        evento.preventDefault();
+        cargarCatalogo(enlace.href);
+    });
+
+    window.addEventListener("popstate", () => cargarCatalogo(window.location.href, false));
 
     const elementoModal = document.querySelector("[data-catalog-modal]");
     // Condicional: evalua "!elementoModal || typeof elementoModal.showModal !== "function"" para decidir si ejecuta el bloque siguiente.

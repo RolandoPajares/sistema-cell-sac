@@ -6,6 +6,7 @@ use Database\Factories\CategoriaFactory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -54,5 +55,11 @@ class Categoria extends Model
     public function products(): HasMany
     {
         return $this->hasMany(Producto::class, 'categoria_id');
+    }
+
+    public function atributos(): BelongsToMany
+    {
+        return $this->belongsToMany(Atributo::class, 'categoria_atributo', 'categoria_id', 'atributo_id')
+            ->withPivot(['activo', 'orden']);
     }
 }
