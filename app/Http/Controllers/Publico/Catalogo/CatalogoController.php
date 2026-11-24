@@ -32,7 +32,7 @@ class CatalogoController extends Controller
         $filters = $request->validated();
 
         // Prepara en $products la consulta que obtiene o modifica los registros necesarios.
-        $products = $catalogService->query($filters)->paginate(20)->withQueryString();
+        $products = $catalogService->query($filters)->paginate((int) ($filters['per_page'] ?? 20))->withQueryString();
         $catalogService->agregarDisponibilidad($products->getCollection(), $request->user());
 
         $products->getCollection()->transform(function (Producto $product): Producto {
@@ -62,10 +62,13 @@ class CatalogoController extends Controller
         $baseFilters = collect($filters)->except('page')->all();
         // Guarda en $filterOptions el resultado necesario para continuar esta operacion.
         $filterOptions = $catalogService->filterOptions();
+        $facets = $catalogService->facets($filters);
+        $filterOptions = $catalogService->contextualizarOpciones($filterOptions, $facets, $filters);
 
         // Devuelve la vista 'publico.catalogo.index' con los datos preparados por este controlador.
         return view('publico.catalogo.index', [
             'products' => $products,
+            'filters' => $filters,
             ...$filterOptions,
             'query' => (string) ($filters['q'] ?? ''),
             'baseFilters' => $baseFilters,
@@ -76,10 +79,12 @@ class CatalogoController extends Controller
                 : null,
             'selectedCategory' => $selectedCategory,
             'selectedBrand' => $selectedBrand,
+            'selectedBrands' => is_array($selectedBrand) ? $selectedBrand : ($selectedBrand ? [$selectedBrand] : []),
             'selectedOrder' => $selectedOrder,
             'minimumPrice' => $minimumPrice,
             'maximumPrice' => $maximumPrice,
             'canAddToCart' => $request->user() !== null,
+            'facetCounts' => $facets,
         ]);
     }
 

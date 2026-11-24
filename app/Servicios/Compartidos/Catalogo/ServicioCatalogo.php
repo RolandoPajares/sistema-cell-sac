@@ -5,6 +5,7 @@ namespace App\Servicios\Compartidos\Catalogo;
 use App\Dominio\Catalogo\ProductoDao;
 use App\Dominio\Catalogo\ProductoEntidad;
 use App\Dominio\Catalogo\VarianteProductoEntidad;
+use App\Models\Catalogo\Atributo;
 use App\Models\Catalogo\Categoria;
 use App\Models\Catalogo\Producto;
 use App\Models\User;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 class ServicioCatalogo
@@ -33,7 +35,7 @@ class ServicioCatalogo
      * @param  array<string, mixed>  $filters  Filtros validados del catálogo.
      * @return Builder<Producto> Consulta Eloquent aún no ejecutada.
      */
-    public function query(array $filters): Builder
+    public function query(array $filters, ?int $excludedAttributeId = null): Builder
     {
         // Construye la consulta del catalogo aplicando busqueda, marca y orden.
         // Prepara en $productsQuery la consulta que obtiene o modifica los datos necesarios.
@@ -57,8 +59,9 @@ class ServicioCatalogo
         }
 
         // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
-        if (($brand = trim((string) ($filters['marca'] ?? ''))) !== '') {
-            $productsQuery->where('marca', $brand);
+        $brands = $this->listaDeValores($filters['marca'] ?? null);
+        if ($brands !== []) {
+            $productsQuery->whereIn('marca', $brands);
         }
 
         // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
@@ -71,15 +74,16 @@ class ServicioCatalogo
             $productsQuery->whereRaw('COALESCE(precio_oferta, precio) <= ?', [(float) $maximumPrice]);
         }
 
-        [$field, $direction] = match ($filters['orden'] ?? null) {
-            'precio_asc' => ['precio', 'asc'],
-            'precio_desc' => ['precio', 'desc'],
-            'nuevo' => ['creado_en', 'desc'],
-            default => ['nombre', 'asc'],
-        };
+        if ($this->eavDisponible()) {
+            $this->aplicarFiltrosDeAtributos($productsQuery, $filters['atributos'] ?? [], $excludedAttributeId);
+        }
 
-        // ORM: ordena la consulta y la devuelve para que el controlador la ejecute con get o paginate.
-        return $productsQuery->orderBy($field, $direction)->orderBy('id');
+        return match ($filters['orden'] ?? null) {
+            'precio_asc' => $productsQuery->orderByRaw('COALESCE(precio_oferta, precio) ASC')->orderBy('id'),
+            'precio_desc' => $productsQuery->orderByRaw('COALESCE(precio_oferta, precio) DESC')->orderBy('id'),
+            'nuevo' => $productsQuery->orderByDesc('creado_en')->orderByDesc('id'),
+            default => $productsQuery->orderBy('nombre')->orderBy('id'),
+        };
     }
 
     public function sincronizarImagenPortada(Producto $producto): void
@@ -225,7 +229,7 @@ class ServicioCatalogo
     }
 
     /**
-     * @return array{categories: Collection, brands: Collection}
+     * @return array{categories: Collection, brands: Collection, attributes: Collection}
      */
     public function filterOptions(): array
     {
@@ -239,7 +243,134 @@ class ServicioCatalogo
                 ->distinct()
                 ->orderBy('marca')
                 ->pluck('marca'),
+            'attributes' => $this->eavDisponible()
+                ? Atributo::query()->where('activo', true)->where('visible', true)->where('filtrable', true)
+                    ->with(['valores' => fn ($query) => $query->where('activo', true)])
+                    ->orderBy('orden')->orderBy('nombre')->get()
+                : collect(),
         ];
+    }
+
+    /**
+     * Calcula conteos disyuntivos sobre el conjunto completo, excluyendo la faceta propia.
+     *
+     * @param  array<string, mixed>  $filters
+     * @return array{categories: Collection, brands: Collection, attributes: Collection}
+     */
+    public function facets(array $filters): array
+    {
+        $filtersWithoutCategory = $filters;
+        unset($filtersWithoutCategory['categoria']);
+        $filtersWithoutBrand = $filters;
+        unset($filtersWithoutBrand['marca']);
+        $categoryCounts = $this->query($filtersWithoutCategory)->without(['category', 'images'])->reorder()->select('categoria_id')
+            ->selectRaw('COUNT(DISTINCT productos.id) AS total')->groupBy('categoria_id')->pluck('total', 'categoria_id');
+        $brandCounts = $this->query($filtersWithoutBrand)->without(['category', 'images'])->reorder()->select('marca')
+            ->selectRaw('COUNT(DISTINCT productos.id) AS total')->groupBy('marca')->pluck('total', 'marca');
+        $attributeCounts = collect();
+
+        if ($this->eavDisponible()) {
+            $attributeCounts = $this->filterOptions()['attributes']->map(function (Atributo $atributo) use ($filters): array {
+                $baseQuery = $this->query($filters, (int) $atributo->id)->select('productos.id');
+                $values = DB::table('atributo_valores as valor')
+                    ->join('producto_atributo_valor as pivote', 'pivote.atributo_valor_id', '=', 'valor.id')
+                    ->where('valor.atributo_id', $atributo->id)->where('valor.activo', true)
+                    ->whereIn('pivote.producto_id', $baseQuery)
+                    ->select('valor.id', 'valor.atributo_id', 'valor.valor')
+                    ->selectRaw('COUNT(DISTINCT pivote.producto_id) AS total')
+                    ->groupBy('valor.id', 'valor.atributo_id', 'valor.valor')
+                    ->orderBy('valor.orden')->orderBy('valor.valor')->get();
+
+                return [
+                    'id' => (int) $atributo->id,
+                    'values' => $values->map(fn (object $value): array => [
+                        'id' => (int) $value->id,
+                        'label' => (string) $value->valor,
+                        'count' => (int) $value->total,
+                    ])->all(),
+                ];
+            })->filter(fn (array $attribute): bool => $attribute['values'] !== [])->values();
+        }
+
+        return ['categories' => $categoryCounts, 'brands' => $brandCounts, 'attributes' => $attributeCounts];
+    }
+
+    /**
+     * Conserva únicamente las opciones que tienen coincidencias en el contexto actual.
+     * Los valores ya seleccionados se conservan para que puedan desmarcarse.
+     *
+     * @param  array{categories: Collection, brands: Collection, attributes: Collection}  $options
+     * @param  array{categories: Collection, brands: Collection, attributes: Collection}  $facets
+     * @param  array<string, mixed>  $filters
+     * @return array{categories: Collection, brands: Collection, attributes: Collection}
+     */
+    public function contextualizarOpciones(array $options, array $facets, array $filters): array
+    {
+        $selectedBrands = $this->listaDeValores($filters['marca'] ?? null);
+        $brandCounts = $facets['brands'];
+        $options['brands'] = $options['brands']->filter(
+            fn (string $brand): bool => (int) $brandCounts->get($brand, 0) > 0 || in_array($brand, $selectedBrands, true),
+        )->values();
+
+        $selectedAttributes = collect($filters['atributos'] ?? [])->mapWithKeys(
+            fn (mixed $values, int|string $attributeId): array => [
+                (int) $attributeId => collect((array) $values)->map(fn (mixed $value): int => (int) $value)->all(),
+            ],
+        );
+        $attributeCounts = collect($facets['attributes'])->keyBy('id');
+
+        $options['attributes'] = $options['attributes']->map(function (Atributo $attribute) use ($attributeCounts, $selectedAttributes): Atributo {
+            $countsByValue = collect($attributeCounts->get($attribute->id, [])['values'] ?? [])->keyBy('id');
+            $selectedValues = collect($selectedAttributes->get($attribute->id, []));
+            $values = $attribute->valores->filter(
+                fn (object $value): bool => $countsByValue->has($value->id) || $selectedValues->contains((int) $value->id),
+            )->values();
+            $attribute->setRelation('valores', $values);
+
+            return $attribute;
+        })->filter(fn (Atributo $attribute): bool => $attribute->valores->isNotEmpty())->values();
+
+        return $options;
+    }
+
+    private function eavDisponible(): bool
+    {
+        return Schema::hasTable('atributos') && Schema::hasTable('atributo_valores')
+            && Schema::hasTable('producto_atributo_valor');
+    }
+
+    /** @return array<int, string> */
+    private function listaDeValores(mixed $value): array
+    {
+        $values = is_array($value) ? $value : [$value];
+
+        return collect($values)->map(fn (mixed $item): string => trim((string) $item))
+            ->filter()->unique()->take(20)->values()->all();
+    }
+
+    /** @param array<int|string, mixed> $attributes */
+    private function aplicarFiltrosDeAtributos(Builder $query, array $attributes, ?int $excludedAttributeId): void
+    {
+        foreach ($attributes as $attributeId => $valueIds) {
+            $attributeId = (int) $attributeId;
+            if ($attributeId < 1 || $attributeId === $excludedAttributeId) {
+                continue;
+            }
+
+            $values = collect(is_array($valueIds) ? $valueIds : [$valueIds])->map(fn (mixed $value): int => (int) $value)
+                ->filter(fn (int $value): bool => $value > 0)->unique()->take(20)->values()->all();
+            if ($values === []) {
+                continue;
+            }
+
+            $query->whereExists(function (QueryBuilder $subquery) use ($attributeId, $values): void {
+                $subquery->selectRaw('1')->from('producto_atributo_valor as pivote')
+                    ->join('atributo_valores as valor', 'valor.id', '=', 'pivote.atributo_valor_id')
+                    ->whereColumn('pivote.producto_id', 'productos.id')
+                    ->where('valor.atributo_id', $attributeId)->whereIn('valor.id', $values)
+                    ->where('valor.activo', true);
+            });
+        }
     }
 
     /** @return Builder<Producto> */

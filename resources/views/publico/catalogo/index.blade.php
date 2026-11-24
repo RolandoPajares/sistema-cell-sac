@@ -32,25 +32,49 @@
                     </nav>
                 </section>
 
-                <section class="catalog-filter-section">
-                    <h2>Marca</h2>
-                    <nav class="catalog-filter-list" aria-label="Marcas">
-                        <a class="{{ $selectedBrand ? '' : 'is-active' }}" href="{{ route('catalog.index', collect($baseFilters)->except('marca')->all()) }}">Todas las marcas</a>
-{{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
-                        @foreach($brands as $brand)
-                        <a class="{{ $selectedBrand === $brand ? 'is-active' : '' }}" href="{{ route('catalog.index', array_merge($baseFilters, ['marca' => $brand])) }}">{{ $brand }}</a>
-                        @endforeach
-                    </nav>
-                </section>
+                <form class="catalog-facet-form" method="get" action="{{ route('catalog.index') }}" data-catalog-filters>
+                    <input type="hidden" name="q" value="{{ $query }}">
+                    <input type="hidden" name="categoria" value="{{ $selectedCategory }}">
+                    <input type="hidden" name="min" value="{{ request('min') }}">
+                    <input type="hidden" name="max" value="{{ request('max') }}">
+                    <input type="hidden" name="orden" value="{{ $selectedOrder }}">
+                    <section class="catalog-filter-section">
+                        <h2>Marca</h2>
+                        <div class="catalog-filter-list" aria-label="Marcas">
+                            @foreach($brands as $brand)
+                            <label class="catalog-check-option">
+                                <input type="checkbox" name="marca[]" value="{{ $brand }}" @checked(in_array($brand, $selectedBrands, true))>
+                                <span>{{ $brand }}</span><small>{{ $facetCounts['brands'][$brand] ?? 0 }}</small>
+                            </label>
+                            @endforeach
+                        </div>
+                    </section>
+                    @foreach($attributes as $attribute)
+                    <details class="catalog-filter-section catalog-filter-attribute" open>
+                        <summary>{{ $attribute->nombre }}</summary>
+                        <div class="catalog-filter-list" aria-label="{{ $attribute->nombre }}">
+                            @foreach($attribute->valores as $value)
+                            @php($attributeFacet = $facetCounts['attributes']->firstWhere('id', $attribute->id))
+                            @php($valueFacet = collect($attributeFacet['values'] ?? [])->firstWhere('id', $value->id))
+                            <label class="catalog-check-option">
+                                <input type="checkbox" name="atributos[{{ $attribute->id }}][]" value="{{ $value->id }}" @checked(in_array((string) $value->id, array_map('strval', (array) ($filters['atributos'][$attribute->id] ?? [])), true))>
+                                <span>{{ $value->valor }}</span><small>{{ $valueFacet['count'] ?? 0 }}</small>
+                            </label>
+                            @endforeach
+                        </div>
+                    </details>
+                    @endforeach
+                    <button class="btn btn-primary w-100" type="submit">Aplicar filtros</button>
+                    <a class="btn btn-ghost w-100" href="{{ route('catalog.index') }}">Limpiar todo</a>
+                </form>
 
 {{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                 <form class="catalog-price-filter" method="get" action="{{ route('catalog.index') }}">
                     <h2>Rango de precio</h2>
                     <input type="hidden" name="q" value="{{ $query }}">
-                    <input
-                        type="hidden"
-                        name="marca"
-                        value="{{ $selectedBrand }}">
+                    @foreach($selectedBrands as $brand)
+                    <input type="hidden" name="marca[]" value="{{ $brand }}">
+                    @endforeach
                     <input
                         type="hidden"
                         name="categoria"
@@ -59,6 +83,11 @@
                         type="hidden"
                         name="orden"
                         value="{{ request('orden') }}">
+                    @foreach((array) ($filters['atributos'] ?? []) as $attributeId => $valueIds)
+                        @foreach((array) $valueIds as $valueId)
+                        <input type="hidden" name="atributos[{{ $attributeId }}][]" value="{{ $valueId }}">
+                        @endforeach
+                    @endforeach
                     <label for="catalog-min-price">Mínimo</label>
                     <input
                         class="input"
@@ -91,10 +120,17 @@
                  
 {{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                     <form id="catalog-search-form" class="catalog-search" method="get" action="{{ route('catalog.index') }}" role="search">
-                        <input type="hidden" name="marca" value="{{ $selectedBrand }}">
+                        @foreach($selectedBrands as $brand)
+                        <input type="hidden" name="marca[]" value="{{ $brand }}">
+                        @endforeach
                         <input type="hidden" name="categoria" value="{{ $selectedCategory }}">
                         <input type="hidden" name="min" value="{{ request('min') }}">
                         <input type="hidden" name="max" value="{{ request('max') }}">
+                        @foreach((array) ($filters['atributos'] ?? []) as $attributeId => $valueIds)
+                            @foreach((array) $valueIds as $valueId)
+                            <input type="hidden" name="atributos[{{ $attributeId }}][]" value="{{ $valueId }}">
+                            @endforeach
+                        @endforeach
                         <label class="visually-hidden" for="catalog-search-input">Buscar productos</label>
                         
                         
@@ -181,3 +217,7 @@
     </div>
 </section>
 @endsection
+
+@push('scripts')
+    @vite('resources/js/publico/catalogo/index.js')
+@endpush

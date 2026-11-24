@@ -102,6 +102,12 @@ class Producto extends Model
         return $this->hasMany(CaracteristicaProducto::class, 'producto_id');
     }
 
+    public function attributeValues(): BelongsToMany
+    {
+        return $this->belongsToMany(AtributoValor::class, 'producto_atributo_valor', 'producto_id', 'atributo_valor_id')
+            ->with('atributo');
+    }
+
     /**
      * Ejecuta la operación variants definida por la clase Producto.
      *
