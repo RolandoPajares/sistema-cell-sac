@@ -14,6 +14,7 @@ import '../../nucleo/cargador-recursos-panel.js';
 import '../../componentes/comunes/confirmacion.js';
 import '../../componentes/comunes/bloqueo-envio.js';
 import '../../componentes/comunes/visibilidad-contrasenas.js';
+import '../../componentes/comunes/mensajes-emergentes.js';
 import '../../inteligente/asistente/flotante.js';
 import '../../gestion/index.js';
 

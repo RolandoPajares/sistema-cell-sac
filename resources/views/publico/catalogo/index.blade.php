@@ -173,7 +173,7 @@
                             <div class="catalog-product-actions">
                                 @auth
 {{-- formulario que recopila datos y los envia a la ruta indicada. --}}
-                                    <form action="{{ route('cart.add', $product) }}" method="post">
+                                    <form action="{{ route('cart.add', $product) }}" method="post" data-product-purchase-form>
 {{-- proteccion CSRF que valida el origen del formulario. --}}
                                         @csrf
                                         <input type="hidden" name="cantidad" value="1">
@@ -184,22 +184,14 @@
                                     </form>
 {{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                                 @else
-                                    <details class="catalog-buy-choice">
-                                        <summary class="btn btn-primary catalog-buy-button" @if($product->existencias_disponibles <= 0) aria-disabled="true" @endif><i class="bi bi-cart3" aria-hidden="true"></i> {{ $product->existencias_disponibles > 0 ? 'Comprar' : 'Agotado' }}</summary>
-{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
-                                        @if($product->existencias_disponibles > 0)
-                                            <div class="catalog-buy-choice-options">
-                                                <a class="btn btn-ghost" href="{{ route('login') }}">Iniciar sesión</a>
-{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
-                                                <form action="{{ route('cart.add', $product) }}" method="post">
-{{-- proteccion CSRF que valida el origen del formulario. --}}
-                                                    @csrf
-                                                    <input type="hidden" name="cantidad" value="1">
-                                                    <button class="btn btn-primary" type="submit">Continuar como invitado</button>
-                                                </form>
-                                            </div>
-                                        @endif
-                                    </details>
+                                    <button class="btn btn-primary catalog-buy-button" type="button" data-purchase-trigger data-login-url="{{ route('login') }}" @disabled($product->existencias_disponibles <= 0)>
+                                        <i class="bi bi-cart3" aria-hidden="true"></i>
+                                        {{ $product->existencias_disponibles > 0 ? 'Comprar' : 'Agotado' }}
+                                    </button>
+                                    <form action="{{ route('cart.add', $product) }}" method="post" data-product-purchase-form hidden>
+                                        @csrf
+                                        <input type="hidden" name="cantidad" value="1">
+                                    </form>
                                 @endauth
                                 <a class="btn btn-ghost catalog-details-button" href="{{ route('catalog.show', $product) }}">Ver detalles</a>
                             </div>

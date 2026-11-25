@@ -91,6 +91,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', InicioController::class)->name('home');
 // [GET /catalogo] Abre el catálogo de productos. Controlador: CatalogoController::index(). Nombre: catalog.index.
 Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalog.index');
+Route::get('/catalogo/menu', [CatalogoController::class, 'menu'])->name('catalog.menu');
 // [GET /catalogo/{product}] Muestra el detalle de un producto del catálogo. Controlador: CatalogoController::show(). Nombre: catalog.show. Parámetro(s) numérico(s).
 Route::get('/catalogo/{product}', [CatalogoController::class, 'show'])->whereNumber('product')->name('catalog.show');
 

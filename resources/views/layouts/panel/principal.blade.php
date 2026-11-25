@@ -19,11 +19,7 @@
                 @include('layouts.panel.encabezado')
                 <main class="admin-main">
 {{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
-                    @if (session('status'))<div class="admin-alert admin-alert--success" role="status">{{ session('status') }}</div>@endif
-{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
-                    @if ($errors->any())<div class="admin-alert admin-alert--error" role="alert">{{ $errors->first() }}</div>@endif
-{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
-                    @if (session('error'))<div class="admin-alert admin-alert--error" role="alert">{{ session('error') }}</div>@endif
+                    @include('layouts.tienda.mensaje-emergente')
                     @yield('content')
                 </main>
             </div>

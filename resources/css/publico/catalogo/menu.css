@@ -1,0 +1,22 @@
+.catalog-menu-launcher { display: inline-flex; align-items: center; gap: .35rem; min-height: 38px; padding: .45rem .7rem; border: 1px solid #d8e3f3; border-radius: .55rem; background: #fff; color: #0a285f; font-weight: 750; cursor: pointer; }
+.catalog-menu-launcher:hover { border-color: #0875ed; color: #0875ed; }
+.catalog-menu-backdrop { position: fixed; inset: 0; z-index: 1040; background: rgb(4 17 39 / 52%); }
+.catalog-menu-drawer { position: fixed; inset: 0 auto 0 0; z-index: 1050; display: flex; width: min(390px, 92vw); flex-direction: column; overflow: hidden; background: #fff; box-shadow: 14px 0 36px rgb(5 24 56 / 18%); animation: catalog-menu-enter .2s ease-out; }
+.catalog-menu-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.15rem; background: linear-gradient(120deg, #0759ed, #0875ed); color: #fff; }
+.catalog-menu-user { display: flex; align-items: center; gap: .55rem; font-weight: 750; }
+.catalog-menu-user i { font-size: 1.45rem; }
+.catalog-menu-close, .catalog-menu-back { border: 0; background: transparent; color: inherit; cursor: pointer; }
+.catalog-menu-close { font-size: 1.05rem; }
+.catalog-menu-toolbar { display: flex; align-items: center; gap: .65rem; padding: 1rem 1.15rem .75rem; border-bottom: 1px solid #e5ebf4; color: #0a285f; }
+.catalog-menu-toolbar h2 { margin: 0; font-size: 1.05rem; }
+.catalog-menu-back { display: inline-flex; align-items: center; gap: .3rem; color: #456798; font-size: .84rem; }
+.catalog-menu-status { margin: .75rem 1.15rem 0; color: #456798; font-size: .82rem; }
+.catalog-menu-status.is-error { color: #b42318; }
+.catalog-menu-options { display: flex; flex: 1; flex-direction: column; gap: .15rem; overflow-y: auto; padding: .65rem .75rem 1.25rem; }
+.catalog-menu-option { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: .65rem; width: 100%; padding: .8rem .55rem; border: 0; border-bottom: 1px solid #edf1f7; background: #fff; color: #253551; text-align: left; cursor: pointer; }
+.catalog-menu-option:hover, .catalog-menu-option:focus-visible { background: #f3f7fd; color: #0759ed; outline: 0; }
+.catalog-menu-option small { color: #718198; font-size: .75rem; }
+.catalog-menu-empty { padding: 1rem .5rem; color: #718198; }
+@keyframes catalog-menu-enter { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+@media (prefers-reduced-motion: reduce) { .catalog-menu-drawer { animation: none; } }
+@media (max-width: 720px) { .catalog-menu-launcher span { display: none; } }

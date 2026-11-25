@@ -12,6 +12,8 @@ import '../../componentes/publico/publicidad.js';
 import '../../componentes/comunes/visibilidad-contrasenas.js';
 import '../../inteligente/asistente/flotante.js';
 import '../../publico/paginas/index.js';
+import '../../publico/catalogo/menu.js';
+import '../../componentes/comunes/mensajes-emergentes.js';
 
 /**
  * Ejecuta la operación inicializarBotonSubir utilizada por el módulo JavaScript.

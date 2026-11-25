@@ -60,3 +60,27 @@ it('acepta filtros dinamicos solo cuando la estructura EAV existe', function ():
         ->assertSee('256 GB')
         ->assertDontSee('512 GB');
 });
+
+it('expone el menu lateral con categorias, marcas y atributos compatibles', function (): void {
+    $categoria = Categoria::factory()->create(['nombre' => 'Celulares menú']);
+    $producto = Producto::factory()->create([
+        'categoria_id' => $categoria->id,
+        'categoria' => $categoria->nombre,
+        'marca' => 'Marca menú',
+        'nombre' => 'Producto menú',
+    ]);
+    $atributo = Atributo::create(['nombre' => 'Memoria menú', 'tipo_dato' => 'texto']);
+    $valor = AtributoValor::create([
+        'atributo_id' => $atributo->id,
+        'valor' => '8 GB',
+        'valor_normalizado' => '8 gb',
+    ]);
+    $producto->attributeValues()->attach($valor->id);
+
+    $respuesta = $this->getJson(route('catalog.menu'));
+
+    $respuesta->assertOk()->assertJsonPath('total_productos', 1);
+    expect(collect($respuesta->json('opciones'))->pluck('nombre'))
+        ->toContain('Celulares menú')
+        ->not->toContain('Ver productos compatibles', 'DEMO Operaciones Comerciales');
+});
