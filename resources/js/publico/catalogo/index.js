@@ -1,8 +1,5 @@
 /**
- * GUIA DE EXPOSICION JAVASCRIPT
- * Archivo: resources/js/publico/catalogo/index.js
- * Este modulo contiene comportamiento de interfaz, eventos, validaciones y/o
- * comunicacion con el backend. Los comentarios explican el flujo sin cambiar la logica.
+todo esto se aplica ina busqueda asincrona de productos 
  */
 
 // El catálogo ya recibe del servidor los datos consultados por el controlador.

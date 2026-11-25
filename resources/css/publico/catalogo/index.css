@@ -352,7 +352,7 @@ body.modulo-catalog .catalog-search select {
 }
 
 body.modulo-catalog .catalog-product-grid {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: stretch;
   gap: 12px;
 }
@@ -521,6 +521,8 @@ body.modulo-catalog .catalog-details-button {
   font-weight: 750;
   line-height: 1.2;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 body.modulo-catalog .catalog-details-button {

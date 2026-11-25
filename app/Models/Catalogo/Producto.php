@@ -69,7 +69,7 @@ class Producto extends Model
      */
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where('activo', true);
+        return $query->where('productos.activo', true);
     }
 
     /**

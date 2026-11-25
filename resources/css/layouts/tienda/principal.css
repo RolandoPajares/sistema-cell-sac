@@ -9,6 +9,7 @@
 @import '../../componentes/comunes/precios.css';
 @import '../../componentes/comunes/tarjetas.css';
 @import '../../componentes/comunes/alertas.css';
+@import '../../componentes/comunes/mensajes-emergentes.css';
 @import '../../componentes/comunes/badges.css';
 @import '../../componentes/comunes/estados.css';
 @import '../../componentes/comunes/tablas.css';
@@ -22,6 +23,7 @@
 /* Page modules are bundled here so Blade only selects a layout. */
 @import '../../publico/paginas/inicio.css';
 @import '../../publico/catalogo/index.css';
+@import '../../publico/catalogo/menu.css';
 @import '../../publico/catalogo/detalle.css';
 @import '../../publico/comercio/carrito.css';
 @import '../../publico/comercio/checkout.css';

@@ -15,6 +15,7 @@
     <body class="@yield('body_class')">
 {{-- vista parcial reutilizada con los datos necesarios para este bloque. --}}
         @include('layouts.tienda.encabezado')
+        @include('layouts.tienda.menu-catalogo')
 
 {{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
         @unless(request()->routeIs('home'))
@@ -64,9 +65,7 @@
         @endunless
 
 {{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
-        @if (session('status'))<div class="container flash-success" role="status">{{ session('status') }}</div>@endif
-{{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
-        @if ($errors->any())<div class="container flash-error" role="alert">{{ $errors->first() }}</div>@endif
+        @include('layouts.tienda.mensaje-emergente')
 
         <main>@yield('content')</main>
 

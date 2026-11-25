@@ -13,6 +13,9 @@
         >
             <i class="bi bi-list" aria-hidden="true"></i>
         </button>
+        <button class="catalog-menu-launcher" type="button" data-catalog-menu-open aria-controls="catalog-menu-drawer" aria-expanded="false">
+            <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i><span>Explorar</span>
+        </button>
         <div class="navlinks" id="navegacionPrincipal">
             <a class="{{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">Inicio</a>
             <a class="{{ request()->routeIs('catalog.*') ? 'active' : '' }}" href="{{ route('catalog.index') }}">Catálogo</a>

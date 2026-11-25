@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Publico\Catalogo;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Compartidos\Catalogo\FiltroCatalogoRequest;
 use App\Http\Requests\Publico\Catalogo\GuardarResenaProductoRequest;
+use App\Http\Requests\Publico\Catalogo\MenuCatalogoRequest;
 use App\Models\Catalogo\FavoritoProducto;
 use App\Models\Catalogo\Producto;
 use App\Models\Catalogo\ResenaProducto;
 use App\Servicios\Compartidos\Catalogo\ServicioCatalogo;
+use App\Servicios\Compartidos\Catalogo\ServicioNavegacionCatalogo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -19,6 +21,11 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
  */
 class CatalogoController extends Controller
 {
+    public function menu(MenuCatalogoRequest $request, ServicioNavegacionCatalogo $navigation): JsonResponse
+    {
+        return response()->json($navigation->menu($request->validated()));
+    }
+
     /**
      * Filtra y pagina el catálogo, agregando disponibilidad y opciones de filtro a la vista.
      *

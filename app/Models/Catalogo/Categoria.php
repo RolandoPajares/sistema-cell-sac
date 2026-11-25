@@ -6,6 +6,7 @@ use Database\Factories\CategoriaFactory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -33,7 +34,7 @@ class Categoria extends Model
     protected $table = 'categorias';
 
     // Define los campos que pueden asignarse de forma masiva desde formularios o servicios.
-    protected $fillable = ['nombre', 'descripcion', 'activo', 'creado_en', 'empresa_id'];
+    protected $fillable = ['nombre', 'descripcion', 'activo', 'creado_en', 'empresa_id', 'categoria_padre_id', 'orden'];
 
     public $timestamps = false;
 
@@ -55,6 +56,16 @@ class Categoria extends Model
     public function products(): HasMany
     {
         return $this->hasMany(Producto::class, 'categoria_id');
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'categoria_padre_id');
+    }
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(self::class, 'categoria_padre_id')->orderBy('orden')->orderBy('nombre');
     }
 
     public function atributos(): BelongsToMany

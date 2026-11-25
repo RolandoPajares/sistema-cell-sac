@@ -287,9 +287,12 @@ trait RefreshSpanishTestDatabase
                 $table->string('nombre', 120)->unique();
                 $table->string('descripcion', 500)->nullable();
                 $table->boolean('activo')->default(true);
+                $table->unsignedInteger('categoria_padre_id')->nullable();
+                $table->unsignedInteger('orden')->default(0);
                 $table->timestamp('creado_en')->useCurrent();
                 $table->unsignedBigInteger('empresa_id')->nullable();
                 $table->index('empresa_id');
+                $table->index(['categoria_padre_id', 'activo', 'orden']);
             });
         }
 

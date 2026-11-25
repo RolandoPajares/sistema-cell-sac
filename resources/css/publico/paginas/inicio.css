@@ -1257,8 +1257,13 @@
   font-size: 1.8rem;
 }
 .smart-home-strip .smart-tile b {
-  font-size: 1.2rem;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.9rem;
   line-height: 1.2;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-wrap: normal;
 }
 .smart-home-strip .smart-tile small {
   font-size: 0.9rem;
@@ -1646,9 +1651,18 @@
   font-size: 0.76rem;
   line-height: 1.2;
   text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .featured-products .home-product-buy-form .home-product-action {
   width: 100%;
+}
+
+.featured-products .home-product-details {
+  gap: 4px;
+  padding-inline: 5px;
+  font-size: 0.68rem;
 }
 .featured-products .home-product-action:disabled {
   cursor: not-allowed;

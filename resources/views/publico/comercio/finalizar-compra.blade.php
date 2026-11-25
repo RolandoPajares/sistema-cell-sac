@@ -13,7 +13,7 @@
         <div class="auth-wrap panel">
             <h1>Finalizar pedido</h1>
 {{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
-            @if(session('status'))<div class="alert alert-success">{{ session('status') }}</div><a class="btn btn-ghost" href="{{ route('orders.index') }}">Ver mis pedidos</a>@endif
+            @if(session('status'))<a class="btn btn-ghost" href="{{ route('orders.index') }}">Ver mis pedidos</a>@endif
 {{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
             @if($lines->isEmpty())
                 <p>No hay productos pendientes.</p>
