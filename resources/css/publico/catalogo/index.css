@@ -401,6 +401,21 @@ body.modulo-catalog .catalog-product-photo {
   object-fit: contain;
 }
 
+body.modulo-catalog .catalog-product-image-link {
+  display: block;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+body.modulo-catalog .catalog-product-photo {
+  transition: transform .25s ease;
+}
+
+body.modulo-catalog .catalog-product-image-link:hover .catalog-product-photo,
+body.modulo-catalog .catalog-product-image-link:focus-visible .catalog-product-photo {
+  transform: scale(1.04);
+}
+
 body.modulo-catalog .catalog-product-art .phone-shape {
   width: clamp(64px, 5vw, 92px);
   height: clamp(120px, 10vw, 168px);
@@ -454,6 +469,17 @@ body.modulo-catalog .catalog-product-card h2 {
   line-height: 1.2;
 }
 
+body.modulo-catalog .catalog-product-name {
+  color: inherit;
+  text-decoration: none;
+  transition: color .18s ease;
+}
+
+body.modulo-catalog .catalog-product-name:hover,
+body.modulo-catalog .catalog-product-name:focus-visible {
+  color: #0759ed;
+}
+
 body.modulo-catalog .catalog-product-specs {
   min-height: 1.35em;
   color: #718198;
@@ -497,7 +523,7 @@ body.modulo-catalog .catalog-product-stock {
 
 body.modulo-catalog .catalog-product-actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 8px;
   margin-top: auto;
   padding-top: 8px;
@@ -507,6 +533,10 @@ body.modulo-catalog .catalog-product-actions form {
   display: flex;
   min-width: 0;
   margin: 0;
+}
+
+body.modulo-catalog .catalog-product-actions .catalog-buy-button {
+  width: 100%;
 }
 
 body.modulo-catalog .catalog-buy-button,

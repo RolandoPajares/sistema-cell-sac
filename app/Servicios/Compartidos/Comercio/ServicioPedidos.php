@@ -40,7 +40,7 @@ class ServicioPedidos
     /**
      * @param  array<int|string, mixed>  $cart
      */
-    public function finalizarCompra(User $user, array $cart, ?string $couponCode, ?string $ip, string $checkoutToken): Pedido
+    public function finalizarCompra(User $user, array $cart, ?string $couponCode, ?string $ip, string $checkoutToken, array $delivery = []): Pedido
     {
         // Valida carrito, calcula totales y crea el pedido de un usuario autenticado.
         // Comprueba la condicion indicada antes de ejecutar este bloque del servicio.
@@ -59,7 +59,7 @@ class ServicioPedidos
 
         // Ejecuta los cambios dentro de una transaccion para evitar datos incompletos.
         // ORM: este servicio aplica ORM para consultar o modificar datos en la base de datos.
-        return DB::transaction(function () use ($user, $cart, $couponCode, $ip, $checkoutToken): Pedido {
+        return DB::transaction(function () use ($user, $cart, $couponCode, $ip, $checkoutToken, $delivery): Pedido {
             // Guarda en $location el resultado necesario para continuar la operacion.
             $location = $this->authorization->operationLocation($user);
             // Detiene la operacion cuando la condicion de seguridad o negocio no se cumple.
@@ -137,6 +137,10 @@ class ServicioPedidos
             // Crea y guarda en $order el registro gestionado por este servicio.
             $order = Pedido::create([
                 'usuario_id' => $user->id,
+                'direccion_entrega_snapshot' => [
+                    'direccion' => $delivery['direccion'] ?? null,
+                    'referencia' => $delivery['referencia'] ?? null,
+                ],
                 'canal' => 'ecommerce',
                 'subtotal' => $subtotalCents / 100,
                 'descuento' => $descuentoCupon['descuento_centimos'] / 100,

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Servicios\Compartidos\Paneles\ServicioPaneles;
 use App\Servicios\Cuenta\Perfil\ServicioPerfil;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
@@ -32,13 +33,17 @@ class CuentaController extends Controller
      * @param  mixed  $request  Parámetro recibido por la operación.
      * @return View Resultado de la operación.
      */
-    public function dashboard(Request $request): View
+    public function dashboard(Request $request): View|RedirectResponse
     {
         // Obtiene en $user la informacion de la solicitud o del usuario actual.
         $user = $request->user();
 
         // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($user instanceof User, 403);
+
+        if ($user->can('gestion.panel.consultar')) {
+            return redirect()->route('management.dashboard');
+        }
 
         // Devuelve la vista 'paneles.dashboard' con los datos preparados por este controlador.
         return view('paneles.dashboard', $this->panelService->roleDashboard(

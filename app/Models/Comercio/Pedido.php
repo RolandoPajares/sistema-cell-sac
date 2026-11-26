@@ -2,6 +2,7 @@
 
 namespace App\Models\Comercio;
 
+use App\Models\Finanzas\Pago;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -57,6 +58,16 @@ class Pedido extends Model
     public function details(): HasMany
     {
         return $this->hasMany(DetallePedido::class, 'pedido_id');
+    }
+
+    /**
+     * Recupera los pagos registrados para el pedido.
+     *
+     * @return HasMany Relación con los pagos del pedido.
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Pago::class, 'pedido_id');
     }
 
     /**

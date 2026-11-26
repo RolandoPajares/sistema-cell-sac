@@ -99,11 +99,11 @@
 
                     <article class="smartmatch-tarjeta">
                         <span class="smartmatch-puesto">#{{ $position }}</span>
-                        <img class="smartmatch-product-photo" src="{{ $product->recommendation_image_url }}" alt="{{ $product->marca }} {{ $product->nombre }}" loading="lazy">
+                        <a class="smartmatch-product-image-link" href="{{ route('catalog.show', $product) }}" aria-label="Ver {{ $product->marca }} {{ $product->nombre }}"><img class="smartmatch-product-photo" src="{{ $product->recommendation_image_url }}" alt="{{ $product->marca }} {{ $product->nombre }}" loading="lazy"></a>
                         <div class="smartmatch-tarjeta-arriba">
                             <div>
                                 <small>{{ $product->marca ?: 'CELL SAC' }}</small>
-                                <h3>{{ $product->nombre }}</h3>
+                                <h3><a class="smartmatch-product-name" href="{{ route('catalog.show', $product) }}">{{ $product->nombre }}</a></h3>
                                 <p class="smartmatch-precio">S/ {{ number_format((float) $product->effective_price, 2) }}</p>
                             </div>
                             <div class="smartmatch-porcentaje"><b>{{ (int) $product->recommendation_score }}%</b><small>coincide</small></div>
@@ -114,8 +114,11 @@
                             <li><i class="bi bi-check-circle-fill"></i> Puntaje calculado según tu selección</li>
                         </ul>
                         <div class="smartmatch-botones">
-                            <a class="btn btn-primary" href="{{ route('catalog.show', $product) }}">Ver equipo</a>
-                            <a class="btn btn-ghost" href="{{ route('comparison', ['seleccion' => $product->id]) }}">Comparar</a>
+                            <form action="{{ route('cart.add', $product) }}" method="post" data-product-purchase-form data-cart-async="true" data-variants='@json($product->variants->map(fn ($variant): array => ["id" => (int) $variant->id, "label" => $variant->nombre_color ?: "Variante {$variant->id}"])->values())'>
+                                @csrf
+                                <input type="hidden" name="cantidad" value="1">
+                                <button class="btn btn-primary" type="submit" data-cart-submit @disabled($product->existencias <= 0)><i class="bi bi-cart3" aria-hidden="true"></i> {{ $product->existencias > 0 ? 'Agregar al carrito' : 'Agotado' }}</button>
+                            </form>
                         </div>
                     </article>
                 @endforeach

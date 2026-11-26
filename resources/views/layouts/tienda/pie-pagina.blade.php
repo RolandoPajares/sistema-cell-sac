@@ -22,6 +22,7 @@
         </nav>
         <nav class="footer-column" aria-label="Ayuda">
             <h2>Ayuda</h2>
+            <a href="{{ route('orders.tracking.index') }}"><i class="bi bi-truck" aria-hidden="true"></i> Seguimiento de pedido</a>
             <a href="{{ route('pages.contact') }}"><i class="bi bi-envelope" aria-hidden="true"></i> Contacto</a>
             <a href="{{ route('pages.claims') }}"><i class="bi bi-journal-text" aria-hidden="true"></i> Libro de reclamaciones</a>
             <a href="{{ route('pages.faq') }}"><i class="bi bi-question-circle" aria-hidden="true"></i> Preguntas frecuentes</a>

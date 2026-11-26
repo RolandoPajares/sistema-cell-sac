@@ -224,9 +224,16 @@ Route::middleware(['carrito.ecommerce'])->group(function (): void {
 // @MODULO 09 | SEGUIMIENTO DE PEDIDOS
 // La ruta aquí no declara auth: revisar el controlador para conocer validaciones de acceso.
 
-// [GET /seguimiento-pedido/{order}] Consulta el seguimiento de un pedido. Controlador: SeguimientoPedidoController::show(). Nombre: orders.tracking. Parámetro(s) numérico(s).
+// [GET /seguimiento-pedido] Muestra la consulta pública de seguimiento. Controlador: SeguimientoPedidoController::index(). Nombre: orders.tracking.index.
+Route::get('/seguimiento-pedido', [SeguimientoPedidoController::class, 'index'])->name('orders.tracking.index');
+// [POST /seguimiento-pedido] Busca un pedido por número y correo. Controlador: SeguimientoPedidoController::search(). Nombre: orders.tracking.search.
+Route::post('/seguimiento-pedido', [SeguimientoPedidoController::class, 'search'])->middleware('throttle:tracking')->name('orders.tracking.search');
+// [GET /seguimiento-pedido/{order}] Consulta el seguimiento privado de un pedido. Controlador: SeguimientoPedidoController::show(). Nombre: orders.tracking.
 Route::get('/seguimiento-pedido/{order}', [SeguimientoPedidoController::class, 'show'])
     ->whereNumber('order')->name('orders.tracking');
+// [GET /seguimiento-pedido/{order}/comprobante] Descarga el comprobante PDF con el código de seguimiento.
+Route::get('/seguimiento-pedido/{order}/comprobante', [PedidoController::class, 'pdf'])
+    ->whereNumber('order')->name('orders.pdf');
 
 // @MODULO 10 | REDIRECCIONES A MÓDULOS DE GESTIÓN
 // Puntos de acceso que redirigen a la pantalla canónica y verifican middleware.

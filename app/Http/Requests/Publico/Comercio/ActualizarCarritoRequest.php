@@ -19,7 +19,7 @@ class ActualizarCarritoRequest extends FormRequest
     // Comprueba si el usuario actual tiene autorizacion para enviar esta solicitud.
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return $this->user() !== null || $this->session()->has('cart');
     }
 
     /**

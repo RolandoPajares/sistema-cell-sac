@@ -11,6 +11,7 @@ use App\Models\Comercio\Cupon;
 use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
 use App\Servicios\Gestion\InventarioLogistica\ServicioInventario;
 use App\Servicios\Publico\Comercio\ServicioCarrito;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -49,7 +50,7 @@ class CarritoController extends Controller
         // Guarda en $cart el resultado necesario para continuar esta operacion.
         $cart = $this->carritoService->normalizar((array) $request->session()->get('cart', []));
         // Prepara en $products la consulta que obtiene o modifica los registros necesarios.
-        $products = Producto::query()->with('images', 'variants')->active()->whereIn('id', array_keys($cart))->get()->keyBy('id');
+        $products = Producto::query()->with('images', 'variants', 'category')->active()->whereIn('id', array_keys($cart))->get()->keyBy('id');
         // Guarda en $lines el resultado necesario para continuar esta operacion.
         $lines = collect($cart)->map(function (array $linea, int $id) use ($products): ?array {
             // Guarda en $product el resultado necesario para continuar esta operacion.
@@ -86,7 +87,7 @@ class CarritoController extends Controller
      *
      * @throws HttpException Si el producto, variante o stock no es válido.
      */
-    public function add(AgregarCarritoRequest $request, Producto $product): RedirectResponse
+    public function add(AgregarCarritoRequest $request, Producto $product): RedirectResponse|JsonResponse
     {
         // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($product->activo, 404);
@@ -129,6 +130,41 @@ class CarritoController extends Controller
             return redirect()->route('checkout.form');
         }
 
+        if ($request->expectsJson()) {
+            $product->loadMissing('category');
+            $variant = $variantId === null
+                ? null
+                : $product->variants()->whereKey($variantId)->first();
+            $cartProducts = Producto::query()->active()->whereIn('id', array_keys($cart))->get();
+
+            return response()->json([
+                'message' => 'Producto agregado al carrito.',
+                'cart_item_count' => collect($cart)->sum(
+                    fn (mixed $line): int => is_array($line) ? (int) ($line['cantidad'] ?? 0) : (int) $line,
+                ),
+                'cart_total' => $cartProducts->sum(function (Producto $cartProduct) use ($cart): float {
+                    return (float) $cartProduct->effective_price * (int) ($cart[$cartProduct->getKey()]['cantidad'] ?? 0);
+                }),
+                'product' => [
+                    'name' => $product->nombre,
+                    'brand' => $product->marca,
+                    'category' => $product->category?->nombre ?: $product->categoria,
+                    'image' => $product->url_imagen_principal,
+                    'variant' => $variant?->nombre_color,
+                    'quantity' => $nuevaCantidad,
+                    'unit_price' => (float) $product->effective_price,
+                    'original_price' => $product->precio_original !== null ? (float) $product->precio_original : null,
+                    'discount' => $product->descuento !== null ? (float) $product->descuento : null,
+                    'available_stock' => $disponible,
+                    'subtotal' => (float) $product->effective_price * $nuevaCantidad,
+                ],
+                'links' => [
+                    'cart' => route('cart.index'),
+                    'checkout' => route('checkout.form'),
+                ],
+            ], 201);
+        }
+
         // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Producto agregado al carrito.');
     }
@@ -145,7 +181,7 @@ class CarritoController extends Controller
      *
      * @throws HttpException Si la línea no existe o supera el stock.
      */
-    public function update(ActualizarCarritoRequest $request, Producto $product): RedirectResponse
+    public function update(ActualizarCarritoRequest $request, Producto $product): RedirectResponse|JsonResponse
     {
         // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $quantity = (int) $request->validated('cantidad');
@@ -169,6 +205,20 @@ class CarritoController extends Controller
 
         $request->session()->put('cart', $cart);
 
+        if ($request->expectsJson()) {
+            $line = $cart[$product->getKey()] ?? null;
+            $cartProducts = Producto::query()->active()->whereIn('id', array_keys($cart))->get();
+
+            return response()->json([
+                'message' => $quantity === 0 ? 'Producto retirado del carrito.' : 'Cantidad actualizada.',
+                'removed' => $quantity === 0,
+                'quantity' => $line['cantidad'] ?? 0,
+                'subtotal' => $quantity === 0 ? 0 : (float) $product->effective_price * $quantity,
+                'cart_item_count' => collect($cart)->sum(fn (array $item): int => $item['cantidad']),
+                'cart_total' => $cartProducts->sum(fn (Producto $cartProduct): float => (float) $cartProduct->effective_price * (int) ($cart[$cartProduct->getKey()]['cantidad'] ?? 0)),
+            ]);
+        }
+
         // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back();
     }
@@ -180,12 +230,24 @@ class CarritoController extends Controller
      * @param  mixed  $product  Parámetro recibido por la operación.
      * @return RedirectResponse Resultado de la operación.
      */
-    public function remove(Request $request, Producto $product): RedirectResponse
+    public function remove(Request $request, Producto $product): RedirectResponse|JsonResponse
     {
         // Guarda en $cart el resultado necesario para continuar esta operacion.
         $cart = (array) $request->session()->get('cart', []);
         unset($cart[$product->id]);
         $request->session()->put('cart', $cart);
+
+        if ($request->expectsJson()) {
+            $cartProducts = Producto::query()->active()->whereIn('id', array_keys($cart))->get();
+
+            return response()->json([
+                'message' => 'Producto retirado del carrito.',
+                'removed' => true,
+                'cart_item_count' => collect($cart)->sum(fn (mixed $line): int => is_array($line) ? (int) ($line['cantidad'] ?? 0) : (int) $line),
+                'cart_total' => $cartProducts->sum(fn (Producto $cartProduct): float => (float) $cartProduct->effective_price * (int) ($cart[$cartProduct->getKey()]['cantidad'] ?? 0)),
+                'links' => ['cart' => route('cart.index'), 'checkout' => route('checkout.form')],
+            ]);
+        }
 
         // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
         return back()->with('status', 'Producto retirado del carrito.');
@@ -251,18 +313,27 @@ class CarritoController extends Controller
     {
         // Guarda en $code el resultado necesario para continuar esta operacion.
         $code = mb_strtoupper($request->string('codigo')->trim()->toString());
+        if (! Schema::hasColumn('cupones', 'empresa_id')) {
+            return back()->withInput()->withErrors(['codigo' => 'Los cupones no están disponibles en este momento.']);
+        }
         // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless(Schema::hasColumn('cupones', 'empresa_id'), 503,
             'Los cupones no están disponibles hasta configurar su empresa propietaria.');
         $ubicacion = $request->user() !== null
             ? $this->autorizacion->operationLocation($request->user())
             : ['empresa_id' => $this->autorizacion->activeCompanyId()];
+        if ($ubicacion['empresa_id'] === null) {
+            return back()->withInput()->withErrors(['codigo' => 'No se pudo validar el cupón en este momento.']);
+        }
         // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($ubicacion['empresa_id'] !== null, 503, 'No hay una empresa autorizada para validar el cupón.');
         // Prepara en $coupon la consulta que obtiene o modifica los registros necesarios.
         $coupon = Cupon::query()->where('empresa_id', $ubicacion['empresa_id'])->where('codigo', $code)->where('activo', true)
             ->where('inicia_en', '<=', now())->where('finaliza_en', '>=', now())->first();
 
+        if (! $coupon || ($coupon->limite_usos !== null && $coupon->usos >= $coupon->limite_usos)) {
+            return back()->withInput()->withErrors(['codigo' => 'El cupón no es válido o está agotado.']);
+        }
         // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_unless($coupon && ($coupon->limite_usos === null || $coupon->usos < $coupon->limite_usos), 422, 'Cupón no válido o agotado.');
         $request->session()->put('coupon_code', $coupon->codigo);

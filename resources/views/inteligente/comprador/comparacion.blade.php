@@ -45,9 +45,9 @@
 {{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @foreach ($products as $product)
 <article class="panel comparison-card">
-    <img class="comparison-product-photo" src="{{ $product->comparison_image }}" alt="{{ $product->marca }} {{ $product->nombre }}" loading="lazy">
+    <a class="comparison-product-image-link" href="{{ route('catalog.show', $product) }}" aria-label="Ver {{ $product->marca }} {{ $product->nombre }}"><img class="comparison-product-photo" src="{{ $product->comparison_image }}" alt="{{ $product->marca }} {{ $product->nombre }}" loading="lazy"></a>
     <span class="eyebrow">{{ $product->marca ?: 'CELL SAC' }}</span>
-    <h2>{{ $product->nombre }}</h2>
+    <h2><a class="comparison-product-name" href="{{ route('catalog.show', $product) }}">{{ $product->nombre }}</a></h2>
     <div class="price">S/ {{ number_format((float) $product->effective_price, 2) }}</div>
     <p>{{ $product->category?->nombre ?: 'Equipo' }} · Stock {{ (int) $product->existencias }}</p>
     <div class="score-row">
@@ -55,7 +55,11 @@
         <b>{{ $product->comparison_score }}/100</b>
         <div class="scorebar"><i style="width: {{ $product->comparison_score }}%"></i></div>
     </div>
-    <a class="btn btn-ghost" href="{{ route('catalog.show', $product) }}">Ver detalles</a>
+    <form action="{{ route('cart.add', $product) }}" method="post" data-product-purchase-form data-cart-async="true" data-variants='@json($product->variants->map(fn ($variant): array => ["id" => (int) $variant->id, "label" => $variant->nombre_color ?: "Variante {$variant->id}"])->values())'>
+        @csrf
+        <input type="hidden" name="cantidad" value="1">
+        <button class="btn btn-primary comparison-cart-button" type="submit" data-cart-submit @disabled($product->existencias <= 0)><i class="bi bi-cart3" aria-hidden="true"></i> {{ $product->existencias > 0 ? 'Agregar al carrito' : 'Agotado' }}</button>
+    </form>
 </article>
 
                     @endforeach

@@ -330,6 +330,32 @@
   flex-wrap: wrap;
   gap: 8px;
 }
+.smartmatch-product-image-link {
+  display: block;
+  cursor: pointer;
+}
+.smartmatch-product-image-link .smartmatch-product-photo {
+  transition: transform .25s ease;
+}
+.smartmatch-product-image-link:hover .smartmatch-product-photo,
+.smartmatch-product-image-link:focus-visible .smartmatch-product-photo {
+  transform: scale(1.04);
+}
+.smartmatch-product-name {
+  color: inherit;
+  text-decoration: none;
+}
+.smartmatch-product-name:hover,
+.smartmatch-product-name:focus-visible {
+  color: #1356e8;
+}
+.smartmatch-botones form {
+  width: 100%;
+  margin: 0;
+}
+.smartmatch-botones .btn {
+  width: 100%;
+}
 
 /* mensaje cuando no hay resultados */
 .smartmatch-vacio {

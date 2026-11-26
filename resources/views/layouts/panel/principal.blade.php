@@ -6,6 +6,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>@yield('title', 'Panel CELL SAC')</title>
+        <link rel="icon" type="image/png" sizes="64x64" href="{{ asset('assets/cell-legacy/img/marca/favicon-technology-cell.png') }}">
+        <link rel="alternate icon" type="image/x-icon" href="{{ asset('favicon_technology_cell.ico') }}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/cell-legacy/img/marca/apple-touch-icon-technology-cell.png') }}">
         @vite(['resources/css/layouts/panel/principal.css', 'resources/css/paneles/dashboard.css', 'resources/js/layouts/panel/principal.js', 'resources/js/gestion/index.js', 'resources/js/gestion/comercial/pedidos/index.js', 'resources/js/gestion/finanzas/index.js', 'resources/js/gestion/administracion/organizacion/organizacion.js'])
         <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.min.css') }}">
         @stack('styles')

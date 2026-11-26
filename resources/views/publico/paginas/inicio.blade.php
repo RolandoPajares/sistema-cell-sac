@@ -82,45 +82,41 @@
                     </a>
                     <div class="product-body home-product-body">
                         <div class="product-meta"><span>{{ $producto->marca }}</span><span>{{ $producto->category?->nombre ?: $producto->categoria }}</span></div>
-                        <h3>{{ $producto->nombre }}</h3>
+                        <h3><a class="home-product-name" href="{{ route('catalog.show', $producto) }}">{{ $producto->nombre }}</a></h3>
                         <div class="home-product-specs">{{ $producto->display_specifications }}</div>
 {{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                         @if($producto->display_discount > 0)<div class="home-product-pricing"><del>S/ {{ number_format($producto->display_original_price, 2) }}</del><span>-{{ $producto->display_discount }}%</span></div>@endif
                         <div class="price">S/ {{ number_format((float) $producto->precio_oferta, 2) }}</div>
                         <div class="stock">{{ $producto->existencias_disponibles }} unidades disponibles</div>
-                        <div class="home-product-actions">
+                        <div class="home-product-actions" data-product-card>
                             @auth
 {{-- formulario que recopila datos y los envia a la ruta indicada. --}}
                                 <form
                                     class="home-product-buy-form"
                                     action="{{ route('cart.add', $producto) }}"
                                     method="post"
+                                    data-product-purchase-form
+                                    data-cart-async="true"
+                                    data-variants='@json($producto->variants->map(fn ($variant): array => ["id" => (int) $variant->id, "label" => $variant->nombre_color ?: "Variante {$variant->id}"])->values())'
                                 >
 {{-- proteccion CSRF que valida el origen del formulario. --}}
                                     @csrf
                                     <input type="hidden" name="cantidad" value="1">
                                     <button class="btn btn-primary home-product-action" type="submit">
                                         <i class="bi bi-cart3" aria-hidden="true"></i>
-                                        Comprar
+                                        Agregar al carrito
                                     </button>
                                 </form>
 {{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                             @else
-                                <details class="home-product-buy-choice">
-                                    <summary class="btn btn-primary home-product-action"><i class="bi bi-cart3" aria-hidden="true"></i> Comprar</summary>
-                                    <div class="home-product-buy-options">
-                                        <a class="btn btn-ghost" href="{{ route('login') }}">Iniciar sesión</a>
-{{-- formulario que recopila datos y los envia a la ruta indicada. --}}
-                                        <form action="{{ route('cart.add', $producto) }}" method="post">
-{{-- proteccion CSRF que valida el origen del formulario. --}}
-                                            @csrf
-                                            <input type="hidden" name="cantidad" value="1">
-                                            <button class="btn btn-primary" type="submit">Continuar como invitado</button>
-                                        </form>
-                                    </div>
-                                </details>
+                                <button class="btn btn-primary home-product-action" type="button" data-cart-add-trigger data-login-url="{{ route('login') }}">
+                                    <i class="bi bi-cart3" aria-hidden="true"></i> Agregar al carrito
+                                </button>
+                                <form action="{{ route('cart.add', $producto) }}" method="post" data-product-purchase-form data-cart-async="true" data-variants='@json($producto->variants->map(fn ($variant): array => ["id" => (int) $variant->id, "label" => $variant->nombre_color ?: "Variante {$variant->id}"])->values())' hidden>
+                                    @csrf
+                                    <input type="hidden" name="cantidad" value="1">
+                                </form>
                             @endauth
-                            <a class="btn btn-ghost home-product-details" href="{{ route('catalog.show', $producto) }}"><i class="bi bi-eye" aria-hidden="true"></i> Ver detalles</a>
                         </div>
                     </div>
                 </article>

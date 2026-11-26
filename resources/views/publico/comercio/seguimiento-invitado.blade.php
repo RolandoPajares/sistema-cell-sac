@@ -22,10 +22,11 @@
     <div class="cart-total"><span>Total</span><strong>S/ {{ number_format((float) $order->total, 2) }}</strong></div>
     
         <p class="notice">Guarda tu enlace para consultar el avance de tu pedido.</p>
-        <button type="button" class="btn btn-primary"
-            onclick="navigator.clipboard.writeText(window.location.href).then(() => alert('Enlace copiado correctamente'))">
+        <p class="notice">Código de seguimiento: <strong>ENV-{{ str_pad((string) $order->id, 8, '0', STR_PAD_LEFT) }}</strong></p>
+        <button type="button" class="btn btn-primary" data-copy-link>
             Copiar enlace de seguimiento
         </button>
+        <a class="btn btn-ghost" href="{{ route('orders.pdf', [$order, 'token' => request('token')]) }}"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i> Descargar detalle PDF</a>
 
 </section>
 @endsection
