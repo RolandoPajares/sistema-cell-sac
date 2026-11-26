@@ -1,0 +1,119 @@
+.mensaje-emergente[hidden] {
+  display: none;
+}
+
+.mensaje-emergente {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.mensaje-emergente__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(15 23 42 / 55%);
+  backdrop-filter: blur(2px);
+}
+
+.mensaje-emergente__dialog {
+  position: relative;
+  width: min(100%, 430px);
+  padding: 2rem;
+  border-radius: 1.25rem;
+  background: #fff;
+  box-shadow: 0 1.5rem 4rem rgb(15 23 42 / 25%);
+  text-align: center;
+}
+
+.mensaje-emergente__close {
+  position: absolute;
+  top: .75rem;
+  right: .75rem;
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font-size: 1rem;
+}
+
+.mensaje-emergente__icon {
+  display: grid;
+  width: 3.25rem;
+  height: 3.25rem;
+  margin: 0 auto 1rem;
+  place-items: center;
+  border-radius: 50%;
+  background: #dbeafe;
+  color: #2563eb;
+  font-size: 1.5rem;
+}
+
+.mensaje-emergente.is-success .mensaje-emergente__icon {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.mensaje-emergente.is-error .mensaje-emergente__icon {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.mensaje-emergente__dialog h2 {
+  margin-bottom: .5rem;
+  color: #172554;
+  font-size: 1.35rem;
+}
+
+.mensaje-emergente__dialog p {
+  margin-bottom: 1.5rem;
+  color: #64748b;
+}
+
+.mensaje-emergente__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .75rem;
+}
+
+.mensaje-emergente__actions .btn {
+  min-width: 10rem;
+}
+
+body.popup-open {
+  overflow: hidden;
+}
+
+.cart-toast {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 2100;
+  max-width: min(22rem, calc(100vw - 2rem));
+  padding: .8rem 1rem;
+  border: 1px solid #bbf7d0;
+  border-radius: .75rem;
+  background: #f0fdf4;
+  color: #166534;
+  box-shadow: 0 .75rem 2rem rgb(15 23 42 / 16%);
+  font-size: .9rem;
+  font-weight: 700;
+}
+
+.cart-toast.is-error {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b42318;
+}
+
+.cart-variant-select {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: .55rem .75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: .6rem;
+  background: #fff;
+  color: #172033;
+}

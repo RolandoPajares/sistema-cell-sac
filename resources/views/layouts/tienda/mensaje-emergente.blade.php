@@ -7,6 +7,7 @@
         <span class="mensaje-emergente__icon" data-popup-icon aria-hidden="true"><i class="bi bi-info-circle"></i></span>
         <h2 id="popup-title" data-popup-title>Mensaje</h2>
         <p id="popup-message" data-popup-message></p>
+        <div class="mensaje-emergente__detail" data-popup-detail hidden></div>
         <div class="mensaje-emergente__actions" data-popup-actions></div>
     </section>
 </div>

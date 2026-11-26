@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Servicios\Compartidos\Auditoria\RegistradorAuditoria;
 use App\Servicios\Compartidos\Seguridad\ServicioAutorizacion;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -31,8 +32,12 @@ class AutenticacionController extends Controller
      *
      * @return View Resultado de la operación.
      */
-    public function loginForm(): View
+    public function loginForm(Request $request): View
     {
+        if ($request->string('continuar')->toString() === 'checkout') {
+            $request->session()->put('url.intended', route('checkout.form'));
+        }
+
         // Devuelve la vista 'auth.login' con los datos preparados por este controlador.
         return view('auth.login');
     }
@@ -42,8 +47,12 @@ class AutenticacionController extends Controller
      *
      * @return View Resultado de la operación.
      */
-    public function registerForm(): View
+    public function registerForm(Request $request): View
     {
+        if ($request->string('continuar')->toString() === 'checkout') {
+            $request->session()->put('url.intended', route('checkout.form'));
+        }
+
         // Devuelve la vista 'auth.register' con los datos preparados por este controlador.
         return view('auth.register');
     }
@@ -90,13 +99,14 @@ class AutenticacionController extends Controller
         $request->session()->regenerate();
         $audit->record($user->getKey(), 'inicio_sesion', 'autenticacion', $user->getKey(), null, null, $request->ip());
 
-        // Guarda en $destination el resultado necesario para continuar esta operacion.
-        $destination = $this->authorization->allows($user, 'gestion.panel.consultar')
-            ? route('management.dashboard')
-            : route('dashboard');
+        // Los administradores deben iniciar siempre en el dashboard de gestión,
+        // aunque hayan llegado al login desde una pantalla de cuenta.
+        if ($this->authorization->allows($user, 'gestion.panel.consultar')) {
+            return redirect()->route('management.dashboard');
+        }
 
-        // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
-        return redirect()->intended($destination);
+        // Conserva la ruta pendiente solo para cuentas de cliente.
+        return redirect()->intended(route('dashboard'));
     }
 
     /**
@@ -170,7 +180,7 @@ class AutenticacionController extends Controller
         $request->session()->regenerate();
 
         // Redirige al usuario usando la respuesta indicada en la instruccion siguiente.
-        return redirect()->route('dashboard');
+        return redirect()->intended(route('dashboard'));
     }
 
     /**

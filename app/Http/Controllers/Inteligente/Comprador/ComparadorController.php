@@ -34,7 +34,7 @@ class ComparadorController extends Controller
 
         // Consulta los productos activos seleccionados y carga sus caracteristicas, categoria,
         // imagenes y perfil de inteligencia para mostrar una comparacion completa.
-        $products = Producto::with('features', 'category', 'images', 'perfilInteligencia')->active()->whereIn('id', $ids)->get();
+        $products = Producto::with('features', 'category', 'images', 'variants', 'perfilInteligencia')->active()->whereIn('id', $ids)->get();
 
         // Prepara los productos con el formato y los datos calculados que necesita la vista.
         $products = $catalogService->prepararComparacion($products);

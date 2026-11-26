@@ -7,6 +7,9 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <meta name="description" content="Celulares y accesorios originales de MD Technology Digital Cell.">
         <title>@yield('title', 'MD Technology Cell')</title>
+        <link rel="icon" type="image/png" sizes="64x64" href="{{ asset('assets/cell-legacy/img/marca/favicon-technology-cell.png') }}">
+        <link rel="alternate icon" type="image/x-icon" href="{{ asset('favicon_technology_cell.ico') }}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/cell-legacy/img/marca/apple-touch-icon-technology-cell.png') }}">
 
         @vite(['resources/css/layouts/tienda/principal.css', 'resources/js/layouts/tienda/principal.js'])
         <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.min.css') }}">

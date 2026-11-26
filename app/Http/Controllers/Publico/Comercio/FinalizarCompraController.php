@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Publico\Comercio;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Publico\Comercio\FinalizarCompraRequest;
 use App\Models\Catalogo\Producto;
+use App\Models\Comercio\Pedido;
 use App\Servicios\Compartidos\Comercio\ServicioPedidos;
 use App\Servicios\Gestion\InventarioLogistica\ServicioInventario;
 use App\Servicios\Publico\Comercio\ServicioCarrito;
@@ -52,7 +53,7 @@ class FinalizarCompraController extends Controller
         // Guarda en $cart el resultado necesario para continuar esta operacion.
         $cart = $this->carritoService->normalizar((array) $request->session()->get('cart', []));
         // Prepara en $products la consulta que obtiene o modifica los registros necesarios.
-        $products = Producto::query()->with('variants')->active()->whereIn('id', array_keys($cart))->get()->keyBy('id');
+        $products = Producto::query()->with('variants', 'category')->active()->whereIn('id', array_keys($cart))->get()->keyBy('id');
         // Guarda en $lines el resultado necesario para continuar esta operacion.
         $lines = collect($cart)->map(function (array $linea, int $id) use ($products): ?array {
             // Guarda en $product el resultado necesario para continuar esta operacion.
@@ -107,15 +108,19 @@ class FinalizarCompraController extends Controller
         // Detiene la solicitud si se cumple la validacion de seguridad indicada.
         abort_if($cart === [], 422, 'El carrito está vacío.');
 
-        $order = $request->user() !== null
-            // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
-            ? $this->orderService->finalizarCompra($request->user(), $cart, $request->session()->get('coupon_code'), $request->ip(), $request->validated('checkout_token'))
-            // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
-            : $this->orderService->finalizarCompraInvitado($cart, $request->session()->get('coupon_code'), $request->ip(), $request->validated());
+        $order = DB::transaction(function () use ($request, $cart): Pedido {
+            $order = $request->user() !== null
+                // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
+                ? $this->orderService->finalizarCompra($request->user(), $cart, $request->session()->get('coupon_code'), $request->ip(), $request->validated('checkout_token'), $request->validated())
+                // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
+                : $this->orderService->finalizarCompraInvitado($cart, $request->session()->get('coupon_code'), $request->ip(), $request->validated());
+
+            $this->orderService->registrarPagoPendiente($order, $request->validated('medio_pago_id'), $request->user()?->getKey());
+
+            return $order;
+        }, 3);
 
         $request->session()->forget(['cart', 'coupon_code', 'checkout_token']);
-        // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
-        $this->orderService->registrarPagoPendiente($order, $request->validated('medio_pago_id'), $request->user()?->getKey());
 
         // Comprueba la condicion $request->user() === null antes de ejecutar este bloque.
         if ($request->user() === null) {

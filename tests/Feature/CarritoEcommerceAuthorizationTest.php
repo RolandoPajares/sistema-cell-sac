@@ -82,6 +82,31 @@ it('permite carrito invitado y rechaza operadores sin permiso', function (): voi
         ->assertForbidden();
 });
 
+it('agrega al carrito por json y devuelve el contador actualizado', function (): void {
+    $product = productoParaCarritoEcommerce();
+
+    $this->postJson(route('cart.add', $product), ['cantidad' => 1])
+        ->assertCreated()
+        ->assertJson([
+            'message' => 'Producto agregado al carrito.',
+            'cart_item_count' => 1,
+        ]);
+
+    expect(session('cart.'.$product->id.'.cantidad'))->toBe(1);
+});
+
+it('permite a un invitado modificar su carrito por json', function (): void {
+    $product = productoParaCarritoEcommerce();
+
+    $this->post(route('cart.add', $product), ['cantidad' => 1])->assertRedirect();
+
+    $this->patchJson(route('cart.update', $product), ['cantidad' => 2])
+        ->assertOk()
+        ->assertJson(['quantity' => 2, 'cart_item_count' => 2]);
+
+    expect(session('cart.'.$product->id.'.cantidad'))->toBe(2);
+});
+
 it('muestra a los invitados el formulario publico de compra y no un redireccionamiento al login', function (): void {
     $product = productoParaCarritoEcommerce();
 
@@ -90,7 +115,8 @@ it('muestra a los invitados el formulario publico de compra y no un redirecciona
         ->assertSee('action="'.route('cart.add', $product).'"', false)
         ->assertSee('name="cantidad"', false)
         ->assertSee('Iniciar sesión')
-        ->assertSee('Continuar como invitado');
+        ->assertSee('data-cart-add-trigger', false)
+        ->assertSee('Agregar al carrito');
 });
 
 it('returns 422 for insufficient stock without writing the session', function (): void {

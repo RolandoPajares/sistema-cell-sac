@@ -33,6 +33,7 @@ class RecomendacionController extends Controller
     {
         // Obtiene los datos validados de la solicitud antes de utilizarlos en esta operacion.
         $products = $this->servicioRecomendaciones->recomendar($request->validated());
+        $products->loadMissing('variants');
         $products->each(function ($product): void {
             // Guarda en $path el resultado necesario para continuar esta operacion.
             $path = $product->images->first()?->ruta_imagen ?: $product->url_imagen;

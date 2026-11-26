@@ -81,6 +81,9 @@ class AppServiceProvider extends ServiceProvider
         // Limita el envÃ­o del formulario de contacto a cinco solicitudes por minuto por IP.
         RateLimiter::for('contact', fn (Request $request): Limit => Limit::perMinute(5)->by($request->ip()));
 
+        // Limita las consultas de seguimiento para evitar enumeraciÃ³n automatizada de pedidos.
+        RateLimiter::for('tracking', fn (Request $request): Limit => Limit::perMinute(10)->by($request->ip()));
+
         // Permite hasta sesenta consultas por minuto al catÃ¡logo API por usuario o IP.
         RateLimiter::for('catalog-api', fn (Request $request): Limit => Limit::perMinute(60)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip())));
 

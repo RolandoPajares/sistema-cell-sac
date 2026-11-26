@@ -13,6 +13,7 @@ import '../../componentes/comunes/visibilidad-contrasenas.js';
 import '../../inteligente/asistente/flotante.js';
 import '../../publico/paginas/index.js';
 import '../../publico/catalogo/menu.js';
+import '../../publico/comercio/checkout.js';
 import '../../componentes/comunes/mensajes-emergentes.js';
 
 /**

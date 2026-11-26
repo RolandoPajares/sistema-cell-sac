@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Publico\Comercio;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Gestion\Comercial\Pedidos\ActualizarEstadoPedidoRequest;
+use App\Models\Comercio\EnvioPedido;
 use App\Models\Comercio\Pedido;
 use App\Servicios\Compartidos\Auditoria\RegistradorAuditoria;
 use App\Servicios\Compartidos\Comercio\ServicioPedidos;
@@ -15,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -33,6 +35,7 @@ class PedidoController extends Controller
     public function __construct(
         private readonly ServicioPedidos $orderService,
         private readonly ServicioAutorizacion $authorization,
+        private readonly ExportadorTabular $exporter,
     ) {}
 
     /**
@@ -381,9 +384,63 @@ class PedidoController extends Controller
 
         // Devuelve la vista 'publico.comercio.confirmacion' con los datos preparados por este controlador.
         return view('publico.comercio.confirmacion', [
-            'order' => $order->load('details.product', 'user'),
+            'order' => $order->load('details.product', 'user', 'payments.medioPago'),
             'isPanel' => $isPanel,
             'statusOptions' => ['Pendiente', 'En proceso', 'Enviado', 'Entregado', 'Cancelado'],
+        ]);
+    }
+
+    /**
+     * Descarga el comprobante PDF de un pedido autenticado o de un invitado con token.
+     *
+     * @param  Request  $request  Solicitud con usuario autenticado o token público.
+     * @param  Pedido  $order  Pedido cuyo comprobante se solicita.
+     * @return Response|StreamedResponse Documento PDF del pedido.
+     */
+    public function pdf(Request $request, Pedido $order): Response|StreamedResponse
+    {
+        if ($request->user() !== null) {
+            $order->loadMissing('user');
+            $this->authorize('view', $order);
+        } else {
+            $token = $request->string('token')->toString();
+            abort_unless(preg_match('/^[a-f0-9]{64}$/', $token) === 1, 404);
+            abort_unless($order->usuario_id === null && hash_equals((string) $order->token_acceso_publico, hash('sha256', 'guest:'.$token)), 404);
+        }
+
+        $order->load('details.product');
+        $shipping = Schema::hasTable('envios_pedidos')
+            ? EnvioPedido::query()->where('pedido_id', $order->getKey())->first()
+            : null;
+        $address = $order->direccion_entrega_snapshot ?? [];
+        $customer = $order->user?->nombre ?: ($order->cliente_invitado_nombre ?: 'Cliente invitado');
+        $email = $order->user?->correo ?: ($order->cliente_invitado_correo ?: 'Sin correo');
+        $trackingCode = $shipping?->codigo ?: 'CELL-'.str_pad((string) $order->getKey(), 6, '0', STR_PAD_LEFT);
+        $rows = $order->details->map(fn ($line): array => [
+            $line->product?->nombre ?: 'Producto no disponible',
+            (int) $line->cantidad,
+            'S/ '.number_format((float) $line->precio_unitario, 2),
+            'S/ '.number_format((float) $line->precio_unitario * (int) $line->cantidad, 2),
+        ])->all();
+
+        return $this->exporter->download('pdf', 'pedido-'.$order->id, ['Producto', 'Cantidad', 'Precio unitario', 'Subtotal'], $rows, [
+            'brand' => 'TECHNOLOGY CELL',
+            'company' => 'CELL SAC — Technology CELL',
+            'title' => 'DETALLE DEL PEDIDO #'.$order->id,
+            'subtitle' => 'Comprobante de compra y seguimiento.',
+            'module' => 'Comercio',
+            'report_name' => 'Detalle del pedido',
+            'generated_by' => $customer,
+            'scope' => 'Correo: '.$email,
+            'observations' => [
+                'Fecha: '.($order->creado_en?->format('d/m/Y H:i') ?? 'No disponible'),
+                'Código de seguimiento: '.$trackingCode,
+                'Dirección de entrega: '.($address['direccion'] ?? 'Por coordinar'),
+                'Referencia: '.($address['referencia'] ?? 'Sin referencia'),
+                'Estado: '.$order->estado,
+            ],
+            'summary_row' => ['TOTAL', '', '', 'S/ '.number_format((float) $order->total, 2)],
+            'orientation' => 'portrait',
         ]);
     }
 

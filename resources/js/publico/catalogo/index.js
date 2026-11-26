@@ -64,7 +64,7 @@ todo esto se aplica ina busqueda asincrona de productos
 
     document.addEventListener("submit", (evento) => {
         const formulario = evento.target.closest(".catalog-page form");
-        if (!formulario || formulario.matches("form[action*='/carrito']")) {
+        if (!formulario || formulario.matches('[data-product-purchase-form]')) {
             return;
         }
 

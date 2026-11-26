@@ -157,43 +157,44 @@
 {{-- ciclo que recorre los datos recibidos para generar elementos repetidos. --}}
                     @forelse($products as $product)
                     <article class="product-card catalog-product-card">
+                        <a class="catalog-product-image-link" href="{{ route('catalog.show', $product) }}" aria-label="Ver {{ $product->marca }} {{ $product->nombre }}">
                         <div class="product-art catalog-product-art">
 {{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                             @if($product->etiqueta || $product->catalog_discount > 0)<span class="badge">{{ $product->etiqueta ?: 'Oferta' }}</span>@endif
 {{-- condicional que muestra este bloque solo cuando se cumple la condicion. --}}
                             @if($product->url_imagen_principal)<img class="catalog-product-photo" src="{{ $product->url_imagen_principal }}" alt="{{ $product->marca }} {{ $product->nombre }}" loading="lazy">@else<div class="catalog-accessory-shape" role="img" aria-label="Imagen no disponible"><i class="bi bi-box-seam"></i></div>@endif
                         </div>
+                        </a>
                         <div class="product-body catalog-product-body">
                             <div class="catalog-product-meta"><span>{{ $product->marca }}</span><span>{{ $product->category?->nombre ?: $product->categoria }}</span></div>
-                            <h2>{{ $product->nombre }}</h2>
+                            <h2><a class="catalog-product-name" href="{{ route('catalog.show', $product) }}">{{ $product->nombre }}</a></h2>
                             <div class="catalog-product-specs">{{ trim(($product->almacenamiento ? $product->almacenamiento.' · ' : '').\Illuminate\Support\Str::limit(strip_tags((string) $product->descripcion), 38)) }}</div>
                             <div class="catalog-product-pricing">@if($product->catalog_discount > 0)<div><del>S/ {{ number_format($product->catalog_original_price, 2) }}</del><span>-{{ $product->catalog_discount }}%</span></div>@endif</div>
                             <p class="price catalog-product-sale-price">S/ {{ number_format($product->catalog_sale_price, 2) }}</p>
                             <div class="stock catalog-product-stock">{{ $product->existencias_disponibles > 0 ? $product->existencias_disponibles.' unidades disponibles' : 'Agotado' }}</div>
-                            <div class="catalog-product-actions">
+                            <div class="catalog-product-actions" data-product-card>
                                 @auth
 {{-- formulario que recopila datos y los envia a la ruta indicada. --}}
-                                    <form action="{{ route('cart.add', $product) }}" method="post" data-product-purchase-form>
+                                    <form action="{{ route('cart.add', $product) }}" method="post" data-product-purchase-form data-cart-async="true" data-variants='@json($product->variants->map(fn ($variant): array => ["id" => (int) $variant->id, "label" => $variant->nombre_color ?: "Variante {$variant->id}"])->values())'>
 {{-- proteccion CSRF que valida el origen del formulario. --}}
                                         @csrf
                                         <input type="hidden" name="cantidad" value="1">
                                         <button class="btn btn-primary catalog-buy-button" type="submit" @disabled($product->existencias_disponibles <= 0)>
                                             <i class="bi bi-cart3" aria-hidden="true"></i>
-                                            {{ $product->existencias_disponibles > 0 ? 'Comprar' : 'Agotado' }}
+                                            {{ $product->existencias_disponibles > 0 ? 'Agregar al carrito' : 'Agotado' }}
                                         </button>
                                     </form>
 {{-- alternativa del condicional cuando la condicion anterior no se cumple. --}}
                                 @else
-                                    <button class="btn btn-primary catalog-buy-button" type="button" data-purchase-trigger data-login-url="{{ route('login') }}" @disabled($product->existencias_disponibles <= 0)>
+                                    <button class="btn btn-primary catalog-buy-button" type="button" data-cart-add-trigger data-login-url="{{ route('login') }}" data-login-label="Iniciar sesión" @disabled($product->existencias_disponibles <= 0)>
                                         <i class="bi bi-cart3" aria-hidden="true"></i>
-                                        {{ $product->existencias_disponibles > 0 ? 'Comprar' : 'Agotado' }}
+                                        {{ $product->existencias_disponibles > 0 ? 'Agregar al carrito' : 'Agotado' }}
                                     </button>
-                                    <form action="{{ route('cart.add', $product) }}" method="post" data-product-purchase-form hidden>
+                                    <form action="{{ route('cart.add', $product) }}" method="post" data-product-purchase-form data-cart-async="true" data-variants='@json($product->variants->map(fn ($variant): array => ["id" => (int) $variant->id, "label" => $variant->nombre_color ?: "Variante {$variant->id}"])->values())' hidden>
                                         @csrf
                                         <input type="hidden" name="cantidad" value="1">
                                     </form>
                                 @endauth
-                                <a class="btn btn-ghost catalog-details-button" href="{{ route('catalog.show', $product) }}">Ver detalles</a>
                             </div>
                         </div>
                     </article>

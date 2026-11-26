@@ -40,7 +40,7 @@ class ServicioCatalogo
         // Construye la consulta del catalogo aplicando busqueda, marca y orden.
         // Prepara en $productsQuery la consulta que obtiene o modifica los datos necesarios.
         // ORM: inicia la consulta de productos, carga relaciones y filtra los activos.
-        $productsQuery = Producto::query()->with(['category', 'images'])->active();
+        $productsQuery = Producto::query()->with(['category', 'images', 'variants'])->active();
         // Guarda en $searchTerm el resultado necesario para continuar la operacion.
         $searchTerm = trim((string) ($filters['q'] ?? ''));
 

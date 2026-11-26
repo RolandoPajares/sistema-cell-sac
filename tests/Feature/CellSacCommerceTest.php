@@ -103,6 +103,18 @@ it('applies a valid coupon once and records the discounted total', function () {
     expect((int) $coupon->fresh()->usos)->toBe(1);
 });
 
+it('returns an error when a public coupon does not exist', function () {
+    $user = SpanishAccessFixture::user('cliente_minorista');
+    $product = productForCellSac(['precio' => 100, 'existencias' => 3]);
+
+    $this->actingAs($user)
+        ->withSession(['cart' => [$product->id => 1]])
+        ->from(route('cart.index'))
+        ->post(route('cart.coupon'), ['codigo' => 'NOEXISTE'])
+        ->assertRedirect(route('cart.index'))
+        ->assertSessionHasErrors('codigo');
+});
+
 it('forbids a customer from viewing another user order', function () {
     $owner = User::factory()->create();
     $other = User::factory()->create();

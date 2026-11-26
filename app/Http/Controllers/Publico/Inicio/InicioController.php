@@ -28,7 +28,7 @@ class InicioController extends Controller
     {
         // Prepara en $productosDestacados la consulta que obtiene o modifica los registros necesarios.
         $productosDestacados = $catalogo->conExistenciasPotenciales(Producto::query()
-            ->with(['category', 'images'])
+            ->with(['category', 'images', 'variants'])
             ->active())
             ->whereNotNull('precio_original')
             ->whereNotNull('precio_oferta')

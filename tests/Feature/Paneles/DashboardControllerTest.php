@@ -40,14 +40,12 @@ it('renders the administrator dashboard through both existing admin entry points
         ->assertViewIs('paneles.dashboard');
 });
 
-it('renders the account dashboard on the account route for every permission profile', function (): void {
+it('redirects administrators from the shared account route to the management dashboard', function (): void {
     $user = SpanishAccessFixture::user('administrador');
 
     $this->actingAs($user)
         ->get(route('dashboard'))
-        ->assertOk()
-        ->assertViewIs('paneles.dashboard')
-        ->assertViewHas('dashboardKind', 'account');
+        ->assertRedirect(route('management.dashboard'));
 });
 
 it('renders the unified profile for every configured role', function (): void {
